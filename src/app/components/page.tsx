@@ -1,12 +1,22 @@
-import { Button } from '@/shared';
+import { Button, IconBtn } from '@/shared';
 import { ArrowIcon } from '@/shared/assets';
 
 const Components = () => {
   return (
     <div>
-      <Button variant='outline' size='lg'>outline btn</Button>
-      <Button iconLeft={<ArrowIcon className='rotate-180 size-5' />} iconRight={<ArrowIcon className="size-5" />}>Button</Button>
+      <Button variant='outline' size='lg'>
+        outline btn
+      </Button>
+      <Button
+        iconLeft={<ArrowIcon className='rotate-180 size-5' />}
+        iconRight={<ArrowIcon className='size-5' />}
+      >
+        Button
+      </Button>
       <Button variant='text'>text btn</Button>
+      <IconBtn size='lg'>
+        <ArrowIcon className='rotate-180 size-5' />
+      </IconBtn>
       <p>QWERTY</p>
     </div>
   );
