@@ -6,7 +6,7 @@ import { Option } from './types';
 type TriggerProps = {
   isActive: boolean;
   isMulti: boolean;
-  value: any;
+  value?: string | string[];
   options: Option[];
   placeholder: string;
   onToggle: () => void;
@@ -55,7 +55,9 @@ export const DropdownTrigger: FC<TriggerProps> = ({
           ))
         ) : (
           <span className={cn(value ? 'text-[#191A1B]' : 'text-[#838A8D]')}>
-            {options.find((o) => o.value === value)?.label || placeholder}
+            {/* Для не-multi мы уверены, что value это строка (или undefined) */}
+            {options.find((o) => o.value === (value as string))?.label ||
+              placeholder}
           </span>
         )}
       </div>

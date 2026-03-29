@@ -56,13 +56,14 @@ export const Dropdown: FC<DropdownProps> = ({
   const handleSelect = (val: string) => {
     if (isMulti) {
       const current = Array.isArray(value) ? value : [];
-      onChange?.(
-        current.includes(val)
-          ? current.filter((v) => v !== val)
-          : [...current, val],
-      );
+      const newValues = current.includes(val)
+        ? current.filter((v) => v !== val)
+        : [...current, val];
+
+      (onChange as (val: string[]) => void)?.(newValues);
     } else {
-      onChange?.(val);
+      (onChange as (val: string) => void)?.(val);
+
       if (window.innerWidth >= 768) closeDropdown();
     }
   };
@@ -119,7 +120,8 @@ export const Dropdown: FC<DropdownProps> = ({
                 <div
                   className='p-4 md:px-3 md:py-2.5 flex items-center justify-between border-b border-[#E3E4E5] md:border-none md:hover:bg-[#F2F3F5] cursor-pointer transition-colors'
                   onClick={() =>
-                    onChange?.(
+                    // Явно указываем TS, что здесь onChange работает с массивом
+                    (onChange as (val: string[]) => void)?.(
                       Array.isArray(value) && value.length === options.length
                         ? []
                         : options.map((o) => o.value),

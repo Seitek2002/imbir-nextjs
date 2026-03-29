@@ -11,8 +11,9 @@ const options = [
 ];
 
 const Components = () => {
-  const [selected, setSelected] = useState();
-  const [single, setSingle] = useState();
+  const [selectedMulti, setSelectedMulti] = useState<string[]>([]); // Для мульти-выбора (массив)
+  const [singleDefault, setSingleDefault] = useState<string>(); // Для обычного выбора (строка)
+  const [singleRadio, setSingleRadio] = useState<string>();
 
   return (
     <div>
@@ -57,37 +58,38 @@ const Components = () => {
       </div>
 
       <Dropdown
-        label='Специализация с поиском'
+        label='Специализация с поиском (Default)'
         options={options}
         type='default'
-        value={selected}
-        onChange={setSelected}
+        value={singleDefault}
+        onChange={setSingleDefault} // TS знает, что тут ожидается string
       />
 
       <Dropdown
-        label='Специализация с поиском'
+        label='Специализация с поиском (Multi Checkbox)'
         options={options}
         type='checkbox'
         isMulti
-        searchable // Включает инпут поиска внутри дропдауна
-        value={selected}
-        onChange={setSelected}
+        searchable
+        value={selectedMulti}
+        onChange={setSelectedMulti} // TS знает, что тут ожидается string[]
       />
 
       <Dropdown
-        label='Специализация'
+        label='Специализация (Multi Checkbox)'
         options={options}
         type='checkbox'
         isMulti
-        value={selected}
-        onChange={setSelected}
+        value={selectedMulti} // Можно переиспользовать тот же стейт для теста
+        onChange={setSelectedMulti}
       />
+
       <Dropdown
-        label='Выбор одного'
+        label='Выбор одного (Radio)'
         options={options}
         type='radio'
-        value={single}
-        onChange={setSingle}
+        value={singleRadio}
+        onChange={setSingleRadio} // TS знает, что тут ожидается string
       />
     </div>
   );
