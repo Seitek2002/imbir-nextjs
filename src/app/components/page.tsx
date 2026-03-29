@@ -2,8 +2,18 @@
 
 import { Button, Checkbox, Dropdown, IconBtn, Input, Radio } from '@/shared';
 import { ArrowIcon, PersonIcon } from '@/shared/assets';
+import { useState } from 'react';
+
+const options = [
+  { label: 'Акушер-гинеколог', value: '1' },
+  { label: 'Аллерголог', value: '2' },
+  { label: 'Анестезиолог', value: '3' },
+];
 
 const Components = () => {
+  const [selected, setSelected] = useState();
+  const [single, setSingle] = useState();
+
   return (
     <div>
       <p>
@@ -45,7 +55,32 @@ const Components = () => {
         {/* Пустой чекбокс */}
         <Checkbox size='large' label='Option 2' />
       </div>
-      <Dropdown />
+
+      <Dropdown
+        label='Специализация с поиском'
+        options={options}
+        type='checkbox'
+        isMulti
+        searchable // Включает инпут поиска внутри дропдауна
+        value={selected}
+        onChange={setSelected}
+      />
+
+      <Dropdown
+        label='Специализация'
+        options={options}
+        type='checkbox'
+        isMulti
+        value={selected}
+        onChange={setSelected}
+      />
+      <Dropdown
+        label='Выбор одного'
+        options={options}
+        type='radio'
+        value={single}
+        onChange={setSingle}
+      />
     </div>
   );
 };
