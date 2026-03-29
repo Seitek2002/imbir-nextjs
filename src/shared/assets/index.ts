@@ -1,1 +1,1 @@
-export { ArrowIcon } from "./icons";
+export { ArrowIcon, EmailIcon, PersonIcon, WarningIcon } from './icons';

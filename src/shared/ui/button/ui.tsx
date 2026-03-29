@@ -1,7 +1,7 @@
-'use client';
-
-import { ButtonHTMLAttributes, FC, ReactNode } from 'react';
+import { ButtonHTMLAttributes, ComponentType, FC, SVGProps } from 'react';
 import { cn } from '@/shared/lib/utils';
+
+type IconType = ComponentType<SVGProps<SVGSVGElement>>;
 
 type Variant = 'default' | 'outline' | 'text';
 type Sizes = 'xs' | 'sm' | 'md' | 'lg';
@@ -9,8 +9,8 @@ type Sizes = 'xs' | 'sm' | 'md' | 'lg';
 type Props = {
   loading?: boolean;
   variant?: Variant;
-  iconLeft?: ReactNode;
-  iconRight?: ReactNode;
+  IconLeft?: IconType;
+  IconRight?: IconType;
   size?: Sizes;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
@@ -18,8 +18,8 @@ export const Button: FC<Props> = ({
   children,
   className,
   loading,
-  iconRight,
-  iconLeft,
+  IconRight,
+  IconLeft,
   variant = 'default',
   size = 'xs',
   ...props
@@ -49,9 +49,9 @@ export const Button: FC<Props> = ({
       {...props}
       disabled={props.disabled || loading}
     >
-      {iconLeft}
+      {IconLeft && <IconLeft className='size-5' />}
       <span>{children}</span>
-      {iconRight}
+      {IconRight && <IconRight className='size-5' />}
     </button>
   );
 };
