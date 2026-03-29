@@ -1,1 +1,9 @@
-export { ArrowIcon, EmailIcon, PersonIcon, WarningIcon } from './icons';
+export {
+  ArrowIcon,
+  EmailIcon,
+  PersonIcon,
+  WarningIcon,
+  DropdownArrowIcon,
+  DropdownRemoveIcon,
+  DropdownCheckIcon,
+} from './icons';

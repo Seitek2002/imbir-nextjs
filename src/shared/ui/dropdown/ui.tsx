@@ -3,8 +3,12 @@
 import { FC, useState, useRef, useMemo } from 'react';
 import { useClickAway } from 'react-use';
 import { cn } from '@/shared/lib/utils';
-// Импорты остаются твоими, как ты и просил
 import { Checkbox, Radio } from '@/shared';
+import {
+  DropdownArrowIcon,
+  DropdownCheckIcon,
+  DropdownRemoveIcon,
+} from '@/shared/assets';
 
 type Option = {
   label: string;
@@ -109,20 +113,7 @@ export const Dropdown: FC<Props> = ({
                     }}
                     className='hover:text-[#F5653E] transition-colors'
                   >
-                    <svg
-                      width='14'
-                      height='14'
-                      viewBox='0 0 14 14'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth='1.5'
-                    >
-                      <path
-                        d='M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      />
-                    </svg>
+                    <DropdownRemoveIcon className='size-3.5' />
                   </button>
                 </div>
               ))
@@ -133,24 +124,12 @@ export const Dropdown: FC<Props> = ({
             )}
           </div>
 
-          <svg
-            width='20'
-            height='20'
-            viewBox='0 0 20 20'
-            fill='none'
+          <DropdownArrowIcon
             className={cn(
-              'text-[#838A8D] transition-transform duration-200',
+              'text-[#838A8D] transition-transform duration-200 size-5',
               isOpen && 'rotate-180',
             )}
-          >
-            <path
-              d='M5 7.5L10 12.5L15 7.5'
-              stroke='currentColor'
-              strokeWidth='1.5'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            />
-          </svg>
+          />
         </div>
 
         {/* Выпадающее меню */}
@@ -235,22 +214,7 @@ export const Dropdown: FC<Props> = ({
                       <span className='text-sm text-[#191A1B]'>
                         {opt.label}
                       </span>
-                      {isSelected(opt.value) && (
-                        <svg
-                          width='12'
-                          height='12'
-                          viewBox='0 0 12 12'
-                          fill='none'
-                        >
-                          <path
-                            d='M10 3L4.5 8.5L2 6'
-                            stroke='#191A1B'
-                            strokeWidth='1.5'
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                          />
-                        </svg>
-                      )}
+                      {isSelected(opt.value) && <DropdownCheckIcon />}
                     </>
                   )}
                 </div>

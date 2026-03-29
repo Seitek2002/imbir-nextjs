@@ -59,6 +59,14 @@ const Components = () => {
       <Dropdown
         label='Специализация с поиском'
         options={options}
+        type='default'
+        value={selected}
+        onChange={setSelected}
+      />
+
+      <Dropdown
+        label='Специализация с поиском'
+        options={options}
         type='checkbox'
         isMulti
         searchable // Включает инпут поиска внутри дропдауна
