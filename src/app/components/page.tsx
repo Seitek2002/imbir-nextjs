@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, IconBtn, Input } from '@/shared';
+import { Button, Dropdown, IconBtn, Input } from '@/shared';
 import { ArrowIcon, PersonIcon } from '@/shared/assets';
 
 const Components = () => {
@@ -31,7 +31,7 @@ const Components = () => {
           disabled
         />
       </div>
-      <p>QWERTY</p>
+      <Dropdown />
     </div>
   );
 };
