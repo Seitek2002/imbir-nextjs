@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Dropdown, IconBtn, Input, Radio } from '@/shared';
+import { Button, Checkbox, Dropdown, IconBtn, Input, Radio } from '@/shared';
 import { ArrowIcon, PersonIcon } from '@/shared/assets';
 
 const Components = () => {
@@ -34,6 +34,16 @@ const Components = () => {
       <div className='flex flex-col gap-4'>
         <Radio name='group1' size='small' label='Small option' defaultChecked />
         <Radio name='group1' size='large' label='Large option' />
+      </div>
+      <div className='flex flex-col gap-4'>
+        {/* Обычный чекбокс */}
+        <Checkbox size='small' label='Option 1' defaultChecked disabled />
+
+        {/* Состояние "минус" (Indeterminate) */}
+        <Checkbox size='large' label='Partial Selection' indeterminate />
+
+        {/* Пустой чекбокс */}
+        <Checkbox size='large' label='Option 2' />
       </div>
       <Dropdown />
     </div>
