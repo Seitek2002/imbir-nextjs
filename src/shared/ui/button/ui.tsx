@@ -4,12 +4,14 @@ import { ButtonHTMLAttributes, FC, ReactNode } from 'react';
 import { cn } from '@/shared/lib/utils';
 
 type Variant = 'default' | 'outline' | 'text';
+type Sizes = 'xs' | 'sm' | 'md' | 'lg';
 
 type Props = {
   loading?: boolean;
   variant?: Variant;
   iconLeft?: ReactNode;
   iconRight?: ReactNode;
+  size?: Sizes;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const Button: FC<Props> = ({
@@ -19,10 +21,19 @@ export const Button: FC<Props> = ({
   iconRight,
   iconLeft,
   variant = 'default',
+  size = 'xs',
   ...props
 }) => {
+  const sizes: Record<Sizes, string> = {
+    xs: 'text-xs py-1.5',
+    sm: 'text-sm py-2.5',
+    md: 'text-base py-3.5',
+    lg: 'text-base py-4',
+  };
+
   const baseStyles =
-    'py-1.5 px-4 flex items-center gap-2 cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none';
+    'px-4 font-medium flex items-center gap-2 cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none' +
+    sizes[size];
 
   const variants: Record<Variant, string> = {
     default:
