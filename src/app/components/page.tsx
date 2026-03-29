@@ -1,14 +1,14 @@
 'use client';
 
-import { Button, Dropdown, IconBtn, Input } from '@/shared';
+import { Button, Dropdown, IconBtn, Input, Radio } from '@/shared';
 import { ArrowIcon, PersonIcon } from '@/shared/assets';
 
 const Components = () => {
   return (
     <div>
       <p>
-        Если хочешь навешать Event (события) на компоненты, то надо в начале файла где есть
-        кнопка написать &apos;use client&apos;
+        Если хочешь навешать Event (события) на компоненты, то надо в начале
+        файла где есть кнопка написать &apos;use client&apos;
       </p>
       <Button variant='outline' size='lg'>
         outline btn
@@ -30,6 +30,10 @@ const Components = () => {
           error='Буран добавь деталей'
           disabled
         />
+      </div>
+      <div className='flex flex-col gap-4'>
+        <Radio name='group1' size='small' label='Small option' defaultChecked />
+        <Radio name='group1' size='large' label='Large option' />
       </div>
       <Dropdown />
     </div>

@@ -1,0 +1,53 @@
+.input-radio {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.input-radio input {
+  -webkit-appearance: none; /* отключаем системный стиль */
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border: 1px solid #10b981;
+  border-radius: 50%;
+  position: relative;
+  transition:
+    border 0.2s,
+    background-color 0.2s;
+  cursor: pointer;
+}
+
+.input-radio input:checked {
+  background-color: #10b981; /* цвет заполненного кружка */
+  border-color: #10b981;
+}
+
+.input-radio input:checked::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  background: green;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.input-radio input:hover {
+  border-color: green;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.input-radio input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4);
+}
