@@ -42,7 +42,9 @@ export const Dropdown: FC<Props> = ({
   onChange,
   className,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  // ДВА СОСТОЯНИЯ ДЛЯ ИДЕАЛЬНОЙ АНИМАЦИИ:
+  const [isMounted, setIsMounted] = useState(false); // Отвечает за наличие HTML в DOM
+  const [isActive, setIsActive] = useState(false); // Отвечает за запуск CSS-переходов
   const [searchQuery, setSearchQuery] = useState('');
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,18 +52,32 @@ export const Dropdown: FC<Props> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const touchStart = useRef({ y: 0, time: 0 });
 
-  const closeDropdown = () => {
-    setIsOpen(false);
-    setSearchQuery('');
+  const openDropdown = () => {
+    setIsMounted(true);
+    // Даем браузеру микросекунду на рендер DOM, затем запускаем CSS-анимацию
+    setTimeout(() => setIsActive(true), 10);
   };
 
-  // Закрытие при клике вне компонента (работает на десктопе)
-  useClickAway(containerRef, () => closeDropdown());
+  const closeDropdown = () => {
+    setIsActive(false); // Запускает обратную анимацию ухода
+    setTimeout(() => {
+      setIsMounted(false); // Удаляет из DOM только когда анимация завершилась
+      setSearchQuery('');
+    }, 300); // Ровно время transition duration
+  };
 
-  // Блокировка скролла body при открытой шторке на мобильных
+  const toggleDropdown = () => {
+    if (isActive) closeDropdown();
+    else openDropdown();
+  };
+
+  useClickAway(containerRef, () => {
+    if (isMounted && isActive) closeDropdown();
+  });
+
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
-    if (isOpen && isMobile) {
+    if (isMounted && isMobile) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -69,7 +85,7 @@ export const Dropdown: FC<Props> = ({
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isMounted]);
 
   const handleSelect = (val: string) => {
     if (isMulti) {
@@ -96,11 +112,11 @@ export const Dropdown: FC<Props> = ({
     );
   }, [options, searchQuery]);
 
-  // --- ЛОГИКА СВАЙПА (60 FPS Performance) ---
+  // --- НАИВНАЯ 60 FPS ЛОГИКА СВАЙПА ---
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStart.current = { y: e.touches[0].clientY, time: Date.now() };
     if (sheetRef.current) {
-      // Отключаем анимацию во время перетаскивания, чтобы палец "прилипал" к шторке
+      // Выключаем CSS-анимацию, чтобы шторка "прилипла" к пальцу без задержек
       sheetRef.current.style.transition = 'none';
     }
   };
@@ -109,16 +125,11 @@ export const Dropdown: FC<Props> = ({
     if (!sheetRef.current) return;
     const deltaY = e.touches[0].clientY - touchStart.current.y;
 
-    // Предотвращаем свайп шторки, если пользователь скроллит сам список (и список не в самом верху)
     if (scrollRef.current?.contains(e.target as Node)) {
-      if (scrollRef.current.scrollTop > 0 || deltaY < 0) {
-        return;
-      }
+      if (scrollRef.current.scrollTop > 0 || deltaY < 0) return;
     }
 
-    // Тянем шторку только вниз
     if (deltaY > 0) {
-      // Прямая мутация DOM (без перерендера React) для производительности
       sheetRef.current.style.transform = `translateY(${deltaY}px)`;
     }
   };
@@ -127,22 +138,14 @@ export const Dropdown: FC<Props> = ({
     if (!sheetRef.current) return;
     const deltaY = e.changedTouches[0].clientY - touchStart.current.y;
     const timeElapsed = Date.now() - touchStart.current.time;
-    const velocity = deltaY / timeElapsed; // Скорость свайпа
+    const velocity = deltaY / timeElapsed;
 
-    // Включаем красивую spring-анимацию для возврата/закрытия
-    sheetRef.current.style.transition =
-      'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)';
+    // Сбрасываем инлайн-стили, возвращая контроль нативным CSS-классам
+    sheetRef.current.style.transition = '';
+    sheetRef.current.style.transform = '';
 
-    // Если свайпнули достаточно сильно (более 150px или быстро)
     if (deltaY > 150 || velocity > 0.5) {
       closeDropdown();
-      // Сбрасываем стили после закрытия
-      setTimeout(() => {
-        if (sheetRef.current) sheetRef.current.style.transform = '';
-      }, 300);
-    } else {
-      // Возвращаем на место (недостаточный свайп)
-      sheetRef.current.style.transform = 'translateY(0px)';
     }
   };
 
@@ -156,13 +159,12 @@ export const Dropdown: FC<Props> = ({
       )}
 
       <div className='relative'>
-        {/* Trigger (Поле выбора) */}
         <div
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={toggleDropdown}
           className={cn(
             'flex items-center justify-between min-h-10.5 px-3 py-2 border rounded-lg cursor-pointer transition-all duration-200 bg-white select-none',
             'border-[#E3E4E5]',
-            isOpen
+            isActive
               ? 'border-[#F5653E] shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]'
               : 'hover:border-[#F5653E]/50',
           )}
@@ -172,7 +174,7 @@ export const Dropdown: FC<Props> = ({
               value.map((val) => (
                 <div
                   key={val}
-                  className='flex items-center gap-1 px-2 py-0.5 border border-[#E3E4E5] rounded-md bg-white text-sm animate-in fade-in zoom-in-95 duration-200'
+                  className='flex items-center gap-1 px-2 py-0.5 border border-[#E3E4E5] rounded-md bg-white text-sm'
                 >
                   {options.find((o) => o.value === val)?.label}
                   <button
@@ -188,12 +190,7 @@ export const Dropdown: FC<Props> = ({
                 </div>
               ))
             ) : (
-              <span
-                className={cn(
-                  value ? 'text-[#191A1B]' : 'text-[#838A8D]',
-                  'animate-in fade-in duration-200',
-                )}
-              >
+              <span className={cn(value ? 'text-[#191A1B]' : 'text-[#838A8D]')}>
                 {options.find((o) => o.value === value)?.label || placeholder}
               </span>
             )}
@@ -202,21 +199,24 @@ export const Dropdown: FC<Props> = ({
           <DropdownArrowIcon
             className={cn(
               'text-[#838A8D] transition-transform duration-300 size-5',
-              isOpen && 'rotate-180',
+              isActive && 'rotate-180',
             )}
           />
         </div>
 
-        {/* Темный фон для мобильной шторки (Добавлен blur) */}
-        {isOpen && (
+        {/* Темный фон (исправлен на transition-opacity) */}
+        {isMounted && (
           <div
-            className='fixed inset-0 z-40 bg-[#0D0D12]/40 backdrop-blur-[2px] md:hidden animate-in fade-in duration-300'
+            className={cn(
+              'fixed inset-0 z-40 bg-[#0D0D12]/40 backdrop-blur-[2px] md:hidden transition-opacity duration-300 ease-out',
+              isActive ? 'opacity-100' : 'opacity-0',
+            )}
             onClick={closeDropdown}
           />
         )}
 
         {/* Выпадающее меню / Bottom Sheet */}
-        {isOpen && (
+        {isMounted && (
           <div
             ref={sheetRef}
             onTouchStart={handleTouchStart}
@@ -225,16 +225,18 @@ export const Dropdown: FC<Props> = ({
             className={cn(
               // --- MOBILE BASE ---
               'fixed inset-x-0 bottom-0 z-50 flex flex-col bg-white rounded-t-3xl p-4 pb-safe',
-              'animate-in slide-in-from-bottom-full duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]',
+              'transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]',
               // --- DESKTOP OVERRIDES ---
               'md:absolute md:inset-auto md:top-full md:mt-1 md:w-full md:p-1 md:rounded-xl md:border md:border-[#E3E4E5] md:shadow-[0_4px_20px_rgba(0,0,0,0.08)]',
-              'md:slide-in-from-top-2 md:zoom-in-95 md:duration-200 md:ease-out',
+
+              // === МАГИЯ ПОЯВЛЕНИЯ И ИСЧЕЗНОВЕНИЯ ===
+              isActive
+                ? 'translate-y-0 opacity-100 md:scale-100'
+                : 'translate-y-full opacity-0 md:-translate-y-2 md:scale-95',
             )}
           >
-            {/* Индикатор свайпа (Pill) */}
             <div className='w-10 h-1.5 bg-[#E3E4E5] rounded-full mx-auto mb-3 md:hidden' />
 
-            {/* Хедер (Заголовок и крестик) */}
             <div className='flex items-center justify-between mb-4 md:hidden'>
               <div className='size-8' />
               <span className='text-lg font-semibold text-[#0D0D12]'>
@@ -248,7 +250,6 @@ export const Dropdown: FC<Props> = ({
               </button>
             </div>
 
-            {/* Строка поиска */}
             {searchable && (
               <div className='mb-4 md:mb-0 md:p-2 sticky top-0 bg-white z-10 md:border-b md:border-[#E3E4E5]/50'>
                 <input
@@ -262,12 +263,10 @@ export const Dropdown: FC<Props> = ({
               </div>
             )}
 
-            {/* Контейнер списка со скроллом */}
             <div
               ref={scrollRef}
               className='flex-1 overflow-y-auto max-h-[55vh] md:max-h-64 border border-[#E3E4E5] rounded-xl md:border-none md:rounded-none'
             >
-              {/* Опция "Все" */}
               {isMulti && !searchQuery && (
                 <>
                   <div
@@ -298,7 +297,6 @@ export const Dropdown: FC<Props> = ({
                 </>
               )}
 
-              {/* Список опций */}
               {filteredOptions.length > 0 ? (
                 filteredOptions.map((opt) => (
                   <div
@@ -329,7 +327,7 @@ export const Dropdown: FC<Props> = ({
                     )}
 
                     {type === 'default' && isSelected(opt.value) && (
-                      <DropdownCheckIcon className='size-5 md:size-3.5 text-[#F5653E] md:text-[#191A1B] animate-in zoom-in duration-200' />
+                      <DropdownCheckIcon className='size-5 md:size-3.5 text-[#F5653E] md:text-[#191A1B]' />
                     )}
                   </div>
                 ))
@@ -340,7 +338,6 @@ export const Dropdown: FC<Props> = ({
               )}
             </div>
 
-            {/* Кнопка "Готово" только для мобилок */}
             <div className='mt-5 md:hidden'>
               <Button
                 className='w-full py-3.5 text-base justify-center'
