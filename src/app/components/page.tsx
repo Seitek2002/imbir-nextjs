@@ -7,7 +7,7 @@ const Components = () => {
   return (
     <div>
       <p>
-        Если хочешь навешать onClick на кнопки, то надо в начале файла где есть
+        Если хочешь навешать Event (события) на компоненты, то надо в начале файла где есть
         кнопка написать &apos;use client&apos;
       </p>
       <Button variant='outline' size='lg'>
