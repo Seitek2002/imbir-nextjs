@@ -22,7 +22,7 @@ export const Button: FC<Props> = ({
   ...props
 }) => {
   const baseStyles =
-    'py-1.5 px-4 flex gap-2 cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none';
+    'py-1.5 px-4 flex items-center gap-2 cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none';
 
   const variants: Record<Variant, string> = {
     default:
