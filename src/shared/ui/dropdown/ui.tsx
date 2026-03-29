@@ -172,7 +172,7 @@ export const Dropdown: FC<Props> = ({
                     />
                   </div>
                 </div>
-                <div className='h-[1px] bg-[#F2F3F5] my-1 mx-3' />
+                <div className='h-px bg-[#F2F3F5] my-1 mx-3' />
               </>
             )}
 
