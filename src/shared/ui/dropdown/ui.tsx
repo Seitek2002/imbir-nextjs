@@ -214,7 +214,9 @@ export const Dropdown: FC<Props> = ({
                       <span className='text-sm text-[#191A1B]'>
                         {opt.label}
                       </span>
-                      {isSelected(opt.value) && <DropdownCheckIcon className="size-3.5" />}
+                      {isSelected(opt.value) && (
+                        <DropdownCheckIcon className='size-3.5' />
+                      )}
                     </>
                   )}
                 </div>
