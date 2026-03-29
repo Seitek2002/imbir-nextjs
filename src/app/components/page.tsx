@@ -1,4 +1,4 @@
-import { Button, IconBtn } from '@/shared';
+import { Button, IconBtn, Input } from '@/shared';
 import { ArrowIcon } from '@/shared/assets';
 
 const Components = () => {
@@ -17,6 +17,9 @@ const Components = () => {
       <IconBtn size='lg'>
         <ArrowIcon className='rotate-180 size-5' />
       </IconBtn>
+      <div>
+        <Input />
+      </div>
       <p>QWERTY</p>
     </div>
   );
