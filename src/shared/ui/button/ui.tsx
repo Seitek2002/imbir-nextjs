@@ -1,6 +1,6 @@
 'use client';
 
-import { ButtonHTMLAttributes, FC } from 'react';
+import { ButtonHTMLAttributes, FC, ReactNode } from 'react';
 import { cn } from '@/shared/lib/utils';
 
 type Variant = 'default' | 'outline' | 'text';
@@ -8,16 +8,16 @@ type Variant = 'default' | 'outline' | 'text';
 type Props = {
   loading?: boolean;
   variant?: Variant;
-  suffix?: React.ReactNode;
-  prefix?: React.ReactNode;
+  iconLeft?: ReactNode;
+  iconRight?: ReactNode;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const Button: FC<Props> = ({
   children,
   className,
   loading,
-  suffix,
-  prefix,
+  iconRight,
+  iconLeft,
   variant = 'default',
   ...props
 }) => {
@@ -38,9 +38,9 @@ export const Button: FC<Props> = ({
       {...props}
       disabled={props.disabled || loading}
     >
-      {prefix}
+      {iconLeft}
       <span>{children}</span>
-      {suffix}
+      {iconRight}
     </button>
   );
 };

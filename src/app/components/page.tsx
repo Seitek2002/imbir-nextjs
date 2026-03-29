@@ -1,9 +1,10 @@
 import { Button } from '@/shared';
+import { ArrowIcon } from '@/shared/assets';
 
 const Components = () => {
   return (
     <div>
-      <Button prefix={'ICON'} suffix={'ICON'}>default btn</Button>
+      <Button iconLeft={<ArrowIcon />} iconRight={'ICON'}>default btn</Button>
       <Button variant='outline'>outline btn</Button>
       <Button variant='text'>text btn</Button>
       <p>QWERTY</p>
