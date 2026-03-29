@@ -1,5 +1,7 @@
+'use client';
+
 import { Button, IconBtn, Input } from '@/shared';
-import { ArrowIcon } from '@/shared/assets';
+import { ArrowIcon, PersonIcon } from '@/shared/assets';
 
 const Components = () => {
   return (
@@ -15,7 +17,15 @@ const Components = () => {
         <ArrowIcon className='rotate-180 size-5' />
       </IconBtn>
       <div>
-        <Input />
+        <Input IconLeft={PersonIcon} type='password' />
+      </div>
+      <div>
+        <Input
+          label='Имя'
+          IconRight={PersonIcon}
+          error='Буран добавь деталей'
+          disabled
+        />
       </div>
       <p>QWERTY</p>
     </div>
