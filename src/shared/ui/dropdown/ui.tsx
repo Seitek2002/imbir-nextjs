@@ -3,7 +3,7 @@
 import { FC, useState, useRef, useMemo, useEffect } from 'react';
 import { useClickAway } from 'react-use';
 import { cn } from '@/shared/lib/utils';
-// Предполагается, что Button тоже экспортируется из '@/shared'
+
 import { Checkbox, Radio, Button } from '@/shared';
 import {
   DropdownArrowIcon,
