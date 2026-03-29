@@ -1,0 +1,107 @@
+<svg
+    width='44'
+    height='44'
+    viewBox='0 0 44 44'
+    fill='none'
+    xmlns='http://www.w3.org/2000/svg'
+>
+    <g filter='url(#filter0_d_4030_20137)'>
+        <rect
+            x='2'
+            y='1'
+            width='40'
+            height='40'
+            rx='20'
+            fill='white'
+            shape-rendering='crispEdges'
+        />
+        <rect
+            x='2.5'
+            y='1.5'
+            width='39'
+            height='39'
+            rx='19.5'
+            stroke='#E5E6E8'
+            shape-rendering='crispEdges'
+        />
+        <path
+            d='M28.667 17.334H24.667'
+            stroke='#191A1B'
+            stroke-miterlimit='10'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+        />
+        <path
+            d='M17.9997 17.334H15.333'
+            stroke='#191A1B'
+            stroke-miterlimit='10'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+        />
+        <path
+            d='M20.6663 19.6667C21.955 19.6667 22.9997 18.622 22.9997 17.3333C22.9997 16.0447 21.955 15 20.6663 15C19.3777 15 18.333 16.0447 18.333 17.3333C18.333 18.622 19.3777 19.6667 20.6663 19.6667Z'
+            stroke='#191A1B'
+            stroke-miterlimit='10'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+        />
+        <path
+            d='M28.6667 24.666H26'
+            stroke='#191A1B'
+            stroke-miterlimit='10'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+        />
+        <path
+            d='M19.333 24.666H15.333'
+            stroke='#191A1B'
+            stroke-miterlimit='10'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+        />
+        <path
+            d='M23.3333 27.0007C24.622 27.0007 25.6667 25.956 25.6667 24.6673C25.6667 23.3787 24.622 22.334 23.3333 22.334C22.0447 22.334 21 23.3787 21 24.6673C21 25.956 22.0447 27.0007 23.3333 27.0007Z'
+            stroke='#191A1B'
+            stroke-miterlimit='10'
+            stroke-linecap='round'
+            stroke-linejoin='round'
+        />
+    </g>
+    <defs>
+        <filter
+            id='filter0_d_4030_20137'
+            x='0'
+            y='0'
+            width='44'
+            height='44'
+            filterUnits='userSpaceOnUse'
+            color-interpolation-filters='sRGB'
+        >
+            <feFlood flood-opacity='0' result='BackgroundImageFix' />
+            <feColorMatrix
+                in='SourceAlpha'
+                type='matrix'
+                values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0'
+                result='hardAlpha'
+            />
+            <feOffset dy='1' />
+            <feGaussianBlur stdDeviation='1' />
+            <feComposite in2='hardAlpha' operator='out' />
+            <feColorMatrix
+                type='matrix'
+                values='0 0 0 0 0.0509804 0 0 0 0 0.0509804 0 0 0 0 0.0705882 0 0 0 0.03 0'
+            />
+            <feBlend
+                mode='normal'
+                in2='BackgroundImageFix'
+                result='effect1_dropShadow_4030_20137'
+            />
+            <feBlend
+                mode='normal'
+                in='SourceGraphic'
+                in2='effect1_dropShadow_4030_20137'
+                result='shape'
+            />
+        </filter>
+    </defs>
+</svg>
