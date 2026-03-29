@@ -1,9 +1,10 @@
 'use client';
 
-import { FC, useState, useRef, useMemo } from 'react';
+import { FC, useState, useRef, useMemo, useEffect } from 'react';
 import { useClickAway } from 'react-use';
 import { cn } from '@/shared/lib/utils';
-import { Checkbox, Radio } from '@/shared';
+// Предполагается, что Button тоже экспортируется из '@/shared'
+import { Checkbox, Radio, Button } from '@/shared';
 import {
   DropdownArrowIcon,
   DropdownCheckIcon,
@@ -24,7 +25,7 @@ type Props = {
   options: Option[];
   type?: DropdownType;
   isMulti?: boolean;
-  searchable?: boolean; // Новый пропс для поиска
+  searchable?: boolean;
   value?: any; // string | string[]
   onChange?: (value: any) => void;
   className?: string;
@@ -37,19 +38,33 @@ export const Dropdown: FC<Props> = ({
   options,
   type = 'default',
   isMulti = false,
-  searchable = false, // По умолчанию поиск выключен
+  searchable = false,
   value,
   onChange,
   className,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(''); // Состояние для поиска
-  const containerRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  // Закрытие при клике вне компонента (работает на десктопе)
   useClickAway(containerRef, () => {
     setIsOpen(false);
     setSearchQuery('');
   });
+
+  // Блокировка скролла body при открытой шторке на мобильных
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768; // md breakpoint в Tailwind
+    if (isOpen && isMobile) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const handleSelect = (val: string) => {
     if (isMulti) {
@@ -60,8 +75,13 @@ export const Dropdown: FC<Props> = ({
       onChange?.(newValues);
     } else {
       onChange?.(val);
-      setIsOpen(false);
-      setSearchQuery('');
+      // На мобильных не закрываем сразу при выборе радио/дефолт,
+      // чтобы пользователь мог нажать "Готово" (опционально, зависит от UX)
+      // Если хочешь автозакрытие на десктопе:
+      if (window.innerWidth >= 768) {
+        setIsOpen(false);
+        setSearchQuery('');
+      }
     }
   };
 
@@ -87,6 +107,7 @@ export const Dropdown: FC<Props> = ({
       )}
 
       <div className='relative'>
+        {/* Trigger (Поле выбора) */}
         <div
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
@@ -132,100 +153,152 @@ export const Dropdown: FC<Props> = ({
           />
         </div>
 
-        {/* Выпадающее меню */}
+        {/* Темный фон для мобильной шторки */}
         {isOpen && (
-          <div className='absolute z-50 w-full mt-1 bg-white border border-[#E3E4E5] rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] py-1 max-h-64 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200 flex flex-col'>
+          <div
+            className='fixed inset-0 z-40 bg-[#0D0D12]/40 md:hidden animate-in fade-in duration-200'
+            onClick={() => {
+              setIsOpen(false);
+              setSearchQuery('');
+            }}
+          />
+        )}
+
+        {/* Выпадающее меню / Bottom Sheet */}
+        {isOpen && (
+          <div
+            className={cn(
+              // --- MOBILE BASE ---
+              'fixed inset-x-0 bottom-0 z-50 flex flex-col bg-white rounded-t-3xl p-4 pb-safe',
+              'animate-in slide-in-from-bottom-full duration-300',
+              // --- DESKTOP OVERRIDES ---
+              'md:absolute md:inset-auto md:top-full md:mt-1 md:w-full md:p-1 md:rounded-xl md:border md:border-[#E3E4E5] md:shadow-[0_4px_20px_rgba(0,0,0,0.08)]',
+              'md:slide-in-from-top-2 md:duration-200',
+            )}
+          >
+            {/* Хедер только для мобилок (Заголовок и крестик) */}
+            <div className='flex items-center justify-between mb-4 md:hidden'>
+              <div className='size-8' />{' '}
+              {/* Пустой div для центрирования заголовка */}
+              <span className='text-lg font-semibold text-[#0D0D12]'>
+                {label || placeholder}
+              </span>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setSearchQuery('');
+                }}
+                className='flex items-center justify-center size-8 border border-[#E3E4E5] rounded-full text-[#191A1B]'
+              >
+                <DropdownRemoveIcon className='size-3.5' />
+              </button>
+            </div>
+
             {/* Строка поиска */}
             {searchable && (
-              <div className='p-2 sticky top-0 bg-white z-10 border-b border-[#E3E4E5]/50'>
+              <div className='mb-4 md:mb-0 md:p-2 sticky top-0 bg-white z-10 md:border-b md:border-[#E3E4E5]/50'>
                 <input
                   type='text'
                   placeholder='Поиск...'
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  // Останавливаем всплытие клика, чтобы дропдаун не закрывался/мерцал
                   onClick={(e) => e.stopPropagation()}
-                  className='w-full text-sm border border-[#E3E4E5] text-[#191A1B] rounded-md py-1.5 px-3 outline-none focus:border-[#F5653E] transition-colors'
+                  className='w-full text-sm border border-[#E3E4E5] text-[#191A1B] rounded-xl md:rounded-md py-2.5 md:py-1.5 px-3 outline-none focus:border-[#F5653E] transition-colors'
                 />
               </div>
             )}
 
-            {/* Опция "Все" (рендерим только если ничего не ищем) */}
-            {isMulti && !searchQuery && (
-              <>
-                <div
-                  className='px-3 py-2.5 hover:bg-[#F2F3F5] cursor-pointer'
-                  onClick={() => {
-                    if (Array.isArray(value) && value.length === options.length)
-                      onChange?.([]);
-                    else onChange?.(options.map((o) => o.value));
-                  }}
-                >
-                  {/* Отключаем события мыши на самом чекбоксе, чтобы ловил только родительский div */}
-                  <div className='pointer-events-none'>
-                    <Checkbox
-                      label='Все'
-                      checked={
-                        Array.isArray(value) && value.length === options.length
-                      }
-                      readOnly
-                    />
-                  </div>
-                </div>
-                <div className='h-px bg-[#F2F3F5] my-1 mx-3' />
-              </>
-            )}
-
-            {/* Список опций */}
-            {filteredOptions.length > 0 ? (
-              filteredOptions.map((opt) => (
-                <div
-                  key={opt.value}
-                  onClick={() => handleSelect(opt.value)}
-                  className={cn(
-                    'px-3 py-2.5 flex items-center justify-between cursor-pointer transition-colors',
-                    isSelected(opt.value) && type === 'default'
-                      ? 'bg-[#F2F3F5]'
-                      : 'hover:bg-[#F2F3F5]',
-                  )}
-                >
-                  {type === 'checkbox' && (
+            {/* Контейнер списка со скроллом */}
+            <div className='flex-1 overflow-y-auto max-h-[50vh] md:max-h-64 border border-[#E3E4E5] rounded-xl md:border-none md:rounded-none'>
+              {/* Опция "Все" */}
+              {isMulti && !searchQuery && (
+                <>
+                  <div
+                    className='p-4 md:px-3 md:py-2.5 flex items-center justify-between border-b border-[#E3E4E5] md:border-none md:hover:bg-[#F2F3F5] cursor-pointer'
+                    onClick={() => {
+                      if (
+                        Array.isArray(value) &&
+                        value.length === options.length
+                      )
+                        onChange?.([]);
+                      else onChange?.(options.map((o) => o.value));
+                    }}
+                  >
+                    <span className='text-[#191A1B] text-base md:text-sm flex-1'>
+                      Все
+                    </span>
                     <div className='pointer-events-none'>
                       <Checkbox
-                        label={opt.label}
-                        checked={isSelected(opt.value)}
+                        checked={
+                          Array.isArray(value) &&
+                          value.length === options.length
+                        }
                         readOnly
                       />
                     </div>
-                  )}
+                  </div>
+                  <div className='hidden md:block h-px bg-[#F2F3F5] my-1 mx-3' />
+                </>
+              )}
 
-                  {type === 'radio' && (
-                    <div className='pointer-events-none'>
-                      <Radio
-                        label={opt.label}
-                        checked={isSelected(opt.value)}
-                        readOnly
-                      />
-                    </div>
-                  )}
+              {/* Список опций */}
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((opt) => (
+                  <div
+                    key={opt.value}
+                    onClick={() => handleSelect(opt.value)}
+                    className={cn(
+                      'p-4 md:px-3 md:py-2.5 flex items-center justify-between cursor-pointer transition-colors',
+                      // Границы между элементами только на мобилках
+                      'border-b border-[#E3E4E5] last:border-b-0 md:border-none',
+                      isSelected(opt.value) && type === 'default'
+                        ? 'md:bg-[#F2F3F5]'
+                        : 'md:hover:bg-[#F2F3F5]',
+                    )}
+                  >
+                    {/* Текст вынесен налево */}
+                    <span className='text-[#191A1B] text-base md:text-sm flex-1'>
+                      {opt.label}
+                    </span>
 
-                  {type === 'default' && (
-                    <>
-                      <span className='text-sm text-[#191A1B]'>
-                        {opt.label}
-                      </span>
-                      {isSelected(opt.value) && (
-                        <DropdownCheckIcon className='size-3.5' />
-                      )}
-                    </>
-                  )}
+                    {/* Контролы справа */}
+                    {type === 'checkbox' && (
+                      <div className='pointer-events-none'>
+                        {/* Не передаем label внутрь Checkbox/Radio, чтобы не дублировать текст */}
+                        <Checkbox checked={isSelected(opt.value)} readOnly />
+                      </div>
+                    )}
+
+                    {type === 'radio' && (
+                      <div className='pointer-events-none'>
+                        <Radio checked={isSelected(opt.value)} readOnly />
+                      </div>
+                    )}
+
+                    {type === 'default' && isSelected(opt.value) && (
+                      <DropdownCheckIcon className='size-5 md:size-3.5 text-[#F5653E] md:text-[#191A1B]' />
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className='p-4 md:py-4 text-center text-sm text-[#838A8D]'>
+                  Ничего не найдено
                 </div>
-              ))
-            ) : (
-              <div className='px-3 py-4 text-center text-sm text-[#838A8D]'>
-                Ничего не найдено
-              </div>
-            )}
+              )}
+            </div>
+
+            {/* Кнопка "Готово" только для мобилок */}
+            <div className='mt-4 md:hidden'>
+              <Button
+                className='w-full py-3.5 text-base justify-center'
+                onClick={() => {
+                  setIsOpen(false);
+                  setSearchQuery('');
+                }}
+              >
+                Готово
+              </Button>
+            </div>
           </div>
         )}
       </div>
