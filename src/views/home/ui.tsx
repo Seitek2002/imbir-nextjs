@@ -1,10 +1,9 @@
-import { Header, Hero } from '@/widgets';
+import { Hero } from '@/widgets';
 
 export const HomePage = () => {
   return (
-    <div>
-      <Header />
+    <main>
       <Hero />
-    </div>
+    </main>
   );
 };
