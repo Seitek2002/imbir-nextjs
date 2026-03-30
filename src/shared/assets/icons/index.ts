@@ -2,6 +2,7 @@ import ArrowIcon from "./button/arrow.svg";
 import DropdownArrowIcon from "./dropdown/arrow.svg";
 import DropdownCheckIcon from "./dropdown/check.svg";
 import DropdownRemoveIcon from "./dropdown/remove.svg";
+import HeaderBackIcon from "./header/back-arrow.svg";
 import ChatIcon from "./header/chat.svg";
 import FilterSample from "./header/filter-sample.svg";
 import GeoBtnArrowIcon from "./header/geo-btn-arrow.svg";
@@ -30,4 +31,5 @@ export {
   ChatIcon,
   ProfileIcon,
   SearchIcon,
+  HeaderBackIcon,
 };
