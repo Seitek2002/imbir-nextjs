@@ -12,3 +12,5 @@ export {
   SearchSample,
   FilterSample,
 } from './icons';
+
+export { HeroBg, HeroAvatar } from './images';
