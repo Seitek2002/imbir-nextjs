@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "format": "prettier --write \"src/**/*.{ts,tsx,scss,css}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,scss,css}\""
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -19,6 +21,7 @@
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

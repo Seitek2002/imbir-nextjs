@@ -11,6 +11,6 @@ export {
   GeoBtnArrowIcon,
   SearchSample,
   FilterSample,
-} from './icons';
+} from "./icons";
 
-export { HeroBg, HeroAvatar } from './images';
+export { HeroBg, HeroAvatar } from "./images";

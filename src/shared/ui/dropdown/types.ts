@@ -3,7 +3,7 @@ export type Option = {
   value: string;
 };
 
-export type DropdownType = 'default' | 'checkbox' | 'radio';
+export type DropdownType = "default" | "checkbox" | "radio";
 
 // Общие пропсы, которые есть всегда
 type BaseDropdownProps = {

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef } from "react";
 
 export const useDropdownSwipe = (onClose: () => void) => {
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -7,7 +7,7 @@ export const useDropdownSwipe = (onClose: () => void) => {
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchStart.current = { y: e.touches[0].clientY, time: Date.now() };
-    if (sheetRef.current) sheetRef.current.style.transition = 'none';
+    if (sheetRef.current) sheetRef.current.style.transition = "none";
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
@@ -30,8 +30,8 @@ export const useDropdownSwipe = (onClose: () => void) => {
     const velocity = deltaY / timeElapsed;
 
     sheetRef.current.style.transition =
-      'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)';
-    sheetRef.current.style.transform = '';
+      "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)";
+    sheetRef.current.style.transform = "";
 
     if (deltaY > 150 || velocity > 0.5) onClose();
   };

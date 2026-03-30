@@ -1,4 +1,4 @@
-import { Hero } from '@/widgets';
+import { Hero } from "@/widgets";
 
 export const HomePage = () => {
   return (

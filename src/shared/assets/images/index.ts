@@ -1,4 +1,4 @@
-import HeroBg from './hero/bg.png';
-import HeroAvatar from './hero/avatar.png';
+import HeroAvatar from "./hero/avatar.png";
+import HeroBg from "./hero/bg.png";
 
 export { HeroBg, HeroAvatar };
