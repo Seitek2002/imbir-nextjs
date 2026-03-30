@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Onest } from 'next/font/google';
-import './globals.css';
 import { Header } from '@/widgets';
+import './globals.css';
 
 const onest = Onest({
   variable: '--font-onest',
