@@ -4,7 +4,7 @@ import { HeroAvatar, HeroBg } from '@/shared/assets';
 
 export const Hero = () => {
   return (
-    <div className='relative m-2 p-4 overflow-hidden h-screen rounded-2xl'>
+    <section className='relative m-2 p-4 overflow-hidden h-screen rounded-2xl'>
       <div className=''>
         <h1 className='font-semibold text-2xl text-[#191A1B]'>
           Лучшие специалисты и честные отзывы
@@ -40,6 +40,6 @@ export const Hero = () => {
       <div className='w-full h-screen absolute -z-1 top-0 left-0'>
         <Image className='object-cover h-full w-full' src={HeroBg} alt='' />
       </div>
-    </div>
+    </section>
   );
 };
