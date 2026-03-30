@@ -11,10 +11,11 @@ import {
   Logo,
   ProfileIcon,
   SearchIcon,
-  SearchSample,
 } from "@/shared/assets";
 
-export const DefaultContent: FC = () => {
+export const DefaultContent: FC<{ searchable?: boolean }> = ({
+  searchable,
+}) => {
   return (
     <div>
       <div className="flex items-center justify-between w-full">
@@ -50,9 +51,17 @@ export const DefaultContent: FC = () => {
           Бишкек
         </Button>
       </div>
-      <div className="flex items-center justify-center mt-4 md:hidden">
-        <SearchSample className="active:scale-95 transition-transform" />
-      </div>
+      {searchable && (
+        <div className="w-full flex items-center justify-center mt-4 md:hidden">
+          <Link
+            href={"#"}
+            className="flex items-center w-full gap-2 border border-[#E5E6E8] px-3 py-2 rounded-full transition-transform active:scale-95"
+          >
+            <SearchIcon className="size-5" />
+            <span className="text-[#686F72] text-base">Поиск клиники</span>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
