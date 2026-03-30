@@ -54,7 +54,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
       {searchable && (
         <div className="w-full flex items-center justify-center mt-4 md:hidden">
           <Link
-            href={"#"}
+            href={"/search"}
             className="flex items-center w-full gap-2 border border-[#E5E6E8] px-3 py-2 rounded-full transition-transform active:scale-95"
           >
             <SearchIcon className="size-5" />
