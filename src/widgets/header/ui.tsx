@@ -9,7 +9,7 @@ import {
 
 export const Header = () => {
   return (
-    <header className='px-4'>
+    <header className='px-4 pb-4 bg-white rounded-br-2xl rounded-bl-2xl'>
       <div className='flex items-center justify-between'>
         <Logo />
         <Button
