@@ -11,6 +11,9 @@ export {
   GeoBtnArrowIcon,
   SearchSample,
   FilterSample,
+  ChatIcon,
+  SearchIcon,
+  ProfileIcon,
 } from "./icons";
 
 export { HeroBg, HeroAvatar } from "./images";
