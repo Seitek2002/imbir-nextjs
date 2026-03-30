@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
-import { Onest } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Onest } from 'next/font/google';
+import './globals.css';
 
 const onest = Onest({
-  variable: "--font-onest",
-  subsets: ["latin", "cyrillic"],
-  display: "swap",
+  variable: '--font-onest',
+  subsets: ['latin', 'cyrillic'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "IMBIR",
-  description: "Онлайн запись на прием к врачам со всего Кыргызстана",
+  title: 'IMBIR',
+  description: 'Онлайн запись на прием к врачам со всего Кыргызстана',
 };
 
 export default function RootLayout({
@@ -19,11 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${onest.className} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang='en' className={`${onest.className} h-full antialiased`}>
+      <body className='min-h-full flex flex-col bg-[#F2F3F5]'>{children}</body>
     </html>
   );
 }
