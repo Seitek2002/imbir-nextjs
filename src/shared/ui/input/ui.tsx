@@ -10,6 +10,7 @@ type Sizes = "small" | "large";
 type Props = {
   label?: string;
   className?: string;
+  labelClassName?: string;
   IconLeft?: IconType;
   IconRight?: IconType;
   size?: Sizes;
@@ -20,6 +21,7 @@ type Props = {
 export const Input: FC<Props> = ({
   label,
   className,
+  labelClassName,
   error,
   IconLeft,
   IconRight,
@@ -42,7 +44,7 @@ export const Input: FC<Props> = ({
     error && "shadow-[0_0_1px_3px_rgba(223,28,65,0.3)] border-[#EC778D]";
 
   return (
-    <label htmlFor={props.id} className="w-full">
+    <label htmlFor={props.id} className={cn("block", labelClassName)}>
       <span className="text-[#0D0D12] text-sm font-medium">{label}</span>
       <div className="relative w-full">
         {IconLeft && <IconLeft className="absolute left-3 top-2.25 size-5" />}
