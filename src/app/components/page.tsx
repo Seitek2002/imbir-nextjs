@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button, Checkbox, Dropdown, IconBtn, Input, Radio } from "@/shared";
+import { Header } from "@/widgets";
 
 import { ArrowIcon, PersonIcon } from "@/shared/assets";
 
@@ -13,12 +14,13 @@ const options = [
 ];
 
 const Components = () => {
-  const [selectedMulti, setSelectedMulti] = useState<string[]>([]); // Для мульти-выбора (массив)
-  const [singleDefault, setSingleDefault] = useState<string>(); // Для обычного выбора (строка)
+  const [selectedMulti, setSelectedMulti] = useState<string[]>([]);
+  const [singleDefault, setSingleDefault] = useState<string>();
   const [singleRadio, setSingleRadio] = useState<string>();
 
   return (
     <div>
+      <Header title="Поиск" backTo="/" />
       <p>
         Если хочешь навешать Event (события) на компоненты, то надо в начале
         файла где есть кнопка написать &apos;use client&apos;

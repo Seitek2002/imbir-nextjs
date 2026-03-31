@@ -1,10 +1,12 @@
+import { FC } from "react";
+
 import Image from "next/image";
 
 import { Button } from "@/shared";
 
 import { HeroAvatar, HeroBg } from "@/shared/assets";
 
-export const Hero = () => {
+export const Hero: FC = () => {
   return (
     <section className="relative m-2 p-4 overflow-hidden h-screen rounded-2xl">
       <div className="">
