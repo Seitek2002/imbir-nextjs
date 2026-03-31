@@ -8,26 +8,28 @@ import { Input } from "@/shared";
 
 import { SearchIcon } from "@/shared/assets";
 
+const QUERY_KEY = "q";
+
 export const SearchInput: FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const initialQuery = searchParams.get("search")?.toString() || "";
+  const initialQuery = searchParams.get(QUERY_KEY)?.toString() || "";
   const [query, setQuery] = useState(initialQuery);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      const currentSearch = searchParams.get("search") || "";
+      const currentSearch = searchParams.get(QUERY_KEY) || "";
 
       if (query === currentSearch) return;
 
       const params = new URLSearchParams(searchParams.toString());
 
       if (query) {
-        params.set("search", query);
+        params.set(QUERY_KEY, query);
       } else {
-        params.delete("search");
+        params.delete(QUERY_KEY);
       }
 
       router.replace(`${pathname}?${params.toString()}`);

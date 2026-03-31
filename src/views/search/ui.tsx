@@ -11,7 +11,6 @@ type Props = {
 };
 
 export const SearchPage: FC<Props> = ({ searchParams }) => {
-  // Вытаскиваем параметр search из URL
   const query =
     typeof searchParams?.search === "string" ? searchParams.search : "";
 

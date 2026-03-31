@@ -33,7 +33,7 @@ export const Header: FC<Props> = ({ children, title, backTo, searchable }) => {
               <div>
                 <BackButton backTo={backTo} />
               </div>
-              <h2 className="text-center font-medium text-base truncate px-2">
+              <h2 className="text-center font-medium text-base px-2">
                 {title}
               </h2>
               <div className="flex justify-end">
