@@ -19,20 +19,17 @@ import DoctorImage7 from "./doctors/doctor-7.png";
 import DoctorImage8 from "./doctors/doctor-8.png";
 import HeroAvatar from "./hero/avatar.png";
 import HeroBg from "./hero/bg.png";
-import SpecialtyCardiology from "./specialties/cardiology.png";
-import SpecialtyDentistry from "./specialties/dentistry.png";
-import SpecialtyGastroenterology from "./specialties/gastroenterology.png";
-import SpecialtyGinecology from "./specialties/ginecology.png";
-import SpecialtyLor from "./specialties/lor.png";
-import SpecialtyNevrology from "./specialties/nevrology.png";
-import SpecialtyOphthalmology from "./specialties/ophthalmology.png";
-import SpecialtyPulmonology from "./specialties/pulmonology.png";
-import VideoThumbnail4 from "./videos/video-1.jpg";
-import VideoThumbnail1 from "./videos/video-1.png";
-import VideoThumbnail5 from "./videos/video-2.jpg";
-import VideoThumbnail2 from "./videos/video-2.png";
-import VideoThumbnail6 from "./videos/video-3.jpg";
-import VideoThumbnail3 from "./videos/video-3.png";
+import ServiceCardiology from "./services/cardiology.png";
+import ServiceDentistry from "./services/dentistry.png";
+import ServiceGastroenterology from "./services/gastroenterology.png";
+import ServiceGinecology from "./services/ginecology.png";
+import ServiceLor from "./services/lor.png";
+import ServiceNevrology from "./services/nevrology.png";
+import ServiceOphthalmology from "./services/ophthalmology.png";
+import ServicePulmonology from "./services/pulmonology.png";
+import VideoThumbnail1 from "./videos/video-1.jpg";
+import VideoThumbnail2 from "./videos/video-2.jpg";
+import VideoThumbnail3 from "./videos/video-3.jpg";
 
 export {
   HeroBg,
@@ -49,23 +46,20 @@ export {
   ClinicImage2,
   ClinicImage3,
   ClinicImage4,
-  SpecialtyLor,
-  SpecialtyNevrology,
-  SpecialtyGinecology,
-  SpecialtyCardiology,
-  SpecialtyPulmonology,
-  SpecialtyOphthalmology,
-  SpecialtyGastroenterology,
-  SpecialtyDentistry,
+  ServiceLor,
+  ServiceNevrology,
+  ServiceGinecology,
+  ServiceCardiology,
+  ServicePulmonology,
+  ServiceOphthalmology,
+  ServiceGastroenterology,
+  ServiceDentistry,
   BannerImage1,
   BannerImage2,
   BannerImage3,
   VideoThumbnail1,
   VideoThumbnail2,
   VideoThumbnail3,
-  VideoThumbnail4,
-  VideoThumbnail5,
-  VideoThumbnail6,
   BlogBanner,
   BlogImage1,
   BlogImage2,
