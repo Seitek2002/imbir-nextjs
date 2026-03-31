@@ -18,6 +18,10 @@ export const SearchInput: FC = () => {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
+      const currentSearch = searchParams.get("search") || "";
+
+      if (query === currentSearch) return;
+
       const params = new URLSearchParams(searchParams.toString());
 
       if (query) {
