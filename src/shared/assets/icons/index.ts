@@ -19,11 +19,13 @@ import DropdownArrowIcon from "./dropdown/arrow.svg";
 import DropdownCheckIcon from "./dropdown/check.svg";
 import ChevronDownIcon from "./dropdown/chevron-down.svg";
 import DropdownRemoveIcon from "./dropdown/remove.svg";
+import HeaderBackIcon from "./header/back-arrow.svg";
 import ChatIcon from "./header/chat.svg";
 import FilterSample from "./header/filter-sample.svg";
 import GeoBtnArrowIcon from "./header/geo-btn-arrow.svg";
 import GeoIcon from "./header/geo.svg";
 import Logo from "./header/logo.svg";
+import ProfileIcon from "./header/profile.svg";
 import RemoveIcon from "./header/remove.svg";
 import SearchSample from "./header/search-sample.svg";
 import SearchIcon from "./header/search.svg";
@@ -60,7 +62,9 @@ export {
   GeoBtnArrowIcon,
   Logo,
   SearchIcon,
+  HeaderBackIcon,
   ChatIcon,
+  ProfileIcon,
   UserIcon,
   RemoveIcon,
   HeartIcon,
