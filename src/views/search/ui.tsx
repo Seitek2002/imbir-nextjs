@@ -1,63 +1,39 @@
 import { FC } from "react";
 
-import { Input } from "@/shared";
-import { Header } from "@/widgets";
+import { SearchInput } from "@/features";
 
-import { SearchIcon } from "@/shared/assets";
+import { CategoriesGrid } from "@/widgets/categories-grid/ui";
+import { Header } from "@/widgets/header";
+import { RecentSearches } from "@/widgets/recent-searches/ui";
 
-export const SearchPage: FC = () => {
+type Props = {
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export const SearchPage: FC<Props> = ({ searchParams }) => {
+  // Вытаскиваем параметр search из URL
+  const query =
+    typeof searchParams?.search === "string" ? searchParams.search : "";
+
   return (
-    <main>
-      <Header title="Поиск">
-        <Input
-          IconLeft={SearchIcon}
-          placeholder="Поиск клиники, врача, услуги"
-          className="w-full rounded-full"
-          labelClassName="mt-3"
-        />
+    <main className="min-h-screen bg-[#F2F3F5]">
+      <Header title="Поиск" backTo="/">
+        <SearchInput />
       </Header>
-      <div className="bg-white p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[#191A1B] text-lg font-medium">Недавно искали</h2>
-          <span className="text-[#F5653E] text-base">Удалить все</span>
+
+      {query ? (
+        <div className="p-4">
+          <h2 className="text-[#191A1B] text-lg font-medium mb-3">
+            Результаты по запросу: {query}
+          </h2>
+          {/* Сюда позже вставишь виджет со списком врачей */}
         </div>
-        <ul className="flex flex-col gap-4">
-          <li>Первичная медико-санитарная помощь</li>
-          <li>Врач по зубам</li>
-          <li>Жалобы на боль</li>
-          <li>Врачи-специалисты по глазам</li>
-          <li>Доктор Айбеков Н. Э</li>
-        </ul>
-      </div>
-      <div className="p-4 bg-white">
-        <h2 className="text-[#191A1B] text-lg font-medium mb-3">Категории</h2>
-        <div className="grid grid-cols-2 gap-x-3.5 gap-y-3 text-[#191A1B] font-medium">
-          <div className="border border-[#E3E4E5] px-3 py-4 line-clamp-1 rounded-2xl">
-            Кардиология
-          </div>
-          <div className="border border-[#E3E4E5] px-3 py-4 line-clamp-1 rounded-2xl">
-            Нефрология
-          </div>
-          <div className="border border-[#E3E4E5] px-3 py-4 line-clamp-1 rounded-2xl">
-            Пульмонология
-          </div>
-          <div className="border border-[#E3E4E5] px-3 py-4 line-clamp-1 rounded-2xl">
-            Гастроэнтерология
-          </div>
-          <div className="border border-[#E3E4E5] px-3 py-4 line-clamp-1 rounded-2xl">
-            Офтальмология
-          </div>
-          <div className="border border-[#E3E4E5] px-3 py-4 line-clamp-1 rounded-2xl">
-            Неврология
-          </div>
-          <div className="border border-[#E3E4E5] px-3 py-4 line-clamp-1 rounded-2xl">
-            Стоматология
-          </div>
-          <div className="border border-[#E3E4E5] px-3 py-4 line-clamp-1 rounded-2xl">
-            Дерматология
-          </div>
-        </div>
-      </div>
+      ) : (
+        <>
+          <RecentSearches />
+          <CategoriesGrid />
+        </>
+      )}
     </main>
   );
 };

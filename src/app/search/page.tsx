@@ -1,7 +1,11 @@
-import { FC } from "react";
+import { SearchPage } from "@/views/search";
 
-import { SearchPage } from "@/views";
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-const Search: FC = () => <SearchPage />;
+export default async function Page({ searchParams }: Props) {
+  const resolvedSearchParams = await searchParams;
 
-export default Search;
+  return <SearchPage searchParams={resolvedSearchParams} />;
+}
