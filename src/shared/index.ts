@@ -1,1 +1,9 @@
-export { Button, IconBtn, Input, Dropdown, Radio, Checkbox } from "./ui";
+export {
+  Button,
+  IconBtn,
+  Input,
+  Dropdown,
+  Radio,
+  Checkbox,
+  RangeSlider,
+} from "./ui";

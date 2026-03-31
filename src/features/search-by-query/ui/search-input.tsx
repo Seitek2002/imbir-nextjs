@@ -10,7 +10,9 @@ import { SearchIcon } from "@/shared/assets";
 
 const QUERY_KEY = "q";
 
-export const SearchInput: FC = () => {
+export const SearchInput: FC<{ placeholder?: string }> = ({
+  placeholder = "Поиск",
+}) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -41,9 +43,8 @@ export const SearchInput: FC = () => {
   return (
     <Input
       IconLeft={SearchIcon}
-      placeholder="Поиск клиники, врача, услуги"
+      placeholder={placeholder || "Поиск клиники, врача, услуги"}
       className="w-full rounded-full"
-      labelClassName="mt-3"
       value={query}
       onChange={(e) => setQuery(e.target.value)}
     />
