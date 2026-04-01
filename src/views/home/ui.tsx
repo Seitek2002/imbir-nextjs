@@ -1,5 +1,5 @@
-import { ClinicsSwiper, Header, Hero, VideosSwiper } from "@/widgets";
 import { FilterBar } from "@/features";
+import { ClinicsSwiper, Header, Hero, VideosSwiper } from "@/widgets";
 
 import { DoctorCard } from "@/entities/doctor";
 
@@ -15,7 +15,6 @@ import {
   VideoThumbnail2,
   VideoThumbnail3,
 } from "@/shared/assets";
-
 
 export const HomePage = () => {
   return (
