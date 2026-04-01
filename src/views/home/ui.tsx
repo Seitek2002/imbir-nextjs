@@ -1,4 +1,5 @@
 import { ClinicsSwiper, Header, Hero, VideosSwiper } from "@/widgets";
+import { FilterBar } from "@/features";
 
 import { DoctorCard } from "@/entities/doctor";
 
@@ -15,10 +16,12 @@ import {
   VideoThumbnail3,
 } from "@/shared/assets";
 
+
 export const HomePage = () => {
   return (
     <main>
       <Header searchable />
+      <FilterBar />
       <Hero />
       <div className="px-4 py-6 flex flex-col gap-3">
         <h2 className="font-semibold text-lg text-[#191A1B]">Врачи</h2>
