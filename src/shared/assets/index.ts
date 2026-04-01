@@ -23,6 +23,7 @@ export {
   UserIcon,
   RemoveIcon,
   HeartIcon,
+  HeartIcon2,
   PlayIcon,
   SearchSample,
   FilterSample,

@@ -7,6 +7,7 @@ import TwitterIcon from "./auth/twitter.svg";
 import ArrowLeftIcon from "./button/arrow-left.svg";
 import ArrowRightIcon from "./button/arrow-right.svg";
 import ArrowIcon from "./button/arrow.svg";
+import HeartIcon2 from "./cards/heart-2.svg";
 import HeartIcon from "./cards/heart.svg";
 import PlayIcon from "./cards/play.svg";
 import CalendarIcon from "./common/calendar.svg";
@@ -68,6 +69,7 @@ export {
   UserIcon,
   RemoveIcon,
   HeartIcon,
+  HeartIcon2,
   PlayIcon,
   SearchSample,
   FilterSample,

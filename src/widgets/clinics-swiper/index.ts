@@ -1,0 +1,1 @@
+export { ClinicsSwiper } from "./ui";
