@@ -5,21 +5,27 @@ import { ChangeEvent, FC, useCallback, useEffect, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 
 type Props = {
+  label?: string;
   min: number;
   max: number;
   step?: number;
   value: [number, number];
   onChange: (value: [number, number]) => void;
   className?: string;
+  labelClassName?: string;
+  id?: string;
 };
 
 export const RangeSlider: FC<Props> = ({
+  label,
   min,
   max,
   step = 1,
   value,
   onChange,
   className,
+  labelClassName,
+  id,
 }) => {
   const [minVal, setMinVal] = useState(value[0]);
   const [maxVal, setMaxVal] = useState(value[1]);
@@ -49,40 +55,66 @@ export const RangeSlider: FC<Props> = ({
   };
 
   return (
-    <div className={cn("relative w-full flex items-center h-6", className)}>
-      {/* Фоновая (серая) полоса */}
-      <div className="absolute w-full h-1 bg-[#E3E4E5] rounded-full" />
+    <div className={cn("block w-full", className)}>
+      {/* Лейбл (Стаж, лет) */}
+      {label && (
+        <span
+          className={cn(
+            "block text-[#0D0D12] text-sm font-medium mb-1.5",
+            labelClassName,
+          )}
+        >
+          {label}
+        </span>
+      )}
 
-      {/* Активная (оранжевая) полоса */}
-      <div
-        className="absolute h-1 bg-[#F5653E] rounded-full"
-        style={{
-          left: `${getPercent(minVal)}%`,
-          width: `${getPercent(maxVal) - getPercent(minVal)}%`,
-        }}
-      />
+      {/* Контейнер в стиле инпута (с бордером) */}
+      <div className="border border-[#E3E4E5] rounded-lg p-3 pt-2">
+        {/* Значения по краям */}
+        <div className="flex justify-between text-sm text-[#191A1B] leading-none">
+          <span>{minVal}</span>
+          <span>{maxVal}</span>
+        </div>
 
-      {/* Ползунок MIN */}
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={minVal}
-        onChange={handleMinChange}
-        className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-[#F5653E] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer z-20"
-      />
+        {/* Трек и ползунки */}
+        <div className="relative w-full flex items-center h-4">
+          {/* Фоновая (серая) полоса */}
+          <div className="absolute w-full h-0.5 bg-[#E3E4E5] rounded-full" />
 
-      {/* Ползунок MAX */}
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={maxVal}
-        onChange={handleMaxChange}
-        className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-[#F5653E] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer z-20"
-      />
+          {/* Активная (оранжевая) полоса */}
+          <div
+            className="absolute h-0.5 bg-[#F5653E] rounded-full"
+            style={{
+              left: `${getPercent(minVal)}%`,
+              width: `${getPercent(maxVal) - getPercent(minVal)}%`,
+            }}
+          />
+
+          {/* Ползунок MIN */}
+          <input
+            id={id ? `${id}-min` : undefined}
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={minVal}
+            onChange={handleMinChange}
+            className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:bg-[#F5653E] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer z-20"
+          />
+
+          {/* Ползунок MAX */}
+          <input
+            id={id ? `${id}-max` : undefined}
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={maxVal}
+            onChange={handleMaxChange}
+            className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:bg-[#F5653E] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer z-20"
+          />
+        </div>
+      </div>
     </div>
   );
 };

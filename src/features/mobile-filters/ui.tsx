@@ -53,42 +53,29 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
     searchParams.get("rating"),
   );
 
-  // Специализация (пока храним строку, позже подключим к шторке)
+  // Специализация
   const [specialty, setSpecialty] = useState<string | null>(
     searchParams.get("spec"),
   );
 
   // ЛОГИКА ПРИМЕНЕНИЯ И СБРОСА ---
-
   const handleApply = () => {
-    // Берем текущие параметры (например, если там есть ?search=...), чтобы не затереть их
     const params = new URLSearchParams(searchParams.toString());
 
-    // Удаляем флаг открытия модалки, чтобы она закрылась при пуше
     params.delete("modal");
 
-    // Стаж
     if (fields?.experience)
       params.set("exp", `${experience[0]}-${experience[1]}`);
 
-    // Стоимость
     if (fields?.price) params.set("price", `${price[0]}-${price[1]}`);
 
-    // Оценка
     if (fields?.rating && rating) params.set("rating", rating);
     else params.delete("rating");
 
-    // Специализация
     if (fields?.specialty && specialty) params.set("spec", specialty);
     else params.delete("spec");
 
-    // Пушим новые параметры и закрываем (если onClose просто делает back(), то push достаточно,
-    // но если onClose меняет стейт родителя, вызываем его).
-    // Важно: мы используем replace, чтобы не плодить 100 переходов в истории для одной страницы.
     router.replace(`?${params.toString()}`);
-    // Если onClose делает router.back(), здесь его вызывать НЕ НАДО, иначе нас откинет назад.
-    // Я оставлю его закомментированным на случай, если у тебя там другая логика.
-    // onClose();
   };
 
   const handleReset = () => {
@@ -104,7 +91,7 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
     <div className="fixed inset-0 z-50 bg-[#F2F3F5] flex flex-col">
       <Header title="Фильтр" />
 
-      <div className="flex-1 overflow-y-auto mt-2 px-2 pb-4 space-y-3">
+      <div className="flex-1 overflow-y-auto mt-2 px-2 pb-10 space-y-3">
         {/* БЛОК 1: СПЕЦИАЛИЗАЦИЯ */}
         {fields?.specialty && (
           <div className="bg-white p-4 rounded-2xl">
@@ -113,10 +100,10 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
             </span>
             <Dropdown
               options={SPECIALTY_OPTIONS}
-              value={specialty || "all"} // "all" как дефолтное значение
+              value={specialty || "all"}
               onChange={(value) => setSpecialty(value === "all" ? null : value)}
               placeholder="Выберите специализацию"
-              className="w-full" // Убедись, что дропдаун тянется на всю ширину
+              className="w-full"
             />
           </div>
         )}
@@ -124,16 +111,9 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
         {/* БЛОК 2: СТАЖ */}
         {fields?.experience && (
           <div className="bg-white p-4 rounded-2xl">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-sm font-medium text-[#191A1B]">
-                Стаж, лет
-              </span>
-              <div className="text-sm text-[#F5653E]">
-                {experience[0]} -{" "}
-                {experience[1] === MAX_EXP ? `${MAX_EXP}+` : experience[1]}
-              </div>
-            </div>
             <RangeSlider
+              label="Стаж, лет"
+              id="exp"
               min={0}
               max={MAX_EXP}
               step={1}
@@ -153,24 +133,18 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
               {RATINGS.map((rate) => (
                 <label
                   key={rate}
-                  // Убираем justify-between, так как теперь Radio сам содержит кружочек и мы его выровняем через флекс
                   className="flex items-center justify-between cursor-pointer group"
                 >
                   <div className="flex items-center gap-2">
                     <StarIcon className="size-5 text-[#F5653E]" />
                     <span className="text-base text-[#191A1B]">{rate}</span>
                   </div>
-
-                  {/* Используем твой компонент Radio */}
                   <Radio
                     name="rating"
                     value={rate}
                     checked={rating === rate}
                     onChange={(e) => setRating(e.target.value)}
-                    size="large" // У нас там размер 5 (20px), твой large как раз size-5
-                    // Твой компонент имеет отступы (gap-2.5) для label,
-                    // но так как мы вынесли label (звезду и текст) отдельно для гибкости макета,
-                    // мы просто не передаем пропс label внутрь Radio.
+                    size="large"
                   />
                 </label>
               ))}
@@ -181,16 +155,9 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
         {/* БЛОК 4: СТОИМОСТЬ */}
         {fields?.price && (
           <div className="bg-white p-4 rounded-2xl">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-sm font-medium text-[#191A1B]">
-                Стоимость, с
-              </span>
-              <div className="text-sm text-[#F5653E]">
-                {price[0]} -{" "}
-                {price[1] === MAX_PRICE ? `${MAX_PRICE}+` : price[1]}
-              </div>
-            </div>
             <RangeSlider
+              label="Стоимость, с"
+              id="price"
               min={0}
               max={MAX_PRICE}
               step={50}
@@ -201,6 +168,7 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
         )}
       </div>
 
+      {/* ФУТЕР С КНОПКАМИ */}
       <div className="bg-white p-4 grid grid-cols-2 gap-3 pb-8 rounded-t-2xl shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
         <Button
           variant="outline"
