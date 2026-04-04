@@ -10,6 +10,7 @@ import ArrowIcon from "./button/arrow.svg";
 import HeartIcon2 from "./cards/heart-2.svg";
 import HeartIcon from "./cards/heart.svg";
 import PlayIcon from "./cards/play.svg";
+import ThunderIcon from "./cards/thunder.svg";
 import CalendarIcon from "./common/calendar.svg";
 import MedicalServiceIcon from "./common/medical-service.svg";
 import StarBoldIcon from "./common/star-bold.svg";
@@ -75,6 +76,7 @@ export {
   HeartIcon,
   HeartIcon2,
   PlayIcon,
+  ThunderIcon,
   SearchSample,
   FilterSample,
   AppleIcon,
