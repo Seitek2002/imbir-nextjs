@@ -45,10 +45,10 @@ export const DoctorCard: FC<Props> = ({
   const heartBtn = (
     <IconBtn
       variant="outline"
-      size="xs"
+      size="sm"
       onClick={handleSave}
       aria-label={saved ? "Убрать из сохранённых" : "Сохранить врача"}
-      className="size-8 shrink-0 flex items-center justify-center bg-white border-[#E5E6E8]"
+      className="flex items-center justify-center bg-white border-[#E5E6E8]"
     >
       <HeartIcon
         className={
