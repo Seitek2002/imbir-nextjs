@@ -1,20 +1,16 @@
-"use client";
-
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { CategoriesGrid, Footer, Header, RecentSearches } from "@/widgets";
 
 import { FilterBar } from "@/features/filter-bar/ui";
+import { UrlSearchInput } from "@/features/search-by-query/ui";
 
 import { DoctorCard } from "@/entities/doctor";
 
 import { DoctorImage1, DoctorImage2, DoctorImage3 } from "@/shared/assets";
-import { Button, SearchInput } from "@/shared/ui";
-
-const QUERY_KEY = "q";
+import { Button } from "@/shared/ui";
 
 const MOCK_DOCTORS = [
   {
@@ -99,55 +95,22 @@ const MOCK_DOCTORS = [
   },
 ];
 
-export const SearchPage: FC = () => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+type Props = {
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
-  const urlQuery = searchParams.get(QUERY_KEY) || "";
-  const [query, setQuery] = useState(urlQuery);
-  const [prevUrlQuery, setPrevUrlQuery] = useState(urlQuery);
-
-  if (urlQuery !== prevUrlQuery) {
-    setPrevUrlQuery(urlQuery);
-    setQuery(urlQuery);
-  }
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (query === urlQuery) return; // Если всё совпадает, ничего не делаем
-
-      const params = new URLSearchParams(searchParams.toString());
-      if (query) {
-        params.set(QUERY_KEY, query);
-      } else {
-        params.delete(QUERY_KEY);
-      }
-      router.replace(`${pathname}?${params.toString()}`);
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [query, pathname, router, searchParams, urlQuery]);
-
-  const activeQuery = searchParams.get(QUERY_KEY) || "";
-
-  const handleEnter = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (query) params.set(QUERY_KEY, query);
-    else params.delete(QUERY_KEY);
-    router.replace(`${pathname}?${params.toString()}`);
-  };
+export const SearchPage: FC<Props> = ({ searchParams }) => {
+  const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
       <Header title="Поиск" backTo="/">
-        <SearchInput value={query} onChange={setQuery} onEnter={handleEnter} />
+        <UrlSearchInput />
       </Header>
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
         {activeQuery ? (
           <>
-            {/* --- МОБИЛЬНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ --- */}
             <div className="md:hidden p-4">
               <h2 className="text-[#191A1B] text-lg font-medium mb-4">
                 Результаты по запросу: {activeQuery}
@@ -169,7 +132,7 @@ export const SearchPage: FC = () => {
               </Button>
             </div>
 
-            {/* --- ДЕСКТОПНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ (КАК НА СКРИНЕ) --- */}
+            {/* --- ДЕСКТОПНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ --- */}
             <div className="hidden md:block px-10 py-6">
               <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
                 <Link
@@ -212,12 +175,7 @@ export const SearchPage: FC = () => {
           /* --- СОСТОЯНИЕ ДО ПОИСКА (ПУСТОЙ ИНПУТ) --- */
           <div className="px-4 md:px-10 pt-6 md:pt-16 max-w-200 mx-auto w-full">
             <div className="hidden md:block mb-8 drop-shadow-sm rounded-full">
-              <SearchInput
-                value={query}
-                onChange={setQuery}
-                onEnter={handleEnter}
-                placeholder="Поиск клиники, специалиста, услуги"
-              />
+              <UrlSearchInput />
             </div>
 
             <div className="bg-white md:bg-transparent rounded-3xl md:rounded-none overflow-hidden md:flex md:flex-col md:gap-6">
