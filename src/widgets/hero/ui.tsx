@@ -8,7 +8,7 @@ import { HeroAvatar, HeroBg } from "@/shared/assets";
 
 export const Hero: FC = () => {
   return (
-    <section className="relative m-2 overflow-hidden rounded-3xl bg-[#FFF0E9] pt-8 px-4 pb-0 md:p-12 md:pb-0 flex flex-col md:block min-h-150">
+    <section className="relative max-w-340 mx-auto mt-6 overflow-hidden rounded-3xl bg-[#FFF0E9] pt-8 px-4 pb-0 md:p-12 md:pb-0 flex flex-col md:block min-h-150">
       <Image
         src={HeroBg}
         alt=""
@@ -54,7 +54,7 @@ export const Hero: FC = () => {
           </div>
         </div>
 
-        <div className="mt-8 md:mt-0 w-full md:absolute md:bottom-0 md:right-0 flex justify-center md:justify-end items-end z-10 h-[350px] md:h-[90%] pointer-events-none">
+        <div className="mt-8 md:mt-0 w-full md:absolute md:bottom-0 md:right-0 flex justify-center md:justify-end items-end z-10 h-87.5 md:h-[90%] pointer-events-none">
           <Image
             src={HeroAvatar}
             alt=""
