@@ -1,4 +1,5 @@
 import {
+  Banners,
   ClinicsMainList,
   DoctorsMainList,
   Header,
@@ -19,6 +20,7 @@ export const HomePage = () => {
       <Hero />
       <DoctorsMainList />
       <ClinicsMainList />
+      <Banners />
       <div className="max-w-340 mx-auto">
         <VideosSwiper
           title="Интервью"
