@@ -16,7 +16,7 @@ export const Header: FC<Props> = ({ children, title, backTo, searchable }) => {
   return (
     <header
       className={cn(
-        "px-4 pt-1 pb-4 bg-white md:border md:border-[#E3E4E5] md:mt-6 md:py-3 w-full max-w-360 md:max-w-300 mx-auto",
+        "px-4 pt-1 pb-4 bg-white md:border md:border-[#E3E4E5] md:mt-6 md:py-3 w-full max-w-360 md:max-w-[1360px] mx-auto",
         !(title || backTo)
           ? "rounded-bl-2xl rounded-br-2xl md:rounded-full"
           : "border-b border-[#E3E4E5] md:rounded-full",

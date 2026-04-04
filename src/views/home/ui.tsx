@@ -20,8 +20,8 @@ export const HomePage = () => {
   return (
     <main>
       <Header searchable />
-      <FilterBar />
       <Hero />
+      <FilterBar />
       <div className="px-4 py-6 flex flex-col gap-3 max-w-[1360px] mx-auto">
         <h2 className="font-semibold text-lg text-[#191A1B]">Врачи</h2>
 
