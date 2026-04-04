@@ -10,7 +10,7 @@ export const DoctorsMainList: FC = () => {
   return (
     <div className="max-w-340 mx-auto py-30">
       <div className="hidden lg:block">
-        <FilterBar />
+        <FilterBar title="Специалисты" />
       </div>
       <div className="flex items-center justify-between lg:hidden">
         <h2 className="text-[18px] font-medium text-[#191A1B]">Специалисты</h2>

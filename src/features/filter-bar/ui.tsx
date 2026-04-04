@@ -9,6 +9,7 @@ import { Button, Dropdown, IconBtn, RangeSlider } from "@/shared";
 import { GeoIcon, RemoveIcon } from "@/shared/assets";
 
 type Props = {
+  title?: string;
   fields?: {
     specialty?: boolean;
     experience?: boolean;
@@ -38,6 +39,7 @@ const MAX_EXP = 50;
 const MAX_PRICE = 5000;
 
 export const FilterBar: FC<Props> = ({
+  title = "Фильтры",
   fields = { specialty: true, experience: true, rating: true, price: true },
 }) => {
   const router = useRouter();
@@ -83,7 +85,7 @@ export const FilterBar: FC<Props> = ({
     <div className="w-full">
       <div className="max-w-200 flex items-center">
         <h2 className="border-r border-r-[#E5E6E8] text-[40px] font-semibold pr-6">
-          Специалисты
+          {title}
         </h2>
         <div className="flex items-center gap-2 ml-4">
           <IconBtn size="md">
