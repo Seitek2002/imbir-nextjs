@@ -36,7 +36,7 @@ export const VideosSwiper: FC<Props> = ({
   viewAllHref,
 }) => {
   return (
-    <section className="py-6 flex flex-col gap-6 max-w-[1440px] mx-auto w-full px-4 md:px-10">
+    <section className="py-6 flex flex-col gap-6 max-w-360 mx-auto w-full px-4">
       {/* Шапка блока */}
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-1.5">

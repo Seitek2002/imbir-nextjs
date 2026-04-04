@@ -25,10 +25,10 @@ export const VideoCard: FC<Props> = ({
       target="_blank"
       rel="noopener noreferrer"
       // Жесткая высота 357px для десктопа
-      className="bg-white rounded-3xl border border-[#E3E4E5] overflow-hidden flex flex-col w-full h-auto md:h-[357px] shrink-0 group-hover:shadow-lg transition-shadow duration-300"
+      className="bg-white rounded-3xl border border-[#E3E4E5] overflow-hidden flex flex-col w-full h-auto md:h-89.25 shrink-0 group-hover:shadow-lg transition-shadow duration-300"
     >
       {/* Жесткая высота 220px для картинки на десктопе */}
-      <div className="relative w-full aspect-video md:aspect-auto md:h-[220px] shrink-0 overflow-hidden bg-[#F2F3F5]">
+      <div className="relative w-full aspect-video md:aspect-auto md:h-55 shrink-0 overflow-hidden bg-[#F2F3F5]">
         <Image
           src={thumbnail}
           alt={title}
