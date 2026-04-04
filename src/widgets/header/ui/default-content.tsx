@@ -2,6 +2,7 @@ import { FC } from "react";
 
 import Link from "next/link";
 
+import { GlobalSearch } from "@/features";
 import { Button, IconBtn } from "@/shared";
 
 import {
@@ -30,9 +31,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
 
         <div className="hidden md:flex gap-3">
           <Button size="xs">Записаться на приём</Button>
-          <IconBtn variant="outline" size="sm">
-            <SearchIcon className="size-5" />
-          </IconBtn>
+          <GlobalSearch />
           <IconBtn variant="outline" size="sm">
             <ChatIcon className="size-5" />
           </IconBtn>

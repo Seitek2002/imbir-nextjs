@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { FiltersTrigger, MobileFiltersModal, SearchInput } from "@/features";
+import { FiltersTrigger, MobileFiltersModal, UrlSearchInput } from "@/features";
 import { Header } from "@/widgets";
 
 type Props = {
@@ -8,10 +8,9 @@ type Props = {
 };
 
 export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
-  const query =
-    typeof searchParams?.search === "string" ? searchParams.search : "";
+  const query = typeof searchParams?.q === "string" ? searchParams.q : "";
 
-  console.log(query);
+  console.log("Текущий запрос:", query);
 
   const isFiltersModalOpen = searchParams?.modal === "filters";
 
@@ -20,7 +19,7 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
       <Header title="Специалисты" backTo="/">
         <div className="flex gap-3 items-center mt-3">
           <div className="flex-1">
-            <SearchInput placeholder="Поиск специалиста" />
+            <UrlSearchInput placeholder="Поиск специалиста" />
           </div>
           <FiltersTrigger />
         </div>
