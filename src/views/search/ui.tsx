@@ -142,7 +142,7 @@ export const SearchPage: FC = () => {
         <SearchInput value={query} onChange={setQuery} onEnter={handleEnter} />
       </Header>
 
-      <div className="flex-1 w-full max-w-[1440px] mx-auto pb-10">
+      <div className="flex-1 w-full max-w-360 mx-auto pb-10">
         {activeQuery ? (
           <>
             {/* --- МОБИЛЬНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ --- */}
@@ -212,7 +212,7 @@ export const SearchPage: FC = () => {
           </>
         ) : (
           /* --- СОСТОЯНИЕ ДО ПОИСКА (ПУСТОЙ ИНПУТ) --- */
-          <div className="px-4 md:px-10 pt-6 md:pt-16 max-w-[800px] mx-auto w-full">
+          <div className="px-4 md:px-10 pt-6 md:pt-16 max-w-200 mx-auto w-full">
             {/* Добавляем инпут для ПК-версии пустого стейта */}
             <div className="hidden md:block mb-8 drop-shadow-sm rounded-full">
               <SearchInput
