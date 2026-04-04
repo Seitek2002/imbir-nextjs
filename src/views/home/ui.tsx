@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import {
   Banners,
   ClinicsMainList,
@@ -17,7 +19,9 @@ import {
 export const HomePage = () => {
   return (
     <main>
-      <Header searchable />
+      <Suspense fallback={<div className="h-16 w-full bg-white" />}>
+        <Header searchable />
+      </Suspense>
       <Hero />
       <DoctorsMainList />
       <ClinicsMainList />

@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, Suspense } from "react";
 
 import Link from "next/link";
 
@@ -33,7 +33,13 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
 
         <div className="hidden md:flex gap-3">
           <Button size="xs">Записаться на приём</Button>
-          <GlobalSearch />
+          <Suspense
+            fallback={
+              <div className="size-10 bg-gray-100 rounded-full animate-pulse" />
+            }
+          >
+            <GlobalSearch />
+          </Suspense>
           <IconBtn variant="outline" size="sm">
             <ChatIcon className="size-5" />
           </IconBtn>
