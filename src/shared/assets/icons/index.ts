@@ -43,9 +43,13 @@ import LogoutIcon from "./profile/logout.svg";
 import ReviewsIcon from "./profile/reviews.svg";
 import SavedIcon from "./profile/saved.svg";
 import SettingsIcon from "./profile/settings.svg";
+import SearchHistory from "./search/history.svg";
+import SearchRemoveHistory from "./search/remove-history.svg";
 
 export {
   ArrowIcon,
+  SearchHistory,
+  SearchRemoveHistory,
   ArrowLeftIcon,
   ArrowRightIcon,
   PersonIcon,

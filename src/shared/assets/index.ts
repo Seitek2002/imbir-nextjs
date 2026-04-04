@@ -44,6 +44,8 @@ export {
   ReviewsIcon,
   SavedIcon,
   SettingsIcon,
+  SearchHistory,
+  SearchRemoveHistory,
 } from "./icons";
 
 export {
