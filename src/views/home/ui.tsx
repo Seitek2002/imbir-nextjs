@@ -14,8 +14,6 @@ import {
   VideoThumbnail3,
 } from "@/shared/assets";
 
-2;
-
 export const HomePage = () => {
   return (
     <main>
