@@ -8,7 +8,7 @@ import { DoctorImage1, DoctorImage2, DoctorImage3 } from "@/shared/assets";
 
 export const DoctorsMainList: FC = () => {
   return (
-    <div className="max-w-340 mx-auto py-30">
+    <div className="max-w-340 mx-auto py-30 px-4">
       <div className="hidden lg:block">
         <FilterBar title="Специалисты" />
       </div>

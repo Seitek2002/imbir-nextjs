@@ -1,5 +1,5 @@
 import {
-  ClinicsSwiper,
+  ClinicsMainList,
   DoctorsMainList,
   Header,
   Hero,
@@ -7,10 +7,6 @@ import {
 } from "@/widgets";
 
 import {
-  ClinicImage1,
-  ClinicImage2,
-  ClinicImage3,
-  ClinicImage4,
   VideoThumbnail1,
   VideoThumbnail2,
   VideoThumbnail3,
@@ -22,57 +18,7 @@ export const HomePage = () => {
       <Header searchable />
       <Hero />
       <DoctorsMainList />
-      <div className="max-w-340 mx-auto">
-        <ClinicsSwiper
-          title="Клиники"
-          viewAllHref="/clinics"
-          description="Выберите интересующие вас параметры, чтобы ознакомиться с подходящими клиниками"
-          city="г. Бишкек"
-          district="Ленинский район"
-          clinics={[
-            {
-              id: "1",
-              name: "Nova Clinic",
-              rating: 4.85,
-              reviews: 255,
-              experience: 12,
-              address: "ул. Московская, 189",
-              image: ClinicImage1.src,
-              specialty: "cardiology",
-            },
-            {
-              id: "2",
-              name: "K-MED",
-              rating: 4.85,
-              reviews: 255,
-              experience: 12,
-              address: "ул. Московская, 189",
-              image: ClinicImage2.src,
-              specialty: "dentistry",
-            },
-            {
-              id: "3",
-              name: "Med Center",
-              rating: 4.85,
-              reviews: 255,
-              experience: 12,
-              address: "ул. Московская, 189",
-              image: ClinicImage3.src,
-              specialty: "neurology",
-            },
-            {
-              id: "4",
-              name: "Nova Clinic",
-              rating: 4.85,
-              reviews: 255,
-              experience: 12,
-              address: "ул. Московская, 189",
-              image: ClinicImage4.src,
-              specialty: "cardiology",
-            },
-          ]}
-        />
-      </div>
+      <ClinicsMainList />
       <div className="max-w-340 mx-auto">
         <VideosSwiper
           title="Интервью"
