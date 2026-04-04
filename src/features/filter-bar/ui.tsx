@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, ReactNode, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -16,9 +16,9 @@ type Props = {
     rating?: boolean;
     price?: boolean;
   };
+  children?: ReactNode; // ДОБАВИЛИ PROPS
 };
 
-// УБРАЛИ { value: "all", label: "Все" }, так как isMulti сам рендерит "Все"
 const SPECIALTY_OPTIONS = [
   { value: "cardiologist", label: "Кардиолог" },
   { value: "therapist", label: "Терапевт" },
@@ -41,14 +41,14 @@ const MAX_PRICE = 5000;
 export const FilterBar: FC<Props> = ({
   title = "Фильтры",
   fields = { specialty: true, experience: true, rating: true, price: true },
+  children, // ДОСТАЕМ ИЗ PROPS
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // 1. ИЗМЕНИЛИ СТЕЙТ СПЕЦИАЛИЗАЦИИ НА МАССИВ
   const initialSpec = searchParams.get("spec");
   const [specialty, setSpecialty] = useState<string[]>(
-    initialSpec ? initialSpec.split(",") : [], // Если пусто, то пустой массив (значит выбрано "Все")
+    initialSpec ? initialSpec.split(",") : [],
   );
 
   const initialExp = searchParams.get("exp")?.split("-").map(Number);
@@ -68,10 +68,10 @@ export const FilterBar: FC<Props> = ({
   ]);
 
   const handleReset = () => {
-    setSpecialty([]); // Сброс мультивыбора — это пустой массив
+    setSpecialty([]);
     setExperience([0, 10]);
     setRating("all");
-    setPrice([0, 1000]);
+    setPrice([0, MAX_PRICE]);
 
     const params = new URLSearchParams(searchParams.toString());
     params.delete("spec");
@@ -83,36 +83,44 @@ export const FilterBar: FC<Props> = ({
 
   return (
     <div className="w-full">
-      <div className="max-w-200 flex items-center">
-        <h2 className="border-r border-r-[#E5E6E8] text-[40px] font-semibold pr-6">
-          {title}
-        </h2>
-        <div className="flex items-center gap-2 ml-4">
-          <IconBtn size="md">
-            <GeoIcon className="size-5 [&_path]:stroke-white" />
-          </IconBtn>
-          <div>
-            <div className="text-[#191A1B] font-medium">г. Бишкек</div>
-            <div className="text-[#838A8D] text-sm">Ленинский район</div>
+      {/* ЛОГИКА РЕНДЕРА ШАПКИ */}
+      {children ? (
+        children
+      ) : (
+        <>
+          <div className="max-w-200 flex items-center">
+            <h2 className="border-r border-r-[#E5E6E8] text-[40px] font-semibold pr-6">
+              {title}
+            </h2>
+            <div className="flex items-center gap-2 ml-4">
+              <IconBtn size="md">
+                <GeoIcon className="size-5 [&_path]:stroke-white" />
+              </IconBtn>
+              <div>
+                <div className="text-[#191A1B] font-medium">г. Бишкек</div>
+                <div className="text-[#838A8D] text-sm">Ленинский район</div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <p className="text-[#686F72] text-lg mt-4 mb-10">
-        Выберите интересующие вас параметры, чтобы ознакомиться с подходящими
-        врачами
-      </p>
+          <p className="text-[#686F72] text-lg mt-4 mb-10">
+            Выберите интересующие вас параметры, чтобы ознакомиться с
+            подходящими врачами
+          </p>
+        </>
+      )}
 
+      {/* Сами фильтры */}
       <div className="grid grid-cols-4 gap-5 items-start">
         {fields.specialty && (
           <Dropdown
             label="Специализация"
-            placeholder="Все" // Будет показываться, когда массив пустой
+            placeholder="Все"
             options={SPECIALTY_OPTIONS}
             value={specialty}
             onChange={(val) => setSpecialty(val as string[])}
-            isMulti={true} // 2. ВКЛЮЧАЕМ МУЛЬТИ-ВЫБОР
-            type="checkbox" // 3. ВКЛЮЧАЕМ ЧЕКБОКСЫ
+            isMulti={true}
+            type="checkbox"
           />
         )}
 
