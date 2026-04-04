@@ -2,6 +2,7 @@ import {
   Banners,
   ClinicsMainList,
   DoctorsMainList,
+  Footer,
   Header,
   Hero,
   VideosSwiper,
@@ -12,6 +13,8 @@ import {
   VideoThumbnail2,
   VideoThumbnail3,
 } from "@/shared/assets";
+
+2;
 
 export const HomePage = () => {
   return (
@@ -86,6 +89,7 @@ export const HomePage = () => {
           ]}
         />
       </div>
+      <Footer />
     </main>
   );
 };

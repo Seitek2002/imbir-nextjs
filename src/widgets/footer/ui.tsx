@@ -1,0 +1,113 @@
+import { FC, ReactNode } from "react";
+
+import Link from "next/link";
+
+import {
+  FacebookIcon,
+  InstagramIcon,
+  LinkedinIcon,
+  Logo,
+  TwitterIcon,
+} from "@/shared/assets";
+
+// --- Вспомогательные микро-компоненты для чистоты кода ---
+
+const SocialLink: FC<{ href: string; Icon: FC<{ className?: string }> }> = ({
+  href,
+  Icon,
+}) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="size-10 rounded-full bg-[#F5653E] flex items-center justify-center text-white hover:bg-[#E0542E] transition-colors"
+  >
+    {/* Добавил fill-white на случай, если svg экспортировались с другим цветом */}
+    <Icon className="size-5 [&_path]:fill-white" />
+  </a>
+);
+
+const ColumnHeading: FC<{ children: ReactNode }> = ({ children }) => (
+  <h3 className="text-[#191A1B] font-semibold text-base mb-4 md:mb-6">
+    {children}
+  </h3>
+);
+
+const FooterLink: FC<{ href: string; children: ReactNode }> = ({
+  href,
+  children,
+}) => (
+  <Link
+    href={href}
+    className="text-[#686F72] text-sm md:text-base hover:text-[#F5653E] transition-colors block mb-3 md:mb-4"
+  >
+    {children}
+  </Link>
+);
+
+const FooterText: FC<{ children: ReactNode }> = ({ children }) => (
+  <p className="text-[#686F72] text-sm md:text-base mb-3 md:mb-4">{children}</p>
+);
+
+// --- Основной компонент Footer ---
+
+export const Footer: FC = () => {
+  return (
+    <footer className="w-full max-w-[1440px] mx-auto px-4 md:px-10 pb-6 pt-10">
+      {/* Контейнер со светло-бежевым фоном */}
+      <div className="bg-[#FCF9F7] rounded-[32px] p-6 sm:p-10 md:p-12 flex flex-col gap-10">
+        {/* Верхняя часть: Сетка с контентом */}
+        <div className="flex flex-col lg:flex-row justify-between gap-10 lg:gap-8">
+          {/* Логотип и социальные сети */}
+          <div className="flex flex-col gap-6 lg:w-1/4 shrink-0">
+            <Link href="/">
+              <Logo className="w-[140px] h-auto" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <SocialLink href="#" Icon={FacebookIcon} />
+              <SocialLink href="#" Icon={InstagramIcon} />
+              <SocialLink href="#" Icon={TwitterIcon} />
+              <SocialLink href="#" Icon={LinkedinIcon} />
+            </div>
+          </div>
+
+          {/* Ссылки и контакты (Сетка: 1 колонка на моб, 2 на планшете, 3 на ПК) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 lg:gap-10 lg:w-3/4 lg:ml-auto">
+            {/* Блок 1 */}
+            <div>
+              <ColumnHeading>Быстрые ссылки</ColumnHeading>
+              <FooterLink href="/clinics">Клиники</FooterLink>
+              <FooterLink href="/specialists">Специалисты</FooterLink>
+              <FooterLink href="/services">Услуги</FooterLink>
+            </div>
+
+            {/* Блок 2 */}
+            <div>
+              <ColumnHeading>Помощь и поддержка</ColumnHeading>
+              <FooterLink href="/contacts">Контакты</FooterLink>
+              <FooterLink href="/terms">Условия и положения</FooterLink>
+              <FooterLink href="/privacy">
+                Политика конфиденциальности
+              </FooterLink>
+            </div>
+
+            {/* Блок 3 */}
+            <div>
+              <ColumnHeading>Свяжитесь с нами</ColumnHeading>
+              <FooterText>info@preste.com</FooterText>
+              <FooterText>996 (702) 555-0122</FooterText>
+              <FooterText>г. Бишкек, ул. Тыныстанова, 56</FooterText>
+            </div>
+          </div>
+        </div>
+
+        {/* Нижняя часть: Копирайт */}
+        <div className="flex justify-center items-center md:mt-10 pt-6 md:pt-0 border-t border-[#E3E4E5]/50 md:border-none">
+          <p className="text-[#191A1B] text-sm text-center">
+            © 2026 Imbir. Все права защищены
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+};
