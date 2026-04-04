@@ -54,7 +54,7 @@ const MOCK_CLINICS = [
 
 export const ClinicsMainList: FC = () => {
   return (
-    <div className="max-w-340 mx-auto py-30 px-4">
+    <div className="max-w-340 mx-auto pb-30 px-4">
       <div className="hidden lg:block">
         <FilterBar
           title="Клиники"
