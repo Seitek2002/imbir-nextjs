@@ -20,7 +20,6 @@ type Props = {
 };
 
 const SPECIALTY_OPTIONS = [
-  { value: "all", label: "Все" },
   { value: "cardiologist", label: "Кардиолог" },
   { value: "therapist", label: "Терапевт" },
   { value: "surgeon", label: "Хирург" },
@@ -53,9 +52,10 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
     searchParams.get("rating"),
   );
 
-  // Специализация
-  const [specialty, setSpecialty] = useState<string | null>(
-    searchParams.get("spec"),
+  // Специализация (ИСПРАВЛЕНО НА МАССИВ)
+  const initialSpec = searchParams.get("spec");
+  const [specialty, setSpecialty] = useState<string[]>(
+    initialSpec ? initialSpec.split(",") : [],
   );
 
   // ЛОГИКА ПРИМЕНЕНИЯ И СБРОСА ---
@@ -72,8 +72,12 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
     if (fields?.rating && rating) params.set("rating", rating);
     else params.delete("rating");
 
-    if (fields?.specialty && specialty) params.set("spec", specialty);
-    else params.delete("spec");
+    // ИСПРАВЛЕНО: Сохраняем массив как строку через запятую
+    if (fields?.specialty && specialty.length > 0) {
+      params.set("spec", specialty.join(","));
+    } else {
+      params.delete("spec");
+    }
 
     router.replace(`?${params.toString()}`);
   };
@@ -82,7 +86,7 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
     setExperience([0, 10]);
     setPrice([0, MAX_PRICE]);
     setRating(null);
-    setSpecialty(null);
+    setSpecialty([]); // ИСПРАВЛЕНО: Сбрасываем в пустой массив
   };
 
   if (!isOpen) return null;
@@ -100,10 +104,12 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
             </span>
             <Dropdown
               options={SPECIALTY_OPTIONS}
-              value={specialty || "all"}
-              onChange={(value) => setSpecialty(value === "all" ? null : value)}
+              value={specialty}
+              onChange={(val) => setSpecialty(val as string[])}
               placeholder="Выберите специализацию"
               className="w-full"
+              isMulti={true}
+              type="checkbox"
             />
           </div>
         )}

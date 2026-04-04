@@ -2,6 +2,12 @@ import { FC } from "react";
 
 import Link from "next/link";
 
+// ИМПОРТИРУЕМ ФИЧИ ДЛЯ МОБИЛЬНЫХ ФИЛЬТРОВ
+import {
+  ActiveFiltersChips,
+  FiltersTrigger,
+  MobileFiltersModal,
+} from "@/features";
 import { CategoriesGrid, Footer, Header, RecentSearches } from "@/widgets";
 
 import { FilterBar } from "@/features/filter-bar/ui";
@@ -101,12 +107,34 @@ type Props = {
 
 export const SearchPage: FC<Props> = ({ searchParams }) => {
   const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
+  const isFiltersModalOpen = searchParams?.modal === "filters";
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
+      {/* ВОЗВРАЩАЕМ ФИЛЬТРЫ В HEADER */}
       <Header title="Поиск" backTo="/">
-        <UrlSearchInput />
+        <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
+          <div className="flex-1">
+            <UrlSearchInput />
+          </div>
+          {/* Скрываем кнопку фильтра на десктопе, так как там есть большой FilterBar */}
+          <div className="md:hidden">
+            <FiltersTrigger />
+          </div>
+        </div>
+        <ActiveFiltersChips />
       </Header>
+
+      {/* РЕНДЕРИМ МОБИЛЬНУЮ МОДАЛКУ ФИЛЬТРОВ */}
+      <MobileFiltersModal
+        isOpen={isFiltersModalOpen}
+        fields={{
+          specialty: true,
+          experience: true,
+          rating: true,
+          price: true,
+        }}
+      />
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
         {activeQuery ? (

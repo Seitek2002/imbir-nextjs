@@ -16,6 +16,7 @@ type Props = {
   size?: Sizes;
   error?: string;
   hint?: string;
+  onIconRightClick?: () => void;
 } & InputHTMLAttributes<HTMLInputElement>;
 
 export const Input: FC<Props> = ({
@@ -27,6 +28,7 @@ export const Input: FC<Props> = ({
   IconRight,
   size = "small" as Sizes,
   hint,
+  onIconRightClick,
   ...props
 }) => {
   const sizes: Record<Sizes, string> = {
@@ -59,7 +61,10 @@ export const Input: FC<Props> = ({
         />
 
         {IconRight && (
-          <IconRight className="absolute right-3 top-2.25 size-5" />
+          <IconRight
+            className="absolute right-3 top-2.5 size-5"
+            onClick={onIconRightClick}
+          />
         )}
       </div>
 
