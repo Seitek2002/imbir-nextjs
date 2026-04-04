@@ -1,9 +1,11 @@
 import { SearchPage } from "@/views/search";
 
-export default function Page({
+export default async function Page({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  return <SearchPage searchParams={searchParams} />;
+  const resolvedSearchParams = await searchParams;
+
+  return <SearchPage searchParams={resolvedSearchParams} />;
 }
