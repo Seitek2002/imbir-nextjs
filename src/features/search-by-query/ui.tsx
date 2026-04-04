@@ -6,6 +6,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { SearchInput } from "@/shared/ui";
 
+const QUERY_KEY = "q";
+
 export const UrlSearchInput: FC<{ placeholder?: string }> = ({
   placeholder = "Поиск",
 }) => {
@@ -13,30 +15,46 @@ export const UrlSearchInput: FC<{ placeholder?: string }> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const initialQuery = searchParams.get("q") || "";
-  const [query, setQuery] = useState(initialQuery);
+  const urlQuery = searchParams.get(QUERY_KEY) || "";
+  const [query, setQuery] = useState(urlQuery);
+  const [prevUrlQuery, setPrevUrlQuery] = useState(urlQuery);
+
+  if (urlQuery !== prevUrlQuery) {
+    setPrevUrlQuery(urlQuery);
+    setQuery(urlQuery);
+  }
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      const currentSearch = searchParams.get("q") || "";
-
-      if (query === currentSearch) return;
+      if (query === urlQuery) return;
 
       const params = new URLSearchParams(searchParams.toString());
 
       if (query) {
-        params.set("q", query);
+        params.set(QUERY_KEY, query);
       } else {
-        params.delete("q");
+        params.delete(QUERY_KEY);
       }
 
       router.replace(`${pathname}?${params.toString()}`);
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query, pathname, router, searchParams]);
+  }, [query, pathname, router, searchParams, urlQuery]);
+
+  const handleEnter = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (query) params.set(QUERY_KEY, query);
+    else params.delete(QUERY_KEY);
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   return (
-    <SearchInput placeholder={placeholder} value={query} onChange={setQuery} />
+    <SearchInput
+      placeholder={placeholder}
+      value={query}
+      onChange={setQuery}
+      onEnter={handleEnter}
+    />
   );
 };
