@@ -2,14 +2,23 @@ import { FC } from "react";
 
 import { DoctorCard } from "@/entities";
 import { FilterBar } from "@/features";
+import { Button } from "@/shared";
 
 import { DoctorImage1, DoctorImage2, DoctorImage3 } from "@/shared/assets";
 
 export const DoctorsMainList: FC = () => {
   return (
     <div className="max-w-340 mx-auto py-30">
-      <FilterBar />
-      <div className="flex flex-col gap-3 mt-10">
+      <div className="hidden lg:block">
+        <FilterBar />
+      </div>
+      <div className="flex items-center justify-between lg:hidden">
+        <h2 className="text-[18px] font-medium text-[#191A1B]">Специалисты</h2>
+        <Button variant="text" size="md" className="text-[#FF7C63] font-medium">
+          Все
+        </Button>
+      </div>
+      <div className="flex flex-col gap-3 lg:mt-10">
         {/* Мобильный: вертикальный список */}
         <div className="flex flex-col gap-2 md:hidden">
           <DoctorCard

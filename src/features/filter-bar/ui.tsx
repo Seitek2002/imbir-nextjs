@@ -80,7 +80,7 @@ export const FilterBar: FC<Props> = ({
   };
 
   return (
-    <div className="">
+    <div className="w-full">
       <div className="max-w-200 flex items-center">
         <h2 className="border-r border-r-[#E5E6E8] text-[40px] font-semibold pr-6">
           Специалисты
@@ -153,7 +153,12 @@ export const FilterBar: FC<Props> = ({
       </div>
 
       <div className="flex justify-end mt-6">
-        <Button IconLeft={RemoveIcon} variant="text" onClick={handleReset}>
+        <Button
+          IconLeft={RemoveIcon}
+          variant="text"
+          size="sm"
+          onClick={handleReset}
+        >
           Сбросить фильтры
         </Button>
       </div>
