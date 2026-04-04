@@ -80,7 +80,7 @@ export const FilterBar: FC<Props> = ({
   };
 
   return (
-    <div className="py-30">
+    <div className="py-30 mx-auto max-w-340">
       <div className="max-w-200 flex items-center">
         <h2 className="border-r border-r-[#E5E6E8] text-[40px] font-semibold pr-6">
           Специалисты
