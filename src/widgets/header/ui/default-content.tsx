@@ -20,7 +20,9 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
   return (
     <div>
       <div className="flex items-center justify-between w-full">
-        <Logo className="w-26.5 h-6.5" />
+        <Link href="/">
+          <Logo className="w-26.5 h-6.5" />
+        </Link>
 
         <nav className="hidden md:flex text-[#191A1B] text-xs lg:text-base gap-6 items-center">
           <Link href={"#"}>Клиники</Link>
