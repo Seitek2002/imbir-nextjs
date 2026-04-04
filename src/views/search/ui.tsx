@@ -16,7 +16,6 @@ import { Button, SearchInput } from "@/shared/ui";
 
 const QUERY_KEY = "q";
 
-// Моковые данные для отображения сетки
 const MOCK_DOCTORS = [
   {
     id: 1,
@@ -109,14 +108,11 @@ export const SearchPage: FC = () => {
   const [query, setQuery] = useState(urlQuery);
   const [prevUrlQuery, setPrevUrlQuery] = useState(urlQuery);
 
-  // 1. СИНХРОНИЗАЦИЯ БЕЗ USEEFFECT (React Best Practice):
-  // Если URL изменился извне (из GlobalSearch), обновляем локальный стейт при рендере.
   if (urlQuery !== prevUrlQuery) {
     setPrevUrlQuery(urlQuery);
     setQuery(urlQuery);
   }
 
-  // 2. ДЕБАУНС: Отправляем локальный стейт в URL при печати
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (query === urlQuery) return; // Если всё совпадает, ничего не делаем
@@ -144,7 +140,6 @@ export const SearchPage: FC = () => {
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
-      {/* На десктопе Header выведет просто навигацию и лупу, на мобилке - добавит инпут */}
       <Header title="Поиск" backTo="/">
         <SearchInput value={query} onChange={setQuery} onEnter={handleEnter} />
       </Header>
@@ -176,7 +171,6 @@ export const SearchPage: FC = () => {
 
             {/* --- ДЕСКТОПНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ (КАК НА СКРИНЕ) --- */}
             <div className="hidden md:block px-10 py-6">
-              {/* Хлебные крошки */}
               <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
                 <Link
                   href="/"
@@ -190,7 +184,6 @@ export const SearchPage: FC = () => {
                 </span>
               </div>
 
-              {/* Вот тут магия children в FilterBar! */}
               <FilterBar>
                 <div className="flex items-end gap-3 mb-6">
                   <h1 className="text-[40px] font-semibold text-[#191A1B] leading-none">
@@ -202,14 +195,12 @@ export const SearchPage: FC = () => {
                 </div>
               </FilterBar>
 
-              {/* Сетка результатов */}
               <div className="grid grid-cols-4 gap-5 mt-2">
                 {MOCK_DOCTORS.map((doc) => (
                   <DoctorCard key={`desk-${doc.id}`} {...doc} />
                 ))}
               </div>
 
-              {/* Кнопка Показать еще */}
               <div className="flex justify-center mt-10">
                 <Button variant="outline" className="bg-white">
                   Показать еще
@@ -220,7 +211,6 @@ export const SearchPage: FC = () => {
         ) : (
           /* --- СОСТОЯНИЕ ДО ПОИСКА (ПУСТОЙ ИНПУТ) --- */
           <div className="px-4 md:px-10 pt-6 md:pt-16 max-w-200 mx-auto w-full">
-            {/* Добавляем инпут для ПК-версии пустого стейта */}
             <div className="hidden md:block mb-8 drop-shadow-sm rounded-full">
               <SearchInput
                 value={query}
@@ -230,7 +220,6 @@ export const SearchPage: FC = () => {
               />
             </div>
 
-            {/* Виджеты истории и категорий (теперь видны и на ПК, и на мобилке) */}
             <div className="bg-white md:bg-transparent rounded-3xl md:rounded-none overflow-hidden md:flex md:flex-col md:gap-6">
               <RecentSearches />
               <CategoriesGrid />
@@ -239,7 +228,6 @@ export const SearchPage: FC = () => {
         )}
       </div>
 
-      {/* Футер скрыт на телефонах, отображается от планшетов и выше */}
       <div className="hidden md:block mt-auto">
         <Footer />
       </div>
