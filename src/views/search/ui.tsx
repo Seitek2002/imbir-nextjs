@@ -62,10 +62,10 @@ export const SearchPage: FC = () => {
           {/* Сюда позже вставишь виджет со списком врачей */}
         </div>
       ) : (
-        <>
+        <div className="lg:hidden">
           <RecentSearches />
           <CategoriesGrid />
-        </>
+        </div>
       )}
     </main>
   );
