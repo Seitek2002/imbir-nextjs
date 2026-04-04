@@ -53,15 +53,15 @@ const FooterText: FC<{ children: ReactNode }> = ({ children }) => (
 
 export const Footer: FC = () => {
   return (
-    <footer className="w-full max-w-[1440px] mx-auto px-4 md:px-10 pb-6 pt-10">
+    <footer className="w-full max-w-360 mx-auto px-4 md:px-10 pb-6 pt-10">
       {/* Контейнер со светло-бежевым фоном */}
-      <div className="bg-[#FCF9F7] rounded-[32px] p-6 sm:p-10 md:p-12 flex flex-col gap-10">
+      <div className="bg-[#FCF9F7] rounded-4xl p-6 sm:p-10 md:p-12 flex flex-col gap-10">
         {/* Верхняя часть: Сетка с контентом */}
         <div className="flex flex-col lg:flex-row justify-between gap-10 lg:gap-8">
           {/* Логотип и социальные сети */}
           <div className="flex flex-col gap-6 lg:w-1/4 shrink-0">
             <Link href="/">
-              <Logo className="w-[140px] h-auto" />
+              <Logo className="w-35 h-auto" />
             </Link>
             <div className="flex items-center gap-3">
               <SocialLink href="#" Icon={FacebookIcon} />
