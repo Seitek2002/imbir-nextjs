@@ -12,6 +12,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@types/swiper": "^6.0.0",
     "clsx": "^2.1.1",
     "next": "16.2.1",
     "react": "19.2.4",

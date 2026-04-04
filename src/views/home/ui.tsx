@@ -49,6 +49,38 @@ export const HomePage = () => {
               thumbnail: VideoThumbnail3.src,
               youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
             },
+            {
+              id: "4",
+              title: "Как правильно ухаживать за полостью рта",
+              authorName: "Осмонов К. Д.",
+              authorRole: "Врач-стоматолог",
+              thumbnail: VideoThumbnail1.src,
+              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            },
+            {
+              id: "5",
+              title: "Профилактика сердечно-сосудистых заболеваний",
+              authorName: "Исаева Б. М.",
+              authorRole: "Врач-кардиолог",
+              thumbnail: VideoThumbnail2.src,
+              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            },
+            {
+              id: "6",
+              title: "Всё, что нужно знать о лазерной коррекции зрения",
+              authorName: "Тимуров А. С.",
+              authorRole: "Врач-офтальмолог",
+              thumbnail: VideoThumbnail3.src,
+              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            },
+            {
+              id: "7",
+              title: "Детский иммунитет: советы родителям на осень",
+              authorName: "Жунусова Э. К.",
+              authorRole: "Врач-педиатр",
+              thumbnail: VideoThumbnail1.src,
+              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            },
           ]}
         />
       </div>
