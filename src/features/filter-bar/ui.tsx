@@ -4,9 +4,9 @@ import { FC, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Dropdown, IconBtn, RangeSlider } from "@/shared";
+import { Button, Dropdown, IconBtn, RangeSlider } from "@/shared";
 
-import { GeoIcon } from "@/shared/assets";
+import { GeoIcon, RemoveIcon } from "@/shared/assets";
 
 type Props = {
   fields?: {
@@ -80,7 +80,7 @@ export const FilterBar: FC<Props> = ({
   };
 
   return (
-    <div className="py-30 mx-auto max-w-340">
+    <div className="">
       <div className="max-w-200 flex items-center">
         <h2 className="border-r border-r-[#E5E6E8] text-[40px] font-semibold pr-6">
           Специалисты
@@ -96,7 +96,7 @@ export const FilterBar: FC<Props> = ({
         </div>
       </div>
 
-      <p className="text-[#686F72] text-lg mt-4 mb-6">
+      <p className="text-[#686F72] text-lg mt-4 mb-10">
         Выберите интересующие вас параметры, чтобы ознакомиться с подходящими
         врачами
       </p>
@@ -152,27 +152,10 @@ export const FilterBar: FC<Props> = ({
         )}
       </div>
 
-      <div className="flex justify-end mt-4">
-        <button
-          onClick={handleReset}
-          className="flex items-center gap-2 text-[#191A1B] text-sm font-medium hover:text-[#F5653E] transition-colors"
-        >
-          <svg
-            className="size-4 text-[#F5653E]"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 4L4 12M4 4L12 12"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+      <div className="flex justify-end mt-6">
+        <Button IconLeft={RemoveIcon} variant="text" onClick={handleReset}>
           Сбросить фильтры
-        </button>
+        </Button>
       </div>
     </div>
   );
