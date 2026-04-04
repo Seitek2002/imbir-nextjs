@@ -44,7 +44,7 @@ export const ClinicCard: FC<Props> = ({
       size="xs"
       onClick={handleSave}
       aria-label={saved ? "Убрать из сохранённых" : "Сохранить клинику"}
-      className="size-8 shrink-0 flex items-center justify-center bg-white border-[#E5E6E8]"
+      className="size-8 shrink-0 flex items-center justify-center bg-white border-[#E5E6E8] hover:bg-white"
     >
       <HeartIcon
         className={
