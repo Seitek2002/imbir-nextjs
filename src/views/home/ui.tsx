@@ -22,7 +22,7 @@ export const HomePage = () => {
       <Header searchable />
       <Hero />
       <FilterBar />
-      <div className="px-4 py-6 flex flex-col gap-3 max-w-[1360px] mx-auto">
+      <div className="px-4 py-6 flex flex-col gap-3 max-w-340 mx-auto">
         <h2 className="font-semibold text-lg text-[#191A1B]">Врачи</h2>
 
         {/* Мобильный: вертикальный список */}
@@ -99,7 +99,7 @@ export const HomePage = () => {
           />
         </div>
       </div>
-      <div className="max-w-[1360px] mx-auto">
+      <div className="max-w-340 mx-auto">
         <ClinicsSwiper
           title="Клиники"
           viewAllHref="/clinics"
@@ -150,7 +150,7 @@ export const HomePage = () => {
           ]}
         />
       </div>
-      <div className="max-w-[1360px] mx-auto">
+      <div className="max-w-340 mx-auto">
         <VideosSwiper
           title="Интервью"
           viewAllHref="/videos"
