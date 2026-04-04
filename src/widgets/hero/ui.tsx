@@ -8,7 +8,7 @@ import { HeroAvatar, HeroBg } from "@/shared/assets";
 
 export const Hero: FC = () => {
   return (
-    <section className="relative m-2 p-4 overflow-hidden h-screen rounded-2xl max-w-[1360px] mx-auto">
+    <section className="relative m-2 p-4 overflow-hidden h-screen rounded-2xl max-w-[1360px] mx-auto bg-[#FFF0E9]">
       <div className="">
         <h1 className="font-semibold text-2xl text-[#191A1B]">
           Лучшие специалисты и честные отзывы
