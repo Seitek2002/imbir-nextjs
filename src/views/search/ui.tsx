@@ -9,7 +9,6 @@ import { CategoriesGrid, Footer, Header, RecentSearches } from "@/widgets";
 
 import { FilterBar } from "@/features/filter-bar/ui";
 
-// или откуда он у тебя
 import { DoctorCard } from "@/entities/doctor";
 
 import { DoctorImage1, DoctorImage2, DoctorImage3 } from "@/shared/assets";
@@ -106,13 +105,21 @@ export const SearchPage: FC = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const initialQuery = searchParams.get(QUERY_KEY) || "";
-  const [query, setQuery] = useState(initialQuery);
+  const urlQuery = searchParams.get(QUERY_KEY) || "";
+  const [query, setQuery] = useState(urlQuery);
+  const [prevUrlQuery, setPrevUrlQuery] = useState(urlQuery);
 
+  // 1. СИНХРОНИЗАЦИЯ БЕЗ USEEFFECT (React Best Practice):
+  // Если URL изменился извне (из GlobalSearch), обновляем локальный стейт при рендере.
+  if (urlQuery !== prevUrlQuery) {
+    setPrevUrlQuery(urlQuery);
+    setQuery(urlQuery);
+  }
+
+  // 2. ДЕБАУНС: Отправляем локальный стейт в URL при печати
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      const currentSearch = searchParams.get(QUERY_KEY) || "";
-      if (query === currentSearch) return;
+      if (query === urlQuery) return; // Если всё совпадает, ничего не делаем
 
       const params = new URLSearchParams(searchParams.toString());
       if (query) {
@@ -124,7 +131,7 @@ export const SearchPage: FC = () => {
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query, pathname, router, searchParams]);
+  }, [query, pathname, router, searchParams, urlQuery]);
 
   const activeQuery = searchParams.get(QUERY_KEY) || "";
 
@@ -167,7 +174,7 @@ export const SearchPage: FC = () => {
               </Button>
             </div>
 
-            {/* --- ДЕСКТОПНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ --- */}
+            {/* --- ДЕСКТОПНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ (КАК НА СКРИНЕ) --- */}
             <div className="hidden md:block px-10 py-6">
               {/* Хлебные крошки */}
               <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
@@ -183,7 +190,7 @@ export const SearchPage: FC = () => {
                 </span>
               </div>
 
-              {/* Магия children в FilterBar */}
+              {/* Вот тут магия children в FilterBar! */}
               <FilterBar>
                 <div className="flex items-end gap-3 mb-6">
                   <h1 className="text-[40px] font-semibold text-[#191A1B] leading-none">
