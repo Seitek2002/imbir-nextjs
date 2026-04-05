@@ -4,7 +4,16 @@ import { DoctorCard } from "@/entities";
 import { FilterBar } from "@/features";
 import { Button } from "@/shared";
 
-import { DoctorImage1, DoctorImage2, DoctorImage3 } from "@/shared/assets";
+import {
+  DoctorImage1,
+  DoctorImage2,
+  DoctorImage3,
+  DoctorImage4,
+  DoctorImage5,
+  DoctorImage6,
+  DoctorImage7,
+  DoctorImage8,
+} from "@/shared/assets";
 
 export const DoctorsMainList: FC = () => {
   return (
@@ -53,8 +62,8 @@ export const DoctorsMainList: FC = () => {
           />
         </div>
 
-        {/* Десктоп: грид 4 колонки */}
-        <div className="hidden md:grid md:grid-cols-4 gap-3">
+        {/* Десктоп: грид 4 колонки, 2 ряда */}
+        <div className="hidden md:grid md:grid-cols-4 gap-3 items-stretch">
           <DoctorCard
             name="Айбеков Нурлан Эльдарович"
             specialty="Врач-терапевт"
@@ -90,6 +99,42 @@ export const DoctorsMainList: FC = () => {
             experience={20}
             image={DoctorImage3}
             initialSaved
+          />
+          <DoctorCard
+            name="Садыкова Айгуль Турдукановна"
+            specialty="Педиатр"
+            clinic="MedCity"
+            rating={4.95}
+            reviews={312}
+            experience={10}
+            image={DoctorImage4}
+          />
+          <DoctorCard
+            name="Токтосунов Мирлан"
+            specialty="Хирург"
+            clinic="Nova Clinic"
+            rating={4.8}
+            reviews={98}
+            experience={18}
+            image={DoctorImage5}
+          />
+          <DoctorCard
+            name="Эрматова Зульфия"
+            specialty="Офтальмолог"
+            clinic="BioMed"
+            rating={4.7}
+            reviews={145}
+            experience={9}
+            image={DoctorImage6}
+          />
+          <DoctorCard
+            name="Асанов Бакыт Кемелович"
+            specialty="Кардиолог"
+            clinic="HealthPlus"
+            rating={4.88}
+            reviews={203}
+            experience={22}
+            image={DoctorImage7}
           />
         </div>
       </div>

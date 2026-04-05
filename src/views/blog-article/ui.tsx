@@ -1,0 +1,122 @@
+import { FC } from "react";
+
+import Image from "next/image";
+import Link from "next/link";
+
+import { Header } from "@/widgets";
+
+import { BlogArticle, BlogCard, BlogPost } from "@/entities/blog";
+
+import { ThunderIcon } from "@/shared/assets";
+
+const BLUR =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+";
+
+type Props = {
+  article: BlogArticle;
+  relatedPosts: BlogPost[];
+};
+
+export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
+  return (
+    <main className="min-h-screen bg-[#F2F3F5]">
+      <div className="md:hidden">
+        <Header title="Статья" backTo="/blog" />
+      </div>
+
+      <div className="w-full max-w-340 mx-auto px-3 md:px-4 pt-4 md:pt-6 pb-8">
+        <nav className="hidden md:flex items-center gap-3 text-sm leading-none mb-6 text-[#838A8D]">
+          <Link href="/" className="hover:text-[#F5653E] transition-colors">
+            Главная
+          </Link>
+          <span>•</span>
+          <Link href="/blog" className="hover:text-[#F5653E] transition-colors">
+            Блог
+          </Link>
+          <span className="text-[#F5653E]">•</span>
+          <span className="text-[#F5653E]">{article.title}</span>
+        </nav>
+
+        <div className="flex items-center gap-3 mb-4 md:mb-6">
+          {article.badge && (
+            <span className="flex items-center gap-1.5 rounded-full bg-[#FFF3F0] text-[#F5653E] text-[12px] md:text-sm font-medium px-4 py-2">
+              <ThunderIcon />
+              {article.badge}
+            </span>
+          )}
+          <span className="rounded-full border border-[#D6D9DC] text-[#686F72] text-[12px] md:text-sm font-medium px-4 py-2">
+            {article.date}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_332px] gap-6 md:gap-3 md:items-start">
+          <article>
+            <h1 className="text-[32px] font-semibold leading-[115%] text-[#191A1B] mb-5 md:mb-6">
+              {article.title}
+            </h1>
+
+            <div className="relative w-full h-64 md:h-105 overflow-hidden rounded-3xl">
+              <Image
+                src={article.image}
+                alt={article.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 900px"
+                className="object-cover"
+                placeholder="blur"
+                blurDataURL={BLUR}
+              />
+            </div>
+
+            <div className="mt-5 md:mt-6 space-y-4 md:space-y-5">
+              <p className="text-base text-[#686F72] leading-[145%]">
+                {article.intro}
+              </p>
+
+              {article.points.map((point) => (
+                <div key={point.title}>
+                  <h2 className="flex items-start gap-2 text-[18px] font-semibold leading-[130%] text-[#191A1B]">
+                    <span className="text-[#D11313] text-[12px] leading-none mt-1.5">
+                      ►
+                    </span>
+                    <span>{point.title}</span>
+                  </h2>
+                  <p className="mt-2 text-base text-[#686F72] leading-[145%]">
+                    {point.text}
+                  </p>
+                </div>
+              ))}
+
+              <div>
+                <h2 className="text-[18px] font-semibold leading-[130%] text-[#191A1B]">
+                  {article.summaryTitle}
+                </h2>
+                <p className="mt-2 text-base text-[#686F72] leading-[145%]">
+                  {article.summary}
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <aside className="w-full">
+            <h2 className="text-[32px] font-semibold leading-[120%] text-[#191A1B] mb-3">
+              Читать далее
+            </h2>
+            <div className="flex flex-col gap-3">
+              {relatedPosts.map((post) => (
+                <BlogCard
+                  key={post.id}
+                  title={post.title}
+                  category={post.category}
+                  categoryColor={post.categoryColor}
+                  date={post.date}
+                  image={post.image}
+                  href={post.href}
+                />
+              ))}
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  );
+};

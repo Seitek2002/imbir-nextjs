@@ -1,0 +1,180 @@
+"use client";
+
+import { FC, useState } from "react";
+
+import Image from "next/image";
+import Link from "next/link";
+
+import { Button } from "@/shared";
+
+import { BlogCard, BlogCategory, BlogPost } from "@/entities/blog";
+
+import { ThunderIcon } from "@/shared/assets";
+
+const BLUR =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+";
+
+type Props = {
+  posts: BlogPost[];
+  categories: BlogCategory[];
+};
+
+export const BlogSection: FC<Props> = ({ posts, categories }) => {
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  const featured = posts.find((post) => post.featured);
+  const filtered =
+    activeCategory === "all"
+      ? posts.filter((post) => !post.featured)
+      : posts.filter(
+          (post) => !post.featured && post.categoryId === activeCategory,
+        );
+
+  return (
+    <div className="flex flex-col gap-6">
+      {featured && (
+        <div className="hidden md:flex gap-5">
+          <Link
+            href={featured.href}
+            className="relative w-167.5 shrink-0 h-105 rounded-3xl overflow-hidden border border-[#E3E4E5] group block"
+          >
+            <Image
+              src={featured.image}
+              alt={featured.title}
+              fill
+              sizes="50vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              placeholder="blur"
+              blurDataURL={BLUR}
+            />
+          </Link>
+
+          <div className="flex flex-col justify-center gap-4 bg-white rounded-3xl border border-[#E3E4E5] p-8 flex-1">
+            <div className="flex items-center gap-3">
+              {featured.badge && (
+                <span className="flex items-center gap-1.5 bg-[#FFF3F0] text-[#F5653E] text-xs font-semibold px-3 py-1.5 rounded-full">
+                  <ThunderIcon />
+                  {featured.badge}
+                </span>
+              )}
+              <span className="text-sm text-[#838A8D] border border-[#E3E4E5] px-3 py-1.5 rounded-full">
+                {featured.date}
+              </span>
+            </div>
+
+            <div>
+              <h2 className="font-semibold text-[28px] text-[#191A1B] leading-[130%] mb-2">
+                {featured.title}
+              </h2>
+              {featured.description && (
+                <p className="text-sm text-[#686F72] leading-relaxed line-clamp-2">
+                  {featured.description}
+                </p>
+              )}
+            </div>
+
+            <Link href={featured.href}>
+              <Button size="sm" className="w-fit">
+                Читать статью
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {featured && (
+        <div className="md:hidden flex flex-col gap-2">
+          {/* Контент */}
+          <div className="bg-white rounded-3xl border border-[#E3E4E5] p-5 flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              {featured.badge && (
+                <span className="flex items-center gap-1.5 bg-[#FFF3F0] text-[#F5653E] text-xs font-semibold px-3 py-1.5 rounded-full">
+                  <ThunderIcon />
+                  {featured.badge}
+                </span>
+              )}
+              <span className="text-sm text-[#838A8D] border border-[#E3E4E5] px-3 py-1.5 rounded-full">
+                {featured.date}
+              </span>
+            </div>
+            <h2 className="font-bold text-xl text-[#191A1B] leading-snug">
+              {featured.title}
+            </h2>
+            {featured.description && (
+              <p className="text-sm text-[#686F72] leading-relaxed">
+                {featured.description}
+              </p>
+            )}
+            <Link href={featured.href}>
+              <Button size="sm" className="w-fit">
+                Читать статью
+              </Button>
+            </Link>
+          </div>
+          {/* Изображение */}
+          <Link
+            href={featured.href}
+            className="relative w-full h-52 rounded-3xl overflow-hidden border border-[#E3E4E5] block"
+          >
+            <Image
+              src={featured.image}
+              alt={featured.title}
+              fill
+              sizes="100vw"
+              className="object-cover object-top"
+              placeholder="blur"
+              blurDataURL={BLUR}
+            />
+          </Link>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <button
+          onClick={() => setActiveCategory("all")}
+          className="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
+          style={{
+            backgroundColor: activeCategory === "all" ? "#F5653E" : "#E3E4E5",
+            color: activeCategory === "all" ? "#fff" : "#686F72",
+          }}
+        >
+          Все
+        </button>
+        {categories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => setActiveCategory(category.id)}
+            className="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
+            style={{
+              backgroundColor:
+                activeCategory === category.id ? "#F5653E" : "#E3E4E5",
+              color: activeCategory === category.id ? "#fff" : "#686F72",
+            }}
+          >
+            {category.label}
+          </button>
+        ))}
+      </div>
+
+      {filtered.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {filtered.map((post) => (
+            <BlogCard
+              key={post.id}
+              title={post.title}
+              category={post.category}
+              categoryColor={post.categoryColor}
+              date={post.date}
+              image={post.image}
+              href={post.href}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-[#838A8D] py-8 text-center">
+          Нет статей в этой категории
+        </p>
+      )}
+    </div>
+  );
+};

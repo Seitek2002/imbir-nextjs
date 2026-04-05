@@ -25,6 +25,7 @@ export {
   HeartIcon,
   HeartIcon2,
   PlayIcon,
+  ThunderIcon,
   SearchSample,
   FilterSample,
   AppleIcon,

@@ -191,15 +191,16 @@ export const ClinicsSwiper: FC<Props> = ({
               style={{ scrollbarWidth: "none" }}
             >
               {filtered.map((clinic) => (
-                <ClinicCard
-                  name={clinic.name}
-                  rating={clinic.rating}
-                  reviews={clinic.reviews}
-                  experience={clinic.experience}
-                  address={clinic.address}
-                  image={clinic.image}
-                  key={clinic.id}
-                />
+                <div key={clinic.id} className="w-81.25 h-89 shrink-0">
+                  <ClinicCard
+                    name={clinic.name}
+                    rating={clinic.rating}
+                    reviews={clinic.reviews}
+                    experience={clinic.experience}
+                    address={clinic.address}
+                    image={clinic.image}
+                  />
+                </div>
               ))}
             </div>
 
