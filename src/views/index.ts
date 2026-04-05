@@ -5,3 +5,5 @@ export { BlogPage } from "./blog";
 export { BlogArticlePage } from "./blog-article";
 export { ClinicsPage } from "./clinics";
 export { ServicesPage } from "./services";
+export { RegisterPage } from "./register";
+export { LoginPage } from "./login";
