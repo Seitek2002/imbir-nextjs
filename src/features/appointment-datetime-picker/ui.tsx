@@ -1,0 +1,437 @@
+﻿"use client";
+
+import { FC, useEffect, useMemo, useRef, useState } from "react";
+
+import { IconBtn } from "@/shared";
+
+import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets";
+import { cn } from "@/shared/lib/utils";
+
+export type ConsultationMode = "online" | "offline";
+
+export type TimeSlot = {
+  value: string;
+  disabled?: boolean;
+};
+
+export type TimeGroup = {
+  label: string;
+  slots: TimeSlot[];
+};
+
+type Props = {
+  mode: ConsultationMode;
+  onModeChange: (mode: ConsultationMode) => void;
+  canUseOnline?: boolean;
+  selectedDate: Date | null;
+  onDateChange: (date: Date) => void;
+  selectedTime: string | null;
+  onTimeChange: (time: string) => void;
+  timeGroups?: TimeGroup[];
+  isDateDisabled?: (date: Date) => boolean;
+  className?: string;
+};
+
+const WEEK_DAYS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
+
+const MONTHS = [
+  "Январь",
+  "Февраль",
+  "Март",
+  "Апрель",
+  "Май",
+  "Июнь",
+  "Июль",
+  "Август",
+  "Сентябрь",
+  "Октябрь",
+  "Ноябрь",
+  "Декабрь",
+];
+
+const DEFAULT_TIME_GROUPS: TimeGroup[] = [
+  {
+    label: "Утро",
+    slots: [
+      { value: "08:00" },
+      { value: "09:00" },
+      { value: "10:00" },
+      { value: "11:00", disabled: true },
+      { value: "12:00" },
+    ],
+  },
+  {
+    label: "Обед",
+    slots: [
+      { value: "13:00" },
+      { value: "14:00" },
+      { value: "15:00", disabled: true },
+      { value: "16:00", disabled: true },
+      { value: "17:00" },
+    ],
+  },
+  {
+    label: "Вечер",
+    slots: [
+      { value: "18:00" },
+      { value: "19:00", disabled: true },
+      { value: "20:00" },
+      { value: "21:00", disabled: true },
+    ],
+  },
+];
+
+const toMondayIndex = (day: number) => (day + 6) % 7;
+
+const isSameDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
+
+const addDays = (date: Date, days: number) => {
+  const copy = new Date(date);
+  copy.setDate(copy.getDate() + days);
+  return copy;
+};
+
+const pad = (n: number) => String(n).padStart(2, "0");
+
+export const AppointmentDateTimePicker: FC<Props> = ({
+  mode,
+  onModeChange,
+  canUseOnline = true,
+  selectedDate,
+  onDateChange,
+  selectedTime,
+  onTimeChange,
+  timeGroups = DEFAULT_TIME_GROUPS,
+  isDateDisabled,
+  className,
+}) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const selectedBtnRef = useRef<HTMLButtonElement>(null);
+
+  const [monthCursor, setMonthCursor] = useState(() => {
+    const d = selectedDate ?? new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+
+  useEffect(() => {
+    if (!canUseOnline && mode === "online") onModeChange("offline");
+  }, [canUseOnline, mode, onModeChange]);
+
+  // Auto-scroll selected date into view on mobile
+  useEffect(() => {
+    if (!selectedBtnRef.current || !scrollRef.current) return;
+    const container = scrollRef.current;
+    const btn = selectedBtnRef.current;
+    const left =
+      btn.offsetLeft - container.offsetWidth / 2 + btn.offsetWidth / 2;
+    container.scrollTo({ left, behavior: "smooth" });
+  }, [selectedDate]);
+
+  const monthLabel = `${MONTHS[monthCursor.getMonth()]} ${monthCursor.getFullYear()}`;
+
+  // Desktop: full month calendar cells
+  const monthCells = useMemo(() => {
+    const firstDay = new Date(
+      monthCursor.getFullYear(),
+      monthCursor.getMonth(),
+      1,
+    );
+    const daysInMonth = new Date(
+      monthCursor.getFullYear(),
+      monthCursor.getMonth() + 1,
+      0,
+    ).getDate();
+    const leading = toMondayIndex(firstDay.getDay());
+
+    const cells: Array<{ date: Date | null; disabled: boolean; key: string }> =
+      [];
+
+    for (let i = 0; i < leading; i++) {
+      cells.push({ date: null, disabled: true, key: `empty-${i}` });
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(
+        monthCursor.getFullYear(),
+        monthCursor.getMonth(),
+        day,
+      );
+      cells.push({
+        date,
+        disabled: isDateDisabled?.(date) ?? false,
+        key: `d-${day}`,
+      });
+    }
+    while (cells.length % 7 !== 0) {
+      cells.push({ date: null, disabled: true, key: `tail-${cells.length}` });
+    }
+    return cells;
+  }, [monthCursor, isDateDisabled]);
+
+  // Mobile: horizontal strip for current month plus adjacent days
+  const mobileStrip = useMemo(() => {
+    const firstDay = new Date(
+      monthCursor.getFullYear(),
+      monthCursor.getMonth(),
+      1,
+    );
+    const lastDay = new Date(
+      monthCursor.getFullYear(),
+      monthCursor.getMonth() + 1,
+      0,
+    );
+    const start = addDays(firstDay, -7);
+    const total =
+      Math.round((lastDay.getTime() - start.getTime()) / 86400000) + 1 + 7;
+    return Array.from({ length: total }, (_, i) => {
+      const date = addDays(start, i);
+      return { date, disabled: isDateDisabled?.(date) ?? false };
+    });
+  }, [monthCursor, isDateDisabled]);
+
+  const handleDateSelect = (date: Date) => {
+    onDateChange(date);
+    if (
+      date.getMonth() !== monthCursor.getMonth() ||
+      date.getFullYear() !== monthCursor.getFullYear()
+    ) {
+      setMonthCursor(new Date(date.getFullYear(), date.getMonth(), 1));
+    }
+  };
+
+  const monthNav = (
+    <div className="flex items-center justify-between bg-[#F2F3F5] rounded-xl px-2 py-1.5">
+      <IconBtn
+        variant="text"
+        size="xs"
+        className="hover:bg-white"
+        aria-label="Предыдущий месяц"
+        onClick={() =>
+          setMonthCursor((p) => new Date(p.getFullYear(), p.getMonth() - 1, 1))
+        }
+      >
+        <ArrowLeftIcon className="size-4" />
+      </IconBtn>
+      <span className="text-sm font-medium text-[#191A1B]">{monthLabel}</span>
+      <IconBtn
+        variant="text"
+        size="xs"
+        className="hover:bg-white"
+        aria-label="Следующий месяц"
+        onClick={() =>
+          setMonthCursor((p) => new Date(p.getFullYear(), p.getMonth() + 1, 1))
+        }
+      >
+        <ArrowRightIcon className="size-4" />
+      </IconBtn>
+    </div>
+  );
+
+  return (
+    <div className={cn("space-y-3", className)}>
+      {/* Mode toggle */}
+      <div className="space-y-2">
+        <div className="relative grid grid-cols-2 items-center bg-[#F2F3F5] p-1 rounded-full">
+          <div
+            className="absolute top-1 bottom-1 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-transform duration-300"
+            style={{
+              width: "calc(50% - 4px)",
+              left: "4px",
+              transform: `translateX(${mode === "online" ? "0%" : "100%"})`,
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => canUseOnline && onModeChange("online")}
+            disabled={!canUseOnline}
+            className={cn(
+              "relative z-10 py-2 text-sm font-medium transition-colors rounded-full",
+              mode === "online" ? "text-[#191A1B]" : "text-[#686F72]",
+              !canUseOnline && "opacity-50 cursor-not-allowed",
+            )}
+          >
+            Онлайн
+          </button>
+          <button
+            type="button"
+            onClick={() => onModeChange("offline")}
+            className={cn(
+              "relative z-10 py-2 text-sm font-medium transition-colors rounded-full",
+              mode === "offline" ? "text-[#191A1B]" : "text-[#686F72]",
+            )}
+          >
+            Оффлайн
+          </button>
+        </div>
+        {!canUseOnline && (
+          <p className="text-xs text-[#838A8D]">
+            Онлайн-доступ доступен после авторизации.
+          </p>
+        )}
+      </div>
+
+      {/* MOBILE layout */}
+      <div className="lg:hidden space-y-3">
+        <div className="border border-[#E3E4E5] rounded-2xl p-3">
+          {monthNav}
+          {/* Scrollable day strip */}
+          <div
+            ref={scrollRef}
+            className="mt-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            <div className="flex gap-2" style={{ width: "max-content" }}>
+              {mobileStrip.map((item) => {
+                const isSelected = selectedDate
+                  ? isSameDay(selectedDate, item.date)
+                  : false;
+                const dayLabel = WEEK_DAYS[toMondayIndex(item.date.getDay())];
+                return (
+                  <button
+                    key={`${item.date.getFullYear()}-${item.date.getMonth()}-${item.date.getDate()}`}
+                    ref={isSelected ? selectedBtnRef : null}
+                    type="button"
+                    onClick={() =>
+                      !item.disabled && handleDateSelect(item.date)
+                    }
+                    disabled={item.disabled}
+                    className={cn(
+                      "flex flex-col items-center justify-center gap-1 w-12 h-14 rounded-xl border text-sm transition-all shrink-0",
+                      isSelected
+                        ? "border-[#F5653E] text-[#F5653E] bg-[#FFF3EE]"
+                        : "border-[#E3E4E5] text-[#191A1B] bg-white",
+                      item.disabled &&
+                        "bg-[#F2F3F5] text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "text-[10px]",
+                        isSelected ? "text-[#F5653E]" : "text-[#838A8D]",
+                      )}
+                    >
+                      {dayLabel}
+                    </span>
+                    <span className="font-medium">
+                      {pad(item.date.getDate())}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Time slots mobile */}
+        <div className="border border-[#E3E4E5] rounded-2xl p-3 space-y-3">
+          {timeGroups.map((group) => (
+            <div key={group.label}>
+              <p className="text-sm text-[#686F72] mb-2">{group.label}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {group.slots.map((slot) => {
+                  const isSelected = selectedTime === slot.value;
+                  return (
+                    <button
+                      key={slot.value}
+                      type="button"
+                      onClick={() => !slot.disabled && onTimeChange(slot.value)}
+                      disabled={slot.disabled}
+                      className={cn(
+                        "min-w-14 px-2 h-9 rounded-lg border text-sm transition-colors",
+                        isSelected
+                          ? "border-[#F5653E] text-[#F5653E] bg-[#FFF3EE]"
+                          : "border-[#E3E4E5] text-[#191A1B]",
+                        slot.disabled &&
+                          "bg-[#F2F3F5] text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                      )}
+                    >
+                      {slot.value}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* DESKTOP layout */}
+      <div className="hidden lg:grid lg:grid-cols-2 gap-3">
+        <div className="border border-[#E3E4E5] rounded-2xl p-3">
+          {monthNav}
+          <div className="mt-3">
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {WEEK_DAYS.map((d) => (
+                <span
+                  key={d}
+                  className="text-center text-xs text-[#838A8D] py-1"
+                >
+                  {d}
+                </span>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1.5">
+              {monthCells.map((cell) => {
+                if (!cell.date) return <div key={cell.key} className="h-9" />;
+                const isSelected = selectedDate
+                  ? isSameDay(selectedDate, cell.date)
+                  : false;
+                const date = cell.date;
+                return (
+                  <button
+                    key={cell.key}
+                    type="button"
+                    onClick={() => !cell.disabled && handleDateSelect(date)}
+                    disabled={cell.disabled}
+                    className={cn(
+                      "h-9 rounded-lg border text-sm transition-all",
+                      isSelected
+                        ? "border-[#F5653E] text-[#F5653E] bg-[#FFF3EE]"
+                        : "border-[#E3E4E5] text-[#191A1B] hover:border-[#F5653E]/40",
+                      cell.disabled &&
+                        "bg-[#F2F3F5] text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                    )}
+                  >
+                    {pad(date.getDate())}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="border border-[#E3E4E5] rounded-2xl p-3 space-y-3">
+          {timeGroups.map((group) => (
+            <div key={group.label}>
+              <p className="text-sm text-[#686F72] mb-2">{group.label}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {group.slots.map((slot) => {
+                  const isSelected = selectedTime === slot.value;
+                  return (
+                    <button
+                      key={slot.value}
+                      type="button"
+                      onClick={() => !slot.disabled && onTimeChange(slot.value)}
+                      disabled={slot.disabled}
+                      className={cn(
+                        "min-w-14 px-2 h-9 rounded-lg border text-sm transition-colors",
+                        isSelected
+                          ? "border-[#F5653E] text-[#F5653E] bg-[#FFF3EE]"
+                          : "border-[#E3E4E5] text-[#191A1B] hover:border-[#F5653E]/40",
+                        slot.disabled &&
+                          "bg-[#F2F3F5] text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                      )}
+                    >
+                      {slot.value}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -5,6 +5,8 @@ export {
   Dropdown,
   Radio,
   Checkbox,
+  SearchInput,
   RangeSlider,
   SegmentedControl,
+  Textarea,
 } from "./ui";

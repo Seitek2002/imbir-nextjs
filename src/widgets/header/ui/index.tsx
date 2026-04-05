@@ -8,11 +8,18 @@ import { DefaultContent } from "./default-content";
 type Props = {
   title?: string;
   backTo?: string;
+  onBack?: () => void;
   children?: ReactNode;
   searchable?: boolean;
 };
 
-export const Header: FC<Props> = ({ children, title, backTo, searchable }) => {
+export const Header: FC<Props> = ({
+  children,
+  title,
+  backTo,
+  onBack,
+  searchable,
+}) => {
   return (
     <header
       className={cn(
@@ -31,7 +38,7 @@ export const Header: FC<Props> = ({ children, title, backTo, searchable }) => {
           <div>
             <div className="grid grid-cols-3 items-center min-h-10">
               <div>
-                <BackButton backTo={backTo} />
+                <BackButton backTo={backTo} onBack={onBack} />
               </div>
               <h2 className="text-center font-medium text-base px-2">
                 {title}

@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
 import { HeartIcon2 } from "@/shared/assets";
+import { cn } from "@/shared/lib/utils";
 
 type Props = {
   initialSaved?: boolean;
@@ -17,17 +18,19 @@ export const DoctorSaveButton: FC<Props> = ({
 
   return (
     <button
+      type="button"
       onClick={() => {
-        setSaved((p) => !p);
+        setSaved((prev) => !prev);
         onSave?.();
       }}
       aria-label={saved ? "Убрать из сохранённых" : "Сохранить врача"}
       className="transition-transform active:scale-90"
     >
       <HeartIcon2
-        className={
-          saved ? "[&_path]:fill-[#F5653E] [&_path]:stroke-[#F5653E]" : ""
-        }
+        className={cn(
+          "transition-colors",
+          saved && "[&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]",
+        )}
       />
     </button>
   );
