@@ -1,22 +1,35 @@
 import { FC } from "react";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 
-// ИМПОРТИРУЕМ ФИЧИ ДЛЯ МОБИЛЬНЫХ ФИЛЬТРОВ
-import {
-  ActiveFiltersChips,
-  FiltersTrigger,
-  MobileFiltersModal,
-} from "@/features";
-import { CategoriesGrid, Footer, Header, RecentSearches } from "@/widgets";
+import { ActiveFiltersChips, FiltersTrigger } from "@/features";
+import { Header } from "@/widgets";
 
-import { FilterBar } from "@/features/filter-bar/ui";
 import { UrlSearchInput } from "@/features/search-by-query/ui";
-
-import { DoctorCard } from "@/entities/doctor";
 
 import { DoctorImage1, DoctorImage2, DoctorImage3 } from "@/shared/assets";
 import { Button } from "@/shared/ui";
+
+const MobileFiltersModal = dynamic(() =>
+  import("@/features").then((mod) => mod.MobileFiltersModal),
+);
+
+const Footer = dynamic(() => import("@/widgets").then((mod) => mod.Footer));
+
+const CategoriesGrid = dynamic(() =>
+  import("@/widgets").then((mod) => mod.CategoriesGrid),
+);
+const RecentSearches = dynamic(() =>
+  import("@/widgets").then((mod) => mod.RecentSearches),
+);
+
+const FilterBar = dynamic(() =>
+  import("@/features/filter-bar/ui").then((mod) => mod.FilterBar),
+);
+const DoctorCard = dynamic(() =>
+  import("@/entities/doctor").then((mod) => mod.DoctorCard),
+);
 
 const MOCK_DOCTORS = [
   {
@@ -111,13 +124,11 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
-      {/* ВОЗВРАЩАЕМ ФИЛЬТРЫ В HEADER */}
       <Header title="Поиск" backTo="/">
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
             <UrlSearchInput />
           </div>
-          {/* Скрываем кнопку фильтра на десктопе, так как там есть большой FilterBar */}
           <div className="md:hidden">
             <FiltersTrigger />
           </div>
@@ -125,16 +136,17 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
         <ActiveFiltersChips />
       </Header>
 
-      {/* РЕНДЕРИМ МОБИЛЬНУЮ МОДАЛКУ ФИЛЬТРОВ */}
-      <MobileFiltersModal
-        isOpen={isFiltersModalOpen}
-        fields={{
-          specialty: true,
-          experience: true,
-          rating: true,
-          price: true,
-        }}
-      />
+      {isFiltersModalOpen && (
+        <MobileFiltersModal
+          isOpen={isFiltersModalOpen}
+          fields={{
+            specialty: true,
+            experience: true,
+            rating: true,
+            price: true,
+          }}
+        />
+      )}
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
         {activeQuery ? (
@@ -160,7 +172,6 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
               </Button>
             </div>
 
-            {/* --- ДЕСКТОПНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ --- */}
             <div className="hidden md:block px-10 py-6">
               <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
                 <Link
@@ -200,7 +211,6 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
             </div>
           </>
         ) : (
-          /* --- СОСТОЯНИЕ ДО ПОИСКА (ПУСТОЙ ИНПУТ) --- */
           <div className="px-4 md:px-10 pt-6 md:pt-16 max-w-200 mx-auto w-full">
             <div className="hidden md:block mb-8 drop-shadow-sm rounded-full">
               <UrlSearchInput />
