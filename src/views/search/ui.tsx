@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, Suspense } from "react";
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -127,7 +127,13 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
       <Header title="Поиск" backTo="/">
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
-            <UrlSearchInput />
+            <Suspense
+              fallback={
+                <div className="h-10.5 w-full bg-gray-100 rounded-lg animate-pulse" />
+              }
+            >
+              <UrlSearchInput />
+            </Suspense>
           </div>
           <div className="md:hidden">
             <FiltersTrigger />
@@ -213,7 +219,13 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
         ) : (
           <div className="px-4 md:px-10 pt-6 md:pt-16 max-w-200 mx-auto w-full">
             <div className="hidden md:block mb-8 drop-shadow-sm rounded-full">
-              <UrlSearchInput />
+              <Suspense
+                fallback={
+                  <div className="h-13 w-full bg-gray-100 rounded-full animate-pulse" />
+                }
+              >
+                <UrlSearchInput />
+              </Suspense>
             </div>
 
             <div className="bg-white md:bg-transparent rounded-3xl md:rounded-none overflow-hidden md:flex md:flex-col md:gap-6">
