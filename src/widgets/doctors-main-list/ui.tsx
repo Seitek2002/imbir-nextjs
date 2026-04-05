@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, Suspense } from "react";
 
 import { DoctorCard } from "@/entities";
 import { FilterBar } from "@/features";
@@ -12,14 +12,15 @@ import {
   DoctorImage5,
   DoctorImage6,
   DoctorImage7,
-  DoctorImage8,
 } from "@/shared/assets";
 
 export const DoctorsMainList: FC = () => {
   return (
     <div className="max-w-340 mx-auto py-30 px-4">
       <div className="hidden lg:block">
-        <FilterBar title="Специалисты" />
+        <Suspense fallback={<div />}>
+          <FilterBar title="Специалисты" />
+        </Suspense>
       </div>
       <div className="flex items-center justify-between lg:hidden">
         <h2 className="text-[18px] font-medium text-[#191A1B]">Специалисты</h2>

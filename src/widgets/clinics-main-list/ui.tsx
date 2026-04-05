@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, Suspense } from "react";
 
 import { FilterBar } from "@/features";
 import { Button } from "@/shared";
@@ -56,15 +56,17 @@ export const ClinicsMainList: FC = () => {
   return (
     <div className="max-w-340 mx-auto pb-30 px-4">
       <div className="hidden lg:block">
-        <FilterBar
-          title="Клиники"
-          fields={{
-            specialty: true,
-            experience: false,
-            rating: true,
-            price: false,
-          }}
-        />
+        <Suspense fallback={<div />}>
+          <FilterBar
+            title="Клиники"
+            fields={{
+              specialty: true,
+              experience: false,
+              rating: true,
+              price: false,
+            }}
+          />
+        </Suspense>
       </div>
 
       <div className="flex items-center justify-between lg:hidden">
