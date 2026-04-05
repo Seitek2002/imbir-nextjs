@@ -1,6 +1,5 @@
 import { Header } from "@/widgets";
 
-// Импортируй иконку поиска, как она у тебя называется (возможно SearchIcon)
 import { SearchIcon } from "@/shared/assets";
 
 export default function Loading() {
