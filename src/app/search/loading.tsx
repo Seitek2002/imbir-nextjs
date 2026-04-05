@@ -9,7 +9,7 @@ export default function Loading() {
       <Header title="Поиск" backTo="/">
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
-            <div className="flex items-center w-full gap-2 border border-[#E3E4E5] px-3 py-2.25 rounded-lg bg-white opacity-70">
+            <div className="flex items-center w-full gap-2 border border-[#E3E4E5] px-3 py-2.25 rounded-full bg-white opacity-70">
               <SearchIcon className="size-5 text-[#191A1B]" />
               <div className="w-1/2 h-4 bg-gray-200 animate-pulse rounded" />
             </div>
