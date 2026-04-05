@@ -6,4 +6,5 @@ export {
   Radio,
   Checkbox,
   RangeSlider,
+  SegmentedControl,
 } from "./ui";
