@@ -1,12 +1,6 @@
-import {
-  Banners,
-  ClinicsMainList,
-  DoctorsMainList,
-  Footer,
-  Header,
-  Hero,
-  VideosSwiper,
-} from "@/widgets";
+import dynamic from "next/dynamic";
+
+import { Header, Hero } from "@/widgets";
 
 import {
   VideoThumbnail1,
@@ -14,14 +8,28 @@ import {
   VideoThumbnail3,
 } from "@/shared/assets";
 
+const DoctorsMainList = dynamic(() =>
+  import("@/widgets").then((mod) => mod.DoctorsMainList),
+);
+const ClinicsMainList = dynamic(() =>
+  import("@/widgets").then((mod) => mod.ClinicsMainList),
+);
+const Banners = dynamic(() => import("@/widgets").then((mod) => mod.Banners));
+const VideosSwiper = dynamic(() =>
+  import("@/widgets").then((mod) => mod.VideosSwiper),
+);
+const Footer = dynamic(() => import("@/widgets").then((mod) => mod.Footer));
+
 export const HomePage = () => {
   return (
     <main>
       <Header searchable />
       <Hero />
+
       <DoctorsMainList />
       <ClinicsMainList />
       <Banners />
+
       <div className="max-w-340 mx-auto">
         <VideosSwiper
           title="Интервью"
@@ -38,7 +46,7 @@ export const HomePage = () => {
             },
             {
               id: "2",
-              title: "3 шага к консультации с врачом",
+              title: "Врач онлайн: как это работает за 1 минуту",
               authorName: "Садыкова А. Т.",
               authorRole: "Врач-терапевт",
               thumbnail: VideoThumbnail2.src,
@@ -46,42 +54,10 @@ export const HomePage = () => {
             },
             {
               id: "3",
-              title: "Медицина без очередей — попробуйте сами",
+              title: "Врач онлайн: как это работает за 1 минуту",
               authorName: "Садыкова А. Т.",
               authorRole: "Врач-терапевт",
               thumbnail: VideoThumbnail3.src,
-              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            },
-            {
-              id: "4",
-              title: "Как правильно ухаживать за полостью рта",
-              authorName: "Осмонов К. Д.",
-              authorRole: "Врач-стоматолог",
-              thumbnail: VideoThumbnail1.src,
-              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            },
-            {
-              id: "5",
-              title: "Профилактика сердечно-сосудистых заболеваний",
-              authorName: "Исаева Б. М.",
-              authorRole: "Врач-кардиолог",
-              thumbnail: VideoThumbnail2.src,
-              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            },
-            {
-              id: "6",
-              title: "Всё, что нужно знать о лазерной коррекции зрения",
-              authorName: "Тимуров А. С.",
-              authorRole: "Врач-офтальмолог",
-              thumbnail: VideoThumbnail3.src,
-              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            },
-            {
-              id: "7",
-              title: "Детский иммунитет: советы родителям на осень",
-              authorName: "Жунусова Э. К.",
-              authorRole: "Врач-педиатр",
-              thumbnail: VideoThumbnail1.src,
               youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
             },
           ]}
