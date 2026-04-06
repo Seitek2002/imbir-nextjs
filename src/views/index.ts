@@ -11,3 +11,4 @@ export { RecordPage } from "./record";
 export { ForgotPasswordPage } from "./forgot-password";
 export { SpecialistDetailsPage } from "./specialist-details";
 export { ClinicDetailsPage } from "./clinic-details";
+export { ChatPage } from "./chat";
