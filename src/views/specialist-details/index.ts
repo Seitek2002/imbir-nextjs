@@ -1,0 +1,1 @@
+export { SpecialistDetailsPage } from "./ui";
