@@ -70,7 +70,7 @@ export const ForgotPasswordPage = () => {
         </div>
 
         {/* --- ПРАВАЯ КАРТОЧКА --- */}
-        <div className="flex-1 md:bg-white md:rounded-2xl md:p-10 md:pb-16 flex flex-col max-w-[480px] md:max-w-none mx-auto w-full relative">
+        <div className="flex-1 md:bg-white md:rounded-2xl md:p-10 md:pb-16 flex flex-col max-w-120 md:max-w-none mx-auto w-full relative">
           <div className="md:contents bg-white rounded-2xl m-2 p-4 md:p-0 flex-1 flex flex-col">
             {/* Кнопка назад внутри карточки (как на скринах) */}
             {step !== "success" && (
@@ -117,7 +117,7 @@ export const ForgotPasswordPage = () => {
                 />
                 <div className="mt-auto pt-10 md:mt-10">
                   <Button
-                    className="w-full justify-center md:h-[56px] md:text-lg"
+                    className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
                     onClick={() => setStep("code")}
                     disabled={!email}
@@ -166,7 +166,7 @@ export const ForgotPasswordPage = () => {
 
                 <div className="mt-auto pt-10 md:mt-10">
                   <Button
-                    className="w-full justify-center md:h-[56px] md:text-lg"
+                    className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
                     onClick={() => setStep("new_password")}
                     disabled={code.join("").length < 4}
@@ -228,7 +228,7 @@ export const ForgotPasswordPage = () => {
 
                 <div className="mt-auto pt-10 md:mt-10">
                   <Button
-                    className="w-full justify-center md:h-[56px] md:text-lg"
+                    className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
                     onClick={() => setStep("success")}
                     disabled={!isPasswordValid}
@@ -255,7 +255,7 @@ export const ForgotPasswordPage = () => {
                 </p>
 
                 <Button
-                  className="w-full max-w-[280px] justify-center md:h-[56px] md:text-lg"
+                  className="w-full max-w-70 justify-center md:h-14 md:text-lg"
                   size="lg"
                   onClick={() => router.push("/login")}
                 >
