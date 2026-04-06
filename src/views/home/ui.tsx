@@ -38,7 +38,7 @@ export const HomePage = () => {
           videos={[
             {
               id: "1",
-              title: "Врач онлайн: как это работает за 1 минуту",
+              title: "3 шага к консультации с врачом",
               authorName: "Садыкова А. Т.",
               authorRole: "Врач-терапевт",
               thumbnail: VideoThumbnail1.src,
