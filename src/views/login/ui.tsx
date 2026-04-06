@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Header } from "@/widgets";
@@ -62,7 +63,7 @@ export const LoginPage = () => {
         </div>
 
         {/* --- ПРАВАЯ КАРТОЧКА С ФОРМОЙ (md: wider) --- */}
-        <div className="flex-1 md:bg-white md:rounded-2xl md:p-10 md:pb-16 flex flex-col max-w-[480px] md:max-w-none mx-auto w-full">
+        <div className="flex-1 md:bg-white md:rounded-2xl md:p-10 md:pb-16 flex flex-col max-w-120 md:max-w-none mx-auto w-full">
           <div className="md:contents bg-white rounded-2xl m-2 p-4 md:p-0 flex-1 flex flex-col">
             <div className="hidden md:block">{AuthTabs}</div>
 
@@ -106,19 +107,19 @@ export const LoginPage = () => {
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
                   />
-                  <button
-                    type="button"
+                  <Link
+                    href="/forgot-password"
                     className="text-sm font-medium text-[#F5653E] hover:underline"
                   >
                     Забыли пароль?
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
 
             <div className="mt-auto pt-10 md:mt-10">
               <Button
-                className="w-full justify-center md:h-[56px] md:text-lg"
+                className="w-full justify-center md:h-14 md:text-lg"
                 size="lg"
                 onClick={handleSubmit}
                 disabled={!email || !password}
