@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { Footer, Header } from "@/widgets";
 
-import { HeaderBackIcon, HeartIcon } from "@/shared/assets";
+import { ChatIcon, HeaderBackIcon, HeartIcon, StarIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
 import { Button, IconBtn } from "@/shared/ui";
 
@@ -444,21 +444,32 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
           </div>
 
           <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-            <div className="w-full md:w-[320px] shrink-0 flex flex-col gap-5">
+            <div className="w-full md:w-100 shrink-0 flex flex-col gap-5">
               <div className="flex gap-4">
-                <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-4 flex flex-col items-center md:items-start justify-center">
-                  <span className="text-2xl font-bold text-[#191A1B] mb-1">
-                    ⭐ 4.85
-                  </span>
-                  <span className="text-xs text-[#838A8D]">Сред. оценка</span>
+                <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-6 flex flex-col items-center md:items-start justify-center">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-[#FFA18D] p-2.5 rounded-xl size-10">
+                      <StarIcon className="size-5 text-white" />
+                    </div>
+                    <span className="text-[24px] font-semibold text-[#191A1B]">
+                      4.85
+                    </span>
+                  </div>
+                  <span className="text-[#838A8D]">Средняя оценка</span>
                 </div>
-                <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-4 flex flex-col items-center md:items-start justify-center">
-                  <span className="text-2xl font-bold text-[#191A1B] mb-1">
-                    💬 255
-                  </span>
-                  <span className="text-xs text-[#838A8D]">Всего отзывов</span>
+                <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-6 flex flex-col items-center md:items-start justify-center">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-[#FFA18D] p-2.5 rounded-xl size-10">
+                      <ChatIcon className="size-5 text-white" />
+                    </div>
+                    <span className="text-[24px] font-semibold text-[#191A1B]">
+                      255
+                    </span>
+                  </div>
+                  <span className="text-[#838A8D]">Всего отзывов</span>
                 </div>
               </div>
+              {/* Кнопка "Оставить отзыв" для мобилки */}
               <Button
                 variant="outline"
                 className="md:hidden w-full justify-center bg-white"
@@ -466,15 +477,31 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                 Оставить свой отзыв
               </Button>
 
-              <div className="hidden md:flex flex-col bg-white border border-[#E3E4E5] rounded-2xl p-6">
-                <h3 className="font-semibold text-[#191A1B] mb-4">
+              {/* Форма "Оставить отзыв" для ПК */}
+              <div className="hidden md:flex flex-col bg-white border border-[#E3E4E5] rounded-2xl p-4">
+                <h3 className="font-medium text-[20px] text-[#191A1B] mb-6">
                   Оставьте свой отзыв
                 </h3>
+                <span className="text-base mb-2">Оцените специалиста</span>
+
+                {/* Звездочки */}
+                <div className="flex justify-center gap-5 py-4 mb-6 border border-[#E5E6E8] rounded-xl">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <StarIcon key={star} className="size-10 text-[#E5E6E8]" />
+                  ))}
+                </div>
+
+                <span className="text-base mb-2">
+                  Поделитесь своим мнением о клинике
+                </span>
                 <textarea
-                  className="w-full border border-[#E3E4E5] rounded-xl p-3 text-sm h-24 mb-4 resize-none"
-                  placeholder="Напишите текст..."
+                  className="w-full border border-[#E3E4E5] rounded-xl p-3 text-sm outline-none focus:border-[#F5653E] resize-none h-24 mb-4"
+                  placeholder="Введите текст"
                 />
-                <Button className="w-full justify-center">Отправить</Button>
+
+                <Button size="md" className="w-full justify-center">
+                  Отправить
+                </Button>
               </div>
             </div>
 
@@ -499,7 +526,13 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                         </span>
                       </div>
                     </div>
-                    <span className="text-[#F5653E] text-xs">⭐⭐⭐⭐⭐</span>
+                    <span className="text-white flex bg-[#FFA18D] py-1 px-2 rounded-full">
+                      <StarIcon className="size-4" />
+                      <StarIcon className="size-4" />
+                      <StarIcon className="size-4" />
+                      <StarIcon className="size-4" />
+                      <StarIcon className="size-4" />
+                    </span>
                   </div>
                 </div>
               ))}
