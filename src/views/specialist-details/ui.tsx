@@ -8,16 +8,24 @@ import { Footer, Header, VideosSwiper } from "@/widgets";
 
 import { ReviewsSection } from "@/widgets/reviews/ui";
 
-import { HeaderBackIcon, HeartIcon } from "@/shared/assets";
+import {
+  EmailIcon,
+  HeaderBackIcon,
+  HeartIcon,
+  HistoryIcon,
+  PhoneIcon,
+} from "@/shared/assets";
 import { MOCK_DOCTOR, MOCK_REVIEWS } from "@/shared/constants/mocks";
 import { Button, IconBtn } from "@/shared/ui";
+import { InfoCard } from "@/shared/ui/info-card/ui";
+import { StatsPanel } from "@/shared/ui/stats-panel/ui";
 
 type Props = {
   id: string;
 };
 
 export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
-  console.log(id);
+  console.log("Specialist ID:", id);
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col relative pb-20 md:pb-0">
@@ -88,7 +96,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
 
           {/* Правая колонка / Мобильный низ: Информация */}
           <div className="flex-1 flex flex-col rounded-t-3xl md:rounded-none -mt-6 md:mt-0 relative z-10 p-2 md:p-0">
-            {/* Имя и специальность */}
+            {/* Заголовок и статистика */}
             <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
               <div className="flex justify-center md:justify-between items-start mb-6">
                 <div>
@@ -104,27 +112,12 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 </IconBtn>
               </div>
 
-              {/* Статистика (Оценка, Стаж, Отзывы) */}
-              <div className="flex items-center justify-between bg-white border border-[#E3E4E5] rounded-2xl p-4 divide-x divide-[#E3E4E5]">
-                <div className="flex flex-col items-center flex-1">
-                  <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
-                    {MOCK_DOCTOR.rating}
-                  </span>
-                  <span className="text-sm text-[#838A8D]">Оценка</span>
-                </div>
-                <div className="flex flex-col items-center flex-1">
-                  <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
-                    {MOCK_DOCTOR.experience} лет
-                  </span>
-                  <span className="text-sm text-[#838A8D]">Стаж</span>
-                </div>
-                <div className="flex flex-col items-center flex-1">
-                  <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
-                    {MOCK_DOCTOR.reviewsCount}
-                  </span>
-                  <span className="text-sm text-[#838A8D]">Отзывов</span>
-                </div>
-              </div>
+              <StatsPanel
+                rating={MOCK_DOCTOR.rating}
+                experience={`${MOCK_DOCTOR.experience} лет`}
+                experienceLabel="Стаж"
+                reviews={MOCK_DOCTOR.reviewsCount}
+              />
             </div>
 
             {/* Десктопные кнопки */}
@@ -140,44 +133,21 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               </Button>
             </div>
 
-            {/* ТУТ БУДУТ БЛОКИ ДЕТАЛЕЙ (Образование, Опыт и т.д.) */}
+            {/* --- БЛОКИ ДЕТАЛЕЙ (с новым InfoCard) --- */}
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
-              {/* 1. Образование */}
-              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
-                <h3 className="text-lg font-semibold text-[#191A1B] mb-3">
-                  Образование
-                </h3>
-                <p className="text-[#838A8D] text-sm md:text-base leading-relaxed">
-                  {MOCK_DOCTOR.education}
-                </p>
-              </div>
+              <InfoCard title="Образование" expandable lines={3}>
+                {MOCK_DOCTOR.education}
+              </InfoCard>
 
-              {/* 2. О враче */}
-              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-[#191A1B]">
-                    О враче
-                  </h3>
-                  <button className="text-[#F5653E] text-sm hover:underline transition-colors">
-                    Подробнее
-                  </button>
-                </div>
-                <p className="text-[#838A8D] text-sm md:text-base leading-relaxed">
-                  {MOCK_DOCTOR.about}
-                </p>
-              </div>
+              <InfoCard title="О враче" expandable lines={3}>
+                {MOCK_DOCTOR.about}
+              </InfoCard>
 
-              {/* 3. Опыт работы */}
-              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
-                <h3 className="text-lg font-semibold text-[#191A1B] mb-4">
-                  Опыт работы
-                </h3>
+              <InfoCard title="Опыт работы" expandable={false}>
                 <div className="flex flex-col gap-5">
                   {MOCK_DOCTOR.workExperience.map((exp, idx) => (
                     <div key={idx} className="relative pl-5">
-                      {/* Оранжевое тире (декорация) */}
                       <span className="absolute left-0 top-2.5 w-2.5 h-0.5 bg-[#F5653E]" />
-
                       <div className="mb-1">
                         <span className="text-[#191A1B] font-medium text-sm md:text-base">
                           {exp.years}{" "}
@@ -195,17 +165,12 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </InfoCard>
 
-              {/* 4. Профессиональные навыки */}
-              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
-                <h3 className="text-lg font-semibold text-[#191A1B] mb-4">
-                  Профессиональные навыки
-                </h3>
+              <InfoCard title="Профессиональные навыки" expandable={false}>
                 <ul className="flex flex-col gap-3">
                   {MOCK_DOCTOR.skills.map((skill, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      {/* Оранжевое тире для списка */}
                       <span className="text-[#F5653E] font-medium text-lg leading-none mt-0.5">
                         —
                       </span>
@@ -215,40 +180,37 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </InfoCard>
 
-              {/* 5. Контакты */}
-              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
-                <h3 className="text-lg font-semibold text-[#191A1B] mb-4">
-                  Контакты
-                </h3>
+              {/* Контакты с иконками */}
+              <InfoCard title="Контакты" expandable={false}>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center size-5 text-[#F5653E]">
-                      🕒
-                    </div>
+                    <span className="text-[#F5653E] flex items-center justify-center">
+                      <HistoryIcon className="size-5" />
+                    </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
                       {MOCK_DOCTOR.contacts.schedule}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center size-5 text-[#F5653E]">
-                      📞
-                    </div>
+                    <span className="text-[#F5653E] flex items-center justify-center">
+                      <PhoneIcon className="size-5" />
+                    </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
                       {MOCK_DOCTOR.contacts.phone}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center size-5 text-[#F5653E]">
-                      ✉️
-                    </div>
+                    <span className="text-[#F5653E] flex items-center justify-center">
+                      <EmailIcon className="size-5" />
+                    </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
                       {MOCK_DOCTOR.contacts.email}
                     </span>
                   </div>
                 </div>
-              </div>
+              </InfoCard>
             </div>
           </div>
         </div>
