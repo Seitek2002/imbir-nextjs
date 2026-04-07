@@ -31,7 +31,7 @@ export const ReviewCard: FC<ReviewProps> = ({
       <div className="p-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* Аватарка */}
-          <div className="size-[42px] rounded-full bg-[#E3E4E5] shrink-0 overflow-hidden relative">
+          <div className="size-10.5 rounded-full bg-[#E3E4E5] shrink-0 overflow-hidden relative">
             {avatarUrl && (
               <Image
                 src={avatarUrl}
