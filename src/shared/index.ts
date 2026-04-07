@@ -9,4 +9,6 @@ export {
   RangeSlider,
   SegmentedControl,
   Textarea,
+  InfoCard,
+  StatsPanel,
 } from "./ui";

@@ -4,129 +4,33 @@ import { FC, useState } from "react";
 
 import Link from "next/link";
 
-import { ReviewCard } from "@/entities";
+import { DoctorCard } from "@/entities";
 import { Footer, Header } from "@/widgets";
 
-import { ChatIcon, HeaderBackIcon, HeartIcon, StarIcon } from "@/shared/assets";
+import { ReviewsSection } from "@/widgets/reviews/ui";
+
+import {
+  EmailIcon,
+  GeoIcon,
+  HeaderBackIcon,
+  HeartIcon,
+  HistoryIcon,
+  PhoneIcon,
+} from "@/shared/assets";
+import {
+  MOCK_CLINIC,
+  MOCK_REVIEWS,
+  MOCK_SERVICES,
+  MOCK_SPECIALISTS,
+} from "@/shared/constants/mocks";
 import { cn } from "@/shared/lib/utils";
 import { Button, IconBtn } from "@/shared/ui";
+import { InfoCard } from "@/shared/ui/info-card/ui";
+import { StatsPanel } from "@/shared/ui/stats-panel/ui";
 
 type Props = {
   id: string;
 };
-
-// --- МОКОВЫЕ ДАННЫЕ ---
-const MOCK_CLINIC = {
-  id: "1",
-  name: "MED Clinic",
-  type: "Многопрофильная клиника",
-  address: "ул. Московская, 189",
-  schedule: "ПН-ПТ • 08:00-17:00",
-  rating: 4.85,
-  experience: 12,
-  reviewsCount: 255,
-  images: [
-    "/placeholder-1.jpg",
-    "/placeholder-2.jpg",
-    "/placeholder-3.jpg",
-    "/placeholder-4.jpg",
-  ],
-  about:
-    "Наша клиника — это современная медицинская помощь, опытные врачи и индивидуальный подход к каждому пациенту. Мы используем проверенные методы и технологии для того, чтобы обеспечить точную диагностику, эффективное лечение и комфорт на каждом этапе.",
-  contacts: {
-    schedule: "ПН-ПТ • 08:00-17:00",
-    address: "ул. Московская, 189",
-    phone: "+996 700 123 456",
-    email: "dr.sadykova@gmail.com",
-  },
-};
-
-const MOCK_SERVICES = [
-  {
-    id: 1,
-    name: "Анализ крови",
-    category: "Медицина • MED Clinic",
-    price: "1700 c",
-    rating: 4.85,
-    reviews: 255,
-  },
-  {
-    id: 2,
-    name: "Аудиометрия",
-    category: "Медицина • MED Clinic",
-    price: "1700 c",
-    rating: 4.85,
-    reviews: 255,
-  },
-  {
-    id: 3,
-    name: "Биопсия",
-    category: "Хирургия • MED Clinic",
-    price: "1700 c",
-    rating: 4.85,
-    reviews: 255,
-  },
-  {
-    id: 4,
-    name: "УЗИ",
-    category: "УЗИ • MED Clinic",
-    price: "1700 c",
-    rating: 4.85,
-    reviews: 255,
-  },
-];
-
-const MOCK_SPECIALISTS = [
-  {
-    id: 1,
-    name: "Айбеков Нурлан",
-    specialty: "Врач-терапевт • MED Clinic",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-  },
-  {
-    id: 2,
-    name: "Садыкова Алина",
-    specialty: "Врач-терапевт • MED Clinic",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-  },
-  {
-    id: 3,
-    name: "Жумабаев Данияр",
-    specialty: "Врач-терапевт • MED Clinic",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-  },
-  {
-    id: 4,
-    name: "Калиева Айгерим",
-    specialty: "Врач-терапевт • MED Clinic",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-  },
-];
-
-const MOCK_REVIEWS = [
-  {
-    id: 1,
-    author: "Нуркыз Сабырбекова",
-    date: "23 Ноября, 2025",
-    text: "Алина Тимуровна замечательный, добрый и очень тщательный врач...",
-    rating: 5,
-  },
-  {
-    id: 2,
-    author: "Данияр Джумашов",
-    date: "23 Ноября, 2025",
-    text: "Алина Тимуровна замечательный, добрый и очень тщательный врач...",
-    rating: 5,
-  },
-];
 
 export const ClinicDetailsPage: FC<Props> = ({ id }) => {
   console.log("Clinic ID:", id);
@@ -240,14 +144,18 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                     {MOCK_CLINIC.type}
                   </p>
 
-                  {/* Адрес и время работы (под заголовком) */}
+                  {/* Адрес и время работы */}
                   <div className="flex flex-col gap-1.5 text-sm text-[#191A1B]">
                     <div className="flex items-center gap-2">
-                      <span className="text-[#F5653E]">📍</span>{" "}
+                      <span className="text-[#F5653E] flex items-center justify-center">
+                        <GeoIcon className="size-4" />
+                      </span>
                       {MOCK_CLINIC.address}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[#F5653E]">🕒</span>{" "}
+                      <span className="text-[#F5653E] flex items-center justify-center">
+                        <HistoryIcon className="size-4" />
+                      </span>
                       {MOCK_CLINIC.schedule}
                     </div>
                   </div>
@@ -258,26 +166,12 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
               </div>
 
               {/* Статистика */}
-              <div className="flex items-center justify-between bg-white border border-[#E3E4E5] rounded-2xl p-4 divide-x divide-[#E3E4E5]">
-                <div className="flex flex-col items-center flex-1">
-                  <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
-                    {MOCK_CLINIC.rating}
-                  </span>
-                  <span className="text-sm text-[#838A8D]">Оценка</span>
-                </div>
-                <div className="flex flex-col items-center flex-1">
-                  <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
-                    {MOCK_CLINIC.experience} лет
-                  </span>
-                  <span className="text-sm text-[#838A8D]">Опыт</span>
-                </div>
-                <div className="flex flex-col items-center flex-1">
-                  <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
-                    {MOCK_CLINIC.reviewsCount}
-                  </span>
-                  <span className="text-sm text-[#838A8D]">Отзывов</span>
-                </div>
-              </div>
+              <StatsPanel
+                rating={MOCK_CLINIC.rating}
+                experience={`${MOCK_CLINIC.experience} лет`}
+                experienceLabel="Опыт"
+                reviews={MOCK_CLINIC.reviewsCount}
+              />
             </div>
 
             {/* Десктопные кнопки */}
@@ -296,52 +190,47 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
             {/* Детали */}
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
               {/* О клинике */}
-              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-[#191A1B]">
-                    О клинике
-                  </h3>
-                  <button className="text-[#F5653E] text-sm hover:underline transition-colors">
-                    Подробнее
-                  </button>
-                </div>
-                <p className="text-[#838A8D] text-sm md:text-base leading-relaxed">
-                  {MOCK_CLINIC.about}
-                </p>
-              </div>
+              <InfoCard title="О клинике" expandable lines={3}>
+                {MOCK_CLINIC.about}
+              </InfoCard>
 
               {/* Контакты */}
-              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
-                <h3 className="text-lg font-semibold text-[#191A1B] mb-4">
-                  Контакты
-                </h3>
+              <InfoCard title="Контакты" expandable={false}>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">🕒</span>
+                    <span className="text-[#F5653E]">
+                      <HistoryIcon className="size-5" />
+                    </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
                       {MOCK_CLINIC.contacts.schedule}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">📍</span>
+                    <span className="text-[#F5653E]">
+                      <GeoIcon className="size-5" />
+                    </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
                       {MOCK_CLINIC.contacts.address}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">📞</span>
+                    <span className="text-[#F5653E]">
+                      <PhoneIcon className="size-5" />
+                    </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
                       {MOCK_CLINIC.contacts.phone}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">✉️</span>
+                    <span className="text-[#F5653E]">
+                      <EmailIcon className="size-5" />
+                    </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
                       {MOCK_CLINIC.contacts.email}
                     </span>
                   </div>
                 </div>
-              </div>
+              </InfoCard>
             </div>
           </div>
         </div>
@@ -407,118 +296,28 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
             </Link>
           </div>
 
+          {/* ИСПОЛЬЗУЕМ КОМПОНЕНТ DOCTOR CARD */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {MOCK_SPECIALISTS.map((doc) => (
-              <div
+              <DoctorCard
                 key={doc.id}
-                className="bg-white border border-[#E3E4E5] rounded-2xl p-4 flex flex-col"
-              >
-                <div className="h-48 bg-[#FFEFE5] rounded-xl mb-4 flex items-center justify-center text-xs text-gray-400">
-                  Фото врача
-                </div>
-                <h4 className="font-semibold text-[#191A1B]">{doc.name}</h4>
-                <p className="text-xs text-[#838A8D] mb-2">{doc.specialty}</p>
-                <span className="text-xs text-[#838A8D] mb-4">
-                  ⭐ {doc.rating} ({doc.reviews}) • {doc.experience} лет стажа
-                </span>
-                <Button
-                  variant="outline"
-                  className="w-full justify-center mt-auto"
-                >
-                  Записаться
-                </Button>
-              </div>
+                name={doc.name}
+                specialty={doc.specialty}
+                clinic="" // Не пишем название клиники, т.к. мы уже в ней
+                rating={doc.rating}
+                reviews={doc.reviews}
+                experience={doc.experience}
+                variant="vertical" // У тебя по умолчанию vertical, но можно указать явно
+              />
             ))}
           </div>
         </div>
 
         {/* --- СЕКЦИЯ: ОТЗЫВЫ --- */}
-        <div className="mt-10 md:mt-20 mb-10 md:mb-20 md:px-0 bg-white rounded-[20px] p-4 mx-2">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <h2 className="text-2xl font-semibold text-[#191A1B]">Отзывы</h2>
-            <Link
-              href="#"
-              className="md:hidden text-[#F5653E] text-sm font-medium hover:underline"
-            >
-              Все
-            </Link>
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-            <div className="w-full md:w-100 shrink-0 flex flex-col gap-5">
-              <div className="flex gap-4">
-                <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-6 flex flex-col items-center md:items-start justify-center">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="bg-[#FFA18D] p-2.5 rounded-xl size-10">
-                      <StarIcon className="size-5 text-white" />
-                    </div>
-                    <span className="text-[24px] font-semibold text-[#191A1B]">
-                      4.85
-                    </span>
-                  </div>
-                  <span className="text-[#838A8D]">Средняя оценка</span>
-                </div>
-                <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-6 flex flex-col items-center md:items-start justify-center">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="bg-[#FFA18D] p-2.5 rounded-xl size-10">
-                      <ChatIcon className="size-5 text-white" />
-                    </div>
-                    <span className="text-[24px] font-semibold text-[#191A1B]">
-                      255
-                    </span>
-                  </div>
-                  <span className="text-[#838A8D]">Всего отзывов</span>
-                </div>
-              </div>
-              {/* Кнопка "Оставить отзыв" для мобилки */}
-              <Button
-                variant="outline"
-                className="md:hidden w-full justify-center bg-white"
-              >
-                Оставить свой отзыв
-              </Button>
-
-              {/* Форма "Оставить отзыв" для ПК */}
-              <div className="hidden md:flex flex-col bg-white border border-[#E3E4E5] rounded-2xl p-4">
-                <h3 className="font-medium text-[20px] text-[#191A1B] mb-6">
-                  Оставьте свой отзыв
-                </h3>
-                <span className="text-base mb-2">Оцените специалиста</span>
-
-                {/* Звездочки */}
-                <div className="flex justify-center gap-5 py-4 mb-6 border border-[#E5E6E8] rounded-xl">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <StarIcon key={star} className="size-10 text-[#E5E6E8]" />
-                  ))}
-                </div>
-
-                <span className="text-base mb-2">
-                  Поделитесь своим мнением о клинике
-                </span>
-                <textarea
-                  className="w-full border border-[#E3E4E5] rounded-xl p-3 text-sm outline-none focus:border-[#F5653E] resize-none h-24 mb-4"
-                  placeholder="Введите текст"
-                />
-
-                <Button size="md" className="w-full justify-center">
-                  Отправить
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex-1 flex flex-col gap-4">
-              {MOCK_REVIEWS.map((review) => (
-                <ReviewCard
-                  key={review.id}
-                  author={review.author}
-                  date={review.date}
-                  text={review.text}
-                  rating={review.rating}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+        <ReviewsSection
+          initialReviews={MOCK_REVIEWS}
+          averageRating={MOCK_CLINIC.rating}
+        />
       </div>
 
       <div className="hidden md:block">

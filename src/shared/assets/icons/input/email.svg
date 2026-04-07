@@ -1,5 +1,5 @@
 <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
         d="M5.0013 6.66667L8.1523 8.76733C9.27197 9.51378 10.7306 9.51378 11.8503 8.76733L15.0013 6.66667M5.0013 17.5H15.0013C16.8423 17.5 18.3346 16.0076 18.3346 14.1667V5.83333C18.3346 3.99238 16.8423 2.5 15.0013 2.5H5.0013C3.16035 2.5 1.66797 3.99238 1.66797 5.83333V14.1667C1.66797 16.0076 3.16035 17.5 5.0013 17.5Z"
-        stroke="#191A1B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
 </svg>

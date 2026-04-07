@@ -47,6 +47,7 @@ export {
   SettingsIcon,
   SearchHistory,
   SearchRemoveHistory,
+  PhoneIcon,
 } from "./icons";
 
 export {

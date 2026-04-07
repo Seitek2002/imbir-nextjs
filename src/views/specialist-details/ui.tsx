@@ -1,14 +1,21 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 
 import Link from "next/link";
 
 import { Footer, Header, VideosSwiper } from "@/widgets";
 
-// Импортируй нужные иконки (сердце, телефон, почта и т.д.)
+import { ReviewsSection } from "@/widgets/reviews/ui";
+
+// Импортируй нужные иконки
 import { DoctorImage1, HeaderBackIcon, HeartIcon } from "@/shared/assets";
+import { cn } from "@/shared/lib/utils";
 import { Button, IconBtn } from "@/shared/ui";
+
+type Props = {
+  id: string;
+};
 
 const MOCK_REVIEWS = [
   {
@@ -33,10 +40,6 @@ const MOCK_REVIEWS = [
     rating: 5,
   },
 ];
-
-type Props = {
-  id: string;
-};
 
 // Временные моковые данные
 const MOCK_DOCTOR = {
@@ -285,7 +288,6 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 </h3>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    {/* ВАЖНО: Замени эти эмодзи/кружочки на свои SVG иконки из @/shared/assets */}
                     <div className="flex items-center justify-center size-5 text-[#F5653E]">
                       🕒
                     </div>
@@ -315,152 +317,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
           </div>
         </div>
 
-        {/* --- СЕКЦИЯ ОТЗЫВОВ --- */}
-        <div className="mt-10 md:mt-20 md:px-0 bg-white rounded-[20px] p-4 mx-2">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <div>
-              <h2 className="text-2xl font-semibold text-[#191A1B]">Отзывы</h2>
-              <p className="hidden md:block text-[#838A8D] text-sm mt-1">
-                Ознакомьтесь с отзывами пациентов о специалисте
-              </p>
-            </div>
-            <Link
-              href="#"
-              className="md:hidden text-[#F5653E] text-sm font-medium hover:underline"
-            >
-              Все
-            </Link>
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-            {/* Левая колонка (ПК) / Верх (Мобилка) - Статистика и Форма */}
-            <div className="w-full md:w-[320px] shrink-0 flex flex-col gap-5 md:gap-6">
-              {/* Плашки со статистикой */}
-              <div className="flex gap-4">
-                <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-4 flex flex-col items-center md:items-start justify-center">
-                  <span className="text-2xl font-bold text-[#191A1B] flex items-center gap-2 mb-1">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="#F5653E"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    4.85
-                  </span>
-                  <span className="text-xs text-[#838A8D]">Сред. оценка</span>
-                </div>
-                <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-4 flex flex-col items-center md:items-start justify-center">
-                  <span className="text-2xl font-bold text-[#191A1B] flex items-center gap-2 mb-1">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="#F5653E"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M21 15A2 2 0 0 1 19 17H7L3 21V5A2 2 0 0 1 5 3H19A2 2 0 0 1 21 5V15Z" />
-                    </svg>
-                    255
-                  </span>
-                  <span className="text-xs text-[#838A8D]">Всего отзывов</span>
-                </div>
-              </div>
-
-              {/* Кнопка "Оставить отзыв" для мобилки */}
-              <Button
-                variant="outline"
-                className="md:hidden w-full justify-center bg-white"
-              >
-                Оставить свой отзыв
-              </Button>
-
-              {/* Форма "Оставить отзыв" для ПК */}
-              <div className="hidden md:flex flex-col bg-white border border-[#E3E4E5] rounded-2xl p-6">
-                <h3 className="font-semibold text-[#191A1B] mb-4">
-                  Оставьте свой отзыв
-                </h3>
-                <span className="text-sm text-[#838A8D] mb-2">
-                  Оцените специалиста
-                </span>
-
-                {/* Звездочки */}
-                <div className="flex gap-2 mb-6">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="#E3E4E5"
-                      className="cursor-pointer hover:fill-[#F5653E] transition-colors"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                  ))}
-                </div>
-
-                <span className="text-sm text-[#838A8D] mb-2">
-                  Поделитесь впечатлениями о клинике
-                </span>
-                <textarea
-                  className="w-full border border-[#E3E4E5] rounded-xl p-3 text-sm outline-none focus:border-[#F5653E] resize-none h-24 mb-4"
-                  placeholder="Напишите текст..."
-                />
-
-                <Button className="w-full justify-center">Отправить</Button>
-              </div>
-            </div>
-
-            {/* Правая колонка (ПК) / Низ (Мобилка) - Список отзывов */}
-            <div className="flex-1 flex flex-col gap-4">
-              {MOCK_REVIEWS.map((review) => (
-                <div
-                  key={review.id}
-                  className="bg-white border border-[#E3E4E5] rounded-2xl p-5 flex flex-col gap-4"
-                >
-                  <p className="text-[#838A8D] text-sm leading-relaxed">
-                    {review.text}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {/* Аватарка (Заглушка) */}
-                      <div className="size-10 rounded-full bg-gray-200 shrink-0 overflow-hidden">
-                        {/* Замени на <Image /> */}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[#191A1B] font-medium text-sm">
-                          {review.author}
-                        </span>
-                        <span className="text-[#838A8D] text-xs mt-0.5">
-                          {review.date}
-                        </span>
-                      </div>
-                    </div>
-                    {/* Звезды отзыва */}
-                    <div className="flex gap-1">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <svg
-                          key={i}
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="#F5653E"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                        </svg>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* --- СЕКЦИЯ: ОТЗЫВЫ --- */}
+        <ReviewsSection
+          initialReviews={MOCK_REVIEWS}
+          averageRating={MOCK_DOCTOR.rating}
+        />
 
         {/* --- СЕКЦИЯ ИНТЕРВЬЮ --- */}
         <div className="mt-10 md:mt-20 mb-10 md:mb-20 px-4 md:px-0">
@@ -474,7 +335,6 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
             </Link>
           </div>
 
-          {/* На десктопе VideosSwiper сам отрендерит заголовок из пропсов */}
           <VideosSwiper
             title="Интервью"
             viewAllHref="/videos"
@@ -485,7 +345,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 title: "Врач онлайн: как это работает за 1 минуту",
                 authorName: MOCK_DOCTOR.name,
                 authorRole: MOCK_DOCTOR.specialty,
-                thumbnail: MOCK_DOCTOR.image.src, // Подставь тут нужную картинку
+                thumbnail: MOCK_DOCTOR.image.src,
                 youtubeUrl: "#",
               },
               {

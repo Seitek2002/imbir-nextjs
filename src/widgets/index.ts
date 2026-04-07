@@ -10,3 +10,4 @@ export { DoctorsMainList } from "./doctors-main-list";
 export { ClinicsMainList } from "./clinics-main-list";
 export { Banners } from "./banners";
 export { Footer } from "./footer";
+export { ReviewsSection } from "./reviews";
