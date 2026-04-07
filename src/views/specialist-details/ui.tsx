@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC } from "react";
 
 import Link from "next/link";
 
@@ -8,9 +8,7 @@ import { Footer, Header, VideosSwiper } from "@/widgets";
 
 import { ReviewsSection } from "@/widgets/reviews/ui";
 
-// Импортируй нужные иконки
 import { DoctorImage1, HeaderBackIcon, HeartIcon } from "@/shared/assets";
-import { cn } from "@/shared/lib/utils";
 import { Button, IconBtn } from "@/shared/ui";
 
 type Props = {
