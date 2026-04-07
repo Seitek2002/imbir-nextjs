@@ -4,6 +4,7 @@ import { FC, useState } from "react";
 
 import Link from "next/link";
 
+import { ReviewCard } from "@/entities";
 import { Footer, Header } from "@/widgets";
 
 import { ChatIcon, HeaderBackIcon, HeartIcon, StarIcon } from "@/shared/assets";
@@ -507,34 +508,13 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
 
             <div className="flex-1 flex flex-col gap-4">
               {MOCK_REVIEWS.map((review) => (
-                <div
+                <ReviewCard
                   key={review.id}
-                  className="bg-white border border-[#E3E4E5] rounded-2xl p-5 flex flex-col gap-4"
-                >
-                  <p className="text-[#838A8D] text-sm leading-relaxed">
-                    {review.text}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="size-10 rounded-full bg-[#E3E4E5]" />
-                      <div className="flex flex-col">
-                        <span className="text-[#191A1B] font-medium text-sm">
-                          {review.author}
-                        </span>
-                        <span className="text-[#838A8D] text-xs">
-                          {review.date}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-white flex bg-[#FFA18D] py-1 px-2 rounded-full">
-                      <StarIcon className="size-4" />
-                      <StarIcon className="size-4" />
-                      <StarIcon className="size-4" />
-                      <StarIcon className="size-4" />
-                      <StarIcon className="size-4" />
-                    </span>
-                  </div>
-                </div>
+                  author={review.author}
+                  date={review.date}
+                  text={review.text}
+                  rating={review.rating}
+                />
               ))}
             </div>
           </div>
