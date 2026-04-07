@@ -8,74 +8,12 @@ import { Footer, Header, VideosSwiper } from "@/widgets";
 
 import { ReviewsSection } from "@/widgets/reviews/ui";
 
-import { DoctorImage1, HeaderBackIcon, HeartIcon } from "@/shared/assets";
+import { HeaderBackIcon, HeartIcon } from "@/shared/assets";
+import { MOCK_DOCTOR, MOCK_REVIEWS } from "@/shared/constants/mocks";
 import { Button, IconBtn } from "@/shared/ui";
 
 type Props = {
   id: string;
-};
-
-const MOCK_REVIEWS = [
-  {
-    id: 1,
-    author: "Нуркыз Сабырбекова",
-    date: "23 Ноября, 2025",
-    text: "Алина Тимуровна замечательный, добрый и очень тщательный врач. Она убедилась, что на все мои вопросы даны ответы, и очень терпеливо объяснила мой диагноз.",
-    rating: 5,
-  },
-  {
-    id: 2,
-    author: "Данияр Джумашов",
-    date: "23 Ноября, 2025",
-    text: "Алина Тимуровна замечательный, добрый и очень тщательный врач. Она убедилась, что на все мои вопросы даны ответы, и очень терпеливо объяснила мой диагноз.",
-    rating: 5,
-  },
-  {
-    id: 3,
-    author: "Бегимай Асанова",
-    date: "23 Ноября, 2025",
-    text: "Алина Тимуровна замечательный, добрый и очень тщательный врач. Она убедилась, что на все мои вопросы даны ответы, и очень терпеливо объяснила мой диагноз.",
-    rating: 5,
-  },
-];
-
-// Временные моковые данные
-const MOCK_DOCTOR = {
-  id: "1",
-  name: "Садыкова Алина Тимуровна",
-  specialty: "Врач-кардиолог",
-  rating: 4.85,
-  experience: 12,
-  reviewsCount: 255,
-  image: DoctorImage1, // или "/assets/doctor-large.png"
-  education:
-    "Кыргызская Государственная Медицинская Академия, факультет лечебного дела (окончила с отличием)",
-  about:
-    "Опытный кардиолог с более чем 12-летней практикой. Специализируется на диагностике и лечении сердечно-сосудистых заболеваний...",
-  workExperience: [
-    {
-      years: "2012-2020",
-      duration: "(8 лет)",
-      place: "Национальный центр кардиологии",
-      role: "Кардиолог",
-    },
-    {
-      years: "2020-2024",
-      duration: "(4 года)",
-      place: "Частная клиника «Медицина»",
-      role: "Ведущий кардиолог",
-    },
-  ],
-  skills: [
-    "Диагностика и лечение заболеваний сердечно-сосудистой системы",
-    "ЭКГ, ЭХО-КГ, нагрузочные тесты",
-    "Составление индивидуальных программ реабилитации",
-  ],
-  contacts: {
-    schedule: "ПН-ПТ • 08:00-17:00",
-    phone: "+996 700 123 456",
-    email: "dr.sadykova@gmail.com",
-  },
 };
 
 export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
