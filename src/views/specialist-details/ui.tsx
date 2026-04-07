@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Footer, Header, VideosSwiper } from "@/widgets";
 
 // Импортируй нужные иконки (сердце, телефон, почта и т.д.)
-import { DoctorImage1 } from "@/shared/assets";
+import { DoctorImage1, HeaderBackIcon, HeartIcon } from "@/shared/assets";
 import { Button, IconBtn } from "@/shared/ui";
 
 const MOCK_REVIEWS = [
@@ -109,23 +109,33 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
           {/* Левая колонка / Мобильный верх: Фото */}
           <div className="relative w-full md:w-100 shrink-0">
             {/* Мобильная шапка поверх фото */}
-            <div className="absolute top-4 left-4 right-4 flex justify-between z-10 md:hidden">
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 md:hidden">
               <IconBtn
                 variant="outline"
                 size="sm"
                 className="bg-white/80 backdrop-blur"
                 onClick={() => window.history.back()}
               >
-                {/* Иконка назад */}
-                <span className="text-xl">←</span>
+                <HeaderBackIcon className="size-4" />
               </IconBtn>
               <IconBtn
                 variant="outline"
                 size="sm"
                 className="bg-white/80 backdrop-blur"
               >
-                {/* Иконка лайка */}
-                <span className="text-xl">♡</span>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M13.7002 3.08203C15.98 3.08203 17.8339 4.9391 17.834 7.24023C17.834 8.17748 17.6844 9.04242 17.4248 9.84473L17.4238 9.84766C16.8013 11.8176 15.5246 13.4089 14.1426 14.5967C12.7583 15.7864 11.2961 16.5471 10.3555 16.8672L10.3506 16.8691C10.2791 16.8944 10.1517 16.915 10 16.915C9.84865 16.915 9.72192 16.8943 9.65039 16.8691L9.64453 16.8672L9.26855 16.7266C8.33979 16.3503 7.06963 15.6377 5.8584 14.5967C4.47629 13.4088 3.19968 11.8177 2.57715 9.84766L2.57617 9.84473L2.48438 9.54102C2.28184 8.82512 2.16699 8.06042 2.16699 7.24023C2.16706 4.9391 4.02097 3.08203 6.30078 3.08203C7.64403 3.08218 8.84796 3.73555 9.59961 4.74023L10 5.27539L10.4004 4.74023C11.1521 3.73547 12.3568 3.08207 13.7002 3.08203Z"
+                    fill="#FFA18D"
+                    stroke="#FFA18D"
+                  />
+                </svg>
               </IconBtn>
             </div>
 
@@ -138,47 +148,48 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
           </div>
 
           {/* Правая колонка / Мобильный низ: Информация */}
-          <div className="flex-1 flex flex-col bg-white rounded-t-3xl md:rounded-none -mt-6 md:mt-0 relative z-10 p-5 md:p-0">
+          <div className="flex-1 flex flex-col rounded-t-3xl md:rounded-none -mt-6 md:mt-0 relative z-10 p-2 md:p-0">
             {/* Имя и специальность */}
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-semibold text-[#191A1B] mb-1">
-                  {MOCK_DOCTOR.name}
-                </h1>
-                <p className="text-[#838A8D] text-base">
-                  {MOCK_DOCTOR.specialty}
-                </p>
+            <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
+              <div className="flex justify-center md:justify-between items-start mb-6">
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-semibold text-[#191A1B] mb-1">
+                    {MOCK_DOCTOR.name}
+                  </h1>
+                  <p className="text-[#838A8D] text-center lg:text-left text-base">
+                    {MOCK_DOCTOR.specialty}
+                  </p>
+                </div>
+                <IconBtn variant="outline" size="md">
+                  <HeartIcon className="size-5" />
+                </IconBtn>
               </div>
-              <button className="hidden md:flex text-[#838A8D] hover:text-[#F5653E] transition-colors p-2">
-                {/* Иконка лайка для ПК */}
-                <span className="text-2xl">♡</span>
-              </button>
-            </div>
 
-            {/* Статистика (Оценка, Стаж, Отзывы) */}
-            <div className="flex items-center justify-between md:justify-start md:gap-12 bg-white md:bg-transparent border md:border-none border-[#E3E4E5] rounded-2xl p-4 md:p-0 mb-8 divide-x md:divide-x-0 divide-[#E3E4E5]">
-              <div className="flex flex-col items-center md:items-start flex-1 md:flex-none">
-                <span className="text-xl font-bold text-[#191A1B]">
-                  {MOCK_DOCTOR.rating}
-                </span>
-                <span className="text-xs text-[#838A8D]">Оценка</span>
-              </div>
-              <div className="flex flex-col items-center md:items-start flex-1 md:flex-none">
-                <span className="text-xl font-bold text-[#191A1B]">
-                  {MOCK_DOCTOR.experience} лет
-                </span>
-                <span className="text-xs text-[#838A8D]">Стаж</span>
-              </div>
-              <div className="flex flex-col items-center md:items-start flex-1 md:flex-none">
-                <span className="text-xl font-bold text-[#191A1B]">
-                  {MOCK_DOCTOR.reviewsCount}
-                </span>
-                <span className="text-xs text-[#838A8D]">Отзывов</span>
+              {/* Статистика (Оценка, Стаж, Отзывы) */}
+              <div className="flex items-center justify-between bg-white border border-[#E3E4E5] rounded-2xl p-4 divide-x divide-[#E3E4E5]">
+                <div className="flex flex-col items-center flex-1">
+                  <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
+                    {MOCK_DOCTOR.rating}
+                  </span>
+                  <span className="text-sm text-[#838A8D]">Оценка</span>
+                </div>
+                <div className="flex flex-col items-center flex-1">
+                  <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
+                    {MOCK_DOCTOR.experience} лет
+                  </span>
+                  <span className="text-sm text-[#838A8D]">Стаж</span>
+                </div>
+                <div className="flex flex-col items-center flex-1">
+                  <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
+                    {MOCK_DOCTOR.reviewsCount}
+                  </span>
+                  <span className="text-sm text-[#838A8D]">Отзывов</span>
+                </div>
               </div>
             </div>
 
             {/* Десктопные кнопки */}
-            <div className="hidden md:flex gap-4 mb-10">
+            <div className="hidden md:flex gap-4 mb-10 mt-4">
               <Button
                 variant="outline"
                 className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-[#F5653E]"
@@ -191,9 +202,9 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
             </div>
 
             {/* ТУТ БУДУТ БЛОКИ ДЕТАЛЕЙ (Образование, Опыт и т.д.) */}
-            <div className="flex flex-col gap-8 md:gap-10 border-t border-[#E3E4E5] md:border-none pt-8 md:pt-0">
+            <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
               {/* 1. Образование */}
-              <div>
+              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
                 <h3 className="text-lg font-semibold text-[#191A1B] mb-3">
                   Образование
                 </h3>
@@ -203,7 +214,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               </div>
 
               {/* 2. О враче */}
-              <div>
+              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg font-semibold text-[#191A1B]">
                     О враче
@@ -218,7 +229,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               </div>
 
               {/* 3. Опыт работы */}
-              <div>
+              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
                 <h3 className="text-lg font-semibold text-[#191A1B] mb-4">
                   Опыт работы
                 </h3>
@@ -248,7 +259,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               </div>
 
               {/* 4. Профессиональные навыки */}
-              <div>
+              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
                 <h3 className="text-lg font-semibold text-[#191A1B] mb-4">
                   Профессиональные навыки
                 </h3>
@@ -268,7 +279,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               </div>
 
               {/* 5. Контакты */}
-              <div>
+              <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
                 <h3 className="text-lg font-semibold text-[#191A1B] mb-4">
                   Контакты
                 </h3>
@@ -305,7 +316,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
         </div>
 
         {/* --- СЕКЦИЯ ОТЗЫВОВ --- */}
-        <div className="mt-10 md:mt-20 px-4 md:px-0">
+        <div className="mt-10 md:mt-20 md:px-0 bg-white rounded-[20px] p-4 mx-2">
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <div>
               <h2 className="text-2xl font-semibold text-[#191A1B]">Отзывы</h2>
