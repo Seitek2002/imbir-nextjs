@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { FC, useMemo, useState } from "react";
 
 import Image, { StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
