@@ -39,6 +39,7 @@ export {
   StarIcon,
   StarBoldIcon,
   StarOutlineIcon,
+  SuccessCheckIcon,
   UserCircleIcon,
   HistoryIcon,
   LogoutIcon,

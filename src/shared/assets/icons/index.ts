@@ -16,6 +16,7 @@ import MedicalServiceIcon from "./common/medical-service.svg";
 import StarBoldIcon from "./common/star-bold.svg";
 import StarOutlineIcon from "./common/star-outline.svg";
 import StarIcon from "./common/star.svg";
+import SuccessCheckIcon from "./common/success-check.svg";
 import UserCircleIcon from "./common/user-circle.svg";
 import PhoneIcon from "./details/phone.svg";
 import DropdownArrowIcon from "./dropdown/arrow.svg";
@@ -92,6 +93,7 @@ export {
   StarIcon,
   StarBoldIcon,
   StarOutlineIcon,
+  SuccessCheckIcon,
   UserCircleIcon,
   HistoryIcon,
   LogoutIcon,
