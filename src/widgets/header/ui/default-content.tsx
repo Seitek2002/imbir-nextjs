@@ -32,7 +32,9 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
         </nav>
 
         <div className="hidden md:flex gap-3">
-          <Button size="xs">Записаться на приём</Button>
+          <Link href="/record">
+            <Button size="xs">Записаться на приём</Button>
+          </Link>
           <Suspense
             fallback={
               <div className="size-10 bg-gray-100 rounded-full animate-pulse" />

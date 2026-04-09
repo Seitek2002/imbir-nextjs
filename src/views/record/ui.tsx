@@ -29,6 +29,7 @@ import {
   ServiceDentistry,
   ServiceNevrology,
   StarIcon,
+  SuccessCheckIcon,
 } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
 
@@ -197,52 +198,18 @@ const formatDateLabel = (date: Date) =>
 
 const formatPrice = (price: number) => `${price} c`;
 
-const formatPhoneNumberTail = (digits: string) =>
-  digits.replace(/(\d{3})(?=\d)/g, "$1 ").trim();
-
-const normalizePhoneInput = (value: string) => {
-  const cleanValue = value.replace(/[^\d+\s]/g, "");
-  if (!cleanValue.trim()) return "";
-
-  const withPlus = cleanValue.startsWith("+")
-    ? cleanValue
-    : `+${cleanValue.replace(/\+/g, "")}`;
-
-  const raw = withPlus.slice(1);
-  const firstSpaceIndex = raw.indexOf(" ");
-
-  let countryCode = "";
-  let localPhone = "";
-
-  if (firstSpaceIndex >= 0) {
-    countryCode = raw.slice(0, firstSpaceIndex).replace(/\D/g, "").slice(0, 4);
-    localPhone = raw
-      .slice(firstSpaceIndex + 1)
-      .replace(/\D/g, "")
-      .slice(0, 12);
-  } else {
-    const digitsOnly = raw.replace(/\D/g, "").slice(0, 16);
-
-    if (digitsOnly.length <= 3) {
-      countryCode = digitsOnly;
-    } else {
-      countryCode = digitsOnly.slice(0, 3);
-      localPhone = digitsOnly.slice(3);
-    }
-  }
-
-  if (!countryCode) return "+";
-
-  const formattedTail = formatPhoneNumberTail(localPhone);
-  return `+${countryCode}${formattedTail ? ` ${formattedTail}` : ""}`;
+const normalizeLocalPhone = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 9);
+  return digits.replace(/(\d{3})(\d{3})?(\d{3})?/, (_, a, b, c) =>
+    [a, b, c].filter(Boolean).join(" "),
+  );
 };
 
-const isPhoneValid = (value: string) => {
-  const match = value.match(/^\+(\d{1,4})\s([\d ]+)$/);
-  if (!match) return false;
+const isPhoneLocalValid = (local: string) =>
+  local.replace(/\s/g, "").length === 9;
 
-  const digitsCount = `${match[1]}${match[2].replace(/\s/g, "")}`.length;
-  return digitsCount >= 7 && digitsCount <= 15;
+const isPhoneValid = (value: string) => {
+  return isPhoneLocalValid(value);
 };
 
 const isEmailValid = (value: string) =>
@@ -260,7 +227,7 @@ const StepTitle = ({ number, title }: { number: number; title: string }) => (
     <span className="size-7 rounded-full border border-[#F5653E] text-[#F5653E] text-sm flex items-center justify-center">
       {number}
     </span>
-    <h2 className="text-[32px] lg:text-[36px] text-[#191A1B] leading-none font-semibold">
+    <h2 className="text-[28px] text-[#191A1B] leading-[130%] font-semibold">
       {title}
     </h2>
   </div>
@@ -470,77 +437,107 @@ const SelectionListItem = ({
   );
 };
 
-const SummaryCard = ({
-  doctor,
-  service,
-  mode,
-  selectedDate,
-  selectedTime,
-}: {
+const SummaryCard: FC<{
   doctor: Doctor;
   service: Service;
   mode: ConsultationMode;
   selectedDate: Date | null;
   selectedTime: string | null;
-}) => (
-  <aside className="border border-[#E3E4E5] rounded-3xl bg-white p-2 lg:sticky lg:top-6 flex flex-col lg:w-100 lg:h-128.75">
-    <div className="relative h-56 rounded-2xl overflow-hidden bg-[#FFF8F5]">
-      <Image
-        src={doctor.image}
-        alt={doctor.name}
-        fill
-        className="object-cover object-top"
-        sizes="(max-width: 768px) 100vw, 340px"
-      />
-    </div>
+}> = ({ doctor, service, mode, selectedDate, selectedTime }) => {
+  const [isChecking, setIsChecking] = useState(false);
 
-    <div className="p-2">
-      <p className="text-base font-semibold text-[#191A1B] text-center leading-snug mt-2">
-        {doctor.name}
-      </p>
-      <p className="text-sm text-[#686F72] text-center mt-0.5">
-        {doctor.specialty}
-      </p>
+  const handleCheckStatus = () => {
+    setIsChecking(true);
+    setTimeout(() => setIsChecking(false), 3000);
+  };
 
-      <div className="mt-3 border border-[#E3E4E5] rounded-2xl p-3">
-        <p className="text-sm font-medium text-[#191A1B]">{service.title}</p>
-        <p className="text-sm text-[#686F72] mt-0.5">
-          {mode === "online" ? "Онлайн-консультация" : "Оффлайн-консультация"}
+  return (
+    <aside className="relative border border-[#E3E4E5] rounded-3xl bg-white overflow-hidden lg:sticky lg:top-6 flex flex-col lg:w-100 lg:h-128.75">
+      {/* Loading overlay */}
+      {isChecking && (
+        <div className="absolute inset-0 z-10 bg-white/70 rounded-3xl flex items-center justify-center">
+          <svg
+            className="animate-spin size-10 text-[#F5653E]"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            />
+          </svg>
+        </div>
+      )}
+
+      <div className="relative h-64 lg:flex-1 bg-[#FFF8F5]">
+        <Image
+          src={doctor.image}
+          alt={doctor.name}
+          fill
+          className="object-cover object-[center_20%]"
+          sizes="(max-width: 768px) 100vw, 400px"
+        />
+      </div>
+
+      <div className="p-3 shrink-0">
+        <p className="text-base font-semibold text-[#191A1B] text-center leading-snug mt-2">
+          {doctor.name}
         </p>
-        <div className="flex items-center gap-1.5 text-sm text-[#686F72] mt-1">
-          <CalendarIcon className="size-4 shrink-0" />
-          <span>
-            {selectedDate && selectedTime
-              ? `${formatDateLabel(selectedDate)} • ${selectedTime}`
-              : "Дата и время не выбраны"}
-          </span>
-        </div>
-      </div>
+        <p className="text-sm text-[#686F72] text-center mt-0.5">
+          {doctor.specialty}
+        </p>
 
-      <div className="mt-3 space-y-2">
-        <div className="flex items-center justify-between text-sm text-[#686F72]">
-          <span>К оплате</span>
-          <span className="text-[#191A1B] font-semibold">
-            {formatPrice(service.price)}
-          </span>
+        <div className="mt-3 border border-[#E3E4E5] rounded-2xl p-3">
+          <p className="text-sm font-medium text-[#191A1B]">{service.title}</p>
+          <p className="text-sm text-[#686F72] mt-0.5">
+            {mode === "online" ? "Онлайн-консультация" : "Оффлайн-консультация"}
+          </p>
+          <div className="flex items-center gap-1.5 text-sm text-[#686F72] mt-1">
+            <CalendarIcon className="size-4 shrink-0" />
+            <span>
+              {selectedDate && selectedTime
+                ? `${formatDateLabel(selectedDate)} • ${selectedTime}`
+                : "Дата и время не выбраны"}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center justify-between text-sm text-[#686F72]">
-          <span>Статус</span>
-          <span className="px-2.5 py-1 rounded-full bg-[#FFF3EE] text-[#F5653E] text-xs font-medium">
-            Ожидает оплаты
-          </span>
-        </div>
-      </div>
 
-      <Button
-        variant="outline"
-        className="w-full justify-center mt-3 text-[#191A1B] py-[13.5px]"
-      >
-        Проверить статус
-      </Button>
-    </div>
-  </aside>
-);
+        <div className="mt-3 space-y-2">
+          <div className="flex items-center justify-between text-sm text-[#686F72]">
+            <span>К оплате</span>
+            <span className="text-[#191A1B] font-semibold">
+              {formatPrice(service.price)}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-sm text-[#686F72]">
+            <span>Статус</span>
+            <span className="px-2.5 py-1 rounded-full bg-[#FFF3EE] text-[#F5653E] text-xs font-medium">
+              Ожидает оплаты
+            </span>
+          </div>
+        </div>
+
+        <Button
+          variant="outline"
+          className="w-full justify-center mt-3 text-[#191A1B]"
+          disabled={isChecking}
+          onClick={handleCheckStatus}
+        >
+          Проверить статус
+        </Button>
+      </div>
+    </aside>
+  );
+};
 
 export const RecordPage = () => {
   const router = useRouter();
@@ -571,6 +568,8 @@ export const RecordPage = () => {
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
   const [errors, setErrors] = useState<OptionalFormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const canUseOnline = useMemo(() => {
     if (typeof window === "undefined") return false;
@@ -936,13 +935,18 @@ export const RecordPage = () => {
       patient: {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        phone: phone.trim(),
+        phone: `+996 ${phone.trim()}`,
         email: email.trim() || null,
         comment: comment.trim() || null,
       },
     };
 
     console.log("Record payload:", payload);
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setShowSuccess(true);
+    }, 3000);
   };
 
   return (
@@ -956,7 +960,7 @@ export const RecordPage = () => {
           <IconBtn variant="outline" size="sm" onClick={() => router.back()}>
             <HeaderBackIcon className="size-4" />
           </IconBtn>
-          <h1 className="text-[52px] font-semibold text-[#191A1B] leading-none">
+          <h1 className="text-[28px] font-semibold text-[#191A1B] leading-[130%]">
             Оформление записи
           </h1>
         </div>
@@ -1076,8 +1080,10 @@ export const RecordPage = () => {
                 <Button
                   className="w-full justify-center"
                   size="lg"
-                  disabled={!isStep2Complete}
-                  onClick={() => setMobileStep(3)}
+                  onClick={() => {
+                    if (!isStep2Complete) return;
+                    setMobileStep(3);
+                  }}
                 >
                   Продолжить
                 </Button>
@@ -1116,25 +1122,45 @@ export const RecordPage = () => {
                   error={errors.lastName}
                 />
 
-                <Input
-                  label="Номер телефона"
-                  placeholder="+996 000 000 000"
-                  value={phone}
-                  onChange={(event) => {
-                    setPhone(normalizePhoneInput(event.target.value));
-                    setErrors((prev) => ({ ...prev, phone: undefined }));
-                  }}
-                  onBlur={() => {
-                    if (!phone) return;
-                    setErrors((prev) => ({
-                      ...prev,
-                      phone: isPhoneValid(phone)
-                        ? undefined
-                        : "Проверьте формат телефона",
-                    }));
-                  }}
-                  error={errors.phone}
-                />
+                <div className="space-y-1.5">
+                  <span className="text-sm font-medium text-[#0D0D12]">
+                    Номер телефона
+                  </span>
+                  <div
+                    className={cn(
+                      "flex items-center h-11 rounded-lg border transition-all overflow-hidden",
+                      errors.phone
+                        ? "border-red-400"
+                        : "border-[#E3E4E5] focus-within:border-[#F5653E]/60",
+                    )}
+                  >
+                    <span className="px-3 h-full flex items-center bg-[#F7F8F9] border-r border-[#E3E4E5] text-sm text-[#191A1B] select-none shrink-0">
+                      +996
+                    </span>
+                    <input
+                      type="tel"
+                      placeholder="000 000 000"
+                      value={phone}
+                      onChange={(event) => {
+                        setPhone(normalizeLocalPhone(event.target.value));
+                        setErrors((prev) => ({ ...prev, phone: undefined }));
+                      }}
+                      onBlur={() => {
+                        if (!phone) return;
+                        setErrors((prev) => ({
+                          ...prev,
+                          phone: isPhoneValid(phone)
+                            ? undefined
+                            : "Проверьте формат номера",
+                        }));
+                      }}
+                      className="flex-1 h-full px-3 text-sm text-[#191A1B] outline-none bg-transparent placeholder:text-[#838A8D]"
+                    />
+                  </div>
+                  {errors.phone && (
+                    <p className="text-xs text-red-500">{errors.phone}</p>
+                  )}
+                </div>
 
                 <div>
                   <FieldLabel
@@ -1167,12 +1193,35 @@ export const RecordPage = () => {
                 <Button
                   className="w-full lg:w-auto lg:min-w-50 justify-center"
                   size="lg"
-                  disabled={
-                    !isStep1Complete || !isStep2Complete || !isStep3Complete
-                  }
+                  disabled={isSubmitting}
                   onClick={validateAndSubmit}
                 >
-                  Продолжить
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <svg
+                        className="animate-spin size-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                      </svg>
+                      Отправка...
+                    </span>
+                  ) : (
+                    "Продолжить"
+                  )}
                 </Button>
               </div>
             </section>
@@ -1196,7 +1245,7 @@ export const RecordPage = () => {
         <div className="fixed inset-0 z-50 bg-[#0D0D12]/40 backdrop-blur-[2px] flex items-center justify-center p-3">
           <div className="w-full max-w-138 rounded-3xl border border-[#E3E4E5] bg-white p-4 lg:p-5">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="text-[36px] text-[#191A1B] leading-none font-semibold">
+              <h3 className="text-[28px] text-[#191A1B] leading-[130%] font-semibold">
                 {modalConfig.title}
               </h3>
 
@@ -1246,6 +1295,31 @@ export const RecordPage = () => {
                 Выбрать
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success modal */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 bg-[#0D0D12]/40 backdrop-blur-[2px] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-[#E3E4E5] p-8 max-w-sm w-full flex flex-col items-center text-center gap-5">
+            <SuccessCheckIcon className="size-50" />
+            <div>
+              <p className="text-[20px] font-semibold text-[#191A1B] leading-[130%]">
+                Ваша запись
+                <br />
+                успешно забронирована!
+              </p>
+              <p className="text-sm text-[#686F72] mt-2">
+                Ожидайте сообщение от вашего специалиста
+              </p>
+            </div>
+            <Button
+              className="w-full justify-center"
+              onClick={() => setShowSuccess(false)}
+            >
+              Спасибо
+            </Button>
           </div>
         </div>
       )}
