@@ -11,6 +11,7 @@ import { StarIcon } from "@/shared/assets";
 
 type Props = {
   isOpen: boolean;
+  prefix: string;
   fields?: {
     specialty?: boolean;
     experience?: boolean;
@@ -20,73 +21,85 @@ type Props = {
 };
 
 const SPECIALTY_OPTIONS = [
-  { value: "cardiologist", label: "Кардиолог" },
-  { value: "therapist", label: "Терапевт" },
-  { value: "surgeon", label: "Хирург" },
-  { value: "dentist", label: "Стоматолог" },
+  { value: "Кардиолог", label: "Кардиолог" },
+  { value: "Врач-терапевт", label: "Терапевт" },
+  { value: "Хирург", label: "Хирург" },
+  { value: "Педиатр", label: "Педиатр" },
 ];
 const RATINGS = ["5.0", "4.0", "3.0", "2.0", "1.0"];
 const MAX_PRICE = 5000;
 const MAX_EXP = 50;
 
-export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
+export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Стаж
-  const initialExp = searchParams.get("exp")?.split("-").map(Number);
+  // Читаем из URL с учетом префикса
+  const initialExp = searchParams.get(`${prefix}_exp`)?.split("-").map(Number);
   const [experience, setExperience] = useState<[number, number]>([
     initialExp?.[0] ?? 0,
-    initialExp?.[1] ?? 10,
+    initialExp?.[1] ?? MAX_EXP,
   ]);
 
-  // Стоимость
-  const initialPrice = searchParams.get("price")?.split("-").map(Number);
+  const initialPrice = searchParams
+    .get(`${prefix}_price`)
+    ?.split("-")
+    .map(Number);
   const [price, setPrice] = useState<[number, number]>([
     initialPrice?.[0] ?? 0,
-    initialPrice?.[1] ?? 1000,
+    initialPrice?.[1] ?? MAX_PRICE,
   ]);
 
-  // Оценка
   const [rating, setRating] = useState<string | null>(
-    searchParams.get("rating"),
+    searchParams.get(`${prefix}_rating`),
   );
 
-  // Специализация (ИСПРАВЛЕНО НА МАССИВ)
-  const initialSpec = searchParams.get("spec");
+  const initialSpec = searchParams.get(`${prefix}_spec`);
   const [specialty, setSpecialty] = useState<string[]>(
     initialSpec ? initialSpec.split(",") : [],
   );
 
-  // ЛОГИКА ПРИМЕНЕНИЯ И СБРОСА ---
+  // ПРИМЕНИТЬ ФИЛЬТРЫ
   const handleApply = () => {
     const params = new URLSearchParams(searchParams.toString());
 
+    // Закрываем модалку (убираем параметр modal из URL)
     params.delete("modal");
 
     if (fields?.experience)
-      params.set("exp", `${experience[0]}-${experience[1]}`);
+      params.set(`${prefix}_exp`, `${experience[0]}-${experience[1]}`);
+    if (fields?.price) params.set(`${prefix}_price`, `${price[0]}-${price[1]}`);
 
-    if (fields?.price) params.set("price", `${price[0]}-${price[1]}`);
-
-    if (fields?.rating && rating) params.set("rating", rating);
-    else params.delete("rating");
-
-    // ИСПРАВЛЕНО: Сохраняем массив как строку через запятую
-    if (fields?.specialty && specialty.length > 0) {
-      params.set("spec", specialty.join(","));
+    if (fields?.rating && rating && rating !== "all") {
+      params.set(`${prefix}_rating`, rating);
     } else {
-      params.delete("spec");
+      params.delete(`${prefix}_rating`);
     }
 
-    router.replace(`?${params.toString()}`);
+    if (fields?.specialty && specialty.length > 0) {
+      params.set(`${prefix}_spec`, specialty.join(","));
+    } else {
+      params.delete(`${prefix}_spec`);
+    }
+
+    router.replace(`?${params.toString()}`, { scroll: false });
   };
 
+  // СБРОСИТЬ ФИЛЬТРЫ
   const handleReset = () => {
-    setExperience([0, 10]);
+    setExperience([0, MAX_EXP]);
     setPrice([0, MAX_PRICE]);
     setRating(null);
-    setSpecialty([]); // ИСПРАВЛЕНО: Сбрасываем в пустой массив
+    setSpecialty([]);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("modal");
+    params.delete(`${prefix}_exp`);
+    params.delete(`${prefix}_price`);
+    params.delete(`${prefix}_rating`);
+    params.delete(`${prefix}_spec`);
+
+    router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   if (!isOpen) return null;
@@ -119,7 +132,7 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
           <div className="bg-white p-4 rounded-2xl">
             <RangeSlider
               label="Стаж, лет"
-              id="exp"
+              id={`exp-mobile-${prefix}`}
               min={0}
               max={MAX_EXP}
               step={1}
@@ -129,7 +142,7 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
           </div>
         )}
 
-        {/* БЛОК 3: ОЦЕНКА (РАДИО) */}
+        {/* БЛОК 3: ОЦЕНКА */}
         {fields?.rating && (
           <div className="bg-white p-4 rounded-2xl">
             <span className="block text-sm font-medium text-[#191A1B] mb-3">
@@ -146,7 +159,7 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
                     <span className="text-base text-[#191A1B]">{rate}</span>
                   </div>
                   <Radio
-                    name="rating"
+                    name={`rating-mobile-${prefix}`}
                     value={rate}
                     checked={rating === rate}
                     onChange={(e) => setRating(e.target.value)}
@@ -163,7 +176,7 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, fields }) => {
           <div className="bg-white p-4 rounded-2xl">
             <RangeSlider
               label="Стоимость, с"
-              id="price"
+              id={`price-mobile-${prefix}`}
               min={0}
               max={MAX_PRICE}
               step={50}

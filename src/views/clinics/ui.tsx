@@ -1,8 +1,9 @@
+"use client";
+
 import { FC } from "react";
 
 import Link from "next/link";
 
-// ИМПОРТИРУЕМ ФИЧИ И ВИДЖЕТЫ
 import {
   ActiveFiltersChips,
   FiltersTrigger,
@@ -15,92 +16,9 @@ import { UrlSearchInput } from "@/features/search-by-query/ui";
 
 import { ClinicCard } from "@/entities/clinic";
 
-// Импортируем карточку клиники
-
-import {
-  ClinicImage1,
-  ClinicImage2,
-  ClinicImage3,
-  ClinicImage4,
-} from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
+import { MOCK_CLINICS } from "@/shared/constants/mocks";
 import { Button } from "@/shared/ui";
-
-// Моковые данные (продублировал, чтобы была полноценная сетка из 8 элементов)
-const MOCK_CLINICS = [
-  {
-    id: "1",
-    name: "Nova Clinic",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage1.src,
-  },
-  {
-    id: "2",
-    name: "K-MED",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage2.src,
-  },
-  {
-    id: "3",
-    name: "Med Center",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage3.src,
-  },
-  {
-    id: "4",
-    name: "Nova Clinic",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage4.src,
-  },
-  {
-    id: "5",
-    name: "Nova Clinic",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage1.src,
-  },
-  {
-    id: "6",
-    name: "K-MED",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage2.src,
-  },
-  {
-    id: "7",
-    name: "Med Center",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage3.src,
-  },
-  {
-    id: "8",
-    name: "Nova Clinic",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage4.src,
-  },
-];
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -110,17 +28,51 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
   const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
   const isFiltersModalOpen = searchParams?.modal === "filters";
 
-  // Конфигурация доступных фильтров для этой страницы
+  // 1. Читаем параметры фильтров клиник из URL
+  const currentSpec =
+    typeof searchParams?.clinic_spec === "string"
+      ? searchParams.clinic_spec
+      : null;
+  const currentRating =
+    typeof searchParams?.clinic_rating === "string"
+      ? searchParams.clinic_rating
+      : null;
+
+  // 2. Фильтруем массив клиник
+  const filteredClinics = MOCK_CLINICS.filter((clinic) => {
+    // Поиск по названию клиники
+    if (activeQuery) {
+      const q = activeQuery.toLowerCase();
+      if (!clinic.name.toLowerCase().includes(q)) return false;
+    }
+
+    // Фильтр по специальности (проверяем массив специальностей клиники)
+    if (currentSpec) {
+      const selectedSpecs = currentSpec.split(",");
+      const hasMatch = clinic.specialties?.some((spec) =>
+        selectedSpecs.includes(spec),
+      );
+      if (!hasMatch) return false;
+    }
+
+    // Фильтр по рейтингу
+    if (currentRating && currentRating !== "all") {
+      const minRating = parseFloat(currentRating);
+      if (clinic.rating < minRating) return false;
+    }
+
+    return true;
+  });
+
   const clinicFilters = {
     specialty: true,
-    experience: false, // Отключаем стаж
+    experience: false,
     rating: true,
-    price: false, // Отключаем стоимость
+    price: false,
   };
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
-      {/* HEADER */}
       <Header title="Клиники" backTo={ROUTES.HOME}>
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
@@ -130,14 +82,17 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
             <FiltersTrigger />
           </div>
         </div>
-        <ActiveFiltersChips />
+        <ActiveFiltersChips prefix="clinic" />
       </Header>
 
-      {/* МОДАЛКА ФИЛЬТРОВ (только специализация и рейтинг) */}
-      <MobileFiltersModal isOpen={isFiltersModalOpen} fields={clinicFilters} />
+      <MobileFiltersModal
+        isOpen={isFiltersModalOpen}
+        prefix="clinic"
+        fields={clinicFilters}
+      />
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
-        {/* --- МОБИЛЬНАЯ ВЕРСИЯ КАТАЛОГА --- */}
+        {/* --- МОБИЛЬНАЯ ВЕРСИЯ --- */}
         <div className="md:hidden p-4">
           {activeQuery && (
             <h2 className="text-[#191A1B] text-lg font-medium mb-4">
@@ -146,29 +101,28 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
           )}
 
           <div className="flex flex-col gap-2">
-            {MOCK_CLINICS.map((clinic) => (
-              <ClinicCard
-                key={`mob-${clinic.id}`}
-                name={clinic.name}
-                rating={clinic.rating}
-                reviews={clinic.reviews}
-                experience={clinic.experience}
-                address={clinic.address}
-                image={clinic.image}
-              />
+            {filteredClinics.length === 0 && (
+              <p className="text-center text-[#838A8D] py-10">
+                По вашим параметрам клиники не найдены
+              </p>
+            )}
+            {filteredClinics.map((clinic) => (
+              <ClinicCard key={`mob-${clinic.id}`} {...clinic} />
             ))}
           </div>
-          <Button
-            variant="outline"
-            className="w-full mt-6 bg-white justify-center"
-          >
-            Показать еще
-          </Button>
+
+          {filteredClinics.length > 0 && (
+            <Button
+              variant="outline"
+              className="w-full mt-6 bg-white justify-center"
+            >
+              Показать еще
+            </Button>
+          )}
         </div>
 
-        {/* --- ДЕСКТОПНАЯ ВЕРСИЯ КАТАЛОГА --- */}
+        {/* --- ДЕСКТОПНАЯ ВЕРСИЯ --- */}
         <div className="hidden md:block px-10 py-6">
-          {/* Хлебные крошки */}
           <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
             <Link
               href={ROUTES.HOME}
@@ -199,30 +153,27 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
             )}
           </div>
 
-          {/* FILTER BAR (только специализация и рейтинг) */}
-          <FilterBar title="Клиники" fields={clinicFilters} />
+          {/* ДОБАВИЛИ ПРЕФИКС! */}
+          <FilterBar title="Клиники" prefix="clinic" fields={clinicFilters} />
 
-          {/* Сетка результатов */}
           <div className="grid grid-cols-4 gap-5 mt-2">
-            {MOCK_CLINICS.map((clinic) => (
-              <ClinicCard
-                key={`desk-${clinic.id}`}
-                name={clinic.name}
-                rating={clinic.rating}
-                reviews={clinic.reviews}
-                experience={clinic.experience}
-                address={clinic.address}
-                image={clinic.image}
-              />
+            {filteredClinics.length === 0 && (
+              <p className="col-span-4 text-center text-[#838A8D] py-20 text-lg">
+                По вашим параметрам клиники не найдены
+              </p>
+            )}
+            {filteredClinics.map((clinic) => (
+              <ClinicCard key={`desk-${clinic.id}`} {...clinic} />
             ))}
           </div>
 
-          {/* Кнопка Показать еще */}
-          <div className="flex justify-center mt-10">
-            <Button variant="outline" className="bg-white">
-              Показать еще
-            </Button>
-          </div>
+          {filteredClinics.length > 0 && (
+            <div className="flex justify-center mt-10">
+              <Button variant="outline" className="bg-white">
+                Показать еще
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
