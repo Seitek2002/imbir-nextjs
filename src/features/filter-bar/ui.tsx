@@ -6,7 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button, Dropdown, IconBtn, RangeSlider } from "@/shared";
 
+import { CitySelectorModal } from "@/features/city-selector/ui";
+
 import { GeoIcon, RemoveIcon } from "@/shared/assets";
+import { useCityStore } from "@/shared/store/cityStore";
 
 type Props = {
   title?: string;
@@ -46,7 +49,10 @@ export const FilterBar: FC<Props> = ({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Читаем из URL с учетом префикса
+  // Достаем город из стора и локальный стейт для модалки
+  const city = useCityStore((state) => state.city);
+  const [isCityModalOpen, setIsCityModalOpen] = useState(false);
+
   const initialSpec = searchParams.get(`${prefix}_spec`);
   const [specialty, setSpecialty] = useState<string[]>(
     initialSpec ? initialSpec.split(",") : [],
@@ -71,7 +77,6 @@ export const FilterBar: FC<Props> = ({
     initialPrice?.[1] ?? MAX_PRICE,
   ]);
 
-  // Функция для обновления URL без перезагрузки страницы
   const updateURL = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
     if (value) {
@@ -82,7 +87,6 @@ export const FilterBar: FC<Props> = ({
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  // Обработчики изменений
   const handleSpecialtyChange = (val: string[]) => {
     setSpecialty(val);
     updateURL("spec", val.length > 0 ? val.join(",") : null);
@@ -93,8 +97,6 @@ export const FilterBar: FC<Props> = ({
     updateURL("rating", val === "all" ? null : val);
   };
 
-  // Для ползунков лучше использовать onChangeEnd (если он есть в твоем UI-ките)
-  // Но пока сделаем просто onChange.
   const handleExpChange = (val: [number, number]) => {
     setExperience(val);
     updateURL("exp", `${val[0]}-${val[1]}`);
@@ -120,91 +122,101 @@ export const FilterBar: FC<Props> = ({
   };
 
   return (
-    <div className="w-full">
-      {children ? (
-        children
-      ) : (
-        <>
-          <div className="max-w-200 flex items-center">
-            <h2 className="border-r border-r-[#E5E6E8] text-[40px] font-semibold pr-6">
-              {title}
-            </h2>
-            <div className="flex items-center gap-2 ml-4">
-              <IconBtn size="md">
-                <GeoIcon className="size-5 [&_path]:stroke-white" />
-              </IconBtn>
-              <div>
-                <div className="text-[#191A1B] font-medium">г. Бишкек</div>
-                <div className="text-[#838A8D] text-sm">Ленинский район</div>
+    <>
+      <div className="w-full">
+        {children ? (
+          children
+        ) : (
+          <>
+            <div className="max-w-200 flex items-center">
+              <h2 className="border-r border-r-[#E5E6E8] text-[40px] font-semibold pr-6">
+                {title}
+              </h2>
+              <div className="flex items-center gap-2 ml-4">
+                {/* ВЕШАЕМ ОТКРЫТИЕ МОДАЛКИ НА КНОПКУ */}
+                <IconBtn size="md" onClick={() => setIsCityModalOpen(true)}>
+                  <GeoIcon className="size-5 [&_path]:stroke-white" />
+                </IconBtn>
+                <div>
+                  {/* ВЫВОДИМ ДИНАМИЧЕСКИЙ ГОРОД */}
+                  <div className="text-[#191A1B] font-medium">г. {city}</div>
+                  {/* Район пока оставляем хардкодом или можно убрать, если он не планируется в БД */}
+                  <div className="text-[#838A8D] text-sm">Ленинский район</div>
+                </div>
               </div>
             </div>
-          </div>
-          <p className="text-[#686F72] text-lg mt-4 mb-10">
-            Выберите интересующие вас параметры, чтобы ознакомиться с
-            подходящими вариантами
-          </p>
-        </>
-      )}
+            <p className="text-[#686F72] text-lg mt-4 mb-10">
+              Выберите интересующие вас параметры, чтобы ознакомиться с
+              подходящими вариантами
+            </p>
+          </>
+        )}
 
-      {/* Фильтры */}
-      <div className="grid grid-cols-4 gap-5 items-start">
-        {fields.specialty && (
-          <Dropdown
-            label="Специализация"
-            placeholder="Все"
-            options={SPECIALTY_OPTIONS}
-            value={specialty}
-            onChange={(val) => handleSpecialtyChange(val as string[])}
-            isMulti={true}
-            type="checkbox"
-          />
-        )}
-        {fields.experience && (
-          <RangeSlider
-            id={`exp-desktop-${prefix}`}
-            label="Стаж, лет"
-            min={0}
-            max={MAX_EXP}
-            step={1}
-            value={experience}
-            onChange={handleExpChange}
-            className="bg-white"
-          />
-        )}
-        {fields.rating && (
-          <Dropdown
-            label="Оценка"
-            placeholder="Все"
-            type="radio"
-            options={RATING_OPTIONS}
-            value={rating || "all"}
-            onChange={(val) => handleRatingChange(val as string)}
-          />
-        )}
-        {fields.price && (
-          <RangeSlider
-            id={`price-desktop-${prefix}`}
-            label="Стоимость, с"
-            min={0}
-            max={MAX_PRICE}
-            step={50}
-            value={price}
-            onChange={handlePriceChange}
-            className="bg-white"
-          />
-        )}
+        <div className="grid grid-cols-4 gap-5 items-start">
+          {fields.specialty && (
+            <Dropdown
+              label="Специализация"
+              placeholder="Все"
+              options={SPECIALTY_OPTIONS}
+              value={specialty}
+              onChange={(val) => handleSpecialtyChange(val as string[])}
+              isMulti={true}
+              type="checkbox"
+            />
+          )}
+          {fields.experience && (
+            <RangeSlider
+              id={`exp-desktop-${prefix}`}
+              label="Стаж, лет"
+              min={0}
+              max={MAX_EXP}
+              step={1}
+              value={experience}
+              onChange={handleExpChange}
+              className="bg-white"
+            />
+          )}
+          {fields.rating && (
+            <Dropdown
+              label="Оценка"
+              placeholder="Все"
+              type="radio"
+              options={RATING_OPTIONS}
+              value={rating || "all"}
+              onChange={(val) => handleRatingChange(val as string)}
+            />
+          )}
+          {fields.price && (
+            <RangeSlider
+              id={`price-desktop-${prefix}`}
+              label="Стоимость, с"
+              min={0}
+              max={MAX_PRICE}
+              step={50}
+              value={price}
+              onChange={handlePriceChange}
+              className="bg-white"
+            />
+          )}
+        </div>
+
+        <div className="flex justify-end mt-6">
+          <Button
+            IconLeft={RemoveIcon}
+            variant="text"
+            size="sm"
+            onClick={handleReset}
+          >
+            Сбросить фильтры
+          </Button>
+        </div>
       </div>
 
-      <div className="flex justify-end mt-6">
-        <Button
-          IconLeft={RemoveIcon}
-          variant="text"
-          size="sm"
-          onClick={handleReset}
-        >
-          Сбросить фильтры
-        </Button>
-      </div>
-    </div>
+      {/* РЕНДЕРИМ МОДАЛКУ ВНЕ ПОТОКА ОСНОВНОЙ ВЕРСТКИ */}
+      <CitySelectorModal
+        isOpen={isCityModalOpen}
+        onClose={() => setIsCityModalOpen(false)}
+      />
+    </>
   );
 };
