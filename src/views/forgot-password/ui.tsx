@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Header } from "@/widgets";
 
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 import { cn } from "@/shared/lib/utils";
 import { Button, Input } from "@/shared/ui";
 
@@ -53,13 +54,13 @@ export const ForgotPasswordPage = () => {
   const handleBack = () => {
     if (step === "code") setStep("email");
     else if (step === "new_password") setStep("code");
-    else if (step === "success") router.push("/login");
+    else if (step === "success") router.push(ROUTES.LOGIN);
     else router.back();
   };
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
-      <Header backTo={step === "success" ? undefined : "/login"} />
+      <Header backTo={step === "success" ? undefined : ROUTES.LOGIN} />
 
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
         {/* --- ЛЕВАЯ КАРТОЧКА --- */}
@@ -257,7 +258,7 @@ export const ForgotPasswordPage = () => {
                 <Button
                   className="w-full max-w-70 justify-center md:h-14 md:text-lg"
                   size="lg"
-                  onClick={() => router.push("/login")}
+                  onClick={() => router.push(ROUTES.LOGIN)}
                 >
                   Войти
                 </Button>

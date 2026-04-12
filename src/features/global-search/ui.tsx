@@ -9,6 +9,7 @@ import { IconBtn } from "@/shared";
 import { CategoriesGrid, RecentSearches } from "@/widgets";
 
 import { SearchIcon } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 import { SearchInput } from "@/shared/ui";
 
 export const GlobalSearch: FC = () => {
@@ -40,7 +41,7 @@ export const GlobalSearch: FC = () => {
 
   const handleSearchSubmit = () => {
     if (!query.trim()) return;
-    router.push(`/search?q=${encodeURIComponent(query)}`);
+    router.push(ROUTES.SEARCH({ query }));
     handleClose();
   };
 

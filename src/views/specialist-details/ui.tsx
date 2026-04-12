@@ -15,6 +15,7 @@ import {
   HistoryIcon,
   PhoneIcon,
 } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 import { MOCK_DOCTOR, MOCK_REVIEWS } from "@/shared/constants/mocks";
 import { Button, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card/ui";
@@ -37,12 +38,15 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
       <div className="flex-1 w-full max-w-350 mx-auto md:px-10 flex flex-col pt-0 md:pt-6 pb-10">
         {/* Хлебные крошки (только десктоп) */}
         <div className="hidden md:flex text-sm text-[#686F72] mb-6 items-center gap-2">
-          <Link href="/" className="hover:text-[#F5653E] transition-colors">
+          <Link
+            href={ROUTES.HOME}
+            className="hover:text-[#F5653E] transition-colors"
+          >
             Главная
           </Link>
           <span>•</span>
           <Link
-            href="/specialists"
+            href={ROUTES.SPECIALISTS}
             className="hover:text-[#F5653E] transition-colors"
           >
             Специалисты
@@ -226,7 +230,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
           <div className="flex items-center justify-between mb-6 md:mb-8 md:hidden">
             <h2 className="text-2xl font-semibold text-[#191A1B]">Интервью</h2>
             <Link
-              href="/videos"
+              href={ROUTES.VIDEOS}
               className="text-[#F5653E] text-sm font-medium hover:underline"
             >
               Все
@@ -235,7 +239,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
 
           <VideosSwiper
             title="Интервью"
-            viewAllHref="/videos"
+            viewAllHref={ROUTES.VIDEOS}
             description="Ознакомьтесь с интересными материалами"
             videos={[
               {

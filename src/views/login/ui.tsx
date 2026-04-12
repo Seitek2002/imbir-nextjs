@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Header } from "@/widgets";
 
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 import { Button, Checkbox, Input } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control/ui";
 
@@ -43,14 +44,14 @@ export const LoginPage = () => {
       value={authMode}
       onChange={(val) => {
         setAuthMode(val);
-        if (val === "register") router.push("/register");
+        if (val === "register") router.push(ROUTES.REGISTER);
       }}
     />
   );
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
-      <Header backTo="/">{AuthTabs}</Header>
+      <Header backTo={ROUTES.HOME}>{AuthTabs}</Header>
 
       {/* --- ГЛАВНЫЙ КОНТЕЙНЕР ДЛЯ ДЕСКТОПНОГО ГРИДА --- */}
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
@@ -108,7 +109,7 @@ export const LoginPage = () => {
                     onChange={(e) => setRememberMe(e.target.checked)}
                   />
                   <Link
-                    href="/forgot-password"
+                    href={ROUTES.FORGOT_PASSWORD}
                     className="text-sm font-medium text-[#F5653E] hover:underline"
                   >
                     Забыли пароль?

@@ -9,6 +9,7 @@ import { Header } from "@/widgets";
 import { UrlSearchInput } from "@/features/search-by-query/ui";
 
 import { DoctorImage1, DoctorImage2, DoctorImage3 } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 import { Button } from "@/shared/ui";
 
 const MobileFiltersModal = dynamic(() =>
@@ -124,7 +125,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
-      <Header title="Поиск" backTo="/">
+      <Header title="Поиск" backTo={ROUTES.HOME}>
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
             <Suspense
@@ -181,7 +182,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
             <div className="hidden md:block px-10 py-6">
               <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
                 <Link
-                  href="/"
+                  href={ROUTES.HOME}
                   className="hover:text-[#F5653E] transition-colors"
                 >
                   Главная

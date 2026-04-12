@@ -6,11 +6,24 @@ export const ROUTES = {
   PROFILE: "/profile",
   CHATS: "/chat",
   VIDEOS: "/videos",
-  record: "/record",
+  RECORD: "/record",
+  SERVICES: "/services",
+  BLOG: "/blog",
+
+  // Авторизация
+  LOGIN: "/login",
+  REGISTER: "/register",
+  FORGOT_PASSWORD: "/forgot-password",
+
+  // Информационные страницы (футер)
+  CONTACTS: "/contacts",
+  TERMS: "/terms",
+  PRIVACY: "/privacy",
 
   // Динамические страницы (передаем ID)
   CLINIC_DETAILS: (id: string | number) => `/clinics/${id}`,
   SPECIALIST_DETAILS: (id: string | number) => `/specialists/${id}`,
+  BLOG_ARTICLE: (slug: string) => `/blog/${slug}`,
 
   // Страницы с Query-параметрами (Search)
   SEARCH: (params?: { query?: string; category?: string }) => {

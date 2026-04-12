@@ -13,6 +13,7 @@ import {
   ProfileIcon,
   SearchIcon,
 } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 
 export const DefaultContent: FC<{ searchable?: boolean }> = ({
   searchable,
@@ -20,19 +21,19 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
   return (
     <div>
       <div className="flex items-center justify-between w-full">
-        <Link href="/">
+        <Link href={ROUTES.HOME}>
           <Logo className="w-26.5 h-6.5" />
         </Link>
 
         <nav className="hidden md:flex text-[#191A1B] text-xs lg:text-base gap-6 items-center">
-          <Link href={"#"}>Клиники</Link>
-          <Link href={"#"}>Специалисты</Link>
-          <Link href={"#"}>Услуги</Link>
-          <Link href={"#"}>Блог</Link>
+          <Link href={ROUTES.CLINICS}>Клиники</Link>
+          <Link href={ROUTES.SPECIALISTS}>Специалисты</Link>
+          <Link href={ROUTES.SERVICES}>Услуги</Link>
+          <Link href={ROUTES.BLOG}>Блог</Link>
         </nav>
 
         <div className="hidden md:flex gap-3">
-          <Link href="/record">
+          <Link href={ROUTES.RECORD}>
             <Button size="xs">Записаться на приём</Button>
           </Link>
           <Suspense
@@ -63,7 +64,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
       {searchable && (
         <div className="w-full flex items-center justify-center mt-4 md:hidden">
           <Link
-            href={"/search"}
+            href={ROUTES.SEARCH()}
             className="flex items-center w-full gap-2 border border-[#E5E6E8] px-3 py-2 rounded-full transition-transform active:scale-95"
           >
             <SearchIcon className="size-5" />

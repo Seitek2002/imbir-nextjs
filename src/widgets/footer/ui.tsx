@@ -9,6 +9,7 @@ import {
   Logo,
   TwitterIcon,
 } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 
 // --- Вспомогательные микро-компоненты для чистоты кода ---
 
@@ -60,7 +61,7 @@ export const Footer: FC = () => {
         <div className="flex flex-col lg:flex-row justify-between gap-10 lg:gap-8">
           {/* Логотип и социальные сети */}
           <div className="flex flex-col gap-6 lg:w-1/4 shrink-0">
-            <Link href="/">
+            <Link href={ROUTES.HOME}>
               <Logo className="w-35 h-auto" />
             </Link>
             <div className="flex items-center gap-3">
@@ -76,17 +77,17 @@ export const Footer: FC = () => {
             {/* Блок 1 */}
             <div>
               <ColumnHeading>Быстрые ссылки</ColumnHeading>
-              <FooterLink href="/clinics">Клиники</FooterLink>
-              <FooterLink href="/specialists">Специалисты</FooterLink>
-              <FooterLink href="/services">Услуги</FooterLink>
+              <FooterLink href={ROUTES.CLINICS}>Клиники</FooterLink>
+              <FooterLink href={ROUTES.SPECIALISTS}>Специалисты</FooterLink>
+              <FooterLink href={ROUTES.SERVICES}>Услуги</FooterLink>
             </div>
 
             {/* Блок 2 */}
             <div>
               <ColumnHeading>Помощь и поддержка</ColumnHeading>
-              <FooterLink href="/contacts">Контакты</FooterLink>
-              <FooterLink href="/terms">Условия и положения</FooterLink>
-              <FooterLink href="/privacy">
+              <FooterLink href={ROUTES.CONTACTS}>Контакты</FooterLink>
+              <FooterLink href={ROUTES.TERMS}>Условия и положения</FooterLink>
+              <FooterLink href={ROUTES.PRIVACY}>
                 Политика конфиденциальности
               </FooterLink>
             </div>

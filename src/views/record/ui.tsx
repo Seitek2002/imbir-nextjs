@@ -31,6 +31,7 @@ import {
   StarIcon,
   SuccessCheckIcon,
 } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 import { cn } from "@/shared/lib/utils";
 
 type SelectionModalType = "clinic" | "doctor" | "service" | null;
@@ -869,7 +870,7 @@ export const RecordPage = () => {
       return;
     }
 
-    router.push("/");
+    router.push(ROUTES.HOME);
   };
 
   const openModal = (type: Exclude<SelectionModalType, null>) => {
@@ -951,7 +952,11 @@ export const RecordPage = () => {
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] lg:bg-white flex flex-col">
-      <Header title="Оформление записи" backTo="/" onBack={handleRecordBack}>
+      <Header
+        title="Оформление записи"
+        backTo={ROUTES.HOME}
+        onBack={handleRecordBack}
+      >
         <MobileStepsProgress currentStep={mobileStep} totalSteps={3} />
       </Header>
 

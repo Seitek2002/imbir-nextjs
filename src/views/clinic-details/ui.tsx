@@ -17,6 +17,7 @@ import {
   HistoryIcon,
   PhoneIcon,
 } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 import {
   MOCK_CLINIC,
   MOCK_REVIEWS,
@@ -45,12 +46,15 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
       <div className="flex-1 w-full max-w-350 mx-auto md:px-10 flex flex-col pt-0 md:pt-6 pb-10">
         {/* --- ХЛЕБНЫЕ КРОШКИ (ПК) --- */}
         <div className="hidden md:flex text-sm text-[#686F72] mb-6 items-center gap-2">
-          <Link href="/" className="hover:text-[#F5653E] transition-colors">
+          <Link
+            href={ROUTES.HOME}
+            className="hover:text-[#F5653E] transition-colors"
+          >
             Главная
           </Link>
           <span>•</span>
           <Link
-            href="/clinics"
+            href={ROUTES.CLINICS}
             className="hover:text-[#F5653E] transition-colors"
           >
             Клиники

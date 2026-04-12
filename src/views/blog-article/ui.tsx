@@ -8,6 +8,7 @@ import { Header } from "@/widgets";
 import { BlogArticle, BlogCard, BlogPost } from "@/entities/blog";
 
 import { ThunderIcon } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 
 const BLUR =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+";
@@ -21,16 +22,22 @@ export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
   return (
     <main className="min-h-screen bg-[#F2F3F5]">
       <div className="md:hidden">
-        <Header title="Статья" backTo="/blog" />
+        <Header title="Статья" backTo={ROUTES.BLOG} />
       </div>
 
       <div className="w-full max-w-340 mx-auto px-3 md:px-4 pt-4 md:pt-6 pb-8">
         <nav className="hidden md:flex items-center gap-3 text-sm leading-none mb-6 text-[#838A8D]">
-          <Link href="/" className="hover:text-[#F5653E] transition-colors">
+          <Link
+            href={ROUTES.HOME}
+            className="hover:text-[#F5653E] transition-colors"
+          >
             Главная
           </Link>
           <span>•</span>
-          <Link href="/blog" className="hover:text-[#F5653E] transition-colors">
+          <Link
+            href={ROUTES.BLOG}
+            className="hover:text-[#F5653E] transition-colors"
+          >
             Блог
           </Link>
           <span className="text-[#F5653E]">•</span>

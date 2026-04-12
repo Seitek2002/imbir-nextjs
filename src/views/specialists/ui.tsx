@@ -15,6 +15,7 @@ import { UrlSearchInput } from "@/features/search-by-query/ui";
 import { DoctorCard } from "@/entities/doctor";
 
 import { DoctorImage1, DoctorImage2, DoctorImage3 } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 import { Button } from "@/shared/ui";
 
 const MOCK_DOCTORS = [
@@ -110,7 +111,7 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
-      <Header title="Специалисты" backTo="/">
+      <Header title="Специалисты" backTo={ROUTES.HOME}>
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
             <UrlSearchInput placeholder="Поиск специалиста" />
@@ -156,14 +157,17 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
         <div className="hidden md:block px-10 py-6">
           {/* Хлебные крошки */}
           <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
-            <Link href="/" className="hover:text-[#F5653E] transition-colors">
+            <Link
+              href={ROUTES.HOME}
+              className="hover:text-[#F5653E] transition-colors"
+            >
               Главная
             </Link>
             <span>•</span>
             <span className={activeQuery ? "" : "text-[#F5653E]"}>
               {activeQuery ? (
                 <Link
-                  href="/specialists"
+                  href={ROUTES.SPECIALISTS}
                   className="hover:text-[#F5653E] transition-colors"
                 >
                   Специалисты

@@ -23,6 +23,7 @@ import {
   ClinicImage3,
   ClinicImage4,
 } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 import { Button } from "@/shared/ui";
 
 // Моковые данные (продублировал, чтобы была полноценная сетка из 8 элементов)
@@ -120,7 +121,7 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
       {/* HEADER */}
-      <Header title="Клиники" backTo="/">
+      <Header title="Клиники" backTo={ROUTES.HOME}>
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
             <UrlSearchInput placeholder="Поиск клиники" />
@@ -169,14 +170,17 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
         <div className="hidden md:block px-10 py-6">
           {/* Хлебные крошки */}
           <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
-            <Link href="/" className="hover:text-[#F5653E] transition-colors">
+            <Link
+              href={ROUTES.HOME}
+              className="hover:text-[#F5653E] transition-colors"
+            >
               Главная
             </Link>
             <span>•</span>
             <span className={activeQuery ? "" : "text-[#F5653E]"}>
               {activeQuery ? (
                 <Link
-                  href="/clinics"
+                  href={ROUTES.CLINICS}
                   className="hover:text-[#F5653E] transition-colors"
                 >
                   Клиники
