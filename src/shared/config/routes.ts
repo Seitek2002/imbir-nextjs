@@ -6,6 +6,7 @@ export const ROUTES = {
   PROFILE: "/profile",
   CHATS: "/chat",
   VIDEOS: "/videos",
+  record: "/record",
 
   // Динамические страницы (передаем ID)
   CLINIC_DETAILS: (id: string | number) => `/clinics/${id}`,
