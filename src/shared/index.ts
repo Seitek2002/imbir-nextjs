@@ -11,4 +11,5 @@ export {
   Textarea,
   InfoCard,
   StatsPanel,
+  Modal,
 } from "./ui";

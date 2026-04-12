@@ -1,3 +1,5 @@
+import { Toaster } from "react-hot-toast";
+
 import type { Metadata } from "next";
 import { Onest } from "next/font/google";
 
@@ -23,6 +25,7 @@ export default function RootLayout({
     <html lang="en" className={`${onest.className} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#F2F3F5] lg:bg-white">
         {children}
+        <Toaster position="bottom-center" />
       </body>
     </html>
   );

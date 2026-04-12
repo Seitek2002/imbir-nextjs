@@ -1,3 +1,4 @@
+export { CitySelectorModal } from "./city-selector";
 export { MobileFiltersModal, FiltersTrigger } from "./mobile-filters";
 export { FilterBar } from "./filter-bar";
 export { GlobalSearch } from "./global-search";
