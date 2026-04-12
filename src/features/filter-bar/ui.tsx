@@ -10,20 +10,21 @@ import { GeoIcon, RemoveIcon } from "@/shared/assets";
 
 type Props = {
   title?: string;
+  prefix: string;
   fields?: {
     specialty?: boolean;
     experience?: boolean;
     rating?: boolean;
     price?: boolean;
   };
-  children?: ReactNode; // ДОБАВИЛИ PROPS
+  children?: ReactNode;
 };
 
 const SPECIALTY_OPTIONS = [
-  { value: "cardiologist", label: "Кардиолог" },
-  { value: "therapist", label: "Терапевт" },
-  { value: "surgeon", label: "Хирург" },
-  { value: "dentist", label: "Стоматолог" },
+  { value: "Кардиолог", label: "Кардиолог" },
+  { value: "Врач-терапевт", label: "Терапевт" },
+  { value: "Хирург", label: "Хирург" },
+  { value: "Педиатр", label: "Педиатр" },
 ];
 
 const RATING_OPTIONS = [
@@ -31,8 +32,6 @@ const RATING_OPTIONS = [
   { value: "5.0", label: "5.0" },
   { value: "4.0", label: "4.0" },
   { value: "3.0", label: "3.0" },
-  { value: "2.0", label: "2.0" },
-  { value: "1.0", label: "1.0" },
 ];
 
 const MAX_EXP = 50;
@@ -40,50 +39,88 @@ const MAX_PRICE = 5000;
 
 export const FilterBar: FC<Props> = ({
   title = "Фильтры",
+  prefix,
   fields = { specialty: true, experience: true, rating: true, price: true },
-  children, // ДОСТАЕМ ИЗ PROPS
+  children,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const initialSpec = searchParams.get("spec");
+  // Читаем из URL с учетом префикса
+  const initialSpec = searchParams.get(`${prefix}_spec`);
   const [specialty, setSpecialty] = useState<string[]>(
     initialSpec ? initialSpec.split(",") : [],
   );
 
-  const initialExp = searchParams.get("exp")?.split("-").map(Number);
+  const initialExp = searchParams.get(`${prefix}_exp`)?.split("-").map(Number);
   const [experience, setExperience] = useState<[number, number]>([
     initialExp?.[0] ?? 0,
-    initialExp?.[1] ?? 10,
+    initialExp?.[1] ?? MAX_EXP,
   ]);
 
   const [rating, setRating] = useState<string | null>(
-    searchParams.get("rating") || "all",
+    searchParams.get(`${prefix}_rating`) || "all",
   );
 
-  const initialPrice = searchParams.get("price")?.split("-").map(Number);
+  const initialPrice = searchParams
+    .get(`${prefix}_price`)
+    ?.split("-")
+    .map(Number);
   const [price, setPrice] = useState<[number, number]>([
     initialPrice?.[0] ?? 0,
-    initialPrice?.[1] ?? 1000,
+    initialPrice?.[1] ?? MAX_PRICE,
   ]);
+
+  // Функция для обновления URL без перезагрузки страницы
+  const updateURL = (key: string, value: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set(`${prefix}_${key}`, value);
+    } else {
+      params.delete(`${prefix}_${key}`);
+    }
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
+
+  // Обработчики изменений
+  const handleSpecialtyChange = (val: string[]) => {
+    setSpecialty(val);
+    updateURL("spec", val.length > 0 ? val.join(",") : null);
+  };
+
+  const handleRatingChange = (val: string) => {
+    setRating(val);
+    updateURL("rating", val === "all" ? null : val);
+  };
+
+  // Для ползунков лучше использовать onChangeEnd (если он есть в твоем UI-ките)
+  // Но пока сделаем просто onChange.
+  const handleExpChange = (val: [number, number]) => {
+    setExperience(val);
+    updateURL("exp", `${val[0]}-${val[1]}`);
+  };
+
+  const handlePriceChange = (val: [number, number]) => {
+    setPrice(val);
+    updateURL("price", `${val[0]}-${val[1]}`);
+  };
 
   const handleReset = () => {
     setSpecialty([]);
-    setExperience([0, 10]);
+    setExperience([0, MAX_EXP]);
     setRating("all");
     setPrice([0, MAX_PRICE]);
 
     const params = new URLSearchParams(searchParams.toString());
-    params.delete("spec");
-    params.delete("exp");
-    params.delete("rating");
-    params.delete("price");
+    params.delete(`${prefix}_spec`);
+    params.delete(`${prefix}_exp`);
+    params.delete(`${prefix}_rating`);
+    params.delete(`${prefix}_price`);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
   return (
     <div className="w-full">
-      {/* ЛОГИКА РЕНДЕРА ШАПКИ */}
       {children ? (
         children
       ) : (
@@ -102,15 +139,14 @@ export const FilterBar: FC<Props> = ({
               </div>
             </div>
           </div>
-
           <p className="text-[#686F72] text-lg mt-4 mb-10">
             Выберите интересующие вас параметры, чтобы ознакомиться с
-            подходящими врачами
+            подходящими вариантами
           </p>
         </>
       )}
 
-      {/* Сами фильтры */}
+      {/* Фильтры */}
       <div className="grid grid-cols-4 gap-5 items-start">
         {fields.specialty && (
           <Dropdown
@@ -118,25 +154,23 @@ export const FilterBar: FC<Props> = ({
             placeholder="Все"
             options={SPECIALTY_OPTIONS}
             value={specialty}
-            onChange={(val) => setSpecialty(val as string[])}
+            onChange={(val) => handleSpecialtyChange(val as string[])}
             isMulti={true}
             type="checkbox"
           />
         )}
-
         {fields.experience && (
           <RangeSlider
-            id="exp-desktop"
+            id={`exp-desktop-${prefix}`}
             label="Стаж, лет"
             min={0}
             max={MAX_EXP}
             step={1}
             value={experience}
-            onChange={setExperience}
+            onChange={handleExpChange}
             className="bg-white"
           />
         )}
-
         {fields.rating && (
           <Dropdown
             label="Оценка"
@@ -144,19 +178,18 @@ export const FilterBar: FC<Props> = ({
             type="radio"
             options={RATING_OPTIONS}
             value={rating || "all"}
-            onChange={(val) => setRating(val as string)}
+            onChange={(val) => handleRatingChange(val as string)}
           />
         )}
-
         {fields.price && (
           <RangeSlider
-            id="price-desktop"
+            id={`price-desktop-${prefix}`}
             label="Стоимость, с"
             min={0}
             max={MAX_PRICE}
             step={50}
             value={price}
-            onChange={setPrice}
+            onChange={handlePriceChange}
             className="bg-white"
           />
         )}

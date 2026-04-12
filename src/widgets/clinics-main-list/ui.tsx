@@ -1,64 +1,97 @@
+"use client";
+
 import { FC, Suspense } from "react";
 
+import { useSearchParams } from "next/navigation";
+
 import { FilterBar } from "@/features";
-import { Button } from "@/shared";
 
 import { ClinicCard } from "@/entities/clinic";
 
-import {
-  ClinicImage1,
-  ClinicImage2,
-  ClinicImage3,
-  ClinicImage4,
-} from "@/shared/assets";
+import { MOCK_CLINICS } from "@/shared/constants/mocks";
+import { Button } from "@/shared/ui";
 
-// Вынес моковые данные в константу для чистоты (позже заменишь на данные с бэка)
-const MOCK_CLINICS = [
-  {
-    id: "1",
-    name: "Nova Clinic",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage1.src,
-  },
-  {
-    id: "2",
-    name: "K-MED",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage2.src,
-  },
-  {
-    id: "3",
-    name: "Med Center",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage3.src,
-  },
-  {
-    id: "4",
-    name: "Nova Clinic",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage4.src,
-  },
-];
+const ClinicsListContent = () => {
+  const searchParams = useSearchParams();
+
+  // Читаем параметры для клиник
+  const currentRating = searchParams.get("clinic_rating");
+  const currentSpec = searchParams.get("clinic_spec"); // <-- ДОБАВИЛИ ЧТЕНИЕ СПЕЦ.
+
+  // Фильтруем данные клиник
+  const filteredClinics = MOCK_CLINICS.filter((clinic) => {
+    // 1. Проверка рейтинга
+    if (currentRating && currentRating !== "all") {
+      const minRating = parseFloat(currentRating);
+      if (clinic.rating < minRating) return false;
+    }
+
+    // 2. Проверка специализации (НОВАЯ ЛОГИКА)
+    if (currentSpec) {
+      const selectedSpecs = currentSpec.split(",");
+      // Проверяем, есть ли в клинике ХОТЯ БЫ ОДНА из выбранных специальностей
+      const hasMatch = clinic.specialties.some((spec) =>
+        selectedSpecs.includes(spec),
+      );
+      if (!hasMatch) return false;
+    }
+
+    return true; // Клиника прошла фильтры
+  });
+
+  return (
+    <div className="flex flex-col gap-3 lg:mt-10">
+      <div className="flex flex-col gap-2 md:hidden">
+        {filteredClinics.length === 0 && (
+          <p className="text-center text-[#838A8D] py-10">Клиники не найдены</p>
+        )}
+        {filteredClinics.map((clinic) => (
+          <ClinicCard
+            key={`mobile-${clinic.id}`}
+            name={clinic.name}
+            rating={clinic.rating}
+            reviews={clinic.reviews}
+            experience={clinic.experience}
+            address={clinic.address}
+            image={clinic.image}
+          />
+        ))}
+      </div>
+
+      <div className="hidden md:grid md:grid-cols-4 gap-3">
+        {filteredClinics.length === 0 && (
+          <p className="col-span-4 text-center text-[#838A8D] py-20 text-lg">
+            По вашим параметрам клиники не найдены
+          </p>
+        )}
+        {filteredClinics.map((clinic) => (
+          <ClinicCard
+            key={`desktop-${clinic.id}`}
+            name={clinic.name}
+            rating={clinic.rating}
+            reviews={clinic.reviews}
+            experience={clinic.experience}
+            address={clinic.address}
+            image={clinic.image}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const ClinicsMainList: FC = () => {
   return (
     <div className="max-w-340 mx-auto pb-30 px-4">
       <div className="hidden lg:block">
-        <Suspense fallback={<div />}>
+        <Suspense
+          fallback={
+            <div className="h-50 bg-gray-100 animate-pulse rounded-2xl" />
+          }
+        >
           <FilterBar
             title="Клиники"
+            prefix="clinic"
             fields={{
               specialty: true,
               experience: false,
@@ -76,36 +109,13 @@ export const ClinicsMainList: FC = () => {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-3 lg:mt-10">
-        {/* Мобильный: вертикальный список */}
-        <div className="flex flex-col gap-2 md:hidden">
-          {MOCK_CLINICS.map((clinic) => (
-            <ClinicCard
-              key={`mobile-${clinic.id}`}
-              name={clinic.name}
-              rating={clinic.rating}
-              reviews={clinic.reviews}
-              experience={clinic.experience}
-              address={clinic.address}
-              image={clinic.image}
-            />
-          ))}
-        </div>
-
-        <div className="hidden md:grid md:grid-cols-4 gap-3">
-          {MOCK_CLINICS.map((clinic) => (
-            <ClinicCard
-              key={`desktop-${clinic.id}`}
-              name={clinic.name}
-              rating={clinic.rating}
-              reviews={clinic.reviews}
-              experience={clinic.experience}
-              address={clinic.address}
-              image={clinic.image}
-            />
-          ))}
-        </div>
-      </div>
+      <Suspense
+        fallback={
+          <div className="h-100 bg-gray-100 animate-pulse mt-10 rounded-2xl" />
+        }
+      >
+        <ClinicsListContent />
+      </Suspense>
     </div>
   );
 };
