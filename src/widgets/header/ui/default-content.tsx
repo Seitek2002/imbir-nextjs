@@ -45,9 +45,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
               </Button>
             </Link>
             <Suspense
-              fallback={
-                <div className="size-10 bg-gray-100 rounded-full animate-pulse" />
-              }
+              fallback={<div className="size-10 bg-gray-100 rounded-full" />}
             >
               <GlobalSearch />
             </Suspense>

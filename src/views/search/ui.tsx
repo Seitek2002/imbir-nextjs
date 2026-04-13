@@ -91,7 +91,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
           <div className="flex-1">
             <Suspense
               fallback={
-                <div className="h-10.5 w-full bg-gray-100 rounded-lg animate-pulse" />
+                <div className="h-10.5 w-full bg-gray-100 rounded-lg" />
               }
             >
               <UrlSearchInput />
@@ -202,7 +202,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
             <div className="hidden md:block mb-8 drop-shadow-sm rounded-full">
               <Suspense
                 fallback={
-                  <div className="h-13 w-full bg-gray-100 rounded-full animate-pulse" />
+                  <div className="h-13 w-full bg-gray-100 rounded-full" />
                 }
               >
                 <UrlSearchInput />

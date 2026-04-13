@@ -9,55 +9,55 @@ export default function Loading() {
       <div className="h-16 w-full bg-white" />
 
       <div className="flex-1 w-full max-w-340 mx-auto px-4 py-6">
-        <div className="hidden md:block h-13 w-28 bg-gray-200 animate-pulse rounded-xl mb-6" />
+        <div className="hidden md:block h-13 w-28 skeleton rounded-xl mb-6" />
 
         <div className="flex flex-col gap-6">
           {HAS_FEATURED_POST && (
             <>
               <div className="hidden md:flex gap-5">
-                <div className="w-167.5 shrink-0 h-105 rounded-3xl overflow-hidden border border-[#E3E4E5] bg-gray-200 animate-pulse" />
+                <div className="w-167.5 shrink-0 h-105 rounded-3xl border border-[#E3E4E5] skeleton" />
 
                 <div className="flex flex-col justify-center gap-4 bg-white rounded-3xl border border-[#E3E4E5] p-8 flex-1">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-24 bg-gray-200 animate-pulse rounded-full" />
-                    <div className="h-8 w-28 bg-gray-200 animate-pulse rounded-full" />
+                    <div className="h-8 w-24 skeleton rounded-full" />
+                    <div className="h-8 w-28 skeleton rounded-full" />
                   </div>
 
                   <div className="space-y-3">
-                    <div className="h-8 w-4/5 bg-gray-200 animate-pulse rounded-lg" />
-                    <div className="h-4 w-full bg-gray-200 animate-pulse rounded-md" />
-                    <div className="h-4 w-2/3 bg-gray-200 animate-pulse rounded-md" />
+                    <div className="h-8 w-4/5 skeleton rounded-lg" />
+                    <div className="h-4 w-full skeleton rounded-md" />
+                    <div className="h-4 w-2/3 skeleton rounded-md" />
                   </div>
 
-                  <div className="h-10 w-36 bg-gray-200 animate-pulse rounded-xl" />
+                  <div className="h-10 w-36 skeleton rounded-xl" />
                 </div>
               </div>
 
               <div className="md:hidden flex flex-col gap-2">
                 <div className="bg-white rounded-3xl border border-[#E3E4E5] p-5 flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-24 bg-gray-200 animate-pulse rounded-full" />
-                    <div className="h-8 w-28 bg-gray-200 animate-pulse rounded-full" />
+                    <div className="h-8 w-24 skeleton rounded-full" />
+                    <div className="h-8 w-28 skeleton rounded-full" />
                   </div>
                   <div className="space-y-3">
-                    <div className="h-7 w-full bg-gray-200 animate-pulse rounded-lg" />
-                    <div className="h-4 w-full bg-gray-200 animate-pulse rounded-md" />
-                    <div className="h-4 w-3/4 bg-gray-200 animate-pulse rounded-md" />
+                    <div className="h-7 w-full skeleton rounded-lg" />
+                    <div className="h-4 w-full skeleton rounded-md" />
+                    <div className="h-4 w-3/4 skeleton rounded-md" />
                   </div>
-                  <div className="h-10 w-36 bg-gray-200 animate-pulse rounded-xl" />
+                  <div className="h-10 w-36 skeleton rounded-xl" />
                 </div>
 
-                <div className="w-full h-52 rounded-3xl overflow-hidden border border-[#E3E4E5] bg-gray-200 animate-pulse" />
+                <div className="w-full h-52 rounded-3xl border border-[#E3E4E5] skeleton" />
               </div>
             </>
           )}
 
           <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="shrink-0 h-10 w-16 bg-gray-200 animate-pulse rounded-full" />
+            <div className="shrink-0 h-10 w-16 skeleton rounded-full" />
             {BLOG_CATEGORIES.map((category) => (
               <div
                 key={category.id}
-                className="shrink-0 h-10 w-28 bg-gray-200 animate-pulse rounded-full"
+                className="shrink-0 h-10 w-28 skeleton rounded-full"
               />
             ))}
           </div>

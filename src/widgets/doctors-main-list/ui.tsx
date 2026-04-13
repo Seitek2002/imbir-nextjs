@@ -99,11 +99,7 @@ export const DoctorsMainList: FC = () => {
   return (
     <div className="max-w-340 mx-auto py-30 px-4">
       <div className="hidden lg:block">
-        <Suspense
-          fallback={
-            <div className="h-50 bg-gray-100 animate-pulse rounded-2xl" />
-          }
-        >
+        <Suspense fallback={<div className="h-50 bg-gray-100 rounded-2xl" />}>
           <FilterBar prefix="doc" title="Специалисты" />
         </Suspense>
       </div>
@@ -116,9 +112,7 @@ export const DoctorsMainList: FC = () => {
       </div>
 
       <Suspense
-        fallback={
-          <div className="h-100 bg-gray-100 animate-pulse mt-10 rounded-2xl" />
-        }
+        fallback={<div className="h-100 bg-gray-100 mt-10 rounded-2xl" />}
       >
         <DoctorsListContent />
       </Suspense>
