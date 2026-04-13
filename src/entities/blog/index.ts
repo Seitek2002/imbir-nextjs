@@ -4,6 +4,8 @@ export {
   BLOG_ARTICLES,
   BLOG_CATEGORIES,
   BLOG_POSTS,
+  fetchBlogCategories,
+  fetchBlogPosts,
   getBlogArticleBySlug,
   getRelatedBlogPosts,
 } from "./model";

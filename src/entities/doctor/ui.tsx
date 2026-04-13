@@ -1,4 +1,4 @@
-﻿import { FC } from "react";
+import { FC } from "react";
 
 import Image, { StaticImageData } from "next/image";
 
@@ -47,8 +47,6 @@ export const DoctorCard: FC<Props> = ({
               fill
               sizes="120px"
               className="object-cover object-top scale-110"
-              placeholder="blur"
-              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEzMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">

@@ -237,3 +237,12 @@ export const getBlogArticleBySlug = (slug: string) =>
 
 export const getRelatedBlogPosts = (slug: string, limit = 3) =>
   BLOG_POSTS.filter((post) => post.slug !== slug).slice(0, limit);
+
+// Async data-fetching functions — replace with real API calls when backend is ready
+export async function fetchBlogPosts(): Promise<BlogPost[]> {
+  return BLOG_POSTS;
+}
+
+export async function fetchBlogCategories(): Promise<BlogCategory[]> {
+  return BLOG_CATEGORIES;
+}

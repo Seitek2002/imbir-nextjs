@@ -9,9 +9,6 @@ import { BlogCard, BlogCategory, BlogPost } from "@/entities/blog";
 
 import { ThunderIcon } from "@/shared/assets";
 
-const BLUR =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+";
-
 type Props = {
   posts: BlogPost[];
   categories: BlogCategory[];
@@ -19,6 +16,8 @@ type Props = {
 
 export const BlogSection: FC<Props> = ({ posts, categories }) => {
   const [activeCategory, setActiveCategory] = useState("all");
+  const [featuredLoaded, setFeaturedLoaded] = useState(false);
+
   const featuredLinkClassName =
     "inline-flex w-fit items-center rounded-full bg-[#F5653E] px-4 py-2.5 text-sm font-medium text-white transition-all active:bg-[#C54826] hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]";
 
@@ -38,14 +37,14 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
             href={featured.href}
             className="relative w-167.5 shrink-0 h-105 rounded-3xl overflow-hidden border border-[#E3E4E5] group block"
           >
+            {!featuredLoaded && <div className="absolute inset-0 skeleton" />}
             <Image
               src={featured.image}
               alt={featured.title}
               fill
               sizes="50vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              placeholder="blur"
-              blurDataURL={BLUR}
+              onLoad={() => setFeaturedLoaded(true)}
             />
           </Link>
 
@@ -82,7 +81,6 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
 
       {featured && (
         <div className="md:hidden flex flex-col gap-2">
-          {/* Контент */}
           <div className="bg-white rounded-3xl border border-[#E3E4E5] p-5 flex flex-col gap-4">
             <div className="flex items-center gap-3">
               {featured.badge && (
@@ -107,19 +105,18 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
               Читать статью
             </Link>
           </div>
-          {/* Изображение */}
           <Link
             href={featured.href}
             className="relative w-full h-52 rounded-3xl overflow-hidden border border-[#E3E4E5] block"
           >
+            {!featuredLoaded && <div className="absolute inset-0 skeleton" />}
             <Image
               src={featured.image}
               alt={featured.title}
               fill
               sizes="100vw"
               className="object-cover object-top"
-              placeholder="blur"
-              blurDataURL={BLUR}
+              onLoad={() => setFeaturedLoaded(true)}
             />
           </Link>
         </div>

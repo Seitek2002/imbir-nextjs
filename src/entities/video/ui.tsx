@@ -1,4 +1,4 @@
-﻿import { FC } from "react";
+import { FC } from "react";
 
 import Image, { StaticImageData } from "next/image";
 
@@ -31,8 +31,6 @@ export const VideoCard: FC<Props> = ({
           fill
           sizes="(max-width: 768px) 100vw, 440px"
           className="object-cover"
-          placeholder="blur"
-          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+"
         />
 
         <div className="absolute inset-0 flex items-center justify-center">

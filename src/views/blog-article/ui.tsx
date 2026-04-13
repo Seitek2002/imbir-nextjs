@@ -1,6 +1,5 @@
 import { FC } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { Header } from "@/widgets";
@@ -10,8 +9,7 @@ import { BlogArticle, BlogCard, BlogPost } from "@/entities/blog";
 import { ThunderIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
 
-const BLUR =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+";
+import { ArticleImage } from "./article-image";
 
 type Props = {
   article: BlogArticle;
@@ -62,17 +60,7 @@ export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
               {article.title}
             </h1>
 
-            <div className="relative w-full h-64 md:h-105 overflow-hidden rounded-3xl">
-              <Image
-                src={article.image}
-                alt={article.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 900px"
-                className="object-cover"
-                placeholder="blur"
-                blurDataURL={BLUR}
-              />
-            </div>
+            <ArticleImage src={article.image} alt={article.title} />
 
             <div className="mt-5 md:mt-6 space-y-4 md:space-y-5">
               <p className="text-base text-[#686F72] leading-[145%]">

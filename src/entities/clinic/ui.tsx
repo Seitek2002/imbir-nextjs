@@ -7,11 +7,6 @@ import { GeoIcon, StarIcon } from "@/shared/assets";
 
 import { ClinicSaveButton } from "./save-button";
 
-const BLUR_SM =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQwIiBoZWlnaHQ9IjEwNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+";
-const BLUR_LG =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIxMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+";
-
 type Props = {
   name: string;
   rating?: number;
@@ -46,8 +41,6 @@ export const ClinicCard: FC<Props> = ({
               fill
               sizes="140px"
               className="object-cover"
-              placeholder="blur"
-              blurDataURL={BLUR_SM}
             />
           ) : (
             <div className="w-full h-full bg-[#F2F3F5]" />
@@ -91,8 +84,6 @@ export const ClinicCard: FC<Props> = ({
             fill
             sizes="280px"
             className="object-cover"
-            placeholder="blur"
-            blurDataURL={BLUR_LG}
           />
         ) : (
           <div className="w-full h-full bg-[#F2F3F5]" />
