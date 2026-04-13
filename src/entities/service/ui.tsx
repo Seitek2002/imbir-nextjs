@@ -1,0 +1,173 @@
+"use client";
+
+import { FC, useState } from "react";
+
+import Image from "next/image";
+
+import { Button } from "@/shared";
+
+import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets";
+
+type Props = {
+  name: string;
+  category: string;
+  clinic: string;
+  rating: number;
+  reviews: number;
+  price: number;
+  image?: string;
+  onBook?: () => void;
+  onSave?: () => void;
+  initialSaved?: boolean;
+  variant?: "vertical" | "horizontal";
+};
+
+const SaveButton: FC<{
+  initialSaved: boolean;
+  onSave?: () => void;
+}> = ({ initialSaved, onSave }) => {
+  const [isSaved, setIsSaved] = useState(initialSaved);
+
+  const handleClick = () => {
+    setIsSaved(!isSaved);
+    onSave?.();
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shadow-sm flex-shrink-0"
+      aria-label={isSaved ? "Удалить из избранного" : "Добавить в избранное"}
+    >
+      {isSaved ? (
+        <HeartIcon2 className="w-6 h-6 text-[#F5653E]" />
+      ) : (
+        <HeartIcon className="w-6 h-6 text-[#F5653E]" />
+      )}
+    </button>
+  );
+};
+
+export const ServiceCard: FC<Props> = ({
+  name,
+  category,
+  clinic,
+  rating,
+  reviews,
+  price,
+  image,
+  onBook,
+  onSave,
+  initialSaved = false,
+  variant = "vertical",
+}) => {
+  if (variant === "horizontal") {
+    return (
+      <div className="bg-white rounded-3xl p-4 flex items-center gap-4 border border-[#E5E6E8]">
+        <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-[#F8F9FA] flex-shrink-0">
+          {image ? (
+            <Image
+              src={image}
+              alt={name}
+              fill
+              sizes="112px"
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-[#C4C8CA] text-2xl font-semibold">
+              {name.charAt(0)}
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h3 className="text-[#191A1B] font-semibold text-base leading-tight">
+              {name}
+            </h3>
+            <span className="text-[#191A1B] font-semibold text-base whitespace-nowrap">
+              {price} с
+            </span>
+          </div>
+
+          <p className="text-[#838A8D] text-sm mb-2">
+            {category} <span className="text-[#F5653E]">• {clinic}</span>
+          </p>
+
+          <div className="flex items-center gap-1 mb-3 text-sm">
+            <StarIcon className="w-4 h-4 text-[#F5653E]" />
+            <span className="text-[#F5653E] font-medium">{rating}</span>
+            <span className="text-[#686F72]">({reviews})</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 justify-center"
+              onClick={onBook}
+            >
+              Записаться
+            </Button>
+            <SaveButton initialSaved={initialSaved} onSave={onSave} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden flex flex-col h-full">
+      <div className="relative aspect-[4/3] w-full">
+        {image ? (
+          <Image
+            src={image}
+            alt={name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-[#F8F9FA] flex items-center justify-center">
+            <span className="text-[#C4C8CA] text-4xl font-semibold">
+              {name.charAt(0)}
+            </span>
+          </div>
+        )}
+        <div className="absolute top-4 right-4 z-10">
+          <SaveButton initialSaved={initialSaved} onSave={onSave} />
+        </div>
+      </div>
+
+      <div className="flex-1 p-4 flex flex-col">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="text-[#191A1B] font-semibold text-base leading-tight flex-1">
+            {name}
+          </h3>
+          <span className="text-[#191A1B] font-semibold text-base whitespace-nowrap">
+            {price} с
+          </span>
+        </div>
+
+        <p className="text-[#838A8D] text-sm mb-2">
+          {category} <span className="text-[#F5653E]">• {clinic}</span>
+        </p>
+
+        <div className="flex items-center gap-1 mb-4 text-sm">
+          <StarIcon className="w-4 h-4 text-[#F5653E]" />
+          <span className="text-[#F5653E] font-medium">{rating}</span>
+          <span className="text-[#686F72]">({reviews})</span>
+        </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full justify-center mt-auto"
+          onClick={onBook}
+        >
+          Записаться
+        </Button>
+      </div>
+    </div>
+  );
+};
