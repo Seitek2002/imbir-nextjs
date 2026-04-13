@@ -40,7 +40,9 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
 
           <div className="hidden md:flex gap-3">
             <Link href={ROUTES.RECORD}>
-              <Button size="xs">Записаться на приём</Button>
+              <Button size="sm" className="px-5 whitespace-nowrap">
+                Записаться на приём
+              </Button>
             </Link>
             <Suspense
               fallback={

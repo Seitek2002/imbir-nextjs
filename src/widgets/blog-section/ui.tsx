@@ -5,8 +5,6 @@ import { FC, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Button } from "@/shared";
-
 import { BlogCard, BlogCategory, BlogPost } from "@/entities/blog";
 
 import { ThunderIcon } from "@/shared/assets";
@@ -21,6 +19,8 @@ type Props = {
 
 export const BlogSection: FC<Props> = ({ posts, categories }) => {
   const [activeCategory, setActiveCategory] = useState("all");
+  const featuredLinkClassName =
+    "inline-flex w-fit items-center rounded-full bg-[#F5653E] px-4 py-2.5 text-sm font-medium text-white transition-all active:bg-[#C54826] hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]";
 
   const featured = posts.find((post) => post.featured);
   const filtered =
@@ -73,10 +73,8 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
               )}
             </div>
 
-            <Link href={featured.href}>
-              <Button size="sm" className="w-fit">
-                Читать статью
-              </Button>
+            <Link href={featured.href} className={featuredLinkClassName}>
+              Читать статью
             </Link>
           </div>
         </div>
@@ -105,10 +103,8 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
                 {featured.description}
               </p>
             )}
-            <Link href={featured.href}>
-              <Button size="sm" className="w-fit">
-                Читать статью
-              </Button>
+            <Link href={featured.href} className={featuredLinkClassName}>
+              Читать статью
             </Link>
           </div>
           {/* Изображение */}
