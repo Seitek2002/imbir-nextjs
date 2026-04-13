@@ -1,4 +1,5 @@
 export { BlogCard } from "./ui";
+export { BlogSkeleton } from "./skeleton";
 export {
   BLOG_ARTICLES,
   BLOG_CATEGORIES,
