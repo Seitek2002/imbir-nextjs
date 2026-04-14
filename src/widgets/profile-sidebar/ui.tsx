@@ -41,7 +41,7 @@ export const ProfileSidebar: FC = () => {
   const pathname = usePathname();
 
   return (
-    <div className="w-full max-w-[352px] flex flex-col gap-4">
+    <div className="w-full max-w-88 flex flex-col gap-4">
       {/* Profile Card */}
       <Link
         href="/profile"
