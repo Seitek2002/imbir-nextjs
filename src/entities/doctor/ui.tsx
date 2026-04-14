@@ -7,14 +7,18 @@ import Image, { StaticImageData } from "next/image";
 import { Button } from "@/shared";
 
 import { StarIcon, UserCircleIcon } from "@/shared/assets";
+import { Workplace } from "@/shared/constants/mocks";
 
 import { DoctorPhoto } from "./photo";
 import { DoctorSaveButton } from "./save-button";
 
+// ИМПОРТИРУЕМ НОВЫЙ ТИП
+
 type Props = {
   name: string;
   specialty: string;
-  clinic: string;
+  workplaces: Workplace[]; // <-- ЗАМЕНИЛИ clinic НА workplaces
+  isOnlineAvailable?: boolean; // <-- ФЛАГ ОНЛАЙН ПРИЕМА
   rating?: number;
   reviews?: number;
   experience: number;
@@ -28,7 +32,8 @@ type Props = {
 export const DoctorCard: FC<Props> = ({
   name,
   specialty,
-  clinic,
+  workplaces,
+  isOnlineAvailable,
   rating,
   reviews,
   experience,
@@ -39,6 +44,12 @@ export const DoctorCard: FC<Props> = ({
   variant = "vertical",
 }) => {
   const [loaded, setLoaded] = useState(false);
+
+  // Вычисляем логику для отображения клиник и цен
+  const primaryClinic = workplaces[0]?.clinicName || "Не указана";
+  const additionalClinicsCount = workplaces.length - 1;
+  const minPrice =
+    workplaces.length > 0 ? Math.min(...workplaces.map((w) => w.price)) : null;
 
   if (variant === "horizontal") {
     return (
@@ -63,13 +74,25 @@ export const DoctorCard: FC<Props> = ({
           )}
         </div>
 
-        <div className="flex-1 min-w-0 py-0.5">
-          <p className="font-semibold text-[18px] text-[#191A1B] leading-tight truncate">
-            {name}
-          </p>
+        <div className="flex-1 min-w-0 py-0.5 flex flex-col">
+          <div className="flex items-start justify-between gap-2">
+            <p className="font-semibold text-[18px] text-[#191A1B] leading-tight truncate">
+              {name}
+            </p>
+            {isOnlineAvailable && (
+              <span className="shrink-0 bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                Онлайн
+              </span>
+            )}
+          </div>
+
           <p className="text-[14px] text-[#686F72] truncate mt-1">
             {specialty}
-            <span className="text-[#F5653E]"> • {clinic}</span>
+            <span className="text-[#F5653E]">
+              {" "}
+              • {primaryClinic}{" "}
+              {additionalClinicsCount > 0 && `+ еще ${additionalClinicsCount}`}
+            </span>
           </p>
 
           {(rating !== undefined || reviews !== undefined) && (
@@ -85,14 +108,19 @@ export const DoctorCard: FC<Props> = ({
             </div>
           )}
 
-          <div className="flex items-center gap-2 mt-2.5">
+          <div className="mt-auto pt-2 flex items-center gap-2">
             <Button
               variant="outline"
               size="xs"
               className="flex-1 justify-center text-[16px] py-2"
               onClick={onBook}
             >
-              Записаться
+              Записаться{" "}
+              {minPrice && (
+                <span className="ml-1 text-sm font-normal opacity-80">
+                  от {minPrice} с
+                </span>
+              )}
             </Button>
             <DoctorSaveButton initialSaved={initialSaved} onSave={onSave} />
           </div>
@@ -101,8 +129,16 @@ export const DoctorCard: FC<Props> = ({
     );
   }
 
+  // VERTICAL VARIANT
   return (
-    <div className="bg-white rounded-3xl border border-[#E3E4E5] p-2 w-full h-full flex flex-col">
+    <div className="bg-white rounded-3xl border border-[#E3E4E5] p-2 w-full h-full flex flex-col relative">
+      {/* Бейджик онлайна поверх фото */}
+      {isOnlineAvailable && (
+        <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider">
+          Онлайн
+        </div>
+      )}
+
       <div className="relative aspect-square w-full">
         <DoctorPhoto image={image} name={name} />
         <div className="absolute top-2 right-2 z-10">
@@ -116,7 +152,11 @@ export const DoctorCard: FC<Props> = ({
         </p>
         <p className="text-xs text-[#686F72] truncate mt-0.5">
           {specialty}
-          <span className="text-[#F5653E]"> • {clinic}</span>
+          <span className="text-[#F5653E]">
+            {" "}
+            • {primaryClinic}{" "}
+            {additionalClinicsCount > 0 && `+${additionalClinicsCount}`}
+          </span>
         </p>
         {(rating !== undefined || reviews !== undefined) && (
           <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">
@@ -127,7 +167,7 @@ export const DoctorCard: FC<Props> = ({
             {reviews !== undefined && (
               <span className="text-[#686F72]">({reviews})</span>
             )}
-            <span className="text-[#686F72]">• {experience} лет опыта</span>
+            <span className="text-[#686F72]">• {experience} лет</span>
           </div>
         )}
       </div>
@@ -138,7 +178,10 @@ export const DoctorCard: FC<Props> = ({
         className="w-full justify-center mt-3"
         onClick={onBook}
       >
-        Записаться
+        Записаться{" "}
+        {minPrice && (
+          <span className="ml-1 opacity-70 font-normal">от {minPrice} с</span>
+        )}
       </Button>
     </div>
   );

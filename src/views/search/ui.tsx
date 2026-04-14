@@ -50,6 +50,9 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
   const currentPrice =
     typeof searchParams?.doc_price === "string" ? searchParams.doc_price : null;
 
+  // <-- НОВОЕ: Читаем флаг "онлайн" из URL
+  const isOnlineOnly = searchParams?.doc_online === "true";
+
   // 3. ФИЛЬТРУЕМ ДАННЫЕ НА ЛЕТУ
   const filteredResults = MOCK_SPECIALISTS.filter((doc) => {
     // A. Поиск по строке (Имя или Специальность)
@@ -61,6 +64,11 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
     }
 
     // B. Фильтры из FilterBar / MobileFiltersModal
+
+    // <-- НОВОЕ: Если юзер включил чекбокс "Только онлайн",
+    // отсеиваем тех врачей, у которых isOnlineAvailable === false
+    if (isOnlineOnly && !doc.isOnlineAvailable) return false;
+
     if (currentSpec) {
       const selectedSpecs = currentSpec.split(",");
       if (!selectedSpecs.includes(doc.specialty)) return false;
@@ -78,7 +86,14 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
 
     if (currentPrice) {
       const [minPrice, maxPrice] = currentPrice.split("-").map(Number);
-      if (doc.price < minPrice || doc.price > maxPrice) return false;
+      // Теперь doc.price не существует, нам нужно проверить массив workplaces
+      // Ищем минимальную цену среди всех клиник врача
+      const docMinPrice =
+        doc.workplaces.length > 0
+          ? Math.min(...doc.workplaces.map((w) => w.price))
+          : 0;
+
+      if (docMinPrice < minPrice || docMinPrice > maxPrice) return false;
     }
 
     return true;
@@ -101,11 +116,9 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
             <FiltersTrigger />
           </div>
         </div>
-        {/* Добавили префикс для чипсов */}
         <ActiveFiltersChips prefix="doc" />
       </Header>
 
-      {/* ДОБАВИЛИ ПРЕФИКС */}
       <MobileFiltersModal
         isOpen={isFiltersModalOpen}
         prefix="doc"
@@ -114,6 +127,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
           experience: true,
           rating: true,
           price: true,
+          online: true, // <-- НОВОЕ: Включаем онлайн-фильтр в модалке
         }}
       />
 
@@ -164,8 +178,16 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                 </span>
               </div>
 
-              {/* ДОБАВИЛИ ПРЕФИКС */}
-              <FilterBar prefix="doc">
+              <FilterBar
+                prefix="doc"
+                fields={{
+                  specialty: true,
+                  experience: true,
+                  rating: true,
+                  price: true,
+                  online: true, // <-- НОВОЕ: Включаем онлайн-фильтр на ПК
+                }}
+              >
                 <div className="flex items-end gap-3 mb-6">
                   <h1 className="text-[40px] font-semibold text-[#191A1B] leading-none">
                     По запросу «{activeQuery}»

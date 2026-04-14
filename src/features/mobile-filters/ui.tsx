@@ -17,6 +17,7 @@ type Props = {
     experience?: boolean;
     rating?: boolean;
     price?: boolean;
+    online?: boolean; // <-- Добавили поддержку онлайн-фильтра
   };
 };
 
@@ -34,7 +35,6 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Читаем из URL с учетом префикса
   const initialExp = searchParams.get(`${prefix}_exp`)?.split("-").map(Number);
   const [experience, setExperience] = useState<[number, number]>([
     initialExp?.[0] ?? 0,
@@ -59,11 +59,13 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
     initialSpec ? initialSpec.split(",") : [],
   );
 
-  // ПРИМЕНИТЬ ФИЛЬТРЫ
+  // Стейт для онлайна
+  const initialOnline = searchParams.get(`${prefix}_online`) === "true";
+  const [isOnline, setIsOnline] = useState<boolean>(initialOnline);
+
   const handleApply = () => {
     const params = new URLSearchParams(searchParams.toString());
 
-    // Закрываем модалку (убираем параметр modal из URL)
     params.delete("modal");
 
     if (fields?.experience)
@@ -82,15 +84,21 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
       params.delete(`${prefix}_spec`);
     }
 
+    if (fields?.online && isOnline) {
+      params.set(`${prefix}_online`, "true");
+    } else {
+      params.delete(`${prefix}_online`);
+    }
+
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  // СБРОСИТЬ ФИЛЬТРЫ
   const handleReset = () => {
     setExperience([0, MAX_EXP]);
     setPrice([0, MAX_PRICE]);
     setRating(null);
     setSpecialty([]);
+    setIsOnline(false);
 
     const params = new URLSearchParams(searchParams.toString());
     params.delete("modal");
@@ -98,6 +106,7 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
     params.delete(`${prefix}_price`);
     params.delete(`${prefix}_rating`);
     params.delete(`${prefix}_spec`);
+    params.delete(`${prefix}_online`);
 
     router.replace(`?${params.toString()}`, { scroll: false });
   };
@@ -109,6 +118,25 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
       <Header title="Фильтр" />
 
       <div className="flex-1 overflow-y-auto mt-2 px-2 pb-10 space-y-3">
+        {/* ЧЕКБОКС ОНЛАЙН */}
+        {fields?.online && (
+          <div
+            className="bg-white p-4 rounded-2xl flex items-center justify-between cursor-pointer"
+            onClick={() => setIsOnline(!isOnline)}
+          >
+            <span className="text-base font-medium text-[#191A1B]">
+              Только онлайн-консультация
+            </span>
+            <div
+              className={`w-12 h-6 rounded-full transition-colors relative ${isOnline ? "bg-[#F5653E]" : "bg-[#E3E4E5]"}`}
+            >
+              <div
+                className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isOnline ? "left-7" : "left-1"}`}
+              />
+            </div>
+          </div>
+        )}
+
         {/* БЛОК 1: СПЕЦИАЛИЗАЦИЯ */}
         {fields?.specialty && (
           <div className="bg-white p-4 rounded-2xl">

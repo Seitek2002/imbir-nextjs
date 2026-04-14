@@ -38,6 +38,9 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
   const currentPrice =
     typeof searchParams?.doc_price === "string" ? searchParams.doc_price : null;
 
+  // <-- НОВОЕ: Читаем флаг "онлайн" из URL
+  const isOnlineOnly = searchParams?.doc_online === "true";
+
   // 2. Фильтруем массив перед рендером
   const filteredDoctors = MOCK_SPECIALISTS.filter((doc) => {
     // Поиск по имени или специальности
@@ -50,6 +53,9 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
         return false;
       }
     }
+
+    // <-- НОВОЕ: Отсеиваем тех, кто не принимает онлайн
+    if (isOnlineOnly && !doc.isOnlineAvailable) return false;
 
     if (currentSpec) {
       const selectedSpecs = currentSpec.split(",");
@@ -68,7 +74,14 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
 
     if (currentPrice) {
       const [minPrice, maxPrice] = currentPrice.split("-").map(Number);
-      if (doc.price < minPrice || doc.price > maxPrice) return false;
+
+      // <-- НОВОЕ: Ищем минимальную цену по всем местам работы врача
+      const docMinPrice =
+        doc.workplaces.length > 0
+          ? Math.min(...doc.workplaces.map((w) => w.price))
+          : 0;
+
+      if (docMinPrice < minPrice || docMinPrice > maxPrice) return false;
     }
 
     return true;
@@ -96,6 +109,7 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
           experience: true,
           rating: true,
           price: true,
+          online: true, // <-- НОВОЕ: Включаем онлайн-фильтр
         }}
       />
 
@@ -161,8 +175,17 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
             )}
           </div>
 
-          {/* ДОБАВИЛИ ПРЕФИКС! */}
-          <FilterBar prefix="doc" title="Специалисты" />
+          <FilterBar
+            prefix="doc"
+            title="Специалисты"
+            fields={{
+              specialty: true,
+              experience: true,
+              rating: true,
+              price: true,
+              online: true, // <-- НОВОЕ: Включаем онлайн-фильтр
+            }}
+          />
 
           <div className="grid grid-cols-4 gap-5 mt-2">
             {filteredDoctors.length === 0 && (

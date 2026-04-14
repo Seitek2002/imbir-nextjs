@@ -60,6 +60,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
             Клиники
           </Link>
           <span>•</span>
+          {/* ИСПРАВЛЕНО НА MOCK_CLINIC */}
           <span className="text-[#F5653E]">{MOCK_CLINIC.name}</span>
         </div>
 
@@ -82,19 +83,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                 size="sm"
                 className="bg-white/80 backdrop-blur"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M13.7002 3.08203C15.98 3.08203 17.8339 4.9391 17.834 7.24023C17.834 8.17748 17.6844 9.04242 17.4248 9.84473L17.4238 9.84766C16.8013 11.8176 15.5246 13.4089 14.1426 14.5967C12.7583 15.7864 11.2961 16.5471 10.3555 16.8672L10.3506 16.8691C10.2791 16.8944 10.1517 16.915 10 16.915C9.84865 16.915 9.72192 16.8943 9.65039 16.8691L9.64453 16.8672L9.26855 16.7266C8.33979 16.3503 7.06963 15.6377 5.8584 14.5967C4.47629 13.4088 3.19968 11.8177 2.57715 9.84766L2.57617 9.84473L2.48438 9.54102C2.28184 8.82512 2.16699 8.06042 2.16699 7.24023C2.16706 4.9391 4.02097 3.08203 6.30078 3.08203C7.64403 3.08218 8.84796 3.73555 9.59961 4.74023L10 5.27539L10.4004 4.74023C11.1521 3.73547 12.3568 3.08207 13.7002 3.08203Z"
-                    fill="#FFA18D"
-                    stroke="#FFA18D"
-                  />
-                </svg>
+                <HeartIcon className="size-5 text-[#FFA18D]" />
               </IconBtn>
             </div>
 
@@ -137,10 +126,10 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
 
           {/* ПРАВАЯ КОЛОНКА: ИНФОРМАЦИЯ О КЛИНИКЕ */}
           <div className="flex-1 flex flex-col rounded-t-3xl md:rounded-none -mt-6 md:mt-0 relative z-10 p-2 md:p-0">
-            {/* Заголовок */}
             <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
               <div className="flex justify-center md:justify-between items-start mb-6">
                 <div>
+                  {/* ИСПРАВЛЕНО НА MOCK_CLINIC */}
                   <h1 className="text-2xl md:text-3xl font-semibold text-[#191A1B] mb-1">
                     {MOCK_CLINIC.name}
                   </h1>
@@ -148,7 +137,6 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                     {MOCK_CLINIC.type}
                   </p>
 
-                  {/* Адрес и время работы */}
                   <div className="flex flex-col gap-1.5 text-sm text-[#191A1B]">
                     <div className="flex items-center gap-2">
                       <span className="text-[#F5653E] flex items-center justify-center">
@@ -169,7 +157,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                 </IconBtn>
               </div>
 
-              {/* Статистика */}
+              {/* ИСПРАВЛЕНО НА MOCK_CLINIC */}
               <StatsPanel
                 rating={MOCK_CLINIC.rating}
                 experience={`${MOCK_CLINIC.experience} лет`}
@@ -178,7 +166,6 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
               />
             </div>
 
-            {/* Десктопные кнопки */}
             <div className="hidden md:flex gap-4 mb-10 mt-4">
               <Button
                 variant="outline"
@@ -191,14 +178,13 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
               </Button>
             </div>
 
-            {/* Детали */}
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
-              {/* О клинике */}
+              {/* ИСПРАВЛЕНО НА MOCK_CLINIC */}
               <InfoCard title="О клинике" expandable lines={3}>
                 {MOCK_CLINIC.about}
               </InfoCard>
 
-              {/* Контакты */}
+              {/* ИСПРАВЛЕНО НА MOCK_CLINIC */}
               <InfoCard title="Контакты" expandable={false}>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
@@ -300,19 +286,9 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
             </Link>
           </div>
 
-          {/* ИСПОЛЬЗУЕМ КОМПОНЕНТ DOCTOR CARD */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {MOCK_SPECIALISTS.map((doc) => (
-              <DoctorCard
-                key={doc.id}
-                name={doc.name}
-                specialty={doc.specialty}
-                clinic="" // Не пишем название клиники, т.к. мы уже в ней
-                rating={doc.rating}
-                reviews={doc.reviews}
-                experience={doc.experience}
-                variant="vertical" // У тебя по умолчанию vertical, но можно указать явно
-              />
+              <DoctorCard key={doc.id} {...doc} variant="vertical" />
             ))}
           </div>
         </div>
@@ -320,7 +296,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
         {/* --- СЕКЦИЯ: ОТЗЫВЫ --- */}
         <ReviewsSection
           initialReviews={MOCK_REVIEWS}
-          averageRating={MOCK_CLINIC.rating}
+          averageRating={MOCK_CLINIC.rating} // <-- ИСПРАВЛЕНО НА MOCK_CLINIC
         />
       </div>
 

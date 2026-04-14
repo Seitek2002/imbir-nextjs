@@ -19,6 +19,7 @@ type Props = {
     experience?: boolean;
     rating?: boolean;
     price?: boolean;
+    online?: boolean; // <-- Добавили поддержку онлайн-фильтра
   };
   children?: ReactNode;
 };
@@ -43,13 +44,18 @@ const MAX_PRICE = 5000;
 export const FilterBar: FC<Props> = ({
   title = "Фильтры",
   prefix,
-  fields = { specialty: true, experience: true, rating: true, price: true },
+  fields = {
+    specialty: true,
+    experience: true,
+    rating: true,
+    price: true,
+    online: true,
+  },
   children,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Достаем город из стора и локальный стейт для модалки
   const city = useCityStore((state) => state.city);
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
 
@@ -76,6 +82,10 @@ export const FilterBar: FC<Props> = ({
     initialPrice?.[0] ?? 0,
     initialPrice?.[1] ?? MAX_PRICE,
   ]);
+
+  // Стейт для онлайн-фильтра
+  const initialOnline = searchParams.get(`${prefix}_online`) === "true";
+  const [isOnline, setIsOnline] = useState<boolean>(initialOnline);
 
   const updateURL = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -107,17 +117,24 @@ export const FilterBar: FC<Props> = ({
     updateURL("price", `${val[0]}-${val[1]}`);
   };
 
+  const handleOnlineChange = (checked: boolean) => {
+    setIsOnline(checked);
+    updateURL("online", checked ? "true" : null);
+  };
+
   const handleReset = () => {
     setSpecialty([]);
     setExperience([0, MAX_EXP]);
     setRating("all");
     setPrice([0, MAX_PRICE]);
+    setIsOnline(false);
 
     const params = new URLSearchParams(searchParams.toString());
     params.delete(`${prefix}_spec`);
     params.delete(`${prefix}_exp`);
     params.delete(`${prefix}_rating`);
     params.delete(`${prefix}_price`);
+    params.delete(`${prefix}_online`);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
@@ -133,23 +150,51 @@ export const FilterBar: FC<Props> = ({
                 {title}
               </h2>
               <div className="flex items-center gap-2 ml-4">
-                {/* ВЕШАЕМ ОТКРЫТИЕ МОДАЛКИ НА КНОПКУ */}
                 <IconBtn size="md" onClick={() => setIsCityModalOpen(true)}>
                   <GeoIcon className="size-5 [&_path]:stroke-white" />
                 </IconBtn>
                 <div>
-                  {/* ВЫВОДИМ ДИНАМИЧЕСКИЙ ГОРОД */}
                   <div className="text-[#191A1B] font-medium">г. {city}</div>
-                  {/* Район пока оставляем хардкодом или можно убрать, если он не планируется в БД */}
                   <div className="text-[#838A8D] text-sm">Ленинский район</div>
                 </div>
               </div>
             </div>
-            <p className="text-[#686F72] text-lg mt-4 mb-10">
+            <p className="text-[#686F72] text-lg mt-4 mb-6">
               Выберите интересующие вас параметры, чтобы ознакомиться с
               подходящими вариантами
             </p>
           </>
+        )}
+
+        {/* Чекбокс ОНЛАЙН */}
+        {fields.online && (
+          <div className="mb-6 flex items-center">
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center">
+                <input
+                  type="checkbox"
+                  checked={isOnline}
+                  onChange={(e) => handleOnlineChange(e.target.checked)}
+                  className="peer sr-only"
+                />
+                <div className="w-6 h-6 border-2 border-[#E3E4E5] rounded-md peer-checked:bg-[#F5653E] peer-checked:border-[#F5653E] transition-colors"></div>
+                <svg
+                  className="absolute w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <span className="text-[#191A1B] font-medium group-hover:text-[#F5653E] transition-colors">
+                Только онлайн-консультация
+              </span>
+            </label>
+          </div>
         )}
 
         <div className="grid grid-cols-4 gap-5 items-start">
@@ -212,7 +257,6 @@ export const FilterBar: FC<Props> = ({
         </div>
       </div>
 
-      {/* РЕНДЕРИМ МОДАЛКУ ВНЕ ПОТОКА ОСНОВНОЙ ВЕРСТКИ */}
       <CitySelectorModal
         isOpen={isCityModalOpen}
         onClose={() => setIsCityModalOpen(false)}
