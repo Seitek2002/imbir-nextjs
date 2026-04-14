@@ -19,8 +19,12 @@ const DoctorsListContent = () => {
   const currentRating = searchParams.get("doc_rating");
   const currentExp = searchParams.get("doc_exp");
   const currentPrice = searchParams.get("doc_price");
+  const isOnlineOnly = searchParams.get("doc_online") === "true"; // <-- НОВОЕ
 
   const filteredDoctors = MOCK_SPECIALISTS.filter((doc) => {
+    // <-- НОВОЕ: Фильтр онлайна
+    if (isOnlineOnly && !doc.isOnlineAvailable) return false;
+
     // 1. Специальность
     if (currentSpec) {
       const selectedSpecs = currentSpec.split(",");
@@ -39,10 +43,15 @@ const DoctorsListContent = () => {
       if (doc.experience < minExp || doc.experience > maxExp) return false;
     }
 
-    // 4. Цена
+    // 4. Цена (Ищем минимальную по всем клиникам)
     if (currentPrice) {
       const [minPrice, maxPrice] = currentPrice.split("-").map(Number);
-      if (doc.price < minPrice || doc.price > maxPrice) return false;
+      const docMinPrice =
+        doc.workplaces.length > 0
+          ? Math.min(...doc.workplaces.map((w) => w.price))
+          : 0;
+
+      if (docMinPrice < minPrice || docMinPrice > maxPrice) return false;
     }
 
     return true;
@@ -59,13 +68,7 @@ const DoctorsListContent = () => {
           {filteredDoctors.map((doc) => (
             <DoctorCard
               key={`mobile-doc-${doc.id}`}
-              name={doc.name}
-              specialty={doc.specialty}
-              clinic={doc.clinic}
-              rating={doc.rating}
-              reviews={doc.reviews}
-              experience={doc.experience}
-              image={doc.image}
+              {...doc} // <-- ИСПРАВЛЕНО
               variant="horizontal"
             />
           ))}
@@ -81,13 +84,7 @@ const DoctorsListContent = () => {
           {filteredDoctors.map((doc) => (
             <DoctorCard
               key={`desktop-doc-${doc.id}`}
-              name={doc.name}
-              specialty={doc.specialty}
-              clinic={doc.clinic}
-              rating={doc.rating}
-              reviews={doc.reviews}
-              experience={doc.experience}
-              image={doc.image}
+              {...doc} // <-- ИСПРАВЛЕНО
               variant="vertical"
             />
           ))}
@@ -113,7 +110,18 @@ export const DoctorsMainList: FC = () => {
             </div>
           }
         >
-          <FilterBar prefix="doc" title="Специалисты" />
+          {/* Передаем online: true чтобы появился чекбокс */}
+          <FilterBar
+            prefix="doc"
+            title="Специалисты"
+            fields={{
+              specialty: true,
+              experience: true,
+              rating: true,
+              price: true,
+              online: true,
+            }}
+          />
         </Suspense>
       </div>
 

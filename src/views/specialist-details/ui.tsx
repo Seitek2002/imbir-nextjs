@@ -2,6 +2,7 @@
 
 import { FC } from "react";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { Footer, Header, VideosSwiper } from "@/widgets";
@@ -10,6 +11,7 @@ import { ReviewsSection } from "@/widgets/reviews/ui";
 
 import {
   EmailIcon,
+  GeoIcon,
   HeaderBackIcon,
   HeartIcon,
   HistoryIcon,
@@ -30,13 +32,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col relative pb-20 md:pb-0">
-      {/* Десктопный хедер (скрыт на мобилках) */}
       <div className="hidden md:block">
         <Header />
       </div>
 
       <div className="flex-1 w-full max-w-350 mx-auto md:px-10 flex flex-col pt-0 md:pt-6 pb-10">
-        {/* Хлебные крошки (только десктоп) */}
         <div className="hidden md:flex text-sm text-[#686F72] mb-6 items-center gap-2">
           <Link
             href={ROUTES.HOME}
@@ -55,11 +55,8 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
           <span className="text-[#F5653E]">{MOCK_DOCTOR.name}</span>
         </div>
 
-        {/* --- ОСНОВНОЙ БЛОК: ФОТО + ИНФО --- */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-          {/* Левая колонка / Мобильный верх: Фото */}
           <div className="relative w-full md:w-100 shrink-0">
-            {/* Мобильная шапка поверх фото */}
             <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 md:hidden">
               <IconBtn
                 variant="outline"
@@ -74,42 +71,63 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 size="sm"
                 className="bg-white/80 backdrop-blur"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M13.7002 3.08203C15.98 3.08203 17.8339 4.9391 17.834 7.24023C17.834 8.17748 17.6844 9.04242 17.4248 9.84473L17.4238 9.84766C16.8013 11.8176 15.5246 13.4089 14.1426 14.5967C12.7583 15.7864 11.2961 16.5471 10.3555 16.8672L10.3506 16.8691C10.2791 16.8944 10.1517 16.915 10 16.915C9.84865 16.915 9.72192 16.8943 9.65039 16.8691L9.64453 16.8672L9.26855 16.7266C8.33979 16.3503 7.06963 15.6377 5.8584 14.5967C4.47629 13.4088 3.19968 11.8177 2.57715 9.84766L2.57617 9.84473L2.48438 9.54102C2.28184 8.82512 2.16699 8.06042 2.16699 7.24023C2.16706 4.9391 4.02097 3.08203 6.30078 3.08203C7.64403 3.08218 8.84796 3.73555 9.59961 4.74023L10 5.27539L10.4004 4.74023C11.1521 3.73547 12.3568 3.08207 13.7002 3.08203Z"
-                    fill="#FFA18D"
-                    stroke="#FFA18D"
-                  />
-                </svg>
+                <HeartIcon className="size-5 text-[#FFA18D]" />
               </IconBtn>
             </div>
 
             <div className="relative w-full h-85 md:h-125 bg-[#FFEFE5] md:rounded-3xl overflow-hidden">
-              {/* Заглушка под фото. Заменишь на <Image src={MOCK_DOCTOR.image} ... /> */}
-              <div className="absolute inset-0 flex items-center justify-center text-[#838A8D]">
-                Фото {MOCK_DOCTOR.name}
-              </div>
+              {/* Вставили реальное фото вместо заглушки */}
+              <Image
+                src={MOCK_DOCTOR.image}
+                alt={MOCK_DOCTOR.name}
+                fill
+                className="object-cover object-top"
+              />
+              {/* Бейджик онлайна, если врач доступен онлайн */}
+              {MOCK_DOCTOR.isOnlineAvailable && (
+                <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider hidden md:block">
+                  Онлайн
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Правая колонка / Мобильный низ: Информация */}
           <div className="flex-1 flex flex-col rounded-t-3xl md:rounded-none -mt-6 md:mt-0 relative z-10 p-2 md:p-0">
-            {/* Заголовок и статистика */}
             <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
               <div className="flex justify-center md:justify-between items-start mb-6">
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-semibold text-[#191A1B] mb-1">
-                    {MOCK_DOCTOR.name}
-                  </h1>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-2xl md:text-3xl font-semibold text-[#191A1B]">
+                      {MOCK_DOCTOR.name}
+                    </h1>
+                    {/* Мобильный бейджик онлайна */}
+                    {MOCK_DOCTOR.isOnlineAvailable && (
+                      <span className="md:hidden bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0 mt-1">
+                        Онлайн
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[#838A8D] text-center lg:text-left text-base">
                     {MOCK_DOCTOR.specialty}
                   </p>
+
+                  {/* ВЫВОДИМ МЕСТА РАБОТЫ (КЛИНИКИ) И ЦЕНЫ */}
+                  <div className="mt-3 flex flex-col gap-1.5">
+                    {MOCK_DOCTOR.workplaces.map((workplace) => (
+                      <div
+                        key={workplace.clinicId}
+                        className="flex items-center gap-2 text-sm text-[#191A1B]"
+                      >
+                        <span className="text-[#F5653E]">
+                          <GeoIcon className="size-4" />
+                        </span>
+                        <span>{workplace.clinicName}</span>
+                        <span className="text-[#838A8D] ml-auto font-medium">
+                          {workplace.price} с
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <IconBtn variant="outline" size="md">
                   <HeartIcon className="size-5" />
@@ -130,14 +148,15 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 variant="outline"
                 className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-[#F5653E]"
               >
-                Онлайн-консультация
+                Офлайн-запись
               </Button>
-              <Button className="flex-1 justify-center">
-                Офлайн-консультация
-              </Button>
+              {MOCK_DOCTOR.isOnlineAvailable && (
+                <Button className="flex-1 justify-center">
+                  Видео-консультация
+                </Button>
+              )}
             </div>
 
-            {/* --- БЛОКИ ДЕТАЛЕЙ (с новым InfoCard) --- */}
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
               <InfoCard title="Образование" expandable lines={3}>
                 {MOCK_DOCTOR.education}
@@ -186,11 +205,10 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 </ul>
               </InfoCard>
 
-              {/* Контакты с иконками */}
               <InfoCard title="Контакты" expandable={false}>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E] flex items-center justify-center">
+                    <span className="text-[#F5653E]">
                       <HistoryIcon className="size-5" />
                     </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
@@ -198,7 +216,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E] flex items-center justify-center">
+                    <span className="text-[#F5653E]">
                       <PhoneIcon className="size-5" />
                     </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
@@ -206,7 +224,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E] flex items-center justify-center">
+                    <span className="text-[#F5653E]">
                       <EmailIcon className="size-5" />
                     </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
@@ -219,13 +237,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
           </div>
         </div>
 
-        {/* --- СЕКЦИЯ: ОТЗЫВЫ --- */}
         <ReviewsSection
           initialReviews={MOCK_REVIEWS}
           averageRating={MOCK_DOCTOR.rating}
         />
 
-        {/* --- СЕКЦИЯ ИНТЕРВЬЮ --- */}
         <div className="mt-10 md:mt-20 mb-10 md:mb-20 px-4 md:px-0">
           <div className="flex items-center justify-between mb-6 md:mb-8 md:hidden">
             <h2 className="text-2xl font-semibold text-[#191A1B]">Интервью</h2>
@@ -247,7 +263,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 title: "Врач онлайн: как это работает за 1 минуту",
                 authorName: MOCK_DOCTOR.name,
                 authorRole: MOCK_DOCTOR.specialty,
-                thumbnail: MOCK_DOCTOR.image.src,
+                // ИСПРАВЛЕНО: убрал .src, т.к. картинка может быть строкой или StaticImageData
+                thumbnail:
+                  typeof MOCK_DOCTOR.image === "string"
+                    ? MOCK_DOCTOR.image
+                    : MOCK_DOCTOR.image?.src || "",
                 youtubeUrl: "#",
               },
               {
@@ -255,7 +275,10 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 title: "3 шага к консультации с врачом",
                 authorName: MOCK_DOCTOR.name,
                 authorRole: MOCK_DOCTOR.specialty,
-                thumbnail: MOCK_DOCTOR.image.src,
+                thumbnail:
+                  typeof MOCK_DOCTOR.image === "string"
+                    ? MOCK_DOCTOR.image
+                    : MOCK_DOCTOR.image?.src || "",
                 youtubeUrl: "#",
               },
             ]}
@@ -267,11 +290,18 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
         <Footer />
       </div>
 
-      {/* Мобильная липкая кнопка внизу */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#E3E4E5] z-50">
-        <Button className="w-full justify-center" size="lg">
-          Записаться на приём
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#E3E4E5] z-50 flex gap-2 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
+        <Button
+          className="flex-1 justify-center bg-[#FFF2F0] text-[#F5653E] border border-transparent"
+          size="lg"
+        >
+          Офлайн
         </Button>
+        {MOCK_DOCTOR.isOnlineAvailable && (
+          <Button className="flex-1 justify-center" size="lg">
+            Онлайн
+          </Button>
+        )}
       </div>
     </main>
   );
