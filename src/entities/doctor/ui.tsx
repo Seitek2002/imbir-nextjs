@@ -1,4 +1,6 @@
-﻿import { FC } from "react";
+"use client";
+
+import { FC, useState } from "react";
 
 import Image, { StaticImageData } from "next/image";
 
@@ -36,20 +38,24 @@ export const DoctorCard: FC<Props> = ({
   initialSaved = false,
   variant = "vertical",
 }) => {
+  const [loaded, setLoaded] = useState(false);
+
   if (variant === "horizontal") {
     return (
       <div className="bg-white rounded-2xl border border-[#E3E4E5] p-2.5 flex items-stretch gap-2.5 w-full">
         <div className="relative w-30 min-w-30 self-stretch rounded-2xl overflow-hidden bg-[#FFF8F5]">
           {image ? (
-            <Image
-              src={image}
-              alt={name}
-              fill
-              sizes="120px"
-              className="object-cover object-top scale-110"
-              placeholder="blur"
-              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEzMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+"
-            />
+            <>
+              {!loaded && <div className="absolute inset-0 skeleton" />}
+              <Image
+                src={image}
+                alt={name}
+                fill
+                sizes="120px"
+                className="object-cover object-top scale-110"
+                onLoad={() => setLoaded(true)}
+              />
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <UserCircleIcon className="size-10 text-[#C4C8CA]" />

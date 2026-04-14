@@ -4,10 +4,37 @@
   -ms-overflow-style: none; /* IE и Edge */
   scrollbar-width: none; /* Firefox */
 
-  /* В v4 вложенность работает из коробки */
   &::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
+}
+
+@keyframes skeleton-wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  background-color: #e5e7eb !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  animation: skeleton-wave 1.4s ease-in-out infinite;
 }
 
 /* :root {

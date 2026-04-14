@@ -1,4 +1,6 @@
-﻿import { FC } from "react";
+"use client";
+
+import { FC, useState } from "react";
 
 import Image, { StaticImageData } from "next/image";
 
@@ -17,6 +19,8 @@ export const VideoCard: FC<Props> = ({
   thumbnail,
   youtubeUrl,
 }) => {
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <a
       href={youtubeUrl}
@@ -25,16 +29,15 @@ export const VideoCard: FC<Props> = ({
       className="bg-white rounded-3xl border border-[#D8DCE0] p-2 flex flex-col w-full h-auto md:h-89.25 shrink-0 hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] transition-shadow duration-300"
     >
       <div className="relative w-full aspect-video md:aspect-auto md:h-55 shrink-0 overflow-hidden rounded-2xl bg-[#F2F3F5]">
+        {!loaded && <div className="absolute inset-0 skeleton" />}
         <Image
           src={thumbnail}
           alt={title}
           fill
           sizes="(max-width: 768px) 100vw, 440px"
           className="object-cover"
-          placeholder="blur"
-          blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+"
+          onLoad={() => setLoaded(true)}
         />
-
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="size-12 rounded-full bg-white/90 flex items-center justify-center shadow-md pl-0.5">
             <svg
@@ -90,7 +93,6 @@ export const VideoCard: FC<Props> = ({
               strokeLinejoin="round"
             />
           </svg>
-
           <span className="truncate text-[#313A45]">{authorName}</span>
           <span className="shrink-0">•</span>
           <span className="truncate">{authorRole}</span>

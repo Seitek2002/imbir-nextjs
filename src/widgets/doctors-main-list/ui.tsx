@@ -7,6 +7,8 @@ import { useSearchParams } from "next/navigation";
 import { DoctorCard } from "@/entities";
 import { FilterBar } from "@/features";
 
+import { DoctorSkeleton } from "@/entities/doctor";
+
 import { MOCK_SPECIALISTS } from "@/shared/constants/mocks";
 import { Button } from "@/shared/ui";
 
@@ -101,7 +103,14 @@ export const DoctorsMainList: FC = () => {
       <div className="hidden lg:block">
         <Suspense
           fallback={
-            <div className="h-50 bg-gray-100 animate-pulse rounded-2xl" />
+            <div className="flex items-center justify-between">
+              <div className="h-9 w-44 skeleton rounded-xl" />
+              <div className="flex gap-2">
+                {Array.from({ length: 4 }, (_, i) => (
+                  <div key={i} className="h-9 w-28 skeleton rounded-full" />
+                ))}
+              </div>
+            </div>
           }
         >
           <FilterBar prefix="doc" title="Специалисты" />
@@ -117,7 +126,9 @@ export const DoctorsMainList: FC = () => {
 
       <Suspense
         fallback={
-          <div className="h-100 bg-gray-100 animate-pulse mt-10 rounded-2xl" />
+          <div className="mt-10">
+            <DoctorSkeleton count={4} variant="vertical" />
+          </div>
         }
       >
         <DoctorsListContent />

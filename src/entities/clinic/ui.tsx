@@ -1,4 +1,6 @@
-import { FC } from "react";
+"use client";
+
+import { FC, useState } from "react";
 
 import { StaticImageData } from "next/image";
 import Image from "next/image";
@@ -6,11 +8,6 @@ import Image from "next/image";
 import { GeoIcon, StarIcon } from "@/shared/assets";
 
 import { ClinicSaveButton } from "./save-button";
-
-const BLUR_SM =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQwIiBoZWlnaHQ9IjEwNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+";
-const BLUR_LG =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIxMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+";
 
 type Props = {
   name: string;
@@ -35,20 +32,24 @@ export const ClinicCard: FC<Props> = ({
   initialSaved = false,
   variant = "vertical",
 }) => {
+  const [loaded, setLoaded] = useState(false);
+
   if (variant === "horizontal") {
     return (
       <div className="bg-white rounded-2xl border border-[#E3E4E5] overflow-hidden flex items-stretch w-full">
         <div className="relative w-35">
           {image ? (
-            <Image
-              src={image}
-              alt={name}
-              fill
-              sizes="140px"
-              className="object-cover"
-              placeholder="blur"
-              blurDataURL={BLUR_SM}
-            />
+            <>
+              {!loaded && <div className="absolute inset-0 skeleton" />}
+              <Image
+                src={image}
+                alt={name}
+                fill
+                sizes="140px"
+                className="object-cover"
+                onLoad={() => setLoaded(true)}
+              />
+            </>
           ) : (
             <div className="w-full h-full bg-[#F2F3F5]" />
           )}
@@ -85,15 +86,17 @@ export const ClinicCard: FC<Props> = ({
     <div className="bg-white rounded-3xl border border-[#E3E4E5] w-full h-full flex flex-col p-2">
       <div className="relative w-full h-55 rounded-2xl overflow-hidden">
         {image ? (
-          <Image
-            src={image}
-            alt={name}
-            fill
-            sizes="280px"
-            className="object-cover"
-            placeholder="blur"
-            blurDataURL={BLUR_LG}
-          />
+          <>
+            {!loaded && <div className="absolute inset-0 skeleton" />}
+            <Image
+              src={image}
+              alt={name}
+              fill
+              sizes="280px"
+              className="object-cover"
+              onLoad={() => setLoaded(true)}
+            />
+          </>
         ) : (
           <div className="w-full h-full bg-[#F2F3F5]" />
         )}

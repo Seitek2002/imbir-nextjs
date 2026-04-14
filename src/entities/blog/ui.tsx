@@ -1,10 +1,9 @@
-import { FC } from "react";
+"use client";
+
+import { FC, useState } from "react";
 
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
-
-const BLUR =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDQwIiBoZWlnaHQ9IjM2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRjJGM0Y1Ii8+PC9zdmc+";
 
 type Props = {
   title: string;
@@ -23,20 +22,22 @@ export const BlogCard: FC<Props> = ({
   image,
   href = "#",
 }) => {
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <Link
       href={href}
       className="bg-white rounded-3xl overflow-hidden flex flex-col p-2 group w-full border border-[#E3E4E5]"
     >
       <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
+        {!loaded && <div className="absolute inset-0 rounded-2xl skeleton" />}
         <Image
           src={image}
           alt={title}
           fill
           sizes="(max-width: 768px) 100vw, 440px"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
-          placeholder="blur"
-          blurDataURL={BLUR}
+          onLoad={() => setLoaded(true)}
         />
       </div>
 
