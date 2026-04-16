@@ -6,19 +6,51 @@ import {
   ClinicImage3,
   ClinicImage4,
   DoctorImage1,
-  DoctorImage2,
-  DoctorImage3,
-  DoctorImage4,
 } from "../assets";
 
 // ==========================================
 // 1. ТИПЫ ДАННЫХ (КОНТРАКТ ДЛЯ БЭКЕНДА)
 // ==========================================
 
+export type ReviewItem = {
+  id: string;
+  author: string;
+  avatar?: string; // Добавим аватарку автора для красоты
+  date: string;
+  text: string;
+  rating: number;
+
+  // СВЯЗИ (Foreign Keys)
+  doctorId: string; // К какому врачу относится
+  clinicId: string; // В какой клинике проходил прием
+  serviceId?: string; // Какая услуга была оказана (опционально)
+
+  // Для верификации (что отзыв реальный)
+  appointmentId?: string;
+};
+
+export type TimeSlot = {
+  start: string; // "09:00"
+  end: string; // "18:00"
+} | null;
+
+// Полный график на неделю + обед
+export type Schedule = {
+  mon: TimeSlot;
+  tue: TimeSlot;
+  wed: TimeSlot;
+  thu: TimeSlot;
+  fri: TimeSlot;
+  sat: TimeSlot;
+  sun: TimeSlot;
+  lunchBreak: TimeSlot; // Один обед на всю неделю, как на твоем макете
+};
+
 export type Workplace = {
-  clinicId: string | number;
+  clinicId: string;
   clinicName: string;
   price: number;
+  schedule: Schedule;
 };
 
 export type DoctorListItem = {
@@ -41,24 +73,20 @@ export type ClinicListItem = {
   experience: number;
   address: string;
   specialties: string[];
-  image?: StaticImageData | any | string; // <-- Заменил на any | string
+  image?: StaticImageData | any | string;
 };
 
 export type ServiceItem = {
-  id: string | number;
+  id: string;
+  clinicId: string;
   name: string;
   category: string;
-  price: string;
+  price: number;
+  image: string;
+  schedule: Schedule;
+  doctorIds: string[];
   rating: number;
   reviews: number;
-};
-
-export type ReviewItem = {
-  id: string | number;
-  author: string;
-  date: string;
-  text: string;
-  rating: number;
 };
 
 // ==========================================
@@ -67,54 +95,73 @@ export type ReviewItem = {
 
 export const MOCK_SPECIALISTS: DoctorListItem[] = [
   {
-    id: 1,
+    id: "1",
     name: "Айбеков Нурлан",
     specialty: "Кардиолог",
     workplaces: [
-      { clinicId: "1", clinicName: "Nova Clinic", price: 2500 },
-      { clinicId: "2", clinicName: "K-MED", price: 2000 },
+      {
+        clinicId: "1",
+        clinicName: "Nova Clinic",
+        price: 2500,
+        schedule: {
+          mon: { start: "09:00", end: "15:00" },
+          tue: null,
+          wed: { start: "09:00", end: "15:00" },
+          thu: null,
+          fri: { start: "09:00", end: "15:00" },
+          sat: null,
+          sun: null,
+          lunchBreak: { start: "13:00", end: "14:00" },
+        },
+      },
+      {
+        clinicId: "2",
+        clinicName: "K-MED",
+        price: 2000,
+        schedule: {
+          mon: null,
+          tue: { start: "10:00", end: "18:00" },
+          wed: null,
+          thu: { start: "10:00", end: "18:00" },
+          fri: null,
+          sat: { start: "10:00", end: "14:00" },
+          sun: null,
+          lunchBreak: { start: "14:00", end: "15:00" },
+        },
+      },
     ],
-    isOnlineAvailable: true, // Принимает онлайн
+    isOnlineAvailable: true,
     rating: 4.9,
     reviews: 128,
     experience: 15,
-    image: DoctorImage1,
+    image: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
   },
   {
-    id: 2,
+    id: "2",
     name: "Садыкова Алина",
     specialty: "Врач-терапевт",
-    workplaces: [{ clinicId: "3", clinicName: "MED Clinic", price: 1500 }],
-    isOnlineAvailable: false, // Только офлайн
+    workplaces: [
+      {
+        clinicId: "3",
+        clinicName: "MED Clinic",
+        price: 1500,
+        schedule: {
+          mon: { start: "08:00", end: "16:00" },
+          tue: { start: "08:00", end: "16:00" },
+          wed: { start: "08:00", end: "16:00" },
+          thu: { start: "08:00", end: "16:00" },
+          fri: { start: "08:00", end: "16:00" },
+          sat: null,
+          sun: null,
+          lunchBreak: { start: "12:00", end: "13:00" },
+        },
+      },
+    ],
+    isOnlineAvailable: false,
     rating: 4.85,
     reviews: 255,
     experience: 12,
-    image: DoctorImage2,
-  },
-  {
-    id: 3,
-    name: "Жумабаев Данияр",
-    specialty: "Хирург",
-    workplaces: [
-      { clinicId: "4", clinicName: "BioMed", price: 3000 },
-      { clinicId: "5", clinicName: "City Health", price: 3200 },
-    ],
-    isOnlineAvailable: true,
-    rating: 4.2,
-    reviews: 45,
-    experience: 8,
-    image: DoctorImage3,
-  },
-  {
-    id: 4,
-    name: "Калиева Айгерим",
-    specialty: "Педиатр",
-    workplaces: [{ clinicId: "6", clinicName: "HealthPlus", price: 2000 }],
-    isOnlineAvailable: true,
-    rating: 5.0,
-    reviews: 312,
-    experience: 20,
-    image: DoctorImage4,
+    image: "https://i.pravatar.cc/150?u=a04258114e29026702d",
   },
 ];
 
@@ -163,36 +210,46 @@ export const MOCK_CLINICS: ClinicListItem[] = [
 
 export const MOCK_SERVICES: ServiceItem[] = [
   {
-    id: 1,
+    id: "1",
+    clinicId: "3",
     name: "Анализ крови",
-    category: "Лаборатория • MED Clinic",
-    price: "800 c",
+    category: "Лаборатория",
+    price: 800,
+    image: "https://placehold.co/400x300/E3E4E5/838A8D?text=Lab",
+    schedule: {
+      mon: { start: "07:00", end: "12:00" },
+      tue: { start: "07:00", end: "12:00" },
+      wed: { start: "07:00", end: "12:00" },
+      thu: { start: "07:00", end: "12:00" },
+      fri: { start: "07:00", end: "12:00" },
+      sat: null,
+      sun: null,
+      lunchBreak: null,
+    },
+    doctorIds: ["2"],
     rating: 4.9,
     reviews: 1200,
   },
   {
-    id: 2,
-    name: "Аудиометрия",
-    category: "Медицина • MED Clinic",
-    price: "1500 c",
-    rating: 4.7,
-    reviews: 340,
-  },
-  {
-    id: 3,
-    name: "Биопсия",
-    category: "Хирургия • MED Clinic",
-    price: "4500 c",
+    id: "2",
+    clinicId: "1",
+    name: "ЭКГ",
+    category: "Кардиология",
+    price: 1500,
+    image: "https://placehold.co/400x300/E3E4E5/838A8D?text=ECG",
+    schedule: {
+      mon: { start: "09:00", end: "18:00" },
+      tue: { start: "09:00", end: "18:00" },
+      wed: { start: "09:00", end: "18:00" },
+      thu: { start: "09:00", end: "18:00" },
+      fri: { start: "09:00", end: "18:00" },
+      sat: null,
+      sun: null,
+      lunchBreak: { start: "13:00", end: "14:00" },
+    },
+    doctorIds: ["1"],
     rating: 4.8,
-    reviews: 150,
-  },
-  {
-    id: 4,
-    name: "УЗИ брюшной полости",
-    category: "УЗИ • MED Clinic",
-    price: "1200 c",
-    rating: 4.6,
-    reviews: 580,
+    reviews: 340,
   },
 ];
 

@@ -97,4 +97,31 @@ export const api = {
       throw error;
     }
   },
+
+  getReviewsByDoctor: async (doctorId: string): Promise<ReviewItem[]> => {
+    try {
+      const res = await fetch(`${API_URL}/reviews?doctorId=${doctorId}`, {
+        next: { revalidate: 0 },
+      });
+      if (!res.ok) throw new Error("Ошибка при загрузке отзывов врача");
+      return await res.json();
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  },
+
+  // Получить отзывы клиники
+  getReviewsByClinic: async (clinicId: string): Promise<ReviewItem[]> => {
+    try {
+      const res = await fetch(`${API_URL}/reviews?clinicId=${clinicId}`, {
+        next: { revalidate: 0 },
+      });
+      if (!res.ok) throw new Error("Ошибка при загрузке отзывов клиники");
+      return await res.json();
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  },
 };
