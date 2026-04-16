@@ -2,8 +2,7 @@
 
 import { FC, useState } from "react";
 
-import { ProfileMobileHeader } from "@/widgets";
-
+import { ProfileMobileHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSaved as SavedWidget } from "@/widgets/profile-saved";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 

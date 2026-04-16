@@ -4,8 +4,8 @@ import { FC } from "react";
 
 import Image from "next/image";
 
-import { EditIcon, GeoIcon, RemoveIcon } from "@/shared/assets";
-import { StarRating } from "@/shared/ui";
+import { EditIcon, GeoIcon, RemoveIcon } from "@/shared/assets/icons";
+import { StarRating } from "@/shared/ui/star-rating";
 
 import type { UserReview } from "./model";
 
@@ -34,7 +34,7 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
       case "clinic":
         return (
           <div className="flex items-center gap-1 text-[#838A8D] text-sm mt-0.5">
-            <GeoIcon className="w-4 h-4 [&_path]:stroke-[#838A8D] flex-shrink-0" />
+            <GeoIcon className="w-4 h-4 [&_path]:stroke-[#838A8D] shrink-0" />
             <span className="truncate">{review.clinicAddress}</span>
           </div>
         );
@@ -62,7 +62,7 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           {review.image ? (
-            <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+            <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
               <Image
                 src={review.image}
                 alt={getTitle() || ""}
@@ -72,7 +72,7 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
               />
             </div>
           ) : (
-            <div className="w-12 h-12 rounded-full bg-[#F8F9FA] flex items-center justify-center text-[#838A8D] text-lg font-semibold flex-shrink-0">
+            <div className="w-12 h-12 rounded-full bg-[#F8F9FA] flex items-center justify-center text-[#838A8D] text-lg font-semibold shrink-0">
               {getTitle()?.charAt(0) || "?"}
             </div>
           )}
@@ -84,7 +84,7 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {onEdit && (
             <button
               onClick={() => onEdit(review.id)}

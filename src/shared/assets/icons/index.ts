@@ -12,6 +12,7 @@ import HeartIcon from "./cards/heart.svg";
 import PlayIcon from "./cards/play.svg";
 import ThunderIcon from "./cards/thunder.svg";
 import CalendarIcon from "./common/calendar.svg";
+import EditIcon from "./common/edit.svg";
 import MedicalServiceIcon from "./common/medical-service.svg";
 import StarBoldIcon from "./common/star-bold.svg";
 import StarOutlineIcon from "./common/star-outline.svg";
@@ -50,6 +51,7 @@ import SearchHistory from "./search/history.svg";
 import SearchRemoveHistory from "./search/remove-history.svg";
 
 export {
+  EditIcon,
   ArrowIcon,
   PhoneIcon,
   SearchHistory,
