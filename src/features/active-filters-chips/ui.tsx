@@ -54,7 +54,7 @@ export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
       {specs.map((spec) => (
         <div
           key={spec}
-          className="flex items-center gap-1 px-2 py-1 bg-white border border-[#E5E6E8] rounded-sm shrink-0"
+          className="flex items-center gap-1 px-2 py-1 bg-white border border-[#E5E6E8] rounded-sm shrink-0-0"
         >
           <span className="text-sm text-[#191A1B] font-medium">{spec}</span>
           <button
@@ -68,7 +68,7 @@ export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
 
       {/* 2. Плашка рейтинга */}
       {rating && rating !== "all" && (
-        <div className="flex items-center gap-1 px-2 py-1 bg-white border border-[#E5E6E8] rounded-sm shrink-0">
+        <div className="flex items-center gap-1 px-2 py-1 bg-white border border-[#E5E6E8] rounded-sm shrink-0-0">
           <StarIcon className="size-4 text-[#F5653E]" />
           <span className="text-sm text-[#191A1B] font-medium">{rating}</span>
           <button
@@ -82,7 +82,7 @@ export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
 
       {/* 3. Плашка стажа */}
       {experience && (
-        <div className="flex items-center gap-1 px-2 py-1 bg-white border border-[#E5E6E8] rounded-sm shrink-0">
+        <div className="flex items-center gap-1 px-2 py-1 bg-white border border-[#E5E6E8] rounded-sm shrink-0-0">
           <span className="text-sm text-[#191A1B] font-medium">
             Стаж: {experience}
           </span>
@@ -97,7 +97,7 @@ export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
 
       {/* 4. Плашка стоимости */}
       {price && (
-        <div className="flex items-center gap-1 px-2 py-1 bg-white border border-[#E5E6E8] rounded-sm shrink-0">
+        <div className="flex items-center gap-1 px-2 py-1 bg-white border border-[#E5E6E8] rounded-sm shrink-0-0">
           <span className="text-sm text-[#191A1B] font-medium">
             Цена: {price}
           </span>

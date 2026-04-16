@@ -29,13 +29,9 @@ const ClinicCardSkeletonVertical = () => (
 );
 
 const ClinicCardSkeletonHorizontal = () => (
-  // Убрал p-2.5, так как в реальной карточке картинка прилегает к краю
-  <div className="bg-white rounded-2xl border border-[#E3E4E5] overflow-hidden flex items-stretch w-full">
-    {/* Картинка: w-35 как в оригинале */}
-    <div className="w-35 skeleton shrink-0" style={{ minHeight: "110px" }} />
-
-    <div className="p-3 flex-1 min-w-0 flex flex-col justify-center">
-      {/* Название */}
+  <div className="bg-white rounded-2xl border border-[#E3E4E5] p-2.5 flex items-stretch gap-2.5 w-full">
+    <div className="w-20 h-20 rounded-xl skeleton shrink-0-0" />
+    <div className="flex-1 py-1 space-y-2">
       <div className="h-4 w-3/4 skeleton rounded-md" />
 
       {/* Рейтинг */}

@@ -297,7 +297,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                     }
                     disabled={item.disabled}
                     className={cn(
-                      "flex flex-col items-center justify-center gap-1 w-12 h-14 rounded-xl border text-sm transition-all shrink-0",
+                      "flex flex-col items-center justify-center gap-1 w-12 h-14 rounded-xl border text-sm transition-all shrink-0-0",
                       isSelected
                         ? "border-[#F5653E] text-[#F5653E] bg-[#FFF3EE]"
                         : "border-[#E3E4E5] text-[#191A1B] bg-white",

@@ -38,7 +38,6 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
     );
   }
 
-  // Мобильная версия - все в колонку
   if (isMobile) {
     return (
       <div className="flex flex-col gap-4">
@@ -49,7 +48,8 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
                 key={item.id}
                 name={item.data.name}
                 specialty={item.data.specialty}
-                clinic={item.data.clinic}
+                workplaces={item.data.workplaces}
+                isOnlineAvailable={item.data.isOnlineAvailable}
                 rating={item.data.rating}
                 reviews={item.data.reviews}
                 experience={item.data.experience}
@@ -102,7 +102,6 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
     );
   }
 
-  // Десктоп - сетка
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {filteredItems.map((item) => {
@@ -112,7 +111,8 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
               key={item.id}
               name={item.data.name}
               specialty={item.data.specialty}
-              clinic={item.data.clinic}
+              workplaces={item.data.workplaces}
+              isOnlineAvailable={item.data.isOnlineAvailable}
               rating={item.data.rating}
               reviews={item.data.reviews}
               experience={item.data.experience}

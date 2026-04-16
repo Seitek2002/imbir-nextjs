@@ -36,7 +36,7 @@ const SaveButton: FC<{
   return (
     <button
       onClick={handleClick}
-      className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shadow-sm flex-shrink-0"
+      className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shadow-sm shrink-0"
       aria-label={isSaved ? "Удалить из избранного" : "Добавить в избранное"}
     >
       {isSaved ? (
@@ -64,7 +64,7 @@ export const ServiceCard: FC<Props> = ({
   if (variant === "horizontal") {
     return (
       <div className="bg-white rounded-3xl p-4 flex items-center gap-4 border border-[#E5E6E8]">
-        <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-[#F8F9FA] flex-shrink-0">
+        <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-[#F8F9FA] shrink-0">
           {image ? (
             <Image
               src={image}
@@ -118,7 +118,7 @@ export const ServiceCard: FC<Props> = ({
 
   return (
     <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden flex flex-col h-full">
-      <div className="relative aspect-[4/3] w-full">
+      <div className="relative aspect-4/3 w-full">
         {image ? (
           <Image
             src={image}

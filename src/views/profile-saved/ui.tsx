@@ -2,8 +2,7 @@
 
 import { FC, useState } from "react";
 
-import { ProfileMobileHeader } from "@/widgets";
-
+import { ProfileMobileHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSaved as SavedWidget } from "@/widgets/profile-saved";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
@@ -32,7 +31,7 @@ export const ProfileSavedPage: FC = () => {
             viewBox="0 0 20 20"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="flex-shrink-0"
+            className="shrink-0"
           >
             <path
               d="M3.33334 16.6667H16.6667M5.00001 16.6667V6.66667L10 3.33334L15 6.66667V16.6667M8.33334 16.6667V12.5C8.33334 12.0398 8.70644 11.6667 9.16668 11.6667H10.8333C11.2936 11.6667 11.6667 12.0398 11.6667 12.5V16.6667"
@@ -51,7 +50,7 @@ export const ProfileSavedPage: FC = () => {
             viewBox="0 0 20 20"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="flex-shrink-0"
+            className="shrink-0"
           >
             <path
               d="M13.3333 5.83333C13.3333 7.67428 11.8409 9.16667 10 9.16667C8.15906 9.16667 6.66667 7.67428 6.66667 5.83333C6.66667 3.99238 8.15906 2.5 10 2.5C11.8409 2.5 13.3333 3.99238 13.3333 5.83333Z"
@@ -73,7 +72,7 @@ export const ProfileSavedPage: FC = () => {
             viewBox="0 0 20 20"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="flex-shrink-0"
+            className="shrink-0"
           >
             <path
               d="M10 2.5V5.83333M10 14.1667V17.5M5.83333 10H2.5M17.5 10H14.1667M14.7487 14.7487L12.357 12.357M14.7487 5.25132L12.357 7.643M5.25132 14.7487L7.643 12.357M5.25132 5.25132L7.643 7.643"
@@ -89,13 +88,13 @@ export const ProfileSavedPage: FC = () => {
   return (
     <>
       <ProfileMobileHeader title="Сохранённое" />
-      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
+      <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
         <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden md:block">
           Мой профиль
         </h1>
 
         <div className="flex gap-6">
-          <aside className="hidden lg:block flex-shrink-0">
+          <aside className="hidden lg:block shrink-0">
             <ProfileSidebar />
           </aside>
 
@@ -116,7 +115,7 @@ export const ProfileSavedPage: FC = () => {
                   />
                   <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#838A8D] [&_path]:stroke-[#838A8D]" />
                 </div>
-                <button className="w-12 h-12 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center hover:bg-[#F8F9FA] transition-colors flex-shrink-0">
+                <button className="w-12 h-12 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shrink-0">
                   <svg
                     width="20"
                     height="20"

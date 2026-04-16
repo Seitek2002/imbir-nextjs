@@ -60,7 +60,7 @@ export const Footer: FC = () => {
         {/* Верхняя часть: Сетка с контентом */}
         <div className="flex flex-col lg:flex-row justify-between gap-10 lg:gap-8">
           {/* Логотип и социальные сети */}
-          <div className="flex flex-col gap-6 lg:w-1/4 shrink-0">
+          <div className="flex flex-col gap-6 lg:w-1/4 shrink-0-0">
             <Link href={ROUTES.HOME}>
               <Logo className="w-35 h-auto" />
             </Link>

@@ -80,7 +80,7 @@ export const DoctorCard: FC<Props> = ({
               {name}
             </p>
             {isOnlineAvailable && (
-              <span className="shrink-0 bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+              <span className="shrink-0-0 bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
                 Онлайн
               </span>
             )}
