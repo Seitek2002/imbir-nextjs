@@ -42,7 +42,6 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
 
   const { data: services = [] } = useQuery({
     queryKey: ["services", "clinic", id],
-    // Получаем все услуги и фильтруем те, что принадлежат этой клинике
     queryFn: async () => {
       const allServices = await api.getServices();
       return allServices.filter((s) => s.clinicId === id);
@@ -51,7 +50,6 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
 
   const { data: doctors = [] } = useQuery({
     queryKey: ["doctors", "clinic", id],
-    // Получаем всех врачей и ищем тех, кто работает в этой клинике
     queryFn: async () => {
       const allDoctors = await api.getDoctors();
       return allDoctors.filter((doc) =>
@@ -65,7 +63,6 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
     queryFn: () => api.getReviewsByClinic(id),
   });
 
-  // ПОКА ГРУЗИТСЯ — ПОКАЗЫВАЕМ ПРОСТОЙ ЛОАДЕР (Можешь заменить на красивый скелетон потом)
   if (isClinicLoading || !clinic) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -74,7 +71,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
     );
   }
 
-  // Если у клиники нет детального описания и контактов (в MockAPI мы их пока не добавили всем), ставим заглушки
+  // --- ФОЛЛБЭКИ ТЕКСТОВ ---
   const aboutText =
     clinic.about ||
     "Современная медицинская помощь, опытные врачи и индивидуальный подход к каждому пациенту.";
@@ -82,8 +79,18 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
   const phoneText = clinic.phone || "+996 700 123 456";
   const emailText = clinic.email || "info@clinic.kg";
 
-  // Делаем массив картинок (так как в MockAPI у нас пока одна строка image, размножим её для слайдера)
-  const images = clinic.images || [clinic.image, clinic.image, clinic.image];
+  // --- ИСПРАВЛЕНИЕ ОШИБКИ С КАРТИНКАМИ ---
+  // Создаем дефолтную картинку-заглушку на случай, если с сервера вообще ничего не пришло
+  const defaultImg =
+    "https://placehold.co/600x400/FFEFE5/F5653E.png?text=Clinic";
+
+  // Гарантируем, что у нас всегда есть валидный src
+  const safeImage = clinic.image || defaultImg;
+
+  // Если есть массив images, берем его. Если нет — размножаем safeImage
+  const images = clinic.images?.length
+    ? clinic.images
+    : [safeImage, safeImage, safeImage];
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col relative pb-20 md:pb-0">
@@ -143,7 +150,8 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
               </div>
 
               <div className="hidden md:flex gap-3 overflow-x-auto scrollbar-hide">
-                {images.map((img: string, idx: number) => (
+                {/* ИСПРАВЛЕНИЕ: убрал (img: string), позволив TS вывести тип (string | StaticImageData) */}
+                {images.map((img, idx) => (
                   <div
                     key={idx}
                     onClick={() => setActiveImageIdx(idx)}
@@ -156,7 +164,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                   >
                     <Image
                       src={img}
-                      alt="thumb"
+                      alt={`thumb-${idx}`}
                       fill
                       className="object-cover"
                     />
