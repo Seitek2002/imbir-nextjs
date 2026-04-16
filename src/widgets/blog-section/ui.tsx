@@ -35,7 +35,7 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
         <div className="hidden md:flex gap-5">
           <Link
             href={featured.href}
-            className="relative w-167.5 shrink-0 h-105 rounded-3xl overflow-hidden border border-[#E3E4E5] group block"
+            className="relative w-167.5 shrink-0-0 h-105 rounded-3xl overflow-hidden border border-[#E3E4E5] group block"
           >
             {!featuredLoaded && <div className="absolute inset-0 skeleton" />}
             <Image
@@ -125,7 +125,7 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
       <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button
           onClick={() => setActiveCategory("all")}
-          className="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
+          className="shrink-0-0 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
           style={{
             backgroundColor: activeCategory === "all" ? "#F5653E" : "#E3E4E5",
             color: activeCategory === "all" ? "#fff" : "#686F72",
@@ -137,7 +137,7 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
           <button
             key={category.id}
             onClick={() => setActiveCategory(category.id)}
-            className="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
+            className="shrink-0-0 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
             style={{
               backgroundColor:
                 activeCategory === category.id ? "#F5653E" : "#E3E4E5",

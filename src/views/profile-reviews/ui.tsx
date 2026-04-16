@@ -24,13 +24,13 @@ export const ProfileReviewsPage: FC = () => {
   return (
     <>
       <ProfileMobileHeader title="История записей" />
-      <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
+      <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
         <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden md:block">
           Мой профиль
         </h1>
 
         <div className="flex gap-6">
-          <aside className="hidden lg:block flex-shrink-0">
+          <aside className="hidden lg:block shrink-0">
             <ProfileSidebar />
           </aside>
 
@@ -51,7 +51,7 @@ export const ProfileReviewsPage: FC = () => {
                   />
                   <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#838A8D] [&_path]:stroke-[#838A8D]" />
                 </div>
-                <button className="w-12 h-12 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center hover:bg-[#F8F9FA] transition-colors flex-shrink-0">
+                <button className="w-12 h-12 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shrink-0">
                   <svg
                     width="20"
                     height="20"

@@ -56,7 +56,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
         </div>
 
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-          <div className="relative w-full md:w-100 shrink-0">
+          <div className="relative w-full md:w-100 shrink-0-0">
             <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 md:hidden">
               <IconBtn
                 variant="outline"
@@ -102,7 +102,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                     </h1>
                     {/* Мобильный бейджик онлайна */}
                     {MOCK_DOCTOR.isOnlineAvailable && (
-                      <span className="md:hidden bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0 mt-1">
+                      <span className="md:hidden bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0-0 mt-1">
                         Онлайн
                       </span>
                     )}

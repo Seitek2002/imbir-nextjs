@@ -24,8 +24,8 @@ export const AppointmentCard: FC<Props> = ({
       {/* Desktop */}
       <div className="hidden md:flex bg-white rounded-3xl p-5 border border-[#E5E6E8] items-start gap-4">
         {/* Doctor Photo + Rating */}
-        <div className="relative flex-shrink-0">
-          <div className="relative w-[200px] h-[200px] rounded-2xl overflow-hidden bg-[#FFF8F5]">
+        <div className="relative shrink-0">
+          <div className="relative w-50 h-50 rounded-2xl overflow-hidden bg-[#FFF8F5]">
             {appointment.doctorImage ? (
               <Image
                 src={appointment.doctorImage}
@@ -66,7 +66,7 @@ export const AppointmentCard: FC<Props> = ({
                 height="20"
                 viewBox="0 0 20 20"
                 fill="none"
-                className="flex-shrink-0"
+                className="shrink-0"
               >
                 <path
                   d="M6.66667 2.5V5.83333M13.3333 2.5V5.83333M3.33333 9.16667H16.6667M5 4.16667H15C15.9205 4.16667 16.6667 4.91286 16.6667 5.83333V15.8333C16.6667 16.7538 15.9205 17.5 15 17.5H5C4.07953 17.5 3.33333 16.7538 3.33333 15.8333V5.83333C3.33333 4.91286 4.07953 4.16667 5 4.16667Z"
@@ -85,7 +85,7 @@ export const AppointmentCard: FC<Props> = ({
                 height="20"
                 viewBox="0 0 20 20"
                 fill="none"
-                className="flex-shrink-0"
+                className="shrink-0"
               >
                 <circle
                   cx="10"
@@ -106,7 +106,7 @@ export const AppointmentCard: FC<Props> = ({
             </div>
 
             <div className="flex items-start gap-2">
-              <GeoIcon className="w-5 h-5 mt-0.5 flex-shrink-0 [&_path]:stroke-[#686F72]" />
+              <GeoIcon className="w-5 h-5 mt-0.5 shrink-0 [&_path]:stroke-[#686F72]" />
               <span className="flex-1">{appointment.address}</span>
             </div>
           </div>
@@ -124,7 +124,7 @@ export const AppointmentCard: FC<Props> = ({
                 height="16"
                 viewBox="0 0 16 16"
                 fill="none"
-                className="flex-shrink-0"
+                className="shrink-0"
               >
                 <path
                   d="M12 4L4 12M4 4L12 12"
@@ -147,7 +147,7 @@ export const AppointmentCard: FC<Props> = ({
                 height="16"
                 viewBox="0 0 16 16"
                 fill="none"
-                className="flex-shrink-0"
+                className="shrink-0"
               >
                 <path
                   d="M13.3333 7.33333V4C13.3333 3.26362 12.7364 2.66667 12 2.66667H4C3.26362 2.66667 2.66667 3.26362 2.66667 4V12C2.66667 12.7364 3.26362 13.3333 4 13.3333H7.33333M10 10H14M12 8V12"
@@ -175,8 +175,8 @@ export const AppointmentCard: FC<Props> = ({
       <div className="md:hidden bg-white rounded-3xl p-4 border border-[#E5E6E8]">
         <div className="flex items-start gap-3 mb-4">
           {/* Photo + Rating */}
-          <div className="relative flex-shrink-0">
-            <div className="relative w-[100px] h-[120px] rounded-2xl overflow-hidden bg-[#FFF8F5]">
+          <div className="relative shrink-0">
+            <div className="relative w-25 h-30 rounded-2xl overflow-hidden bg-[#FFF8F5]">
               {appointment.doctorImage ? (
                 <Image
                   src={appointment.doctorImage}
@@ -218,7 +218,7 @@ export const AppointmentCard: FC<Props> = ({
                   height="16"
                   viewBox="0 0 16 16"
                   fill="none"
-                  className="flex-shrink-0"
+                  className="shrink-0"
                 >
                   <path
                     d="M5.33333 2V4.66667M10.6667 2V4.66667M2.66667 7.33333H13.3333M4 3.33333H12C12.7364 3.33333 13.3333 3.93029 13.3333 4.66667V12.6667C13.3333 13.403 12.7364 14 12 14H4C3.26362 14 2.66667 13.403 2.66667 12.6667V4.66667C2.66667 3.93029 3.26362 3.33333 4 3.33333Z"
@@ -237,7 +237,7 @@ export const AppointmentCard: FC<Props> = ({
                   height="16"
                   viewBox="0 0 16 16"
                   fill="none"
-                  className="flex-shrink-0"
+                  className="shrink-0"
                 >
                   <circle
                     cx="8"
@@ -265,14 +265,14 @@ export const AppointmentCard: FC<Props> = ({
         {/* Address + Button */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-start gap-1.5 text-sm text-[#191A1B] flex-1 min-w-0 bg-[#F2F3F5] p-2 rounded-xl">
-            <GeoIcon className="w-4 h-4 mt-0.5 flex-shrink-0 [&_path]:stroke-[#686F72]" />
+            <GeoIcon className="w-4 h-4 mt-0.5 shrink-0-0 [&_path]:stroke-[#686F72]" />
             <span className="flex-1">{appointment.address}</span>
           </div>
 
           {appointment.status === "upcoming" && onCancel && (
             <button
               onClick={() => onCancel(appointment.id)}
-              className="w-10 h-10 rounded-full bg-[#FFF8F5] flex items-center justify-center hover:bg-[#FFE5E0] transition-colors flex-shrink-0"
+              className="w-10 h-10 rounded-full bg-[#FFF8F5] flex items-center justify-center hover:bg-[#FFE5E0] transition-colors shrink-0"
               aria-label="Отменить"
             >
               <svg
@@ -295,7 +295,7 @@ export const AppointmentCard: FC<Props> = ({
           {appointment.status === "completed" && onReview && (
             <button
               onClick={() => onReview(appointment.id)}
-              className="w-10 h-10 rounded-full bg-[#FFF8F5] flex items-center justify-center hover:bg-[#FFE5E0] transition-colors flex-shrink-0"
+              className="w-10 h-10 rounded-full bg-[#FFF8F5] flex items-center justify-center hover:bg-[#FFE5E0] transition-colors shrink-0"
               aria-label="Оставить отзыв"
             >
               <svg

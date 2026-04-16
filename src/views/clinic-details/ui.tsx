@@ -67,7 +67,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
         {/* --- ОСНОВНОЙ БЛОК --- */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
           {/* ЛЕВАЯ КОЛОНКА: СЛАЙДЕР/ГАЛЕРЕЯ */}
-          <div className="relative w-full md:w-125 lg:w-150 shrink-0">
+          <div className="relative w-full md:w-125 lg:w-150 shrink-0-0">
             {/* Шапка для мобилки */}
             <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 md:hidden">
               <IconBtn
@@ -97,7 +97,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                 {MOCK_CLINIC.images.map((img, idx) => (
                   <div
                     key={idx}
-                    className="md:hidden shrink-0 w-full h-full snap-center flex items-center justify-center text-[#838A8D] border-r border-white/20"
+                    className="md:hidden shrink-0-0 w-full h-full snap-center flex items-center justify-center text-[#838A8D] border-r border-white/20"
                   >
                     Фото {idx + 1}
                   </div>
@@ -111,7 +111,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                     key={idx}
                     onClick={() => setActiveImageIdx(idx)}
                     className={cn(
-                      "size-20 lg:size-24 rounded-2xl bg-[#E3E4E5] shrink-0 cursor-pointer transition-all flex items-center justify-center text-xs text-[#838A8D]",
+                      "size-20 lg:size-24 rounded-2xl bg-[#E3E4E5] shrink-0-0 cursor-pointer transition-all flex items-center justify-center text-xs text-[#838A8D]",
                       activeImageIdx === idx
                         ? "border-2 border-[#F5653E]"
                         : "border-2 border-transparent hover:border-[#F5653E]/50",

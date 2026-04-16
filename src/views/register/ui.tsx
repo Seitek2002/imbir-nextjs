@@ -73,14 +73,14 @@ export const RegisterPage = () => {
       {/* --- ГЛАВНЫЙ КОНТЕЙНЕР ДЛЯ ДЕСКТОПНОГО ГРИДА --- */}
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
         {/* --- ЛЕВАЯ КАРТОЧКА С КАРТИНКОЙ (md: block) --- */}
-        <div className="hidden md:flex md:w-1/2 rounded-2xl p-6 bg-white shrink-0 items-center justify-center">
+        <div className="hidden md:flex md:w-1/2 rounded-2xl p-6 bg-white shrink-0-0 items-center justify-center">
           <div className="relative w-full aspect-square rounded-xl flex items-center justify-center">
             <Image src="/assets/auth-bg.png" fill alt="logo" />
           </div>
         </div>
 
         {/* --- ПРАВАЯ КАРТОЧКА С ФОРМОЙ (md: wider) --- */}
-        <div className="flex-1 md:bg-white md:rounded-2xl md:p-10 md:pb-16 flex flex-col max-w-[480px] md:max-w-none mx-auto w-full">
+        <div className="flex-1 md:bg-white md:rounded-2xl md:p-10 md:pb-16 flex flex-col max-w-120 md:max-w-none mx-auto w-full">
           <div className="md:contents bg-white rounded-2xl m-2 p-4 md:p-0 flex-1 flex flex-col">
             <div className="hidden md:block">{AuthTabs}</div>
 
@@ -152,7 +152,7 @@ export const RegisterPage = () => {
               {step === 2 && (
                 <Button
                   variant="outline"
-                  className="w-full justify-center md:h-[56px] md:text-lg"
+                  className="w-full justify-center md:h-14 md:text-lg"
                   size="lg"
                   onClick={handleBack}
                 >
@@ -162,7 +162,7 @@ export const RegisterPage = () => {
 
               {step === 1 ? (
                 <Button
-                  className="w-full justify-center md:h-[56px] md:text-lg"
+                  className="w-full justify-center md:h-14 md:text-lg"
                   size="lg"
                   onClick={handleNextStep}
                   disabled={
@@ -173,7 +173,7 @@ export const RegisterPage = () => {
                 </Button>
               ) : (
                 <Button
-                  className="w-full justify-center md:h-[56px] md:text-lg"
+                  className="w-full justify-center md:h-14 md:text-lg"
                   size="lg"
                   onClick={handleSubmit}
                   disabled={!formData.password || !formData.confirmPassword}

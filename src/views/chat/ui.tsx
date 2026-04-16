@@ -187,7 +187,7 @@ export const ChatPage = () => {
           {/* === ЛЕВАЯ КОЛОНКА === */}
           <div
             className={cn(
-              "w-full md:w-[340px] lg:w-[380px] flex flex-col gap-4 shrink-0 bg-[#F2F3F5] p-4 md:p-0",
+              "w-full md:w-[340px] lg:w-[380px] flex flex-col gap-4 shrink-0-0 bg-[#F2F3F5] p-4 md:p-0",
               activeChatId
                 ? "hidden md:flex"
                 : "flex absolute inset-0 z-10 md:relative",
@@ -204,7 +204,7 @@ export const ChatPage = () => {
                   className="w-full outline-none bg-transparent text-[#191A1B] text-sm"
                 />
               </div>
-              <button className="flex items-center justify-center size-[42px] shrink-0 bg-white border border-[#E3E4E5] rounded-full hover:bg-gray-50 transition-colors">
+              <button className="flex items-center justify-center size-[42px] shrink-0-0 bg-white border border-[#E3E4E5] rounded-full hover:bg-gray-50 transition-colors">
                 <span className="text-[#191A1B]">⚙️</span>
               </button>
             </div>
@@ -223,7 +223,7 @@ export const ChatPage = () => {
                         : "bg-white border-transparent hover:border-[#E3E4E5]",
                     )}
                   >
-                    <div className="relative size-12 rounded-full bg-gray-200 shrink-0">
+                    <div className="relative size-12 rounded-full bg-gray-200 shrink-0-0">
                       {chat.isOnline && (
                         <div className="absolute bottom-0 right-0 size-3 bg-[#4CAF50] border-2 border-white rounded-full z-10" />
                       )}
@@ -240,7 +240,7 @@ export const ChatPage = () => {
                             </span>
                           )}
                         </div>
-                        <span className="text-xs text-[#838A8D] shrink-0 ml-2">
+                        <span className="text-xs text-[#838A8D] shrink-0-0 ml-2">
                           {chat.time}
                         </span>
                       </div>
@@ -249,7 +249,7 @@ export const ChatPage = () => {
                           {chat.lastMessage}
                         </p>
                         {chat.unreadCount > 0 && (
-                          <div className="flex items-center justify-center size-5 bg-[#F5653E] rounded-full shrink-0">
+                          <div className="flex items-center justify-center size-5 bg-[#F5653E] rounded-full shrink-0-0">
                             <span className="text-[10px] font-medium text-white">
                               {chat.unreadCount}
                             </span>
@@ -284,7 +284,7 @@ export const ChatPage = () => {
                     >
                       <span className="text-xl">←</span>
                     </button>
-                    <div className="size-10 rounded-full bg-[#E3E4E5] shrink-0" />
+                    <div className="size-10 rounded-full bg-[#E3E4E5] shrink-0-0" />
                     <div className="flex flex-col">
                       <span className="font-semibold text-[#191A1B]">
                         {activeChat.name}
@@ -387,7 +387,7 @@ export const ChatPage = () => {
                     <button
                       onClick={handleSendMessage}
                       disabled={!inputText.trim()}
-                      className="flex items-center justify-center bg-[#F5653E] disabled:bg-[#F2F3F5] disabled:text-[#838A8D] text-white rounded-full size-[46px] shrink-0 transition-colors"
+                      className="flex items-center justify-center bg-[#F5653E] disabled:bg-[#F2F3F5] disabled:text-[#838A8D] text-white rounded-full size-[46px] shrink-0-0 transition-colors"
                     >
                       {/* Иконка отправки (Замени на SVG) */}
                       <span className="text-lg ml-0.5 mt-0.5">➢</span>
