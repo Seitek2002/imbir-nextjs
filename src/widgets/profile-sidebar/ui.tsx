@@ -41,13 +41,13 @@ export const ProfileSidebar: FC = () => {
   const pathname = usePathname();
 
   return (
-    <div className="w-full max-w-[352px] flex flex-col gap-4">
+    <div className="w-full max-w-88 flex flex-col gap-4">
       {/* Profile Card */}
       <Link
         href="/profile"
         className="bg-white rounded-3xl px-6 py-5 flex items-center gap-3 hover:bg-[#FAFAFA] transition-colors group"
       >
-        <div className="w-14 h-14 rounded-full overflow-hidden bg-[#F8F9FA] flex-shrink-0">
+        <div className="w-14 h-14 rounded-full overflow-hidden bg-[#F8F9FA] shrink-0">
           <Image
             src="/path-to-avatar.jpg"
             alt="Айжан К. К."
@@ -62,7 +62,7 @@ export const ProfileSidebar: FC = () => {
           </h3>
         </div>
         <svg
-          className="w-5 h-5 text-[#C4C8CA] group-hover:text-[#838A8D] transition-colors flex-shrink-0"
+          className="w-5 h-5 text-[#C4C8CA] group-hover:text-[#838A8D] transition-colors shrink-0"
           fill="none"
           viewBox="0 0 20 20"
         >
@@ -91,7 +91,7 @@ export const ProfileSidebar: FC = () => {
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                   isActive ? "bg-[#F5653E]" : "bg-[#FFF8F5]"
                 }`}
               >
@@ -111,7 +111,7 @@ export const ProfileSidebar: FC = () => {
                 {item.label}
               </span>
               <svg
-                className={`w-5 h-5 ml-auto flex-shrink-0 ${
+                className={`w-5 h-5 ml-auto shrink-0 ${
                   isActive ? "text-[#C4C8CA]" : "text-[#C4C8CA]"
                 }`}
                 fill="none"
@@ -132,12 +132,12 @@ export const ProfileSidebar: FC = () => {
 
       {/* Logout */}
       <button className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-[#686F72] hover:bg-[#F8F9FA] transition-colors group">
-        <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
           <LogoutIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
         </div>
         <span className="font-medium text-base">Выйти из профиля</span>
         <svg
-          className="w-5 h-5 ml-auto text-[#C4C8CA] group-hover:text-[#838A8D] transition-colors flex-shrink-0"
+          className="w-5 h-5 ml-auto text-[#C4C8CA] group-hover:text-[#838A8D] transition-colors shrink-0"
           fill="none"
           viewBox="0 0 20 20"
         >
@@ -181,13 +181,13 @@ export const ProfileSidebar: FC = () => {
                 </span>
                 <div className="flex-1 bg-[#E5E6E8] rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-[#F5653E] to-[#F5653E] h-full rounded-full"
+                    className="bg-linear-to-r from-[#F5653E] to-[#F5653E] h-full rounded-full"
                     style={{ width: "90%" }}
                   />
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-12 bg-gradient-to-r from-[#8B9FFF] to-[#8B9FFF] rounded-full h-2" />
+                <div className="w-12 bg-linear-to-r from-[#8B9FFF] to-[#8B9FFF] rounded-full h-2" />
                 <span className="text-[#8B9FFF] text-sm font-semibold border border-[#8B9FFF] rounded-lg px-2 py-0.5">
                   10%
                 </span>

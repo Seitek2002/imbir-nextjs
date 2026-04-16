@@ -56,7 +56,7 @@ export const LoginPage = () => {
       {/* --- ГЛАВНЫЙ КОНТЕЙНЕР ДЛЯ ДЕСКТОПНОГО ГРИДА --- */}
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
         {/* --- ЛЕВАЯ КАРТОЧКА С КАРТИНКОЙ (md: block) --- */}
-        <div className="hidden md:flex md:w-1/2 rounded-2xl p-6 bg-white shrink-0 items-center justify-center">
+        <div className="hidden md:flex md:w-1/2 rounded-2xl p-6 bg-white shrink-0-0 items-center justify-center">
           {/* СИНИЙ ПРЯМОУГОЛЬНИК (Место под фотку) */}
           <div className="relative w-full aspect-square rounded-xl flex items-center justify-center">
             <Image src="/assets/auth-bg.png" fill alt="logo" />

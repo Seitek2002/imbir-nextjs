@@ -100,7 +100,7 @@ export const ClinicsSwiper: FC<Props> = ({
             {viewAllHref && (
               <Link
                 href={viewAllHref}
-                className="text-sm text-[#F5653E] shrink-0 hover:opacity-70 transition-opacity"
+                className="text-sm text-[#F5653E] shrink-0-0 hover:opacity-70 transition-opacity"
               >
                 Все
               </Link>
@@ -191,7 +191,7 @@ export const ClinicsSwiper: FC<Props> = ({
               style={{ scrollbarWidth: "none" }}
             >
               {filtered.map((clinic) => (
-                <div key={clinic.id} className="w-81.25 h-89 shrink-0">
+                <div key={clinic.id} className="w-81.25 h-89 shrink-0-0">
                   <ClinicCard
                     name={clinic.name}
                     rating={clinic.rating}

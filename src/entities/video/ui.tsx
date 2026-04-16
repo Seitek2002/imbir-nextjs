@@ -26,9 +26,9 @@ export const VideoCard: FC<Props> = ({
       href={youtubeUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="bg-white rounded-3xl border border-[#D8DCE0] p-2 flex flex-col w-full h-auto md:h-89.25 shrink-0 hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] transition-shadow duration-300"
+      className="bg-white rounded-3xl border border-[#D8DCE0] p-2 flex flex-col w-full h-auto md:h-89.25 shrink-0-0 hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] transition-shadow duration-300"
     >
-      <div className="relative w-full aspect-video md:aspect-auto md:h-55 shrink-0 overflow-hidden rounded-2xl bg-[#F2F3F5]">
+      <div className="relative w-full aspect-video md:aspect-auto md:h-55 shrink-0-0 overflow-hidden rounded-2xl bg-[#F2F3F5]">
         {!loaded && <div className="absolute inset-0 skeleton" />}
         <Image
           src={thumbnail}
@@ -71,7 +71,7 @@ export const VideoCard: FC<Props> = ({
           <svg
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
-            className="size-4 shrink-0 text-[#F5653E]"
+            className="size-4 shrink-0-0 text-[#F5653E]"
             fill="none"
             aria-hidden="true"
           >
@@ -94,7 +94,7 @@ export const VideoCard: FC<Props> = ({
             />
           </svg>
           <span className="truncate text-[#313A45]">{authorName}</span>
-          <span className="shrink-0">•</span>
+          <span className="shrink-0-0">•</span>
           <span className="truncate">{authorRole}</span>
         </div>
       </div>

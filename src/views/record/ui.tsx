@@ -347,7 +347,7 @@ const SelectionListItem = ({
     >
       <div
         className={cn(
-          "relative rounded-xl overflow-hidden bg-[#F2F3F5] shrink-0",
+          "relative rounded-xl overflow-hidden bg-[#F2F3F5] shrink-0-0",
           compact ? "size-16" : "size-20",
         )}
       >
@@ -367,7 +367,7 @@ const SelectionListItem = ({
           {isService && (
             <span
               className={cn(
-                "font-semibold text-[#191A1B] leading-none shrink-0",
+                "font-semibold text-[#191A1B] leading-none shrink-0-0",
                 compact ? "text-base" : "text-[24px]",
               )}
             >
@@ -431,7 +431,7 @@ const SelectionListItem = ({
         )}
       </div>
 
-      <span className="size-6 rounded-full border shrink-0 mt-1 border-[#D4D8DB] flex items-center justify-center">
+      <span className="size-6 rounded-full border shrink-0-0 mt-1 border-[#D4D8DB] flex items-center justify-center">
         {selected && <span className="size-3.5 rounded-full bg-[#F5653E]" />}
       </span>
     </button>
@@ -489,7 +489,7 @@ const SummaryCard: FC<{
         />
       </div>
 
-      <div className="p-3 shrink-0">
+      <div className="p-3 shrink-0-0">
         <p className="text-base font-semibold text-[#191A1B] text-center leading-snug mt-2">
           {doctor.name}
         </p>
@@ -503,7 +503,7 @@ const SummaryCard: FC<{
             {mode === "online" ? "Онлайн-консультация" : "Оффлайн-консультация"}
           </p>
           <div className="flex items-center gap-1.5 text-sm text-[#686F72] mt-1">
-            <CalendarIcon className="size-4 shrink-0" />
+            <CalendarIcon className="size-4 shrink-0-0" />
             <span>
               {selectedDate && selectedTime
                 ? `${formatDateLabel(selectedDate)} • ${selectedTime}`
@@ -1139,7 +1139,7 @@ export const RecordPage = () => {
                         : "border-[#E3E4E5] focus-within:border-[#F5653E]/60",
                     )}
                   >
-                    <span className="px-3 h-full flex items-center bg-[#F7F8F9] border-r border-[#E3E4E5] text-sm text-[#191A1B] select-none shrink-0">
+                    <span className="px-3 h-full flex items-center bg-[#F7F8F9] border-r border-[#E3E4E5] text-sm text-[#191A1B] select-none shrink-0-0">
                       +996
                     </span>
                     <input

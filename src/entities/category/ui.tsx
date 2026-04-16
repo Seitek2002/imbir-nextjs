@@ -15,7 +15,7 @@ export const CategoryCard: FC<Props> = ({ title, image }) => {
         alt={title}
         width={36}
         height={36}
-        className="shrink-0 object-contain"
+        className="shrink-0-0 object-contain"
       />
       <span className="truncate text-sm md:text-base">{title}</span>
     </div>

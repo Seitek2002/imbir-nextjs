@@ -17,7 +17,7 @@ export default function Loading() {
         {/* --- ОСНОВНОЙ БЛОК: ФОТО + ИНФО --- */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
           {/* Левая колонка / Фото */}
-          <div className="relative w-full md:w-100 shrink-0">
+          <div className="relative w-full md:w-100 shrink-0-0">
             <div className="relative w-full h-85 md:h-125 skeleton md:rounded-3xl" />
           </div>
 
@@ -68,7 +68,7 @@ export default function Loading() {
 
           <div className="flex flex-col md:flex-row gap-6 md:gap-10">
             {/* Левая колонка - Статистика/Форма */}
-            <div className="w-full md:w-[320px] shrink-0 flex flex-col gap-5">
+            <div className="w-full md:w-[320px] shrink-0-0 flex flex-col gap-5">
               <div className="h-24 w-full skeleton rounded-2xl" />
               <div className="hidden md:block h-64 w-full skeleton rounded-2xl" />
             </div>
@@ -86,10 +86,10 @@ export default function Loading() {
           <div className="h-8 w-32 skeleton rounded-md mb-6" />
           <div className="flex gap-4 overflow-hidden">
             {/* Скелетоны карточек видео */}
-            <div className="h-48 w-70 skeleton rounded-2xl shrink-0" />
-            <div className="hidden md:block h-48 w-70 skeleton rounded-2xl shrink-0" />
-            <div className="hidden md:block h-48 w-70 skeleton rounded-2xl shrink-0" />
-            <div className="hidden lg:block h-48 w-70 skeleton rounded-2xl shrink-0" />
+            <div className="h-48 w-70 skeleton rounded-2xl shrink-0-0" />
+            <div className="hidden md:block h-48 w-70 skeleton rounded-2xl shrink-0-0" />
+            <div className="hidden md:block h-48 w-70 skeleton rounded-2xl shrink-0-0" />
+            <div className="hidden lg:block h-48 w-70 skeleton rounded-2xl shrink-0-0" />
           </div>
         </div>
       </div>

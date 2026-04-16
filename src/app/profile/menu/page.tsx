@@ -63,14 +63,14 @@ export default function ProfileMenuPage() {
                 href={item.href}
                 className="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-[#F8F9FA] transition-colors"
               >
-                <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
                   <Icon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
                 </div>
                 <span className="flex-1 font-medium text-base text-[#686F72]">
                   {item.label}
                 </span>
                 <svg
-                  className="w-5 h-5 text-[#C4C8CA] flex-shrink-0"
+                  className="w-5 h-5 text-[#C4C8CA] shrink-0"
                   fill="none"
                   viewBox="0 0 20 20"
                 >
@@ -89,12 +89,12 @@ export default function ProfileMenuPage() {
 
         {/* Logout */}
         <button className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-[#686F72] hover:bg-[#F8F9FA] transition-colors w-full mb-6">
-          <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
             <LogoutIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
           </div>
           <span className="font-medium text-base">Выйти из профиля</span>
           <svg
-            className="w-5 h-5 text-[#C4C8CA] ml-auto flex-shrink-0"
+            className="w-5 h-5 text-[#C4C8CA] ml-auto shrink-0"
             fill="none"
             viewBox="0 0 20 20"
           >
