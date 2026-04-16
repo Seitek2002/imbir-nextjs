@@ -2,7 +2,7 @@
 
 import { FC, useState } from "react";
 
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 
 import { Button } from "@/shared";
 
@@ -11,11 +11,12 @@ import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets";
 type Props = {
   name: string;
   category: string;
-  clinic: string;
+  clinic?: string; // Сделали опциональным
+  clinicId?: string; // Добавили для совместимости с API
   rating: number;
   reviews: number;
-  price: number;
-  image?: string;
+  price: number | string;
+  image?: string | StaticImageData;
   onBook?: () => void;
   onSave?: () => void;
   initialSaved?: boolean;
@@ -52,6 +53,7 @@ export const ServiceCard: FC<Props> = ({
   name,
   category,
   clinic,
+  clinicId, // На будущее, если понадобится ID клиники
   rating,
   reviews,
   price,
@@ -61,6 +63,9 @@ export const ServiceCard: FC<Props> = ({
   initialSaved = false,
   variant = "vertical",
 }) => {
+  // Вычисляем имя клиники (если clinic не передано, но есть clinicId)
+  const displayClinic = clinic || clinicId || "Клиника не указана";
+
   if (variant === "horizontal") {
     return (
       <div className="bg-white rounded-3xl p-4 flex items-center gap-4 border border-[#E5E6E8]">
@@ -91,7 +96,7 @@ export const ServiceCard: FC<Props> = ({
           </div>
 
           <p className="text-[#838A8D] text-sm mb-2">
-            {category} <span className="text-[#F5653E]">• {clinic}</span>
+            {category} <span className="text-[#F5653E]">• {displayClinic}</span>
           </p>
 
           <div className="flex items-center gap-1 mb-3 text-sm">
@@ -150,7 +155,7 @@ export const ServiceCard: FC<Props> = ({
         </div>
 
         <p className="text-[#838A8D] text-sm mb-2">
-          {category} <span className="text-[#F5653E]">• {clinic}</span>
+          {category} <span className="text-[#F5653E]">• {displayClinic}</span>
         </p>
 
         <div className="flex items-center gap-1 mb-4 text-sm">

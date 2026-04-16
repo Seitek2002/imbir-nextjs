@@ -1,63 +1,43 @@
+import {
+  ClinicListItem,
+  DoctorListItem,
+  Schedule,
+  ServiceItem,
+} from "@/shared/constants/mocks";
+
 export type SavedType = "doctor" | "clinic" | "service";
-
-type Workplace = {
-  clinicId: string;
-  clinicName: string;
-  price: number;
-};
-
-type DoctorData = {
-  id: string;
-  name: string;
-  specialty: string;
-  workplaces: Workplace[];
-  isOnlineAvailable?: boolean;
-  rating: number;
-  reviews: number;
-  experience: number;
-  image?: string;
-};
-
-type ClinicData = {
-  id: string;
-  name: string;
-  address: string;
-  rating: number;
-  reviews: number;
-  experience: number;
-  image?: string;
-};
-
-type ServiceData = {
-  id: string;
-  name: string;
-  category: string;
-  clinic: string;
-  rating: number;
-  reviews: number;
-  price: number;
-  image?: string;
-};
 
 export type SavedItem =
   | {
       id: string;
       type: "doctor";
       savedAt: string;
-      data: DoctorData;
+      data: DoctorListItem;
     }
   | {
       id: string;
       type: "clinic";
       savedAt: string;
-      data: ClinicData;
+      data: ClinicListItem;
     }
   | {
       id: string;
       type: "service";
       savedAt: string;
-      data: ServiceData;
+      data: ServiceItem;
     };
+
+// Пустой график-заглушка для моков (чтобы TS не ругался)
+const dummySchedule: Schedule = {
+  mon: null,
+  tue: null,
+  wed: null,
+  thu: null,
+  fri: null,
+  sat: null,
+  sun: null,
+  lunchBreak: null,
+};
 
 export const MOCK_SAVED_ITEMS: SavedItem[] = [
   {
@@ -69,8 +49,18 @@ export const MOCK_SAVED_ITEMS: SavedItem[] = [
       name: "Айбеков Нурлан Эльдарович",
       specialty: "Врач-терапевт",
       workplaces: [
-        { clinicId: "c1", clinicName: "Nova Clinic", price: 1500 },
-        { clinicId: "c2", clinicName: "Health Center", price: 1700 },
+        {
+          clinicId: "c1",
+          clinicName: "Nova Clinic",
+          price: 1500,
+          schedule: dummySchedule,
+        },
+        {
+          clinicId: "c2",
+          clinicName: "Health Center",
+          price: 1700,
+          schedule: dummySchedule,
+        },
       ],
       isOnlineAvailable: true,
       rating: 4.85,
@@ -86,7 +76,15 @@ export const MOCK_SAVED_ITEMS: SavedItem[] = [
       id: "d2",
       name: "Садыкова Алина Тимуровна",
       specialty: "Врач-терапевт",
-      workplaces: [{ clinicId: "c1", clinicName: "Nova Clinic", price: 1500 }],
+      workplaces: [
+        {
+          clinicId: "c1",
+          clinicName: "Nova Clinic",
+          price: 1500,
+          schedule: dummySchedule,
+        },
+      ],
+      isOnlineAvailable: false,
       rating: 4.85,
       reviews: 255,
       experience: 12,
@@ -103,6 +101,7 @@ export const MOCK_SAVED_ITEMS: SavedItem[] = [
       rating: 4.85,
       reviews: 255,
       experience: 12,
+      specialties: ["Терапия", "Кардиология"], // Обязательное поле для клиники
     },
   },
   {
@@ -113,10 +112,13 @@ export const MOCK_SAVED_ITEMS: SavedItem[] = [
       id: "s1",
       name: "Анализ крови",
       category: "Кардиология",
-      clinic: "Nova Clinic",
+      clinicId: "c1",
       rating: 4.85,
       reviews: 255,
       price: 1700,
+      image: "https://placehold.co/400x300/E3E4E5/838A8D.png?text=Lab",
+      schedule: dummySchedule,
+      doctorIds: ["d1", "d2"],
     },
   },
 ];

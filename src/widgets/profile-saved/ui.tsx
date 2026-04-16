@@ -46,14 +46,7 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
             return (
               <DoctorCard
                 key={item.id}
-                name={item.data.name}
-                specialty={item.data.specialty}
-                workplaces={item.data.workplaces}
-                isOnlineAvailable={item.data.isOnlineAvailable}
-                rating={item.data.rating}
-                reviews={item.data.reviews}
-                experience={item.data.experience}
-                image={item.data.image}
+                {...item.data} // <-- Используем spread оператор для передачи всех свойств
                 initialSaved={true}
                 onSave={() => handleUnsave(item.id)}
                 variant="horizontal"
@@ -65,15 +58,10 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
             return (
               <ClinicCard
                 key={item.id}
-                name={item.data.name}
-                address={item.data.address}
-                rating={item.data.rating}
-                reviews={item.data.reviews}
-                experience={item.data.experience}
-                image={item.data.image}
+                {...item.data} // <-- Spread оператор
                 initialSaved={true}
                 onSave={() => handleUnsave(item.id)}
-                variant="vertical"
+                variant="horizontal" // Для мобилок клиники обычно тоже горизонтальные
               />
             );
           }
@@ -82,13 +70,7 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
             return (
               <ServiceCard
                 key={item.id}
-                name={item.data.name}
-                category={item.data.category}
-                clinic={item.data.clinic}
-                rating={item.data.rating}
-                reviews={item.data.reviews}
-                price={item.data.price}
-                image={item.data.image}
+                {...item.data}
                 initialSaved={true}
                 onSave={() => handleUnsave(item.id)}
                 variant="horizontal"
@@ -103,22 +85,16 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
       {filteredItems.map((item) => {
         if (item.type === "doctor") {
           return (
             <DoctorCard
               key={item.id}
-              name={item.data.name}
-              specialty={item.data.specialty}
-              workplaces={item.data.workplaces}
-              isOnlineAvailable={item.data.isOnlineAvailable}
-              rating={item.data.rating}
-              reviews={item.data.reviews}
-              experience={item.data.experience}
-              image={item.data.image}
+              {...item.data} // <-- Spread оператор
               initialSaved={true}
               onSave={() => handleUnsave(item.id)}
+              variant="vertical"
             />
           );
         }
@@ -127,14 +103,10 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
           return (
             <ClinicCard
               key={item.id}
-              name={item.data.name}
-              address={item.data.address}
-              rating={item.data.rating}
-              reviews={item.data.reviews}
-              experience={item.data.experience}
-              image={item.data.image}
+              {...item.data} // <-- Spread оператор
               initialSaved={true}
               onSave={() => handleUnsave(item.id)}
+              variant="vertical"
             />
           );
         }
@@ -143,15 +115,10 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
           return (
             <ServiceCard
               key={item.id}
-              name={item.data.name}
-              category={item.data.category}
-              clinic={item.data.clinic}
-              rating={item.data.rating}
-              reviews={item.data.reviews}
-              price={item.data.price}
-              image={item.data.image}
+              {...item.data}
               initialSaved={true}
               onSave={() => handleUnsave(item.id)}
+              variant="vertical"
             />
           );
         }
