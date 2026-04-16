@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Onest } from "next/font/google";
 
 import "./globals.css";
+import { Providers } from "./providers";
 
 const onest = Onest({
   variable: "--font-onest",
@@ -32,7 +33,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col bg-[#F2F3F5] lg:bg-white"
       >
-        {children}
+        <Providers>{children}</Providers>
         <Toaster position="bottom-right" />
       </body>
     </html>

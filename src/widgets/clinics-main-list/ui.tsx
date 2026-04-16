@@ -5,39 +5,55 @@ import { FC, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { FilterBar } from "@/features";
+import { useQuery } from "@tanstack/react-query";
 
-import { ClinicCard } from "@/entities/clinic";
-import { ClinicSkeleton } from "@/entities/clinic";
+import { ClinicCard, ClinicSkeleton } from "@/entities/clinic";
 
-import { MOCK_CLINICS } from "@/shared/constants/mocks";
+import { api } from "@/shared/api/requests";
 import { Button } from "@/shared/ui";
 
 const ClinicsListContent = () => {
   const searchParams = useSearchParams();
 
-  // Читаем параметры для клиник
   const currentRating = searchParams.get("clinic_rating");
-  const currentSpec = searchParams.get("clinic_spec"); // <-- ДОБАВИЛИ ЧТЕНИЕ СПЕЦ.
+  const currentSpec = searchParams.get("clinic_spec");
 
-  // Фильтруем данные клиник
-  const filteredClinics = MOCK_CLINICS.filter((clinic) => {
-    // 1. Проверка рейтинга
+  // --- МАГИЯ REACT QUERY ---
+  const { data: clinics = [], isLoading } = useQuery({
+    queryKey: ["clinics"],
+    queryFn: api.getClinics,
+  });
+
+  // Если данные грузятся, показываем наши новые красивые скелетоны
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-3 lg:mt-10">
+        <div className="md:hidden">
+          <ClinicSkeleton count={3} variant="horizontal" />
+        </div>
+        <div className="hidden md:block">
+          <ClinicSkeleton count={4} variant="vertical" />
+        </div>
+      </div>
+    );
+  }
+
+  // Фильтруем данные клиник (УЖЕ ИЗ СТЕЙТА `clinics`)
+  const filteredClinics = clinics.filter((clinic) => {
     if (currentRating && currentRating !== "all") {
       const minRating = parseFloat(currentRating);
       if (clinic.rating < minRating) return false;
     }
 
-    // 2. Проверка специализации (НОВАЯ ЛОГИКА)
     if (currentSpec) {
       const selectedSpecs = currentSpec.split(",");
-      // Проверяем, есть ли в клинике ХОТЯ БЫ ОДНА из выбранных специальностей
       const hasMatch = clinic.specialties.some((spec) =>
         selectedSpecs.includes(spec),
       );
       if (!hasMatch) return false;
     }
 
-    return true; // Клиника прошла фильтры
+    return true;
   });
 
   return (
@@ -55,11 +71,13 @@ const ClinicsListContent = () => {
             experience={clinic.experience}
             address={clinic.address}
             image={clinic.image}
+            variant="horizontal"
           />
         ))}
       </div>
 
-      <div className="hidden md:grid md:grid-cols-4 gap-3">
+      {/* ДОБАВИЛ items-stretch ДЛЯ ВЫРАВНИВАНИЯ */}
+      <div className="hidden md:grid md:grid-cols-4 gap-3 items-stretch">
         {filteredClinics.length === 0 && (
           <p className="col-span-4 text-center text-[#838A8D] py-20 text-lg">
             По вашим параметрам клиники не найдены
@@ -74,6 +92,7 @@ const ClinicsListContent = () => {
             experience={clinic.experience}
             address={clinic.address}
             image={clinic.image}
+            variant="vertical"
           />
         ))}
       </div>

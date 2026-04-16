@@ -6,10 +6,11 @@ import { useSearchParams } from "next/navigation";
 
 import { DoctorCard } from "@/entities";
 import { FilterBar } from "@/features";
+import { useQuery } from "@tanstack/react-query";
 
 import { DoctorSkeleton } from "@/entities/doctor";
 
-import { MOCK_SPECIALISTS } from "@/shared/constants/mocks";
+import { api } from "@/shared/api/requests";
 import { Button } from "@/shared/ui";
 
 const DoctorsListContent = () => {
@@ -19,9 +20,28 @@ const DoctorsListContent = () => {
   const currentRating = searchParams.get("doc_rating");
   const currentExp = searchParams.get("doc_exp");
   const currentPrice = searchParams.get("doc_price");
-  const isOnlineOnly = searchParams.get("doc_online") === "true"; // <-- НОВОЕ
+  const isOnlineOnly = searchParams.get("doc_online") === "true";
 
-  const filteredDoctors = MOCK_SPECIALISTS.filter((doc) => {
+  const { data: doctors = [], isLoading } = useQuery({
+    queryKey: ["doctors"], // Уникальный ключ. По нему React Query понимает, где лежат эти данные
+    queryFn: api.getDoctors, // Функция, которая пойдет на сервер
+  });
+
+  if (isLoading) {
+    return (
+      // Обертка теперь точно такая же, как у реального контента (lg:mt-10)
+      <div className="flex flex-col gap-3 lg:mt-10">
+        <div className="md:hidden">
+          <DoctorSkeleton count={3} variant="horizontal" />
+        </div>
+        <div className="hidden md:block">
+          <DoctorSkeleton count={4} variant="vertical" />
+        </div>
+      </div>
+    );
+  }
+
+  const filteredDoctors = doctors.filter((doc) => {
     // <-- НОВОЕ: Фильтр онлайна
     if (isOnlineOnly && !doc.isOnlineAvailable) return false;
 

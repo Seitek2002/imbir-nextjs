@@ -4,12 +4,26 @@ type Props = {
 };
 
 const ClinicCardSkeletonVertical = () => (
-  <div className="bg-white rounded-3xl border border-[#E3E4E5] overflow-hidden flex flex-col">
-    <div className="w-full aspect-video skeleton" />
-    <div className="p-3 space-y-2">
+  // Добавил p-2, как в реальной карточке
+  <div className="bg-white rounded-3xl border border-[#E3E4E5] w-full h-full flex flex-col p-2">
+    {/* Картинка: h-55 и rounded-2xl как в оригинале */}
+    <div className="w-full h-55 rounded-2xl skeleton" />
+
+    <div className="p-3 flex flex-col mt-1">
+      {/* Название */}
       <div className="h-4 w-3/4 skeleton rounded-md" />
-      <div className="h-3 w-1/2 skeleton rounded-md" />
-      <div className="h-3 w-2/3 skeleton rounded-md" />
+
+      {/* Рейтинг и отзывы */}
+      <div className="flex items-center gap-1 mt-2">
+        <div className="size-3.5 skeleton rounded-full" />
+        <div className="h-3 w-1/2 skeleton rounded-md" />
+      </div>
+
+      {/* Адрес */}
+      <div className="flex items-center gap-1 mt-2">
+        <div className="size-3.5 skeleton rounded-full" />
+        <div className="h-3 w-2/3 skeleton rounded-md" />
+      </div>
     </div>
   </div>
 );
@@ -19,8 +33,23 @@ const ClinicCardSkeletonHorizontal = () => (
     <div className="w-20 h-20 rounded-xl skeleton shrink-0-0" />
     <div className="flex-1 py-1 space-y-2">
       <div className="h-4 w-3/4 skeleton rounded-md" />
-      <div className="h-3 w-1/2 skeleton rounded-md" />
-      <div className="h-3 w-2/3 skeleton rounded-md" />
+
+      {/* Рейтинг */}
+      <div className="flex items-center gap-1 mt-2">
+        <div className="size-3.5 skeleton rounded-full" />
+        <div className="h-3 w-1/2 skeleton rounded-md" />
+      </div>
+
+      {/* Адрес */}
+      <div className="flex items-center gap-1 mt-2">
+        <div className="size-3.5 skeleton rounded-full" />
+        <div className="h-3 w-2/3 skeleton rounded-md" />
+      </div>
+
+      {/* Кнопка "Сохранить" */}
+      <div className="flex justify-end mt-2">
+        <div className="size-6 skeleton rounded-md" />
+      </div>
     </div>
   </div>
 );
@@ -37,7 +66,8 @@ export const ClinicSkeleton = ({ count = 4, variant = "vertical" }: Props) => {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    // Добавил items-stretch для одинаковой высоты карточек
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-stretch">
       {Array.from({ length: count }, (_, i) => (
         <ClinicCardSkeletonVertical key={i} />
       ))}
