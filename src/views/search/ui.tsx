@@ -1,3 +1,5 @@
+"use client";
+
 import { FC, Suspense } from "react";
 
 import dynamic from "next/dynamic";
@@ -5,11 +7,12 @@ import Link from "next/link";
 
 import { ActiveFiltersChips, FiltersTrigger } from "@/features";
 import { Header } from "@/widgets";
+import { useQuery } from "@tanstack/react-query";
 
 import { UrlSearchInput } from "@/features/search-by-query/ui";
 
+import { api } from "@/shared/api/requests";
 import { ROUTES } from "@/shared/config/routes";
-import { MOCK_SPECIALISTS } from "@/shared/constants/mocks";
 import { Button } from "@/shared/ui";
 
 const MobileFiltersModal = dynamic(() =>
@@ -28,17 +31,20 @@ const FilterBar = dynamic(() =>
 const DoctorCard = dynamic(() =>
   import("@/entities/doctor").then((mod) => mod.DoctorCard),
 );
+// <-- ДОБАВЛЯЕМ ИМПОРТ КАРТОЧКИ КЛИНИКИ
+const ClinicCard = dynamic(() =>
+  import("@/entities/clinic").then((mod) => mod.ClinicCard),
+);
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export const SearchPage: FC<Props> = ({ searchParams }) => {
-  // 1. Читаем параметры поиска и модалки
+  // 1. Читаем параметры
   const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
   const isFiltersModalOpen = searchParams?.modal === "filters";
 
-  // 2. Читаем параметры фильтров
   const currentSpec =
     typeof searchParams?.doc_spec === "string" ? searchParams.doc_spec : null;
   const currentRating =
@@ -49,13 +55,30 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
     typeof searchParams?.doc_exp === "string" ? searchParams.doc_exp : null;
   const currentPrice =
     typeof searchParams?.doc_price === "string" ? searchParams.doc_price : null;
-
-  // <-- НОВОЕ: Читаем флаг "онлайн" из URL
   const isOnlineOnly = searchParams?.doc_online === "true";
 
-  // 3. ФИЛЬТРУЕМ ДАННЫЕ НА ЛЕТУ
-  const filteredResults = MOCK_SPECIALISTS.filter((doc) => {
-    // A. Поиск по строке (Имя или Специальность)
+  // 2. ПОЛУЧАЕМ ВСЕ ДАННЫЕ С СЕРВЕРА
+  const { data: doctors = [], isLoading: isDocsLoading } = useQuery({
+    queryKey: ["doctors"],
+    queryFn: api.getDoctors,
+  });
+
+  const { data: clinics = [], isLoading: isClinicsLoading } = useQuery({
+    queryKey: ["clinics"],
+    queryFn: api.getClinics,
+  });
+
+  const { data: services = [], isLoading: isServicesLoading } = useQuery({
+    queryKey: ["services"],
+    queryFn: api.getServices,
+  });
+
+  const isLoading = isDocsLoading || isClinicsLoading || isServicesLoading;
+
+  // 3. ФИЛЬТРУЕМ ДАННЫЕ НА ЛЕТУ ПО ЗАПРОСУ И ФИЛЬТРАМ
+
+  // --- ФИЛЬТР ВРАЧЕЙ ---
+  const filteredDoctors = doctors.filter((doc) => {
     if (activeQuery) {
       const q = activeQuery.toLowerCase();
       const matchesName = doc.name.toLowerCase().includes(q);
@@ -63,10 +86,6 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
       if (!matchesName && !matchesSpec) return false;
     }
 
-    // B. Фильтры из FilterBar / MobileFiltersModal
-
-    // <-- НОВОЕ: Если юзер включил чекбокс "Только онлайн",
-    // отсеиваем тех врачей, у которых isOnlineAvailable === false
     if (isOnlineOnly && !doc.isOnlineAvailable) return false;
 
     if (currentSpec) {
@@ -86,18 +105,40 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
 
     if (currentPrice) {
       const [minPrice, maxPrice] = currentPrice.split("-").map(Number);
-      // Теперь doc.price не существует, нам нужно проверить массив workplaces
-      // Ищем минимальную цену среди всех клиник врача
       const docMinPrice =
         doc.workplaces.length > 0
           ? Math.min(...doc.workplaces.map((w) => w.price))
           : 0;
-
       if (docMinPrice < minPrice || docMinPrice > maxPrice) return false;
     }
 
     return true;
   });
+
+  // --- ФИЛЬТР КЛИНИК ---
+  const filteredClinics = clinics.filter((clinic) => {
+    if (!activeQuery) return false; // Показываем клиники только если есть текстовый запрос
+    const q = activeQuery.toLowerCase();
+    const matchesName = clinic.name.toLowerCase().includes(q);
+    const matchesSpec = clinic.specialties.some((s) =>
+      s.toLowerCase().includes(q),
+    );
+    return matchesName || matchesSpec;
+  });
+
+  // --- ФИЛЬТР УСЛУГ ---
+  const filteredServices = services.filter((service) => {
+    if (!activeQuery) return false;
+    const q = activeQuery.toLowerCase();
+    const matchesName = service.name.toLowerCase().includes(q);
+    const matchesCat = service.category.toLowerCase().includes(q);
+    return matchesName || matchesCat;
+  });
+
+  const hasAnyResults =
+    filteredDoctors.length > 0 ||
+    filteredClinics.length > 0 ||
+    filteredServices.length > 0;
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
@@ -127,97 +168,220 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
           experience: true,
           rating: true,
           price: true,
-          online: true, // <-- НОВОЕ: Включаем онлайн-фильтр в модалке
+          online: true,
         }}
       />
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
         {activeQuery ? (
-          <>
-            {/* МОБИЛЬНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ ПОИСКА */}
-            <div className="md:hidden p-4">
-              <h2 className="text-[#191A1B] text-lg font-medium mb-4">
-                Результаты по запросу: {activeQuery}
-              </h2>
-              <div className="flex flex-col gap-2">
-                {filteredResults.length === 0 && (
+          isLoading ? (
+            <div className="flex justify-center items-center py-20 text-[#838A8D]">
+              Выполняем поиск...
+            </div>
+          ) : (
+            <>
+              {/* === МОБИЛЬНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ === */}
+              <div className="md:hidden p-4 flex flex-col gap-8">
+                <h2 className="text-[#191A1B] text-lg font-medium">
+                  Результаты по запросу: {activeQuery}
+                </h2>
+
+                {!hasAnyResults && (
                   <p className="text-center text-[#838A8D] py-10">
                     Ничего не найдено
                   </p>
                 )}
-                {filteredResults.slice(0, 4).map((doc) => (
-                  <DoctorCard
-                    key={`mob-${doc.id}`}
-                    {...doc}
-                    variant="horizontal"
-                  />
-                ))}
-              </div>
-              {filteredResults.length > 4 && (
-                <Button
-                  variant="outline"
-                  className="w-full mt-6 bg-white justify-center"
-                >
-                  Показать еще
-                </Button>
-              )}
-            </div>
 
-            {/* ДЕСКТОПНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ ПОИСКА */}
-            <div className="hidden md:block px-10 py-6">
-              <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
-                <Link
-                  href={ROUTES.HOME}
-                  className="hover:text-[#F5653E] transition-colors"
-                >
-                  Главная
-                </Link>
-                <span>•</span>
-                <span className="text-[#F5653E]">
-                  По запросу «{activeQuery}»
-                </span>
+                {/* Блок Врачей */}
+                {filteredDoctors.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <h3 className="font-semibold text-[#191A1B] text-base border-b border-[#E3E4E5] pb-2">
+                      Врачи
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      {filteredDoctors.slice(0, 4).map((doc) => (
+                        <DoctorCard
+                          key={`mob-doc-${doc.id}`}
+                          {...doc}
+                          variant="horizontal"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Блок Клиник */}
+                {filteredClinics.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <h3 className="font-semibold text-[#191A1B] text-base border-b border-[#E3E4E5] pb-2">
+                      Клиники
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      {filteredClinics.slice(0, 3).map((clinic) => (
+                        <ClinicCard
+                          key={`mob-clinic-${clinic.id}`}
+                          {...clinic}
+                          variant="horizontal"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Блок Услуг */}
+                {filteredServices.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <h3 className="font-semibold text-[#191A1B] text-base border-b border-[#E3E4E5] pb-2">
+                      Услуги
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      {filteredServices.map((service) => (
+                        <div
+                          key={service.id}
+                          className="bg-white p-3 rounded-xl border border-[#E3E4E5] flex justify-between items-center"
+                        >
+                          <div>
+                            <p className="font-semibold text-sm text-[#191A1B]">
+                              {service.name}
+                            </p>
+                            <p className="text-xs text-[#838A8D]">
+                              {service.category}
+                            </p>
+                          </div>
+                          <div className="font-bold text-[#191A1B] text-sm">
+                            {service.price} с
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <FilterBar
-                prefix="doc"
-                fields={{
-                  specialty: true,
-                  experience: true,
-                  rating: true,
-                  price: true,
-                  online: true, // <-- НОВОЕ: Включаем онлайн-фильтр на ПК
-                }}
-              >
-                <div className="flex items-end gap-3 mb-6">
-                  <h1 className="text-[40px] font-semibold text-[#191A1B] leading-none">
+              {/* === ДЕСКТОПНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ === */}
+              <div className="hidden md:block px-10 py-6">
+                <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
+                  <Link
+                    href={ROUTES.HOME}
+                    className="hover:text-[#F5653E] transition-colors"
+                  >
+                    Главная
+                  </Link>
+                  <span>•</span>
+                  <span className="text-[#F5653E]">
                     По запросу «{activeQuery}»
-                  </h1>
-                  <span className="text-[#838A8D] text-lg pb-1">
-                    {filteredResults.length} совпадений
                   </span>
                 </div>
-              </FilterBar>
 
-              <div className="grid grid-cols-4 gap-5 mt-2">
-                {filteredResults.length === 0 && (
-                  <p className="col-span-4 text-center text-[#838A8D] py-20 text-lg">
-                    По вашим параметрам врачи не найдены
-                  </p>
+                {!hasAnyResults ? (
+                  <div className="text-center py-20">
+                    <h1 className="text-[40px] font-semibold text-[#191A1B] leading-none mb-4">
+                      По запросу «{activeQuery}»
+                    </h1>
+                    <p className="text-[#838A8D] text-lg">
+                      По вашим параметрам ничего не найдено
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-14">
+                    {/* Секция Врачей с фильтрами */}
+                    {filteredDoctors.length > 0 && (
+                      <div>
+                        <FilterBar
+                          prefix="doc"
+                          fields={{
+                            specialty: true,
+                            experience: true,
+                            rating: true,
+                            price: true,
+                            online: true,
+                          }}
+                        >
+                          <div className="flex items-end gap-3 mb-6">
+                            <h2 className="text-[32px] font-semibold text-[#191A1B] leading-none">
+                              Врачи
+                            </h2>
+                            <span className="text-[#838A8D] text-lg pb-1">
+                              {filteredDoctors.length} совпадений
+                            </span>
+                          </div>
+                        </FilterBar>
+                        <div className="grid grid-cols-4 gap-5 mt-2">
+                          {filteredDoctors.map((doc) => (
+                            <DoctorCard
+                              key={`desk-doc-${doc.id}`}
+                              {...doc}
+                              variant="vertical"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Секция Клиник */}
+                    {filteredClinics.length > 0 && (
+                      <div>
+                        <div className="flex items-end gap-3 mb-6">
+                          <h2 className="text-[32px] font-semibold text-[#191A1B] leading-none">
+                            Клиники
+                          </h2>
+                          <span className="text-[#838A8D] text-lg pb-1">
+                            {filteredClinics.length} совпадений
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-5 items-stretch">
+                          {filteredClinics.map((clinic) => (
+                            <ClinicCard
+                              key={`desk-clinic-${clinic.id}`}
+                              {...clinic}
+                              variant="vertical"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Секция Услуг */}
+                    {filteredServices.length > 0 && (
+                      <div>
+                        <div className="flex items-end gap-3 mb-6">
+                          <h2 className="text-[32px] font-semibold text-[#191A1B] leading-none">
+                            Услуги
+                          </h2>
+                          <span className="text-[#838A8D] text-lg pb-1">
+                            {filteredServices.length} совпадений
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          {filteredServices.map((service) => (
+                            <div
+                              key={`desk-service-${service.id}`}
+                              className="bg-white border border-[#E3E4E5] rounded-2xl p-4 flex flex-col"
+                            >
+                              <h4 className="font-semibold text-[#191A1B]">
+                                {service.name}
+                              </h4>
+                              <p className="text-xs text-[#838A8D] mb-4">
+                                {service.category}
+                              </p>
+                              <div className="flex items-center justify-between mt-auto">
+                                <span className="font-bold text-[#191A1B] text-lg">
+                                  {service.price} с
+                                </span>
+                                <Button variant="outline" size="sm">
+                                  Подробнее
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
-                {filteredResults.map((doc) => (
-                  <DoctorCard key={`desk-${doc.id}`} {...doc} />
-                ))}
               </div>
-
-              {filteredResults.length > 0 && (
-                <div className="flex justify-center mt-10">
-                  <Button variant="outline" className="bg-white">
-                    Показать еще
-                  </Button>
-                </div>
-              )}
-            </div>
-          </>
+            </>
+          )
         ) : (
           /* ЕСЛИ ЗАПРОС ПУСТОЙ - ПОКАЗЫВАЕМ ИСТОРИЮ И КАТЕГОРИИ */
           <div className="px-4 md:px-10 pt-6 md:pt-16 max-w-200 mx-auto w-full">

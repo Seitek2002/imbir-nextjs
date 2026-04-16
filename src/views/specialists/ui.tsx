@@ -1,6 +1,10 @@
+"use client";
+
 import { FC } from "react";
 
 import Link from "next/link";
+
+// <-- ИМПОРТ REACT QUERY
 
 import {
   ActiveFiltersChips,
@@ -8,22 +12,27 @@ import {
   MobileFiltersModal,
 } from "@/features";
 import { Footer, Header } from "@/widgets";
+import { useQuery } from "@tanstack/react-query";
 
 import { FilterBar } from "@/features/filter-bar/ui";
 import { UrlSearchInput } from "@/features/search-by-query/ui";
 
-import { DoctorCard } from "@/entities/doctor";
+import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
+
+import { api } from "@/shared/api/requests";
+// <-- ДОБАВИЛИ СКЕЛЕТОН
 
 import { ROUTES } from "@/shared/config/routes";
-import { MOCK_SPECIALISTS } from "@/shared/constants/mocks";
 import { Button } from "@/shared/ui";
+
+// <-- ИМПОРТ НАШЕГО API
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
-  // 1. Читаем параметры из пропсов (Next.js Page)
+  // 1. Читаем параметры из пропсов
   const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
   const isFiltersModalOpen = searchParams?.modal === "filters";
 
@@ -37,13 +46,16 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
     typeof searchParams?.doc_exp === "string" ? searchParams.doc_exp : null;
   const currentPrice =
     typeof searchParams?.doc_price === "string" ? searchParams.doc_price : null;
-
-  // <-- НОВОЕ: Читаем флаг "онлайн" из URL
   const isOnlineOnly = searchParams?.doc_online === "true";
 
-  // 2. Фильтруем массив перед рендером
-  const filteredDoctors = MOCK_SPECIALISTS.filter((doc) => {
-    // Поиск по имени или специальности
+  // 2. ПОЛУЧАЕМ ДАННЫЕ С СЕРВЕРА
+  const { data: doctors = [], isLoading } = useQuery({
+    queryKey: ["doctors"],
+    queryFn: api.getDoctors,
+  });
+
+  // 3. Фильтруем данные (уже реальные) перед рендером
+  const filteredDoctors = doctors.filter((doc) => {
     if (activeQuery) {
       const q = activeQuery.toLowerCase();
       if (
@@ -54,7 +66,6 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
       }
     }
 
-    // <-- НОВОЕ: Отсеиваем тех, кто не принимает онлайн
     if (isOnlineOnly && !doc.isOnlineAvailable) return false;
 
     if (currentSpec) {
@@ -74,8 +85,6 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
 
     if (currentPrice) {
       const [minPrice, maxPrice] = currentPrice.split("-").map(Number);
-
-      // <-- НОВОЕ: Ищем минимальную цену по всем местам работы врача
       const docMinPrice =
         doc.workplaces.length > 0
           ? Math.min(...doc.workplaces.map((w) => w.price))
@@ -109,7 +118,7 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
           experience: true,
           rating: true,
           price: true,
-          online: true, // <-- НОВОЕ: Включаем онлайн-фильтр
+          online: true,
         }}
       />
 
@@ -123,17 +132,24 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
           )}
 
           <div className="flex flex-col gap-2">
-            {filteredDoctors.length === 0 && (
+            {isLoading ? (
+              <DoctorSkeleton count={4} variant="horizontal" />
+            ) : filteredDoctors.length === 0 ? (
               <p className="text-center text-[#838A8D] py-10">
                 По вашим параметрам врачи не найдены
               </p>
+            ) : (
+              filteredDoctors.map((doc) => (
+                <DoctorCard
+                  key={`mob-${doc.id}`}
+                  {...doc}
+                  variant="horizontal"
+                />
+              ))
             )}
-            {filteredDoctors.map((doc) => (
-              <DoctorCard key={`mob-${doc.id}`} {...doc} variant="horizontal" />
-            ))}
           </div>
 
-          {filteredDoctors.length > 0 && (
+          {!isLoading && filteredDoctors.length > 0 && (
             <Button
               variant="outline"
               className="w-full mt-6 bg-white justify-center"
@@ -183,22 +199,27 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
               experience: true,
               rating: true,
               price: true,
-              online: true, // <-- НОВОЕ: Включаем онлайн-фильтр
+              online: true,
             }}
           />
 
-          <div className="grid grid-cols-4 gap-5 mt-2">
-            {filteredDoctors.length === 0 && (
-              <p className="col-span-4 text-center text-[#838A8D] py-20 text-lg">
+          <div className="mt-2">
+            {isLoading ? (
+              <DoctorSkeleton count={8} variant="vertical" />
+            ) : filteredDoctors.length === 0 ? (
+              <p className="text-center text-[#838A8D] py-20 text-lg">
                 По вашим параметрам врачи не найдены
               </p>
+            ) : (
+              <div className="grid grid-cols-4 gap-5 items-stretch">
+                {filteredDoctors.map((doc) => (
+                  <DoctorCard key={`desk-${doc.id}`} {...doc} />
+                ))}
+              </div>
             )}
-            {filteredDoctors.map((doc) => (
-              <DoctorCard key={`desk-${doc.id}`} {...doc} />
-            ))}
           </div>
 
-          {filteredDoctors.length > 0 && (
+          {!isLoading && filteredDoctors.length > 0 && (
             <div className="flex justify-center mt-10">
               <Button variant="outline" className="bg-white">
                 Показать еще

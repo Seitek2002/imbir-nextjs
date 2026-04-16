@@ -1,3 +1,5 @@
+"use client";
+
 import { FC } from "react";
 
 import Link from "next/link";
@@ -8,14 +10,15 @@ import {
   MobileFiltersModal,
 } from "@/features";
 import { Footer, Header } from "@/widgets";
+import { useQuery } from "@tanstack/react-query";
 
 import { FilterBar } from "@/features/filter-bar/ui";
 import { UrlSearchInput } from "@/features/search-by-query/ui";
 
-import { ClinicCard } from "@/entities/clinic";
+import { ClinicCard, ClinicSkeleton } from "@/entities/clinic";
 
+import { api } from "@/shared/api/requests";
 import { ROUTES } from "@/shared/config/routes";
-import { MOCK_CLINICS } from "@/shared/constants/mocks";
 import { Button } from "@/shared/ui";
 
 type Props = {
@@ -36,8 +39,14 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
       ? searchParams.clinic_rating
       : null;
 
-  // 2. Фильтруем массив клиник
-  const filteredClinics = MOCK_CLINICS.filter((clinic) => {
+  // 2. ПОЛУЧАЕМ ДАННЫЕ С СЕРВЕРА
+  const { data: clinics = [], isLoading } = useQuery({
+    queryKey: ["clinics"],
+    queryFn: api.getClinics,
+  });
+
+  // 3. Фильтруем массив клиник (уже реальных)
+  const filteredClinics = clinics.filter((clinic) => {
     // Поиск по названию клиники
     if (activeQuery) {
       const q = activeQuery.toLowerCase();
@@ -99,17 +108,24 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
           )}
 
           <div className="flex flex-col gap-2">
-            {filteredClinics.length === 0 && (
+            {isLoading ? (
+              <ClinicSkeleton count={4} variant="horizontal" />
+            ) : filteredClinics.length === 0 ? (
               <p className="text-center text-[#838A8D] py-10">
                 По вашим параметрам клиники не найдены
               </p>
+            ) : (
+              filteredClinics.map((clinic) => (
+                <ClinicCard
+                  key={`mob-${clinic.id}`}
+                  {...clinic}
+                  variant="horizontal"
+                />
+              ))
             )}
-            {filteredClinics.map((clinic) => (
-              <ClinicCard key={`mob-${clinic.id}`} {...clinic} />
-            ))}
           </div>
 
-          {filteredClinics.length > 0 && (
+          {!isLoading && filteredClinics.length > 0 && (
             <Button
               variant="outline"
               className="w-full mt-6 bg-white justify-center"
@@ -151,21 +167,25 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
             )}
           </div>
 
-          {/* ДОБАВИЛИ ПРЕФИКС! */}
           <FilterBar title="Клиники" prefix="clinic" fields={clinicFilters} />
 
-          <div className="grid grid-cols-4 gap-5 mt-2">
-            {filteredClinics.length === 0 && (
+          <div className="mt-2">
+            {isLoading ? (
+              <ClinicSkeleton count={8} variant="vertical" />
+            ) : filteredClinics.length === 0 ? (
               <p className="col-span-4 text-center text-[#838A8D] py-20 text-lg">
                 По вашим параметрам клиники не найдены
               </p>
+            ) : (
+              <div className="grid grid-cols-4 gap-5 items-stretch">
+                {filteredClinics.map((clinic) => (
+                  <ClinicCard key={`desk-${clinic.id}`} {...clinic} />
+                ))}
+              </div>
             )}
-            {filteredClinics.map((clinic) => (
-              <ClinicCard key={`desk-${clinic.id}`} {...clinic} />
-            ))}
           </div>
 
-          {filteredClinics.length > 0 && (
+          {!isLoading && filteredClinics.length > 0 && (
             <div className="flex justify-center mt-10">
               <Button variant="outline" className="bg-white">
                 Показать еще
