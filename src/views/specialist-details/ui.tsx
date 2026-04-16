@@ -6,9 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Footer, Header, VideosSwiper } from "@/widgets";
+import { useQuery } from "@tanstack/react-query";
 
 import { ReviewsSection } from "@/widgets/reviews/ui";
 
+// ИМПОРТЫ API
+import { api } from "@/shared/api/requests";
 import {
   EmailIcon,
   GeoIcon,
@@ -18,7 +21,6 @@ import {
   PhoneIcon,
 } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
-import { MOCK_DOCTOR, MOCK_REVIEWS } from "@/shared/constants/mocks";
 import { Button, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card/ui";
 import { StatsPanel } from "@/shared/ui/stats-panel/ui";
@@ -28,7 +30,48 @@ type Props = {
 };
 
 export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
-  console.log("Specialist ID:", id);
+  // 1. ПОЛУЧАЕМ ДАННЫЕ ВРАЧА
+  const { data: doctor, isLoading: isDoctorLoading } = useQuery({
+    queryKey: ["doctor", id],
+    queryFn: () => api.getDoctorById(id),
+  });
+
+  // 2. ПОЛУЧАЕМ ОТЗЫВЫ ЭТОГО ВРАЧА
+  const { data: reviews = [] } = useQuery({
+    queryKey: ["reviews", "doctor", id],
+    queryFn: () => api.getReviewsByDoctor(id),
+  });
+
+  if (isDoctorLoading || !doctor) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Загрузка специалиста...
+      </div>
+    );
+  }
+
+  // --- ФОЛЛБЭКИ ДЛЯ ДЕТАЛЬНЫХ ПОЛЕЙ (Пока их нет в MockAPI) ---
+  const education =
+    doctor.education || "Медицинская Академия, факультет лечебного дела";
+  const about =
+    doctor.about ||
+    "Опытный специалист с многолетней практикой. Индивидуальный подход к каждому пациенту.";
+  const workExperience = doctor.workExperience || [
+    {
+      years: "2015-Наст. время",
+      duration: `(${doctor.experience} лет)`,
+      place: doctor.workplaces[0]?.clinicName || "Частная клиника",
+      role: doctor.specialty,
+    },
+  ];
+  const skills = doctor.skills || [
+    "Консультация",
+    "Диагностика заболеваний",
+    "Назначение плана лечения",
+  ];
+  const scheduleText = doctor.contacts?.schedule || "ПН-ПТ • 08:00-17:00";
+  const phoneText = doctor.contacts?.phone || "+996 700 123 456";
+  const emailText = doctor.contacts?.email || "doctor@clinic.kg";
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col relative pb-20 md:pb-0">
@@ -52,7 +95,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
             Специалисты
           </Link>
           <span>•</span>
-          <span className="text-[#F5653E]">{MOCK_DOCTOR.name}</span>
+          <span className="text-[#F5653E]">{doctor.name}</span>
         </div>
 
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
@@ -76,15 +119,15 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
             </div>
 
             <div className="relative w-full h-85 md:h-125 bg-[#FFEFE5] md:rounded-3xl overflow-hidden">
-              {/* Вставили реальное фото вместо заглушки */}
-              <Image
-                src={MOCK_DOCTOR.image}
-                alt={MOCK_DOCTOR.name}
-                fill
-                className="object-cover object-top"
-              />
-              {/* Бейджик онлайна, если врач доступен онлайн */}
-              {MOCK_DOCTOR.isOnlineAvailable && (
+              {doctor.image && (
+                <Image
+                  src={doctor.image}
+                  alt={doctor.name}
+                  fill
+                  className="object-cover object-top"
+                />
+              )}
+              {doctor.isOnlineAvailable && (
                 <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider hidden md:block">
                   Онлайн
                 </div>
@@ -98,22 +141,20 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h1 className="text-2xl md:text-3xl font-semibold text-[#191A1B]">
-                      {MOCK_DOCTOR.name}
+                      {doctor.name}
                     </h1>
-                    {/* Мобильный бейджик онлайна */}
-                    {MOCK_DOCTOR.isOnlineAvailable && (
+                    {doctor.isOnlineAvailable && (
                       <span className="md:hidden bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0 mt-1">
                         Онлайн
                       </span>
                     )}
                   </div>
                   <p className="text-[#838A8D] text-center lg:text-left text-base">
-                    {MOCK_DOCTOR.specialty}
+                    {doctor.specialty}
                   </p>
 
-                  {/* ВЫВОДИМ МЕСТА РАБОТЫ (КЛИНИКИ) И ЦЕНЫ */}
                   <div className="mt-3 flex flex-col gap-1.5">
-                    {MOCK_DOCTOR.workplaces.map((workplace) => (
+                    {doctor.workplaces?.map((workplace) => (
                       <div
                         key={workplace.clinicId}
                         className="flex items-center gap-2 text-sm text-[#191A1B]"
@@ -135,14 +176,13 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               </div>
 
               <StatsPanel
-                rating={MOCK_DOCTOR.rating}
-                experience={`${MOCK_DOCTOR.experience} лет`}
+                rating={doctor.rating}
+                experience={`${doctor.experience} лет`}
                 experienceLabel="Стаж"
-                reviews={MOCK_DOCTOR.reviewsCount}
+                reviews={doctor.reviews} // Заменил reviewsCount на reviews (по нашему API)
               />
             </div>
 
-            {/* Десктопные кнопки */}
             <div className="hidden md:flex gap-4 mb-10 mt-4">
               <Button
                 variant="outline"
@@ -150,7 +190,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               >
                 Офлайн-запись
               </Button>
-              {MOCK_DOCTOR.isOnlineAvailable && (
+              {doctor.isOnlineAvailable && (
                 <Button className="flex-1 justify-center">
                   Видео-консультация
                 </Button>
@@ -159,16 +199,15 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
 
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
               <InfoCard title="Образование" expandable lines={3}>
-                {MOCK_DOCTOR.education}
+                {education}
               </InfoCard>
-
               <InfoCard title="О враче" expandable lines={3}>
-                {MOCK_DOCTOR.about}
+                {about}
               </InfoCard>
 
               <InfoCard title="Опыт работы" expandable={false}>
                 <div className="flex flex-col gap-5">
-                  {MOCK_DOCTOR.workExperience.map((exp, idx) => (
+                  {workExperience.map((exp, idx) => (
                     <div key={idx} className="relative pl-5">
                       <span className="absolute left-0 top-2.5 w-2.5 h-0.5 bg-[#F5653E]" />
                       <div className="mb-1">
@@ -192,7 +231,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
 
               <InfoCard title="Профессиональные навыки" expandable={false}>
                 <ul className="flex flex-col gap-3">
-                  {MOCK_DOCTOR.skills.map((skill, idx) => (
+                  {skills.map((skill, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                       <span className="text-[#F5653E] font-medium text-lg leading-none mt-0.5">
                         —
@@ -212,7 +251,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                       <HistoryIcon className="size-5" />
                     </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
-                      {MOCK_DOCTOR.contacts.schedule}
+                      {scheduleText}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
@@ -220,7 +259,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                       <PhoneIcon className="size-5" />
                     </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
-                      {MOCK_DOCTOR.contacts.phone}
+                      {phoneText}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
@@ -228,7 +267,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                       <EmailIcon className="size-5" />
                     </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
-                      {MOCK_DOCTOR.contacts.email}
+                      {emailText}
                     </span>
                   </div>
                 </div>
@@ -237,10 +276,13 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
           </div>
         </div>
 
-        <ReviewsSection
-          initialReviews={MOCK_REVIEWS}
-          averageRating={MOCK_DOCTOR.rating}
-        />
+        {/* Секция отзывов показывается только если есть отзывы */}
+        {reviews.length > 0 && (
+          <ReviewsSection
+            initialReviews={reviews}
+            averageRating={doctor.rating}
+          />
+        )}
 
         <div className="mt-10 md:mt-20 mb-10 md:mb-20 px-4 md:px-0">
           <div className="flex items-center justify-between mb-6 md:mb-8 md:hidden">
@@ -261,24 +303,12 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               {
                 id: "1",
                 title: "Врач онлайн: как это работает за 1 минуту",
-                authorName: MOCK_DOCTOR.name,
-                authorRole: MOCK_DOCTOR.specialty,
-                // ИСПРАВЛЕНО: убрал .src, т.к. картинка может быть строкой или StaticImageData
+                authorName: doctor.name,
+                authorRole: doctor.specialty,
                 thumbnail:
-                  typeof MOCK_DOCTOR.image === "string"
-                    ? MOCK_DOCTOR.image
-                    : MOCK_DOCTOR.image?.src || "",
-                youtubeUrl: "#",
-              },
-              {
-                id: "2",
-                title: "3 шага к консультации с врачом",
-                authorName: MOCK_DOCTOR.name,
-                authorRole: MOCK_DOCTOR.specialty,
-                thumbnail:
-                  typeof MOCK_DOCTOR.image === "string"
-                    ? MOCK_DOCTOR.image
-                    : MOCK_DOCTOR.image?.src || "",
+                  typeof doctor.image === "string"
+                    ? doctor.image
+                    : doctor.image?.src || "",
                 youtubeUrl: "#",
               },
             ]}
@@ -297,7 +327,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
         >
           Офлайн
         </Button>
-        {MOCK_DOCTOR.isOnlineAvailable && (
+        {doctor.isOnlineAvailable && (
           <Button className="flex-1 justify-center" size="lg">
             Онлайн
           </Button>

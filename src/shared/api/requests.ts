@@ -24,7 +24,6 @@ export const api = {
       return [];
     }
   },
-
   getDoctorById: async (id: string): Promise<DoctorListItem | null> => {
     try {
       const res = await fetch(`${API_URL}/doctors/${id}`, {
@@ -49,6 +48,18 @@ export const api = {
     } catch (error) {
       console.error(error);
       return [];
+    }
+  },
+  getClinicById: async (id: string): Promise<ClinicListItem | null> => {
+    try {
+      const res = await fetch(`${API_URL}/clinics/${id}`, {
+        next: { revalidate: 0 },
+      });
+      if (!res.ok) throw new Error("Ошибка при загрузке клиники");
+      return await res.json();
+    } catch (error) {
+      console.error(error);
+      return null;
     }
   },
 

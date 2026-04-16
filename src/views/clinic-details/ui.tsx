@@ -2,13 +2,17 @@
 
 import { FC, useState } from "react";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import { DoctorCard } from "@/entities";
 import { Footer, Header } from "@/widgets";
+import { useQuery } from "@tanstack/react-query";
 
 import { ReviewsSection } from "@/widgets/reviews/ui";
 
+// ИМПОРТЫ API
+import { api } from "@/shared/api/requests";
 import {
   EmailIcon,
   GeoIcon,
@@ -18,12 +22,6 @@ import {
   PhoneIcon,
 } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
-import {
-  MOCK_CLINIC,
-  MOCK_REVIEWS,
-  MOCK_SERVICES,
-  MOCK_SPECIALISTS,
-} from "@/shared/constants/mocks";
 import { cn } from "@/shared/lib/utils";
 import { Button, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card/ui";
@@ -34,8 +32,58 @@ type Props = {
 };
 
 export const ClinicDetailsPage: FC<Props> = ({ id }) => {
-  console.log("Clinic ID:", id);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+
+  // 1. ЗАПРАШИВАЕМ ДАННЫЕ ПАРАЛЛЕЛЬНО
+  const { data: clinic, isLoading: isClinicLoading } = useQuery({
+    queryKey: ["clinic", id],
+    queryFn: () => api.getClinicById(id),
+  });
+
+  const { data: services = [] } = useQuery({
+    queryKey: ["services", "clinic", id],
+    // Получаем все услуги и фильтруем те, что принадлежат этой клинике
+    queryFn: async () => {
+      const allServices = await api.getServices();
+      return allServices.filter((s) => s.clinicId === id);
+    },
+  });
+
+  const { data: doctors = [] } = useQuery({
+    queryKey: ["doctors", "clinic", id],
+    // Получаем всех врачей и ищем тех, кто работает в этой клинике
+    queryFn: async () => {
+      const allDoctors = await api.getDoctors();
+      return allDoctors.filter((doc) =>
+        doc.workplaces.some((w) => w.clinicId === id),
+      );
+    },
+  });
+
+  const { data: reviews = [] } = useQuery({
+    queryKey: ["reviews", "clinic", id],
+    queryFn: () => api.getReviewsByClinic(id),
+  });
+
+  // ПОКА ГРУЗИТСЯ — ПОКАЗЫВАЕМ ПРОСТОЙ ЛОАДЕР (Можешь заменить на красивый скелетон потом)
+  if (isClinicLoading || !clinic) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Загрузка клиники...
+      </div>
+    );
+  }
+
+  // Если у клиники нет детального описания и контактов (в MockAPI мы их пока не добавили всем), ставим заглушки
+  const aboutText =
+    clinic.about ||
+    "Современная медицинская помощь, опытные врачи и индивидуальный подход к каждому пациенту.";
+  const scheduleText = clinic.schedule || "ПН-ПТ • 08:00-17:00";
+  const phoneText = clinic.phone || "+996 700 123 456";
+  const emailText = clinic.email || "info@clinic.kg";
+
+  // Делаем массив картинок (так как в MockAPI у нас пока одна строка image, размножим её для слайдера)
+  const images = clinic.images || [clinic.image, clinic.image, clinic.image];
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col relative pb-20 md:pb-0">
@@ -44,7 +92,6 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
       </div>
 
       <div className="flex-1 w-full max-w-350 mx-auto md:px-10 flex flex-col pt-0 md:pt-6 pb-10">
-        {/* --- ХЛЕБНЫЕ КРОШКИ (ПК) --- */}
         <div className="hidden md:flex text-sm text-[#686F72] mb-6 items-center gap-2">
           <Link
             href={ROUTES.HOME}
@@ -60,15 +107,12 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
             Клиники
           </Link>
           <span>•</span>
-          {/* ИСПРАВЛЕНО НА MOCK_CLINIC */}
-          <span className="text-[#F5653E]">{MOCK_CLINIC.name}</span>
+          <span className="text-[#F5653E]">{clinic.name}</span>
         </div>
 
         {/* --- ОСНОВНОЙ БЛОК --- */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-          {/* ЛЕВАЯ КОЛОНКА: СЛАЙДЕР/ГАЛЕРЕЯ */}
           <div className="relative w-full md:w-125 lg:w-150 shrink-0">
-            {/* Шапка для мобилки */}
             <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 md:hidden">
               <IconBtn
                 variant="outline"
@@ -87,54 +131,50 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
               </IconBtn>
             </div>
 
-            {/* Слайдер */}
             <div className="flex flex-col gap-4">
               <div className="relative flex overflow-x-auto md:overflow-hidden snap-x snap-mandatory scrollbar-hide h-85 md:h-100 w-full md:rounded-3xl bg-[#E3E4E5]">
-                <div className="hidden md:flex absolute inset-0 items-center justify-center text-[#838A8D]">
-                  Большое фото {activeImageIdx + 1}
-                </div>
-
-                {MOCK_CLINIC.images.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className="md:hidden shrink-0 w-full h-full snap-center flex items-center justify-center text-[#838A8D] border-r border-white/20"
-                  >
-                    Фото {idx + 1}
-                  </div>
-                ))}
+                {/* Главное фото */}
+                <Image
+                  src={images[activeImageIdx]}
+                  alt={clinic.name}
+                  fill
+                  className="object-cover"
+                />
               </div>
 
-              {/* Миниатюры для ПК */}
               <div className="hidden md:flex gap-3 overflow-x-auto scrollbar-hide">
-                {MOCK_CLINIC.images.map((img, idx) => (
+                {images.map((img: string, idx: number) => (
                   <div
                     key={idx}
                     onClick={() => setActiveImageIdx(idx)}
                     className={cn(
-                      "size-20 lg:size-24 rounded-2xl bg-[#E3E4E5] shrink-0 cursor-pointer transition-all flex items-center justify-center text-xs text-[#838A8D]",
+                      "relative size-20 lg:size-24 rounded-2xl bg-[#E3E4E5] shrink-0 cursor-pointer transition-all overflow-hidden",
                       activeImageIdx === idx
                         ? "border-2 border-[#F5653E]"
                         : "border-2 border-transparent hover:border-[#F5653E]/50",
                     )}
                   >
-                    Мини {idx + 1}
+                    <Image
+                      src={img}
+                      alt="thumb"
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* ПРАВАЯ КОЛОНКА: ИНФОРМАЦИЯ О КЛИНИКЕ */}
           <div className="flex-1 flex flex-col rounded-t-3xl md:rounded-none -mt-6 md:mt-0 relative z-10 p-2 md:p-0">
             <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
               <div className="flex justify-center md:justify-between items-start mb-6">
                 <div>
-                  {/* ИСПРАВЛЕНО НА MOCK_CLINIC */}
                   <h1 className="text-2xl md:text-3xl font-semibold text-[#191A1B] mb-1">
-                    {MOCK_CLINIC.name}
+                    {clinic.name}
                   </h1>
                   <p className="text-[#838A8D] text-center lg:text-left text-base mb-4">
-                    {MOCK_CLINIC.type}
+                    Многопрофильная клиника
                   </p>
 
                   <div className="flex flex-col gap-1.5 text-sm text-[#191A1B]">
@@ -142,13 +182,13 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                       <span className="text-[#F5653E] flex items-center justify-center">
                         <GeoIcon className="size-4" />
                       </span>
-                      {MOCK_CLINIC.address}
+                      {clinic.address}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[#F5653E] flex items-center justify-center">
                         <HistoryIcon className="size-4" />
                       </span>
-                      {MOCK_CLINIC.schedule}
+                      {scheduleText}
                     </div>
                   </div>
                 </div>
@@ -157,12 +197,11 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                 </IconBtn>
               </div>
 
-              {/* ИСПРАВЛЕНО НА MOCK_CLINIC */}
               <StatsPanel
-                rating={MOCK_CLINIC.rating}
-                experience={`${MOCK_CLINIC.experience} лет`}
+                rating={clinic.rating}
+                experience={`${clinic.experience} лет`}
                 experienceLabel="Опыт"
-                reviews={MOCK_CLINIC.reviewsCount}
+                reviews={clinic.reviews}
               />
             </div>
 
@@ -179,12 +218,10 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
             </div>
 
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
-              {/* ИСПРАВЛЕНО НА MOCK_CLINIC */}
               <InfoCard title="О клинике" expandable lines={3}>
-                {MOCK_CLINIC.about}
+                {aboutText}
               </InfoCard>
 
-              {/* ИСПРАВЛЕНО НА MOCK_CLINIC */}
               <InfoCard title="Контакты" expandable={false}>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
@@ -192,7 +229,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                       <HistoryIcon className="size-5" />
                     </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
-                      {MOCK_CLINIC.contacts.schedule}
+                      {scheduleText}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
@@ -200,7 +237,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                       <GeoIcon className="size-5" />
                     </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
-                      {MOCK_CLINIC.contacts.address}
+                      {clinic.address}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
@@ -208,7 +245,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                       <PhoneIcon className="size-5" />
                     </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
-                      {MOCK_CLINIC.contacts.phone}
+                      {phoneText}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
@@ -216,7 +253,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                       <EmailIcon className="size-5" />
                     </span>
                     <span className="text-[#838A8D] text-sm md:text-base">
-                      {MOCK_CLINIC.contacts.email}
+                      {emailText}
                     </span>
                   </div>
                 </div>
@@ -226,89 +263,75 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
         </div>
 
         {/* --- СЕКЦИЯ: УСЛУГИ --- */}
-        <div className="mt-10 md:mt-20 px-4 md:px-0">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <h2 className="text-2xl font-semibold text-[#191A1B]">Услуги</h2>
-            <div className="hidden md:flex bg-white border border-[#E3E4E5] rounded-full px-4 py-2 w-75">
-              <span className="text-[#838A8D] text-sm">🔍 Поиск...</span>
+        {services.length > 0 && (
+          <div className="mt-10 md:mt-20 px-4 md:px-0">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
+              <h2 className="text-2xl font-semibold text-[#191A1B]">Услуги</h2>
             </div>
-            <Link
-              href="#"
-              className="md:hidden text-[#F5653E] text-sm font-medium hover:underline"
-            >
-              Все
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {MOCK_SERVICES.map((service) => (
-              <div
-                key={service.id}
-                className="bg-white border border-[#E3E4E5] rounded-2xl p-4 flex flex-col"
-              >
-                <div className="h-32 bg-[#E3E4E5] rounded-xl mb-4 flex items-center justify-center text-xs text-gray-400">
-                  Фото услуги
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {services.map((service) => (
+                <div
+                  key={service.id}
+                  className="bg-white border border-[#E3E4E5] rounded-2xl p-4 flex flex-col"
+                >
+                  <div className="relative h-32 bg-[#E3E4E5] rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                    <Image
+                      src={service.image}
+                      alt={service.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <h4 className="font-semibold text-[#191A1B]">
+                    {service.name}
+                  </h4>
+                  <p className="text-xs text-[#838A8D] mb-2">
+                    {service.category}
+                  </p>
+                  <div className="flex items-center justify-between mt-auto mb-4">
+                    <span className="font-bold text-[#191A1B]">
+                      {service.price} с
+                    </span>
+                    <span className="text-xs text-[#838A8D]">
+                      ⭐ {service.rating} ({service.reviews})
+                    </span>
+                  </div>
+                  <Button variant="outline" className="w-full justify-center">
+                    Записаться
+                  </Button>
                 </div>
-                <h4 className="font-semibold text-[#191A1B]">{service.name}</h4>
-                <p className="text-xs text-[#838A8D] mb-2">
-                  {service.category}
-                </p>
-                <div className="flex items-center justify-between mt-auto mb-4">
-                  <span className="font-bold text-[#191A1B]">
-                    {service.price}
-                  </span>
-                  <span className="text-xs text-[#838A8D]">
-                    ⭐ {service.rating} ({service.reviews})
-                  </span>
-                </div>
-                <Button variant="outline" className="w-full justify-center">
-                  Записаться
-                </Button>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* --- СЕКЦИЯ: СПЕЦИАЛИСТЫ --- */}
-        <div className="mt-10 md:mt-20 px-4 md:px-0">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <h2 className="text-2xl font-semibold text-[#191A1B]">
-              Специалисты
-            </h2>
-            <div className="hidden md:flex bg-white border border-[#E3E4E5] rounded-full px-4 py-2 w-75">
-              <span className="text-[#838A8D] text-sm">🔍 Поиск...</span>
+        {doctors.length > 0 && (
+          <div className="mt-10 md:mt-20 px-4 md:px-0">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
+              <h2 className="text-2xl font-semibold text-[#191A1B]">
+                Специалисты клиники
+              </h2>
             </div>
-            <Link
-              href="#"
-              className="md:hidden text-[#F5653E] text-sm font-medium hover:underline"
-            >
-              Все
-            </Link>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {doctors.map((doc) => (
+                <DoctorCard key={doc.id} {...doc} variant="vertical" />
+              ))}
+            </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {MOCK_SPECIALISTS.map((doc) => (
-              <DoctorCard key={doc.id} {...doc} variant="vertical" />
-            ))}
-          </div>
-        </div>
+        )}
 
         {/* --- СЕКЦИЯ: ОТЗЫВЫ --- */}
-        <ReviewsSection
-          initialReviews={MOCK_REVIEWS}
-          averageRating={MOCK_CLINIC.rating} // <-- ИСПРАВЛЕНО НА MOCK_CLINIC
-        />
+        {reviews.length > 0 && (
+          <ReviewsSection
+            initialReviews={reviews}
+            averageRating={clinic.rating}
+          />
+        )}
       </div>
 
       <div className="hidden md:block">
         <Footer />
-      </div>
-
-      {/* Липкая кнопка для мобилки */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#E3E4E5] z-50">
-        <Button className="w-full justify-center" size="lg">
-          Записаться на приём
-        </Button>
       </div>
     </main>
   );
