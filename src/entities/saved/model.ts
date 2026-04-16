@@ -1,14 +1,20 @@
 export type SavedType = "doctor" | "clinic" | "service";
 
+type Workplace = {
+  clinicId: string;
+  clinicName: string;
+  price: number;
+};
+
 type DoctorData = {
   id: string;
   name: string;
   specialty: string;
-  clinic: string;
+  workplaces: Workplace[];
+  isOnlineAvailable?: boolean;
   rating: number;
   reviews: number;
   experience: number;
-  price?: number;
   image?: string;
 };
 
@@ -62,7 +68,11 @@ export const MOCK_SAVED_ITEMS: SavedItem[] = [
       id: "d1",
       name: "Айбеков Нурлан Эльдарович",
       specialty: "Врач-терапевт",
-      clinic: "Nova Clinic",
+      workplaces: [
+        { clinicId: "c1", clinicName: "Nova Clinic", price: 1500 },
+        { clinicId: "c2", clinicName: "Health Center", price: 1700 },
+      ],
+      isOnlineAvailable: true,
       rating: 4.85,
       reviews: 255,
       experience: 12,
@@ -76,7 +86,7 @@ export const MOCK_SAVED_ITEMS: SavedItem[] = [
       id: "d2",
       name: "Садыкова Алина Тимуровна",
       specialty: "Врач-терапевт",
-      clinic: "Nova Clinic",
+      workplaces: [{ clinicId: "c1", clinicName: "Nova Clinic", price: 1500 }],
       rating: 4.85,
       reviews: 255,
       experience: 12,
