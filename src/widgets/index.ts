@@ -11,3 +11,6 @@ export { ClinicsMainList } from "./clinics-main-list";
 export { Banners } from "./banners";
 export { Footer } from "./footer";
 export { ReviewsSection } from "./reviews";
+export { ClinicSidebar } from "./clinic-sidebar";
+export { SpecialistsList } from "./specialists-list";
+export { ProceduresList } from "./procedures-list";

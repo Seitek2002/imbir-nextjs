@@ -12,3 +12,6 @@ export { ForgotPasswordPage } from "./forgot-password";
 export { SpecialistDetailsPage } from "./specialist-details";
 export { ClinicDetailsPage } from "./clinic-details";
 export { ChatPage } from "./chat";
+export { ClinicProfile } from "./clinic-profile";
+export { ClinicSpecialists } from "./clinic-specialists";
+export { ClinicProcedures } from "./clinic-procedures";

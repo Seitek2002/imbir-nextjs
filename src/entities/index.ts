@@ -4,3 +4,7 @@ export { ClinicCard } from "./clinic";
 export { DoctorCard } from "./doctor";
 export { VideoCard } from "./video";
 export { ReviewCard } from "./review";
+export * from "./clinic-profile";
+export * from "./clinic-specialist";
+export { ProcedureCard, MOCK_PROCEDURES } from "./clinic-procedure";
+export type { Procedure } from "./clinic-procedure";
