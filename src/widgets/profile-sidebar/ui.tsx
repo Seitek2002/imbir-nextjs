@@ -37,6 +37,8 @@ const MENU_ITEMS = [
   },
 ];
 
+// todo: Надо все раздробить на еще более мелкие компоненты
+
 export const ProfileSidebar: FC = () => {
   const pathname = usePathname();
 
@@ -131,6 +133,7 @@ export const ProfileSidebar: FC = () => {
       </nav>
 
       {/* Logout */}
+      {/* todo: Вместо обычной button надо переиспользовать компонент <Button /> */}
       <button className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-[#686F72] hover:bg-[#F8F9FA] transition-colors group">
         <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
           <LogoutIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
@@ -152,6 +155,7 @@ export const ProfileSidebar: FC = () => {
       </button>
 
       {/* Vitamin C Status */}
+      {/* todo: Сделать компонент из блока ниже */}
       <div className="bg-white rounded-3xl p-6">
         <p className="text-[#838A8D] text-sm mb-2">Статус пользователя</p>
         <h4 className="text-[#F5653E] text-2xl font-bold mb-3">Витамин C</h4>

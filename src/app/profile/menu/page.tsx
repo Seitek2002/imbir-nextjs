@@ -11,6 +11,7 @@ import {
   SettingsIcon,
 } from "@/shared/assets";
 
+// todo: перенести href в shared/config/routes.ts
 const MENU_ITEMS = [
   {
     href: "/profile/settings",
