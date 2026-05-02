@@ -4,6 +4,7 @@ import { FC, useEffect, useState } from "react";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+import { useSearchHistoryStore } from "@/shared/store/useSearchHistoryStore";
 import { SearchInput } from "@/shared/ui";
 
 const QUERY_KEY = "q";
@@ -14,6 +15,8 @@ export const UrlSearchInput: FC<{ placeholder?: string }> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const addSearch = useSearchHistoryStore((state) => state.addSearch);
 
   const urlQuery = searchParams.get(QUERY_KEY) || "";
 
@@ -50,7 +53,9 @@ export const UrlSearchInput: FC<{ placeholder?: string }> = ({
   }, [query, pathname, router, searchParams, urlQuery]);
 
   const handleEnter = () => {
-    if (query === urlQuery) return;
+    if (query.trim()) {
+      addSearch(query);
+    }
 
     setLastPushedQuery(query);
 
@@ -58,7 +63,11 @@ export const UrlSearchInput: FC<{ placeholder?: string }> = ({
     if (query) params.set(QUERY_KEY, query);
     else params.delete(QUERY_KEY);
 
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    if (pathname === "/") {
+      router.push(`/search?${params.toString()}`);
+    } else {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
   };
 
   return (
