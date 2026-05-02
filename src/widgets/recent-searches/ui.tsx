@@ -2,7 +2,6 @@
 
 import { FC, useEffect, useState } from "react";
 
-// <-- Добавили хуки
 import { useRouter } from "next/navigation";
 
 import { IconBtn } from "@/shared";
