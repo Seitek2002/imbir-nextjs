@@ -1,0 +1,70 @@
+[
+  {
+    "id": "1",
+    "name": "МЦ «Медика»",
+    "rating": 4.8,
+    "reviews": 312,
+    "experience": 15,
+    "address": "г. Бишкек, ул. Московская, 127",
+    "specialties": ["Кардиология", "Терапия", "Неврология", "Педиатрия"],
+    "image": "https://placehold.co/400x300/FEF3F0/F5653E?text=Medika",
+    "about": "Многопрофильная клиника с 15-летним опытом работы. Оснащена современным диагностическим оборудованием.",
+    "schedule": "Пн–Пт: 08:00–20:00, Сб: 09:00–16:00",
+    "phone": "+996 (312) 45-67-89",
+    "email": "info@medika.kg",
+    "images": [
+      "https://placehold.co/800x500/E3E4E5/838A8D?text=Medika+Hall",
+      "https://placehold.co/800x500/E3E4E5/838A8D?text=Medika+Lab"
+    ]
+  },
+  {
+    "id": "2",
+    "name": "Клиника «Здоровье»",
+    "rating": 4.6,
+    "reviews": 198,
+    "experience": 10,
+    "address": "г. Бишкек, пр. Манаса, 45",
+    "specialties": ["Дерматология", "Гинекология", "Хирургия"],
+    "image": "https://placehold.co/400x300/F0FEF3/4CAF50?text=Zdorovye",
+    "about": "Специализированная клиника, сочетающая передовые методы диагностики и лечения.",
+    "schedule": "Пн–Сб: 09:00–19:00",
+    "phone": "+996 (312) 22-33-44",
+    "email": "info@zdorovye.kg",
+    "images": [
+      "https://placehold.co/800x500/E3E4E5/838A8D?text=Zdorovye+Hall"
+    ]
+  },
+  {
+    "id": "3",
+    "name": "МЦ «Диамед»",
+    "rating": 4.7,
+    "reviews": 254,
+    "experience": 12,
+    "address": "г. Бишкек, ул. Токтогула, 78",
+    "specialties": ["Офтальмология", "ЛОР", "Ортопедия"],
+    "image": "https://placehold.co/400x300/F0F4FE/3B82F6?text=Diamed",
+    "about": "Современный медицинский центр с уникальным оборудованием для офтальмологии и ЛОР-заболеваний.",
+    "schedule": "Пн–Пт: 08:30–19:30, Сб: 10:00–15:00",
+    "phone": "+996 (312) 55-66-77",
+    "email": "info@diamed.kg",
+    "images": []
+  },
+  {
+    "id": "4",
+    "name": "МЦ «Жизнь»",
+    "rating": 4.9,
+    "reviews": 421,
+    "experience": 20,
+    "address": "г. Бишкек, ул. Чуй, 210",
+    "specialties": ["Кардиология", "Онкология", "Реабилитация", "Педиатрия"],
+    "image": "https://placehold.co/400x300/FFF8E1/FF9800?text=Life",
+    "about": "Флагманская клиника с 20-летней историей. Полный цикл медицинской помощи.",
+    "schedule": "Круглосуточно",
+    "phone": "+996 (312) 99-00-11",
+    "email": "info@zhizn.kg",
+    "images": [
+      "https://placehold.co/800x500/E3E4E5/838A8D?text=Life+Main",
+      "https://placehold.co/800x500/E3E4E5/838A8D?text=Life+ICU"
+    ]
+  }
+]

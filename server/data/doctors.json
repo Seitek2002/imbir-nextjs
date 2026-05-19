@@ -1,0 +1,297 @@
+[
+  {
+    "id": "1",
+    "name": "Токтосунова Айгуль Бекова",
+    "specialty": "Кардиолог",
+    "isOnlineAvailable": true,
+    "rating": 4.9,
+    "reviews": 134,
+    "experience": 12,
+    "image": "https://pravatar.cc/300?img=47",
+    "education": "КГМА им. И.К. Ахунбаева, 2012. Ординатура по кардиологии — Москва, РНИМУ, 2014.",
+    "about": "Специализируется на лечении ишемической болезни сердца, гипертонии и нарушений ритма. Владеет ЭхоКГ и холтеровским мониторированием.",
+    "workplaces": [
+      {
+        "clinicId": "1",
+        "clinicName": "МЦ «Медика»",
+        "price": 1500,
+        "schedule": {
+          "mon": { "start": "09:00", "end": "18:00" },
+          "tue": { "start": "09:00", "end": "18:00" },
+          "wed": null,
+          "thu": { "start": "09:00", "end": "18:00" },
+          "fri": { "start": "09:00", "end": "17:00" },
+          "sat": null,
+          "sun": null,
+          "lunchBreak": { "start": "13:00", "end": "14:00" }
+        }
+      },
+      {
+        "clinicId": "4",
+        "clinicName": "МЦ «Жизнь»",
+        "price": 1800,
+        "schedule": {
+          "mon": null,
+          "tue": null,
+          "wed": { "start": "10:00", "end": "16:00" },
+          "thu": null,
+          "fri": null,
+          "sat": { "start": "10:00", "end": "14:00" },
+          "sun": null,
+          "lunchBreak": null
+        }
+      }
+    ],
+    "skills": ["ЭКГ", "ЭхоКГ", "Холтер", "Суточное АД", "Велоэргометрия"],
+    "contacts": {
+      "schedule": "Пн, Вт, Чт, Пт: 09:00–18:00",
+      "phone": "+996 700 123 456",
+      "email": "toktosunova@medika.kg"
+    }
+  },
+  {
+    "id": "2",
+    "name": "Алиев Марат Жапарович",
+    "specialty": "Терапевт",
+    "isOnlineAvailable": true,
+    "rating": 4.7,
+    "reviews": 210,
+    "experience": 8,
+    "image": "https://pravatar.cc/300?img=12",
+    "education": "ОшГМА, 2016. Специализация по внутренним болезням.",
+    "about": "Врач общей практики. Проводит комплексные обследования, лечение ОРВИ, бронхитов, гастритов и других терапевтических заболеваний.",
+    "workplaces": [
+      {
+        "clinicId": "1",
+        "clinicName": "МЦ «Медика»",
+        "price": 900,
+        "schedule": {
+          "mon": { "start": "08:00", "end": "17:00" },
+          "tue": { "start": "08:00", "end": "17:00" },
+          "wed": { "start": "08:00", "end": "17:00" },
+          "thu": { "start": "08:00", "end": "17:00" },
+          "fri": { "start": "08:00", "end": "16:00" },
+          "sat": null,
+          "sun": null,
+          "lunchBreak": { "start": "12:00", "end": "13:00" }
+        }
+      }
+    ],
+    "skills": ["Диагностика", "УЗИ брюшной полости", "Спирометрия"],
+    "contacts": {
+      "schedule": "Пн–Пт: 08:00–17:00",
+      "phone": "+996 700 234 567",
+      "email": "aliev@medika.kg"
+    }
+  },
+  {
+    "id": "3",
+    "name": "Исакова Гульнара Турдуевна",
+    "specialty": "Невролог",
+    "isOnlineAvailable": false,
+    "rating": 4.8,
+    "reviews": 88,
+    "experience": 15,
+    "image": "https://pravatar.cc/300?img=25",
+    "education": "КГМА, 2009. Ординатура по неврологии — Санкт-Петербург, 2011.",
+    "about": "Занимается лечением мигреней, остеохондроза, инсультов и эпилепсии. Большой опыт в нейрореабилитации.",
+    "workplaces": [
+      {
+        "clinicId": "1",
+        "clinicName": "МЦ «Медика»",
+        "price": 1400,
+        "schedule": {
+          "mon": { "start": "09:00", "end": "17:00" },
+          "tue": null,
+          "wed": { "start": "09:00", "end": "17:00" },
+          "thu": null,
+          "fri": { "start": "09:00", "end": "17:00" },
+          "sat": null,
+          "sun": null,
+          "lunchBreak": { "start": "13:00", "end": "14:00" }
+        }
+      }
+    ],
+    "skills": ["ЭЭГ", "ЭНМГ", "МРТ-навигация", "Рефлексотерапия"],
+    "contacts": {
+      "schedule": "Пн, Ср, Пт: 09:00–17:00",
+      "phone": "+996 700 345 678",
+      "email": "isakova@medika.kg"
+    }
+  },
+  {
+    "id": "4",
+    "name": "Мамытов Бакыт Эркинович",
+    "specialty": "Педиатр",
+    "isOnlineAvailable": true,
+    "rating": 4.9,
+    "reviews": 302,
+    "experience": 10,
+    "image": "https://pravatar.cc/300?img=33",
+    "education": "КГМА, 2014. Ординатура по педиатрии.",
+    "about": "Детский врач с широким опытом в лечении инфекционных и соматических заболеваний у детей от 0 до 18 лет.",
+    "workplaces": [
+      {
+        "clinicId": "4",
+        "clinicName": "МЦ «Жизнь»",
+        "price": 1100,
+        "schedule": {
+          "mon": { "start": "09:00", "end": "18:00" },
+          "tue": { "start": "09:00", "end": "18:00" },
+          "wed": { "start": "09:00", "end": "18:00" },
+          "thu": { "start": "09:00", "end": "18:00" },
+          "fri": { "start": "09:00", "end": "17:00" },
+          "sat": { "start": "10:00", "end": "14:00" },
+          "sun": null,
+          "lunchBreak": { "start": "13:00", "end": "14:00" }
+        }
+      }
+    ],
+    "skills": ["Вакцинация", "Грудное вскармливание", "Аллергология"],
+    "contacts": {
+      "schedule": "Пн–Сб: 09:00–18:00",
+      "phone": "+996 700 456 789",
+      "email": "mamytov@zhizn.kg"
+    }
+  },
+  {
+    "id": "5",
+    "name": "Джумабекова Анара Сатыбековна",
+    "specialty": "Дерматолог",
+    "isOnlineAvailable": true,
+    "rating": 4.6,
+    "reviews": 76,
+    "experience": 7,
+    "image": "https://pravatar.cc/300?img=29",
+    "education": "ОшГМА, 2017. Ординатура по дерматологии — Алматы.",
+    "about": "Лечение акне, псориаза, экземы, аллергических дерматитов. Косметологические процедуры.",
+    "workplaces": [
+      {
+        "clinicId": "2",
+        "clinicName": "Клиника «Здоровье»",
+        "price": 1200,
+        "schedule": {
+          "mon": { "start": "10:00", "end": "18:00" },
+          "tue": { "start": "10:00", "end": "18:00" },
+          "wed": { "start": "10:00", "end": "18:00" },
+          "thu": { "start": "10:00", "end": "18:00" },
+          "fri": { "start": "10:00", "end": "17:00" },
+          "sat": null,
+          "sun": null,
+          "lunchBreak": { "start": "13:00", "end": "14:00" }
+        }
+      }
+    ],
+    "skills": ["Дерматоскопия", "Криотерапия", "Лазерное лечение"],
+    "contacts": {
+      "schedule": "Пн–Пт: 10:00–18:00",
+      "phone": "+996 700 567 890",
+      "email": "dzhuma@zdorovye.kg"
+    }
+  },
+  {
+    "id": "6",
+    "name": "Усубалиев Темирбек Айтматович",
+    "specialty": "Хирург",
+    "isOnlineAvailable": false,
+    "rating": 4.8,
+    "reviews": 95,
+    "experience": 18,
+    "image": "https://pravatar.cc/300?img=15",
+    "education": "КГМА, 2006. Ординатура по хирургии, 2008. Стажировка — Германия, 2015.",
+    "about": "Специализируется на лапароскопических операциях и абдоминальной хирургии. Более 2000 успешных операций.",
+    "workplaces": [
+      {
+        "clinicId": "2",
+        "clinicName": "Клиника «Здоровье»",
+        "price": 2000,
+        "schedule": {
+          "mon": { "start": "09:00", "end": "16:00" },
+          "tue": { "start": "09:00", "end": "16:00" },
+          "wed": { "start": "09:00", "end": "16:00" },
+          "thu": null,
+          "fri": null,
+          "sat": null,
+          "sun": null,
+          "lunchBreak": { "start": "12:30", "end": "13:30" }
+        }
+      }
+    ],
+    "skills": ["Лапароскопия", "Аппендэктомия", "Грыжесечение", "Холецистэктомия"],
+    "contacts": {
+      "schedule": "Пн–Ср: 09:00–16:00",
+      "phone": "+996 700 678 901",
+      "email": "usubaliev@zdorovye.kg"
+    }
+  },
+  {
+    "id": "7",
+    "name": "Рысбекова Залина Канатовна",
+    "specialty": "Гинеколог",
+    "isOnlineAvailable": true,
+    "rating": 4.9,
+    "reviews": 187,
+    "experience": 14,
+    "image": "https://pravatar.cc/300?img=44",
+    "education": "КГМА, 2010. Ординатура по акушерству и гинекологии, 2012.",
+    "about": "Ведение беременности, лечение гинекологических заболеваний, эндоскопические операции.",
+    "workplaces": [
+      {
+        "clinicId": "2",
+        "clinicName": "Клиника «Здоровье»",
+        "price": 1300,
+        "schedule": {
+          "mon": { "start": "09:00", "end": "18:00" },
+          "tue": { "start": "09:00", "end": "18:00" },
+          "wed": null,
+          "thu": { "start": "09:00", "end": "18:00" },
+          "fri": { "start": "09:00", "end": "18:00" },
+          "sat": { "start": "10:00", "end": "14:00" },
+          "sun": null,
+          "lunchBreak": { "start": "13:00", "end": "14:00" }
+        }
+      }
+    ],
+    "skills": ["УЗИ плода", "Кольпоскопия", "Гистероскопия", "КТГ"],
+    "contacts": {
+      "schedule": "Пн, Вт, Чт, Пт, Сб: 09:00–18:00",
+      "phone": "+996 700 789 012",
+      "email": "rysbekova@zdorovye.kg"
+    }
+  },
+  {
+    "id": "8",
+    "name": "Карыбеков Азиз Болотович",
+    "specialty": "Офтальмолог",
+    "isOnlineAvailable": false,
+    "rating": 4.7,
+    "reviews": 112,
+    "experience": 9,
+    "image": "https://pravatar.cc/300?img=18",
+    "education": "КГМА, 2015. Ординатура по офтальмологии — Москва, 2017.",
+    "about": "Диагностика и лечение катаракты, глаукомы, миопии. Лазерная коррекция зрения.",
+    "workplaces": [
+      {
+        "clinicId": "3",
+        "clinicName": "МЦ «Диамед»",
+        "price": 1100,
+        "schedule": {
+          "mon": { "start": "09:00", "end": "17:00" },
+          "tue": { "start": "09:00", "end": "17:00" },
+          "wed": { "start": "09:00", "end": "17:00" },
+          "thu": { "start": "09:00", "end": "17:00" },
+          "fri": { "start": "09:00", "end": "16:00" },
+          "sat": null,
+          "sun": null,
+          "lunchBreak": { "start": "13:00", "end": "14:00" }
+        }
+      }
+    ],
+    "skills": ["Периметрия", "Тонометрия", "ОКТ", "Лазерная коррекция"],
+    "contacts": {
+      "schedule": "Пн–Пт: 09:00–17:00",
+      "phone": "+996 700 890 123",
+      "email": "karybekov@diamed.kg"
+    }
+  }
+]
