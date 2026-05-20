@@ -1,23 +1,128 @@
 "use client";
 
-import { useState } from "react";
+import { JSX, useState } from "react";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { Header } from "@/widgets";
+import { Footer, Header } from "@/widgets";
 
-import { EmailIcon, EyeIcon, EyeOffIcon, ProfileIcon } from "@/shared/assets";
+import {
+  EmailIcon,
+  EyeIcon,
+  EyeOffIcon,
+  HeaderBackIcon,
+  ProfileIcon,
+} from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
-import { Button, Input } from "@/shared/ui";
+import { cn } from "@/shared/lib/utils";
+import { Button, IconBtn, Input } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control/ui";
+
+import { ClinicRegistrationForm, ClinicStep } from "./clinic-form";
+import { DoctorRegistrationForm, DoctorStep } from "./doctor-form";
+
+// --- Role icons ---
+
+const ClinicIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M3 10L12 3l9 7v10a1 1 0 01-1 1H4a1 1 0 01-1-1V10z"
+      stroke="#F5653E"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9 21V14h6v7"
+      stroke="#F5653E"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M10.5 9.5h3M12 8v3"
+      stroke="#F5653E"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const DoctorIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="7" r="4" stroke="#F5653E" strokeWidth="1.5" />
+    <path
+      d="M4 20c0-3.314 3.134-6 8-6"
+      stroke="#F5653E"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <circle cx="18.5" cy="18.5" r="2.5" stroke="#F5653E" strokeWidth="1.5" />
+    <path
+      d="M17 18.5h3M18.5 17v3"
+      stroke="#F5653E"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const ClientIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="8" r="4" stroke="#F5653E" strokeWidth="1.5" />
+    <path
+      d="M4 21c0-4.418 3.582-8 8-8s8 3.582 8 8"
+      stroke="#F5653E"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+// --- Types ---
+
+type Role = "clinic" | "doctor" | "client";
+type ActiveForm = "role" | "client" | "doctor" | "clinic";
+
+type RoleOption = {
+  value: Role;
+  label: string;
+  description: string;
+  Icon: () => JSX.Element;
+};
+
+const ROLES: RoleOption[] = [
+  {
+    value: "clinic",
+    label: "Клиника",
+    description: "Для медицинских учреждений",
+    Icon: ClinicIcon,
+  },
+  {
+    value: "doctor",
+    label: "Врач",
+    description: "Для медицинских специалистов",
+    Icon: DoctorIcon,
+  },
+  {
+    value: "client",
+    label: "Клиент",
+    description: "Для пациентов и их родственников",
+    Icon: ClientIcon,
+  },
+];
+
+// --- Component ---
 
 export const RegisterPage = () => {
   const router = useRouter();
 
   const [authMode, setAuthMode] = useState<string>("register");
-  const [step, setStep] = useState<1 | 2>(1);
+  const [activeForm, setActiveForm] = useState<ActiveForm>("role");
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
+  // Client form
+  const [clientStep, setClientStep] = useState<1 | 2>(1);
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
@@ -25,31 +130,61 @@ export const RegisterPage = () => {
     password: "",
     confirmPassword: "",
   });
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
+  // Doctor form step (owned here for unified back navigation)
+  const [doctorStep, setDoctorStep] = useState<DoctorStep>(1);
+
+  // Clinic form step
+  const [clinicStep, setClinicStep] = useState<ClinicStep>(1);
+
   const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    if (field === "confirmPassword" || field === "password") {
+    if (field === "confirmPassword" || field === "password")
       setPasswordError("");
+  };
+
+  const handleBack = () => {
+    if (activeForm === "role") {
+      router.back();
+    } else if (activeForm === "client") {
+      if (clientStep === 1) {
+        setActiveForm("role");
+      } else {
+        setClientStep(1);
+      }
+    } else if (activeForm === "doctor") {
+      if (doctorStep === 1) {
+        setActiveForm("role");
+        setDoctorStep(1);
+      } else {
+        setDoctorStep((s) => (s - 1) as DoctorStep);
+      }
+    } else if (activeForm === "clinic") {
+      if (clinicStep === 1) {
+        setActiveForm("role");
+        setClinicStep(1);
+      } else {
+        setClinicStep((s) => (s - 1) as ClinicStep);
+      }
+    } else {
+      setActiveForm("role");
     }
   };
 
-  const handleNextStep = () => setStep(2);
-
-  const handleBack = () => {
-    if (step === 2) setStep(1);
-    else router.back();
+  const handleContinueRole = () => {
+    if (!selectedRole) return;
+    setActiveForm(selectedRole);
   };
 
-  const handleSubmit = () => {
+  const handleSubmitClient = () => {
     if (formData.password !== formData.confirmPassword) {
       setPasswordError("Пароли не совпадают");
       return;
     }
-    console.log("Регистрация:", formData);
+    console.log("Client registration:", formData);
   };
 
   const AuthTabs = (
@@ -68,123 +203,231 @@ export const RegisterPage = () => {
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
-      <Header backTo={ROUTES.HOME}>{AuthTabs}</Header>
+      <Header onBack={handleBack}>{AuthTabs}</Header>
 
-      {/* --- ГЛАВНЫЙ КОНТЕЙНЕР ДЛЯ ДЕСКТОПНОГО ГРИДА --- */}
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
-        {/* --- ЛЕВАЯ КАРТОЧКА С КАРТИНКОЙ (md: block) --- */}
-        <div className="hidden md:flex md:w-1/2 rounded-2xl p-6 bg-white shrink-0-0 items-center justify-center">
-          <div className="relative w-full aspect-square rounded-xl flex items-center justify-center">
-            <Image src="/assets/auth-bg.png" fill alt="logo" />
+        {/* Left decorative panel — desktop only */}
+        <div className="hidden md:block md:w-1/2 shrink-0 self-start sticky top-8">
+          <div className="rounded-2xl bg-[#FEF3F0] overflow-hidden flex items-center justify-center">
+            <div className="relative w-full aspect-square">
+              <Image
+                src="/assets/auth-bg.png"
+                fill
+                alt="Imbir"
+                className="object-contain"
+              />
+            </div>
           </div>
         </div>
 
-        {/* --- ПРАВАЯ КАРТОЧКА С ФОРМОЙ (md: wider) --- */}
+        {/* Right form card */}
         <div className="flex-1 md:bg-white md:rounded-2xl md:p-10 md:pb-16 flex flex-col max-w-120 md:max-w-none mx-auto w-full">
           <div className="md:contents bg-white rounded-2xl m-2 p-4 md:p-0 flex-1 flex flex-col">
-            <div className="hidden md:block">{AuthTabs}</div>
-
-            <div className="mt-8 mb-6 md:mt-12">
-              <h2 className="text-2xl font-semibold text-[#191A1B] mb-2">
-                Добро пожаловать в Imbir
-              </h2>
-              <p className="text-[#838A8D] text-sm md:text-base">
-                {step === 1
-                  ? "Заполните данные, чтобы создать аккаунт"
-                  : "Придумайте и подтвердите пароль вашего аккаунта"}
-              </p>
+            {/* Desktop: back button + auth tabs */}
+            <div className="hidden md:flex items-center gap-4">
+              <IconBtn variant="outline" size="sm" onClick={handleBack}>
+                <HeaderBackIcon className="size-4" />
+              </IconBtn>
+              <div className="flex-1 flex justify-center">{AuthTabs}</div>
+              <div className="size-9" />
             </div>
 
-            {step === 1 && (
-              <div className="flex flex-col gap-4">
-                <Input
-                  label="Имя"
-                  placeholder="Введите ваше имя"
-                  IconRight={ProfileIcon}
-                  value={formData.name}
-                  onChange={(e) => handleChange("name", e.target.value)}
-                />
-                <Input
-                  label="Фамилия"
-                  placeholder="Введите вашу фамилию"
-                  IconRight={ProfileIcon}
-                  value={formData.surname}
-                  onChange={(e) => handleChange("surname", e.target.value)}
-                />
-                <Input
-                  label="Электронная почта"
-                  type="email"
-                  placeholder="Введите вашу почту"
-                  IconRight={EmailIcon}
-                  value={formData.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
+            {/* Step: role selection */}
+            {activeForm === "role" && (
+              <>
+                <div className="mt-8 mb-6 md:mt-12">
+                  <h2 className="text-2xl font-semibold text-[#191A1B] mb-2">
+                    Выберите свою роль
+                  </h2>
+                  <p className="text-[#838A8D] text-sm md:text-base">
+                    Выберите вашу роль для продолжения регистрации
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {ROLES.map(({ value, label, description, Icon }) => (
+                    <label
+                      key={value}
+                      className={cn(
+                        "flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer",
+                        selectedRole === value
+                          ? "border-[#F5653E] bg-[#FFF8F6]"
+                          : "border-[#E5E6E8] bg-white hover:border-[#F5653E]/40",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="role"
+                        value={value}
+                        checked={selectedRole === value}
+                        onChange={() => setSelectedRole(value)}
+                        className="sr-only"
+                      />
+                      <div className="shrink-0 size-12 rounded-full bg-[#FEF3F0] flex items-center justify-center">
+                        <Icon />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-[#191A1B]">{label}</p>
+                        <p className="text-sm text-[#838A8D]">{description}</p>
+                      </div>
+                      <div
+                        className={cn(
+                          "shrink-0 size-5 rounded-full border-4 transition-all flex items-center justify-center",
+                          selectedRole === value
+                            ? "border-[#F5653E]"
+                            : "border-[#E3E4E5]",
+                        )}
+                      >
+                        {selectedRole === value && (
+                          <div className="size-2.5 rounded-full bg-[#F5653E]" />
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="mt-auto pt-10 md:mt-10">
+                  <Button
+                    className="w-full justify-center md:h-14 md:text-lg"
+                    size="lg"
+                    onClick={handleContinueRole}
+                    disabled={!selectedRole}
+                  >
+                    Продолжить
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Doctor registration */}
+            {activeForm === "doctor" && (
+              <div className="mt-8 md:mt-12 flex-1 flex flex-col">
+                <DoctorRegistrationForm
+                  step={doctorStep}
+                  onContinue={() =>
+                    setDoctorStep((s) => Math.min(s + 1, 4) as DoctorStep)
+                  }
                 />
               </div>
             )}
 
-            {step === 2 && (
-              <div className="flex flex-col gap-4">
-                <Input
-                  label="Пароль"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Введите пароль"
-                  IconRight={showPassword ? EyeIcon : EyeOffIcon}
-                  onIconRightClick={() => setShowPassword(!showPassword)}
-                  value={formData.password}
-                  onChange={(e) => handleChange("password", e.target.value)}
-                />
-                <Input
-                  label="Подтвердите пароль"
-                  type={showConfirm ? "text" : "password"}
-                  placeholder="Введите пароль повторно"
-                  IconRight={showConfirm ? EyeIcon : EyeOffIcon}
-                  onIconRightClick={() => setShowConfirm(!showConfirm)}
-                  value={formData.confirmPassword}
-                  onChange={(e) =>
-                    handleChange("confirmPassword", e.target.value)
+            {/* Clinic registration */}
+            {activeForm === "clinic" && (
+              <div className="mt-8 md:mt-12 flex-1 flex flex-col">
+                <ClinicRegistrationForm
+                  step={clinicStep}
+                  onContinue={() =>
+                    setClinicStep((s) => Math.min(s + 1, 7) as ClinicStep)
                   }
-                  error={passwordError}
                 />
               </div>
             )}
 
-            <div className="mt-auto pt-10 md:mt-10 flex flex-col gap-3">
-              {step === 2 && (
-                <Button
-                  variant="outline"
-                  className="w-full justify-center md:h-14 md:text-lg"
-                  size="lg"
-                  onClick={handleBack}
-                >
-                  Назад к данным
-                </Button>
-              )}
+            {/* Client registration */}
+            {activeForm === "client" && (
+              <>
+                <div className="mt-8 mb-6 md:mt-12">
+                  <h2 className="text-2xl font-semibold text-[#191A1B] mb-2">
+                    Добро пожаловать в Imbir
+                  </h2>
+                  <p className="text-[#838A8D] text-sm md:text-base">
+                    {clientStep === 1
+                      ? "Заполните данные, чтобы создать аккаунт"
+                      : "Придумайте и подтвердите пароль вашего аккаунта"}
+                  </p>
+                </div>
 
-              {step === 1 ? (
-                <Button
-                  className="w-full justify-center md:h-14 md:text-lg"
-                  size="lg"
-                  onClick={handleNextStep}
-                  disabled={
-                    !formData.name || !formData.surname || !formData.email
-                  }
-                >
-                  Продолжить
-                </Button>
-              ) : (
-                <Button
-                  className="w-full justify-center md:h-14 md:text-lg"
-                  size="lg"
-                  onClick={handleSubmit}
-                  disabled={!formData.password || !formData.confirmPassword}
-                >
-                  Создать аккаунт
-                </Button>
-              )}
-            </div>
+                {clientStep === 1 && (
+                  <div className="flex flex-col gap-4">
+                    <Input
+                      label="Имя"
+                      placeholder="Введите ваше имя"
+                      IconRight={ProfileIcon}
+                      value={formData.name}
+                      onChange={(e) => handleChange("name", e.target.value)}
+                    />
+                    <Input
+                      label="Фамилия"
+                      placeholder="Введите вашу фамилию"
+                      IconRight={ProfileIcon}
+                      value={formData.surname}
+                      onChange={(e) => handleChange("surname", e.target.value)}
+                    />
+                    <Input
+                      label="Электронная почта"
+                      type="email"
+                      placeholder="Введите вашу почту"
+                      IconRight={EmailIcon}
+                      value={formData.email}
+                      onChange={(e) => handleChange("email", e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {clientStep === 2 && (
+                  <div className="flex flex-col gap-4">
+                    <Input
+                      label="Пароль"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Введите пароль"
+                      IconRight={showPassword ? EyeIcon : EyeOffIcon}
+                      onIconRightClick={() => setShowPassword(!showPassword)}
+                      value={formData.password}
+                      onChange={(e) => handleChange("password", e.target.value)}
+                    />
+                    <Input
+                      label="Подтвердите пароль"
+                      type={showConfirm ? "text" : "password"}
+                      placeholder="Введите пароль повторно"
+                      IconRight={showConfirm ? EyeIcon : EyeOffIcon}
+                      onIconRightClick={() => setShowConfirm(!showConfirm)}
+                      value={formData.confirmPassword}
+                      onChange={(e) =>
+                        handleChange("confirmPassword", e.target.value)
+                      }
+                      error={passwordError}
+                    />
+                  </div>
+                )}
+
+                <div className="mt-auto pt-10 md:mt-10 flex flex-col gap-3">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center md:h-14 md:text-lg"
+                    size="lg"
+                    onClick={handleBack}
+                  >
+                    Назад
+                  </Button>
+
+                  {clientStep === 1 ? (
+                    <Button
+                      className="w-full justify-center md:h-14 md:text-lg"
+                      size="lg"
+                      onClick={() => setClientStep(2)}
+                      disabled={
+                        !formData.name || !formData.surname || !formData.email
+                      }
+                    >
+                      Продолжить
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full justify-center md:h-14 md:text-lg"
+                      size="lg"
+                      onClick={handleSubmitClient}
+                      disabled={!formData.password || !formData.confirmPassword}
+                    >
+                      Создать аккаунт
+                    </Button>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
+      <Footer />
     </main>
   );
 };

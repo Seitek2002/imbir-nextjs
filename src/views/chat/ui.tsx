@@ -15,7 +15,6 @@ import { cn } from "@/shared/lib/utils";
 
 const API_BASE = "http://155.212.216.197:8054";
 const WS_BASE = "ws://155.212.216.197:8054";
-const ROOM = "general";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -36,7 +35,7 @@ type Chat = {
 type Message = {
   id: number;
   content: string;
-  timestamp: string; // ISO string
+  timestamp: string;
   isMe: boolean;
   isRead?: boolean;
 };
@@ -51,30 +50,51 @@ const formatTime = (timestamp: string) =>
 
 // ── WebSocket hook ────────────────────────────────────────────────────────────
 
-function useChatRoom(roomName: string) {
+function useChatRoom(roomName: string, currentUser: string | null) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const wsRef = useRef<WebSocket | null>(null);
-  // Tracks content of messages we sent to skip WS echo
-  const pendingSent = useRef<Set<string>>(new Set());
 
   useEffect(() => {
+    if (!currentUser || !roomName) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setMessages([]);
     setIsConnected(false);
+    setTypingUsers(new Set());
 
     // 1. Load history
-    fetch(`${API_BASE}/api/messages/${roomName}/`)
+    fetch(`${API_BASE}/api/messages/${roomName}/`, { credentials: "include" })
       .then((r) => r.json())
       .then(
-        (history: Array<{ id: number; content: string; timestamp: string }>) =>
-          setMessages(history.map((m) => ({ ...m, isMe: false }))),
+        (
+          history: Array<{
+            id: number;
+            content: string;
+            timestamp: string;
+            sender_username: string;
+            is_read: boolean;
+          }>,
+        ) =>
+          setMessages(
+            history.map((m) => ({
+              id: m.id,
+              content: m.content,
+              timestamp: m.timestamp,
+              isMe: m.sender_username === currentUser,
+              isRead: m.is_read,
+            })),
+          ),
       )
       .catch(() => {})
       .finally(() => setIsLoading(false));
 
-    // 2. Open WebSocket
+    // 2. Open WebSocket (browser sends session cookie automatically)
     const ws = new WebSocket(`${WS_BASE}/ws/chat/${roomName}/`);
     wsRef.current = ws;
 
@@ -82,40 +102,62 @@ function useChatRoom(roomName: string) {
     ws.onclose = () => setIsConnected(false);
     ws.onerror = () => setIsConnected(false);
 
-    ws.onmessage = (e) => {
-      const data = JSON.parse(e.data) as {
-        message: string;
-        timestamp: string;
-      };
+    ws.onmessage = (e: MessageEvent) => {
+      const data = JSON.parse(e.data as string) as Record<string, unknown>;
 
-      // Skip echo of our own message (already added locally)
-      if (pendingSent.current.has(data.message)) {
-        pendingSent.current.delete(data.message);
-        return;
+      switch (data.type) {
+        case "chat_message": {
+          // Server echoes our own messages too — skip since we added them optimistically
+          if ((data.sender_username as string) === currentUser) return;
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: data.message_id as number,
+              content: data.message as string,
+              timestamp: data.timestamp as string,
+              isMe: false,
+              isRead: false,
+            },
+          ]);
+          // Auto-mark as read since it's visible
+          ws.send(
+            JSON.stringify({ type: "read", message_id: data.message_id }),
+          );
+          break;
+        }
+        case "typing": {
+          const username = data.username as string;
+          if (username === currentUser) return;
+          setTypingUsers((prev) => {
+            const next = new Set(prev);
+            if (data.is_typing) next.add(username);
+            else next.delete(username);
+            return next;
+          });
+          break;
+        }
+        case "read": {
+          const msgId = data.message_id as number;
+          setMessages((prev) =>
+            prev.map((m) => (m.id === msgId ? { ...m, isRead: true } : m)),
+          );
+          break;
+        }
+        // user_join / user_leave — could update online list, skip for now
       }
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          content: data.message,
-          timestamp: data.timestamp,
-          isMe: false,
-        },
-      ]);
     };
 
     return () => {
       ws.close();
       wsRef.current = null;
     };
-  }, [roomName]);
+  }, [roomName, currentUser]);
 
   const sendMessage = useCallback((text: string) => {
     if (!text.trim()) return;
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
 
-    // Add locally as isMe immediately (optimistic)
+    // Optimistic add
     setMessages((prev) => [
       ...prev,
       {
@@ -123,18 +165,26 @@ function useChatRoom(roomName: string) {
         content: text,
         timestamp: new Date().toISOString(),
         isMe: true,
-        isRead: true,
+        isRead: false,
       },
     ]);
 
-    pendingSent.current.add(text);
-    wsRef.current.send(JSON.stringify({ message: text }));
-
-    // Cleanup pending after 5s in case echo never arrives
-    setTimeout(() => pendingSent.current.delete(text), 5000);
+    wsRef.current.send(JSON.stringify({ type: "chat_message", message: text }));
   }, []);
 
-  return { messages, isConnected, isLoading, sendMessage };
+  const sendTyping = useCallback((isTyping: boolean) => {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+    wsRef.current.send(JSON.stringify({ type: "typing", is_typing: isTyping }));
+  }, []);
+
+  return {
+    messages,
+    isConnected,
+    isLoading,
+    typingUsers,
+    sendMessage,
+    sendTyping,
+  };
 }
 
 const MOCK_CHATS: Chat[] = [
@@ -313,21 +363,6 @@ const FileIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const CloseIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    width="10"
-    height="10"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-  >
-    <path d="M18 6L6 18M6 6l12 12" />
-  </svg>
-);
-
 // ── Avatar ────────────────────────────────────────────────────────────────────
 
 const Avatar = ({
@@ -371,8 +406,13 @@ const Avatar = ({
 
 // ── Read receipt ──────────────────────────────────────────────────────────────
 
-const ReadCheck = () => (
-  <span className="flex items-center justify-center size-3.5 rounded-full bg-[#4CAF50] shrink-0">
+const ReadCheck = ({ isRead }: { isRead?: boolean }) => (
+  <span
+    className={cn(
+      "flex items-center justify-center size-3.5 rounded-full shrink-0",
+      isRead ? "bg-[#4CAF50]" : "bg-[#D1D2D4]",
+    )}
+  >
     <svg width="8" height="8" viewBox="0 0 12 10" fill="none">
       <path
         d="M1 5l3.5 3.5L11 1"
@@ -388,6 +428,15 @@ const ReadCheck = () => (
 // ── Main component ────────────────────────────────────────────────────────────
 
 export const ChatPage = () => {
+  const [currentUser, setCurrentUser] = useState<string | null>(() => {
+    if (typeof window !== "undefined")
+      return localStorage.getItem("chat_username");
+    return null;
+  });
+  const [loginInput, setLoginInput] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState("");
+
   const [activeChatId, setActiveChatId] = useState<string>("putri");
   const [searchQuery, setSearchQuery] = useState("");
   const [inputText, setInputText] = useState("");
@@ -395,10 +444,18 @@ export const ChatPage = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const attachRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const activeChat = MOCK_CHATS.find((c) => c.id === activeChatId);
 
-  const { messages, isConnected, isLoading, sendMessage } =
-    useChatRoom(activeChatId);
+  const {
+    messages,
+    isConnected,
+    isLoading,
+    typingUsers,
+    sendMessage,
+    sendTyping,
+  } = useChatRoom(activeChatId, currentUser);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -418,16 +475,106 @@ export const ChatPage = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const handleLogin = async () => {
+    const username = loginInput.trim();
+    if (!username) return;
+    setIsLoggingIn(true);
+    setLoginError("");
+    try {
+      const res = await fetch(`${API_BASE}/api/login/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { username: string };
+        setCurrentUser(data.username);
+        localStorage.setItem("chat_username", data.username);
+      } else {
+        setLoginError("Ошибка входа. Попробуйте снова.");
+      }
+    } catch {
+      setLoginError("Нет соединения с сервером.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputText(e.target.value);
+    sendTyping(true);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => sendTyping(false), 2000);
+  };
+
   const handleSend = () => {
     if (!inputText.trim()) return;
     sendMessage(inputText);
     setInputText("");
     setIsAttachOpen(false);
+    sendTyping(false);
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem("chat_username");
   };
 
   const filteredChats = MOCK_CHATS.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  const typingLabel =
+    typingUsers.size > 0
+      ? `${Array.from(typingUsers).join(", ")} печатает...`
+      : null;
+
+  // ── Login screen ──────────────────────────────────────────────────────────
+
+  if (!currentUser) {
+    return (
+      <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
+        <div className="hidden md:block">
+          <Header />
+        </div>
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-sm">
+            <h2 className="text-xl font-semibold text-[#191A1B] mb-1">
+              Войти в чат
+            </h2>
+            <p className="text-sm text-[#838A8D] mb-6">
+              Введите ваше имя пользователя
+            </p>
+            <input
+              type="text"
+              placeholder="Имя пользователя"
+              value={loginInput}
+              onChange={(e) => setLoginInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              className="w-full px-4 py-3 rounded-xl border border-[#E3E4E5] text-[#191A1B] text-sm outline-none focus:border-[#F5653E] transition-colors mb-3"
+            />
+            {loginError && (
+              <p className="text-xs text-red-500 mb-3">{loginError}</p>
+            )}
+            <button
+              onClick={handleLogin}
+              disabled={!loginInput.trim() || isLoggingIn}
+              className="w-full py-3 rounded-xl bg-[#F5653E] text-white text-sm font-medium disabled:bg-[#E3E4E5] disabled:text-[#838A8D] transition-colors"
+            >
+              {isLoggingIn ? "Вход..." : "Войти"}
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Main chat UI ──────────────────────────────────────────────────────────
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
@@ -436,9 +583,15 @@ export const ChatPage = () => {
       </div>
 
       <div className="flex-1 w-full max-w-350 mx-auto md:px-10 flex flex-col pt-0 md:pt-8 pb-0 md:pb-10">
-        <h1 className="text-[28px] font-semibold text-[#191A1B] mb-6 hidden md:block">
-          Чаты
-        </h1>
+        <div className="hidden md:flex items-center justify-between mb-6">
+          <h1 className="text-[28px] font-semibold text-[#191A1B]">Чаты</h1>
+          <button
+            onClick={handleLogout}
+            className="text-xs text-[#838A8D] hover:text-[#191A1B] transition-colors"
+          >
+            {currentUser} · Выйти
+          </button>
+        </div>
 
         <div className="flex flex-1 gap-5 md:h-[calc(100vh-220px)] min-h-150 relative">
           {/* ── LEFT: chat list ────────────────────────────────────────── */}
@@ -555,7 +708,11 @@ export const ChatPage = () => {
                         )}
                       </p>
                       <p className="text-xs leading-tight mt-0.5 flex items-center gap-1">
-                        {isConnected ? (
+                        {typingLabel ? (
+                          <span className="text-[#F5653E] animate-pulse">
+                            {typingLabel}
+                          </span>
+                        ) : isConnected ? (
                           <>
                             <span className="inline-block size-1.5 rounded-full bg-[#4CAF50]" />
                             <span className="text-[#4CAF50]">В сети</span>
@@ -625,6 +782,7 @@ export const ChatPage = () => {
                             <span className="text-[11px] text-[#838A8D]">
                               {formatTime(msg.timestamp)}
                             </span>
+                            {msg.isMe && <ReadCheck isRead={msg.isRead} />}
                           </div>
                         </div>
                       ))}
@@ -663,8 +821,9 @@ export const ChatPage = () => {
                         type="text"
                         placeholder="Введите текст"
                         value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
+                        onChange={handleInputChange}
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                        onBlur={() => sendTyping(false)}
                         className="flex-1 outline-none text-[#191A1B] text-sm bg-transparent placeholder:text-[#838A8D]"
                       />
                       <button
