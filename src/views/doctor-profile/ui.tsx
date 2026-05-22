@@ -9,19 +9,7 @@ import { DoctorSidebar } from "@/widgets/doctor-sidebar";
 
 import { MOCK_DOCTOR_PROFILE } from "@/entities/doctor-profile";
 
-import { LogoutIcon, StarIcon } from "@/shared/assets";
-
-const ChevronRight = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path
-      d="M7.5 5L12.5 10L7.5 15"
-      stroke="#C4C8CA"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+import { ChevronRightIcon, LogoutIcon, StarIcon } from "@/shared/assets";
 
 const MENU_ITEMS = [
   {
@@ -158,19 +146,19 @@ export const DoctorProfilePage: FC = () => {
                 href={item.href}
                 className="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-[#F8F9FA] transition-colors"
               >
-                <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
                   {item.icon}
                 </div>
                 <span className="flex-1 font-medium text-base text-[#191A1B]">
                   {item.label}
                 </span>
-                <ChevronRight />
+                <ChevronRightIcon className="w-5 h-5 text-[#C4C8CA]" />
               </Link>
             ))}
           </nav>
 
           <button className="mt-3 w-full bg-white rounded-3xl px-6 py-4 flex items-center gap-3 hover:bg-[#F8F9FA] transition-colors">
-            <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
               <LogoutIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
             </div>
             <span className="font-medium text-base text-[#686F72]">
@@ -195,7 +183,7 @@ export const DoctorProfilePage: FC = () => {
           <main className="flex-1 min-w-0">
             <div className="bg-white rounded-3xl border border-[#E5E6E8] p-8">
               <div className="flex items-center gap-6 mb-8">
-                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center flex-shrink-0">
+                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center shrink-0">
                   {d.photo ? (
                     <Image
                       src={d.photo}
@@ -235,13 +223,13 @@ export const DoctorProfilePage: FC = () => {
                     href={item.href}
                     className="flex items-center gap-3 p-4 rounded-2xl border border-[#E5E6E8] hover:border-[#F5653E] hover:bg-[#FFF8F5] transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
                       {item.icon}
                     </div>
-                    <span className="font-medium text-[#191A1B]">
+                    <span className="font-medium text-[#191A1B] flex-1">
                       {item.label}
                     </span>
-                    <ChevronRight />
+                    <ChevronRightIcon className="w-5 h-5 text-[#C4C8CA]" />
                   </Link>
                 ))}
               </div>

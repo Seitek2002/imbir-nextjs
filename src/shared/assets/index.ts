@@ -41,6 +41,8 @@ export {
   StarOutlineIcon,
   SuccessCheckIcon,
   UserCircleIcon,
+  CheckIcon,
+  ChevronRightIcon,
   HistoryIcon,
   LogoutIcon,
   ReviewsIcon,

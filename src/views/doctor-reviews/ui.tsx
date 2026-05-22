@@ -2,9 +2,7 @@
 
 import { FC, useCallback, useState } from "react";
 
-import { useRouter } from "next/navigation";
-
-import { DoctorSidebar } from "@/widgets/doctor-sidebar";
+import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
 import {
   DoctorReview,
@@ -15,18 +13,6 @@ import {
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 const DURATION = 200;
-
-const BackIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path
-      d="M15 18L9 12L15 6"
-      stroke="#191A1B"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 const StarFilled = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="#F5653E">
@@ -156,13 +142,6 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
     }, DURATION);
   }, [onClose]);
 
-  const handleSubmit = () => {
-    if (!reason) return;
-    setReason("");
-    setComment("");
-    handleClose();
-  };
-
   if (!isOpen && !isClosing) return null;
   const state = isClosing ? "closed" : "open";
 
@@ -196,10 +175,13 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
         <div className="p-5 space-y-3">
           <p className="text-[#838A8D] text-sm mb-1">Выберите причину жалобы</p>
           {COMPLAINT_REASONS.map((r) => (
-            <label key={r} className="flex items-center gap-3 cursor-pointer">
+            <label
+              key={r}
+              className="flex items-center gap-3 cursor-pointer"
+              onClick={() => setReason(r)}
+            >
               <div
                 className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${reason === r ? "border-[#F5653E]" : "border-[#C4C8CA]"}`}
-                onClick={() => setReason(r)}
               >
                 {reason === r && (
                   <div className="w-2.5 h-2.5 rounded-full bg-[#F5653E]" />
@@ -232,7 +214,11 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
               Отмена
             </button>
             <button
-              onClick={handleSubmit}
+              onClick={() => {
+                setReason("");
+                setComment("");
+                handleClose();
+              }}
               className="flex-1 py-3.5 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors"
             >
               Отправить
@@ -254,7 +240,7 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
   <div className="p-5 border-b border-[#E5E6E8] last:border-0">
     <div className="flex items-start justify-between gap-3">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-[#FFF0EE] flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-[#FFF0EE] flex items-center justify-center shrink-0">
           <span className="text-[#F5653E] font-semibold text-sm">
             {review.authorInitial}
           </span>
@@ -272,13 +258,10 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
       </div>
       <span className="text-[#838A8D] text-xs shrink-0">{review.date}</span>
     </div>
-
     <p className="text-[#191A1B] text-sm mt-3 leading-relaxed">{review.text}</p>
-
     {review.replyTime && (
       <p className="text-[#838A8D] text-xs mt-2">{review.replyTime}</p>
     )}
-
     <div className="flex items-center gap-4 mt-3">
       <button
         onClick={() => onReply(review)}
@@ -321,7 +304,6 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
 );
 
 export const DoctorReviewsPage: FC = () => {
-  const router = useRouter();
   const d = MOCK_DOCTOR_PROFILE;
   const [reviews] = useState<DoctorReview[]>(MOCK_REVIEWS);
   const [replyTarget, setReplyTarget] = useState<DoctorReview | null>(null);
@@ -330,78 +312,48 @@ export const DoctorReviewsPage: FC = () => {
   );
 
   return (
-    <div className="w-full min-h-screen bg-[#FAFAFA]">
-      {/* Mobile header */}
-      <div className="lg:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-[#E5E6E8]">
-        <button
-          onClick={() => router.back()}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
-        >
-          <BackIcon />
-        </button>
-        <h1 className="text-lg font-semibold text-[#191A1B]">Отзывы</h1>
-        <div className="w-10" />
-      </div>
+    <>
+      <DoctorPageLayout title="Отзывы">
+        <h2 className="text-[28px] font-semibold text-[#191A1B] mb-6 hidden lg:block">
+          Отзывы
+        </h2>
 
-      <div className="max-w-360 mx-auto px-4 lg:px-10 py-4 lg:py-8">
-        <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden lg:block">
-          Мой профиль
-        </h1>
-        <div className="flex gap-6">
-          <div className="hidden lg:block">
-            <DoctorSidebar
-              fullName={d.fullName}
-              photo={d.photo}
-              specialty={d.specialty}
-              rating={d.rating}
-            />
+        <div className="bg-white rounded-3xl border border-[#E5E6E8] p-5 mb-4 flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-3xl font-bold text-[#191A1B]">
+              {d.rating}
+            </span>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <StarFilled key={i} />
+                ))}
+              </div>
+              <span className="text-[#838A8D] text-xs mt-0.5">
+                Средняя оценка
+              </span>
+            </div>
           </div>
-
-          <main className="flex-1 min-w-0">
-            <h2 className="text-[28px] font-semibold text-[#191A1B] mb-6 hidden lg:block">
-              Отзывы
-            </h2>
-
-            {/* Stats */}
-            <div className="bg-white rounded-3xl border border-[#E5E6E8] p-5 mb-4 flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <span className="text-3xl font-bold text-[#191A1B]">
-                  {d.rating}
-                </span>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <StarFilled key={i} />
-                    ))}
-                  </div>
-                  <span className="text-[#838A8D] text-xs mt-0.5">
-                    Средняя оценка
-                  </span>
-                </div>
-              </div>
-              <div className="w-px h-10 bg-[#E5E6E8]" />
-              <div>
-                <span className="text-3xl font-bold text-[#191A1B]">
-                  {d.totalReviews}
-                </span>
-                <p className="text-[#838A8D] text-xs mt-0.5">Всего отзывов</p>
-              </div>
-            </div>
-
-            {/* Reviews list */}
-            <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden">
-              {reviews.map((r) => (
-                <ReviewCard
-                  key={r.id}
-                  review={r}
-                  onReply={setReplyTarget}
-                  onComplain={setComplaintTarget}
-                />
-              ))}
-            </div>
-          </main>
+          <div className="w-px h-10 bg-[#E5E6E8]" />
+          <div>
+            <span className="text-3xl font-bold text-[#191A1B]">
+              {d.totalReviews}
+            </span>
+            <p className="text-[#838A8D] text-xs mt-0.5">Всего отзывов</p>
+          </div>
         </div>
-      </div>
+
+        <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden">
+          {reviews.map((r) => (
+            <ReviewCard
+              key={r.id}
+              review={r}
+              onReply={setReplyTarget}
+              onComplain={setComplaintTarget}
+            />
+          ))}
+        </div>
+      </DoctorPageLayout>
 
       <ReplyModal
         isOpen={!!replyTarget}
@@ -413,6 +365,6 @@ export const DoctorReviewsPage: FC = () => {
         isOpen={!!complaintTarget}
         onClose={() => setComplaintTarget(null)}
       />
-    </div>
+    </>
   );
 };

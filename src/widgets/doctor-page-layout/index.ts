@@ -1,0 +1,1 @@
+export { DoctorPageLayout } from "./ui";
