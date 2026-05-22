@@ -8,138 +8,66 @@ import { useRouter } from "next/navigation";
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
 import { MOCK_CLINIC_PROFILE } from "@/entities/clinic-profile";
+import {
+  EMPTY_SPECIALIST_FORM,
+  type SpecialistFormData,
+  useSpecialistsStore,
+} from "@/entities/clinic-specialist";
 
-type WorkSchedule = {
-  day: string;
-  from: string;
-  to: string;
-  enabled: boolean;
-};
+const inp =
+  "w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors bg-white";
+const lbl = "block text-[#838A8D] text-sm mb-1.5";
 
-type WorkExperience = {
-  clinic: string;
-  specialty: string;
-  startMonth: string;
-  startYear: string;
-  endMonth: string;
-  endYear: string;
-  currentlyWorking: boolean;
-};
-
-type Skill = {
-  id: string;
-  text: string;
-};
+const chevron = (
+  <svg
+    className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+  >
+    <path
+      d="M4 6L8 10L12 6"
+      stroke="#686F72"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 export default function NewSpecialistPage() {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { add } = useSpecialistsStore();
+  const [d, setD] = useState<SpecialistFormData>({ ...EMPTY_SPECIALIST_FORM });
+  const [certs, setCerts] = useState<string[]>([]);
+  const photoRef = useRef<HTMLInputElement>(null);
+  const certRef = useRef<HTMLInputElement>(null);
 
-  const [photo, setPhoto] = useState<string>();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [specialty, setSpecialty] = useState("");
-  const [experienceYears, setExperienceYears] = useState("0");
-
-  const [schedule, setSchedule] = useState<WorkSchedule[]>([
-    { day: "ПН", from: "00:00", to: "00:00", enabled: false },
-    { day: "ВТ", from: "00:00", to: "00:00", enabled: false },
-    { day: "СР", from: "00:00", to: "00:00", enabled: false },
-    { day: "ЧТ", from: "00:00", to: "00:00", enabled: false },
-    { day: "ПТ", from: "00:00", to: "00:00", enabled: false },
-    { day: "СБ", from: "00:00", to: "00:00", enabled: false },
-    { day: "ВС", from: "00:00", to: "00:00", enabled: false },
-  ]);
-
-  const [lunchBreak, setLunchBreak] = useState({ from: "00:00", to: "00:00" });
-
-  const [workExperiences, setWorkExperiences] = useState<WorkExperience[]>([
-    {
-      clinic: "",
-      specialty: "",
-      startMonth: "",
-      startYear: "",
-      endMonth: "",
-      endYear: "",
-      currentlyWorking: false,
-    },
-  ]);
-
-  const [education, setEducation] = useState("");
-  const [description, setDescription] = useState("");
-  const [skills, setSkills] = useState<Skill[]>([]);
+  const set = <K extends keyof SpecialistFormData>(
+    field: K,
+    value: SpecialistFormData[K],
+  ) => setD((prev) => ({ ...prev, [field]: value }));
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhoto(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => set("photo", reader.result as string);
+    reader.readAsDataURL(file);
   };
 
-  const handleAddPhoto = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleSave = () => {
-    console.log("Save new specialist");
-    router.push("/clinic-profile/specialists");
-  };
-
-  const updateSchedule = (
-    index: number,
-    field: "from" | "to" | "enabled",
-    value: string | boolean,
-  ) => {
-    setSchedule((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
-    );
-  };
-
-  const addWorkExperience = () => {
-    setWorkExperiences([
-      ...workExperiences,
-      {
-        clinic: "",
-        specialty: "",
-        startMonth: "",
-        startYear: "",
-        endMonth: "",
-        endYear: "",
-        currentlyWorking: false,
-      },
-    ]);
-  };
-
-  const updateWorkExperience = (
-    index: number,
-    field: keyof WorkExperience,
-    value: string | boolean,
-  ) => {
-    setWorkExperiences((prev) =>
-      prev.map((exp, i) => (i === index ? { ...exp, [field]: value } : exp)),
-    );
-  };
-
-  const addSkill = () => {
-    setSkills([...skills, { id: Date.now().toString(), text: "" }]);
-  };
-
-  const updateSkill = (id: string, text: string) => {
-    setSkills((prev) =>
-      prev.map((skill) => (skill.id === id ? { ...skill, text } : skill)),
-    );
-  };
-
-  const removeSkill = (id: string) => {
-    setSkills((prev) => prev.filter((skill) => skill.id !== id));
+  const handleCertUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () =>
+      setCerts((prev) => [...prev, reader.result as string]);
+    reader.readAsDataURL(file);
   };
 
   return (
-    <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
+    <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
       <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8">
         Мой профиль
       </h1>
@@ -152,11 +80,10 @@ export default function NewSpecialistPage() {
         />
 
         <main className="flex-1 min-w-0">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-3 mb-6">
             <button
               onClick={() => router.back()}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shrink-0"
               aria-label="Назад"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -170,472 +97,330 @@ export default function NewSpecialistPage() {
               </svg>
             </button>
 
-            <h2 className="text-[32px] font-semibold text-[#191A1B] flex-1">
+            <h2 className="text-[28px] font-semibold text-[#191A1B] flex-1">
               Добавить специалиста
             </h2>
 
             <button
-              onClick={handleSave}
-              className="px-6 py-3 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors"
+              onClick={() => {
+                const newId = add({ ...d, certificates: certs });
+                router.push(`/clinic-profile/specialists/${newId}`);
+              }}
+              className="px-6 py-2.5 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors shrink-0"
             >
               Сохранить
             </button>
           </div>
 
-          {/* Form */}
-          <div className="bg-white rounded-3xl p-8 border border-[#E5E6E8] space-y-8">
-            {/* Личные данные */}
-            <div>
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-4">
-                Личные данные
+          <div className="bg-white rounded-3xl border border-[#E5E6E8] divide-y divide-[#E5E6E8]">
+            {/* 1. Основная информация */}
+            <div className="p-8">
+              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+                Основная информация
               </h3>
+              <div className="flex gap-8">
+                <div className="flex-1 grid grid-cols-2 gap-x-6 gap-y-5">
+                  <div className="col-span-2">
+                    <label className={lbl}>ФИО</label>
+                    <input
+                      type="text"
+                      value={d.fullName}
+                      onChange={(e) => set("fullName", e.target.value)}
+                      placeholder="Введите ФИО"
+                      className={inp}
+                    />
+                  </div>
 
-              {/* Фото */}
-              <div className="mb-4">
-                <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                  Фото специалиста
-                </label>
-                <div className="flex items-center gap-4">
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden bg-[#FFF8F5] border border-[#E5E6E8] flex items-center justify-center flex-shrink-0">
-                    {photo ? (
+                  <div>
+                    <label className={lbl}>Пол</label>
+                    <div className="relative">
+                      <select
+                        value={d.gender}
+                        onChange={(e) => set("gender", e.target.value)}
+                        className={`${inp} appearance-none pr-10`}
+                      >
+                        <option value="">Выберите</option>
+                        <option>Мужской</option>
+                        <option>Женский</option>
+                      </select>
+                      {chevron}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={lbl}>Дата рождения</label>
+                    <input
+                      type="text"
+                      value={d.birthDate}
+                      onChange={(e) => set("birthDate", e.target.value)}
+                      placeholder="ДД.ММ.ГГГГ"
+                      className={inp}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={lbl}>Город</label>
+                    <input
+                      type="text"
+                      value={d.city}
+                      onChange={(e) => set("city", e.target.value)}
+                      placeholder="Введите город"
+                      className={inp}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={lbl}>Языки общения</label>
+                    <input
+                      type="text"
+                      value={d.languages}
+                      onChange={(e) => set("languages", e.target.value)}
+                      placeholder="Русский, Английский"
+                      className={inp}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={lbl}>Телефон</label>
+                    <input
+                      type="tel"
+                      value={d.phone}
+                      onChange={(e) => set("phone", e.target.value)}
+                      placeholder="+996 500 000 000"
+                      className={inp}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={lbl}>Почта</label>
+                    <input
+                      type="email"
+                      value={d.email}
+                      onChange={(e) => set("email", e.target.value)}
+                      placeholder="example@mail.com"
+                      className={inp}
+                    />
+                  </div>
+                </div>
+
+                <div className="shrink-0 flex flex-col items-center gap-3 pt-6">
+                  <div className="w-30 h-30 rounded-2xl overflow-hidden bg-[#F8F9FA] border border-[#E5E6E8] flex items-center justify-center">
+                    {d.photo ? (
                       <Image
-                        src={photo}
-                        alt="Фото"
-                        width={96}
-                        height={96}
+                        src={d.photo}
+                        alt="Фото врача"
+                        width={120}
+                        height={120}
                         className="w-full h-full object-cover"
                       />
                     ) : (
                       <svg
-                        width="40"
-                        height="40"
-                        viewBox="0 0 40 40"
+                        width="48"
+                        height="48"
+                        viewBox="0 0 48 48"
                         fill="none"
                       >
-                        <circle cx="20" cy="20" r="20" fill="#E5E6E8" />
+                        <circle cx="24" cy="24" r="24" fill="#E5E6E8" />
                         <path
-                          d="M20 10C14.48 10 10 14.48 10 20C10 25.52 14.48 30 20 30C25.52 30 30 25.52 30 20C30 14.48 25.52 10 20 10ZM20 15C21.66 15 23 16.34 23 18C23 19.66 21.66 21 20 21C18.34 21 17 19.66 17 18C17 16.34 18.34 15 20 15ZM20 28C17.33 28 14.94 26.66 13.5 24.65C13.53 22.58 17.6 21.43 20 21.43C22.38 21.43 26.47 22.58 26.5 24.65C25.06 26.66 22.67 28 20 28Z"
+                          d="M24 12C17.37 12 12 17.37 12 24s5.37 12 12 12 12-5.37 12-12-5.37-12-12-12zm0 6c1.99 0 3.6 1.61 3.6 3.6S25.99 25.2 24 25.2s-3.6-1.61-3.6-3.6S22.01 18 24 18zm0 15.6c-3.2 0-6-.8-7.8-3.42.04-2.47 4.92-3.86 7.8-3.86 2.86 0 7.76 1.39 7.8 3.86C29.8 32.8 27.2 33.6 24 33.6z"
                           fill="#C4C8CA"
                         />
                       </svg>
                     )}
                   </div>
                   <input
-                    ref={fileInputRef}
+                    ref={photoRef}
                     type="file"
                     accept="image/*"
                     onChange={handlePhotoUpload}
                     className="hidden"
                   />
                   <button
-                    onClick={handleAddPhoto}
-                    className="px-4 py-2 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors flex items-center gap-2"
+                    onClick={() => photoRef.current?.click()}
+                    className="px-4 py-1.5 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors"
                   >
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path
-                        d="M8 3.33334V12.6667M3.33333 8H12.6667"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                      />
-                    </svg>
                     Добавить фото
                   </button>
                 </div>
               </div>
-
-              {/* Имя и Фамилия */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                    Имя специалиста
-                  </label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Введите имя"
-                    className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                    Фамилия специалиста
-                  </label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Введите фамилию"
-                    className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
-                  />
-                </div>
-              </div>
             </div>
 
-            {/* Специализация */}
-            <div>
-              <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                Специализация
-              </label>
-              <div className="relative">
-                <select
-                  value={specialty}
-                  onChange={(e) => setSpecialty(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#C4C8CA] focus:text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors appearance-none bg-white cursor-pointer"
-                >
-                  <option value="">Выберите из списка</option>
-                  <option value="Кардиология">Кардиология</option>
-                  <option value="Терапия">Терапия</option>
-                  <option value="Хирургия">Хирургия</option>
-                </select>
-                <svg
-                  className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                >
-                  <path
-                    d="M5 7.5L10 12.5L15 7.5"
-                    stroke="#686F72"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* Стаж работы */}
-            <div>
-              <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                Стаж работы
-              </label>
-              <input
-                type="text"
-                value={experienceYears}
-                onChange={(e) => setExperienceYears(e.target.value)}
-                placeholder="0 лет"
-                className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
-              />
-            </div>
-
-            {/* График работы */}
-            <div>
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-4">
-                График работы
+            {/* 2. Профессиональные данные */}
+            <div className="p-8">
+              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+                Профессиональные данные
               </h3>
-              <div className="space-y-3">
-                {schedule.map((item, index) => (
-                  <div key={item.day} className="flex items-center gap-4">
-                    <span className="text-[#191A1B] text-sm font-medium w-8">
-                      {item.day}
-                    </span>
-                    <input
-                      type="time"
-                      value={item.from}
-                      onChange={(e) =>
-                        updateSchedule(index, "from", e.target.value)
-                      }
-                      className="w-28 px-3 py-2 rounded-xl border border-[#E5E6E8] text-[#C4C8CA] text-sm focus:outline-none focus:border-[#F5653E] transition-colors"
-                    />
-                    <span className="text-[#838A8D]">—</span>
-                    <input
-                      type="time"
-                      value={item.to}
-                      onChange={(e) =>
-                        updateSchedule(index, "to", e.target.value)
-                      }
-                      className="w-28 px-3 py-2 rounded-xl border border-[#E5E6E8] text-[#C4C8CA] text-sm focus:outline-none focus:border-[#F5653E] transition-colors"
-                    />
-                  </div>
-                ))}
-
-                {/* Обеденный перерыв */}
-                <div className="flex items-center gap-4 pt-1">
-                  <span className="text-[#191A1B] text-sm font-medium whitespace-nowrap">
-                    Обеденный перерыв
-                  </span>
-                  <input
-                    type="time"
-                    value={lunchBreak.from}
-                    onChange={(e) =>
-                      setLunchBreak({ ...lunchBreak, from: e.target.value })
-                    }
-                    className="w-28 px-3 py-2 rounded-xl border border-[#E5E6E8] text-[#C4C8CA] text-sm focus:outline-none focus:border-[#F5653E] transition-colors"
-                  />
-                  <span className="text-[#838A8D]">—</span>
-                  <input
-                    type="time"
-                    value={lunchBreak.to}
-                    onChange={(e) =>
-                      setLunchBreak({ ...lunchBreak, to: e.target.value })
-                    }
-                    className="w-28 px-3 py-2 rounded-xl border border-[#E5E6E8] text-[#C4C8CA] text-sm focus:outline-none focus:border-[#F5653E] transition-colors"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Опыт работы */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[#191A1B] font-semibold text-lg">
-                  Опыт работы
-                </h3>
-                <button
-                  onClick={addWorkExperience}
-                  className="text-[#F5653E] text-sm font-medium hover:text-[#E5542D] transition-colors flex items-center gap-1"
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path
-                      d="M8 3.33334V12.6667M3.33333 8H12.6667"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  Добавить
-                </button>
-              </div>
-
-              {workExperiences.map((exp, index) => (
-                <div key={index} className="space-y-4 mb-6">
-                  <div>
-                    <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                      Клиника
-                    </label>
-                    <input
-                      type="text"
-                      value={exp.clinic}
-                      onChange={(e) =>
-                        updateWorkExperience(index, "clinic", e.target.value)
-                      }
-                      placeholder="Введите название клиники"
-                      className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                      Специализация
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={exp.specialty}
-                        onChange={(e) =>
-                          updateWorkExperience(
-                            index,
-                            "specialty",
-                            e.target.value,
-                          )
-                        }
-                        className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#C4C8CA] focus:text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors appearance-none bg-white cursor-pointer"
-                      >
-                        <option value="">Выберите из списка</option>
-                        <option value="Кардиология">Кардиология</option>
-                        <option value="Терапия">Терапия</option>
-                      </select>
-                      <svg
-                        className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                      >
-                        <path
-                          d="M5 7.5L10 12.5L15 7.5"
-                          stroke="#686F72"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                        Начало
-                      </label>
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <select
-                            value={exp.startMonth}
-                            onChange={(e) =>
-                              updateWorkExperience(
-                                index,
-                                "startMonth",
-                                e.target.value,
-                              )
-                            }
-                            className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#C4C8CA] focus:text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors appearance-none bg-white cursor-pointer"
-                          >
-                            <option value="">Месяц</option>
-                            <option value="1">Январь</option>
-                            <option value="2">Февраль</option>
-                          </select>
-                          <svg
-                            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                          >
-                            <path
-                              d="M4 6L8 10L12 6"
-                              stroke="#686F72"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </div>
-                        <input
-                          type="text"
-                          value={exp.startYear}
-                          onChange={(e) =>
-                            updateWorkExperience(
-                              index,
-                              "startYear",
-                              e.target.value,
-                            )
-                          }
-                          placeholder="Год"
-                          className="w-24 px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                        Окончание
-                      </label>
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <select
-                            value={exp.endMonth}
-                            onChange={(e) =>
-                              updateWorkExperience(
-                                index,
-                                "endMonth",
-                                e.target.value,
-                              )
-                            }
-                            disabled={exp.currentlyWorking}
-                            className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#C4C8CA] focus:text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors appearance-none bg-white cursor-pointer disabled:bg-[#F8F9FA] disabled:cursor-not-allowed"
-                          >
-                            <option value="">Месяц</option>
-                            <option value="1">Январь</option>
-                            <option value="2">Февраль</option>
-                          </select>
-                          <svg
-                            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                          >
-                            <path
-                              d="M4 6L8 10L12 6"
-                              stroke="#686F72"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </div>
-                        <input
-                          type="text"
-                          value={exp.endYear}
-                          onChange={(e) =>
-                            updateWorkExperience(
-                              index,
-                              "endYear",
-                              e.target.value,
-                            )
-                          }
-                          placeholder="Год"
-                          disabled={exp.currentlyWorking}
-                          className="w-24 px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors disabled:bg-[#F8F9FA] disabled:cursor-not-allowed"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={exp.currentlyWorking}
-                      onChange={(e) =>
-                        updateWorkExperience(
-                          index,
-                          "currentlyWorking",
-                          e.target.checked,
-                        )
-                      }
-                      className="w-5 h-5 rounded border-2 border-[#E5E6E8] text-[#F5653E] focus:ring-0 focus:ring-offset-0 cursor-pointer"
-                    />
-                    <span className="text-[#191A1B] text-sm">
-                      Работаю сейчас
-                    </span>
-                  </label>
-                </div>
-              ))}
-            </div>
-
-            {/* Дополнительные данные */}
-            <div>
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-4">
-                Дополнительные данные
-              </h3>
-
-              <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-5">
                 <div>
-                  <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                    Образование
-                  </label>
+                  <label className={lbl}>Специализация</label>
                   <input
                     type="text"
-                    value={education}
-                    onChange={(e) => setEducation(e.target.value)}
-                    placeholder="Введите название учебного заведения"
-                    className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
+                    value={d.specialty}
+                    onChange={(e) => set("specialty", e.target.value)}
+                    placeholder="Введите специализацию"
+                    className={inp}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                    Описание
-                  </label>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={4}
-                    placeholder="Введите информацию о враче"
-                    className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] resize-none focus:outline-none focus:border-[#F5653E] transition-colors"
+                  <label className={lbl}>Дополнительная специализация</label>
+                  <input
+                    type="text"
+                    value={d.additionalSpecialty}
+                    onChange={(e) => set("additionalSpecialty", e.target.value)}
+                    placeholder="Введите специализацию"
+                    className={inp}
                   />
                 </div>
 
                 <div>
+                  <label className={lbl}>Стаж работы (лет)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={d.experienceYears}
+                    onChange={(e) => set("experienceYears", e.target.value)}
+                    placeholder="0"
+                    className={inp}
+                  />
+                </div>
+
+                <div>
+                  <label className={lbl}>Текущая должность</label>
+                  <input
+                    type="text"
+                    value={d.currentPosition}
+                    onChange={(e) => set("currentPosition", e.target.value)}
+                    placeholder="Введите должность"
+                    className={inp}
+                  />
+                </div>
+
+                <div>
+                  <label className={lbl}>Место работы (клиника)</label>
+                  <input
+                    type="text"
+                    value={d.workplace}
+                    onChange={(e) => set("workplace", e.target.value)}
+                    placeholder="Название клиники"
+                    className={inp}
+                  />
+                </div>
+
+                <div>
+                  <label className={lbl}>Категория / Квалификация</label>
+                  <div className="relative">
+                    <select
+                      value={d.qualification}
+                      onChange={(e) => set("qualification", e.target.value)}
+                      className={`${inp} appearance-none pr-10`}
+                    >
+                      <option value="">Выберите</option>
+                      <option>Высшая</option>
+                      <option>Первая</option>
+                      <option>Вторая</option>
+                      <option>Без категории</option>
+                    </select>
+                    {chevron}
+                  </div>
+                </div>
+
+                <div className="col-span-2">
+                  <label className={lbl}>Научная степень</label>
+                  <input
+                    type="text"
+                    value={d.scientificDegree}
+                    onChange={(e) => set("scientificDegree", e.target.value)}
+                    placeholder="Введите степень"
+                    className={inp}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Образование */}
+            <div className="p-8">
+              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+                Образование
+              </h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                <div>
+                  <label className={lbl}>ВУЗ</label>
+                  <input
+                    type="text"
+                    value={d.university}
+                    onChange={(e) => set("university", e.target.value)}
+                    placeholder="Название учебного заведения"
+                    className={inp}
+                  />
+                </div>
+
+                <div>
+                  <label className={lbl}>Год окончания</label>
+                  <input
+                    type="text"
+                    value={d.graduationYear}
+                    onChange={(e) => set("graduationYear", e.target.value)}
+                    placeholder="ГГГГ"
+                    className={inp}
+                  />
+                </div>
+
+                <div>
+                  <label className={lbl}>Интернатура</label>
+                  <input
+                    type="text"
+                    value={d.internship}
+                    onChange={(e) => set("internship", e.target.value)}
+                    placeholder="Специальность"
+                    className={inp}
+                  />
+                </div>
+
+                <div>
+                  <label className={lbl}>Ординатура</label>
+                  <input
+                    type="text"
+                    value={d.residency}
+                    onChange={(e) => set("residency", e.target.value)}
+                    placeholder="Специальность"
+                    className={inp}
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <label className={lbl}>Специализация по диплому</label>
+                  <input
+                    type="text"
+                    value={d.diplomaSpecialty}
+                    onChange={(e) => set("diplomaSpecialty", e.target.value)}
+                    placeholder="Введите специализацию"
+                    className={inp}
+                  />
+                </div>
+
+                <div className="col-span-2">
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-[#191A1B] text-sm font-medium">
-                      Профессиональные навыки
-                    </label>
+                    <div className="text-[#838A8D] text-sm">
+                      Дополнительное образование
+                    </div>
                     <button
-                      onClick={addSkill}
-                      className="text-[#F5653E] text-sm font-medium hover:text-[#E5542D] transition-colors flex items-center gap-1"
+                      onClick={() =>
+                        set("additionalEducation", [
+                          ...d.additionalEducation,
+                          "",
+                        ])
+                      }
+                      className="text-[#F5653E] text-sm font-medium flex items-center gap-1 hover:text-[#E5542D] transition-colors"
                     >
                       <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 14 14"
                         fill="none"
                       >
                         <path
-                          d="M8 3.33334V12.6667M3.33333 8H12.6667"
+                          d="M7 2V12M2 7H12"
                           stroke="currentColor"
                           strokeWidth="1.5"
                           strokeLinecap="round"
@@ -644,38 +429,45 @@ export default function NewSpecialistPage() {
                       Добавить
                     </button>
                   </div>
-                  {skills.length === 0 ? (
-                    <input
-                      type="text"
-                      placeholder="Введите навык"
-                      className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
-                      readOnly
-                    />
-                  ) : (
-                    <div className="space-y-2">
-                      {skills.map((skill) => (
-                        <div key={skill.id} className="flex items-center gap-2">
+                  <div className="space-y-2">
+                    {d.additionalEducation.length === 0 ? (
+                      <div className="text-[#C4C8CA] text-sm px-4 py-3 rounded-2xl border border-dashed border-[#E5E6E8] text-center">
+                        Нажмите «Добавить» для добавления записи
+                      </div>
+                    ) : (
+                      d.additionalEducation.map((item, i) => (
+                        <div key={i} className="flex items-center gap-2">
                           <input
                             type="text"
-                            value={skill.text}
+                            value={item}
                             onChange={(e) =>
-                              updateSkill(skill.id, e.target.value)
+                              set(
+                                "additionalEducation",
+                                d.additionalEducation.map((v, j) =>
+                                  j === i ? e.target.value : v,
+                                ),
+                              )
                             }
-                            placeholder="Введите навык"
-                            className="flex-1 px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
+                            placeholder="Курс, год"
+                            className={`${inp} flex-1`}
                           />
                           <button
-                            onClick={() => removeSkill(skill.id)}
-                            className="w-10 h-10 flex items-center justify-center text-[#C4C8CA] hover:text-[#F5653E] transition-colors"
+                            onClick={() =>
+                              set(
+                                "additionalEducation",
+                                d.additionalEducation.filter((_, j) => j !== i),
+                              )
+                            }
+                            className="w-9 h-9 flex items-center justify-center text-[#C4C8CA] hover:text-[#F5653E] transition-colors shrink-0"
                           >
                             <svg
-                              width="20"
-                              height="20"
-                              viewBox="0 0 20 20"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 16 16"
                               fill="none"
                             >
                               <path
-                                d="M15 5L5 15M5 5L15 15"
+                                d="M12 4L4 12M4 4L12 12"
                                 stroke="currentColor"
                                 strokeWidth="1.5"
                                 strokeLinecap="round"
@@ -683,10 +475,104 @@ export default function NewSpecialistPage() {
                             </svg>
                           </button>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      ))
+                    )}
+                  </div>
                 </div>
+              </div>
+            </div>
+
+            {/* 4. Сертификаты и документы */}
+            <div className="p-8">
+              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+                Сертификаты и документы
+              </h3>
+
+              <div className="mb-6">
+                <label className={lbl}>Номер лицензии</label>
+                <input
+                  type="text"
+                  value={d.licenseNumber}
+                  onChange={(e) => set("licenseNumber", e.target.value)}
+                  placeholder="ЛИЦ-XXXXXX"
+                  className={inp}
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[#838A8D] text-sm">Сертификаты</div>
+                  <>
+                    <input
+                      ref={certRef}
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={handleCertUpload}
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => certRef.current?.click()}
+                      className="text-[#F5653E] text-sm font-medium flex items-center gap-1 hover:text-[#E5542D] transition-colors"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 14 14"
+                        fill="none"
+                      >
+                        <path
+                          d="M7 2V12M2 7H12"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      Добавить
+                    </button>
+                  </>
+                </div>
+                {certs.length === 0 ? (
+                  <div className="text-[#C4C8CA] text-sm">
+                    Нажмите «Добавить» для загрузки сертификата
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-3">
+                    {certs.map((cert, i) => (
+                      <div
+                        key={i}
+                        className="relative w-24 h-24 rounded-2xl overflow-hidden border border-[#E5E6E8] bg-[#F8F9FA]"
+                      >
+                        <Image
+                          src={cert}
+                          alt={`Сертификат ${i + 1}`}
+                          width={96}
+                          height={96}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          onClick={() =>
+                            setCerts((prev) => prev.filter((_, j) => j !== i))
+                          }
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-[#F5653E] flex items-center justify-center"
+                        >
+                          <svg
+                            width="8"
+                            height="8"
+                            viewBox="0 0 8 8"
+                            fill="none"
+                          >
+                            <path
+                              d="M6.5 1.5L1.5 6.5M1.5 1.5L6.5 6.5"
+                              stroke="white"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

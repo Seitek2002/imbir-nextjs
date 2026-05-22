@@ -8,12 +8,25 @@ import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 import { SpecialistsList } from "@/widgets/specialists-list";
 
 import { MOCK_CLINIC_PROFILE } from "@/entities/clinic-profile";
-import { MOCK_SPECIALISTS } from "@/entities/clinic-specialist";
+import { useSpecialistsStore } from "@/entities/clinic-specialist";
+import type { Specialist } from "@/entities/clinic-specialist";
 
 export const ClinicSpecialistsPage: FC = () => {
+  const { specialists, remove } = useSpecialistsStore();
+
+  const listItems: Specialist[] = specialists.map((s) => ({
+    id: s.id,
+    name: s.fullName,
+    specialty: s.specialty,
+    clinic: s.workplace,
+    rating: s.rating,
+    reviews: s.reviews,
+    experience: parseInt(s.experienceYears) || 0,
+    image: s.photo || undefined,
+  }));
+
   return (
     <div className="w-full min-h-screen">
-      {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-[#E5E6E8]">
         <h1 className="text-lg font-semibold text-[#191A1B]">
           Мои специалисты
@@ -26,7 +39,6 @@ export const ClinicSpecialistsPage: FC = () => {
         </Link>
       </div>
 
-      {/* Desktop Content */}
       <div className="max-w-360 mx-auto px-4 md:px-10 py-4 md:py-8">
         <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden md:block">
           Мой профиль
@@ -52,7 +64,7 @@ export const ClinicSpecialistsPage: FC = () => {
               </Link>
             </div>
 
-            <SpecialistsList specialists={MOCK_SPECIALISTS} />
+            <SpecialistsList specialists={listItems} onDelete={remove} />
           </main>
         </div>
       </div>
