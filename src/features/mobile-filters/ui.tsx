@@ -111,10 +111,10 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 bg-[#F2F3F5] flex flex-col">
+    <div
+      className={`fixed inset-0 z-50 bg-[#F2F3F5] flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? "translate-y-0" : "translate-y-full"}`}
+    >
       <Header title="Фильтр" />
 
       <div className="flex-1 overflow-y-auto mt-2 px-2 pb-10 space-y-3">

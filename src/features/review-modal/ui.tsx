@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useCallback, useState } from "react";
 
 import Image from "next/image";
 
@@ -18,6 +18,8 @@ type Props = {
   onSubmit: (rating: number, comment: string) => void;
 };
 
+const DURATION = 200;
+
 export const ReviewModal: FC<Props> = ({
   isOpen,
   onClose,
@@ -29,27 +31,46 @@ export const ReviewModal: FC<Props> = ({
 }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [isClosing, setIsClosing] = useState(false);
 
-  if (!isOpen) return null;
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, DURATION);
+  }, [onClose]);
+
+  if (!isOpen && !isClosing) return null;
+
+  const state = isClosing ? "closed" : "open";
 
   const handleSubmit = () => {
     if (rating === 0) return;
     onSubmit(rating, comment);
     setRating(0);
     setComment("");
-    onClose();
+    handleClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="modal-overlay absolute inset-0 bg-black/50"
+        data-state={state}
+        onClick={handleClose}
+      />
+      <div
+        className="modal-panel relative bg-white rounded-3xl w-full max-w-md overflow-hidden"
+        data-state={state}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#E5E6E8]">
           <h2 className="text-xl font-semibold text-[#191A1B]">
             Оставить свой отзыв
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
