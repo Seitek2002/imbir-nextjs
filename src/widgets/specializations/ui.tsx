@@ -14,22 +14,14 @@ import {
 import { ROUTES } from "@/shared/config/routes";
 
 const SPECIALIZATIONS = [
-  { label: "ЛОР", image: ServiceLor, slug: "lor" },
-  { label: "Неврология", image: ServiceNevrology, slug: "nevrology" },
-  { label: "Гинекология", image: ServiceGinecology, slug: "ginecology" },
-  { label: "Кардиология", image: ServiceCardiology, slug: "cardiology" },
-  { label: "Пульмонология", image: ServicePulmonology, slug: "pulmonology" },
-  {
-    label: "Офтальмология",
-    image: ServiceOphthalmology,
-    slug: "ophthalmology",
-  },
-  {
-    label: "Гастроэнтерология",
-    image: ServiceGastroenterology,
-    slug: "gastroenterology",
-  },
-  { label: "Стоматология", image: ServiceDentistry, slug: "dentistry" },
+  { label: "ЛОР", image: ServiceLor },
+  { label: "Неврология", image: ServiceNevrology },
+  { label: "Гинекология", image: ServiceGinecology },
+  { label: "Кардиология", image: ServiceCardiology },
+  { label: "Пульмонология", image: ServicePulmonology },
+  { label: "Офтальмология", image: ServiceOphthalmology },
+  { label: "Гастроэнтерология", image: ServiceGastroenterology },
+  { label: "Стоматология", image: ServiceDentistry },
 ];
 
 export const SpecializationsSection = () => {
@@ -53,10 +45,10 @@ export const SpecializationsSection = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        {SPECIALIZATIONS.map(({ label, image, slug }) => (
+        {SPECIALIZATIONS.map(({ label, image }) => (
           <Link
-            key={slug}
-            href={`${ROUTES.SPECIALISTS}?specialization=${slug}`}
+            key={label}
+            href={`${ROUTES.SPECIALISTS}?doc_spec=${encodeURIComponent(label)}`}
             className="group flex flex-col items-center gap-3 md:gap-4 p-4 md:p-6 bg-white border border-[#E5E6E8] rounded-2xl md:rounded-3xl hover:border-[#F5653E]/40 hover:shadow-sm transition-all duration-200"
           >
             <div className="relative w-20 h-20 md:w-28 md:h-28 shrink-0">

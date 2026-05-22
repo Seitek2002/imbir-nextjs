@@ -80,7 +80,7 @@ export const GlobalSearch: FC = () => {
               ) : (
                 <>
                   <RecentSearches />
-                  <CategoriesGrid />
+                  <CategoriesGrid onItemClick={handleClose} />
                 </>
               )}
             </div>

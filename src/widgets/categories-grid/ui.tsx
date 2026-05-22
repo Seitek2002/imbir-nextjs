@@ -12,6 +12,7 @@ import {
   ServiceOphthalmology,
   ServicePulmonology,
 } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 
 const CATEGORIES = [
   { title: "Кардиология", image: ServiceCardiology },
@@ -24,7 +25,11 @@ const CATEGORIES = [
   { title: "ЛОР", image: ServiceLor },
 ];
 
-export const CategoriesGrid: FC = () => {
+type Props = {
+  onItemClick?: () => void;
+};
+
+export const CategoriesGrid: FC<Props> = ({ onItemClick }) => {
   return (
     <div className="p-4 bg-white">
       <h2 className="text-[#191A1B] text-lg font-medium mb-3">Категории</h2>
@@ -33,7 +38,9 @@ export const CategoriesGrid: FC = () => {
           <CategoryCard
             key={cat.title}
             title={cat.title}
-            image={cat.image} // Передаем картинку пропсом в карточку
+            image={cat.image}
+            href={`${ROUTES.SPECIALISTS}?doc_spec=${encodeURIComponent(cat.title)}`}
+            onClick={onItemClick}
           />
         ))}
       </div>
