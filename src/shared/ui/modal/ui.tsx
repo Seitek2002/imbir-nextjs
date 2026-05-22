@@ -3,6 +3,7 @@
 import { FC, ReactNode, useCallback, useEffect, useState } from "react";
 
 import { RemoveIcon } from "@/shared/assets";
+import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 type Props = {
   isOpen: boolean;
@@ -32,13 +33,7 @@ export const Modal: FC<Props> = ({ isOpen, onClose, title, children }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, handleClose]);
 
-  useEffect(() => {
-    if (isOpen) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "auto";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   if (!isOpen && !isClosing) return null;
 

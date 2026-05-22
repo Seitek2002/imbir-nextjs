@@ -2,6 +2,8 @@
 
 import { FC, ReactNode, useCallback, useEffect, useState } from "react";
 
+import { useScrollLock } from "@/shared/lib/useScrollLock";
+
 type Props = {
   isOpen: boolean;
   onClose: () => void;
@@ -43,19 +45,14 @@ export const ConfirmDialog: FC<Props> = ({
     return () => window.removeEventListener("keydown", handleKey);
   }, [isOpen, handleClose]);
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   if (!isOpen && !isClosing) return null;
 
   const state = isClosing ? "closed" : "open";
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
       <div
         className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm"
         data-state={state}

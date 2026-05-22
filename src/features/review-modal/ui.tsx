@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Button } from "@/shared";
 
 import { StarBoldIcon, StarOutlineIcon } from "@/shared/assets";
+import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 type Props = {
   isOpen: boolean;
@@ -32,6 +33,8 @@ export const ReviewModal: FC<Props> = ({
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isClosing, setIsClosing] = useState(false);
+
+  useScrollLock(isOpen);
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
