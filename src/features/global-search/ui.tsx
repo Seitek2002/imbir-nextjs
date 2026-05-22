@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 
 import { useRouter } from "next/navigation";
@@ -13,29 +13,32 @@ import { ROUTES } from "@/shared/config/routes";
 import { useSearchHistoryStore } from "@/shared/store/useSearchHistoryStore";
 import { SearchInput } from "@/shared/ui";
 
+const DURATION = 200;
+
 export const GlobalSearch: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [query, setQuery] = useState("");
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const addSearch = useSearchHistoryStore((state) => state.addSearch);
 
-  // Единая функция для закрытия модалки и очистки инпута
-  const handleClose = () => {
-    setIsOpen(false);
-    setQuery("");
-  };
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      setIsOpen(false);
+      setQuery("");
+    }, DURATION);
+  }, []);
 
-  // 1. Закрытие по клику вне
-  useClickAway(ref, handleClose);
+  useClickAway(ref, () => {
+    if (isOpen && !isClosing) handleClose();
+  });
 
-  // В эффекте оставляем ТОЛЬКО работу с DOM (внешней системой)
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (isOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -48,15 +51,25 @@ export const GlobalSearch: FC = () => {
     handleClose();
   };
 
+  const visible = isOpen || isClosing;
+  const state = isClosing ? "closed" : "open";
+
   return (
     <>
       <IconBtn variant="outline" size="sm" onClick={() => setIsOpen(true)}>
         <SearchIcon className="size-5" />
       </IconBtn>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex justify-center items-start pt-[15vh] bg-[#0D0D12]/40 backdrop-blur-[2px]">
-          <div ref={ref} className="w-full max-w-150 mx-4 overflow-hidden">
+      {visible && (
+        <div
+          className="modal-overlay fixed inset-0 z-50 flex justify-center items-start pt-[15vh] bg-[#0D0D12]/40 backdrop-blur-[2px]"
+          data-state={state}
+        >
+          <div
+            ref={ref}
+            className="search-panel w-full max-w-150 mx-4 overflow-hidden"
+            data-state={state}
+          >
             <div className="py-4">
               <SearchInput
                 placeholder="Поиск клиники, специалиста, услуги"
