@@ -4,12 +4,11 @@ import { FC, ReactNode, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Button, Dropdown, IconBtn, RangeSlider } from "@/shared";
+import { Button, Dropdown, RangeSlider } from "@/shared";
 
 import { CitySelectorModal } from "@/features/city-selector/ui";
 
-import { GeoIcon, RemoveIcon } from "@/shared/assets";
-import { useCityStore } from "@/shared/store/cityStore";
+import { RemoveIcon } from "@/shared/assets";
 
 type Props = {
   title?: string;
@@ -56,7 +55,6 @@ export const FilterBar: FC<Props> = ({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const city = useCityStore((state) => state.city);
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
 
   const initialSpec = searchParams.get(`${prefix}_spec`);
@@ -146,18 +144,7 @@ export const FilterBar: FC<Props> = ({
         ) : (
           <>
             <div className="max-w-200 flex items-center">
-              <h2 className="border-r border-r-[#E5E6E8] text-[40px] font-semibold pr-6">
-                {title}
-              </h2>
-              <div className="flex items-center gap-2 ml-4">
-                <IconBtn size="md" onClick={() => setIsCityModalOpen(true)}>
-                  <GeoIcon className="size-5 [&_path]:stroke-white" />
-                </IconBtn>
-                <div>
-                  <div className="text-[#191A1B] font-medium">г. {city}</div>
-                  <div className="text-[#838A8D] text-sm">Ленинский район</div>
-                </div>
-              </div>
+              <h2 className="text-[40px] font-semibold pr-6">{title}</h2>
             </div>
             <p className="text-[#686F72] text-lg mt-4 mb-6">
               Выберите интересующие вас параметры, чтобы ознакомиться с
