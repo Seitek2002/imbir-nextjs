@@ -7,5 +7,6 @@ export { Textarea } from "./textarea";
 export { InfoCard } from "./info-card";
 export { StatsPanel } from "./stats-panel";
 export { Modal } from "./modal";
+export { ConfirmDialog } from "./confirm-dialog";
 
 export { Input, Radio, Checkbox, SearchInput } from "./input";

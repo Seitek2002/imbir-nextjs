@@ -1,28 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import {
-  ServiceCardiology,
-  ServiceDentistry,
-  ServiceGastroenterology,
-  ServiceGinecology,
-  ServiceLor,
-  ServiceNevrology,
-  ServiceOphthalmology,
-  ServicePulmonology,
-} from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
-
-const SPECIALIZATIONS = [
-  { label: "ЛОР", image: ServiceLor },
-  { label: "Неврология", image: ServiceNevrology },
-  { label: "Гинекология", image: ServiceGinecology },
-  { label: "Кардиология", image: ServiceCardiology },
-  { label: "Пульмонология", image: ServicePulmonology },
-  { label: "Офтальмология", image: ServiceOphthalmology },
-  { label: "Гастроэнтерология", image: ServiceGastroenterology },
-  { label: "Стоматология", image: ServiceDentistry },
-];
+import { SPECIALIZATIONS } from "@/shared/config/specializations";
 
 export const SpecializationsSection = () => {
   return (
@@ -45,22 +25,22 @@ export const SpecializationsSection = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        {SPECIALIZATIONS.map(({ label, image }) => (
+        {SPECIALIZATIONS.map(({ name, image }) => (
           <Link
-            key={label}
-            href={`${ROUTES.SPECIALISTS}?doc_spec=${encodeURIComponent(label)}`}
+            key={name}
+            href={`${ROUTES.SPECIALISTS}?doc_spec=${encodeURIComponent(name)}`}
             className="group flex flex-col items-center gap-3 md:gap-4 p-4 md:p-6 bg-white border border-[#E5E6E8] rounded-2xl md:rounded-3xl hover:border-[#F5653E]/40 hover:shadow-sm transition-all duration-200"
           >
             <div className="relative w-20 h-20 md:w-28 md:h-28 shrink-0">
               <Image
                 src={image}
-                alt={label}
+                alt={name}
                 fill
                 className="object-contain group-hover:scale-105 transition-transform duration-200"
               />
             </div>
             <span className="text-sm md:text-base font-medium text-[#191A1B] text-center leading-snug">
-              {label}
+              {name}
             </span>
           </Link>
         ))}

@@ -10,6 +10,7 @@ import { CategoriesGrid, RecentSearches } from "@/widgets";
 
 import { SearchIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
+import { useSearchHistoryStore } from "@/shared/store/useSearchHistoryStore";
 import { SearchInput } from "@/shared/ui";
 
 export const GlobalSearch: FC = () => {
@@ -17,6 +18,7 @@ export const GlobalSearch: FC = () => {
   const [query, setQuery] = useState("");
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const addSearch = useSearchHistoryStore((state) => state.addSearch);
 
   // Единая функция для закрытия модалки и очистки инпута
   const handleClose = () => {
@@ -41,6 +43,7 @@ export const GlobalSearch: FC = () => {
 
   const handleSearchSubmit = () => {
     if (!query.trim()) return;
+    addSearch(query);
     router.push(ROUTES.SEARCH({ query }));
     handleClose();
   };
