@@ -6,8 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button, Dropdown, RangeSlider } from "@/shared";
 
-import { CitySelectorModal } from "@/features/city-selector/ui";
-
 import { RemoveIcon } from "@/shared/assets";
 
 type Props = {
@@ -54,8 +52,6 @@ export const FilterBar: FC<Props> = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const [isCityModalOpen, setIsCityModalOpen] = useState(false);
 
   const initialSpec = searchParams.get(`${prefix}_spec`);
   const [specialty, setSpecialty] = useState<string[]>(
@@ -243,11 +239,6 @@ export const FilterBar: FC<Props> = ({
           </Button>
         </div>
       </div>
-
-      <CitySelectorModal
-        isOpen={isCityModalOpen}
-        onClose={() => setIsCityModalOpen(false)}
-      />
     </>
   );
 };
