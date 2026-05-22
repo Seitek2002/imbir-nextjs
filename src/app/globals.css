@@ -79,6 +79,27 @@
   transform: scale(0.95) translateY(6px);
 }
 
+/* Bottom-sheet variant (mobile) */
+.modal-sheet {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 200ms ease,
+    transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@starting-style {
+  .modal-sheet {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+.modal-sheet[data-state="closed"] {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
 .search-panel {
   opacity: 1;
   transform: translateY(0);

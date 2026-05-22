@@ -40,15 +40,16 @@ export const Modal: FC<Props> = ({ isOpen, onClose, title, children }) => {
   const state = isClosing ? "closed" : "open";
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-100 flex items-end sm:items-center justify-center">
       <div
         className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm"
         data-state={state}
         onClick={handleClose}
       />
 
+      {/* Mobile bottom-sheet */}
       <div
-        className="modal-panel relative bg-white rounded-3xl w-full max-w-md flex flex-col max-h-[90vh] overflow-hidden shadow-xl"
+        className="modal-sheet sm:hidden relative bg-white rounded-t-3xl w-full flex flex-col max-h-[90vh] overflow-hidden shadow-xl"
         data-state={state}
       >
         <div className="flex items-center justify-between p-5 border-b border-[#E3E4E5]">
@@ -60,7 +61,23 @@ export const Modal: FC<Props> = ({ isOpen, onClose, title, children }) => {
             <RemoveIcon className="size-5" />
           </button>
         </div>
+        <div className="p-5 overflow-y-auto">{children}</div>
+      </div>
 
+      {/* Desktop centered */}
+      <div
+        className="modal-panel hidden sm:flex relative bg-white rounded-3xl w-full max-w-md flex-col max-h-[90vh] overflow-hidden shadow-xl"
+        data-state={state}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-[#E3E4E5]">
+          <h2 className="text-xl font-semibold text-[#191A1B]">{title}</h2>
+          <button
+            onClick={handleClose}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors text-[#838A8D]"
+          >
+            <RemoveIcon className="size-5" />
+          </button>
+        </div>
         <div className="p-5 overflow-y-auto">{children}</div>
       </div>
     </div>

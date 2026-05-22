@@ -1,8 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
-
-import { IconBtn, SearchInput } from "@/shared";
+import { FC, ReactNode, useState } from "react";
 
 import { ProfileMobileHeader } from "@/widgets/profile-mobile-header";
 import { ProfileReviews as ReviewsWidget } from "@/widgets/profile-reviews";
@@ -11,19 +9,74 @@ import { ProfileSidebar } from "@/widgets/profile-sidebar";
 import { MOCK_USER_REVIEWS } from "@/entities/user-review";
 import type { ReviewType } from "@/entities/user-review";
 
-const TABS: { id: ReviewType; label: string; icon: string }[] = [
-  { id: "clinic", label: "Клиники", icon: "🏥" },
-  { id: "doctor", label: "Специалисты", icon: "👨‍⚕️" },
-  { id: "service", label: "Услуги", icon: "💼" },
+const ClinicTabIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 20 20"
+    fill="none"
+    className="shrink-0"
+  >
+    <path
+      d="M3.33334 16.6667H16.6667M5.00001 16.6667V6.66667L10 3.33334L15 6.66667V16.6667M8.33334 16.6667V12.5C8.33334 12.0398 8.70644 11.6667 9.16668 11.6667H10.8333C11.2936 11.6667 11.6667 12.0398 11.6667 12.5V16.6667"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const DoctorTabIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 20 20"
+    fill="none"
+    className="shrink-0"
+  >
+    <path
+      d="M13.3333 5.83333C13.3333 7.67428 11.8409 9.16667 10 9.16667C8.15906 9.16667 6.66667 7.67428 6.66667 5.83333C6.66667 3.99238 8.15906 2.5 10 2.5C11.8409 2.5 13.3333 3.99238 13.3333 5.83333Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <path
+      d="M10 11.6667C6.77834 11.6667 4.16667 14.2783 4.16667 17.5H15.8333C15.8333 14.2783 13.2217 11.6667 10 11.6667Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+  </svg>
+);
+
+const ServiceTabIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 20 20"
+    fill="none"
+    className="shrink-0"
+  >
+    <path
+      d="M10 2.5V5.83333M10 14.1667V17.5M5.83333 10H2.5M17.5 10H14.1667M14.7487 14.7487L12.357 12.357M14.7487 5.25132L12.357 7.643M5.25132 14.7487L7.643 12.357M5.25132 5.25132L7.643 7.643"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const TABS: { id: ReviewType; label: string; icon: () => ReactNode }[] = [
+  { id: "clinic", label: "Клиники", icon: ClinicTabIcon },
+  { id: "doctor", label: "Специалисты", icon: DoctorTabIcon },
+  { id: "service", label: "Услуги", icon: ServiceTabIcon },
 ];
 
 export const ProfileReviewsPage: FC = () => {
   const [activeTab, setActiveTab] = useState<ReviewType>("clinic");
-  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <>
-      <ProfileMobileHeader title="История записей" />
+      <ProfileMobileHeader title="Отзывы" />
       <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
         <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden md:block">
           Мой профиль
@@ -35,49 +88,28 @@ export const ProfileReviewsPage: FC = () => {
           </aside>
 
           <main className="flex-1 min-w-0">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              <h2 className="text-[28px] md:text-[32px] font-semibold text-[#191A1B]">
-                Отзывы
-              </h2>
-
-              <div className="flex items-center gap-3">
-                <div className="flex-1 md:flex-initial">
-                  <SearchInput value={searchQuery} onChange={setSearchQuery} />
-                </div>
-                <IconBtn variant="outline" className="w-12 h-12 shrink-0">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M2.5 5.83333H17.5M5.83333 10H14.1667M8.33333 14.1667H11.6667"
-                      stroke="#686F72"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </IconBtn>
-              </div>
-            </div>
+            <h2 className="text-[28px] md:text-[32px] font-semibold text-[#191A1B] mb-6 hidden md:block">
+              Отзывы
+            </h2>
 
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-              {TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-5 py-3 rounded-full font-medium text-base whitespace-nowrap transition-all flex items-center gap-2 ${
-                    activeTab === tab.id
-                      ? "bg-[#F5653E] text-white shadow-sm"
-                      : "bg-[#F2F4F7] text-[#686F72] hover:bg-[#E5E6E8]"
-                  }`}
-                >
-                  <span className="text-lg leading-none">{tab.icon}</span>
-                  <span>{tab.label}</span>
-                </button>
-              ))}
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-4 py-2.5 rounded-full font-medium text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                      activeTab === tab.id
+                        ? "bg-[#F5653E] text-white"
+                        : "bg-[#F2F4F7] text-[#686F72] hover:bg-[#E5E6E8]"
+                    }`}
+                  >
+                    <Icon />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
             <ReviewsWidget reviews={MOCK_USER_REVIEWS} activeTab={activeTab} />

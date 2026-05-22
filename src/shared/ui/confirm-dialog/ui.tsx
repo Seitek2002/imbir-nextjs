@@ -52,22 +52,23 @@ export const ConfirmDialog: FC<Props> = ({
   const state = isClosing ? "closed" : "open";
 
   return (
-    <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-200 flex items-end sm:items-center justify-center">
       <div
         className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm"
         data-state={state}
         onClick={handleClose}
       />
+
+      {/* Mobile bottom-sheet */}
       <div
-        className="modal-panel relative bg-white rounded-3xl w-full max-w-sm p-6 flex flex-col items-center gap-4 shadow-xl"
+        className="modal-sheet sm:hidden relative bg-white rounded-t-3xl w-full p-6 pb-8 flex flex-col items-center gap-4"
         data-state={state}
       >
         {icon && (
-          <div className="w-16 h-16 rounded-full bg-[#FFF0EE] flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-[#FFF0EE] flex items-center justify-center">
             {icon}
           </div>
         )}
-
         <div className="text-center">
           <h2 className="text-lg font-bold text-[#191A1B]">{title}</h2>
           {description && (
@@ -76,7 +77,43 @@ export const ConfirmDialog: FC<Props> = ({
             </p>
           )}
         </div>
+        <div className="flex gap-3 w-full mt-2">
+          <button
+            onClick={handleClose}
+            className="flex-1 py-3.5 rounded-full border border-[#E3E4E5] text-[#191A1B] font-medium text-base hover:bg-[#F2F3F5] transition-colors active:scale-95"
+          >
+            {cancelLabel}
+          </button>
+          <button
+            onClick={() => {
+              onConfirm();
+              handleClose();
+            }}
+            className="flex-1 py-3.5 rounded-full bg-[#F5653E] text-white font-medium text-base hover:bg-[#E0532D] transition-colors active:scale-95"
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
 
+      {/* Desktop centered */}
+      <div
+        className="modal-panel hidden sm:flex relative bg-white rounded-3xl w-full max-w-sm p-6 flex-col items-center gap-4 shadow-xl"
+        data-state={state}
+      >
+        {icon && (
+          <div className="w-16 h-16 rounded-full bg-[#FFF0EE] flex items-center justify-center">
+            {icon}
+          </div>
+        )}
+        <div className="text-center">
+          <h2 className="text-lg font-bold text-[#191A1B]">{title}</h2>
+          {description && (
+            <p className="text-sm text-[#838A8D] mt-1.5 leading-snug">
+              {description}
+            </p>
+          )}
+        </div>
         <div className="flex gap-3 w-full mt-2">
           <button
             onClick={handleClose}

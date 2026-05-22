@@ -7,6 +7,9 @@ import { ReviewModal } from "@/features/review-modal";
 import { AppointmentCard } from "@/entities/appointment";
 import type { Appointment, AppointmentStatus } from "@/entities/appointment";
 
+import { WarningIcon } from "@/shared/assets";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
+
 type Props = {
   appointments: Appointment[];
   activeTab: "upcoming" | "completed";
@@ -17,6 +20,7 @@ export const ProfileHistory: FC<Props> = ({ appointments, activeTab }) => {
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<string | null>(null);
 
   const filteredAppointments = appointmentsList.filter((apt) =>
     activeTab === "upcoming"
@@ -24,16 +28,16 @@ export const ProfileHistory: FC<Props> = ({ appointments, activeTab }) => {
       : apt.status === "completed",
   );
 
-  const handleCancel = (id: string) => {
-    console.log("Cancel appointment:", id);
-    // TODO: API call to cancel
+  const handleCancelConfirm = () => {
+    if (!cancelTarget) return;
     setAppointmentsList((prev) =>
       prev.map((apt) =>
-        apt.id === id
+        apt.id === cancelTarget
           ? { ...apt, status: "cancelled" as AppointmentStatus }
           : apt,
       ),
     );
+    setCancelTarget(null);
   };
 
   const handleOpenReviewModal = (id: string) => {
@@ -46,7 +50,6 @@ export const ProfileHistory: FC<Props> = ({ appointments, activeTab }) => {
 
   const handleSubmitReview = (rating: number, comment: string) => {
     console.log("Submit review:", { rating, comment });
-    // TODO: API call to submit review
   };
 
   if (filteredAppointments.length === 0) {
@@ -68,13 +71,26 @@ export const ProfileHistory: FC<Props> = ({ appointments, activeTab }) => {
           <AppointmentCard
             key={appointment.id}
             appointment={appointment}
-            onCancel={activeTab === "upcoming" ? handleCancel : undefined}
+            onCancel={
+              activeTab === "upcoming" ? (id) => setCancelTarget(id) : undefined
+            }
             onReview={
               activeTab === "completed" ? handleOpenReviewModal : undefined
             }
           />
         ))}
       </div>
+
+      <ConfirmDialog
+        isOpen={!!cancelTarget}
+        onClose={() => setCancelTarget(null)}
+        onConfirm={handleCancelConfirm}
+        icon={<WarningIcon className="w-7 h-7 [&_path]:stroke-[#F5653E]" />}
+        title="Отменить запись на приём?"
+        description="История будет удалена без возможности восстановления"
+        confirmLabel="Да, отменить"
+        cancelLabel="Назад"
+      />
 
       {selectedAppointment && (
         <ReviewModal

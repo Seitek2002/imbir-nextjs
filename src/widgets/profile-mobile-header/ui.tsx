@@ -1,20 +1,15 @@
 "use client";
 
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { SearchIcon } from "@/shared/assets";
-
 type Props = {
   title: string;
-  showSearch?: boolean;
+  rightElement?: ReactNode;
 };
 
-export const ProfileMobileHeader: FC<Props> = ({
-  title,
-  showSearch = true,
-}) => {
+export const ProfileMobileHeader: FC<Props> = ({ title, rightElement }) => {
   const router = useRouter();
 
   return (
@@ -37,16 +32,9 @@ export const ProfileMobileHeader: FC<Props> = ({
 
       <h1 className="text-lg font-semibold text-[#191A1B]">{title}</h1>
 
-      {showSearch ? (
-        <button
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
-          aria-label="Поиск"
-        >
-          <SearchIcon className="w-5 h-5 [&_path]:stroke-[#191A1B]" />
-        </button>
-      ) : (
-        <div className="w-10" />
-      )}
+      <div className="w-10 flex items-center justify-center">
+        {rightElement ?? null}
+      </div>
     </div>
   );
 };
