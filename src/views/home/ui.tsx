@@ -19,6 +19,9 @@ const VideosSwiper = dynamic(() =>
   import("@/widgets").then((mod) => mod.VideosSwiper),
 );
 const Footer = dynamic(() => import("@/widgets").then((mod) => mod.Footer));
+const SpecializationsSection = dynamic(() =>
+  import("@/widgets").then((mod) => mod.SpecializationsSection),
+);
 
 export const HomePage = () => {
   return (
@@ -27,6 +30,7 @@ export const HomePage = () => {
       <Hero />
 
       <DoctorsMainList />
+      <SpecializationsSection />
       <ClinicsMainList />
       <Banners />
 

@@ -14,3 +14,4 @@ export { ReviewsSection } from "./reviews";
 export { ClinicSidebar } from "./clinic-sidebar";
 export { SpecialistsList } from "./specialists-list";
 export { ProceduresList } from "./procedures-list";
+export { SpecializationsSection } from "./specializations";
