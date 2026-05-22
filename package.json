@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "kill-port 3000 3001 || true",
+    "predev": "kill-port 3000 3001 3002 3003 3004 || true",
     "dev": "concurrently -n \"server,front\" -c \"yellow,cyan\" \"npm run dev:server\" \"next dev\"",
     "dev:front": "next dev",
     "dev:server": "node server/index.js",
