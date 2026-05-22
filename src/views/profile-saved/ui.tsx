@@ -2,14 +2,14 @@
 
 import { FC, useState } from "react";
 
+import { IconBtn, SearchInput } from "@/shared";
+
 import { ProfileMobileHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSaved as SavedWidget } from "@/widgets/profile-saved";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
 import { MOCK_SAVED_ITEMS } from "@/entities/saved";
 import type { SavedType } from "@/entities/saved";
-
-import { SearchIcon } from "@/shared/assets";
 
 const TABS: { id: SavedType; label: string }[] = [
   { id: "clinic", label: "Клиники" },
@@ -105,17 +105,10 @@ export const ProfileSavedPage: FC = () => {
               </h2>
 
               <div className="flex items-center gap-3">
-                <div className="relative flex-1 md:flex-initial">
-                  <input
-                    type="text"
-                    placeholder="Поиск"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full md:w-60 h-12 pl-12 pr-4 rounded-full bg-white border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
-                  />
-                  <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#838A8D] [&_path]:stroke-[#838A8D]" />
+                <div className="flex-1 md:flex-initial">
+                  <SearchInput value={searchQuery} onChange={setSearchQuery} />
                 </div>
-                <button className="w-12 h-12 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shrink-0">
+                <IconBtn variant="outline" className="w-12 h-12 shrink-0">
                   <svg
                     width="20"
                     height="20"
@@ -130,7 +123,7 @@ export const ProfileSavedPage: FC = () => {
                       strokeLinecap="round"
                     />
                   </svg>
-                </button>
+                </IconBtn>
               </div>
             </div>
 

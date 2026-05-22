@@ -2,12 +2,10 @@
 
 import { FC, useState } from "react";
 
-import { ConfirmDialog } from "@/shared";
+import { ConfirmDialog, IconBtn, SearchInput } from "@/shared";
 
 import { SpecialistCard } from "@/entities/clinic-specialist";
 import type { Specialist } from "@/entities/clinic-specialist";
-
-import { SearchIcon } from "@/shared/assets";
 
 const TrashIcon = () => (
   <svg
@@ -47,17 +45,10 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            placeholder="Поиск"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-12 pl-12 pr-4 rounded-full bg-white border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
-          />
-          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#838A8D] [&_path]:stroke-[#838A8D]" />
+        <div className="flex-1">
+          <SearchInput value={searchQuery} onChange={setSearchQuery} />
         </div>
-        <button className="w-12 h-12 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shrink-0">
+        <IconBtn variant="outline" className="w-12 h-12 shrink-0">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path
               d="M2.5 5.83333H17.5M5.83333 10H14.1667M8.33333 14.1667H11.6667"
@@ -66,7 +57,7 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
               strokeLinecap="round"
             />
           </svg>
-        </button>
+        </IconBtn>
       </div>
 
       {filteredItems.length === 0 ? (

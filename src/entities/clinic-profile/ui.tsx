@@ -1,8 +1,22 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, SVGProps, useState } from "react";
 
 import Image from "next/image";
+
+import { Button, Input, Textarea } from "@/shared";
+
+const UploadIcon: FC<SVGProps<SVGSVGElement>> = (props) => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...props}>
+    <path
+      d="M2 11L2 14L5 14M14 5L14 2L11 2M5 2L2 2L2 5M11 14L14 14L14 11"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 type Props = {
   name: string;
@@ -25,18 +39,13 @@ export const ClinicProfileForm: FC<Props> = ({
   address,
   schedule,
 }) => {
-  const [logoFile, setLogoFile] = useState<string | undefined>(logo);
+  const [logoFile] = useState<string | undefined>(logo);
 
   return (
     <div className="bg-white rounded-3xl p-8 border border-[#E5E6E8]">
       {/* Название */}
       <div className="mb-6">
-        <label className="block text-[#686F72] text-sm mb-2">Название</label>
-        <input
-          type="text"
-          defaultValue={name}
-          className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors"
-        />
+        <Input label="Название" defaultValue={name} />
       </div>
 
       {/* Логотип */}
@@ -58,29 +67,15 @@ export const ClinicProfileForm: FC<Props> = ({
               </span>
             )}
           </div>
-          <button className="px-4 py-2 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M2 11L2 14L5 14M14 5L14 2L11 2M5 2L2 2L2 5M11 14L14 14L14 11"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+          <Button variant="outline" size="sm" IconLeft={UploadIcon}>
             Новый логотип
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Описание */}
       <div className="mb-6">
-        <label className="block text-[#686F72] text-sm mb-2">Описание</label>
-        <textarea
-          defaultValue={description}
-          rows={5}
-          className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] resize-none focus:outline-none focus:border-[#F5653E] transition-colors"
-        />
+        <Textarea label="Описание" defaultValue={description} rows={5} />
       </div>
 
       {/* Фотографии */}
@@ -116,47 +111,10 @@ export const ClinicProfileForm: FC<Props> = ({
 
       {/* Контакты в 2 колонки */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-[#686F72] text-sm mb-2">
-            Номер телефона
-          </label>
-          <input
-            type="tel"
-            defaultValue={phone}
-            className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="block text-[#686F72] text-sm mb-2">
-            Электронная почта
-          </label>
-          <input
-            type="email"
-            defaultValue={email}
-            className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="block text-[#686F72] text-sm mb-2">Адрес</label>
-          <input
-            type="text"
-            defaultValue={address}
-            className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors"
-          />
-        </div>
-
-        <div>
-          <label className="block text-[#686F72] text-sm mb-2">
-            График работы
-          </label>
-          <input
-            type="text"
-            defaultValue={schedule}
-            className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors"
-          />
-        </div>
+        <Input label="Номер телефона" type="tel" defaultValue={phone} />
+        <Input label="Электронная почта" type="email" defaultValue={email} />
+        <Input label="Адрес" defaultValue={address} />
+        <Input label="График работы" defaultValue={schedule} />
       </div>
     </div>
   );

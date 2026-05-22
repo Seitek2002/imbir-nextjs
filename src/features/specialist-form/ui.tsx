@@ -1,8 +1,10 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, SVGProps, useState } from "react";
 
 import Image from "next/image";
+
+import { Button, Input, SegmentedControl, Textarea } from "@/shared";
 
 type WorkExperience = {
   id: string;
@@ -42,6 +44,18 @@ const SPECIALTIES = [
   "Педиатрия",
   "Неврология",
 ];
+
+const PencilIcon: FC<SVGProps<SVGSVGElement>> = (props) => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...props}>
+    <path
+      d="M11.3334 2.00001C11.5086 1.82491 11.7164 1.68605 11.9452 1.59129C12.174 1.49653 12.4193 1.44775 12.6667 1.44775C12.9142 1.44775 13.1595 1.49653 13.3883 1.59129C13.6171 1.68605 13.8249 1.82491 14.0001 2.00001C14.1752 2.17511 14.314 2.38293 14.4088 2.61173C14.5036 2.84053 14.5523 3.08584 14.5523 3.33334C14.5523 3.58084 14.5036 3.82615 14.4088 4.05495C14.314 4.28375 14.1752 4.49157 14.0001 4.66668L5.00008 13.6667L1.33341 14.6667L2.33341 11L11.3334 2.00001Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
   const [fullName, setFullName] = useState(initialData?.fullName || "");
@@ -149,14 +163,10 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
     <div className="space-y-6">
       {/* ФИО */}
       <div>
-        <label className="block text-[#191A1B] text-sm font-medium mb-2">
-          ФИО
-        </label>
-        <input
-          type="text"
+        <Input
+          label="ФИО"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
-          className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors"
           placeholder="Введите ФИО"
         />
       </div>
@@ -167,7 +177,7 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
           Фото специалиста
         </label>
         <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-[#FFF8F5] flex items-center justify-center shrink-0">
             {photo ? (
               <Image
                 src={photo}
@@ -186,18 +196,9 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
               </svg>
             )}
           </div>
-          <button className="px-4 py-2 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path
-                d="M11.3334 2.00001C11.5086 1.82491 11.7164 1.68605 11.9452 1.59129C12.174 1.49653 12.4193 1.44775 12.6667 1.44775C12.9142 1.44775 13.1595 1.49653 13.3883 1.59129C13.6171 1.68605 13.8249 1.82491 14.0001 2.00001C14.1752 2.17511 14.314 2.38293 14.4088 2.61173C14.5036 2.84053 14.5523 3.08584 14.5523 3.33334C14.5523 3.58084 14.5036 3.82615 14.4088 4.05495C14.314 4.28375 14.1752 4.49157 14.0001 4.66668L5.00008 13.6667L1.33341 14.6667L2.33341 11L11.3334 2.00001Z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+          <Button variant="outline" size="sm" IconLeft={PencilIcon}>
             Новое фото
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -238,28 +239,22 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
 
       {/* Образование */}
       <div>
-        <label className="block text-[#191A1B] text-sm font-medium mb-2">
-          Образование
-        </label>
-        <textarea
+        <Textarea
+          label="Образование"
           value={education}
           onChange={(e) => setEducation(e.target.value)}
           rows={3}
-          className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] resize-none focus:outline-none focus:border-[#F5653E] transition-colors"
           placeholder="Введите информацию об образовании"
         />
       </div>
 
       {/* О специалисте */}
       <div>
-        <label className="block text-[#191A1B] text-sm font-medium mb-2">
-          О специалисте
-        </label>
-        <textarea
+        <Textarea
+          label="О специалисте"
           value={about}
           onChange={(e) => setAbout(e.target.value)}
           rows={8}
-          className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] resize-none focus:outline-none focus:border-[#F5653E] transition-colors leading-relaxed"
           placeholder="Расскажите о специалисте"
         />
       </div>
@@ -288,7 +283,7 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
         <div className="space-y-3">
           {workExperience.map((exp) => (
             <div key={exp.id} className="flex items-start gap-3">
-              <div className="w-0.5 h-16 bg-[#FFE5E0] rounded-full flex-shrink-0 mt-1" />
+              <div className="w-0.5 h-16 bg-[#FFE5E0] rounded-full shrink-0 mt-1" />
               <div className="flex-1 min-w-0">
                 <p className="text-[#F5653E] text-sm mb-1">
                   {exp.period}{" "}
@@ -341,7 +336,7 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
         <div className="space-y-2">
           {skills.map((skill) => (
             <div key={skill.id} className="flex items-start gap-3">
-              <div className="w-0.5 h-6 bg-[#FFE5E0] rounded-full flex-shrink-0 mt-1" />
+              <div className="w-0.5 h-6 bg-[#FFE5E0] rounded-full shrink-0 mt-1" />
               <p className="flex-1 text-[#191A1B] text-base">{skill.name}</p>
               <button
                 onClick={() => handleRemoveSkill(skill.id)}
@@ -368,33 +363,21 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
         </label>
 
         {/* Онлайн/Оффлайн табы */}
-        <div className="inline-flex gap-0 mb-6 bg-[#F8F9FA] rounded-full p-1">
-          <button
-            onClick={() => setScheduleType("online")}
-            className={`px-8 py-2.5 rounded-full font-medium text-sm transition-all ${
-              scheduleType === "online"
-                ? "bg-white text-[#191A1B] shadow-sm"
-                : "bg-transparent text-[#686F72]"
-            }`}
-          >
-            Онлайн
-          </button>
-          <button
-            onClick={() => setScheduleType("offline")}
-            className={`px-8 py-2.5 rounded-full font-medium text-sm transition-all ${
-              scheduleType === "offline"
-                ? "bg-white text-[#191A1B] shadow-sm"
-                : "bg-transparent text-[#686F72]"
-            }`}
-          >
-            Оффлайн
-          </button>
+        <div className="mb-6">
+          <SegmentedControl
+            options={[
+              { value: "online" as const, label: "Онлайн" },
+              { value: "offline" as const, label: "Оффлайн" },
+            ]}
+            value={scheduleType}
+            onChange={setScheduleType}
+          />
         </div>
 
         <div className="flex gap-6">
           {/* Календарь */}
           <div
-            className="bg-[#FAFAFA] rounded-3xl border border-[#E5E6E8] p-5 flex-shrink-0"
+            className="bg-[#FAFAFA] rounded-3xl border border-[#E5E6E8] p-5 shrink-0"
             style={{ width: "340px" }}
           >
             <div className="flex items-center justify-between mb-4">

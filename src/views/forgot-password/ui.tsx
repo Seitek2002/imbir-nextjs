@@ -9,7 +9,7 @@ import { Header } from "@/widgets";
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
 import { cn } from "@/shared/lib/utils";
-import { Button, Input } from "@/shared/ui";
+import { Button, IconBtn, Input } from "@/shared/ui";
 
 type Step = "email" | "code" | "new_password" | "success";
 
@@ -75,9 +75,10 @@ export const ForgotPasswordPage = () => {
           <div className="md:contents bg-white rounded-2xl m-2 p-4 md:p-0 flex-1 flex flex-col">
             {/* Кнопка назад внутри карточки (как на скринах) */}
             {step !== "success" && (
-              <button
+              <IconBtn
                 onClick={handleBack}
-                className="hidden md:flex items-center justify-center size-10 rounded-full border border-[#E3E4E5] hover:bg-gray-50 transition-colors mb-6"
+                variant="outline"
+                className="hidden md:flex size-10 mb-6"
               >
                 <svg
                   width="20"
@@ -94,7 +95,7 @@ export const ForgotPasswordPage = () => {
                     strokeLinejoin="round"
                   />
                 </svg>
-              </button>
+              </IconBtn>
             )}
 
             {/* === ШАГ 1: ВВОД EMAIL (Логически необходим) === */}
@@ -157,9 +158,13 @@ export const ForgotPasswordPage = () => {
                 </div>
 
                 <div className="text-center md:text-left">
-                  <button className="text-sm text-[#838A8D] hover:text-[#191A1B] transition-colors">
+                  <Button
+                    variant="text"
+                    size="xs"
+                    className="px-0 text-sm text-[#838A8D] hover:text-[#191A1B]"
+                  >
                     Получить код повторно через 00:59
-                  </button>
+                  </Button>
                   {/* Замени текст выше на этот, когда таймер истечет:
                      <button className="text-sm text-[#F5653E] hover:underline">Получить код повторно</button>
                   */}
