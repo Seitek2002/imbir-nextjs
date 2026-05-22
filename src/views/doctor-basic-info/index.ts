@@ -1,0 +1,1 @@
+export { DoctorBasicInfoPage } from "./ui";

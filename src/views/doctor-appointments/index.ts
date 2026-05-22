@@ -1,0 +1,1 @@
+export { DoctorAppointmentsPage } from "./ui";
