@@ -10,3 +10,4 @@ export { Modal } from "./modal";
 export { ConfirmDialog } from "./confirm-dialog";
 
 export { Input, Radio, Checkbox, SearchInput } from "./input";
+export { FilterTabBar } from "./filter-tabs";

@@ -7,24 +7,7 @@ import { ConfirmDialog, IconBtn, SearchInput } from "@/shared";
 import { SpecialistCard } from "@/entities/clinic-specialist";
 import type { Specialist } from "@/entities/clinic-specialist";
 
-const TrashIcon = () => (
-  <svg
-    width="28"
-    height="28"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="#F5653E"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="3 6 5 6 21 6" />
-    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-    <path d="M10 11v6" />
-    <path d="M14 11v6" />
-    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-  </svg>
-);
+import { TrashIcon } from "@/shared/assets";
 
 type Props = {
   specialists: Specialist[];
@@ -85,7 +68,7 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
           if (pendingDeleteId) onDelete(pendingDeleteId);
           setPendingDeleteId(null);
         }}
-        icon={<TrashIcon />}
+        icon={<TrashIcon className="w-7 h-7 text-[#F5653E]" />}
         title="Удалить специалиста?"
         description={
           pendingName

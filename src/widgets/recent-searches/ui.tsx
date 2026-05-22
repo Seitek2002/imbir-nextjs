@@ -6,29 +6,10 @@ import { useRouter } from "next/navigation";
 
 import { ConfirmDialog, IconBtn } from "@/shared";
 
-import { SearchHistory, SearchRemoveHistory } from "@/shared/assets";
+import { SearchHistory, SearchRemoveHistory, TrashIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
 import { useMounted } from "@/shared/lib/useMounted";
 import { useSearchHistoryStore } from "@/shared/store/useSearchHistoryStore";
-
-const TrashIcon = () => (
-  <svg
-    width="28"
-    height="28"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="#F5653E"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="3 6 5 6 21 6" />
-    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-    <path d="M10 11v6" />
-    <path d="M14 11v6" />
-    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-  </svg>
-);
 
 export const RecentSearches: FC = () => {
   const router = useRouter();
@@ -83,7 +64,7 @@ export const RecentSearches: FC = () => {
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={clearHistory}
-        icon={<TrashIcon />}
+        icon={<TrashIcon className="w-7 h-7 text-[#F5653E]" />}
         title="Удалить историю поиска?"
         description="История будет удалена без возможности восстановления"
         confirmLabel="Удалить"

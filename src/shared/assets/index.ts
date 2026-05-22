@@ -52,6 +52,10 @@ export {
   SearchHistory,
   SearchRemoveHistory,
   PhoneIcon,
+  ClinicBuildingIcon,
+  DoctorPersonIcon,
+  ServiceRadialIcon,
+  TrashIcon,
 } from "./icons";
 
 export {

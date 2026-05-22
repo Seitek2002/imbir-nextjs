@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, ReactNode, useState } from "react";
+import { FC, useState } from "react";
 
 import { ProfileMobileHeader } from "@/widgets/profile-mobile-header";
 import { ProfileReviews as ReviewsWidget } from "@/widgets/profile-reviews";
@@ -9,66 +9,29 @@ import { ProfileSidebar } from "@/widgets/profile-sidebar";
 import { MOCK_USER_REVIEWS } from "@/entities/user-review";
 import type { ReviewType } from "@/entities/user-review";
 
-const ClinicTabIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 20 20"
-    fill="none"
-    className="shrink-0"
-  >
-    <path
-      d="M3.33334 16.6667H16.6667M5.00001 16.6667V6.66667L10 3.33334L15 6.66667V16.6667M8.33334 16.6667V12.5C8.33334 12.0398 8.70644 11.6667 9.16668 11.6667H10.8333C11.2936 11.6667 11.6667 12.0398 11.6667 12.5V16.6667"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+import {
+  ClinicBuildingIcon,
+  DoctorPersonIcon,
+  ServiceRadialIcon,
+} from "@/shared/assets";
+import { FilterTabBar } from "@/shared/ui";
 
-const DoctorTabIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 20 20"
-    fill="none"
-    className="shrink-0"
-  >
-    <path
-      d="M13.3333 5.83333C13.3333 7.67428 11.8409 9.16667 10 9.16667C8.15906 9.16667 6.66667 7.67428 6.66667 5.83333C6.66667 3.99238 8.15906 2.5 10 2.5C11.8409 2.5 13.3333 3.99238 13.3333 5.83333Z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-    <path
-      d="M10 11.6667C6.77834 11.6667 4.16667 14.2783 4.16667 17.5H15.8333C15.8333 14.2783 13.2217 11.6667 10 11.6667Z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    />
-  </svg>
-);
-
-const ServiceTabIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 20 20"
-    fill="none"
-    className="shrink-0"
-  >
-    <path
-      d="M10 2.5V5.83333M10 14.1667V17.5M5.83333 10H2.5M17.5 10H14.1667M14.7487 14.7487L12.357 12.357M14.7487 5.25132L12.357 7.643M5.25132 14.7487L7.643 12.357M5.25132 5.25132L7.643 7.643"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const TABS: { id: ReviewType; label: string; icon: () => ReactNode }[] = [
-  { id: "clinic", label: "Клиники", icon: ClinicTabIcon },
-  { id: "doctor", label: "Специалисты", icon: DoctorTabIcon },
-  { id: "service", label: "Услуги", icon: ServiceTabIcon },
+const TABS = [
+  {
+    id: "clinic" as ReviewType,
+    label: "Клиники",
+    icon: <ClinicBuildingIcon className="shrink-0" />,
+  },
+  {
+    id: "doctor" as ReviewType,
+    label: "Специалисты",
+    icon: <DoctorPersonIcon className="shrink-0" />,
+  },
+  {
+    id: "service" as ReviewType,
+    label: "Услуги",
+    icon: <ServiceRadialIcon className="shrink-0" />,
+  },
 ];
 
 export const ProfileReviewsPage: FC = () => {
@@ -92,25 +55,12 @@ export const ProfileReviewsPage: FC = () => {
               Отзывы
             </h2>
 
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-              {TABS.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-2.5 rounded-full font-medium text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-                      activeTab === tab.id
-                        ? "bg-[#F5653E] text-white"
-                        : "bg-[#F2F4F7] text-[#686F72] hover:bg-[#E5E6E8]"
-                    }`}
-                  >
-                    <Icon />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <FilterTabBar
+              tabs={TABS}
+              value={activeTab}
+              onChange={setActiveTab}
+              className="mb-6"
+            />
 
             <ReviewsWidget reviews={MOCK_USER_REVIEWS} activeTab={activeTab} />
           </main>
