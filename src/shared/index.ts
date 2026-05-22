@@ -12,4 +12,5 @@ export {
   InfoCard,
   StatsPanel,
   Modal,
+  ConfirmDialog,
 } from "./ui";

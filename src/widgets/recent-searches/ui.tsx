@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -8,6 +8,7 @@ import { ConfirmDialog, IconBtn } from "@/shared";
 
 import { SearchHistory, SearchRemoveHistory } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
+import { useMounted } from "@/shared/lib/useMounted";
 import { useSearchHistoryStore } from "@/shared/store/useSearchHistoryStore";
 
 const TrashIcon = () => (
@@ -33,12 +34,8 @@ export const RecentSearches: FC = () => {
   const router = useRouter();
   const { history, removeSearch, clearHistory } = useSearchHistoryStore();
 
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [confirmOpen, setConfirmOpen] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleSearch = (query: string) => router.push(ROUTES.SEARCH({ query }));
 
