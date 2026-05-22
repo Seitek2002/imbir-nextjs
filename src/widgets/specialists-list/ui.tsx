@@ -39,7 +39,7 @@ export const SpecialistsList: FC<Props> = ({ specialists }) => {
           />
           <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#838A8D] [&_path]:stroke-[#838A8D]" />
         </div>
-        <button className="w-12 h-12 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center hover:bg-[#F8F9FA] transition-colors flex-shrink-0">
+        <button className="w-12 h-12 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shrink-0">
           <svg
             width="20"
             height="20"
