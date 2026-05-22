@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, ReactNode, useState } from "react";
+import { FC, ReactNode } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -16,7 +16,7 @@ type Props = {
     experience?: boolean;
     rating?: boolean;
     price?: boolean;
-    online?: boolean; // <-- Добавили поддержку онлайн-фильтра
+    online?: boolean;
   };
   children?: ReactNode;
 };
@@ -53,33 +53,28 @@ export const FilterBar: FC<Props> = ({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const initialSpec = searchParams.get(`${prefix}_spec`);
-  const [specialty, setSpecialty] = useState<string[]>(
-    initialSpec ? initialSpec.split(",") : [],
-  );
+  // Все значения — единственный источник правды: URL.
+  // router.replace обновляет useSearchParams синхронно через React,
+  // поэтому слайдеры не тормозят и состояние всегда в синхе с URL.
+  const specialty =
+    searchParams.get(`${prefix}_spec`)?.split(",").filter(Boolean) ?? [];
+  const rating = searchParams.get(`${prefix}_rating`) ?? "all";
+  const isOnline = searchParams.get(`${prefix}_online`) === "true";
 
-  const initialExp = searchParams.get(`${prefix}_exp`)?.split("-").map(Number);
-  const [experience, setExperience] = useState<[number, number]>([
-    initialExp?.[0] ?? 0,
-    initialExp?.[1] ?? MAX_EXP,
-  ]);
+  const expParts = searchParams.get(`${prefix}_exp`)?.split("-").map(Number);
+  const experience: [number, number] = [
+    expParts?.[0] ?? 0,
+    expParts?.[1] ?? MAX_EXP,
+  ];
 
-  const [rating, setRating] = useState<string | null>(
-    searchParams.get(`${prefix}_rating`) || "all",
-  );
-
-  const initialPrice = searchParams
+  const priceParts = searchParams
     .get(`${prefix}_price`)
     ?.split("-")
     .map(Number);
-  const [price, setPrice] = useState<[number, number]>([
-    initialPrice?.[0] ?? 0,
-    initialPrice?.[1] ?? MAX_PRICE,
-  ]);
-
-  // Стейт для онлайн-фильтра
-  const initialOnline = searchParams.get(`${prefix}_online`) === "true";
-  const [isOnline, setIsOnline] = useState<boolean>(initialOnline);
+  const price: [number, number] = [
+    priceParts?.[0] ?? 0,
+    priceParts?.[1] ?? MAX_PRICE,
+  ];
 
   const updateURL = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -92,37 +87,26 @@ export const FilterBar: FC<Props> = ({
   };
 
   const handleSpecialtyChange = (val: string[]) => {
-    setSpecialty(val);
     updateURL("spec", val.length > 0 ? val.join(",") : null);
   };
 
   const handleRatingChange = (val: string) => {
-    setRating(val);
     updateURL("rating", val === "all" ? null : val);
   };
 
   const handleExpChange = (val: [number, number]) => {
-    setExperience(val);
     updateURL("exp", `${val[0]}-${val[1]}`);
   };
 
   const handlePriceChange = (val: [number, number]) => {
-    setPrice(val);
     updateURL("price", `${val[0]}-${val[1]}`);
   };
 
   const handleOnlineChange = (checked: boolean) => {
-    setIsOnline(checked);
     updateURL("online", checked ? "true" : null);
   };
 
   const handleReset = () => {
-    setSpecialty([]);
-    setExperience([0, MAX_EXP]);
-    setRating("all");
-    setPrice([0, MAX_PRICE]);
-    setIsOnline(false);
-
     const params = new URLSearchParams(searchParams.toString());
     params.delete(`${prefix}_spec`);
     params.delete(`${prefix}_exp`);
