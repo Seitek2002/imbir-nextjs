@@ -155,6 +155,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
               filteredServices.map((s) => (
                 <ServiceCard
                   key={s.id}
+                  id={s.id}
                   name={s.name}
                   category={s.category}
                   clinicId={s.clinicId}
@@ -280,6 +281,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                 {filteredServices.map((s) => (
                   <ServiceCard
                     key={s.id}
+                    id={s.id}
                     name={s.name}
                     category={s.category}
                     clinicId={s.clinicId}

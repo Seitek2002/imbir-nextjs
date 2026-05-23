@@ -1,5 +1,11 @@
+import { Suspense } from "react";
+
 import { RecordPage } from "@/views";
 
 export default function Page() {
-  return <RecordPage />;
+  return (
+    <Suspense>
+      <RecordPage />
+    </Suspense>
+  );
 }

@@ -3,16 +3,19 @@
 import { FC, useState } from "react";
 
 import Image, { StaticImageData } from "next/image";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/shared";
 
 import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 
 type Props = {
+  id?: string;
   name: string;
   category: string;
-  clinic?: string; // Сделали опциональным
-  clinicId?: string; // Добавили для совместимости с API
+  clinic?: string;
+  clinicId?: string;
   rating: number;
   reviews: number;
   price: number | string;
@@ -26,12 +29,15 @@ type Props = {
 const SaveButton: FC<{
   initialSaved: boolean;
   onSave?: () => void;
-}> = ({ initialSaved, onSave }) => {
+  onClick?: (e: React.MouseEvent) => void;
+}> = ({ initialSaved, onSave, onClick }) => {
   const [isSaved, setIsSaved] = useState(initialSaved);
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsSaved(!isSaved);
     onSave?.();
+    onClick?.(e);
   };
 
   return (
@@ -50,10 +56,11 @@ const SaveButton: FC<{
 };
 
 export const ServiceCard: FC<Props> = ({
+  id,
   name,
   category,
   clinic,
-  clinicId, // На будущее, если понадобится ID клиники
+  clinicId,
   rating,
   reviews,
   price,
@@ -63,12 +70,23 @@ export const ServiceCard: FC<Props> = ({
   initialSaved = false,
   variant = "vertical",
 }) => {
-  // Вычисляем имя клиники (если clinic не передано, но есть clinicId)
+  const router = useRouter();
   const displayClinic = clinic || clinicId || "Клиника не указана";
+
+  const handleCardClick = () => {
+    if (id) {
+      router.push(`${ROUTES.RECORD}?service=${id}`);
+    }
+  };
+
+  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
 
   if (variant === "horizontal") {
     return (
-      <div className="bg-white rounded-3xl p-4 flex items-center gap-4 border border-[#E5E6E8]">
+      <div
+        onClick={handleCardClick}
+        className="bg-white rounded-3xl p-4 flex items-center gap-4 border border-[#E5E6E8] cursor-pointer hover:border-[#F5653E]/40 transition-colors"
+      >
         <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-[#F8F9FA] shrink-0">
           {image ? (
             <Image
@@ -110,7 +128,11 @@ export const ServiceCard: FC<Props> = ({
               variant="outline"
               size="sm"
               className="flex-1 justify-center"
-              onClick={onBook}
+              onClick={(e) => {
+                stopProp(e);
+                onBook?.();
+                handleCardClick();
+              }}
             >
               Записаться
             </Button>
@@ -122,7 +144,10 @@ export const ServiceCard: FC<Props> = ({
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden flex flex-col h-full">
+    <div
+      onClick={handleCardClick}
+      className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden flex flex-col h-full cursor-pointer hover:border-[#F5653E]/40 transition-colors"
+    >
       <div className="relative aspect-4/3 w-full">
         {image ? (
           <Image
@@ -168,7 +193,11 @@ export const ServiceCard: FC<Props> = ({
           variant="outline"
           size="sm"
           className="w-full justify-center mt-auto"
-          onClick={onBook}
+          onClick={(e) => {
+            stopProp(e);
+            onBook?.();
+            handleCardClick();
+          }}
         >
           Записаться
         </Button>

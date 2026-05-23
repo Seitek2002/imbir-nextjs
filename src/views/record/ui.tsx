@@ -1,9 +1,9 @@
 "use client";
 
-import { FC, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 
 import Image, { StaticImageData } from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button, IconBtn, Input, SearchInput, Textarea } from "@/shared";
 import { Header } from "@/widgets";
@@ -15,19 +15,10 @@ import {
 
 import {
   CalendarIcon,
-  ClinicImage1,
-  ClinicImage2,
-  ClinicImage3,
-  DoctorImage1,
-  DoctorImage2,
-  DoctorImage3,
   DropdownArrowIcon,
   GeoIcon,
   HeaderBackIcon,
   RemoveIcon,
-  ServiceCardiology,
-  ServiceDentistry,
-  ServiceNevrology,
   StarIcon,
   SuccessCheckIcon,
 } from "@/shared/assets";
@@ -82,100 +73,214 @@ type OptionalFormErrors = {
 
 const CLINICS: Clinic[] = [
   {
-    id: "clinic-1",
-    name: "Med Center",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    address: "ул. Московская, 189",
-    image: ClinicImage1,
+    id: "1",
+    name: "МЦ «Медика»",
+    rating: 4.8,
+    reviews: 312,
+    experience: 15,
+    address: "г. Бишкек, ул. Московская, 127",
+    image: "https://placehold.co/400x300/FEF3F0/F5653E?text=Medika",
   },
   {
-    id: "clinic-2",
-    name: "Nova Clinic",
-    rating: 4.9,
-    reviews: 203,
+    id: "2",
+    name: "Клиника «Здоровье»",
+    rating: 4.6,
+    reviews: 198,
     experience: 10,
-    address: "ул. Киевская, 77",
-    image: ClinicImage2,
+    address: "г. Бишкек, пр. Манаса, 45",
+    image: "https://placehold.co/400x300/F0FEF3/4CAF50?text=Zdorovye",
   },
   {
-    id: "clinic-3",
-    name: "Health Center",
-    rating: 4.75,
-    reviews: 178,
-    experience: 9,
-    address: "пр. Манаса, 42",
-    image: ClinicImage3,
+    id: "3",
+    name: "МЦ «Диамед»",
+    rating: 4.7,
+    reviews: 254,
+    experience: 12,
+    address: "г. Бишкек, ул. Токтогула, 78",
+    image: "https://placehold.co/400x300/F0F4FE/3B82F6?text=Diamed",
+  },
+  {
+    id: "4",
+    name: "МЦ «Жизнь»",
+    rating: 4.9,
+    reviews: 421,
+    experience: 20,
+    address: "г. Бишкек, ул. Чуй, 210",
+    image: "https://placehold.co/400x300/FFF8E1/FF9800?text=Life",
   },
 ];
 
 const DOCTORS: Doctor[] = [
   {
-    id: "doctor-1",
-    clinicId: "clinic-1",
-    name: "Садыкова Алина Тимуровна",
-    specialty: "Врач-кардиолог",
-    rating: 4.85,
-    reviews: 255,
-    experience: 12,
-    image: DoctorImage1,
-  },
-  {
-    id: "doctor-2",
-    clinicId: "clinic-2",
-    name: "А. Н. Эльдарович",
-    specialty: "Врач-терапевт",
-    rating: 4.8,
-    reviews: 220,
-    experience: 11,
-    image: DoctorImage2,
-  },
-  {
-    id: "doctor-3",
-    clinicId: "clinic-3",
-    name: "И. Г. Смирнов",
-    specialty: "Хирург",
+    id: "1",
+    clinicId: "1",
+    name: "Токтосунова Айгуль Бекова",
+    specialty: "Кардиолог",
     rating: 4.9,
-    reviews: 198,
+    reviews: 134,
+    experience: 12,
+    image: "https://pravatar.cc/300?img=47",
+  },
+  {
+    id: "2",
+    clinicId: "1",
+    name: "Алиев Марат Жапарович",
+    specialty: "Терапевт",
+    rating: 4.7,
+    reviews: 210,
+    experience: 8,
+    image: "https://pravatar.cc/300?img=12",
+  },
+  {
+    id: "3",
+    clinicId: "1",
+    name: "Исакова Гульнара Турдуевна",
+    specialty: "Невролог",
+    rating: 4.8,
+    reviews: 88,
     experience: 15,
-    image: DoctorImage3,
+    image: "https://pravatar.cc/300?img=25",
+  },
+  {
+    id: "4",
+    clinicId: "4",
+    name: "Мамытов Бакыт Эркинович",
+    specialty: "Педиатр",
+    rating: 4.9,
+    reviews: 302,
+    experience: 10,
+    image: "https://pravatar.cc/300?img=33",
+  },
+  {
+    id: "5",
+    clinicId: "2",
+    name: "Джумабекова Анара Сатыбековна",
+    specialty: "Дерматолог",
+    rating: 4.6,
+    reviews: 76,
+    experience: 7,
+    image: "https://pravatar.cc/300?img=29",
+  },
+  {
+    id: "6",
+    clinicId: "2",
+    name: "Усубалиев Темирбек Айтматович",
+    specialty: "Хирург",
+    rating: 4.8,
+    reviews: 95,
+    experience: 18,
+    image: "https://pravatar.cc/300?img=15",
+  },
+  {
+    id: "7",
+    clinicId: "2",
+    name: "Рысбекова Залина Канатовна",
+    specialty: "Гинеколог",
+    rating: 4.9,
+    reviews: 187,
+    experience: 14,
+    image: "https://pravatar.cc/300?img=44",
+  },
+  {
+    id: "8",
+    clinicId: "3",
+    name: "Карыбеков Азиз Болотович",
+    specialty: "Офтальмолог",
+    rating: 4.7,
+    reviews: 112,
+    experience: 9,
+    image: "https://pravatar.cc/300?img=18",
   },
 ];
 
 const SERVICES: Service[] = [
   {
-    id: "service-1",
-    clinicId: "clinic-1",
-    doctorIds: ["doctor-1"],
-    title: "Первичный осмотр",
+    id: "1",
+    clinicId: "1",
+    doctorIds: ["1", "2"],
+    title: "ЭКГ с расшифровкой",
     category: "Кардиология",
-    price: 1700,
-    rating: 4.85,
-    reviews: 255,
-    image: ServiceCardiology,
+    price: 800,
+    rating: 4.8,
+    reviews: 45,
+    image: "https://placehold.co/400x300/FEF3F0/F5653E?text=ECG",
   },
   {
-    id: "service-2",
-    clinicId: "clinic-2",
-    doctorIds: ["doctor-2"],
-    title: "Онлайн-консультация",
-    category: "Терапия",
-    price: 1500,
-    rating: 4.78,
-    reviews: 142,
-    image: ServiceNevrology,
+    id: "2",
+    clinicId: "1",
+    doctorIds: ["3"],
+    title: "Консультация невролога",
+    category: "Неврология",
+    price: 1400,
+    rating: 4.9,
+    reviews: 62,
+    image: "https://placehold.co/400x300/F0F4FE/3B82F6?text=Neuro",
   },
   {
-    id: "service-3",
-    clinicId: "clinic-3",
-    doctorIds: ["doctor-3"],
-    title: "Повторный прием",
-    category: "Хирургия",
-    price: 2000,
-    rating: 4.91,
-    reviews: 186,
-    image: ServiceDentistry,
+    id: "3",
+    clinicId: "2",
+    doctorIds: ["5"],
+    title: "Приём дерматолога + дерматоскопия",
+    category: "Дерматология",
+    price: 1600,
+    rating: 4.7,
+    reviews: 38,
+    image: "https://placehold.co/400x300/F0FEF3/4CAF50?text=Derma",
+  },
+  {
+    id: "4",
+    clinicId: "2",
+    doctorIds: ["7"],
+    title: "УЗИ органов малого таза",
+    category: "Гинекология",
+    price: 1200,
+    rating: 4.9,
+    reviews: 91,
+    image: "https://placehold.co/400x300/FFF8E1/FF9800?text=USG",
+  },
+  {
+    id: "5",
+    clinicId: "3",
+    doctorIds: ["8"],
+    title: "Проверка зрения + подбор очков",
+    category: "Офтальмология",
+    price: 900,
+    rating: 4.7,
+    reviews: 54,
+    image: "https://placehold.co/400x300/F0F4FE/6366F1?text=Eyes",
+  },
+  {
+    id: "6",
+    clinicId: "4",
+    doctorIds: ["4"],
+    title: "Педиатрический осмотр (0–18 лет)",
+    category: "Педиатрия",
+    price: 1100,
+    rating: 4.9,
+    reviews: 143,
+    image: "https://placehold.co/400x300/FEF3F0/F5653E?text=Pediatrics",
+  },
+  {
+    id: "7",
+    clinicId: "1",
+    doctorIds: ["1"],
+    title: "Суточное мониторирование АД (Холтер)",
+    category: "Кардиология",
+    price: 2500,
+    rating: 4.8,
+    reviews: 29,
+    image: "https://placehold.co/400x300/FEF3F0/F5653E?text=Holter",
+  },
+  {
+    id: "8",
+    clinicId: "4",
+    doctorIds: ["1"],
+    title: "Консультация кардиолога онлайн",
+    category: "Кардиология",
+    price: 1200,
+    rating: 4.8,
+    reviews: 67,
+    image: "https://placehold.co/400x300/F0FEF3/4CAF50?text=Online",
   },
 ];
 
@@ -542,6 +647,7 @@ const SummaryCard: FC<{
 
 export const RecordPage = () => {
   const router = useRouter();
+  const urlParams = useSearchParams();
 
   const [mobileStep, setMobileStep] = useState<MobileStep>(1);
   const [mobileSelectionStage, setMobileSelectionStage] =
@@ -571,6 +677,17 @@ export const RecordPage = () => {
   const [errors, setErrors] = useState<OptionalFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    const serviceId = urlParams.get("service");
+    if (!serviceId) return;
+    const service = SERVICES.find((s) => s.id === serviceId);
+    if (!service) return;
+    setSelectedServiceId(serviceId);
+    setSelectedClinicId(service.clinicId);
+    setSelectedDoctorId(service.doctorIds[0] ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const canUseOnline = useMemo(() => {
     if (typeof window === "undefined") return false;
