@@ -179,12 +179,24 @@ const CertificateThumb = ({
   );
 };
 
+export type InviteClinic = {
+  clinicId: string;
+  clinicName: string;
+  branchId: string | null;
+  branchAddress: string;
+};
+
 type Props = {
   step: DoctorStep;
   onContinue: () => void;
+  inviteClinic?: InviteClinic;
 };
 
-export const DoctorRegistrationForm = ({ step, onContinue }: Props) => {
+export const DoctorRegistrationForm = ({
+  step,
+  onContinue,
+  inviteClinic,
+}: Props) => {
   const [data, setData] = useState<DoctorFormData>({
     fullName: "",
     gender: "",
@@ -198,7 +210,7 @@ export const DoctorRegistrationForm = ({ step, onContinue }: Props) => {
     additionalSpecialization: "",
     experience: "0",
     position: "",
-    workplace: "",
+    workplace: inviteClinic?.clinicName ?? "",
     category: "",
     academicDegree: "",
     university: "",
@@ -433,12 +445,63 @@ export const DoctorRegistrationForm = ({ step, onContinue }: Props) => {
             value={data.position}
             onChange={(e) => set("position", e.target.value)}
           />
-          <Input
-            label="Место работы (клиника)"
-            placeholder="Введите название клиники"
-            value={data.workplace}
-            onChange={(e) => set("workplace", e.target.value)}
-          />
+          {inviteClinic ? (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-[#0D0D12]">
+                Место работы (клиника)
+              </span>
+              <div className="h-11 px-3 rounded-lg border border-[#E3E4E5] bg-[#F7F8F9] flex items-center justify-between gap-2">
+                <span className="text-sm text-[#191A1B] flex-1 truncate">
+                  {inviteClinic.clinicName}
+                  {inviteClinic.branchId && (
+                    <span className="text-[#838A8D] ml-1">
+                      — {inviteClinic.branchAddress}
+                    </span>
+                  )}
+                </span>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  className="shrink-0 text-[#838A8D]"
+                >
+                  <path d="M11 6H3M5 3L2 6l3 3M9 3l3 3-3 3" stroke="none" />
+                  <rect
+                    x="4"
+                    y="1"
+                    width="6"
+                    height="8"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                  />
+                  <path
+                    d="M2 9v3a1 1 0 001 1h8a1 1 0 001-1V9"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M5 5h4M5 7h2"
+                    stroke="currentColor"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+              <p className="text-xs text-[#838A8D]">
+                Заполнено клиникой при приглашении
+              </p>
+            </div>
+          ) : (
+            <Input
+              label="Место работы (клиника)"
+              placeholder="Введите название клиники"
+              value={data.workplace}
+              onChange={(e) => set("workplace", e.target.value)}
+            />
+          )}
           <Input
             label="Категория/Квалификация"
             placeholder="Введите категорию/квалификацию"

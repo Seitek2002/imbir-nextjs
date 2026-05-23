@@ -67,6 +67,37 @@ const MENU_ITEMS = [
       </svg>
     ),
   },
+  {
+    href: "/clinic-profile/invites",
+    label: "Пригласить врача",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path
+          d="M13.3333 17.5V15.8333C13.3333 14.9493 12.9821 14.1014 12.357 13.4763C11.7319 12.8512 10.884 12.5 10 12.5H4.16667C3.28261 12.5 2.43477 12.8512 1.80964 13.4763C1.18452 14.1014 0.833332 14.9493 0.833332 15.8333V17.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle
+          cx="7.08333"
+          cy="7.08333"
+          r="3.33333"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M15.8333 6.66667V11.6667M13.3333 9.16667H18.3333"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
 ];
 
 export const ClinicSidebar: FC<Props> = ({
@@ -83,7 +114,7 @@ export const ClinicSidebar: FC<Props> = ({
         href="/clinic-profile"
         className="bg-white rounded-3xl p-5 flex items-center gap-4 mb-4 border border-[#E5E6E8] hover:border-[#F5653E] transition-colors"
       >
-        <div className="w-14 h-14 rounded-full overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center flex-shrink-0">
+        <div className="w-14 h-14 rounded-full overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center shrink-0">
           {clinicLogo ? (
             <Image
               src={clinicLogo}
@@ -126,7 +157,7 @@ export const ClinicSidebar: FC<Props> = ({
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                   isActive ? "bg-[#F5653E]" : "bg-[#FFF8F5]"
                 }`}
               >
@@ -154,7 +185,7 @@ export const ClinicSidebar: FC<Props> = ({
 
       {/* Logout */}
       <button className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-[#686F72] hover:bg-[#F8F9FA] transition-colors w-full">
-        <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
           <LogoutIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
         </div>
         <span className="font-medium text-base">Выйти из профиля</span>

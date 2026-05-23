@@ -1,9 +1,9 @@
 "use client";
 
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Footer, Header } from "@/widgets";
 
@@ -20,7 +20,11 @@ import { Button, IconBtn, Input } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control/ui";
 
 import { ClinicRegistrationForm, ClinicStep } from "./clinic-form";
-import { DoctorRegistrationForm, DoctorStep } from "./doctor-form";
+import {
+  DoctorRegistrationForm,
+  DoctorStep,
+  InviteClinic,
+} from "./doctor-form";
 
 // --- Role icons ---
 
@@ -116,10 +120,27 @@ const ROLES: RoleOption[] = [
 
 export const RegisterPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [authMode, setAuthMode] = useState<string>("register");
   const [activeForm, setActiveForm] = useState<ActiveForm>("role");
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [inviteClinic, setInviteClinic] = useState<InviteClinic | undefined>();
+
+  useEffect(() => {
+    const token = searchParams.get("invite");
+    if (!token) return;
+    try {
+      const data = JSON.parse(atob(token)) as InviteClinic;
+      if (data.clinicId && data.clinicName) {
+        setInviteClinic(data);
+        setSelectedRole("doctor");
+        setActiveForm("doctor");
+      }
+    } catch {
+      // invalid token — ignore
+    }
+  }, []);
 
   // Client form
   const [clientStep, setClientStep] = useState<1 | 2>(1);
@@ -302,11 +323,23 @@ export const RegisterPage = () => {
             {/* Doctor registration */}
             {activeForm === "doctor" && (
               <div className="mt-8 md:mt-12 flex-1 flex flex-col">
+                {inviteClinic && (
+                  <div className="mb-4 px-4 py-3 rounded-xl bg-[#FFF8F5] border border-[#FDDDD5] text-sm text-[#686F72]">
+                    Вы приглашены клиникой{" "}
+                    <span className="font-semibold text-[#191A1B]">
+                      {inviteClinic.clinicName}
+                    </span>
+                    {inviteClinic.branchId && (
+                      <> — {inviteClinic.branchAddress}</>
+                    )}
+                  </div>
+                )}
                 <DoctorRegistrationForm
                   step={doctorStep}
                   onContinue={() =>
                     setDoctorStep((s) => Math.min(s + 1, 4) as DoctorStep)
                   }
+                  inviteClinic={inviteClinic}
                 />
               </div>
             )}
