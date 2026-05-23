@@ -337,6 +337,20 @@ export const MOCK_CLINICS: ClinicListItem[] = [
       "https://placehold.co/800x500/E3E4E5/838A8D?text=Medika+Hall",
       "https://placehold.co/800x500/E3E4E5/838A8D?text=Medika+Lab",
     ],
+    branches: [
+      {
+        id: "1-1",
+        address: "г. Бишкек, ул. Ахунбаева, 92",
+        phone: "+996 (312) 45-67-90",
+        schedule: "Пн–Пт: 09:00–18:00",
+      },
+      {
+        id: "1-2",
+        address: "г. Бишкек, мкр. Джал, ул. Ибраимова, 34",
+        phone: "+996 (312) 45-67-91",
+        schedule: "Пн–Сб: 10:00–19:00",
+      },
+    ],
   },
   {
     id: "2",
@@ -353,6 +367,14 @@ export const MOCK_CLINICS: ClinicListItem[] = [
     phone: "+996 (312) 22-33-44",
     email: "info@zdorovye.kg",
     images: ["https://placehold.co/800x500/E3E4E5/838A8D?text=Zdorovye+Hall"],
+    branches: [
+      {
+        id: "2-1",
+        address: "г. Бишкек, ул. Фрунзе, 155",
+        phone: "+996 (312) 22-33-45",
+        schedule: "Пн–Сб: 09:00–18:00",
+      },
+    ],
   },
   {
     id: "3",
@@ -387,6 +409,20 @@ export const MOCK_CLINICS: ClinicListItem[] = [
     images: [
       "https://placehold.co/800x500/E3E4E5/838A8D?text=Life+Main",
       "https://placehold.co/800x500/E3E4E5/838A8D?text=Life+ICU",
+    ],
+    branches: [
+      {
+        id: "4-1",
+        address: "г. Бишкек, ул. Байтик Баатыра, 50",
+        phone: "+996 (312) 99-00-12",
+        schedule: "Пн–Пт: 08:00–20:00",
+      },
+      {
+        id: "4-2",
+        address: "г. Бишкек, мкр. Аламедин-1, д. 15",
+        phone: "+996 (312) 99-00-13",
+        schedule: "Круглосуточно",
+      },
     ],
   },
 ];

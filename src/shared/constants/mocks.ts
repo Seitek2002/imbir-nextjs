@@ -39,6 +39,7 @@ export type Schedule = {
 export type Workplace = {
   clinicId: string;
   clinicName: string;
+  branchId?: string;
   price: number;
   schedule: Schedule;
 };
@@ -71,6 +72,13 @@ export type DoctorListItem = {
   };
 };
 
+export type Branch = {
+  id: string;
+  address: string;
+  phone?: string;
+  schedule?: string;
+};
+
 export type ClinicListItem = {
   id: string;
   name: string;
@@ -80,6 +88,7 @@ export type ClinicListItem = {
   address: string;
   specialties: string[];
   image?: StaticImageData | string;
+  branches?: Branch[];
 
   // Детальные поля
   about?: string;

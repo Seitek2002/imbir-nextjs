@@ -270,6 +270,42 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
           </div>
         </div>
 
+        {/* --- СЕКЦИЯ: ФИЛИАЛЫ --- */}
+        {clinic.branches && clinic.branches.length > 0 && (
+          <div className="mt-10 md:mt-20 px-4 md:px-0">
+            <h2 className="text-2xl font-semibold text-[#191A1B] mb-6 md:mb-8">
+              Филиалы
+            </h2>
+            <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
+              {clinic.branches.map((branch, idx) => (
+                <div
+                  key={branch.id}
+                  className="bg-white border border-[#E3E4E5] rounded-2xl p-4 flex flex-col gap-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold text-[#191A1B]">
+                      Филиал №{idx + 1}
+                    </span>
+                    <span className="text-xs text-[#F5653E] bg-[#FFF2F0] px-2 py-0.5 rounded-full">
+                      {branch.schedule ?? "По записи"}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm text-[#686F72]">
+                    <GeoIcon className="size-4 text-[#F5653E] mt-0.5 shrink-0" />
+                    <span>{branch.address}</span>
+                  </div>
+                  {branch.phone && (
+                    <div className="flex items-center gap-2 text-sm text-[#686F72]">
+                      <PhoneIcon className="size-4 text-[#F5653E] shrink-0" />
+                      <span>{branch.phone}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* --- СЕКЦИЯ: УСЛУГИ --- */}
         {services.length > 0 && (
           <div className="mt-10 md:mt-20 px-4 md:px-0">
