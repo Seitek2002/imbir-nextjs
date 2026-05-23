@@ -49,12 +49,16 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             >
               <GlobalSearch />
             </Suspense>
-            <IconBtn variant="outline" size="sm">
-              <ChatIcon className="size-5" />
-            </IconBtn>
-            <IconBtn variant="outline" size="sm">
-              <ProfileIcon className="size-5" />
-            </IconBtn>
+            <Link href={ROUTES.LOGIN}>
+              <IconBtn variant="outline" size="sm">
+                <ChatIcon className="size-5" />
+              </IconBtn>
+            </Link>
+            <Link href={ROUTES.LOGIN}>
+              <IconBtn variant="outline" size="sm">
+                <ProfileIcon className="size-5" />
+              </IconBtn>
+            </Link>
           </div>
 
           <Button

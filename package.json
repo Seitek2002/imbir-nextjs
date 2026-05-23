@@ -3,10 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "kill-port 3000 3001 3002 3003 3004 || true",
-    "dev": "concurrently -n \"server,front\" -c \"yellow,cyan\" \"npm run dev:server\" \"next dev\"",
-    "dev:front": "next dev",
-    "dev:server": "node server/index.js",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -36,11 +33,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
-    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "husky": "^9.1.7",
-    "kill-port": "^2.0.1",
     "lint-staged": "^16.4.0",
     "tailwindcss": "^4",
     "typescript": "^5"
