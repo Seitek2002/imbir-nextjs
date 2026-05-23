@@ -3,7 +3,7 @@
 import { FC, useState } from "react";
 
 import Image, { StaticImageData } from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { Button } from "@/shared";
 
@@ -46,25 +46,23 @@ export const DoctorCard: FC<Props> = ({
   variant = "vertical",
 }) => {
   const [loaded, setLoaded] = useState(false);
-  const router = useRouter();
 
-  const handleCardClick = () => {
-    if (id) router.push(ROUTES.SPECIALIST_DETAILS(id));
-  };
-
-  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
-
-  // Вычисляем логику для отображения клиник и цен
   const primaryClinic = workplaces[0]?.clinicName || "Не указана";
   const additionalClinicsCount = workplaces.length - 1;
   const minPrice =
     workplaces.length > 0 ? Math.min(...workplaces.map((w) => w.price)) : null;
 
+  const href = id ? ROUTES.SPECIALIST_DETAILS(id) : "/";
+  const stopProp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   if (variant === "horizontal") {
     return (
-      <div
-        className="bg-white rounded-2xl border border-[#E3E4E5] p-2.5 flex items-stretch gap-2.5 w-full cursor-pointer"
-        onClick={handleCardClick}
+      <Link
+        href={href}
+        className="bg-white rounded-2xl border border-[#E3E4E5] p-2.5 flex items-stretch gap-2.5 w-full cursor-pointer hover:border-[#F5653E]/40 transition-colors"
       >
         <div className="relative w-30 min-w-30 self-stretch rounded-2xl overflow-hidden bg-[#FFF8F5]">
           {image ? (
@@ -92,7 +90,7 @@ export const DoctorCard: FC<Props> = ({
               {name}
             </p>
             {isOnlineAvailable && (
-              <span className="shrink-0-0 bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+              <span className="shrink-0 bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
                 Онлайн
               </span>
             )}
@@ -120,15 +118,15 @@ export const DoctorCard: FC<Props> = ({
             </div>
           )}
 
-          <div
-            className="mt-auto pt-2 flex items-center gap-2"
-            onClick={stopProp}
-          >
+          <div className="mt-auto pt-2 flex items-center gap-2">
             <Button
               variant="outline"
               size="xs"
               className="flex-1 justify-center text-[16px] py-2"
-              onClick={onBook}
+              onClick={(e) => {
+                stopProp(e);
+                onBook?.();
+              }}
             >
               Записаться{" "}
               {minPrice && (
@@ -137,20 +135,20 @@ export const DoctorCard: FC<Props> = ({
                 </span>
               )}
             </Button>
-            <DoctorSaveButton initialSaved={initialSaved} onSave={onSave} />
+            <div onClick={stopProp}>
+              <DoctorSaveButton initialSaved={initialSaved} onSave={onSave} />
+            </div>
           </div>
         </div>
-      </div>
+      </Link>
     );
   }
 
-  // VERTICAL VARIANT
   return (
-    <div
-      className="bg-white rounded-3xl border border-[#E3E4E5] p-2 w-full h-full flex flex-col relative cursor-pointer"
-      onClick={handleCardClick}
+    <Link
+      href={href}
+      className="bg-white rounded-3xl border border-[#E3E4E5] p-2 w-full h-full flex flex-col relative cursor-pointer hover:border-[#F5653E]/40 transition-colors"
     >
-      {/* Бейджик онлайна поверх фото */}
       {isOnlineAvailable && (
         <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider">
           Онлайн
@@ -195,7 +193,7 @@ export const DoctorCard: FC<Props> = ({
         size="sm"
         className="w-full justify-center mt-3"
         onClick={(e) => {
-          e.stopPropagation();
+          stopProp(e);
           onBook?.();
         }}
       >
@@ -204,6 +202,6 @@ export const DoctorCard: FC<Props> = ({
           <span className="ml-1 opacity-70 font-normal">от {minPrice} с</span>
         )}
       </Button>
-    </div>
+    </Link>
   );
 };

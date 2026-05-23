@@ -92,6 +92,7 @@ export type ClinicListItem = {
 export type ServiceItem = {
   id: string;
   clinicId: string;
+  clinicName: string;
   name: string;
   category: string;
   price: number;

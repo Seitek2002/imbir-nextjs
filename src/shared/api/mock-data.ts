@@ -395,6 +395,7 @@ export const MOCK_SERVICES: ServiceItem[] = [
   {
     id: "1",
     clinicId: "1",
+    clinicName: "МЦ «Медика»",
     name: "ЭКГ с расшифровкой",
     category: "Кардиология",
     price: 800,
@@ -416,6 +417,7 @@ export const MOCK_SERVICES: ServiceItem[] = [
   {
     id: "2",
     clinicId: "1",
+    clinicName: "МЦ «Медика»",
     name: "Консультация невролога",
     category: "Неврология",
     price: 1400,
@@ -437,6 +439,7 @@ export const MOCK_SERVICES: ServiceItem[] = [
   {
     id: "3",
     clinicId: "2",
+    clinicName: "Клиника «Здоровье»",
     name: "Приём дерматолога + дерматоскопия",
     category: "Дерматология",
     price: 1600,
@@ -458,6 +461,7 @@ export const MOCK_SERVICES: ServiceItem[] = [
   {
     id: "4",
     clinicId: "2",
+    clinicName: "Клиника «Здоровье»",
     name: "УЗИ органов малого таза",
     category: "Гинекология",
     price: 1200,
@@ -479,6 +483,7 @@ export const MOCK_SERVICES: ServiceItem[] = [
   {
     id: "5",
     clinicId: "3",
+    clinicName: "МЦ «Диамед»",
     name: "Проверка зрения + подбор очков",
     category: "Офтальмология",
     price: 900,
@@ -500,6 +505,7 @@ export const MOCK_SERVICES: ServiceItem[] = [
   {
     id: "6",
     clinicId: "4",
+    clinicName: "МЦ «Жизнь»",
     name: "Педиатрический осмотр (0–18 лет)",
     category: "Педиатрия",
     price: 1100,
@@ -521,6 +527,7 @@ export const MOCK_SERVICES: ServiceItem[] = [
   {
     id: "7",
     clinicId: "1",
+    clinicName: "МЦ «Медика»",
     name: "Суточное мониторирование АД (Холтер)",
     category: "Кардиология",
     price: 2500,
@@ -542,6 +549,7 @@ export const MOCK_SERVICES: ServiceItem[] = [
   {
     id: "8",
     clinicId: "4",
+    clinicName: "МЦ «Жизнь»",
     name: "Консультация кардиолога онлайн",
     category: "Кардиология",
     price: 1200,

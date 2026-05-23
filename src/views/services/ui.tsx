@@ -158,6 +158,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                   id={s.id}
                   name={s.name}
                   category={s.category}
+                  clinic={s.clinicName}
                   clinicId={s.clinicId}
                   rating={s.rating}
                   reviews={s.reviews}
@@ -284,6 +285,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                     id={s.id}
                     name={s.name}
                     category={s.category}
+                    clinic={s.clinicName}
                     clinicId={s.clinicId}
                     rating={s.rating}
                     reviews={s.reviews}

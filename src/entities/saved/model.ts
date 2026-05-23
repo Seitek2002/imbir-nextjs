@@ -113,6 +113,7 @@ export const MOCK_SAVED_ITEMS: SavedItem[] = [
       name: "Анализ крови",
       category: "Кардиология",
       clinicId: "c1",
+      clinicName: "МЦ «Медика»",
       rating: 4.85,
       reviews: 255,
       price: 1700,

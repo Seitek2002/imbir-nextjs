@@ -3,7 +3,7 @@
 import { FC, useState } from "react";
 
 import Image, { StaticImageData } from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { Button } from "@/shared";
 
@@ -29,15 +29,14 @@ type Props = {
 const SaveButton: FC<{
   initialSaved: boolean;
   onSave?: () => void;
-  onClick?: (e: React.MouseEvent) => void;
-}> = ({ initialSaved, onSave, onClick }) => {
+}> = ({ initialSaved, onSave }) => {
   const [isSaved, setIsSaved] = useState(initialSaved);
 
   const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     setIsSaved(!isSaved);
     onSave?.();
-    onClick?.(e);
   };
 
   return (
@@ -70,21 +69,17 @@ export const ServiceCard: FC<Props> = ({
   initialSaved = false,
   variant = "vertical",
 }) => {
-  const router = useRouter();
   const displayClinic = clinic || clinicId || "Клиника не указана";
-
-  const handleCardClick = () => {
-    if (id) {
-      router.push(`${ROUTES.RECORD}?service=${id}`);
-    }
+  const href = id ? `${ROUTES.RECORD}?service=${id}` : ROUTES.RECORD;
+  const stopProp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
-
-  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
 
   if (variant === "horizontal") {
     return (
-      <div
-        onClick={handleCardClick}
+      <Link
+        href={href}
         className="bg-white rounded-3xl p-4 flex items-center gap-4 border border-[#E5E6E8] cursor-pointer hover:border-[#F5653E]/40 transition-colors"
       >
         <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-[#F8F9FA] shrink-0">
@@ -131,7 +126,6 @@ export const ServiceCard: FC<Props> = ({
               onClick={(e) => {
                 stopProp(e);
                 onBook?.();
-                handleCardClick();
               }}
             >
               Записаться
@@ -139,13 +133,13 @@ export const ServiceCard: FC<Props> = ({
             <SaveButton initialSaved={initialSaved} onSave={onSave} />
           </div>
         </div>
-      </div>
+      </Link>
     );
   }
 
   return (
-    <div
-      onClick={handleCardClick}
+    <Link
+      href={href}
       className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden flex flex-col h-full cursor-pointer hover:border-[#F5653E]/40 transition-colors"
     >
       <div className="relative aspect-4/3 w-full">
@@ -196,12 +190,11 @@ export const ServiceCard: FC<Props> = ({
           onClick={(e) => {
             stopProp(e);
             onBook?.();
-            handleCardClick();
           }}
         >
           Записаться
         </Button>
       </div>
-    </div>
+    </Link>
   );
 };

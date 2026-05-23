@@ -4,7 +4,7 @@ import { FC, useState } from "react";
 
 import { StaticImageData } from "next/image";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { GeoIcon, StarIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
@@ -37,19 +37,18 @@ export const ClinicCard: FC<Props> = ({
   variant = "vertical",
 }) => {
   const [loaded, setLoaded] = useState(false);
-  const router = useRouter();
 
-  const handleCardClick = () => {
-    if (id) router.push(ROUTES.CLINIC_DETAILS(id));
+  const href = id ? ROUTES.CLINIC_DETAILS(id) : "/";
+  const stopProp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
-
-  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
 
   if (variant === "horizontal") {
     return (
-      <div
-        className="bg-white rounded-2xl border border-[#E3E4E5] overflow-hidden flex items-stretch w-full cursor-pointer"
-        onClick={handleCardClick}
+      <Link
+        href={href}
+        className="bg-white rounded-2xl border border-[#E3E4E5] overflow-hidden flex items-stretch w-full cursor-pointer hover:border-[#F5653E]/40 transition-colors"
       >
         <div className="relative w-35">
           {image ? (
@@ -92,14 +91,14 @@ export const ClinicCard: FC<Props> = ({
             <ClinicSaveButton initialSaved={initialSaved} onSave={onSave} />
           </div>
         </div>
-      </div>
+      </Link>
     );
   }
 
   return (
-    <div
-      className="bg-white rounded-3xl border border-[#E3E4E5] w-full h-full flex flex-col p-2 cursor-pointer"
-      onClick={handleCardClick}
+    <Link
+      href={href}
+      className="bg-white rounded-3xl border border-[#E3E4E5] w-full h-full flex flex-col p-2 cursor-pointer hover:border-[#F5653E]/40 transition-colors"
     >
       <div className="relative w-full h-55 rounded-2xl overflow-hidden">
         {image ? (
@@ -141,6 +140,6 @@ export const ClinicCard: FC<Props> = ({
           <span className="truncate">{address}</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
