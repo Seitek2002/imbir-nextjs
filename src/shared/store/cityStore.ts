@@ -3,14 +3,16 @@ import { persist } from "zustand/middleware";
 
 type CityStore = {
   city: string;
+  isSet: boolean;
   setCity: (city: string) => void;
 };
 
 export const useCityStore = create<CityStore>()(
   persist(
     (set) => ({
-      city: "Бишкек", // По умолчанию
-      setCity: (city) => set({ city }),
+      city: "Бишкек",
+      isSet: false,
+      setCity: (city) => set({ city, isSet: true }),
     }),
     {
       name: "user-city-storage",

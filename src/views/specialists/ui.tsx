@@ -19,10 +19,10 @@ import { UrlSearchInput } from "@/features/search-by-query/ui";
 
 import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 
+import { MOCK_CLINICS } from "@/shared/api/mock-data";
 import { api } from "@/shared/api/requests";
-// <-- ДОБАВИЛИ СКЕЛЕТОН
-
 import { ROUTES } from "@/shared/config/routes";
+import { useCityStore } from "@/shared/store/cityStore";
 import { Button } from "@/shared/ui";
 
 // <-- ИМПОРТ НАШЕГО API
@@ -48,6 +48,8 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
     typeof searchParams?.doc_price === "string" ? searchParams.doc_price : null;
   const isOnlineOnly = searchParams?.doc_online === "true";
 
+  const selectedCity = useCityStore((s) => s.city);
+
   // 2. ПОЛУЧАЕМ ДАННЫЕ С СЕРВЕРА
   const { data: doctors = [], isLoading } = useQuery({
     queryKey: ["doctors"],
@@ -56,6 +58,11 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
 
   // 3. Фильтруем данные (уже реальные) перед рендером
   const filteredDoctors = doctors.filter((doc) => {
+    const worksInCity = doc.workplaces.some(
+      (w) =>
+        MOCK_CLINICS.find((c) => c.id === w.clinicId)?.city === selectedCity,
+    );
+    if (!worksInCity) return false;
     if (activeQuery) {
       const q = activeQuery.toLowerCase();
       if (

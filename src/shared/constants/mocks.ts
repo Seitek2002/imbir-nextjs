@@ -72,11 +72,18 @@ export type DoctorListItem = {
   };
 };
 
+export type Coordinates = {
+  lat: number;
+  lng: number;
+};
+
 export type Branch = {
   id: string;
   address: string;
   phone?: string;
   schedule?: string;
+  city?: string;
+  coordinates?: Coordinates;
 };
 
 export type ClinicListItem = {
@@ -86,6 +93,8 @@ export type ClinicListItem = {
   reviews: number;
   experience: number;
   address: string;
+  city: string;
+  coordinates: Coordinates;
   specialties: string[];
   image?: StaticImageData | string;
   branches?: Branch[];

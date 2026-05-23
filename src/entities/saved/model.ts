@@ -98,10 +98,12 @@ export const MOCK_SAVED_ITEMS: SavedItem[] = [
       id: "c1",
       name: "Nova Clinic",
       address: "ул. Московская, 189",
+      city: "Бишкек",
+      coordinates: { lat: 42.8746, lng: 74.602 },
       rating: 4.85,
       reviews: 255,
       experience: 12,
-      specialties: ["Терапия", "Кардиология"], // Обязательное поле для клиники
+      specialties: ["Терапия", "Кардиология"],
     },
   },
   {

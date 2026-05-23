@@ -19,6 +19,7 @@ import { ClinicCard, ClinicSkeleton } from "@/entities/clinic";
 
 import { api } from "@/shared/api/requests";
 import { ROUTES } from "@/shared/config/routes";
+import { useCityStore } from "@/shared/store/cityStore";
 import { Button } from "@/shared/ui";
 
 type Props = {
@@ -39,6 +40,8 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
       ? searchParams.clinic_rating
       : null;
 
+  const selectedCity = useCityStore((s) => s.city);
+
   // 2. ПОЛУЧАЕМ ДАННЫЕ С СЕРВЕРА
   const { data: clinics = [], isLoading } = useQuery({
     queryKey: ["clinics"],
@@ -47,6 +50,8 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
 
   // 3. Фильтруем массив клиник (уже реальных)
   const filteredClinics = clinics.filter((clinic) => {
+    if (clinic.city !== selectedCity) return false;
+
     // Поиск по названию клиники
     if (activeQuery) {
       const q = activeQuery.toLowerCase();
