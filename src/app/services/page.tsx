@@ -1,5 +1,13 @@
-const page = () => {
-  return <div>page</div>;
+import { ServicesPage } from "@/views";
+
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export default page;
+const Services = async ({ searchParams }: Props) => {
+  const resolvedSearchParams = await searchParams;
+
+  return <ServicesPage searchParams={resolvedSearchParams} />;
+};
+
+export default Services;

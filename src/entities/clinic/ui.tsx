@@ -4,12 +4,15 @@ import { FC, useState } from "react";
 
 import { StaticImageData } from "next/image";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { GeoIcon, StarIcon } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 
 import { ClinicSaveButton } from "./save-button";
 
 type Props = {
+  id?: string;
   name: string;
   rating?: number;
   reviews?: number;
@@ -22,6 +25,7 @@ type Props = {
 };
 
 export const ClinicCard: FC<Props> = ({
+  id,
   name,
   rating,
   reviews,
@@ -33,10 +37,20 @@ export const ClinicCard: FC<Props> = ({
   variant = "vertical",
 }) => {
   const [loaded, setLoaded] = useState(false);
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    if (id) router.push(ROUTES.CLINIC_DETAILS(id));
+  };
+
+  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
 
   if (variant === "horizontal") {
     return (
-      <div className="bg-white rounded-2xl border border-[#E3E4E5] overflow-hidden flex items-stretch w-full">
+      <div
+        className="bg-white rounded-2xl border border-[#E3E4E5] overflow-hidden flex items-stretch w-full cursor-pointer"
+        onClick={handleCardClick}
+      >
         <div className="relative w-35">
           {image ? (
             <>
@@ -74,7 +88,7 @@ export const ClinicCard: FC<Props> = ({
             <GeoIcon className="size-3.5 text-[#F5653E]" />
             <span className="truncate">{address}</span>
           </div>
-          <div className="flex justify-end mt-2">
+          <div className="flex justify-end mt-2" onClick={stopProp}>
             <ClinicSaveButton initialSaved={initialSaved} onSave={onSave} />
           </div>
         </div>
@@ -83,7 +97,10 @@ export const ClinicCard: FC<Props> = ({
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-[#E3E4E5] w-full h-full flex flex-col p-2">
+    <div
+      className="bg-white rounded-3xl border border-[#E3E4E5] w-full h-full flex flex-col p-2 cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="relative w-full h-55 rounded-2xl overflow-hidden">
         {image ? (
           <>
@@ -100,7 +117,7 @@ export const ClinicCard: FC<Props> = ({
         ) : (
           <div className="w-full h-full bg-[#F2F3F5]" />
         )}
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2" onClick={stopProp}>
           <ClinicSaveButton initialSaved={initialSaved} onSave={onSave} />
         </div>
       </div>

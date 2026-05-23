@@ -3,22 +3,23 @@
 import { FC, useState } from "react";
 
 import Image, { StaticImageData } from "next/image";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/shared";
 
 import { StarIcon, UserCircleIcon } from "@/shared/assets";
+import { ROUTES } from "@/shared/config/routes";
 import { Workplace } from "@/shared/constants/mocks";
 
 import { DoctorPhoto } from "./photo";
 import { DoctorSaveButton } from "./save-button";
 
-// ИМПОРТИРУЕМ НОВЫЙ ТИП
-
 type Props = {
+  id?: string | number;
   name: string;
   specialty: string;
-  workplaces: Workplace[]; // <-- ЗАМЕНИЛИ clinic НА workplaces
-  isOnlineAvailable?: boolean; // <-- ФЛАГ ОНЛАЙН ПРИЕМА
+  workplaces: Workplace[];
+  isOnlineAvailable?: boolean;
   rating?: number;
   reviews?: number;
   experience: number;
@@ -30,6 +31,7 @@ type Props = {
 };
 
 export const DoctorCard: FC<Props> = ({
+  id,
   name,
   specialty,
   workplaces,
@@ -44,6 +46,13 @@ export const DoctorCard: FC<Props> = ({
   variant = "vertical",
 }) => {
   const [loaded, setLoaded] = useState(false);
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    if (id) router.push(ROUTES.SPECIALIST_DETAILS(id));
+  };
+
+  const stopProp = (e: React.MouseEvent) => e.stopPropagation();
 
   // Вычисляем логику для отображения клиник и цен
   const primaryClinic = workplaces[0]?.clinicName || "Не указана";
@@ -53,7 +62,10 @@ export const DoctorCard: FC<Props> = ({
 
   if (variant === "horizontal") {
     return (
-      <div className="bg-white rounded-2xl border border-[#E3E4E5] p-2.5 flex items-stretch gap-2.5 w-full">
+      <div
+        className="bg-white rounded-2xl border border-[#E3E4E5] p-2.5 flex items-stretch gap-2.5 w-full cursor-pointer"
+        onClick={handleCardClick}
+      >
         <div className="relative w-30 min-w-30 self-stretch rounded-2xl overflow-hidden bg-[#FFF8F5]">
           {image ? (
             <>
@@ -108,7 +120,10 @@ export const DoctorCard: FC<Props> = ({
             </div>
           )}
 
-          <div className="mt-auto pt-2 flex items-center gap-2">
+          <div
+            className="mt-auto pt-2 flex items-center gap-2"
+            onClick={stopProp}
+          >
             <Button
               variant="outline"
               size="xs"
@@ -131,7 +146,10 @@ export const DoctorCard: FC<Props> = ({
 
   // VERTICAL VARIANT
   return (
-    <div className="bg-white rounded-3xl border border-[#E3E4E5] p-2 w-full h-full flex flex-col relative">
+    <div
+      className="bg-white rounded-3xl border border-[#E3E4E5] p-2 w-full h-full flex flex-col relative cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* Бейджик онлайна поверх фото */}
       {isOnlineAvailable && (
         <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider">
@@ -141,7 +159,7 @@ export const DoctorCard: FC<Props> = ({
 
       <div className="relative aspect-square w-full">
         <DoctorPhoto image={image} name={name} />
-        <div className="absolute top-2 right-2 z-10">
+        <div className="absolute top-2 right-2 z-10" onClick={stopProp}>
           <DoctorSaveButton initialSaved={initialSaved} onSave={onSave} />
         </div>
       </div>
@@ -176,7 +194,10 @@ export const DoctorCard: FC<Props> = ({
         variant="outline"
         size="sm"
         className="w-full justify-center mt-3"
-        onClick={onBook}
+        onClick={(e) => {
+          e.stopPropagation();
+          onBook?.();
+        }}
       >
         Записаться{" "}
         {minPrice && (

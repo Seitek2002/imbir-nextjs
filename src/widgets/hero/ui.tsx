@@ -1,6 +1,7 @@
 import { FC } from "react";
 
 import Image from "next/image";
+import Link from "next/link";
 
 import { Button } from "@/shared";
 
@@ -28,12 +29,11 @@ export const Hero: FC = () => {
             ожидания
           </p>
 
-          <Button
-            size="md"
-            className="mb-6 md:mb-16 w-full md:w-auto justify-center"
-          >
-            Выбрать специалиста / услугу
-          </Button>
+          <Link href="/specialists" className="w-full md:w-auto mb-6 md:mb-16">
+            <Button size="md" className="w-full justify-center">
+              Выбрать специалиста / услугу
+            </Button>
+          </Link>
 
           <div className="border border-[#F5653E] rounded-3xl bg-white p-4 w-full md:w-105 flex flex-col gap-4">
             <div className="flex items-center gap-3">
@@ -49,7 +49,9 @@ export const Hero: FC = () => {
               </p>
             </div>
             <div className="flex justify-end">
-              <Button size="sm">Описать симптомы</Button>
+              <Link href="/search">
+                <Button size="sm">Описать симптомы</Button>
+              </Link>
             </div>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { FC, Suspense } from "react";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { FilterBar } from "@/features";
@@ -65,6 +66,7 @@ const ClinicsListContent = () => {
         {filteredClinics.map((clinic) => (
           <ClinicCard
             key={`mobile-${clinic.id}`}
+            id={clinic.id}
             name={clinic.name}
             rating={clinic.rating}
             reviews={clinic.reviews}
@@ -86,6 +88,7 @@ const ClinicsListContent = () => {
         {filteredClinics.map((clinic) => (
           <ClinicCard
             key={`desktop-${clinic.id}`}
+            id={clinic.id}
             name={clinic.name}
             rating={clinic.rating}
             reviews={clinic.reviews}
@@ -131,9 +134,15 @@ export const ClinicsMainList: FC = () => {
 
       <div className="flex items-center justify-between lg:hidden">
         <h2 className="text-[18px] font-medium text-[#191A1B]">Клиники</h2>
-        <Button variant="text" size="md" className="text-[#FF7C63] font-medium">
-          Все
-        </Button>
+        <Link href="/clinics">
+          <Button
+            variant="text"
+            size="md"
+            className="text-[#FF7C63] font-medium"
+          >
+            Все
+          </Button>
+        </Link>
       </div>
 
       <Suspense

@@ -2,6 +2,7 @@
 
 import { FC, Suspense } from "react";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import { DoctorCard } from "@/entities";
@@ -147,9 +148,15 @@ export const DoctorsMainList: FC = () => {
 
       <div className="flex items-center justify-between lg:hidden">
         <h2 className="text-[18px] font-medium text-[#191A1B]">Специалисты</h2>
-        <Button variant="text" size="md" className="text-[#FF7C63] font-medium">
-          Все
-        </Button>
+        <Link href="/specialists">
+          <Button
+            variant="text"
+            size="md"
+            className="text-[#FF7C63] font-medium"
+          >
+            Все
+          </Button>
+        </Link>
       </div>
 
       <Suspense

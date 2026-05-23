@@ -3,6 +3,7 @@
 import { FC } from "react";
 
 import Image from "next/image";
+import Link from "next/link";
 
 import { Button } from "@/shared";
 import "swiper/css";
@@ -24,12 +25,14 @@ export const Banners: FC = () => {
         </p>
       </div>
       <div className="relative z-10 flex justify-start md:justify-end mt-4">
-        <Button
-          size="sm"
-          className="bg-white text-[#191A1B] border-none hover:bg-gray-50"
-        >
-          Смотреть
-        </Button>
+        <Link href="/services">
+          <Button
+            size="sm"
+            className="bg-white text-[#191A1B] border-none hover:bg-gray-50"
+          >
+            Смотреть
+          </Button>
+        </Link>
       </div>
       <Image
         src={BannerImage1}
@@ -51,7 +54,9 @@ export const Banners: FC = () => {
           Свяжитесь с врачом из любой точки — быстро, удобно и без ожидания
         </p>
         <div>
-          <Button size="md">Записаться</Button>
+          <Link href="/record">
+            <Button size="md">Записаться</Button>
+          </Link>
         </div>
       </div>
       <Image
@@ -75,13 +80,15 @@ export const Banners: FC = () => {
         </p>
       </div>
       <div className="relative z-10 flex justify-start mt-4">
-        <Button
-          size="sm"
-          variant="outline"
-          className="bg-white hover:bg-gray-50"
-        >
-          Смотреть
-        </Button>
+        <Link href="/specialists">
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white hover:bg-gray-50"
+          >
+            Смотреть
+          </Button>
+        </Link>
       </div>
       <Image
         src={BannerImage3}
