@@ -5,7 +5,7 @@ import { FC, useState } from "react";
 import { Button } from "@/shared";
 
 import { MOCK_CLINICS } from "@/shared/api/mock-data";
-import { GeoIcon, HistoryIcon, PhoneIcon } from "@/shared/assets";
+import { GeoIcon, HistoryIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
 
 const MOCK_CLINIC_ID = "1";
@@ -13,7 +13,7 @@ const clinic = MOCK_CLINICS.find((c) => c.id === MOCK_CLINIC_ID)!;
 
 type InviteLink = {
   id: string;
-  token: string;
+  clinicId: string;
   branchId: string | null;
   branchLabel: string;
   createdAt: string;
@@ -96,17 +96,6 @@ const branchOptions = [
   })),
 ];
 
-function makeToken(
-  clinicId: string,
-  clinicName: string,
-  branchId: string | null,
-  branchAddress: string,
-) {
-  return btoa(
-    JSON.stringify({ clinicId, clinicName, branchId, branchAddress }),
-  );
-}
-
 function makeExpiryDate() {
   const d = new Date();
   d.setDate(d.getDate() + 7);
@@ -122,15 +111,9 @@ export const ClinicInvitesPage: FC = () => {
     branchOptions.find((b) => b.id === selectedBranchId) ?? branchOptions[0];
 
   const handleCreate = () => {
-    const token = makeToken(
-      clinic.id,
-      clinic.name,
-      selectedBranch.id,
-      selectedBranch.address,
-    );
     const newLink: InviteLink = {
       id: crypto.randomUUID(),
-      token,
+      clinicId: clinic.id,
       branchId: selectedBranch.id,
       branchLabel: selectedBranch.label,
       createdAt: new Date().toLocaleDateString("ru-RU"),
@@ -141,7 +124,9 @@ export const ClinicInvitesPage: FC = () => {
   };
 
   const handleCopy = (link: InviteLink) => {
-    const url = `${window.location.origin}/register?invite=${link.token}`;
+    const params = new URLSearchParams({ clinicId: link.clinicId });
+    if (link.branchId) params.set("branchId", link.branchId);
+    const url = `${window.location.origin}/register?${params.toString()}`;
     navigator.clipboard.writeText(url);
     setCopiedId(link.id);
     setTimeout(() => setCopiedId(null), 2000);
@@ -264,7 +249,8 @@ export const ClinicInvitesPage: FC = () => {
                           {link.branchLabel}
                         </p>
                         <p className="text-xs text-[#838A8D] mt-0.5 font-mono truncate">
-                          /register?invite={link.token.slice(0, 24)}…
+                          /register?clinicId={link.clinicId}
+                          {link.branchId && `&branchId=${link.branchId}`}
                         </p>
                       </div>
                       <span

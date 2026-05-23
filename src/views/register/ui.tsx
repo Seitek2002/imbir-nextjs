@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Footer, Header } from "@/widgets";
 
+import { MOCK_CLINICS } from "@/shared/api/mock-data";
 import {
   EmailIcon,
   EyeIcon,
@@ -128,18 +129,22 @@ export const RegisterPage = () => {
   const [inviteClinic, setInviteClinic] = useState<InviteClinic | undefined>();
 
   useEffect(() => {
-    const token = searchParams.get("invite");
-    if (!token) return;
-    try {
-      const data = JSON.parse(atob(token)) as InviteClinic;
-      if (data.clinicId && data.clinicName) {
-        setInviteClinic(data);
-        setSelectedRole("doctor");
-        setActiveForm("doctor");
-      }
-    } catch {
-      // invalid token — ignore
-    }
+    const clinicId = searchParams.get("clinicId");
+    if (!clinicId) return;
+    const clinic = MOCK_CLINICS.find((c) => c.id === clinicId);
+    if (!clinic) return;
+    const branchId = searchParams.get("branchId");
+    const branch = branchId
+      ? clinic.branches?.find((b) => b.id === branchId)
+      : null;
+    setInviteClinic({
+      clinicId: clinic.id,
+      clinicName: clinic.name,
+      branchId: branchId ?? null,
+      branchAddress: branch?.address ?? clinic.address,
+    });
+    setSelectedRole("doctor");
+    setActiveForm("doctor");
   }, []);
 
   // Client form
