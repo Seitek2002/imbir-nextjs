@@ -16,6 +16,8 @@ import {
   useSpecialistsStore,
 } from "@/entities/clinic-specialist";
 
+import { PhoneInput } from "@/shared/ui";
+
 const TrashIcon = () => (
   <svg
     width="28"
@@ -371,16 +373,11 @@ export default function SpecialistDetailsPage() {
                   </div>
                   <div>
                     {isEditing ? (
-                      <>
-                        <label className={lbl}>Телефон</label>
-                        <input
-                          type="tel"
-                          value={d.phone}
-                          onChange={(e) => set("phone", e.target.value)}
-                          placeholder="+996 500 000 000"
-                          className={inp}
-                        />
-                      </>
+                      <PhoneInput
+                        label="Телефон"
+                        value={d.phone}
+                        onChange={(v) => set("phone", v)}
+                      />
                     ) : (
                       <>
                         <div className="text-[#838A8D] text-sm mb-1">

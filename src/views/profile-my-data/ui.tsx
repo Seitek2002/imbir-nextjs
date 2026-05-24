@@ -8,6 +8,7 @@ import { ProfileMobileHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
 import { CheckIcon, EditIcon } from "@/shared/assets";
+import { PhoneInput } from "@/shared/ui";
 
 type D = {
   firstName: string;
@@ -22,7 +23,7 @@ const MOCK: D = {
   firstName: "Айжан",
   lastName: "Курманова",
   patronymic: "Курмановна",
-  phone: "+996 700 123 456",
+  phone: "",
   email: "",
 };
 
@@ -176,15 +177,25 @@ export const ProfileMyDataPage: FC = () => {
                     ] as { key: keyof D; label: string; placeholder: string }[]
                   ).map(({ key, label, placeholder }) => (
                     <div key={key}>
-                      <label className={lbl}>{label}</label>
-                      <input
-                        value={(d[key] as string) ?? ""}
-                        onChange={(e) =>
-                          set(key, e.target.value as D[typeof key])
-                        }
-                        placeholder={placeholder}
-                        className={inp}
-                      />
+                      {key === "phone" ? (
+                        <PhoneInput
+                          label={label}
+                          value={d.phone}
+                          onChange={(v) => set("phone", v)}
+                        />
+                      ) : (
+                        <>
+                          <label className={lbl}>{label}</label>
+                          <input
+                            value={(d[key] as string) ?? ""}
+                            onChange={(e) =>
+                              set(key, e.target.value as D[typeof key])
+                            }
+                            placeholder={placeholder}
+                            className={inp}
+                          />
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>

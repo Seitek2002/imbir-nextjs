@@ -12,6 +12,8 @@ import {
   formStyles,
 } from "@/entities/doctor-profile";
 
+import { PhoneInput } from "@/shared/ui";
+
 const { inp, lbl } = formStyles;
 
 export const DoctorBasicInfoPage: FC = () => {
@@ -22,7 +24,7 @@ export const DoctorBasicInfoPage: FC = () => {
     birthDate: MOCK_DOCTOR_PROFILE.birthDate,
     city: MOCK_DOCTOR_PROFILE.city,
     languages: MOCK_DOCTOR_PROFILE.languages,
-    phone: MOCK_DOCTOR_PROFILE.phone,
+    phone: "",
     email: MOCK_DOCTOR_PROFILE.email,
     photo: MOCK_DOCTOR_PROFILE.photo as string | undefined,
   });
@@ -193,16 +195,11 @@ export const DoctorBasicInfoPage: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Телефон</label>
-                <input
-                  type="tel"
-                  value={d.phone}
-                  onChange={(e) => set("phone", e.target.value)}
-                  placeholder="+996 500 000 000"
-                  className={inp}
-                />
-              </>
+              <PhoneInput
+                label="Телефон"
+                value={d.phone}
+                onChange={(v) => set("phone", v)}
+              />
             ) : (
               <FieldView label="Телефон" value={d.phone} />
             )}

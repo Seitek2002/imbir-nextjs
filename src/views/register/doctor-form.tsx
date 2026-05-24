@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 
 import { cn } from "@/shared/lib/utils";
-import { Button, Dropdown, Input, Textarea } from "@/shared/ui";
+import { Button, Dropdown, Input, PhoneInput, Textarea } from "@/shared/ui";
 
 export type DoctorStep = 1 | 2 | 3 | 4;
 
@@ -203,7 +203,7 @@ export const DoctorRegistrationForm = ({
     birthDate: "",
     city: "",
     languages: [],
-    phone: "+996 ",
+    phone: "",
     email: "",
     photo: null,
     specialization: "",
@@ -236,7 +236,7 @@ export const DoctorRegistrationForm = ({
     data.gender &&
     data.birthDate &&
     data.city &&
-    data.phone.length > 5 &&
+    data.phone.length > 0 &&
     data.email
   );
 
@@ -348,11 +348,10 @@ export const DoctorRegistrationForm = ({
             onChange={(v) => set("languages", v)}
           />
 
-          <Input
+          <PhoneInput
             label="Телефон"
-            placeholder="+996 ХХХ ХХХ ХХХ"
             value={data.phone}
-            onChange={(e) => set("phone", e.target.value)}
+            onChange={(v) => set("phone", v)}
           />
 
           <Input

@@ -14,6 +14,8 @@ import {
   useSpecialistsStore,
 } from "@/entities/clinic-specialist";
 
+import { PhoneInput } from "@/shared/ui";
+
 const inp =
   "w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors bg-white";
 const lbl = "block text-[#838A8D] text-sm mb-1.5";
@@ -181,13 +183,10 @@ export default function NewSpecialistPage() {
                   </div>
 
                   <div>
-                    <label className={lbl}>Телефон</label>
-                    <input
-                      type="tel"
+                    <PhoneInput
+                      label="Телефон"
                       value={d.phone}
-                      onChange={(e) => set("phone", e.target.value)}
-                      placeholder="+996 500 000 000"
-                      className={inp}
+                      onChange={(v) => set("phone", v)}
                     />
                   </div>
 

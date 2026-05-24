@@ -3,7 +3,14 @@
 import { useRef, useState } from "react";
 
 import { cn } from "@/shared/lib/utils";
-import { Button, Checkbox, Dropdown, Input, Textarea } from "@/shared/ui";
+import {
+  Button,
+  Checkbox,
+  Dropdown,
+  Input,
+  PhoneInput,
+  Textarea,
+} from "@/shared/ui";
 
 export type ClinicStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
@@ -276,7 +283,7 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
     country: "",
     city: "",
     fullAddress: "",
-    phone: "+996 ",
+    phone: "",
     email: "",
     website: "",
 
@@ -511,11 +518,10 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
             value={data.fullAddress}
             onChange={(e) => set("fullAddress", e.target.value)}
           />
-          <Input
+          <PhoneInput
             label="Телефон"
-            placeholder="+996 ХХХ ХХХ ХХХ"
             value={data.phone}
-            onChange={(e) => set("phone", e.target.value)}
+            onChange={(v) => set("phone", v)}
           />
           <Input
             label="Почта"

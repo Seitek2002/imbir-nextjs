@@ -4,7 +4,7 @@ import { FC, SVGProps, useState } from "react";
 
 import Image from "next/image";
 
-import { Button, Input, Textarea } from "@/shared";
+import { Button, Input, PhoneInput, Textarea } from "@/shared/ui";
 
 import type { ClinicProfile, WorkDaySchedule } from "./model";
 
@@ -125,6 +125,7 @@ export const ClinicProfileForm: FC<Props> = ({
   paymentMethods,
 }) => {
   const [logoSrc] = useState<string | undefined>(logo);
+  const [phoneValue, setPhoneValue] = useState("");
 
   const days = getDays(workSchedule);
 
@@ -264,7 +265,11 @@ export const ClinicProfileForm: FC<Props> = ({
               defaultValue={fullAddress}
               className="md:col-span-2"
             />
-            <Input label="Телефон" type="tel" defaultValue={phone} />
+            <PhoneInput
+              label="Телефон"
+              value={phoneValue}
+              onChange={setPhoneValue}
+            />
             <Input label="Почта" type="email" defaultValue={email} />
             <Input
               label="Сайт"
