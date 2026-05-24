@@ -2,7 +2,7 @@ import { FC } from "react";
 
 import Link from "next/link";
 
-import { Header } from "@/widgets";
+import { Footer, Header } from "@/widgets";
 
 import { BlogArticle, BlogCard, BlogPost } from "@/entities/blog";
 
@@ -18,7 +18,10 @@ type Props = {
 
 export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
   return (
-    <main className="min-h-screen bg-[#F2F3F5]">
+    <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
+      <div className="hidden md:block">
+        <Header />
+      </div>
       <div className="md:hidden">
         <Header title="Статья" backTo={ROUTES.BLOG} />
       </div>
@@ -111,6 +114,10 @@ export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
             </div>
           </aside>
         </div>
+      </div>
+
+      <div className="hidden md:block">
+        <Footer />
       </div>
     </main>
   );

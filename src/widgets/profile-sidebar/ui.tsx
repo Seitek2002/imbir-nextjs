@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useLayoutEffect, useRef, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -25,6 +25,16 @@ const MENU_ITEMS = [
 export const ProfileSidebar: FC = () => {
   const pathname = usePathname();
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const [indicator, setIndicator] = useState({ top: 0, height: 0 });
+
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const active = nav.querySelector('[data-active="true"]') as HTMLElement;
+    if (!active) return;
+    setIndicator({ top: active.offsetTop, height: active.offsetHeight });
+  }, [pathname]);
 
   return (
     <>
@@ -46,7 +56,15 @@ export const ProfileSidebar: FC = () => {
         </div>
 
         {/* Menu */}
-        <nav className="bg-white rounded-3xl py-2 px-2 flex flex-col gap-1">
+        <nav
+          ref={navRef}
+          className="bg-white rounded-3xl py-2 px-2 flex flex-col gap-1 relative"
+        >
+          <div
+            className="absolute inset-x-2 rounded-2xl bg-[#FFF8F5] transition-all duration-200 ease-out pointer-events-none"
+            style={{ top: indicator.top, height: indicator.height }}
+          />
+
           {MENU_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = pathname.startsWith(item.href);
@@ -55,27 +73,16 @@ export const ProfileSidebar: FC = () => {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors group ${
-                  isActive ? "bg-[#FFF8F5]" : "hover:bg-[#F8F9FA]"
-                }`}
+                data-active={isActive ? "true" : undefined}
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl relative z-10 ${!isActive && "hover:bg-[#F8F9FA]"}`}
               >
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                    isActive ? "bg-[#F5653E]" : "bg-[#FFF8F5]"
-                  }`}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200 ${isActive ? "bg-[#F5653E] text-white" : "bg-[#FFF8F5] text-[#F5653E]"}`}
                 >
-                  <Icon
-                    className={`w-5 h-5 ${
-                      isActive
-                        ? "[&_path]:stroke-white"
-                        : "[&_path]:stroke-[#F5653E]"
-                    }`}
-                  />
+                  <Icon className="w-5 h-5" />
                 </div>
                 <span
-                  className={`font-medium text-base ${
-                    isActive ? "text-[#191A1B]" : "text-[#686F72]"
-                  }`}
+                  className={`font-medium text-base transition-colors duration-200 ${isActive ? "text-[#191A1B]" : "text-[#686F72]"}`}
                 >
                   {item.label}
                 </span>
@@ -102,8 +109,8 @@ export const ProfileSidebar: FC = () => {
           onClick={() => setLogoutOpen(true)}
           className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-[#686F72] hover:bg-[#F8F9FA] transition-colors group"
         >
-          <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
-            <LogoutIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
+          <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0 text-[#F5653E]">
+            <LogoutIcon className="w-5 h-5" />
           </div>
           <span className="font-medium text-base">Выйти из профиля</span>
           <svg
@@ -174,7 +181,7 @@ export const ProfileSidebar: FC = () => {
         onConfirm={() => {
           /* TODO: logout */
         }}
-        icon={<LogoutIcon className="w-7 h-7 [&_path]:stroke-[#F5653E]" />}
+        icon={<LogoutIcon className="w-7 h-7 text-[#F5653E]" />}
         title="Выйти из профиля?"
         description="Для продолжения работы потребуется снова войти в аккаунт"
         confirmLabel="Выйти"

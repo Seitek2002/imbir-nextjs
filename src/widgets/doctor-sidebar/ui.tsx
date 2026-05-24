@@ -1,6 +1,6 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useLayoutEffect, useRef, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -114,6 +114,16 @@ export const DoctorSidebar: FC<Props> = ({
   rating,
 }) => {
   const pathname = usePathname();
+  const navRef = useRef<HTMLElement>(null);
+  const [indicator, setIndicator] = useState({ top: 0, height: 0 });
+
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const active = nav.querySelector('[data-active="true"]') as HTMLElement;
+    if (!active) return;
+    setIndicator({ top: active.offsetTop, height: active.offsetHeight });
+  }, [pathname]);
 
   return (
     <aside className="w-72 shrink-0 hidden lg:block">
@@ -121,7 +131,7 @@ export const DoctorSidebar: FC<Props> = ({
         href="/doctor-profile"
         className="bg-white rounded-3xl p-5 flex items-center gap-4 mb-4 border border-[#E5E6E8] hover:border-[#F5653E] transition-colors"
       >
-        <div className="w-14 h-14 rounded-full overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center flex-shrink-0">
+        <div className="w-14 h-14 rounded-full overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center shrink-0">
           {photo ? (
             <Image
               src={photo}
@@ -148,7 +158,15 @@ export const DoctorSidebar: FC<Props> = ({
         </div>
       </Link>
 
-      <nav className="bg-white rounded-3xl p-2 flex flex-col gap-1 mb-4">
+      <nav
+        ref={navRef}
+        className="bg-white rounded-3xl p-2 flex flex-col gap-1 mb-4 relative"
+      >
+        <div
+          className="absolute inset-x-2 rounded-2xl bg-[#FFF8F5] transition-all duration-200 ease-out pointer-events-none"
+          style={{ top: indicator.top, height: indicator.height }}
+        />
+
         {MENU_ITEMS.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -157,25 +175,16 @@ export const DoctorSidebar: FC<Props> = ({
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-colors ${
-                isActive ? "bg-[#FFF8F5]" : "hover:bg-[#F8F9FA]"
-              }`}
+              data-active={isActive ? "true" : undefined}
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl relative z-10 ${!isActive && "hover:bg-[#F8F9FA]"}`}
             >
               <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${isActive ? "bg-[#F5653E]" : "bg-[#FFF8F5]"}`}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200 ${isActive ? "bg-[#F5653E] text-white" : "bg-[#FFF8F5] text-[#F5653E]"}`}
               >
-                <div
-                  className={
-                    isActive
-                      ? "[&_path]:stroke-white"
-                      : "[&_path]:stroke-[#F5653E]"
-                  }
-                >
-                  {item.icon}
-                </div>
+                {item.icon}
               </div>
               <span
-                className={`flex-1 font-medium text-base ${isActive ? "text-[#191A1B]" : "text-[#686F72]"}`}
+                className={`flex-1 font-medium text-base transition-colors duration-200 ${isActive ? "text-[#191A1B]" : "text-[#686F72]"}`}
               >
                 {item.label}
               </span>
@@ -185,8 +194,8 @@ export const DoctorSidebar: FC<Props> = ({
       </nav>
 
       <button className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-[#686F72] hover:bg-[#F8F9FA] transition-colors w-full">
-        <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
-          <LogoutIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
+        <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0 text-[#F5653E]">
+          <LogoutIcon className="w-5 h-5" />
         </div>
         <span className="font-medium text-base">Выйти из профиля</span>
       </button>

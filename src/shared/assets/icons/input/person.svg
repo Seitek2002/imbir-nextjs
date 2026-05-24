@@ -9,7 +9,7 @@
         cy='14.5837'
         rx='5.83333'
         ry='2.91667'
-        stroke='#191A1B'
+        stroke='currentColor'
         stroke-width='1.5'
         stroke-linejoin='round'
     />
@@ -17,7 +17,7 @@
         cx='10.0013'
         cy='5.83333'
         r='3.33333'
-        stroke='#191A1B'
+        stroke='currentColor'
         stroke-width='1.5'
         stroke-linejoin='round'
     />

@@ -4,6 +4,8 @@ import { FC, useState } from "react";
 
 import { Button } from "@/shared";
 
+import { ClinicSidebar } from "@/widgets/clinic-sidebar";
+
 import { MOCK_CLINICS } from "@/shared/api/mock-data";
 import { GeoIcon, HistoryIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
@@ -152,8 +154,7 @@ export const ClinicInvitesPage: FC = () => {
         </h1>
 
         <div className="flex gap-6">
-          {/* Sidebar placeholder on desktop — filled by layout */}
-          <div className="w-72 shrink-0 hidden lg:block" />
+          <ClinicSidebar clinicName={clinic.name} rating={clinic.rating} />
 
           <main className="flex-1 min-w-0 flex flex-col gap-6">
             {/* Info banner */}
