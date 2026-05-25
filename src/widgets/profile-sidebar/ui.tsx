@@ -179,7 +179,7 @@ export const ProfileSidebar: FC = () => {
         isOpen={logoutOpen}
         onClose={() => setLogoutOpen(false)}
         onConfirm={() => {
-          /* TODO: logout */
+          window.location.href = "/";
         }}
         icon={<LogoutIcon className="w-7 h-7 text-[#F5653E]" />}
         title="Выйти из профиля?"

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { LogoutIcon, StarIcon } from "@/shared/assets";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 type Props = {
   clinicName: string;
@@ -108,6 +109,7 @@ export const ClinicSidebar: FC<Props> = ({
   const pathname = usePathname();
   const navRef = useRef<HTMLElement>(null);
   const [indicator, setIndicator] = useState({ top: 0, height: 0 });
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   useLayoutEffect(() => {
     const nav = navRef.current;
@@ -188,12 +190,28 @@ export const ClinicSidebar: FC<Props> = ({
         })}
       </nav>
 
-      <button className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-[#686F72] hover:bg-[#F8F9FA] transition-colors w-full">
+      <button
+        onClick={() => setLogoutOpen(true)}
+        className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-[#686F72] hover:bg-[#F8F9FA] transition-colors w-full"
+      >
         <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0 text-[#F5653E]">
           <LogoutIcon className="w-5 h-5" />
         </div>
         <span className="font-medium text-base">Выйти из профиля</span>
       </button>
+
+      <ConfirmDialog
+        isOpen={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        onConfirm={() => {
+          window.location.href = "/";
+        }}
+        icon={<LogoutIcon className="w-7 h-7 text-[#F5653E]" />}
+        title="Выйти из профиля?"
+        description="Для продолжения работы потребуется снова войти в аккаунт"
+        confirmLabel="Выйти"
+        cancelLabel="Отмена"
+      />
     </aside>
   );
 };

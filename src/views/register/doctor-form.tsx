@@ -167,7 +167,7 @@ const CertificateThumb = ({
         )}
         <button
           onClick={onRemove}
-          className="absolute top-0.5 right-0.5 size-4 rounded-full bg-black/60 flex items-center justify-center text-white text-[10px] leading-none"
+          className="absolute top-0 right-0 w-1/2 aspect-square bg-black/60 flex items-center justify-center text-white leading-none"
         >
           ×
         </button>
@@ -384,7 +384,7 @@ export const DoctorRegistrationForm = ({
                   />
                   <button
                     onClick={() => set("photo", null)}
-                    className="absolute top-0.5 right-0.5 size-4 rounded-full bg-black/60 flex items-center justify-center text-white text-[10px] leading-none"
+                    className="absolute top-0 right-0 w-1/2 aspect-square bg-black/60 flex items-center justify-center text-white leading-none"
                   >
                     ×
                   </button>

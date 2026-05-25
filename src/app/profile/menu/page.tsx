@@ -158,7 +158,7 @@ export default function ProfileMenuPage() {
         isOpen={logoutOpen}
         onClose={() => setLogoutOpen(false)}
         onConfirm={() => {
-          /* TODO: logout */
+          window.location.href = "/";
         }}
         icon={<LogoutIcon className="w-7 h-7 [&_path]:stroke-[#F5653E]" />}
         title="Выйти из профиля?"

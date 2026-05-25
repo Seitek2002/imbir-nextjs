@@ -113,24 +113,29 @@ export const DoctorDocumentsPage: FC = () => {
                   </div>
                 ))
               : certs.map((cert, i) => (
-                  <div key={i} className="relative">
-                    <div className="w-16 h-16 rounded-xl overflow-hidden border border-[#E5E6E8] bg-[#F8F9FA]">
-                      <Image
-                        src={cert}
-                        alt={`cert-${i}`}
-                        width={64}
-                        height={64}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                  <div
+                    key={i}
+                    className="relative w-16 h-16 rounded-xl overflow-hidden border border-[#E5E6E8] bg-[#F8F9FA]"
+                  >
+                    <Image
+                      src={cert}
+                      alt={`cert-${i}`}
+                      width={64}
+                      height={64}
+                      className="w-full h-full object-cover"
+                    />
                     {isEditing && (
                       <button
                         onClick={() =>
                           setCerts((prev) => prev.filter((_, j) => j !== i))
                         }
-                        className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#F5653E] flex items-center justify-center"
+                        className="absolute top-0 right-0 w-1/2 aspect-square bg-[#F5653E] flex items-center justify-center"
                       >
-                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                        <svg
+                          className="w-1/2 h-1/2"
+                          viewBox="0 0 8 8"
+                          fill="none"
+                        >
                           <path
                             d="M6.5 1.5L1.5 6.5M1.5 1.5L6.5 6.5"
                             stroke="white"

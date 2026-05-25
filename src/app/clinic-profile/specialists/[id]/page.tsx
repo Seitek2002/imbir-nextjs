@@ -950,11 +950,10 @@ export default function SpecialistDetailsPage() {
                             onClick={() =>
                               setCerts((prev) => prev.filter((_, j) => j !== i))
                             }
-                            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-[#F5653E] flex items-center justify-center"
+                            className="absolute top-0 right-0 w-1/2 aspect-square bg-[#F5653E] flex items-center justify-center"
                           >
                             <svg
-                              width="8"
-                              height="8"
+                              className="w-1/2 h-1/2"
                               viewBox="0 0 8 8"
                               fill="none"
                             >
