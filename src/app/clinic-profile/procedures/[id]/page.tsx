@@ -5,6 +5,8 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 
+import { ConfirmDialog } from "@/shared";
+
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
 import { MOCK_CLINIC_PROFILE } from "@/entities/clinic-profile";
@@ -56,6 +58,7 @@ export default function ProcedureDetailsPage() {
   );
   const [currentMonth, setCurrentMonth] = useState("Декабрь 2026");
   const [selectedDays, setSelectedDays] = useState<number[]>([16, 19]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const [morningSlots, setMorningSlots] = useState<TimeSlot[]>([
     { time: "08:00", selected: false },
@@ -101,12 +104,7 @@ export default function ProcedureDetailsPage() {
     router.push("/clinic-profile/procedures");
   };
 
-  const handleDelete = () => {
-    if (confirm("Вы уверены, что хотите удалить процедуру?")) {
-      console.log("Delete procedure", id);
-      router.push("/clinic-profile/procedures");
-    }
-  };
+  const handleDelete = () => setConfirmOpen(true);
 
   const removeSpecialist = (id: string) => {
     setSpecialists((prev) => prev.filter((spec) => spec.id !== id));
@@ -537,6 +535,19 @@ export default function ProcedureDetailsPage() {
           </div>
         </main>
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => {
+          console.log("Delete procedure", id);
+          router.push("/clinic-profile/procedures");
+        }}
+        title="Удалить процедуру?"
+        description="Это действие нельзя отменить"
+        confirmLabel="Удалить"
+        cancelLabel="Отмена"
+      />
     </div>
   );
 }

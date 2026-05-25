@@ -2,7 +2,7 @@
 
 import { FC, useState } from "react";
 
-import { IconBtn, SearchInput } from "@/shared";
+import { ConfirmDialog, IconBtn, SearchInput } from "@/shared";
 
 import { ProcedureCard } from "@/entities/clinic-procedure";
 import type { Procedure } from "@/entities/clinic-procedure";
@@ -14,12 +14,9 @@ type Props = {
 export const ProceduresList: FC<Props> = ({ procedures }) => {
   const [items, setItems] = useState(procedures);
   const [searchQuery, setSearchQuery] = useState("");
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
-  const handleDelete = (id: string) => {
-    if (confirm("Вы уверены, что хотите удалить процедуру?")) {
-      setItems((prev) => prev.filter((item) => item.id !== id));
-    }
-  };
+  const handleDelete = (id: string) => setPendingDeleteId(id);
 
   const filteredItems = items.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -60,6 +57,20 @@ export const ProceduresList: FC<Props> = ({ procedures }) => {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        isOpen={pendingDeleteId !== null}
+        onClose={() => setPendingDeleteId(null)}
+        onConfirm={() => {
+          setItems((prev) =>
+            prev.filter((item) => item.id !== pendingDeleteId),
+          );
+          setPendingDeleteId(null);
+        }}
+        title="Удалить процедуру?"
+        description="Это действие нельзя отменить"
+        confirmLabel="Удалить"
+        cancelLabel="Отмена"
+      />
     </div>
   );
 };
