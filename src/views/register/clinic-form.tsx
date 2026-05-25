@@ -407,9 +407,9 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
                 </span>
                 <button
                   onClick={() => logoInputRef.current?.click()}
-                  className="size-8 rounded-full bg-[#F5653E] flex items-center justify-center text-white text-lg shrink-0"
+                  className="px-3 py-1.5 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors shrink-0"
                 >
-                  +
+                  Заменить
                 </button>
               </div>
             ) : (
