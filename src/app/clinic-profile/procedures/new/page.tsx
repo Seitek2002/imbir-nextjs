@@ -5,6 +5,8 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+import { Dropdown } from "@/shared";
+
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
 import { MOCK_CLINIC_PROFILE } from "@/entities/clinic-profile";
@@ -182,39 +184,18 @@ export default function NewProcedurePage() {
                 </div>
 
                 {/* Специализация */}
-                <div>
-                  <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                    Специализация
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={specialty}
-                      onChange={(e) => setSpecialty(e.target.value)}
-                      className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#C4C8CA] focus:text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors appearance-none bg-white cursor-pointer"
-                    >
-                      <option value="">Выберите из списка</option>
-                      <option value="Кардиология">Кардиология</option>
-                      <option value="Терапия">Терапия</option>
-                      <option value="Хирургия">Хирургия</option>
-                      <option value="Косметология">Косметология</option>
-                    </select>
-                    <svg
-                      className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 20 20"
-                      fill="none"
-                    >
-                      <path
-                        d="M5 7.5L10 12.5L15 7.5"
-                        stroke="#686F72"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
+                <Dropdown
+                  label="Специализация"
+                  placeholder="Выберите из списка"
+                  options={[
+                    { label: "Кардиология", value: "Кардиология" },
+                    { label: "Терапия", value: "Терапия" },
+                    { label: "Хирургия", value: "Хирургия" },
+                    { label: "Косметология", value: "Косметология" },
+                  ]}
+                  value={specialty}
+                  onChange={(val) => setSpecialty(val)}
+                />
 
                 {/* Стоимость */}
                 <div>

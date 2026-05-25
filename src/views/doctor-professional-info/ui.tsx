@@ -2,6 +2,8 @@
 
 import { FC, useState } from "react";
 
+import { Dropdown } from "@/shared";
+
 import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
 import {
@@ -11,44 +13,6 @@ import {
 } from "@/entities/doctor-profile";
 
 const { inp, lbl } = formStyles;
-
-const SelectField: FC<{
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: string[];
-}> = ({ label, value, onChange, options }) => (
-  <div>
-    <label className={lbl}>{label}</label>
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${inp} appearance-none pr-10`}
-      >
-        <option value="">Выберите</option>
-        {options.map((o) => (
-          <option key={o}>{o}</option>
-        ))}
-      </select>
-      <svg
-        className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill="none"
-      >
-        <path
-          d="M4 6L8 10L12 6"
-          stroke="#686F72"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </div>
-  </div>
-);
 
 type D = {
   specialty: string;
@@ -96,17 +60,18 @@ export const DoctorProfessionalInfoPage: FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div>
             {isEditing ? (
-              <SelectField
+              <Dropdown
                 label="Специализация"
-                value={d.specialty}
-                onChange={(v) => set("specialty", v)}
+                placeholder="Выберите"
                 options={[
                   "Терапевт",
                   "Кардиолог",
                   "Хирург",
                   "Педиатр",
                   "Невролог",
-                ]}
+                ].map((o) => ({ label: o, value: o }))}
+                value={d.specialty}
+                onChange={(v) => set("specialty", v)}
               />
             ) : (
               <FieldView label="Специализация" value={d.specialty} />
@@ -114,11 +79,14 @@ export const DoctorProfessionalInfoPage: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <SelectField
+              <Dropdown
                 label="Дополнительная специализация"
+                placeholder="Выберите"
+                options={["Кардиолог", "Терапевт", "Хирург", "Педиатр"].map(
+                  (o) => ({ label: o, value: o }),
+                )}
                 value={d.additionalSpecialty}
                 onChange={(v) => set("additionalSpecialty", v)}
-                options={["Кардиолог", "Терапевт", "Хирург", "Педиатр"]}
               />
             ) : (
               <FieldView
@@ -161,11 +129,14 @@ export const DoctorProfessionalInfoPage: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <SelectField
+              <Dropdown
                 label="Место работы (клиника)"
+                placeholder="Выберите"
+                options={["k-MEO", "Городская больница", "Медцентр"].map(
+                  (o) => ({ label: o, value: o }),
+                )}
                 value={d.workplace}
                 onChange={(v) => set("workplace", v)}
-                options={["k-MEO", "Городская больница", "Медцентр"]}
               />
             ) : (
               <FieldView label="Место работы (клиника)" value={d.workplace} />
@@ -173,11 +144,14 @@ export const DoctorProfessionalInfoPage: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <SelectField
+              <Dropdown
                 label="Категория / Квалификация"
+                placeholder="Выберите"
+                options={["Высшая", "Первая", "Вторая", "Без категории"].map(
+                  (o) => ({ label: o, value: o }),
+                )}
                 value={d.qualification}
                 onChange={(v) => set("qualification", v)}
-                options={["Высшая", "Первая", "Вторая", "Без категории"]}
               />
             ) : (
               <FieldView

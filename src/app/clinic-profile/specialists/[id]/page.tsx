@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 
-import { ConfirmDialog } from "@/shared";
+import { ConfirmDialog, Dropdown } from "@/shared";
 
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
@@ -40,24 +40,6 @@ const TrashIcon = () => (
 const inp =
   "w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors bg-white";
 const lbl = "block text-[#838A8D] text-sm mb-1.5";
-
-const chevron = (
-  <svg
-    className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-  >
-    <path
-      d="M4 6L8 10L12 6"
-      stroke="#686F72"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 export default function SpecialistDetailsPage() {
   const router = useRouter();
@@ -280,21 +262,16 @@ export default function SpecialistDetailsPage() {
                   </div>
                   <div>
                     {isEditing ? (
-                      <>
-                        <label className={lbl}>Пол</label>
-                        <div className="relative">
-                          <select
-                            value={d.gender}
-                            onChange={(e) => set("gender", e.target.value)}
-                            className={`${inp} appearance-none pr-10`}
-                          >
-                            <option value="">Выберите</option>
-                            <option>Мужской</option>
-                            <option>Женский</option>
-                          </select>
-                          {chevron}
-                        </div>
-                      </>
+                      <Dropdown
+                        label="Пол"
+                        placeholder="Выберите"
+                        options={[
+                          { label: "Мужской", value: "Мужской" },
+                          { label: "Женский", value: "Женский" },
+                        ]}
+                        value={d.gender}
+                        onChange={(val) => set("gender", val)}
+                      />
                     ) : (
                       <>
                         <div className="text-[#838A8D] text-sm mb-1">Пол</div>
@@ -585,23 +562,18 @@ export default function SpecialistDetailsPage() {
                 </div>
                 <div>
                   {isEditing ? (
-                    <>
-                      <label className={lbl}>Категория / Квалификация</label>
-                      <div className="relative">
-                        <select
-                          value={d.qualification}
-                          onChange={(e) => set("qualification", e.target.value)}
-                          className={`${inp} appearance-none pr-10`}
-                        >
-                          <option value="">Выберите</option>
-                          <option>Высшая</option>
-                          <option>Первая</option>
-                          <option>Вторая</option>
-                          <option>Без категории</option>
-                        </select>
-                        {chevron}
-                      </div>
-                    </>
+                    <Dropdown
+                      label="Категория / Квалификация"
+                      placeholder="Выберите"
+                      options={[
+                        { label: "Высшая", value: "Высшая" },
+                        { label: "Первая", value: "Первая" },
+                        { label: "Вторая", value: "Вторая" },
+                        { label: "Без категории", value: "Без категории" },
+                      ]}
+                      value={d.qualification}
+                      onChange={(val) => set("qualification", val)}
+                    />
                   ) : (
                     <>
                       <div className="text-[#838A8D] text-sm mb-1">

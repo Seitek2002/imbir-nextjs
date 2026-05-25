@@ -4,7 +4,7 @@ import { FC, SVGProps, useState } from "react";
 
 import Image from "next/image";
 
-import { Button, Input, SegmentedControl, Textarea } from "@/shared";
+import { Button, Dropdown, Input, SegmentedControl, Textarea } from "@/shared";
 
 type WorkExperience = {
   id: string;
@@ -203,39 +203,13 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
       </div>
 
       {/* Специализация */}
-      <div>
-        <label className="block text-[#191A1B] text-sm font-medium mb-2">
-          Специализация
-        </label>
-        <div className="relative">
-          <select
-            value={specialty}
-            onChange={(e) => setSpecialty(e.target.value)}
-            className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors appearance-none bg-white cursor-pointer"
-          >
-            {SPECIALTIES.map((spec) => (
-              <option key={spec} value={spec}>
-                {spec}
-              </option>
-            ))}
-          </select>
-          <svg
-            className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-          >
-            <path
-              d="M5 7.5L10 12.5L15 7.5"
-              stroke="#686F72"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
+      <Dropdown
+        label="Специализация"
+        placeholder="Выберите из списка"
+        options={SPECIALTIES.map((spec) => ({ label: spec, value: spec }))}
+        value={specialty}
+        onChange={(val) => setSpecialty(val)}
+      />
 
       {/* Образование */}
       <div>
