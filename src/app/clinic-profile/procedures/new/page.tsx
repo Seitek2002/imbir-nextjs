@@ -23,6 +23,8 @@ export default function NewProcedurePage() {
 
   const [photo, setPhoto] = useState<string>();
   const [name, setName] = useState("");
+  const [nameError, setNameError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [specialty, setSpecialty] = useState("");
   const [price, setPrice] = useState("0");
   const [clinic, setClinic] = useState("");
@@ -52,7 +54,12 @@ export default function NewProcedurePage() {
   };
 
   const handleSave = () => {
-    console.log("Save new procedure");
+    if (!name.trim()) {
+      setNameError(true);
+      return;
+    }
+    setNameError(false);
+    setIsSubmitting(true);
     router.push("/clinic-profile/procedures");
   };
 
@@ -104,9 +111,14 @@ export default function NewProcedurePage() {
 
             <button
               onClick={handleSave}
-              className="px-6 py-3 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors"
+              disabled={isSubmitting}
+              className={`px-6 py-3 rounded-full font-medium transition-colors ${
+                isSubmitting
+                  ? "bg-[#C4C8CA] text-white cursor-not-allowed"
+                  : "bg-[#F5653E] text-white hover:bg-[#E5542D]"
+              }`}
             >
-              Сохранить
+              {isSubmitting ? "Сохранение..." : "Сохранить"}
             </button>
           </div>
 
@@ -172,15 +184,25 @@ export default function NewProcedurePage() {
                 {/* Название процедуры */}
                 <div>
                   <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                    Название процедуры
+                    Название процедуры <span className="text-[#F5653E]">*</span>
                   </label>
                   <input
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (e.target.value.trim()) setNameError(false);
+                    }}
                     placeholder="Введите название"
-                    className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
+                    className={`w-full px-4 py-3 rounded-2xl border text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors ${
+                      nameError ? "border-[#F5653E]" : "border-[#E5E6E8]"
+                    }`}
                   />
+                  {nameError && (
+                    <p className="text-[#F5653E] text-xs mt-1">
+                      Обязательное поле
+                    </p>
+                  )}
                 </div>
 
                 {/* Специализация */}

@@ -29,11 +29,24 @@ export default function NewSpecialistPage() {
   const [certs, setCerts] = useState<string[]>([]);
   const photoRef = useRef<HTMLInputElement>(null);
   const certRef = useRef<HTMLInputElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fullNameError, setFullNameError] = useState(false);
 
   const set = <K extends keyof SpecialistFormData>(
     field: K,
     value: SpecialistFormData[K],
   ) => setD((prev) => ({ ...prev, [field]: value }));
+
+  const handleSave = () => {
+    if (!d.fullName.trim()) {
+      setFullNameError(true);
+      return;
+    }
+    setFullNameError(false);
+    setIsSubmitting(true);
+    const newId = add({ ...d, certificates: certs });
+    router.push(`/clinic-profile/specialists/${newId}`);
+  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -88,13 +101,15 @@ export default function NewSpecialistPage() {
             </h2>
 
             <button
-              onClick={() => {
-                const newId = add({ ...d, certificates: certs });
-                router.push(`/clinic-profile/specialists/${newId}`);
-              }}
-              className="px-6 py-2.5 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors shrink-0"
+              onClick={handleSave}
+              disabled={isSubmitting}
+              className={`px-6 py-2.5 rounded-full font-medium transition-colors shrink-0 ${
+                isSubmitting
+                  ? "bg-[#C4C8CA] text-white cursor-not-allowed"
+                  : "bg-[#F5653E] text-white hover:bg-[#E5542D]"
+              }`}
             >
-              Сохранить
+              {isSubmitting ? "Сохранение..." : "Сохранить"}
             </button>
           </div>
 
@@ -107,14 +122,24 @@ export default function NewSpecialistPage() {
               <div className="flex gap-8">
                 <div className="flex-1 grid grid-cols-2 gap-x-6 gap-y-5">
                   <div className="col-span-2">
-                    <label className={lbl}>ФИО</label>
+                    <label className={lbl}>
+                      ФИО <span className="text-[#F5653E]">*</span>
+                    </label>
                     <input
                       type="text"
                       value={d.fullName}
-                      onChange={(e) => set("fullName", e.target.value)}
+                      onChange={(e) => {
+                        set("fullName", e.target.value);
+                        if (e.target.value.trim()) setFullNameError(false);
+                      }}
                       placeholder="Введите ФИО"
-                      className={inp}
+                      className={`${inp} ${fullNameError ? "border-[#F5653E]" : ""}`}
                     />
+                    {fullNameError && (
+                      <p className="text-[#F5653E] text-xs mt-1">
+                        Обязательное поле
+                      </p>
+                    )}
                   </div>
 
                   <div>

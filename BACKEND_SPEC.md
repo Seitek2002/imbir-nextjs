@@ -1,5 +1,6 @@
 # IMBIR — Техническое задание для бэкенда
 
+> Версия: 1.1 | Дата: 2026-05-25 | Обновлено: инвайты, филиалы, регистрация врача по ссылке  
 > Версия: 1.0 | Дата: 2026-05-20  
 > Фронтенд-разработчик: Сейтек  
 > Базовый URL (текущий дев): `http://155.212.216.197:8054`
@@ -80,9 +81,16 @@ POST /api/auth/register/client/
 POST /api/auth/register/doctor/
 Content-Type: multipart/form-data
 ```
+
+> ⚠️ **ОБНОВЛЕНО v1.1:** Врач может регистрироваться по ссылке-приглашению от клиники.  
+> В этом случае URL содержит `?clinicId=1&branchId=1-1`, и эти параметры передаются в теле запроса как `invite_clinic_id` и `invite_branch_id`.  
+> Бэкенд должен автоматически привязать врача к указанной клинике/филиалу после регистрации.
+
 **Body (все поля из 7 шагов формы):**
 ```json
 {
+  "invite_clinic_id": "1",
+  "invite_branch_id": "1-1",
   "step1": {
     "full_name": "Иванов Иван Иванович",
     "gender": "male",
@@ -430,9 +438,20 @@ GET /api/clinics/{id}/
   "equipment": ["МРТ", "КТ"],
   "patient_conditions": ["Парковка", "Кафетерий"],
   "payment_methods": ["Наличные", "Карта", "ОМС"],
-  "location": { "lat": 42.87, "lng": 74.57 }
+  "location": { "lat": 42.87, "lng": 74.57 },
+  "branches": [
+    {
+      "id": "1-1",
+      "address": "ул. Ахунбаева, 92",
+      "phone": "+996312456790",
+      "schedule": "Пн–Пт: 09:00–18:00"
+    }
+  ]
 }
 ```
+
+> ⚠️ **НОВОЕ v1.1:** Поле `branches` — массив филиалов клиники. Может быть пустым `[]`.  
+> Используется на детальной странице клиники и при генерации ссылок-приглашений.
 
 ---
 
@@ -818,10 +837,10 @@ GET /api/clinic/profile/
 PUT /api/clinic/profile/
 Authorization: Bearer <token>
 ```
-Полный объект из раздела 4.2 + приватные поля:
+Полный объект из раздела 4.2 (включая `branches`) + приватные поля:
 ```json
 {
-  "...все публичные поля...",
+  "...все публичные поля из 4.2 включая branches...",
   "legal": {
     "company_name": "ООО «Здоровье»",
     "reg_number": "123456789012",
@@ -836,11 +855,17 @@ Authorization: Bearer <token>
 }
 ```
 
+**Обновить филиал (PUT):**
+```
+PUT /api/clinic/branches/{branch_id}/
+Body: { "address": "...", "phone": "...", "schedule": "..." }
+```
+> ⚠️ **НОВОЕ v1.1**: управление филиалами через кабинет клиники.
+
 ### 11.2 Врачи клиники
 ```
 GET    /api/clinic/doctors/
-POST   /api/clinic/doctors/invite/   Body: { "email": "doctor@mail.com" }  — приглашение врача
-DELETE /api/clinic/doctors/{id}/                                           — открепить врача
+DELETE /api/clinic/doctors/{id}/   — открепить врача от клиники
 ```
 **Ответ GET:**
 ```json
@@ -858,6 +883,66 @@ DELETE /api/clinic/doctors/{id}/                                           — �
   ]
 }
 ```
+
+> ⚠️ **ИЗМЕНЕНО v1.1:** Email-инвайт (`POST /api/clinic/doctors/invite/`) **удалён**.  
+> Вместо него — система ссылок-приглашений (см. раздел 11.6).
+
+### 11.6 Ссылки-приглашения для врачей
+
+> ⚠️ **НОВОЕ v1.1**  
+> Клиника генерирует одноразовые ссылки вида `/register?clinicId=1&branchId=1-1`.  
+> Врач переходит по ссылке → регистрируется → автоматически привязывается к клинике/филиалу.
+
+```
+GET    /api/clinic/invites/          — список созданных ссылок
+POST   /api/clinic/invites/          — создать новую ссылку
+DELETE /api/clinic/invites/{id}/     — деактивировать ссылку
+```
+
+**Body POST:**
+```json
+{
+  "branch_id": "1-1"
+}
+```
+`branch_id` — опциональный. Если не указан — ссылка для главного офиса.
+
+**Ответ POST:**
+```json
+{
+  "id": "uuid",
+  "clinic_id": "1",
+  "branch_id": "1-1",
+  "branch_label": "Филиал — ул. Ахунбаева, 92",
+  "created_at": "2026-05-25T10:00:00Z",
+  "expires_at": "2026-06-01T10:00:00Z",
+  "is_active": true,
+  "url": "https://imbir.kg/register?clinicId=1&branchId=1-1"
+}
+```
+
+**Ответ GET:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "clinic_id": "1",
+      "branch_id": "1-1",
+      "branch_label": "Филиал — ул. Ахунбаева, 92",
+      "created_at": "2026-05-25T10:00:00Z",
+      "expires_at": "2026-06-01T10:00:00Z",
+      "is_active": true
+    }
+  ]
+}
+```
+
+**Поведение бэкенда при регистрации врача по ссылке:**
+- Получает `invite_clinic_id` и `invite_branch_id` в теле запроса
+- Проверяет что такая клиника/филиал существует
+- После создания аккаунта врача автоматически добавляет связь `doctor ↔ clinic/branch`
+- Истёкшие ссылки (`expires_at < now`) всё равно обрабатываются — просто регистрация проходит без привязки к клинике (или возвращает предупреждение, на усмотрение бэка)
 
 ### 11.3 Услуги клиники
 ```
@@ -1001,6 +1086,9 @@ PATCH /api/notifications/read-all/   — отметить все прочита�
 | 🔴 Высший | Upload | Нужно |
 | 🟠 Высокий | Appointments (create, cancel) | Нужно |
 | 🟠 Высокий | Profile (client) — GET/PUT + история записей | Нужно |
+| 🟠 Высокий | **Clinic branches** — поле `branches[]` в GET /api/clinics/{id}/ и GET /api/clinic/profile/ | **Нужно (новое)** |
+| 🟠 Высокий | **Invite links** — POST/GET/DELETE /api/clinic/invites/ | **Нужно (новое)** |
+| 🟠 Высокий | **Doctor register via invite** — поля `invite_clinic_id`, `invite_branch_id` в POST /api/auth/register/doctor/ | **Нужно (новое)** |
 | 🟡 Средний | Doctor cabinet (profile, appointments, schedule) | Нужно |
 | 🟡 Средний | Clinic cabinet (profile, doctors, services) | Нужно |
 | 🟡 Средний | Reviews (list + create) | Нужно |
@@ -1010,3 +1098,14 @@ PATCH /api/notifications/read-all/   — отметить все прочита�
 | 🟢 Низкий | Chat rooms list / create | Нужно |
 | 🟢 Низкий | References (справочники) | Нужно |
 | ✅ Готово | Chat WebSocket + history | Готово |
+
+---
+
+## Changelog
+
+### v1.1 — 2026-05-25
+- **1.2** Регистрация врача: добавлены поля `invite_clinic_id` и `invite_branch_id`
+- **4.2** Детальная клиника: добавлено поле `branches[]`
+- **11.1** Профиль клиники: ссылка на `branches[]` из 4.2, добавлен `PUT /api/clinic/branches/{id}/`
+- **11.2** Врачи клиники: удалён `POST /api/clinic/doctors/invite/` (email-инвайт)
+- **11.6** Новый раздел: система ссылок-приглашений (`POST/GET/DELETE /api/clinic/invites/`)

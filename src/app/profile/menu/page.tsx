@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import {
@@ -34,14 +33,8 @@ export default function ProfileMenuPage() {
 
           {/* Profile Card */}
           <div className="bg-linear-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl p-6 mb-4 flex flex-col items-center gap-3">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-white">
-              <Image
-                src="/path-to-avatar.jpg"
-                alt="Айжан К. К."
-                width={80}
-                height={80}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-20 h-20 rounded-full bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center">
+              <span className="text-white text-2xl font-bold">А</span>
             </div>
             <h2 className="text-[#191A1B] font-semibold text-lg">
               Айжан К. К.

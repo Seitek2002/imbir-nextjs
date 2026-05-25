@@ -29,7 +29,7 @@ export const IconBtn: FC<Props> = ({
   };
 
   const baseStyles =
-    "cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none " +
+    "inline-flex items-center justify-center cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none " +
     sizes[size];
 
   const variants: Record<Variant, string> = {

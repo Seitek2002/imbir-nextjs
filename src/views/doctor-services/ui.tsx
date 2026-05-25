@@ -126,7 +126,12 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
           </div>
           <button
             onClick={handleSubmit}
-            className="w-full py-3.5 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors active:scale-95"
+            disabled={!name.trim()}
+            className={`w-full py-3.5 rounded-full font-medium transition-colors ${
+              name.trim()
+                ? "bg-[#F5653E] text-white hover:bg-[#E5542D] active:scale-95"
+                : "bg-[#E5E6E8] text-[#C4C8CA] cursor-not-allowed"
+            }`}
           >
             Добавить
           </button>
