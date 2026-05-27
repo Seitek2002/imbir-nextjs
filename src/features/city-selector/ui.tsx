@@ -1,23 +1,32 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { GeoIcon } from "@/shared/assets";
 import { useCityStore } from "@/shared/store/cityStore";
-import { Button, Modal, SearchInput } from "@/shared/ui";
+import { Button, Dropdown, Modal } from "@/shared/ui";
 
-const CITIES = [
-  "Бишкек",
-  "Ош",
-  "Джалал-Абад",
-  "Каракол",
-  "Токмок",
-  "Кант",
-  "Нарын",
-  "Талас",
-  "Баткен",
-];
+const COUNTRIES_DATA: Record<string, string[]> = {
+  Кыргызстан: [
+    "Бишкек",
+    "Ош",
+    "Джалал-Абад",
+    "Каракол",
+    "Токмок",
+    "Кант",
+    "Нарын",
+    "Талас",
+    "Баткен",
+  ],
+  Россия: ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург"],
+  Казахстан: ["Алматы", "Астана", "Шымкент", "Караганда"],
+};
+
+const COUNTRY_OPTIONS = Object.keys(COUNTRIES_DATA).map((c) => ({
+  value: c,
+  label: c,
+}));
 
 type Props = {
   isOpen: boolean;
@@ -26,16 +35,34 @@ type Props = {
 
 export const CitySelectorModal: FC<Props> = ({ isOpen, onClose }) => {
   const { city: currentCity, setCity } = useCityStore();
-  const [search, setSearch] = useState("");
   const [isDetecting, setIsDetecting] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
 
-  const filteredCities = CITIES.filter((c) =>
-    c.toLowerCase().includes(search.toLowerCase()),
-  );
+  useEffect(() => {
+    if (isOpen) {
+      const country =
+        Object.entries(COUNTRIES_DATA).find(([, cities]) =>
+          cities.includes(currentCity),
+        )?.[0] ?? "";
+      setSelectedCountry(country);
+      setSelectedCity(currentCity ?? "");
+    }
+  }, [isOpen, currentCity]);
 
-  const handleSelectCity = (cityName: string) => {
-    setCity(cityName);
-    toast.success(`Город изменен на ${cityName}`);
+  const cityOptions = selectedCountry
+    ? COUNTRIES_DATA[selectedCountry].map((c) => ({ value: c, label: c }))
+    : [];
+
+  const handleCountryChange = (country: string) => {
+    setSelectedCountry(country);
+    setSelectedCity(COUNTRIES_DATA[country]?.[0] ?? "");
+  };
+
+  const handleApply = () => {
+    if (!selectedCity) return;
+    setCity(selectedCity);
+    toast.success(`Город изменен на ${selectedCity}`);
     onClose();
   };
 
@@ -73,46 +100,50 @@ export const CitySelectorModal: FC<Props> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Выберите город">
-      <div className="flex flex-col gap-4">
-        {/* Кнопка гео-определения */}
+    <Modal isOpen={isOpen} onClose={onClose} title="Местоположение">
+      <div className="flex flex-col gap-5">
         <Button
           variant="outline"
-          className="w-full justify-center py-3 border-[#F5653E] text-[#F5653E] bg-[#FFF2F0] hover:bg-[#FFE5DF]"
+          className="w-full justify-center border-[#E5E6E8] text-[#191A1B] hover:border-[#F5653E] hover:text-[#F5653E]"
           IconLeft={GeoIcon}
           onClick={handleGeoDetect}
           disabled={isDetecting}
         >
-          {isDetecting ? "Определяем..." : "Определить местоположение"}
+          <span className="md:hidden">
+            {isDetecting ? "Определяем..." : "Мое текущее местоположение"}
+          </span>
+          <span className="hidden md:inline">
+            {isDetecting
+              ? "Определяем..."
+              : "Использовать мое текущее местоположение"}
+          </span>
         </Button>
 
-        {/* Поиск */}
-        <SearchInput
-          placeholder="Поиск города..."
-          value={search}
-          onChange={setSearch}
+        <Dropdown
+          label="Страна"
+          placeholder="Выберите из списка"
+          options={COUNTRY_OPTIONS}
+          type="radio"
+          value={selectedCountry}
+          onChange={handleCountryChange}
         />
 
-        {/* Список городов */}
-        <div className="flex flex-col mt-2">
-          {filteredCities.length === 0 ? (
-            <p className="text-center text-[#838A8D] py-4">Город не найден</p>
-          ) : (
-            filteredCities.map((c) => (
-              <button
-                key={c}
-                onClick={() => handleSelectCity(c)}
-                className={`text-left px-4 py-3 rounded-xl transition-colors ${
-                  currentCity === c
-                    ? "bg-[#F5653E] text-white font-medium"
-                    : "hover:bg-gray-100 text-[#191A1B]"
-                }`}
-              >
-                {c}
-              </button>
-            ))
-          )}
-        </div>
+        <Dropdown
+          label="Город"
+          placeholder="Выберите из списка"
+          options={cityOptions}
+          type="radio"
+          value={selectedCity}
+          onChange={setSelectedCity}
+        />
+
+        <Button
+          className="w-full justify-center"
+          onClick={handleApply}
+          disabled={!selectedCity}
+        >
+          Выбрать
+        </Button>
       </div>
     </Modal>
   );
