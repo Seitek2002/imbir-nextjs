@@ -9,6 +9,8 @@ import { Header } from "@/widgets";
 
 import { StarIcon } from "@/shared/assets";
 
+type DropdownOption = { value: string; label: string };
+
 type Props = {
   isOpen: boolean;
   prefix: string;
@@ -17,8 +19,12 @@ type Props = {
     experience?: boolean;
     rating?: boolean;
     price?: boolean;
-    online?: boolean; // <-- Добавили поддержку онлайн-фильтра
+    online?: boolean;
+    category?: boolean;
+    clinic?: boolean;
   };
+  categoryOptions?: DropdownOption[];
+  clinicOptions?: DropdownOption[];
 };
 
 const SPECIALTY_OPTIONS = [
@@ -31,7 +37,13 @@ const RATINGS = ["5.0", "4.0", "3.0", "2.0", "1.0"];
 const MAX_PRICE = 5000;
 const MAX_EXP = 50;
 
-export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
+export const MobileFiltersModal: FC<Props> = ({
+  isOpen,
+  prefix,
+  fields,
+  categoryOptions = [],
+  clinicOptions = [],
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -59,6 +71,13 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
     initialSpec ? initialSpec.split(",") : [],
   );
 
+  const [category, setCategory] = useState<string>(
+    fields?.category ? (searchParams.get(`${prefix}_spec`) ?? "") : "",
+  );
+  const [clinic, setClinic] = useState<string>(
+    searchParams.get(`${prefix}_clinic`) ?? "",
+  );
+
   // Стейт для онлайна
   const initialOnline = searchParams.get(`${prefix}_online`) === "true";
   const [isOnline, setIsOnline] = useState<boolean>(initialOnline);
@@ -78,10 +97,18 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
       params.delete(`${prefix}_rating`);
     }
 
-    if (fields?.specialty && specialty.length > 0) {
+    if (fields?.category) {
+      if (category) params.set(`${prefix}_spec`, category);
+      else params.delete(`${prefix}_spec`);
+    } else if (fields?.specialty && specialty.length > 0) {
       params.set(`${prefix}_spec`, specialty.join(","));
     } else {
       params.delete(`${prefix}_spec`);
+    }
+
+    if (fields?.clinic) {
+      if (clinic) params.set(`${prefix}_clinic`, clinic);
+      else params.delete(`${prefix}_clinic`);
     }
 
     if (fields?.online && isOnline) {
@@ -98,6 +125,8 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
     setPrice([0, MAX_PRICE]);
     setRating(null);
     setSpecialty([]);
+    setCategory("");
+    setClinic("");
     setIsOnline(false);
 
     const params = new URLSearchParams(searchParams.toString());
@@ -106,6 +135,7 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
     params.delete(`${prefix}_price`);
     params.delete(`${prefix}_rating`);
     params.delete(`${prefix}_spec`);
+    params.delete(`${prefix}_clinic`);
     params.delete(`${prefix}_online`);
 
     router.replace(`?${params.toString()}`, { scroll: false });
@@ -134,6 +164,38 @@ export const MobileFiltersModal: FC<Props> = ({ isOpen, prefix, fields }) => {
                 className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isOnline ? "left-7" : "left-1"}`}
               />
             </div>
+          </div>
+        )}
+
+        {/* БЛОК: УСЛУГА (категория) */}
+        {fields?.category && (
+          <div className="bg-white p-4 rounded-2xl">
+            <span className="block text-sm font-medium text-[#191A1B] mb-2">
+              Услуга
+            </span>
+            <Dropdown
+              options={[{ value: "", label: "Все" }, ...categoryOptions]}
+              value={category}
+              onChange={(val) => setCategory(val as string)}
+              placeholder="Все"
+              className="w-full"
+            />
+          </div>
+        )}
+
+        {/* БЛОК: КЛИНИКА */}
+        {fields?.clinic && (
+          <div className="bg-white p-4 rounded-2xl">
+            <span className="block text-sm font-medium text-[#191A1B] mb-2">
+              Клиника
+            </span>
+            <Dropdown
+              options={[{ value: "", label: "Все" }, ...clinicOptions]}
+              value={clinic}
+              onChange={(val) => setClinic(val as string)}
+              placeholder="Все"
+              className="w-full"
+            />
           </div>
         )}
 

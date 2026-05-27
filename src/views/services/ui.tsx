@@ -120,7 +120,12 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
     return true;
   });
 
-  const mobileFilters = { rating: true as const, price: true as const };
+  const mobileFilters = {
+    category: true as const,
+    clinic: true as const,
+    rating: true as const,
+    price: true as const,
+  };
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
@@ -140,6 +145,8 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
         isOpen={isFiltersModalOpen}
         prefix={PREFIX}
         fields={mobileFilters}
+        categoryOptions={CATEGORY_OPTIONS}
+        clinicOptions={CLINIC_OPTIONS}
       />
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
