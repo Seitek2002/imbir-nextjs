@@ -48,7 +48,7 @@ export const VideosSwiper: FC<Props> = ({
         {viewAllHref && (
           <Link
             href={viewAllHref}
-            className="text-sm md:text-base text-[#F5653E] shrink-0-0 hover:opacity-70 transition-opacity mt-1 md:mt-2"
+            className="text-sm md:text-base text-[#F5653E] shrink-0 hover:opacity-70 transition-opacity mt-1 md:mt-2"
           >
             Все
           </Link>

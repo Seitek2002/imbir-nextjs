@@ -1,1 +1,1 @@
-export { ProfileMobileHeader } from "./ui";
+export { MobilePageHeader } from "./ui";

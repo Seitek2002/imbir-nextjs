@@ -1,1 +1,0 @@
-export { ClinicMobileHeader } from "./ui";

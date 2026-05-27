@@ -15,7 +15,7 @@ function BlogFallback() {
       {HAS_FEATURED_POST && (
         <>
           <div className="hidden md:flex gap-5">
-            <div className="w-167.5 shrink-0-0 h-105 rounded-3xl border border-[#E3E4E5] skeleton" />
+            <div className="w-167.5 shrink-0 h-105 rounded-3xl border border-[#E3E4E5] skeleton" />
             <div className="flex flex-col justify-center gap-4 bg-white rounded-3xl border border-[#E3E4E5] p-8 flex-1">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-24 skeleton rounded-full" />
@@ -49,11 +49,11 @@ function BlogFallback() {
       )}
 
       <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="shrink-0-0 h-10 w-16 skeleton rounded-full" />
+        <div className="shrink-0 h-10 w-16 skeleton rounded-full" />
         {BLOG_CATEGORIES.map((category) => (
           <div
             key={category.id}
-            className="shrink-0-0 h-10 w-28 skeleton rounded-full"
+            className="shrink-0 h-10 w-28 skeleton rounded-full"
           />
         ))}
       </div>

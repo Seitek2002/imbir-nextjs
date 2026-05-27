@@ -3,7 +3,7 @@
 import { FC, useState } from "react";
 
 import { ProfileHistory as HistoryWidget } from "@/widgets/profile-history";
-import { ProfileMobileHeader } from "@/widgets/profile-mobile-header";
+import { MobilePageHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
 import { MOCK_APPOINTMENTS } from "@/entities/appointment";
@@ -22,7 +22,7 @@ export const ProfileHistoryPage: FC = () => {
 
   return (
     <>
-      <ProfileMobileHeader title="История записей" />
+      <MobilePageHeader title="История записей" />
       <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
         <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden md:block">
           Мой профиль

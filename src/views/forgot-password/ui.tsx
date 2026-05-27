@@ -64,7 +64,7 @@ export const ForgotPasswordPage = () => {
 
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
         {/* --- ЛЕВАЯ КАРТОЧКА --- */}
-        <div className="hidden md:flex md:w-1/2 rounded-2xl p-6 bg-white shrink-0-0 items-center justify-center">
+        <div className="hidden md:flex md:w-1/2 rounded-2xl p-6 bg-white shrink-0 items-center justify-center">
           <div className="relative w-full aspect-square rounded-xl bg-[#ADD8E6] flex items-center justify-center border-2 border-dashed border-[#838A8D]/50 text-[#838A8D]">
             <span className="text-xl font-medium">Место для картинки</span>
           </div>

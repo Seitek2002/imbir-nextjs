@@ -1,9 +1,8 @@
 "use client";
 
-import { FC, useLayoutEffect, useRef, useState } from "react";
+import { FC, useState } from "react";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import {
   HistoryIcon,
@@ -12,6 +11,7 @@ import {
   ReviewsIcon,
   SavedIcon,
 } from "@/shared/assets";
+import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 const MENU_ITEMS = [
@@ -21,19 +21,25 @@ const MENU_ITEMS = [
   { href: "/profile/reviews", label: "Отзывы", icon: ReviewsIcon },
 ];
 
-export const ProfileSidebar: FC = () => {
-  const pathname = usePathname();
-  const [logoutOpen, setLogoutOpen] = useState(false);
-  const navRef = useRef<HTMLElement>(null);
-  const [indicator, setIndicator] = useState({ top: 0, height: 0 });
+const CHEVRON = (
+  <svg
+    className="w-5 h-5 ml-auto shrink-0 text-[#C4C8CA]"
+    fill="none"
+    viewBox="0 0 20 20"
+  >
+    <path
+      d="M7.5 15L12.5 10L7.5 5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
-  useLayoutEffect(() => {
-    const nav = navRef.current;
-    if (!nav) return;
-    const active = nav.querySelector('[data-active="true"]') as HTMLElement;
-    if (!active) return;
-    setIndicator({ top: active.offsetTop, height: active.offsetHeight });
-  }, [pathname]);
+export const ProfileSidebar: FC = () => {
+  const { navRef, indicator, pathname } = useSidebarIndicator();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   return (
     <>
@@ -79,19 +85,7 @@ export const ProfileSidebar: FC = () => {
                 >
                   {item.label}
                 </span>
-                <svg
-                  className="w-5 h-5 ml-auto shrink-0 text-[#C4C8CA]"
-                  fill="none"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M7.5 15L12.5 10L7.5 5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                {CHEVRON}
               </Link>
             );
           })}
@@ -106,19 +100,7 @@ export const ProfileSidebar: FC = () => {
             <LogoutIcon className="w-5 h-5" />
           </div>
           <span className="font-medium text-base">Выйти из профиля</span>
-          <svg
-            className="w-5 h-5 ml-auto text-[#C4C8CA] shrink-0"
-            fill="none"
-            viewBox="0 0 20 20"
-          >
-            <path
-              d="M7.5 15L12.5 10L7.5 5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {CHEVRON}
         </button>
 
         {/* Status */}

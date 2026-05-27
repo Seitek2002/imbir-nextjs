@@ -7,13 +7,20 @@ import { useRouter } from "next/navigation";
 type Props = {
   title: string;
   rightElement?: ReactNode;
+  hasBorder?: boolean;
 };
 
-export const ProfileMobileHeader: FC<Props> = ({ title, rightElement }) => {
+export const MobilePageHeader: FC<Props> = ({
+  title,
+  rightElement,
+  hasBorder = false,
+}) => {
   const router = useRouter();
 
   return (
-    <div className="md:hidden flex items-center justify-between px-4 py-4 bg-white">
+    <div
+      className={`md:hidden flex items-center justify-between px-4 py-4 bg-white${hasBorder ? " border-b border-[#E5E6E8]" : ""}`}
+    >
       <button
         onClick={() => router.back()}
         className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"

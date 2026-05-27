@@ -4,7 +4,7 @@ import { FC, useRef, useState } from "react";
 
 import Image from "next/image";
 
-import { ProfileMobileHeader } from "@/widgets/profile-mobile-header";
+import { MobilePageHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
 import { CheckIcon, EditIcon } from "@/shared/assets";
@@ -71,7 +71,7 @@ export const ProfileMyDataPage: FC = () => {
 
   return (
     <>
-      <ProfileMobileHeader title={title} rightElement={mobileRight} />
+      <MobilePageHeader title={title} rightElement={mobileRight} />
 
       <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
         <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden md:block">

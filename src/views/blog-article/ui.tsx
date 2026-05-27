@@ -19,12 +19,7 @@ type Props = {
 export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
   return (
     <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
-      <div className="hidden md:block">
-        <Header />
-      </div>
-      <div className="md:hidden">
-        <Header title="Статья" backTo={ROUTES.BLOG} />
-      </div>
+      <Header title="Статья" backTo={ROUTES.BLOG} />
 
       <div className="w-full max-w-340 mx-auto px-3 md:px-4 pt-4 md:pt-6 pb-8">
         <nav className="hidden md:flex items-center gap-3 text-sm leading-none mb-6 text-[#838A8D]">

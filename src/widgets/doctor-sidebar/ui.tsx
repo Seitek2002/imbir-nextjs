@@ -1,12 +1,12 @@
 "use client";
 
-import { FC, useLayoutEffect, useRef, useState } from "react";
+import { FC, ReactNode, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 import { LogoutIcon, StarIcon } from "@/shared/assets";
+import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 type Props = {
@@ -16,10 +16,18 @@ type Props = {
   rating: number;
 };
 
-const MENU_ITEMS = [
+type MenuItem = {
+  href: string;
+  label: string;
+  icon: ReactNode;
+  exact?: boolean;
+};
+
+const MENU_ITEMS: MenuItem[] = [
   {
     href: "/doctor-profile",
     label: "Мои данные",
+    exact: true,
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
         <path
@@ -114,18 +122,8 @@ export const DoctorSidebar: FC<Props> = ({
   specialty,
   rating,
 }) => {
-  const pathname = usePathname();
-  const navRef = useRef<HTMLElement>(null);
-  const [indicator, setIndicator] = useState({ top: 0, height: 0 });
+  const { navRef, indicator, pathname } = useSidebarIndicator();
   const [logoutOpen, setLogoutOpen] = useState(false);
-
-  useLayoutEffect(() => {
-    const nav = navRef.current;
-    if (!nav) return;
-    const active = nav.querySelector('[data-active="true"]') as HTMLElement;
-    if (!active) return;
-    setIndicator({ top: active.offsetTop, height: active.offsetHeight });
-  }, [pathname]);
 
   return (
     <aside className="w-72 shrink-0 hidden lg:block">
@@ -170,9 +168,10 @@ export const DoctorSidebar: FC<Props> = ({
         />
 
         {MENU_ITEMS.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/doctor-profile" && pathname.startsWith(item.href));
+          const isActive = item.exact
+            ? pathname === item.href
+            : pathname.startsWith(item.href);
+
           return (
             <Link
               key={item.href}
