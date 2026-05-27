@@ -30,7 +30,7 @@ const ClinicCardSkeletonVertical = () => (
 
 const ClinicCardSkeletonHorizontal = () => (
   <div className="bg-white rounded-2xl border border-[#E3E4E5] p-2.5 flex items-stretch gap-2.5 w-full">
-    <div className="w-20 h-20 rounded-xl skeleton shrink-0-0" />
+    <div className="w-20 h-20 rounded-xl skeleton shrink-0" />
     <div className="flex-1 py-1 space-y-2">
       <div className="h-4 w-3/4 skeleton rounded-md" />
 

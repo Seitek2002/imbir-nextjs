@@ -17,7 +17,7 @@ export default function Loading() {
         {/* --- ОСНОВНОЙ БЛОК --- */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
           {/* Левая колонка / Слайдер */}
-          <div className="relative w-full md:w-[500px] lg:w-[600px] shrink-0-0 flex flex-col gap-4">
+          <div className="relative w-full md:w-[500px] lg:w-[600px] shrink-0 flex flex-col gap-4">
             {/* Главное фото */}
             <div className="h-[340px] md:h-[400px] w-full skeleton md:rounded-3xl" />
             {/* Миниатюры (только ПК) */}
@@ -25,7 +25,7 @@ export default function Loading() {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="size-20 lg:size-24 rounded-2xl skeleton shrink-0-0"
+                  className="size-20 lg:size-24 rounded-2xl skeleton shrink-0"
                 />
               ))}
             </div>
@@ -120,7 +120,7 @@ export default function Loading() {
         <div className="mt-10 md:mt-20 mb-10 md:mb-20 px-4 md:px-0">
           <div className="h-8 w-32 skeleton rounded-md mb-6 md:mb-8" />
           <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-            <div className="w-full md:w-[320px] shrink-0-0 flex flex-col gap-5">
+            <div className="w-full md:w-[320px] shrink-0 flex flex-col gap-5">
               <div className="h-24 w-full skeleton rounded-2xl" />
               <div className="hidden md:block h-64 w-full skeleton rounded-2xl" />
             </div>

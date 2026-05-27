@@ -49,7 +49,7 @@ export const Checkbox: FC<Props> = ({
     sizeClasses[size],
   );
 
-  const iconStyles = "text-white shrink-0-0 size-3";
+  const iconStyles = "text-white shrink-0 size-3";
 
   return (
     <label

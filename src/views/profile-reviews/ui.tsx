@@ -2,7 +2,7 @@
 
 import { FC, useState } from "react";
 
-import { ProfileMobileHeader } from "@/widgets/profile-mobile-header";
+import { MobilePageHeader } from "@/widgets/profile-mobile-header";
 import { ProfileReviews as ReviewsWidget } from "@/widgets/profile-reviews";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
@@ -39,7 +39,7 @@ export const ProfileReviewsPage: FC = () => {
 
   return (
     <>
-      <ProfileMobileHeader title="Отзывы" />
+      <MobilePageHeader title="Отзывы" />
       <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
         <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden md:block">
           Мой профиль

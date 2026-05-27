@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 
@@ -7,11 +7,15 @@ import { cn } from "@/shared/lib/utils";
 
 type Props = {
   initialSaved?: boolean;
+  savedLabel?: string;
+  unsavedLabel?: string;
   onSave?: () => void;
 };
 
-export const DoctorSaveButton: FC<Props> = ({
+export const SaveButton: FC<Props> = ({
   initialSaved = false,
+  savedLabel = "Убрать из сохранённых",
+  unsavedLabel = "Сохранить",
   onSave,
 }) => {
   const [saved, setSaved] = useState(initialSaved);
@@ -23,7 +27,7 @@ export const DoctorSaveButton: FC<Props> = ({
         setSaved((prev) => !prev);
         onSave?.();
       }}
-      aria-label={saved ? "Убрать из сохранённых" : "Сохранить врача"}
+      aria-label={saved ? savedLabel : unsavedLabel}
       className="transition-transform active:scale-90"
     >
       <HeartIcon2

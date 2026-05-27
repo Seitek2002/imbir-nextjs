@@ -5,14 +5,13 @@ import { FC, useState } from "react";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 
-import { Button } from "@/shared";
+import { Button, SaveButton } from "@/shared";
 
 import { StarIcon, UserCircleIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
 import { Workplace } from "@/shared/constants/mocks";
 
 import { DoctorPhoto } from "./photo";
-import { DoctorSaveButton } from "./save-button";
 
 type Props = {
   id?: string | number;
@@ -136,7 +135,11 @@ export const DoctorCard: FC<Props> = ({
               )}
             </Button>
             <div onClick={stopProp}>
-              <DoctorSaveButton initialSaved={initialSaved} onSave={onSave} />
+              <SaveButton
+                initialSaved={initialSaved}
+                onSave={onSave}
+                unsavedLabel="Сохранить врача"
+              />
             </div>
           </div>
         </div>
@@ -158,7 +161,11 @@ export const DoctorCard: FC<Props> = ({
       <div className="relative aspect-square w-full">
         <DoctorPhoto image={image} name={name} />
         <div className="absolute top-2 right-2 z-10" onClick={stopProp}>
-          <DoctorSaveButton initialSaved={initialSaved} onSave={onSave} />
+          <SaveButton
+            initialSaved={initialSaved}
+            onSave={onSave}
+            unsavedLabel="Сохранить врача"
+          />
         </div>
       </div>
 

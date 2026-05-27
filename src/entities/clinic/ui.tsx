@@ -6,10 +6,10 @@ import { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 
+import { SaveButton } from "@/shared";
+
 import { GeoIcon, StarIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
-
-import { ClinicSaveButton } from "./save-button";
 
 type Props = {
   id?: string;
@@ -88,7 +88,11 @@ export const ClinicCard: FC<Props> = ({
             <span className="truncate">{address}</span>
           </div>
           <div className="flex justify-end mt-2" onClick={stopProp}>
-            <ClinicSaveButton initialSaved={initialSaved} onSave={onSave} />
+            <SaveButton
+              initialSaved={initialSaved}
+              onSave={onSave}
+              unsavedLabel="Сохранить клинику"
+            />
           </div>
         </div>
       </Link>
@@ -117,7 +121,11 @@ export const ClinicCard: FC<Props> = ({
           <div className="w-full h-full bg-[#F2F3F5]" />
         )}
         <div className="absolute top-2 right-2" onClick={stopProp}>
-          <ClinicSaveButton initialSaved={initialSaved} onSave={onSave} />
+          <SaveButton
+            initialSaved={initialSaved}
+            onSave={onSave}
+            unsavedLabel="Сохранить клинику"
+          />
         </div>
       </div>
 

@@ -37,7 +37,7 @@ export const Hero: FC = () => {
 
           <div className="border border-[#F5653E] rounded-3xl bg-white p-4 w-full md:w-105 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 overflow-hidden rounded-full shrink-0-0">
+              <div className="w-12 h-12 overflow-hidden rounded-full shrink-0">
                 <Image
                   src={HeroAvatar}
                   alt=""

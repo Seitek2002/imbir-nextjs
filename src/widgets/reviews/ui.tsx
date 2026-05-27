@@ -64,7 +64,7 @@ export const ReviewsSection: FC<Props> = ({
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-        <div className="w-full md:w-[320px] shrink-0-0 flex flex-col gap-5">
+        <div className="w-full md:w-[320px] shrink-0 flex flex-col gap-5">
           {/* Статистика */}
           <div className="flex gap-4">
             <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-6 flex flex-col items-center md:items-start justify-center">

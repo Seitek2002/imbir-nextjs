@@ -90,7 +90,7 @@ export const Input: FC<Props> = ({
 
       {error && (
         <span className="flex items-center gap-1 text-sm mt-0.5">
-          <WarningIcon className="size-4 shrink-0-0" />
+          <WarningIcon className="size-4 shrink-0" />
           <span className="text-[#DF1C41]">{error}</span>
         </span>
       )}
