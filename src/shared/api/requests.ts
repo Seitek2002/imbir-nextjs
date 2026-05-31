@@ -1,41 +1,118 @@
-import {
-  ClinicListItem,
-  DoctorListItem,
-  ReviewItem,
-  ServiceItem,
+// Legacy compatibility shim.
+// All new code should import directly from @/shared/api/<resource>/requests
+// or from the barrel @/shared/api/index.ts.
+//
+// This file adapts the new snake_case API types back to the camelCase
+// mock-type shape that existing entity components and views expect.
+// It acts as a backward-compatibility layer during migration.
+import type {
+  ClinicListItem as MockClinicListItem,
+  DoctorListItem as MockDoctorListItem,
+  ReviewItem as MockReviewItem,
+  ServiceItem as MockServiceItem,
 } from "../constants/mocks";
+import { createAppointment as _createAppointment } from "./appointments/requests";
 import {
-  MOCK_CLINICS,
-  MOCK_DOCTORS,
-  MOCK_REVIEWS,
-  MOCK_SERVICES,
-} from "./mock-data";
+  getClinicById as _getClinicById,
+  getClinics,
+} from "./clinics/requests";
+import type { ClinicListItem as ApiClinic } from "./clinics/types";
+import {
+  getDoctorById as _getDoctorById,
+  getDoctors,
+} from "./doctors/requests";
+import type { DoctorListItem as ApiDoctor } from "./doctors/types";
+import { getReviews } from "./reviews/requests";
+import type { ReviewItem as ApiReview } from "./reviews/types";
+import { getServices } from "./services/requests";
+import type { ServiceListItem as ApiService } from "./services/types";
+
+const emptySchedule = {
+  mon: null,
+  tue: null,
+  wed: null,
+  thu: null,
+  fri: null,
+  sat: null,
+  sun: null,
+  lunchBreak: null,
+};
+
+const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
+  id: d.id,
+  name: d.full_name,
+  specialty: d.specialty,
+  experience: d.experience_years,
+  isOnlineAvailable: d.is_online_available,
+  rating: d.rating,
+  reviews: d.reviews_count,
+  image: d.photo ?? undefined,
+  workplaces: d.workplaces.map((w) => ({
+    clinicId: String(w.clinic_id),
+    clinicName: w.clinic_name,
+    price: w.price,
+    schedule: emptySchedule,
+  })),
+});
+
+const adaptClinic = (c: ApiClinic): MockClinicListItem => ({
+  id: String(c.id),
+  name: c.name,
+  experience: c.experience_years ?? 0,
+  rating: c.rating,
+  reviews: c.reviews_count,
+  address: c.address ?? "",
+  city: c.city,
+  coordinates: { lat: 0, lng: 0 },
+  specialties: c.primary_specializations ?? [],
+  image: c.logo ?? undefined,
+});
+
+const adaptService = (s: ApiService): MockServiceItem => ({
+  id: String(s.id),
+  clinicId: "",
+  clinicName: "",
+  name: s.name,
+  category: s.category,
+  price: typeof s.price === "string" ? parseFloat(s.price) || 0 : 0,
+  image: "",
+  schedule: emptySchedule,
+  doctorIds: [],
+  rating: 0,
+  reviews: 0,
+});
+
+const adaptReview = (r: ApiReview): MockReviewItem => ({
+  id: String(r.id),
+  author: r.author,
+  date: r.created_at.slice(0, 10),
+  text: r.text ?? "",
+  rating: r.rating,
+  doctorId: "",
+  clinicId: "",
+});
 
 export const api = {
-  getDoctors: async (): Promise<DoctorListItem[]> => MOCK_DOCTORS,
+  getDoctors: () => getDoctors().then((r) => r.data.map(adaptDoctor)),
 
-  getDoctorById: async (id: string): Promise<DoctorListItem | null> =>
-    MOCK_DOCTORS.find((d) => String(d.id) === id) ?? null,
+  getDoctorById: (id: string) =>
+    _getDoctorById(id).then((d) => (d ? adaptDoctor(d) : null)),
 
-  getClinics: async (): Promise<ClinicListItem[]> => MOCK_CLINICS,
+  getClinics: () => getClinics().then((r) => r.data.map(adaptClinic)),
 
-  getClinicById: async (id: string): Promise<ClinicListItem | null> =>
-    MOCK_CLINICS.find((c) => c.id === id) ?? null,
+  getClinicById: (id: string) =>
+    _getClinicById(id).then((c) => (c ? adaptClinic(c) : null)),
 
-  getServices: async (): Promise<ServiceItem[]> => MOCK_SERVICES,
+  getServices: () => getServices().then((r) => r.data.map(adaptService)),
 
-  getReviews: async (): Promise<ReviewItem[]> => MOCK_REVIEWS,
+  getReviews: () =>
+    getReviews("doctor", 0).then((r) => r.data.map(adaptReview)),
 
-  createAppointment: async (
-    _data: unknown,
-  ): Promise<{ id: string; status: string }> => ({
-    id: "mock",
-    status: "confirmed",
-  }),
+  createAppointment: _createAppointment,
 
-  getReviewsByDoctor: async (doctorId: string): Promise<ReviewItem[]> =>
-    MOCK_REVIEWS.filter((r) => r.doctorId === doctorId),
+  getReviewsByDoctor: (doctorId: string) =>
+    getReviews("doctor", doctorId).then((r) => r.data.map(adaptReview)),
 
-  getReviewsByClinic: async (clinicId: string): Promise<ReviewItem[]> =>
-    MOCK_REVIEWS.filter((r) => r.clinicId === clinicId),
+  getReviewsByClinic: (clinicId: string) =>
+    getReviews("clinic", clinicId).then((r) => r.data.map(adaptReview)),
 };
