@@ -9,19 +9,22 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "i.pravatar.cc",
-        port: "",
         pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "pravatar.cc",
-        port: "",
         pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "placehold.co",
-        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "155.212.216.197",
+        port: "8030",
         pathname: "/**",
       },
     ],

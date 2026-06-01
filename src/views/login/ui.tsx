@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -8,13 +9,22 @@ import { useRouter } from "next/navigation";
 
 import { Header } from "@/widgets";
 
+import { loginFn } from "@/shared/api/auth/requests";
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
+import { useAuthStore } from "@/shared/store/authStore";
 import { Button, Checkbox, Input } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control/ui";
 
+const ROLE_REDIRECT: Record<string, string> = {
+  patient: "/profile",
+  doctor: "/doctor-profile",
+  clinic: "/clinic-profile",
+};
+
 export const LoginPage = () => {
   const router = useRouter();
+  const { setTokens, setUser } = useAuthStore();
 
   const [authMode, setAuthMode] = useState<string>("login");
   const [email, setEmail] = useState("");
@@ -22,17 +32,30 @@ export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!email || !password) return;
-
-    if (password === "Imbir") {
-      setError("Неверный пароль");
-      return;
-    }
-
     setError("");
-    console.log("Вход:", { email, password, rememberMe });
+    setIsLoading(true);
+
+    try {
+      const res = await loginFn({ email, password });
+      setTokens({ access: res.access, refresh: res.refresh });
+      setUser(res.user);
+      toast.success(`Добро пожаловать, ${res.user.first_name}!`);
+      router.push(ROLE_REDIRECT[res.user.role] ?? ROUTES.PROFILE);
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { detail?: string; error?: string } } })
+          ?.response?.data?.detail ??
+        (err as { response?: { data?: { error?: string } } })?.response?.data
+          ?.error ??
+        "Неверный email или пароль";
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const AuthTabs = (
@@ -53,9 +76,8 @@ export const LoginPage = () => {
     <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
       <Header backTo={ROUTES.HOME}>{AuthTabs}</Header>
 
-      {/* --- ГЛАВНЫЙ КОНТЕЙНЕР ДЛЯ ДЕСКТОПНОГО ГРИДА --- */}
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
-        {/* --- ЛЕВАЯ КАРТОЧКА С КАРТИНКОЙ (md: block) --- */}
+        {/* Left decorative panel */}
         <div className="hidden md:block md:w-1/2 shrink-0 self-start sticky top-8">
           <div className="rounded-2xl bg-[#FEF3F0] overflow-hidden flex items-center justify-center">
             <div className="relative w-full aspect-square">
@@ -69,7 +91,7 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        {/* --- ПРАВАЯ КАРТОЧКА С ФОРМОЙ (md: wider) --- */}
+        {/* Right form card */}
         <div className="flex-1 md:bg-white md:rounded-2xl md:p-10 md:pb-16 flex flex-col max-w-120 md:max-w-none mx-auto w-full">
           <div className="md:contents bg-white rounded-2xl m-2 p-4 md:p-0 flex-1 flex flex-col">
             <div className="hidden md:block">{AuthTabs}</div>
@@ -129,7 +151,8 @@ export const LoginPage = () => {
                 className="w-full justify-center md:h-14 md:text-lg"
                 size="lg"
                 onClick={handleSubmit}
-                disabled={!email || !password}
+                disabled={!email || !password || isLoading}
+                loading={isLoading}
               >
                 Продолжить
               </Button>

@@ -1,12 +1,14 @@
 "use client";
 
 import { JSX, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Footer, Header } from "@/widgets";
 
+import { registerClientFn } from "@/shared/api/auth/requests";
 import { MOCK_CLINICS } from "@/shared/api/mock-data";
 import {
   EmailIcon,
@@ -17,6 +19,7 @@ import {
 } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
 import { cn } from "@/shared/lib/utils";
+import { useAuthStore } from "@/shared/store/authStore";
 import { Button, IconBtn, Input } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control/ui";
 
@@ -119,9 +122,16 @@ const ROLES: RoleOption[] = [
 
 // --- Component ---
 
+const ROLE_REDIRECT: Record<string, string> = {
+  patient: "/profile",
+  doctor: "/doctor-profile",
+  clinic: "/clinic-profile",
+};
+
 export const RegisterPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setTokens, setUser } = useAuthStore();
 
   const [authMode, setAuthMode] = useState<string>("register");
   const [activeForm, setActiveForm] = useState<ActiveForm>("role");
@@ -159,6 +169,7 @@ export const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [isLoadingClient, setIsLoadingClient] = useState(false);
 
   // Doctor form step (owned here for unified back navigation)
   const [doctorStep, setDoctorStep] = useState<DoctorStep>(1);
@@ -205,12 +216,34 @@ export const RegisterPage = () => {
     setActiveForm(selectedRole);
   };
 
-  const handleSubmitClient = () => {
+  const handleSubmitClient = async () => {
     if (formData.password !== formData.confirmPassword) {
       setPasswordError("Пароли не совпадают");
       return;
     }
-    console.log("Client registration:", formData);
+    setIsLoadingClient(true);
+    try {
+      const res = await registerClientFn({
+        first_name: formData.name,
+        last_name: formData.surname,
+        email: formData.email,
+        password: formData.password,
+        phone: "",
+      });
+      setTokens({ access: res.access, refresh: res.refresh });
+      setUser(res.user);
+      toast.success(`Добро пожаловать, ${res.user.first_name}!`);
+      router.push(ROLE_REDIRECT[res.user.role] ?? "/profile");
+    } catch (err: unknown) {
+      const data = (err as { response?: { data?: Record<string, string[]> } })
+        ?.response?.data;
+      const msg = data
+        ? Object.values(data).flat()[0]
+        : "Ошибка регистрации. Попробуйте снова";
+      toast.error(msg);
+    } finally {
+      setIsLoadingClient(false);
+    }
   };
 
   const AuthTabs = (
@@ -454,7 +487,12 @@ export const RegisterPage = () => {
                       className="w-full justify-center md:h-14 md:text-lg"
                       size="lg"
                       onClick={handleSubmitClient}
-                      disabled={!formData.password || !formData.confirmPassword}
+                      disabled={
+                        !formData.password ||
+                        !formData.confirmPassword ||
+                        isLoadingClient
+                      }
+                      loading={isLoadingClient}
                     >
                       Создать аккаунт
                     </Button>

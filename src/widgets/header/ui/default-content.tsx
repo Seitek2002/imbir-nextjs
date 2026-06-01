@@ -27,9 +27,21 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
     <>
       <div>
         <div className="flex items-center justify-between w-full">
-          <Link href={ROUTES.HOME}>
-            <Logo className="w-26.5 h-6.5" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href={ROUTES.HOME}>
+              <Logo className="w-26.5 h-6.5" />
+            </Link>
+
+            <Button
+              IconLeft={GeoIcon}
+              IconRight={GeoBtnArrowIcon}
+              variant="outline"
+              size="sm"
+              onClick={() => setIsCityModalOpen(true)}
+            >
+              {city}
+            </Button>
+          </div>
 
           <nav className="hidden md:flex text-[#191A1B] text-xs lg:text-base gap-6 items-center">
             <Link href={ROUTES.CLINICS}>Клиники</Link>
@@ -37,6 +49,20 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             <Link href={ROUTES.SERVICES}>Услуги</Link>
             <Link href={ROUTES.BLOG}>Блог</Link>
           </nav>
+
+          {/* Mobile right icons */}
+          <div className="flex md:hidden gap-2">
+            <Link href={ROUTES.LOGIN}>
+              <IconBtn variant="outline" size="sm">
+                <ChatIcon className="size-5" />
+              </IconBtn>
+            </Link>
+            <Link href={ROUTES.LOGIN}>
+              <IconBtn variant="outline" size="sm">
+                <ProfileIcon className="size-5" />
+              </IconBtn>
+            </Link>
+          </div>
 
           <div className="hidden md:flex gap-3">
             <Link href={ROUTES.RECORD}>
@@ -60,17 +86,6 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
               </IconBtn>
             </Link>
           </div>
-
-          <Button
-            IconLeft={GeoIcon}
-            IconRight={GeoBtnArrowIcon}
-            variant="outline"
-            size="sm"
-            className="md:hidden"
-            onClick={() => setIsCityModalOpen(true)} // ОТКРЫВАЕМ МОДАЛКУ
-          >
-            {city} {/* ДИНАМИЧЕСКОЕ ИМЯ ГОРОДА ИЗ ZUSTAND */}
-          </Button>
         </div>
 
         {searchable && (
