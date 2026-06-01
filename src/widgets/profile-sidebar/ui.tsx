@@ -3,6 +3,7 @@
 import { FC, useState } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import {
   HistoryIcon,
@@ -12,6 +13,7 @@ import {
   SavedIcon,
 } from "@/shared/assets";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
+import { useAuthStore } from "@/shared/store/authStore";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 const MENU_ITEMS = [
@@ -40,6 +42,20 @@ const CHEVRON = (
 export const ProfileSidebar: FC = () => {
   const { navRef, indicator, pathname } = useSidebarIndicator();
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const router = useRouter();
+
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+
+  const displayName = user
+    ? `${user.first_name} ${user.last_name ?? ""}`.trim()
+    : "—";
+  const initials = user?.first_name?.charAt(0)?.toUpperCase() ?? "?";
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   return (
     <>
@@ -47,10 +63,10 @@ export const ProfileSidebar: FC = () => {
         {/* Profile Card */}
         <div className="bg-linear-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl px-6 py-5 flex flex-col items-center gap-3">
           <div className="w-20 h-20 rounded-full bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center shrink-0">
-            <span className="text-white text-2xl font-bold">А</span>
+            <span className="text-white text-2xl font-bold">{initials}</span>
           </div>
           <h3 className="text-[#191A1B] font-semibold text-base">
-            Айжан К. К.
+            {displayName}
           </h3>
         </div>
 
@@ -103,7 +119,7 @@ export const ProfileSidebar: FC = () => {
           {CHEVRON}
         </button>
 
-        {/* Status */}
+        {/* Status — static block, will be driven by backend later */}
         <div className="bg-white rounded-3xl p-6">
           <p className="text-[#838A8D] text-sm mb-2">Статус пользователя</p>
           <h4 className="text-[#F5653E] text-2xl font-bold mb-3">Витамин C</h4>
@@ -153,9 +169,7 @@ export const ProfileSidebar: FC = () => {
       <ConfirmDialog
         isOpen={logoutOpen}
         onClose={() => setLogoutOpen(false)}
-        onConfirm={() => {
-          window.location.href = "/";
-        }}
+        onConfirm={handleLogout}
         icon={<LogoutIcon className="w-7 h-7 text-[#F5653E]" />}
         title="Выйти из профиля?"
         description="Для продолжения работы потребуется снова войти в аккаунт"

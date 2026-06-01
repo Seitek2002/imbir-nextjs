@@ -1,8 +1,11 @@
 export type ReviewTargetType = "doctor" | "clinic" | "service";
 
+// Backend returns author as object despite Swagger saying string
+export type ReviewAuthor = { id: number; full_name: string } | string;
+
 export type ReviewItem = {
   id: number;
-  author: string;
+  author: ReviewAuthor;
   target_type: ReviewTargetType;
   rating: number;
   text: string;

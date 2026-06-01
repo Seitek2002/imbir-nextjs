@@ -1,13 +1,17 @@
 "use client";
 
 import { FC, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 import Image from "next/image";
 
 import { MobilePageHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
+import { updateProfile } from "@/shared/api/profile/requests";
+import { uploadFile } from "@/shared/api/upload/requests";
 import { CheckIcon, EditIcon } from "@/shared/assets";
+import { useAuthStore } from "@/shared/store/authStore";
 import { PhoneInput } from "@/shared/ui";
 
 type D = {
@@ -19,14 +23,6 @@ type D = {
   photo?: string;
 };
 
-const MOCK: D = {
-  firstName: "Айжан",
-  lastName: "Курманова",
-  patronymic: "Курмановна",
-  phone: "",
-  email: "",
-};
-
 const Field: FC<{ label: string; value: string }> = ({ label, value }) => (
   <div className="py-3 border-b border-[#F2F3F5] last:border-0">
     <p className="text-[#838A8D] text-xs mb-1">{label}</p>
@@ -35,8 +31,24 @@ const Field: FC<{ label: string; value: string }> = ({ label, value }) => (
 );
 
 export const ProfileMyDataPage: FC = () => {
+  const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
+
+  const savedPatronymic =
+    typeof window !== "undefined"
+      ? (localStorage.getItem("profile_patronymic") ?? "")
+      : "";
+
   const [isEditing, setIsEditing] = useState(false);
-  const [d, setD] = useState<D>(MOCK);
+  const [isSaving, setIsSaving] = useState(false);
+  const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
+  const [d, setD] = useState<D>({
+    firstName: user?.first_name ?? "",
+    lastName: user?.last_name ?? "",
+    patronymic: savedPatronymic,
+    phone: user?.phone ?? "",
+    email: user?.email ?? "",
+  });
   const photoRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof D>(k: K, v: D[K]) =>
@@ -45,9 +57,59 @@ export const ProfileMyDataPage: FC = () => {
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setPendingPhoto(file);
     const reader = new FileReader();
     reader.onloadend = () => set("photo", reader.result as string);
     reader.readAsDataURL(file);
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      // 1. Save text fields to API
+      const updated = await updateProfile({
+        first_name: d.firstName,
+        last_name: d.lastName,
+        phone: d.phone || undefined,
+      });
+
+      // 2. Patronymic — localStorage only (not in API schema)
+      localStorage.setItem("profile_patronymic", d.patronymic);
+
+      // 3. Update authStore so name updates everywhere
+      if (user) {
+        setUser({
+          ...user,
+          first_name: updated.first_name,
+          last_name: updated.last_name,
+          phone: updated.phone ?? user.phone,
+        });
+      }
+
+      // 4. Upload photo separately — don't block save if it fails
+      if (pendingPhoto) {
+        try {
+          const uploaded = await uploadFile(pendingPhoto);
+          set("photo", uploaded.url);
+        } catch {
+          toast.error(
+            "Данные сохранены, но фото не загрузилось — попробуйте позже",
+          );
+          setIsSaving(false);
+          setIsEditing(false);
+          setPendingPhoto(null);
+          return;
+        }
+        setPendingPhoto(null);
+      }
+
+      toast.success("Данные сохранены");
+      setIsEditing(false);
+    } catch {
+      toast.error("Не удалось сохранить. Попробуйте снова");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const title = isEditing ? "Редактировать" : "Мои данные";
@@ -58,7 +120,8 @@ export const ProfileMyDataPage: FC = () => {
 
   const mobileRight = (
     <button
-      onClick={() => setIsEditing((v) => !v)}
+      onClick={isEditing ? handleSave : () => setIsEditing(true)}
+      disabled={isSaving}
       className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
     >
       {isEditing ? (
@@ -89,14 +152,19 @@ export const ProfileMyDataPage: FC = () => {
                 Мои данные
               </h2>
               <button
-                onClick={() => setIsEditing((v) => !v)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors ${
+                onClick={isEditing ? handleSave : () => setIsEditing(true)}
+                disabled={isSaving}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${
                   isEditing
                     ? "bg-[#F5653E] text-white hover:bg-[#E5542D]"
                     : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"
                 }`}
               >
-                {isEditing ? "Сохранить" : "Редактировать"}
+                {isSaving
+                  ? "Сохранение..."
+                  : isEditing
+                    ? "Сохранить"
+                    : "Редактировать"}
               </button>
             </div>
 
@@ -120,7 +188,7 @@ export const ProfileMyDataPage: FC = () => {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[#838A8D] text-2xl font-semibold">
-                        {d.firstName.charAt(0)}
+                        {d.firstName.charAt(0) || "?"}
                       </div>
                     )}
                   </div>
@@ -192,7 +260,8 @@ export const ProfileMyDataPage: FC = () => {
                               set(key, e.target.value as D[typeof key])
                             }
                             placeholder={placeholder}
-                            className={inp}
+                            disabled={key === "email"}
+                            className={`${inp} ${key === "email" ? "opacity-50 cursor-not-allowed" : ""}`}
                           />
                         </>
                       )}

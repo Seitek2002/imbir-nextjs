@@ -82,9 +82,16 @@ const adaptService = (s: ApiService): MockServiceItem => ({
   reviews: 0,
 });
 
+const resolveAuthor = (author: ApiReview["author"]): string => {
+  if (typeof author === "string") return author;
+  if (author && typeof author === "object" && "full_name" in author)
+    return author.full_name;
+  return "";
+};
+
 const adaptReview = (r: ApiReview): MockReviewItem => ({
   id: String(r.id),
-  author: r.author,
+  author: resolveAuthor(r.author),
   date: r.created_at.slice(0, 10),
   text: r.text ?? "",
   rating: r.rating,

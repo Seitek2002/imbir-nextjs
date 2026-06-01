@@ -50,6 +50,20 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             <Link href={ROUTES.BLOG}>Блог</Link>
           </nav>
 
+          {/* Mobile right icons */}
+          <div className="flex md:hidden gap-2">
+            <Link href={ROUTES.LOGIN}>
+              <IconBtn variant="outline" size="sm">
+                <ChatIcon className="size-5" />
+              </IconBtn>
+            </Link>
+            <Link href={ROUTES.LOGIN}>
+              <IconBtn variant="outline" size="sm">
+                <ProfileIcon className="size-5" />
+              </IconBtn>
+            </Link>
+          </div>
+
           <div className="hidden md:flex gap-3">
             <Link href={ROUTES.RECORD}>
               <Button size="sm" className="px-5 whitespace-nowrap">

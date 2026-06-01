@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type UserRole = "client" | "doctor" | "clinic";
+export type UserRole = "patient" | "doctor" | "clinic";
 
 export type AuthUser = {
   id: number;
