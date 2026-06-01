@@ -13,3 +13,4 @@ export {
 } from "./model";
 
 export { FieldView, formStyles } from "./ui";
+export { useDoctorCabinet, mapApiToProfile } from "./useDoctorCabinet";

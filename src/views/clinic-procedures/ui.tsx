@@ -8,9 +8,11 @@ import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 import { ProceduresList } from "@/widgets/procedures-list";
 
 import { MOCK_PROCEDURES } from "@/entities/clinic-procedure";
-import { MOCK_CLINIC_PROFILE } from "@/entities/clinic-profile";
+import { useClinicCabinet } from "@/entities/clinic-profile";
 
 export const ClinicProceduresPage: FC = () => {
+  const { profile } = useClinicCabinet();
+
   return (
     <div className="w-full min-h-screen">
       {/* Mobile Header */}
@@ -32,9 +34,9 @@ export const ClinicProceduresPage: FC = () => {
 
         <div className="flex gap-6">
           <ClinicSidebar
-            clinicName={MOCK_CLINIC_PROFILE.name}
-            clinicLogo={MOCK_CLINIC_PROFILE.logo}
-            rating={MOCK_CLINIC_PROFILE.rating}
+            clinicName={profile?.name ?? ""}
+            clinicLogo={profile?.logo}
+            rating={profile?.rating ?? 0}
           />
 
           <main className="flex-1 min-w-0">

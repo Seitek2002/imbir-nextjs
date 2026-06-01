@@ -6,10 +6,7 @@ import { Button } from "@/shared";
 
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
-import {
-  ClinicProfileForm,
-  MOCK_CLINIC_PROFILE,
-} from "@/entities/clinic-profile";
+import { ClinicProfileForm, useClinicCabinet } from "@/entities/clinic-profile";
 
 const PencilIcon = () => (
   <svg
@@ -30,10 +27,31 @@ const PencilIcon = () => (
 );
 
 export const ClinicProfilePage: FC = () => {
+  const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleSave = () => setIsEditing(false);
+  const handleSave = async () => {
+    if (profile) {
+      await saveProfile({
+        name: profile.name,
+        about: profile.description,
+        phone: profile.phone || undefined,
+        email: profile.email || undefined,
+        website: profile.website || undefined,
+        address: profile.fullAddress || undefined,
+      });
+    }
+    setIsEditing(false);
+  };
   const handleEdit = () => setIsEditing(true);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-[#838A8D]">
+        Загрузка...
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen">
@@ -59,9 +77,9 @@ export const ClinicProfilePage: FC = () => {
 
         <div className="flex gap-6">
           <ClinicSidebar
-            clinicName={MOCK_CLINIC_PROFILE.name}
-            clinicLogo={MOCK_CLINIC_PROFILE.logo}
-            rating={MOCK_CLINIC_PROFILE.rating}
+            clinicName={profile?.name ?? ""}
+            clinicLogo={profile?.logo}
+            rating={profile?.rating ?? 0}
           />
 
           <main className="flex-1 min-w-0">
@@ -74,7 +92,9 @@ export const ClinicProfilePage: FC = () => {
                   <Button variant="outline" onClick={() => setIsEditing(false)}>
                     Отмена
                   </Button>
-                  <Button onClick={handleSave}>Сохранить</Button>
+                  <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? "Сохранение..." : "Сохранить"}
+                  </Button>
                 </div>
               ) : (
                 <Button
@@ -87,7 +107,9 @@ export const ClinicProfilePage: FC = () => {
               )}
             </div>
 
-            <ClinicProfileForm {...MOCK_CLINIC_PROFILE} isEditing={isEditing} />
+            {profile && (
+              <ClinicProfileForm {...profile} isEditing={isEditing} />
+            )}
           </main>
         </div>
       </div>

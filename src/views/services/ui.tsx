@@ -17,11 +17,9 @@ import { UrlSearchInput } from "@/features/search-by-query/ui";
 
 import { ServiceCard } from "@/entities/service";
 
-import { MOCK_CLINICS } from "@/shared/api/mock-data";
 import { api } from "@/shared/api/requests";
 import { RemoveIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
-import { useCityStore } from "@/shared/store/cityStore";
 import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 
 const MAX_PRICE = 10000;
@@ -91,17 +89,12 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  const selectedCity = useCityStore((s) => s.city);
-
   const { data: services = [], isLoading } = useQuery({
     queryKey: ["services"],
     queryFn: api.getServices,
   });
 
   const filteredServices = services.filter((s) => {
-    const clinicCity = MOCK_CLINICS.find((c) => c.id === s.clinicId)?.city;
-    if (clinicCity !== selectedCity) return false;
-
     if (activeQuery) {
       const q = activeQuery.toLowerCase();
       if (

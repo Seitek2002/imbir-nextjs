@@ -60,7 +60,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
   // 2. ПОЛУЧАЕМ ВСЕ ДАННЫЕ С СЕРВЕРА
   const { data: doctors = [], isLoading: isDocsLoading } = useQuery({
     queryKey: ["doctors"],
-    queryFn: api.getDoctors,
+    queryFn: () => api.getDoctors(),
   });
 
   const { data: clinics = [], isLoading: isClinicsLoading } = useQuery({

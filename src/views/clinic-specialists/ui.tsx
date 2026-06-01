@@ -7,11 +7,12 @@ import Link from "next/link";
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 import { SpecialistsList } from "@/widgets/specialists-list";
 
-import { MOCK_CLINIC_PROFILE } from "@/entities/clinic-profile";
+import { useClinicCabinet } from "@/entities/clinic-profile";
 import { useSpecialistsStore } from "@/entities/clinic-specialist";
 import type { Specialist } from "@/entities/clinic-specialist";
 
 export const ClinicSpecialistsPage: FC = () => {
+  const { profile } = useClinicCabinet();
   const { specialists, remove } = useSpecialistsStore();
 
   const listItems: Specialist[] = specialists.map((s) => ({
@@ -46,9 +47,9 @@ export const ClinicSpecialistsPage: FC = () => {
 
         <div className="flex gap-6">
           <ClinicSidebar
-            clinicName={MOCK_CLINIC_PROFILE.name}
-            clinicLogo={MOCK_CLINIC_PROFILE.logo}
-            rating={MOCK_CLINIC_PROFILE.rating}
+            clinicName={profile?.name ?? ""}
+            clinicLogo={profile?.logo}
+            rating={profile?.rating ?? 0}
           />
 
           <main className="flex-1 min-w-0">

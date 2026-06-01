@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import { Dropdown } from "@/shared";
 
@@ -8,8 +8,8 @@ import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
 import {
   FieldView,
-  MOCK_DOCTOR_PROFILE,
   formStyles,
+  useDoctorCabinet,
 } from "@/entities/doctor-profile";
 
 const { inp, lbl } = formStyles;
@@ -25,34 +25,73 @@ type D = {
 };
 
 export const DoctorProfessionalInfoPage: FC = () => {
+  const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);
   const [d, setD] = useState<D>({
-    specialty: MOCK_DOCTOR_PROFILE.specialty,
-    additionalSpecialty: MOCK_DOCTOR_PROFILE.additionalSpecialty,
-    experienceYears: MOCK_DOCTOR_PROFILE.experienceYears,
-    currentPosition: MOCK_DOCTOR_PROFILE.currentPosition,
-    workplace: MOCK_DOCTOR_PROFILE.workplace,
-    qualification: MOCK_DOCTOR_PROFILE.qualification,
-    scientificDegree: MOCK_DOCTOR_PROFILE.scientificDegree,
+    specialty: "",
+    additionalSpecialty: "",
+    experienceYears: "",
+    currentPosition: "",
+    workplace: "",
+    qualification: "",
+    scientificDegree: "",
   });
+
+  useEffect(() => {
+    if (profile) {
+      setD({
+        specialty: profile.specialty,
+        additionalSpecialty: profile.additionalSpecialty,
+        experienceYears: profile.experienceYears,
+        currentPosition: profile.currentPosition,
+        workplace: profile.workplace,
+        qualification: profile.qualification,
+        scientificDegree: profile.scientificDegree,
+      });
+    }
+  }, [profile]);
+
   const set = <K extends keyof D>(k: K, v: D[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));
 
+  const handleSave = async () => {
+    await saveProfile({
+      specialty: d.specialty,
+      experience_years: parseInt(d.experienceYears) || 0,
+    });
+    setIsEditing(false);
+  };
+
   const title = isEditing ? "Редактировать" : "Профессиональные данные";
+
+  if (isLoading) {
+    return (
+      <DoctorPageLayout title="Профессиональные данные">
+        <div className="flex items-center justify-center py-20 text-[#838A8D]">
+          Загрузка...
+        </div>
+      </DoctorPageLayout>
+    );
+  }
 
   return (
     <DoctorPageLayout
       title={title}
       editAction={isEditing ? "save" : "edit"}
-      onEditToggle={() => setIsEditing((v) => !v)}
+      onEditToggle={isEditing ? handleSave : () => setIsEditing(true)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-[#191A1B]">{title}</h2>
         <button
-          onClick={() => setIsEditing((v) => !v)}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors ${isEditing ? "bg-[#F5653E] text-white hover:bg-[#E5542D]" : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"}`}
+          onClick={isEditing ? handleSave : () => setIsEditing(true)}
+          disabled={isSaving}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-[#F5653E] text-white hover:bg-[#E5542D]" : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"}`}
         >
-          {isEditing ? "Сохранить" : "Редактировать"}
+          {isSaving
+            ? "Сохранение..."
+            : isEditing
+              ? "Сохранить"
+              : "Редактировать"}
         </button>
       </div>
 

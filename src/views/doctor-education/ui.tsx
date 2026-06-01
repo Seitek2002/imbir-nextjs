@@ -1,13 +1,13 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
 import {
   FieldView,
-  MOCK_DOCTOR_PROFILE,
   formStyles,
+  useDoctorCabinet,
 } from "@/entities/doctor-profile";
 
 const { inp, lbl } = formStyles;
@@ -22,33 +22,86 @@ type D = {
 };
 
 export const DoctorEducationPage: FC = () => {
+  const { profile, isLoading, isSaving, saveProfile, rawProfile } =
+    useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);
   const [d, setD] = useState<D>({
-    university: MOCK_DOCTOR_PROFILE.university,
-    graduationYear: MOCK_DOCTOR_PROFILE.graduationYear,
-    internship: MOCK_DOCTOR_PROFILE.internship,
-    residency: MOCK_DOCTOR_PROFILE.residency,
-    diplomaSpecialty: MOCK_DOCTOR_PROFILE.diplomaSpecialty,
-    additionalEducation: [...MOCK_DOCTOR_PROFILE.additionalEducation],
+    university: "",
+    graduationYear: "",
+    internship: "",
+    residency: "",
+    diplomaSpecialty: "",
+    additionalEducation: [],
   });
+
+  useEffect(() => {
+    if (profile) {
+      setD({
+        university: profile.university,
+        graduationYear: profile.graduationYear,
+        internship: profile.internship,
+        residency: profile.residency,
+        diplomaSpecialty: profile.diplomaSpecialty,
+        additionalEducation: [...profile.additionalEducation],
+      });
+    }
+  }, [profile]);
+
   const set = <K extends keyof D>(k: K, v: D[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));
 
+  const handleSave = async () => {
+    const mainEdu = d.university
+      ? [
+          {
+            institution: d.university,
+            degree: d.diplomaSpecialty,
+            year: parseInt(d.graduationYear) || new Date().getFullYear(),
+          },
+        ]
+      : [];
+    const addEdu = d.additionalEducation
+      .filter(Boolean)
+      .map((e) => ({ institution: e, degree: "", year: 0 }));
+    await saveProfile({
+      education: [...mainEdu, ...addEdu],
+    });
+    setIsEditing(false);
+  };
+
   const title = isEditing ? "Редактировать" : "Образование";
+
+  if (isLoading) {
+    return (
+      <DoctorPageLayout title="Образование">
+        <div className="flex items-center justify-center py-20 text-[#838A8D]">
+          Загрузка...
+        </div>
+      </DoctorPageLayout>
+    );
+  }
+
+  // suppress unused var warning — rawProfile used for future extension
+  void rawProfile;
 
   return (
     <DoctorPageLayout
       title={title}
       editAction={isEditing ? "save" : "edit"}
-      onEditToggle={() => setIsEditing((v) => !v)}
+      onEditToggle={isEditing ? handleSave : () => setIsEditing(true)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-[#191A1B]">{title}</h2>
         <button
-          onClick={() => setIsEditing((v) => !v)}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors ${isEditing ? "bg-[#F5653E] text-white hover:bg-[#E5542D]" : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"}`}
+          onClick={isEditing ? handleSave : () => setIsEditing(true)}
+          disabled={isSaving}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-[#F5653E] text-white hover:bg-[#E5542D]" : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"}`}
         >
-          {isEditing ? "Сохранить" : "Редактировать"}
+          {isSaving
+            ? "Сохранение..."
+            : isEditing
+              ? "Сохранить"
+              : "Редактировать"}
         </button>
       </div>
 

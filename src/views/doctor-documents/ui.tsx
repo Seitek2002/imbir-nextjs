@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 import Image from "next/image";
 
@@ -8,8 +8,8 @@ import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
 import {
   FieldView,
-  MOCK_DOCTOR_PROFILE,
   formStyles,
+  useDoctorCabinet,
 } from "@/entities/doctor-profile";
 
 const { inp } = formStyles;
@@ -34,17 +34,19 @@ const FileIcon = () => (
   </svg>
 );
 
-const MOCK_CERT_NAMES = ["No-name.pdf", "No-name.pdf", "No-name.doc"];
-
 export const DoctorDocumentsPage: FC = () => {
+  const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);
-  const [licenseNumber, setLicenseNumber] = useState(
-    MOCK_DOCTOR_PROFILE.licenseNumber,
-  );
-  const [certs, setCerts] = useState<string[]>(
-    MOCK_DOCTOR_PROFILE.certificates,
-  );
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [certs, setCerts] = useState<string[]>([]);
   const certRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (profile) {
+      setLicenseNumber(profile.licenseNumber);
+      setCerts(profile.certificates);
+    }
+  }, [profile]);
 
   const handleCertUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,21 +57,50 @@ export const DoctorDocumentsPage: FC = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleSave = async () => {
+    await saveProfile({
+      legal: {
+        license_number: licenseNumber,
+        documents: certs,
+        company_name: "",
+        reg_number: "",
+        license_date: "",
+        license_authority: "",
+      },
+    });
+    setIsEditing(false);
+  };
+
   const title = isEditing ? "Редактировать" : "Сертификаты и документы";
+
+  if (isLoading) {
+    return (
+      <DoctorPageLayout title="Сертификаты и документы">
+        <div className="flex items-center justify-center py-20 text-[#838A8D]">
+          Загрузка...
+        </div>
+      </DoctorPageLayout>
+    );
+  }
 
   return (
     <DoctorPageLayout
       title={title}
       editAction={isEditing ? "save" : "edit"}
-      onEditToggle={() => setIsEditing((v) => !v)}
+      onEditToggle={isEditing ? handleSave : () => setIsEditing(true)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-[#191A1B]">{title}</h2>
         <button
-          onClick={() => setIsEditing((v) => !v)}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors ${isEditing ? "bg-[#F5653E] text-white hover:bg-[#E5542D]" : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"}`}
+          onClick={isEditing ? handleSave : () => setIsEditing(true)}
+          disabled={isSaving}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-[#F5653E] text-white hover:bg-[#E5542D]" : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"}`}
         >
-          {isEditing ? "Сохранить" : "Редактировать"}
+          {isSaving
+            ? "Сохранение..."
+            : isEditing
+              ? "Сохранить"
+              : "Редактировать"}
         </button>
       </div>
 
@@ -105,48 +136,42 @@ export const DoctorDocumentsPage: FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            {certs.length === 0
-              ? MOCK_CERT_NAMES.map((name, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1">
-                    <FileIcon />
-                    <span className="text-[#838A8D] text-xs">{name}</span>
-                  </div>
-                ))
-              : certs.map((cert, i) => (
-                  <div
-                    key={i}
-                    className="relative w-16 h-16 rounded-xl overflow-hidden border border-[#E5E6E8] bg-[#F8F9FA]"
+            {certs.length === 0 ? (
+              <div className="text-[#C4C8CA] text-sm py-2">
+                Нет загруженных документов
+              </div>
+            ) : null}
+            {certs.map((cert, i) => (
+              <div
+                key={i}
+                className="relative w-16 h-16 rounded-xl overflow-hidden border border-[#E5E6E8] bg-[#F8F9FA]"
+              >
+                <Image
+                  src={cert}
+                  alt={`cert-${i}`}
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-cover"
+                />
+                {isEditing && (
+                  <button
+                    onClick={() =>
+                      setCerts((prev) => prev.filter((_, j) => j !== i))
+                    }
+                    className="absolute top-0 right-0 w-1/2 aspect-square bg-[#F5653E] flex items-center justify-center"
                   >
-                    <Image
-                      src={cert}
-                      alt={`cert-${i}`}
-                      width={64}
-                      height={64}
-                      className="w-full h-full object-cover"
-                    />
-                    {isEditing && (
-                      <button
-                        onClick={() =>
-                          setCerts((prev) => prev.filter((_, j) => j !== i))
-                        }
-                        className="absolute top-0 right-0 w-1/2 aspect-square bg-[#F5653E] flex items-center justify-center"
-                      >
-                        <svg
-                          className="w-1/2 h-1/2"
-                          viewBox="0 0 8 8"
-                          fill="none"
-                        >
-                          <path
-                            d="M6.5 1.5L1.5 6.5M1.5 1.5L6.5 6.5"
-                            stroke="white"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                ))}
+                    <svg className="w-1/2 h-1/2" viewBox="0 0 8 8" fill="none">
+                      <path
+                        d="M6.5 1.5L1.5 6.5M1.5 1.5L6.5 6.5"
+                        stroke="white"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ))}
             {isEditing && certs.length === 0 && (
               <button
                 onClick={() => certRef.current?.click()}

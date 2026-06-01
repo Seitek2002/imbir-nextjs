@@ -7,7 +7,7 @@ import Link from "next/link";
 
 import { DoctorSidebar } from "@/widgets/doctor-sidebar";
 
-import { MOCK_DOCTOR_PROFILE } from "@/entities/doctor-profile";
+import { useDoctorCabinet } from "@/entities/doctor-profile";
 
 import { ChevronRightIcon, LogoutIcon, StarIcon } from "@/shared/assets";
 
@@ -104,7 +104,8 @@ const MENU_ITEMS = [
 ];
 
 export const DoctorProfilePage: FC = () => {
-  const d = MOCK_DOCTOR_PROFILE;
+  const { profile: d } = useDoctorCabinet();
+  if (!d) return null;
 
   return (
     <div className="w-full min-h-screen bg-[#FAFAFA]">

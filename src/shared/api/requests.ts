@@ -100,7 +100,8 @@ const adaptReview = (r: ApiReview): MockReviewItem => ({
 });
 
 export const api = {
-  getDoctors: () => getDoctors().then((r) => r.data.map(adaptDoctor)),
+  getDoctors: (city?: string) =>
+    getDoctors(city ? { city } : {}).then((r) => r.data.map(adaptDoctor)),
 
   getDoctorById: (id: string) =>
     _getDoctorById(id).then((d) => (d ? adaptDoctor(d) : null)),

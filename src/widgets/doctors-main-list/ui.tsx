@@ -25,7 +25,7 @@ const DoctorsListContent = () => {
 
   const { data: doctors = [], isLoading } = useQuery({
     queryKey: ["doctors"], // Уникальный ключ. По нему React Query понимает, где лежат эти данные
-    queryFn: api.getDoctors, // Функция, которая пойдет на сервер
+    queryFn: () => api.getDoctors(),
   });
 
   if (isLoading) {
