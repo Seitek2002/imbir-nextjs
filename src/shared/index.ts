@@ -15,4 +15,5 @@ export {
   ConfirmDialog,
   PhoneInput,
   SaveButton,
+  FilterPanel,
 } from "./ui";

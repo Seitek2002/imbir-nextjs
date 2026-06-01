@@ -13,6 +13,8 @@ import {
 } from "@/shared/assets";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
+const MOCK_USER_NAME = "Айжан К. К.";
+
 const MENU_ITEMS = [
   { href: "/profile/my-data", label: "Мои данные", icon: PersonIcon },
   { href: "/profile/history", label: "История записей", icon: HistoryIcon },
@@ -33,11 +35,16 @@ export default function ProfileMenuPage() {
 
           {/* Profile Card */}
           <div className="bg-linear-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl p-6 mb-4 flex flex-col items-center gap-3">
-            <div className="w-20 h-20 rounded-full bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center">
-              <span className="text-white text-2xl font-bold">А</span>
+            <div
+              className="w-20 h-20 rounded-full bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center"
+              aria-label={MOCK_USER_NAME}
+            >
+              <span className="text-white text-2xl font-bold">
+                {MOCK_USER_NAME.charAt(0)}
+              </span>
             </div>
             <h2 className="text-[#191A1B] font-semibold text-lg">
-              Айжан К. К.
+              {MOCK_USER_NAME}
             </h2>
           </div>
 

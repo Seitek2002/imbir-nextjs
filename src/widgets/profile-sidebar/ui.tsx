@@ -21,6 +21,8 @@ const MENU_ITEMS = [
   { href: "/profile/reviews", label: "Отзывы", icon: ReviewsIcon },
 ];
 
+const MOCK_USER_NAME = "Айжан К. К.";
+
 const CHEVRON = (
   <svg
     className="w-5 h-5 ml-auto shrink-0 text-[#C4C8CA]"
@@ -46,11 +48,16 @@ export const ProfileSidebar: FC = () => {
       <div className="w-full max-w-88 flex flex-col gap-4">
         {/* Profile Card */}
         <div className="bg-linear-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl px-6 py-5 flex flex-col items-center gap-3">
-          <div className="w-20 h-20 rounded-full bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center shrink-0">
-            <span className="text-white text-2xl font-bold">А</span>
+          <div
+            className="w-20 h-20 rounded-full bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center shrink-0"
+            aria-label={MOCK_USER_NAME}
+          >
+            <span className="text-white text-2xl font-bold">
+              {MOCK_USER_NAME.charAt(0)}
+            </span>
           </div>
           <h3 className="text-[#191A1B] font-semibold text-base">
-            Айжан К. К.
+            {MOCK_USER_NAME}
           </h3>
         </div>
 
