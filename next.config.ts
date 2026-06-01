@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
         port: "8030",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "imbir.sino0on.ru",
+        pathname: "/**",
+      },
     ],
   },
 

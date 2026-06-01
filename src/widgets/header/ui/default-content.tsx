@@ -15,13 +15,24 @@ import {
   SearchIcon,
 } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
+import { useAuthStore } from "@/shared/store/authStore";
 import { useCityStore } from "@/shared/store/cityStore";
+
+const ROLE_ROUTE: Record<string, string> = {
+  patient: "/profile",
+  doctor: "/doctor-profile",
+  clinic: "/clinic-profile",
+};
 
 export const DefaultContent: FC<{ searchable?: boolean }> = ({
   searchable,
 }) => {
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
-  const city = useCityStore((state) => state.city); // Читаем город из стора
+  const city = useCityStore((state) => state.city);
+  const user = useAuthStore((s) => s.user);
+  const profileHref = user
+    ? (ROLE_ROUTE[user.role] ?? ROUTES.PROFILE)
+    : ROUTES.LOGIN;
 
   return (
     <>
@@ -57,7 +68,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
                 <ChatIcon className="size-5" />
               </IconBtn>
             </Link>
-            <Link href={ROUTES.LOGIN}>
+            <Link href={profileHref}>
               <IconBtn variant="outline" size="sm">
                 <ProfileIcon className="size-5" />
               </IconBtn>
@@ -80,7 +91,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
                 <ChatIcon className="size-5" />
               </IconBtn>
             </Link>
-            <Link href={ROUTES.LOGIN}>
+            <Link href={profileHref}>
               <IconBtn variant="outline" size="sm">
                 <ProfileIcon className="size-5" />
               </IconBtn>
