@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -31,6 +31,13 @@ export default function NewSpecialistPage() {
   const certRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fullNameError, setFullNameError] = useState(false);
+  const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    return () => clearTimeout(submitTimeoutRef.current);
+  }, []);
 
   const set = <K extends keyof SpecialistFormData>(
     field: K,
@@ -46,6 +53,8 @@ export default function NewSpecialistPage() {
     setIsSubmitting(true);
     const newId = add({ ...d, certificates: certs });
     router.push(`/clinic-profile/specialists/${newId}`);
+    // Safety: re-enable if navigation doesn't complete (component stays mounted)
+    submitTimeoutRef.current = setTimeout(() => setIsSubmitting(false), 5000);
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

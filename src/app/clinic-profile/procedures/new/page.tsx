@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -25,6 +25,13 @@ export default function NewProcedurePage() {
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    return () => clearTimeout(submitTimeoutRef.current);
+  }, []);
   const [specialty, setSpecialty] = useState("");
   const [price, setPrice] = useState("0");
   const [clinic, setClinic] = useState("");
@@ -61,6 +68,7 @@ export default function NewProcedurePage() {
     setNameError(false);
     setIsSubmitting(true);
     router.push("/clinic-profile/procedures");
+    submitTimeoutRef.current = setTimeout(() => setIsSubmitting(false), 5000);
   };
 
   const updateSchedule = (

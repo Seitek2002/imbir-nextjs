@@ -1,8 +1,8 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
-import { ConfirmDialog, IconBtn, SearchInput } from "@/shared";
+import { ConfirmDialog, FilterPanel, IconBtn, SearchInput } from "@/shared";
 
 import { ProcedureCard } from "@/entities/clinic-procedure";
 import type { Procedure } from "@/entities/clinic-procedure";
@@ -18,8 +18,21 @@ export const ProceduresList: FC<Props> = ({ procedures }) => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const handleDelete = (id: string) => setPendingDeleteId(id);
+  const filterBtnRef = useRef<HTMLButtonElement>(null);
+  const filterPanelRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (!filterOpen) return;
+    const close = (e: MouseEvent) => {
+      if (filterBtnRef.current?.contains(e.target as Node)) return;
+      if (filterPanelRef.current?.contains(e.target as Node)) return;
+      setFilterOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [filterOpen]);
+
+  const handleDelete = (id: string) => setPendingDeleteId(id);
   const categories = Array.from(new Set(items.map((i) => i.category)));
 
   const filteredItems = items.filter((item) => {
@@ -39,6 +52,7 @@ export const ProceduresList: FC<Props> = ({ procedures }) => {
           <SearchInput value={searchQuery} onChange={setSearchQuery} />
         </div>
         <IconBtn
+          ref={filterBtnRef}
           variant="outline"
           className={`w-12 h-12 shrink-0 ${filterOpen || selectedCategory ? "border-[#F5653E] text-[#F5653E]" : ""}`}
           onClick={() => setFilterOpen((v) => !v)}
@@ -56,42 +70,24 @@ export const ProceduresList: FC<Props> = ({ procedures }) => {
 
       {/* Filter panel */}
       {filterOpen && (
-        <div className="bg-white rounded-2xl border border-[#E5E6E8] p-4 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-[#191A1B]">Категория</p>
-            {selectedCategory && (
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className="text-xs text-[#F5653E] hover:underline"
-              >
-                Сбросить
-              </button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() =>
-                  setSelectedCategory(selectedCategory === cat ? null : cat)
-                }
-                className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                  selectedCategory === cat
-                    ? "bg-[#F5653E] text-white"
-                    : "border border-[#E5E6E8] text-[#686F72] hover:border-[#F5653E] hover:text-[#F5653E]"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+        <div ref={filterPanelRef}>
+          <FilterPanel
+            label="Категория"
+            options={categories}
+            selected={selectedCategory}
+            onSelect={setSelectedCategory}
+          />
         </div>
       )}
 
       {/* Grid */}
       {filteredItems.length === 0 ? (
         <div className="bg-white rounded-3xl p-10 text-center border border-[#E5E6E8]">
-          <p className="text-[#838A8D] text-lg">Процедуры не найдены</p>
+          <p className="text-[#838A8D] text-lg">
+            {searchQuery || selectedCategory
+              ? "Процедуры не найдены"
+              : "Процедур пока нет"}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -104,6 +100,7 @@ export const ProceduresList: FC<Props> = ({ procedures }) => {
           ))}
         </div>
       )}
+
       <ConfirmDialog
         isOpen={pendingDeleteId !== null}
         onClose={() => setPendingDeleteId(null)}

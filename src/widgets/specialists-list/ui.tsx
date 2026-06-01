@@ -1,8 +1,8 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
-import { ConfirmDialog, IconBtn, SearchInput } from "@/shared";
+import { ConfirmDialog, FilterPanel, IconBtn, SearchInput } from "@/shared";
 
 import { SpecialistCard } from "@/entities/clinic-specialist";
 import type { Specialist } from "@/entities/clinic-specialist";
@@ -21,6 +21,20 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(
     null,
   );
+
+  const filterBtnRef = useRef<HTMLButtonElement>(null);
+  const filterPanelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!filterOpen) return;
+    const close = (e: MouseEvent) => {
+      if (filterBtnRef.current?.contains(e.target as Node)) return;
+      if (filterPanelRef.current?.contains(e.target as Node)) return;
+      setFilterOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [filterOpen]);
 
   const specialties = Array.from(new Set(specialists.map((s) => s.specialty)));
 
@@ -43,6 +57,7 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
           <SearchInput value={searchQuery} onChange={setSearchQuery} />
         </div>
         <IconBtn
+          ref={filterBtnRef}
           variant="outline"
           className={`w-12 h-12 shrink-0 ${filterOpen || selectedSpecialty ? "border-[#F5653E]" : ""}`}
           onClick={() => setFilterOpen((v) => !v)}
@@ -60,35 +75,13 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
 
       {/* Filter panel */}
       {filterOpen && (
-        <div className="bg-white rounded-2xl border border-[#E5E6E8] p-4 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-medium text-[#191A1B]">Специализация</p>
-            {selectedSpecialty && (
-              <button
-                onClick={() => setSelectedSpecialty(null)}
-                className="text-xs text-[#F5653E] hover:underline"
-              >
-                Сбросить
-              </button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {specialties.map((spec) => (
-              <button
-                key={spec}
-                onClick={() =>
-                  setSelectedSpecialty(selectedSpecialty === spec ? null : spec)
-                }
-                className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                  selectedSpecialty === spec
-                    ? "bg-[#F5653E] text-white"
-                    : "border border-[#E5E6E8] text-[#686F72] hover:border-[#F5653E] hover:text-[#F5653E]"
-                }`}
-              >
-                {spec}
-              </button>
-            ))}
-          </div>
+        <div ref={filterPanelRef}>
+          <FilterPanel
+            label="Специализация"
+            options={specialties}
+            selected={selectedSpecialty}
+            onSelect={setSelectedSpecialty}
+          />
         </div>
       )}
 
