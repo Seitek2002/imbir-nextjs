@@ -2,12 +2,17 @@
 
 import { FC, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { ProfileHistory as HistoryWidget } from "@/widgets/profile-history";
 import { MobilePageHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
-import { MOCK_APPOINTMENTS } from "@/entities/appointment";
+import type { Appointment } from "@/entities/appointment";
 
+import { getProfileAppointments } from "@/shared/api/profile/requests";
+import { profileKeys } from "@/shared/api/queryKeys";
+import { useAuthStore } from "@/shared/store/authStore";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 const TABS = [
@@ -19,6 +24,28 @@ export const ProfileHistoryPage: FC = () => {
   const [activeTab, setActiveTab] = useState<"upcoming" | "completed">(
     "upcoming",
   );
+  const accessToken = useAuthStore((s) => s.accessToken);
+
+  const { data } = useQuery({
+    queryKey: profileKeys.appointments({ status: activeTab }),
+    queryFn: () => getProfileAppointments(activeTab),
+    enabled: !!accessToken,
+  });
+
+  const appointments: Appointment[] = (data?.data ?? []).map((apt) => ({
+    id: String(apt.id),
+    doctorId: "",
+    doctorName: typeof apt.doctor === "string" ? apt.doctor : "—",
+    doctorSpecialty: "",
+    doctorClinic: typeof apt.clinic === "string" ? apt.clinic : "—",
+    doctorRating: 0,
+    date: apt.date,
+    time: apt.time,
+    service: typeof apt.service === "string" ? apt.service : "—",
+    price: 0,
+    address: "",
+    status: apt.status as Appointment["status"],
+  }));
 
   return (
     <>
@@ -34,13 +61,12 @@ export const ProfileHistoryPage: FC = () => {
           </aside>
 
           <main className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-6 hidden md:flex">
+            <div className="hidden md:flex items-center justify-between mb-6">
               <h2 className="text-[28px] md:text-[32px] font-semibold text-[#191A1B]">
                 История записей
               </h2>
             </div>
 
-            {/* Mobile: segmented control */}
             <div className="md:hidden mb-6">
               <SegmentedControl
                 options={TABS}
@@ -49,7 +75,6 @@ export const ProfileHistoryPage: FC = () => {
               />
             </div>
 
-            {/* Desktop: border pills */}
             <div className="hidden md:flex gap-2 mb-6">
               {TABS.map((tab) => (
                 <button
@@ -66,10 +91,7 @@ export const ProfileHistoryPage: FC = () => {
               ))}
             </div>
 
-            <HistoryWidget
-              appointments={MOCK_APPOINTMENTS}
-              activeTab={activeTab}
-            />
+            <HistoryWidget appointments={appointments} activeTab={activeTab} />
           </main>
         </div>
       </div>

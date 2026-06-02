@@ -12,6 +12,7 @@ export type AuthUser = {
   email: string;
   phone: string;
   date_joined: string;
+  avatar?: string | null;
 };
 
 type AuthStore = {
@@ -45,7 +46,9 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: "auth-storage",
-      // Only persist tokens and user — nothing else
+      // skipHydration prevents SSR/client hydration mismatch in Next.js.
+      // Rehydration is triggered manually in StoreHydration component.
+      skipHydration: true,
       partialize: (state) => ({
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,

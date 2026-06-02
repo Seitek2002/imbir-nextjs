@@ -2,18 +2,21 @@
 
 import { FC, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { MobilePageHeader } from "@/widgets/profile-mobile-header";
-import { ProfileSaved as SavedWidget } from "@/widgets/profile-saved";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
-import { MOCK_SAVED_ITEMS } from "@/entities/saved";
 import type { SavedType } from "@/entities/saved";
 
+import { getFavorites } from "@/shared/api/profile/requests";
+import { profileKeys } from "@/shared/api/queryKeys";
 import {
   ClinicBuildingIcon,
   DoctorPersonIcon,
   ServiceRadialIcon,
 } from "@/shared/assets";
+import { useAuthStore } from "@/shared/store/authStore";
 import { FilterTabBar } from "@/shared/ui";
 
 const TABS = [
@@ -36,6 +39,19 @@ const TABS = [
 
 export const ProfileSavedPage: FC = () => {
   const [activeTab, setActiveTab] = useState<SavedType>("clinic");
+  const accessToken = useAuthStore((s) => s.accessToken);
+
+  const { data: favorites = [] } = useQuery({
+    queryKey: profileKeys.favorites(),
+    queryFn: getFavorites,
+    enabled: !!accessToken,
+  });
+
+  const filtered = favorites.filter(
+    (f) =>
+      f.target_type === activeTab ||
+      (activeTab === "doctor" && f.target_type === "doctor"),
+  );
 
   return (
     <>
@@ -62,7 +78,31 @@ export const ProfileSavedPage: FC = () => {
               className="mb-6"
             />
 
-            <SavedWidget items={MOCK_SAVED_ITEMS} activeTab={activeTab} />
+            {filtered.length === 0 ? (
+              <div className="bg-white rounded-3xl p-10 text-center">
+                <p className="text-[#838A8D] text-lg">Ничего не сохранено</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {filtered.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-white rounded-2xl border border-[#E5E6E8] p-4 flex items-center justify-between gap-3"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[#191A1B] truncate">
+                        {typeof item.target === "string"
+                          ? item.target
+                          : `#${item.target_id}`}
+                      </p>
+                      <p className="text-xs text-[#838A8D] mt-0.5 capitalize">
+                        {item.target_type}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </main>
         </div>
       </div>

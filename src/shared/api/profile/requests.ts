@@ -17,7 +17,21 @@ export const getProfile = async (): Promise<ClientProfile> => {
 export const updateProfile = async (
   body: UpdateProfileRequest,
 ): Promise<ClientProfile> => {
-  const { data } = await apiClient.put<ClientProfile>("/api/profile/", body);
+  const { avatar_upload, ...rest } = body;
+
+  if (avatar_upload) {
+    const form = new FormData();
+    Object.entries(rest).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) form.append(k, String(v));
+    });
+    form.append("avatar_upload", avatar_upload);
+    const { data } = await apiClient.put<ClientProfile>("/api/profile/", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  }
+
+  const { data } = await apiClient.put<ClientProfile>("/api/profile/", rest);
   return data;
 };
 

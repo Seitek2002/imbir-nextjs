@@ -2,18 +2,22 @@
 
 import { FC, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { MobilePageHeader } from "@/widgets/profile-mobile-header";
 import { ProfileReviews as ReviewsWidget } from "@/widgets/profile-reviews";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
-import { MOCK_USER_REVIEWS } from "@/entities/user-review";
-import type { ReviewType } from "@/entities/user-review";
+import type { ReviewType, UserReview } from "@/entities/user-review";
 
+import { getProfileReviews } from "@/shared/api/profile/requests";
+import { profileKeys } from "@/shared/api/queryKeys";
 import {
   ClinicBuildingIcon,
   DoctorPersonIcon,
   ServiceRadialIcon,
 } from "@/shared/assets";
+import { useAuthStore } from "@/shared/store/authStore";
 import { FilterTabBar } from "@/shared/ui";
 
 const TABS = [
@@ -36,6 +40,23 @@ const TABS = [
 
 export const ProfileReviewsPage: FC = () => {
   const [activeTab, setActiveTab] = useState<ReviewType>("clinic");
+  const accessToken = useAuthStore((s) => s.accessToken);
+
+  const { data } = useQuery({
+    queryKey: profileKeys.reviews(),
+    queryFn: getProfileReviews,
+    enabled: !!accessToken,
+  });
+
+  const reviews: UserReview[] = (data?.data ?? []).map((r) => ({
+    id: String(r.id),
+    type: (r.target_type as ReviewType) ?? "clinic",
+    rating: r.rating,
+    comment: r.text ?? "",
+    date: r.created_at
+      ? new Date(r.created_at).toLocaleDateString("ru-RU")
+      : "",
+  }));
 
   return (
     <>
@@ -62,7 +83,7 @@ export const ProfileReviewsPage: FC = () => {
               className="mb-6"
             />
 
-            <ReviewsWidget reviews={MOCK_USER_REVIEWS} activeTab={activeTab} />
+            <ReviewsWidget reviews={reviews} activeTab={activeTab} />
           </main>
         </div>
       </div>

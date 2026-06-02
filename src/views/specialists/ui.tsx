@@ -18,8 +18,10 @@ import { FilterBar } from "@/features/filter-bar/ui";
 import { UrlSearchInput } from "@/features/search-by-query/ui";
 
 import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
+import { adaptDoctor } from "@/entities/doctor/adapters";
 
-import { api } from "@/shared/api/requests";
+import { getDoctors } from "@/shared/api/doctors/requests";
+import { doctorKeys } from "@/shared/api/queryKeys";
 import { ROUTES } from "@/shared/config/routes";
 import { useCityStore } from "@/shared/store/cityStore";
 import { Button } from "@/shared/ui";
@@ -49,53 +51,40 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
 
   const selectedCity = useCityStore((s) => s.city);
 
-  // 2. ПОЛУЧАЕМ ДАННЫЕ С СЕРВЕРА (city фильтр передаём в API)
-  const { data: doctors = [], isLoading } = useQuery({
-    queryKey: ["doctors", selectedCity],
-    queryFn: () => api.getDoctors(selectedCity),
+  // Собираем фильтры для API
+  const expParts = currentExp?.split("-").map(Number);
+  const priceParts = currentPrice?.split("-").map(Number);
+
+  const apiFilters = {
+    city: selectedCity,
+    ...(activeQuery ? { search: activeQuery } : {}),
+    ...(currentSpec ? { specialization: currentSpec } : {}),
+    ...(currentRating && currentRating !== "all"
+      ? { min_rating: parseFloat(currentRating) }
+      : {}),
+    ...(priceParts
+      ? { min_price: priceParts[0], max_price: priceParts[1] }
+      : {}),
+    ...(isOnlineOnly ? { is_online: true } : {}),
+  };
+
+  // 2. ПОЛУЧАЕМ ДАННЫЕ С СЕРВЕРА (фильтрация на бэке)
+  const { data: result, isLoading } = useQuery({
+    queryKey: doctorKeys.list(apiFilters),
+    queryFn: () => getDoctors(apiFilters),
   });
 
-  // 3. Фильтруем данные перед рендером
-  const filteredDoctors = doctors.filter((doc) => {
-    if (activeQuery) {
-      const q = activeQuery.toLowerCase();
-      if (
-        !doc.name.toLowerCase().includes(q) &&
-        !doc.specialty.toLowerCase().includes(q)
-      ) {
-        return false;
+  // Адаптируем snake_case API → camelCase для DoctorCard
+  const filteredDoctors = (result?.data ?? [])
+    .map(adaptDoctor)
+    .filter((doc) => {
+      // Клиент-сайд фильтр по стажу (нет в API)
+      if (currentExp && expParts) {
+        if (doc.experience < expParts[0] || doc.experience > expParts[1])
+          return false;
       }
-    }
-
-    if (isOnlineOnly && !doc.isOnlineAvailable) return false;
-
-    if (currentSpec) {
-      const selectedSpecs = currentSpec.split(",");
-      if (!selectedSpecs.includes(doc.specialty)) return false;
-    }
-
-    if (currentRating && currentRating !== "all") {
-      const minRating = parseFloat(currentRating);
-      if (doc.rating < minRating) return false;
-    }
-
-    if (currentExp) {
-      const [minExp, maxExp] = currentExp.split("-").map(Number);
-      if (doc.experience < minExp || doc.experience > maxExp) return false;
-    }
-
-    if (currentPrice) {
-      const [minPrice, maxPrice] = currentPrice.split("-").map(Number);
-      const docMinPrice =
-        doc.workplaces.length > 0
-          ? Math.min(...doc.workplaces.map((w) => w.price))
-          : 0;
-
-      if (docMinPrice < minPrice || docMinPrice > maxPrice) return false;
-    }
-
-    return true;
-  });
+      return true;
+    });
 
   return (
     <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">

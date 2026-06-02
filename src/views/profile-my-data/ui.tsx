@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import Image from "next/image";
@@ -8,8 +8,7 @@ import Image from "next/image";
 import { MobilePageHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
-import { updateProfile } from "@/shared/api/profile/requests";
-import { uploadFile } from "@/shared/api/upload/requests";
+import { getProfile, updateProfile } from "@/shared/api/profile/requests";
 import { CheckIcon, EditIcon } from "@/shared/assets";
 import { useAuthStore } from "@/shared/store/authStore";
 import { PhoneInput } from "@/shared/ui";
@@ -32,6 +31,7 @@ const Field: FC<{ label: string; value: string }> = ({ label, value }) => (
 
 export const ProfileMyDataPage: FC = () => {
   const user = useAuthStore((s) => s.user);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const setUser = useAuthStore((s) => s.setUser);
 
   const savedPatronymic =
@@ -48,59 +48,78 @@ export const ProfileMyDataPage: FC = () => {
     patronymic: savedPatronymic,
     phone: user?.phone ?? "",
     email: user?.email ?? "",
+    // Init avatar from authStore (persisted across refreshes)
+    photo: user?.avatar ?? undefined,
   });
   const photoRef = useRef<HTMLInputElement>(null);
 
-  const set = <K extends keyof D>(k: K, v: D[K]) =>
+  const setField = <K extends keyof D>(k: K, v: D[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));
+
+  // Sync form text fields when Zustand rehydrates from localStorage
+  useEffect(() => {
+    if (!user) return;
+    setD((prev) => ({
+      ...prev,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      phone: user.phone ?? "",
+      email: user.email,
+      // Use avatar from authStore if available and no local preview
+      photo: prev.photo || user.avatar || undefined,
+    }));
+  }, [user]);
+
+  // Load fresh avatar from backend once token is ready
+  useEffect(() => {
+    if (!accessToken) return;
+    getProfile()
+      .then((profile) => {
+        if (profile.avatar) {
+          setField("photo", profile.avatar);
+          // Persist avatar in authStore so sidebar and other pages can use it
+          if (user) setUser({ ...user, avatar: profile.avatar });
+        }
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken]);
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setPendingPhoto(file);
     const reader = new FileReader();
-    reader.onloadend = () => set("photo", reader.result as string);
+    reader.onloadend = () => setField("photo", reader.result as string);
     reader.readAsDataURL(file);
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // 1. Save text fields to API
       const updated = await updateProfile({
         first_name: d.firstName,
         last_name: d.lastName,
         phone: d.phone || undefined,
+        ...(pendingPhoto ? { avatar_upload: pendingPhoto } : {}),
       });
 
-      // 2. Patronymic — localStorage only (not in API schema)
+      // Patronymic — localStorage only (not in API schema)
       localStorage.setItem("profile_patronymic", d.patronymic);
 
-      // 3. Update authStore so name updates everywhere
+      const newAvatar = updated.avatar ?? d.photo;
+      if (newAvatar) setField("photo", newAvatar);
+      setPendingPhoto(null);
+
+      // Update authStore — name + avatar persisted across pages
       if (user) {
         setUser({
           ...user,
           first_name: updated.first_name,
           last_name: updated.last_name,
           phone: updated.phone ?? user.phone,
+          avatar: newAvatar ?? user.avatar,
         });
-      }
-
-      // 4. Upload photo separately — don't block save if it fails
-      if (pendingPhoto) {
-        try {
-          const uploaded = await uploadFile(pendingPhoto);
-          set("photo", uploaded.url);
-        } catch {
-          toast.error(
-            "Данные сохранены, но фото не загрузилось — попробуйте позже",
-          );
-          setIsSaving(false);
-          setIsEditing(false);
-          setPendingPhoto(null);
-          return;
-        }
-        setPendingPhoto(null);
       }
 
       toast.success("Данные сохранены");
@@ -113,7 +132,6 @@ export const ProfileMyDataPage: FC = () => {
   };
 
   const title = isEditing ? "Редактировать" : "Мои данные";
-
   const inp =
     "w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors bg-white text-base";
   const lbl = "block text-[#838A8D] text-xs mb-1";
@@ -181,10 +199,11 @@ export const ProfileMyDataPage: FC = () => {
                     {d.photo ? (
                       <Image
                         src={d.photo}
-                        alt="Фото"
+                        alt="Фото профиля"
                         width={80}
                         height={80}
                         className="w-full h-full object-cover"
+                        unoptimized={d.photo.startsWith("data:")}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[#838A8D] text-2xl font-semibold">
@@ -249,7 +268,7 @@ export const ProfileMyDataPage: FC = () => {
                         <PhoneInput
                           label={label}
                           value={d.phone}
-                          onChange={(v) => set("phone", v)}
+                          onChange={(v) => setField("phone", v)}
                         />
                       ) : (
                         <>
@@ -257,7 +276,7 @@ export const ProfileMyDataPage: FC = () => {
                           <input
                             value={(d[key] as string) ?? ""}
                             onChange={(e) =>
-                              set(key, e.target.value as D[typeof key])
+                              setField(key, e.target.value as D[typeof key])
                             }
                             placeholder={placeholder}
                             disabled={key === "email"}

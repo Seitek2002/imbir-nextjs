@@ -29,7 +29,6 @@ const PencilIcon = () => (
 export const ClinicProfilePage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
   const [isEditing, setIsEditing] = useState(false);
-
   const handleSave = async () => {
     if (profile) {
       await saveProfile({

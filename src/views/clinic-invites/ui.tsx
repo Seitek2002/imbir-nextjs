@@ -3,25 +3,19 @@
 import { FC, useState } from "react";
 
 import { Button } from "@/shared";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
-import { MOCK_CLINICS } from "@/shared/api/mock-data";
+import {
+  createClinicInvite,
+  deleteClinicInvite,
+  getClinicInvites,
+} from "@/shared/api/clinic-cabinet/requests";
+import { clinicCabinetKeys } from "@/shared/api/queryKeys";
 import { GeoIcon, HistoryIcon } from "@/shared/assets";
+import { useClinicCabinet } from "@/shared/lib/useClinicCabinet";
 import { cn } from "@/shared/lib/utils";
-
-const MOCK_CLINIC_ID = "1";
-const clinic = MOCK_CLINICS.find((c) => c.id === MOCK_CLINIC_ID)!;
-
-type InviteLink = {
-  id: string;
-  clinicId: string;
-  branchId: string | null;
-  branchLabel: string;
-  createdAt: string;
-  expiresAt: string;
-  active: boolean;
-};
 
 const LinkIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -89,55 +83,60 @@ const CheckIcon = () => (
   </svg>
 );
 
-const branchOptions = [
-  { id: null, label: "Главный офис", address: clinic.address },
-  ...(clinic.branches ?? []).map((b) => ({
-    id: b.id,
-    label: `Филиал — ${b.address}`,
-    address: b.address,
-  })),
-];
-
-function makeExpiryDate() {
-  const d = new Date();
-  d.setDate(d.getDate() + 7);
-  return d.toLocaleDateString("ru-RU");
-}
-
 export const ClinicInvitesPage: FC = () => {
-  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
-  const [links, setLinks] = useState<InviteLink[]>([]);
+  const queryClient = useQueryClient();
+  const { data: profile } = useClinicCabinet();
+  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
-  const selectedBranch =
-    branchOptions.find((b) => b.id === selectedBranchId) ?? branchOptions[0];
+  const { data: invites = [], refetch } = useQuery({
+    queryKey: clinicCabinetKeys.invites(),
+    queryFn: async () => {
+      const res = await getClinicInvites();
+      return res.data ?? res;
+    },
+    retry: false,
+  });
 
-  const handleCreate = () => {
-    const newLink: InviteLink = {
-      id: crypto.randomUUID(),
-      clinicId: clinic.id,
-      branchId: selectedBranch.id,
-      branchLabel: selectedBranch.label,
-      createdAt: new Date().toLocaleDateString("ru-RU"),
-      expiresAt: makeExpiryDate(),
-      active: true,
-    };
-    setLinks((prev) => [newLink, ...prev]);
+  const branchOptions = [
+    {
+      id: null as number | null,
+      label: profile?.name ?? "Главный офис",
+      address: profile?.address ?? "",
+    },
+    ...(profile?.branches ?? []).map((b) => ({
+      id: parseInt(String(b.id)) || null,
+      label: `Филиал — ${b.address}`,
+      address: b.address,
+    })),
+  ];
+
+  const handleCreate = async () => {
+    setIsCreating(true);
+    try {
+      await createClinicInvite(
+        selectedBranchId !== null ? { branch: selectedBranchId } : {},
+      );
+      refetch();
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.invites() });
+    } finally {
+      setIsCreating(false);
+    }
   };
 
-  const handleCopy = (link: InviteLink) => {
-    const params = new URLSearchParams({ clinicId: link.clinicId });
-    if (link.branchId) params.set("branchId", link.branchId);
+  const handleCopy = (invite: { id: string; branch: number | null }) => {
+    const params = new URLSearchParams({ clinicId: String(profile?.id ?? "") });
+    if (invite.branch) params.set("branchId", String(invite.branch));
     const url = `${window.location.origin}/register?${params.toString()}`;
     navigator.clipboard.writeText(url);
-    setCopiedId(link.id);
+    setCopiedId(invite.id);
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleDeactivate = (id: string) => {
-    setLinks((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, active: false } : l)),
-    );
+  const handleDeactivate = async (id: string) => {
+    await deleteClinicInvite(id);
+    refetch();
   };
 
   return (
@@ -154,12 +153,15 @@ export const ClinicInvitesPage: FC = () => {
         </h1>
 
         <div className="flex gap-6">
-          <ClinicSidebar clinicName={clinic.name} rating={clinic.rating} />
+          <ClinicSidebar
+            clinicName={profile?.name ?? "—"}
+            clinicLogo={profile?.logo ?? undefined}
+            rating={profile ? parseFloat(String(profile.rating)) : undefined}
+          />
 
           <main className="flex-1 min-w-0 flex flex-col gap-6">
-            {/* Info banner */}
             <div className="bg-[#FFF8F5] border border-[#FDDDD5] rounded-2xl p-4 flex gap-3">
-              <div className="size-9 rounded-xl bg-[#F5653E] flex items-center justify-center shrink-0 mt-0.5">
+              <div className="size-9 rounded-xl bg-[#F5653E] flex items-center justify-center shrink-0 mt-0.5 text-white">
                 <LinkIcon />
               </div>
               <div>
@@ -174,12 +176,10 @@ export const ClinicInvitesPage: FC = () => {
               </div>
             </div>
 
-            {/* Generator */}
             <div className="bg-white border border-[#E5E6E8] rounded-2xl p-5 flex flex-col gap-4">
               <h2 className="font-semibold text-[#191A1B] text-lg">
                 Создать ссылку
               </h2>
-
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium text-[#0D0D12]">
                   Филиал
@@ -211,95 +211,106 @@ export const ClinicInvitesPage: FC = () => {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-[#191A1B]">
-                          {opt.id === null ? clinic.name : `Филиал`}
+                          {opt.label}
                         </p>
-                        <p className="text-xs text-[#686F72] flex items-center gap-1 mt-0.5">
-                          <GeoIcon className="size-3 text-[#F5653E] shrink-0" />
-                          {opt.address}
-                        </p>
+                        {opt.address && (
+                          <p className="text-xs text-[#686F72] flex items-center gap-1 mt-0.5">
+                            <GeoIcon className="size-3 text-[#F5653E] shrink-0" />
+                            {opt.address}
+                          </p>
+                        )}
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
-
-              <Button className="w-full justify-center" onClick={handleCreate}>
-                Создать ссылку
+              <Button
+                className="w-full justify-center"
+                onClick={handleCreate}
+                disabled={isCreating}
+              >
+                {isCreating ? "Создание..." : "Создать ссылку"}
               </Button>
             </div>
 
-            {/* Links list */}
-            {links.length > 0 && (
+            {invites.length > 0 && (
               <div className="flex flex-col gap-3">
                 <h2 className="font-semibold text-[#191A1B] text-lg">
                   Созданные ссылки
                 </h2>
-                {links.map((link) => (
+                {invites.map((invite) => (
                   <div
-                    key={link.id}
+                    key={invite.id}
                     className={cn(
                       "bg-white border rounded-2xl p-4 flex flex-col gap-3",
-                      link.active
+                      invite.is_active
                         ? "border-[#E5E6E8]"
                         : "border-[#E5E6E8] opacity-50",
                     )}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[#191A1B] truncate">
-                          {link.branchLabel}
+                        <p className="text-sm font-medium text-[#191A1B]">
+                          {invite.branch
+                            ? `Филиал #${invite.branch}`
+                            : (profile?.name ?? "Главный офис")}
                         </p>
                         <p className="text-xs text-[#838A8D] mt-0.5 font-mono truncate">
-                          /register?clinicId={link.clinicId}
-                          {link.branchId && `&branchId=${link.branchId}`}
+                          /register?clinicId={profile?.id}
+                          {invite.branch && `&branchId=${invite.branch}`}
                         </p>
                       </div>
                       <span
                         className={cn(
                           "shrink-0 text-xs px-2 py-0.5 rounded-full font-medium",
-                          link.active
+                          invite.is_valid
                             ? "bg-green-100 text-green-700"
                             : "bg-[#F2F3F5] text-[#838A8D]",
                         )}
                       >
-                        {link.active ? "Активна" : "Деактивирована"}
+                        {invite.is_valid ? "Активна" : "Истекла"}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-4 text-xs text-[#838A8D]">
                       <span className="flex items-center gap-1">
                         <HistoryIcon className="size-3.5 text-[#F5653E]" />
-                        Создана: {link.createdAt}
+                        {new Date(invite.created_at).toLocaleDateString(
+                          "ru-RU",
+                        )}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <HistoryIcon className="size-3.5 text-[#838A8D]" />
-                        До: {link.expiresAt}
-                      </span>
+                      {invite.expires_at && (
+                        <span className="flex items-center gap-1">
+                          <HistoryIcon className="size-3.5 text-[#838A8D]" />
+                          До:{" "}
+                          {new Date(invite.expires_at).toLocaleDateString(
+                            "ru-RU",
+                          )}
+                        </span>
+                      )}
                     </div>
 
-                    {link.active && (
+                    {invite.is_active && (
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           className="flex-1 justify-center gap-2"
-                          onClick={() => handleCopy(link)}
+                          onClick={() => handleCopy(invite)}
                         >
-                          {copiedId === link.id ? (
+                          {copiedId === invite.id ? (
                             <>
-                              <CheckIcon />
-                              Скопировано
+                              <CheckIcon /> Скопировано
                             </>
                           ) : (
                             <>
-                              <CopyIcon />
-                              Копировать ссылку
+                              <CopyIcon /> Копировать ссылку
                             </>
                           )}
                         </Button>
                         <button
                           type="button"
-                          onClick={() => handleDeactivate(link.id)}
+                          onClick={() => handleDeactivate(invite.id)}
                           className="size-9 rounded-xl border border-[#E5E6E8] flex items-center justify-center text-[#838A8D] hover:border-red-300 hover:text-red-500 transition-colors"
                         >
                           <TrashIcon />
