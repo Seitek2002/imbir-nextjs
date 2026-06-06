@@ -2,12 +2,16 @@
 
 import { FC, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { ProfileHistory as HistoryWidget } from "@/widgets/profile-history";
 import { MobilePageHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
-import { MOCK_APPOINTMENTS } from "@/entities/appointment";
+import type { Appointment } from "@/entities/appointment";
 
+import { getProfileAppointments } from "@/shared/api/profile/requests";
+import { profileKeys } from "@/shared/api/queryKeys";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 const TABS = [
@@ -19,6 +23,26 @@ export const ProfileHistoryPage: FC = () => {
   const [activeTab, setActiveTab] = useState<"upcoming" | "completed">(
     "upcoming",
   );
+
+  const { data, isLoading } = useQuery({
+    queryKey: profileKeys.appointments({ status: activeTab }),
+    queryFn: () => getProfileAppointments(activeTab),
+  });
+
+  const appointments: Appointment[] = (data?.data ?? []).map((a) => ({
+    id: String(a.id),
+    doctorId: "",
+    doctorName: a.doctor,
+    doctorSpecialty: "",
+    doctorClinic: a.clinic,
+    doctorRating: 0,
+    date: a.date,
+    time: a.time,
+    service: a.service,
+    price: 0,
+    address: "",
+    status: a.status === "confirmed" ? "upcoming" : a.status,
+  }));
 
   return (
     <>
@@ -34,13 +58,10 @@ export const ProfileHistoryPage: FC = () => {
           </aside>
 
           <main className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-6 hidden md:flex">
-              <h2 className="text-[28px] md:text-[32px] font-semibold text-[#191A1B]">
-                История записей
-              </h2>
-            </div>
+            <h2 className="text-[28px] md:text-[32px] font-semibold text-[#191A1B] mb-6 hidden md:block">
+              История записей
+            </h2>
 
-            {/* Mobile: segmented control */}
             <div className="md:hidden mb-6">
               <SegmentedControl
                 options={TABS}
@@ -49,7 +70,6 @@ export const ProfileHistoryPage: FC = () => {
               />
             </div>
 
-            {/* Desktop: border pills */}
             <div className="hidden md:flex gap-2 mb-6">
               {TABS.map((tab) => (
                 <button
@@ -66,10 +86,16 @@ export const ProfileHistoryPage: FC = () => {
               ))}
             </div>
 
-            <HistoryWidget
-              appointments={MOCK_APPOINTMENTS}
-              activeTab={activeTab}
-            />
+            {isLoading ? (
+              <div className="bg-white rounded-3xl p-10 text-center border border-[#E5E6E8] text-[#838A8D]">
+                Загрузка...
+              </div>
+            ) : (
+              <HistoryWidget
+                appointments={appointments}
+                activeTab={activeTab}
+              />
+            )}
           </main>
         </div>
       </div>

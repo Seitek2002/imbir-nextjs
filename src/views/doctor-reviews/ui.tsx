@@ -2,15 +2,20 @@
 
 import { FC, useCallback, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
-import {
-  DoctorReview,
-  MOCK_DOCTOR_PROFILE,
-  MOCK_REVIEWS,
-} from "@/entities/doctor-profile";
+import { DoctorReview, useDoctorCabinet } from "@/entities/doctor-profile";
 
+import { getReviews } from "@/shared/api/reviews/requests";
+import type { ReviewAuthor } from "@/shared/api/reviews/types";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
+
+const resolveAuthorName = (author: ReviewAuthor): string => {
+  if (typeof author === "string") return author;
+  return author.full_name;
+};
 
 const DURATION = 200;
 
@@ -304,12 +309,29 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
 );
 
 export const DoctorReviewsPage: FC = () => {
-  const d = MOCK_DOCTOR_PROFILE;
-  const [reviews] = useState<DoctorReview[]>(MOCK_REVIEWS);
+  const { profile, rawProfile } = useDoctorCabinet();
   const [replyTarget, setReplyTarget] = useState<DoctorReview | null>(null);
   const [complaintTarget, setComplaintTarget] = useState<DoctorReview | null>(
     null,
   );
+
+  const { data: reviewsData, isLoading } = useQuery({
+    queryKey: ["doctor-reviews", rawProfile?.id],
+    queryFn: () => getReviews("doctor", rawProfile!.id),
+    enabled: !!rawProfile?.id,
+  });
+
+  const reviews: DoctorReview[] = (reviewsData?.data ?? []).map((r) => {
+    const name = resolveAuthorName(r.author);
+    return {
+      id: String(r.id),
+      authorName: name,
+      authorInitial: name.charAt(0).toUpperCase(),
+      rating: r.rating,
+      date: r.created_at.slice(0, 10),
+      text: r.text,
+    };
+  });
 
   return (
     <>
@@ -321,7 +343,7 @@ export const DoctorReviewsPage: FC = () => {
         <div className="bg-white rounded-3xl border border-[#E5E6E8] p-5 mb-4 flex items-center gap-6">
           <div className="flex items-center gap-2">
             <span className="text-3xl font-bold text-[#191A1B]">
-              {d.rating}
+              {profile?.rating ?? "—"}
             </span>
             <div className="flex flex-col">
               <div className="flex items-center gap-0.5">
@@ -337,21 +359,31 @@ export const DoctorReviewsPage: FC = () => {
           <div className="w-px h-10 bg-[#E5E6E8]" />
           <div>
             <span className="text-3xl font-bold text-[#191A1B]">
-              {d.totalReviews}
+              {profile?.totalReviews ?? "—"}
             </span>
             <p className="text-[#838A8D] text-xs mt-0.5">Всего отзывов</p>
           </div>
         </div>
 
         <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden">
-          {reviews.map((r) => (
-            <ReviewCard
-              key={r.id}
-              review={r}
-              onReply={setReplyTarget}
-              onComplain={setComplaintTarget}
-            />
-          ))}
+          {isLoading ? (
+            <div className="p-10 text-center text-[#838A8D] text-sm">
+              Загрузка...
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="p-10 text-center text-[#838A8D] text-sm">
+              Отзывов пока нет
+            </div>
+          ) : (
+            reviews.map((r) => (
+              <ReviewCard
+                key={r.id}
+                review={r}
+                onReply={setReplyTarget}
+                onComplain={setComplaintTarget}
+              />
+            ))
+          )}
         </div>
       </DoctorPageLayout>
 

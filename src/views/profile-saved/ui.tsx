@@ -2,13 +2,18 @@
 
 import { FC, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { MobilePageHeader } from "@/widgets/profile-mobile-header";
 import { ProfileSaved as SavedWidget } from "@/widgets/profile-saved";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
-import { MOCK_SAVED_ITEMS } from "@/entities/saved";
-import type { SavedType } from "@/entities/saved";
+import type { SavedItem, SavedType } from "@/entities/saved";
 
+import { getFavorites } from "@/shared/api/profile/requests";
+import { profileKeys } from "@/shared/api/queryKeys";
+import { api } from "@/shared/api/requests";
+import { getServiceById } from "@/shared/api/services/requests";
 import {
   ClinicBuildingIcon,
   DoctorPersonIcon,
@@ -34,8 +39,88 @@ const TABS = [
   },
 ];
 
+const emptySchedule = {
+  mon: null,
+  tue: null,
+  wed: null,
+  thu: null,
+  fri: null,
+  sat: null,
+  sun: null,
+  lunchBreak: null,
+};
+
 export const ProfileSavedPage: FC = () => {
   const [activeTab, setActiveTab] = useState<SavedType>("clinic");
+
+  const { data: favorites } = useQuery({
+    queryKey: profileKeys.favorites(),
+    queryFn: getFavorites,
+  });
+
+  const { data: savedItems = [], isLoading } = useQuery({
+    queryKey: [
+      "saved-items",
+      (favorites ?? []).map((f) => `${f.target_type}-${f.target_id}`).join(","),
+    ],
+    queryFn: async (): Promise<SavedItem[]> => {
+      if (!favorites || favorites.length === 0) return [];
+      const results = await Promise.all(
+        favorites.map(async (fav) => {
+          try {
+            if (fav.target_type === "doctor") {
+              const data = await api.getDoctorById(String(fav.target_id));
+              if (!data) return null;
+              return {
+                id: String(fav.id),
+                type: "doctor" as const,
+                savedAt: fav.created_at,
+                data,
+              };
+            }
+            if (fav.target_type === "clinic") {
+              const data = await api.getClinicById(String(fav.target_id));
+              if (!data) return null;
+              return {
+                id: String(fav.id),
+                type: "clinic" as const,
+                savedAt: fav.created_at,
+                data,
+              };
+            }
+            if (fav.target_type === "service") {
+              const s = await getServiceById(fav.target_id);
+              const data = {
+                id: String(s.id),
+                clinicId: "",
+                clinicName: "",
+                name: s.name,
+                category: s.category,
+                price:
+                  typeof s.price === "string" ? parseFloat(s.price) || 0 : 0,
+                image: "",
+                schedule: emptySchedule,
+                doctorIds: [],
+                rating: 0,
+                reviews: 0,
+              };
+              return {
+                id: String(fav.id),
+                type: "service" as const,
+                savedAt: fav.created_at,
+                data,
+              };
+            }
+          } catch {
+            return null;
+          }
+          return null;
+        }),
+      );
+      return results.filter(Boolean) as SavedItem[];
+    },
+    enabled: !!favorites,
+  });
 
   return (
     <>
@@ -62,7 +147,13 @@ export const ProfileSavedPage: FC = () => {
               className="mb-6"
             />
 
-            <SavedWidget items={MOCK_SAVED_ITEMS} activeTab={activeTab} />
+            {isLoading ? (
+              <div className="bg-white rounded-3xl p-10 text-center border border-[#E5E6E8] text-[#838A8D]">
+                Загрузка...
+              </div>
+            ) : (
+              <SavedWidget items={savedItems} activeTab={activeTab} />
+            )}
           </main>
         </div>
       </div>

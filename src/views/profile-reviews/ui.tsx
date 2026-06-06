@@ -2,13 +2,16 @@
 
 import { FC, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { MobilePageHeader } from "@/widgets/profile-mobile-header";
 import { ProfileReviews as ReviewsWidget } from "@/widgets/profile-reviews";
 import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
-import { MOCK_USER_REVIEWS } from "@/entities/user-review";
-import type { ReviewType } from "@/entities/user-review";
+import type { ReviewType, UserReview } from "@/entities/user-review";
 
+import { getProfileReviews } from "@/shared/api/profile/requests";
+import { profileKeys } from "@/shared/api/queryKeys";
 import {
   ClinicBuildingIcon,
   DoctorPersonIcon,
@@ -37,6 +40,19 @@ const TABS = [
 export const ProfileReviewsPage: FC = () => {
   const [activeTab, setActiveTab] = useState<ReviewType>("clinic");
 
+  const { data, isLoading } = useQuery({
+    queryKey: profileKeys.reviews(),
+    queryFn: getProfileReviews,
+  });
+
+  const reviews: UserReview[] = (data?.data ?? []).map((r) => ({
+    id: String(r.id),
+    type: r.target_type as ReviewType,
+    rating: r.rating,
+    comment: r.text ?? "",
+    date: r.created_at.slice(0, 10),
+  }));
+
   return (
     <>
       <MobilePageHeader title="Отзывы" />
@@ -62,7 +78,13 @@ export const ProfileReviewsPage: FC = () => {
               className="mb-6"
             />
 
-            <ReviewsWidget reviews={MOCK_USER_REVIEWS} activeTab={activeTab} />
+            {isLoading ? (
+              <div className="bg-white rounded-3xl p-10 text-center border border-[#E5E6E8] text-[#838A8D]">
+                Загрузка...
+              </div>
+            ) : (
+              <ReviewsWidget reviews={reviews} activeTab={activeTab} />
+            )}
           </main>
         </div>
       </div>

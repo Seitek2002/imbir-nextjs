@@ -4,7 +4,7 @@ import { FC, useCallback, useState } from "react";
 
 import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
-import { DoctorService, MOCK_SERVICES } from "@/entities/doctor-profile";
+import { DoctorService } from "@/entities/doctor-profile";
 
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
@@ -142,7 +142,7 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
 };
 
 export const DoctorServicesPage: FC = () => {
-  const [services, setServices] = useState<DoctorService[]>(MOCK_SERVICES);
+  const [services, setServices] = useState<DoctorService[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleAdd = (s: Omit<DoctorService, "id">) =>
