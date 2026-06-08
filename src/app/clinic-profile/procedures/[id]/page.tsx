@@ -9,7 +9,7 @@ import { ConfirmDialog } from "@/shared";
 
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
-import { MOCK_CLINIC_PROFILE } from "@/entities/clinic-profile";
+import { useClinicCabinet } from "@/entities/clinic-profile";
 
 type Specialist = {
   id: string;
@@ -41,6 +41,7 @@ export default function ProcedureDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
+  const { profile } = useClinicCabinet();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState(MOCK_PROCEDURE_DATA.name);
@@ -149,9 +150,9 @@ export default function ProcedureDetailsPage() {
 
       <div className="flex gap-6">
         <ClinicSidebar
-          clinicName={MOCK_CLINIC_PROFILE.name}
-          clinicLogo={MOCK_CLINIC_PROFILE.logo}
-          rating={MOCK_CLINIC_PROFILE.rating}
+          clinicName={profile?.name ?? ""}
+          clinicLogo={profile?.logo}
+          rating={profile?.rating}
         />
 
         <main className="flex-1 min-w-0">

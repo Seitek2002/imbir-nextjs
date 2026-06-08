@@ -9,7 +9,7 @@ import { Dropdown } from "@/shared";
 
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
-import { MOCK_CLINIC_PROFILE } from "@/entities/clinic-profile";
+import { useClinicCabinet } from "@/entities/clinic-profile";
 import {
   EMPTY_SPECIALIST_FORM,
   type SpecialistFormData,
@@ -24,6 +24,7 @@ const lbl = "block text-[#838A8D] text-sm mb-1.5";
 
 export default function NewSpecialistPage() {
   const router = useRouter();
+  const { profile } = useClinicCabinet();
   const { add } = useSpecialistsStore();
   const [d, setD] = useState<SpecialistFormData>({ ...EMPTY_SPECIALIST_FORM });
   const [certs, setCerts] = useState<string[]>([]);
@@ -82,9 +83,9 @@ export default function NewSpecialistPage() {
 
       <div className="flex gap-6">
         <ClinicSidebar
-          clinicName={MOCK_CLINIC_PROFILE.name}
-          clinicLogo={MOCK_CLINIC_PROFILE.logo}
-          rating={MOCK_CLINIC_PROFILE.rating}
+          clinicName={profile?.name ?? ""}
+          clinicLogo={profile?.logo}
+          rating={profile?.rating}
         />
 
         <main className="flex-1 min-w-0">

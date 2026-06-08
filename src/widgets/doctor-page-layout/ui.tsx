@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { DoctorSidebar } from "@/widgets/doctor-sidebar";
 
-import { MOCK_DOCTOR_PROFILE } from "@/entities/doctor-profile";
+import { useDoctorCabinet } from "@/entities/doctor-profile";
 
 import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets";
 
@@ -23,8 +23,6 @@ type Props = {
   headerRight?: ReactNode;
 };
 
-const d = MOCK_DOCTOR_PROFILE;
-
 export const DoctorPageLayout: FC<Props> = ({
   title,
   children,
@@ -33,6 +31,7 @@ export const DoctorPageLayout: FC<Props> = ({
   headerRight,
 }) => {
   const router = useRouter();
+  const { profile } = useDoctorCabinet();
 
   const rightSlot =
     headerRight ??
@@ -84,10 +83,10 @@ export const DoctorPageLayout: FC<Props> = ({
         <div className="flex gap-6">
           <div className="hidden lg:block">
             <DoctorSidebar
-              fullName={d.fullName}
-              photo={d.photo}
-              specialty={d.specialty}
-              rating={d.rating}
+              fullName={profile?.fullName ?? ""}
+              photo={profile?.photo}
+              specialty={profile?.specialty ?? ""}
+              rating={profile?.rating ?? 0}
             />
           </div>
 

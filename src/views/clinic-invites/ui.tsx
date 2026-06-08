@@ -6,12 +6,10 @@ import { Button } from "@/shared";
 
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
-import { MOCK_CLINICS } from "@/shared/api/mock-data";
+import { useClinicCabinet } from "@/entities/clinic-profile";
+
 import { GeoIcon, HistoryIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
-
-const MOCK_CLINIC_ID = "1";
-const clinic = MOCK_CLINICS.find((c) => c.id === MOCK_CLINIC_ID)!;
 
 type InviteLink = {
   id: string;
@@ -89,15 +87,6 @@ const CheckIcon = () => (
   </svg>
 );
 
-const branchOptions = [
-  { id: null, label: "Главный офис", address: clinic.address },
-  ...(clinic.branches ?? []).map((b) => ({
-    id: b.id,
-    label: `Филиал — ${b.address}`,
-    address: b.address,
-  })),
-];
-
 function makeExpiryDate() {
   const d = new Date();
   d.setDate(d.getDate() + 7);
@@ -105,17 +94,28 @@ function makeExpiryDate() {
 }
 
 export const ClinicInvitesPage: FC = () => {
+  const { profile, rawProfile } = useClinicCabinet();
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [links, setLinks] = useState<InviteLink[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const branchOptions = [
+    { id: null, label: "Главный офис", address: profile?.fullAddress ?? "" },
+    ...(rawProfile?.branches ?? []).map((b) => ({
+      id: b.id,
+      label: `Филиал — ${b.address}`,
+      address: b.address,
+    })),
+  ];
+
+  const clinicId = profile?.id ?? "";
   const selectedBranch =
     branchOptions.find((b) => b.id === selectedBranchId) ?? branchOptions[0];
 
   const handleCreate = () => {
     const newLink: InviteLink = {
       id: crypto.randomUUID(),
-      clinicId: clinic.id,
+      clinicId,
       branchId: selectedBranch.id,
       branchLabel: selectedBranch.label,
       createdAt: new Date().toLocaleDateString("ru-RU"),
@@ -154,7 +154,10 @@ export const ClinicInvitesPage: FC = () => {
         </h1>
 
         <div className="flex gap-6">
-          <ClinicSidebar clinicName={clinic.name} rating={clinic.rating} />
+          <ClinicSidebar
+            clinicName={profile?.name ?? ""}
+            rating={profile?.rating}
+          />
 
           <main className="flex-1 min-w-0 flex flex-col gap-6">
             {/* Info banner */}
@@ -211,7 +214,9 @@ export const ClinicInvitesPage: FC = () => {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-[#191A1B]">
-                          {opt.id === null ? clinic.name : `Филиал`}
+                          {opt.id === null
+                            ? (profile?.name ?? "Главный офис")
+                            : `Филиал`}
                         </p>
                         <p className="text-xs text-[#686F72] flex items-center gap-1 mt-0.5">
                           <GeoIcon className="size-3 text-[#F5653E] shrink-0" />

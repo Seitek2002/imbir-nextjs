@@ -9,7 +9,7 @@ import { Dropdown } from "@/shared";
 
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
-import { MOCK_CLINIC_PROFILE } from "@/entities/clinic-profile";
+import { useClinicCabinet } from "@/entities/clinic-profile";
 
 type WorkSchedule = {
   day: string;
@@ -19,6 +19,7 @@ type WorkSchedule = {
 
 export default function NewProcedurePage() {
   const router = useRouter();
+  const { profile } = useClinicCabinet();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [photo, setPhoto] = useState<string>();
@@ -89,9 +90,9 @@ export default function NewProcedurePage() {
 
       <div className="flex gap-6">
         <ClinicSidebar
-          clinicName={MOCK_CLINIC_PROFILE.name}
-          clinicLogo={MOCK_CLINIC_PROFILE.logo}
-          rating={MOCK_CLINIC_PROFILE.rating}
+          clinicName={profile?.name ?? ""}
+          clinicLogo={profile?.logo}
+          rating={profile?.rating}
         />
 
         <main className="flex-1 min-w-0">

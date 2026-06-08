@@ -7,17 +7,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button, IconBtn, Input, SearchInput, Textarea } from "@/shared";
 import { Header } from "@/widgets";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   AppointmentDateTimePicker,
   type ConsultationMode,
 } from "@/features/appointment-datetime-picker";
 
-import {
-  MOCK_CLINICS,
-  MOCK_DOCTORS,
-  MOCK_SERVICES,
-} from "@/shared/api/mock-data";
+import { api } from "@/shared/api/requests";
+import { getServices } from "@/shared/api/services/requests";
 import {
   CalendarIcon,
   DropdownArrowIcon,
@@ -75,39 +73,6 @@ type OptionalFormErrors = {
   phone?: string;
   email?: string;
 };
-
-const CLINICS: Clinic[] = MOCK_CLINICS.map((c) => ({
-  id: c.id,
-  name: c.name,
-  rating: c.rating,
-  reviews: c.reviews,
-  experience: c.experience,
-  address: c.address,
-  image: c.image ?? "",
-}));
-
-const DOCTORS: Doctor[] = MOCK_DOCTORS.map((d) => ({
-  id: String(d.id),
-  clinicId: d.workplaces[0]?.clinicId ?? "",
-  name: d.name,
-  specialty: d.specialty,
-  rating: d.rating,
-  reviews: d.reviews,
-  experience: d.experience,
-  image: d.image ?? "",
-}));
-
-const SERVICES: Service[] = MOCK_SERVICES.map((s) => ({
-  id: s.id,
-  clinicId: s.clinicId,
-  doctorIds: s.doctorIds,
-  title: s.name,
-  category: s.category,
-  price: s.price,
-  rating: s.rating,
-  reviews: s.reviews,
-  image: s.image ?? "",
-}));
 
 const MONTHS_GENITIVE = [
   "января",
@@ -281,7 +246,14 @@ const SelectionListItem = ({
           compact ? "size-16" : "size-20",
         )}
       >
-        <Image src={item.image} alt={itemTitle} fill className="object-cover" />
+        {item.image ? (
+          <Image
+            src={item.image}
+            alt={itemTitle}
+            fill
+            className="object-cover"
+          />
+        ) : null}
       </div>
 
       <div className="min-w-0 flex-1 text-left">
@@ -410,13 +382,15 @@ const SummaryCard: FC<{
       )}
 
       <div className="relative h-64 lg:flex-1 bg-[#FFF8F5]">
-        <Image
-          src={doctor.image}
-          alt={doctor.name}
-          fill
-          className="object-cover object-[center_20%]"
-          sizes="(max-width: 768px) 100vw, 400px"
-        />
+        {doctor.image ? (
+          <Image
+            src={doctor.image}
+            alt={doctor.name}
+            fill
+            className="object-cover object-[center_20%]"
+            sizes="(max-width: 768px) 100vw, 400px"
+          />
+        ) : null}
       </div>
 
       <div className="p-3 shrink-0">
@@ -503,14 +477,61 @@ export const RecordPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  const { data: clinicsData = [] } = useQuery({
+    queryKey: ["record-clinics"],
+    queryFn: () => api.getClinics(),
+  });
+
+  const { data: doctorsData = [] } = useQuery({
+    queryKey: ["record-doctors"],
+    queryFn: () => api.getDoctors(),
+  });
+
+  const { data: servicesRaw } = useQuery({
+    queryKey: ["record-services", selectedClinicId, selectedDoctorId],
+    queryFn: () =>
+      getServices({
+        ...(selectedClinicId ? { clinic_id: selectedClinicId } : {}),
+        ...(selectedDoctorId ? { doctor_id: selectedDoctorId } : {}),
+      }),
+  });
+
+  const CLINICS: Clinic[] = clinicsData.map((c) => ({
+    id: c.id,
+    name: c.name,
+    rating: c.rating,
+    reviews: c.reviews,
+    experience: c.experience,
+    address: c.address,
+    image: c.image ?? "",
+  }));
+
+  const DOCTORS: Doctor[] = doctorsData.map((d) => ({
+    id: String(d.id),
+    clinicId: d.workplaces[0]?.clinicId ?? "",
+    name: d.name,
+    specialty: d.specialty,
+    rating: d.rating,
+    reviews: d.reviews,
+    experience: d.experience,
+    image: d.image ?? "",
+  }));
+
+  const SERVICES: Service[] = (servicesRaw?.data ?? []).map((s) => ({
+    id: String(s.id),
+    clinicId: "",
+    doctorIds: [],
+    title: s.name,
+    category: s.category,
+    price: typeof s.price === "string" ? parseFloat(s.price) || 0 : 0,
+    rating: 0,
+    reviews: 0,
+    image: "",
+  }));
+
   useEffect(() => {
     const serviceId = urlParams.get("service");
-    if (!serviceId) return;
-    const service = SERVICES.find((s) => s.id === serviceId);
-    if (!service) return;
-    setSelectedServiceId(serviceId);
-    setSelectedClinicId(service.clinicId);
-    setSelectedDoctorId(service.doctorIds[0] ?? null);
+    if (serviceId) setSelectedServiceId(serviceId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -526,20 +547,20 @@ export const RecordPage = () => {
 
   const clinicMap = useMemo(
     () => new Map(CLINICS.map((clinic) => [clinic.id, clinic])),
-    [],
+    [CLINICS],
   );
 
   const selectedClinic = useMemo(
     () => CLINICS.find((clinic) => clinic.id === selectedClinicId) ?? null,
-    [selectedClinicId],
+    [CLINICS, selectedClinicId],
   );
   const selectedDoctor = useMemo(
     () => DOCTORS.find((doctor) => doctor.id === selectedDoctorId) ?? null,
-    [selectedDoctorId],
+    [DOCTORS, selectedDoctorId],
   );
   const selectedService = useMemo(
     () => SERVICES.find((service) => service.id === selectedServiceId) ?? null,
-    [selectedServiceId],
+    [SERVICES, selectedServiceId],
   );
 
   const doctorOptions = useMemo(
@@ -547,21 +568,11 @@ export const RecordPage = () => {
       DOCTORS.filter(
         (doctor) => !selectedClinicId || doctor.clinicId === selectedClinicId,
       ),
-    [selectedClinicId],
+    [DOCTORS, selectedClinicId],
   );
 
-  const serviceOptions = useMemo(
-    () =>
-      SERVICES.filter((service) => {
-        const matchesClinic =
-          !selectedClinicId || service.clinicId === selectedClinicId;
-        const matchesDoctor =
-          !selectedDoctorId || service.doctorIds.includes(selectedDoctorId);
-
-        return matchesClinic && matchesDoctor;
-      }),
-    [selectedClinicId, selectedDoctorId],
-  );
+  // Services are already filtered server-side by selectedClinicId/selectedDoctorId
+  const serviceOptions = SERVICES;
 
   const isStep1Complete =
     Boolean(selectedClinicId) &&
@@ -621,20 +632,7 @@ export const RecordPage = () => {
   };
 
   const applyServiceSelection = (serviceId: string) => {
-    const matchedService = SERVICES.find((service) => service.id === serviceId);
-    if (!matchedService) return;
-
     setSelectedServiceId(serviceId);
-
-    if (selectedClinicId !== matchedService.clinicId) {
-      setSelectedClinicId(matchedService.clinicId);
-    }
-    if (
-      !selectedDoctorId ||
-      !matchedService.doctorIds.includes(selectedDoctorId)
-    ) {
-      setSelectedDoctorId(matchedService.doctorIds[0] ?? null);
-    }
   };
 
   const modalConfig = useMemo(() => {
@@ -661,7 +659,7 @@ export const RecordPage = () => {
       searchPlaceholder: "Поиск услуги",
       items: serviceOptions as SelectionItem[],
     };
-  }, [activeModal, doctorOptions, serviceOptions]);
+  }, [activeModal, CLINICS, doctorOptions, serviceOptions]);
 
   const filteredModalItems = useMemo(() => {
     if (!modalConfig) return [];
@@ -721,6 +719,7 @@ export const RecordPage = () => {
     selectedClinicId,
     selectedDoctorId,
     selectedServiceId,
+    CLINICS,
     doctorOptions,
     serviceOptions,
   ]);

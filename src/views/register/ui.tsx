@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Footer, Header } from "@/widgets";
 
 import { registerClientFn } from "@/shared/api/auth/requests";
-import { MOCK_CLINICS } from "@/shared/api/mock-data";
+import { getClinicById } from "@/shared/api/clinics/requests";
 import {
   EmailIcon,
   EyeIcon,
@@ -141,20 +141,23 @@ export const RegisterPage = () => {
   useEffect(() => {
     const clinicId = searchParams.get("clinicId");
     if (!clinicId) return;
-    const clinic = MOCK_CLINICS.find((c) => c.id === clinicId);
-    if (!clinic) return;
     const branchId = searchParams.get("branchId");
-    const branch = branchId
-      ? clinic.branches?.find((b) => b.id === branchId)
-      : null;
-    setInviteClinic({
-      clinicId: clinic.id,
-      clinicName: clinic.name,
-      branchId: branchId ?? null,
-      branchAddress: branch?.address ?? clinic.address,
-    });
-    setSelectedRole("doctor");
-    setActiveForm("doctor");
+    getClinicById(clinicId)
+      .then((clinic) => {
+        const branch = branchId
+          ? clinic.branches?.find((b) => b.id === branchId)
+          : null;
+        setInviteClinic({
+          clinicId: String(clinic.id),
+          clinicName: clinic.name,
+          branchId: branchId ?? null,
+          branchAddress: branch?.address ?? clinic.address ?? "",
+        });
+        setSelectedRole("doctor");
+        setActiveForm("doctor");
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Client form
