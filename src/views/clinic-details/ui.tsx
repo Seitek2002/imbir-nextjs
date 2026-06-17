@@ -4,6 +4,7 @@ import { FC, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { DoctorCard } from "@/entities";
 import { Footer, Header } from "@/widgets";
@@ -32,10 +33,15 @@ type Props = {
 };
 
 export const ClinicDetailsPage: FC<Props> = ({ id }) => {
+  const router = useRouter();
   const [activeImageIdx, setActiveImageIdx] = useState(0);
 
   // 1. ЗАПРАШИВАЕМ ДАННЫЕ ПАРАЛЛЕЛЬНО
-  const { data: clinic, isLoading: isClinicLoading } = useQuery({
+  const {
+    data: clinic,
+    isLoading: isClinicLoading,
+    isError: isClinicError,
+  } = useQuery({
     queryKey: ["clinic", id],
     queryFn: () => api.getClinicById(id),
   });
@@ -62,6 +68,22 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
     queryKey: ["reviews", "clinic", id],
     queryFn: () => api.getReviewsByClinic(id),
   });
+
+  if (isClinicError || (!isClinicLoading && !clinic)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center flex-col gap-4">
+        <p className="text-xl font-semibold text-[#191A1B]">
+          Клиника не найдена
+        </p>
+        <button
+          className="text-[#F5653E] underline text-sm"
+          onClick={() => router.push(ROUTES.CLINICS)}
+        >
+          Вернуться к списку клиник
+        </button>
+      </div>
+    );
+  }
 
   if (isClinicLoading || !clinic) {
     return (
@@ -217,10 +239,18 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
               <Button
                 variant="outline"
                 className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-[#F5653E]"
+                onClick={() =>
+                  router.push(`${ROUTES.RECORD}?clinic=${id}&mode=offline`)
+                }
               >
                 Офлайн-консультация
               </Button>
-              <Button className="flex-1 justify-center">
+              <Button
+                className="flex-1 justify-center"
+                onClick={() =>
+                  router.push(`${ROUTES.RECORD}?clinic=${id}&mode=online`)
+                }
+              >
                 Онлайн-консультация
               </Button>
             </div>

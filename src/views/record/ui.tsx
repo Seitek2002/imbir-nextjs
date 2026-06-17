@@ -532,6 +532,12 @@ export const RecordPage = () => {
   useEffect(() => {
     const serviceId = urlParams.get("service");
     if (serviceId) setSelectedServiceId(serviceId);
+    const doctorId = urlParams.get("doctor");
+    if (doctorId) setSelectedDoctorId(doctorId);
+    const clinicId = urlParams.get("clinic");
+    if (clinicId) setSelectedClinicId(clinicId);
+    const modeParam = urlParams.get("mode");
+    if (modeParam === "online" || modeParam === "offline") setMode(modeParam);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

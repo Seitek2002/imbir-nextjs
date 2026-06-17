@@ -4,6 +4,7 @@ import { FC } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Footer, Header, VideosSwiper } from "@/widgets";
 import { useQuery } from "@tanstack/react-query";
@@ -30,8 +31,14 @@ type Props = {
 };
 
 export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
+  const router = useRouter();
+
   // 1. ПОЛУЧАЕМ ДАННЫЕ ВРАЧА
-  const { data: doctor, isLoading: isDoctorLoading } = useQuery({
+  const {
+    data: doctor,
+    isLoading: isDoctorLoading,
+    isError: isDoctorError,
+  } = useQuery({
     queryKey: ["doctor", id],
     queryFn: () => api.getDoctorById(id),
   });
@@ -41,6 +48,22 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
     queryKey: ["reviews", "doctor", id],
     queryFn: () => api.getReviewsByDoctor(id),
   });
+
+  if (isDoctorError || (!isDoctorLoading && !doctor)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center flex-col gap-4">
+        <p className="text-xl font-semibold text-[#191A1B]">
+          Специалист не найден
+        </p>
+        <button
+          className="text-[#F5653E] underline text-sm"
+          onClick={() => router.push(ROUTES.SPECIALISTS)}
+        >
+          Вернуться к списку специалистов
+        </button>
+      </div>
+    );
+  }
 
   if (isDoctorLoading || !doctor) {
     return (
@@ -187,11 +210,19 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               <Button
                 variant="outline"
                 className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-[#F5653E]"
+                onClick={() =>
+                  router.push(`${ROUTES.RECORD}?doctor=${id}&mode=offline`)
+                }
               >
                 Офлайн-запись
               </Button>
               {doctor.isOnlineAvailable && (
-                <Button className="flex-1 justify-center">
+                <Button
+                  className="flex-1 justify-center"
+                  onClick={() =>
+                    router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
+                  }
+                >
                   Видео-консультация
                 </Button>
               )}
@@ -324,11 +355,20 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
         <Button
           className="flex-1 justify-center bg-[#FFF2F0] text-[#F5653E] border border-transparent"
           size="lg"
+          onClick={() =>
+            router.push(`${ROUTES.RECORD}?doctor=${id}&mode=offline`)
+          }
         >
           Офлайн
         </Button>
         {doctor.isOnlineAvailable && (
-          <Button className="flex-1 justify-center" size="lg">
+          <Button
+            className="flex-1 justify-center"
+            size="lg"
+            onClick={() =>
+              router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
+            }
+          >
             Онлайн
           </Button>
         )}

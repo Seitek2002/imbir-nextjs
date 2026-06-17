@@ -80,7 +80,9 @@ export const ClinicCard: FC<Props> = ({
               {reviews !== undefined && (
                 <span className="text-[#686F72]">({reviews})</span>
               )}
-              <span className="text-[#686F72]">• {experience} лет опыта</span>
+              {experience > 0 && (
+                <span className="text-[#686F72]">• {experience} лет опыта</span>
+              )}
             </div>
           )}
           <div className="flex items-center gap-1 mt-1 text-xs text-[#686F72]">
@@ -140,7 +142,9 @@ export const ClinicCard: FC<Props> = ({
             {reviews !== undefined && (
               <span className="text-[#686F72]">({reviews})</span>
             )}
-            <span className="text-[#686F72]">• {experience} лет опыта</span>
+            {experience > 0 && (
+              <span className="text-[#686F72]">• {experience} лет опыта</span>
+            )}
           </div>
         )}
         <div className="flex items-center gap-1 mt-1 text-xs text-[#686F72]">

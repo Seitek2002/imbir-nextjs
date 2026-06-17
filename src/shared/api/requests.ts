@@ -27,6 +27,14 @@ import type { ReviewItem as ApiReview } from "./reviews/types";
 import { getServices } from "./services/requests";
 import type { ServiceListItem as ApiService } from "./services/types";
 
+const toHttps = (url: string | null | undefined): string | undefined => {
+  if (!url) return undefined;
+  return url.replace(
+    /^http:\/\/imbir\.sino0on\.ru/,
+    "https://imbir.sino0on.ru",
+  );
+};
+
 const emptySchedule = {
   mon: null,
   tue: null,
@@ -46,7 +54,7 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
   isOnlineAvailable: d.is_online_available,
   rating: d.rating,
   reviews: d.reviews_count,
-  image: d.photo ?? undefined,
+  image: toHttps(d.photo),
   workplaces: d.workplaces.map((w) => ({
     clinicId: String(w.clinic_id),
     clinicName: w.clinic_name,
@@ -65,7 +73,7 @@ const adaptClinic = (c: ApiClinic): MockClinicListItem => ({
   city: c.city,
   coordinates: { lat: 0, lng: 0 },
   specialties: c.primary_specializations ?? [],
-  image: c.logo ?? undefined,
+  image: toHttps(c.logo),
 });
 
 const adaptService = (s: ApiService): MockServiceItem => ({
