@@ -4,14 +4,44 @@ import { FC } from "react";
 
 import Link from "next/link";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 import { ProceduresList } from "@/widgets/procedures-list";
 
-import { MOCK_PROCEDURES } from "@/entities/clinic-procedure";
+import type { Procedure } from "@/entities/clinic-procedure";
 import { useClinicCabinet } from "@/entities/clinic-profile";
+
+import {
+  deleteClinicService,
+  getClinicServices,
+} from "@/shared/api/clinic-cabinet/requests";
+import { clinicCabinetKeys } from "@/shared/api/queryKeys";
 
 export const ClinicProceduresPage: FC = () => {
   const { profile } = useClinicCabinet();
+  const queryClient = useQueryClient();
+
+  const { data } = useQuery({
+    queryKey: clinicCabinetKeys.services(),
+    queryFn: getClinicServices,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteClinicService(Number(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.services() });
+    },
+  });
+
+  const procedures: Procedure[] = (data?.data ?? []).map((s) => ({
+    id: String(s.id),
+    name: s.name,
+    category: s.category,
+    clinic: profile?.name ?? "",
+    price:
+      typeof s.price === "string" ? parseFloat(s.price) || 0 : (s.price ?? 0),
+  }));
 
   return (
     <div className="w-full min-h-screen">
@@ -52,7 +82,10 @@ export const ClinicProceduresPage: FC = () => {
               </Link>
             </div>
 
-            <ProceduresList procedures={MOCK_PROCEDURES} />
+            <ProceduresList
+              procedures={procedures}
+              onDelete={(id) => deleteMutation.mutate(id)}
+            />
           </main>
         </div>
       </div>

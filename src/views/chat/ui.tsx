@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Header } from "@/widgets";
+import { useQuery } from "@tanstack/react-query";
 
+import {
+  chatLoginFn,
+  getChatMessages,
+  getChatRooms,
+} from "@/shared/api/chat/requests";
+import { chatKeys } from "@/shared/api/queryKeys";
 import {
   FilterSample,
   HeaderBackIcon,
@@ -13,8 +20,11 @@ import { cn } from "@/shared/lib/utils";
 
 // ── Backend config ────────────────────────────────────────────────────────────
 
-const API_BASE = "http://155.212.216.197:8054";
-const WS_BASE = "ws://155.212.216.197:8054";
+const CHAT_URL =
+  process.env.NEXT_PUBLIC_CHAT_URL ?? "http://155.212.216.197:8054";
+const WS_BASE = CHAT_URL.replace(/^https?/, (m) =>
+  m === "https" ? "wss" : "ws",
+);
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -69,27 +79,17 @@ function useChatRoom(roomName: string, currentUser: string | null) {
     setTypingUsers(new Set());
 
     // 1. Load history
-    fetch(`${API_BASE}/api/messages/${roomName}/`, { credentials: "include" })
-      .then((r) => r.json())
-      .then(
-        (
-          history: Array<{
-            id: number;
-            content: string;
-            timestamp: string;
-            sender_username: string;
-            is_read: boolean;
-          }>,
-        ) =>
-          setMessages(
-            history.map((m) => ({
-              id: m.id,
-              content: m.content,
-              timestamp: m.timestamp,
-              isMe: m.sender_username === currentUser,
-              isRead: m.is_read,
-            })),
-          ),
+    getChatMessages(roomName)
+      .then((history) =>
+        setMessages(
+          history.map((m) => ({
+            id: m.id,
+            content: m.content,
+            timestamp: m.timestamp,
+            isMe: m.username === currentUser,
+            isRead: false,
+          })),
+        ),
       )
       .catch(() => {})
       .finally(() => setIsLoading(false));
@@ -186,64 +186,6 @@ function useChatRoom(roomName: string, currentUser: string | null) {
     sendTyping,
   };
 }
-
-const MOCK_CHATS: Chat[] = [
-  {
-    id: "ai",
-    name: "Имбирь",
-    role: "ИИ-Ассистент",
-    avatar: "",
-    isAI: true,
-    lastMessage: "Пожалуйста, рад помочь вам, не забывайте.",
-    time: "06:30",
-    unreadCount: 2,
-    isOnline: true,
-  },
-  {
-    id: "alina",
-    name: "С. Алина Тимуровна",
-    avatar: "https://pravatar.cc/150?img=47",
-    lastMessage: "Пожалуйста, рад помочь вам, не забывайте.",
-    time: "06:30",
-    unreadCount: 2,
-    status: "Был недавно",
-  },
-  {
-    id: "alan",
-    name: "Dr. Alan Smith",
-    avatar: "https://pravatar.cc/150?img=12",
-    lastMessage: "Нет проблем, рад, что смог помочь.",
-    time: "08:45",
-    unreadCount: 4,
-  },
-  {
-    id: "arya",
-    name: "Dr. Arya Syaputra",
-    avatar: "https://pravatar.cc/150?img=33",
-    lastMessage: "Вы: Могу я получить адрес офиса?",
-    isLastMine: true,
-    time: "11:15",
-    unreadCount: 0,
-  },
-  {
-    id: "riri",
-    name: "Dr. Riri Permatasari",
-    avatar: "https://pravatar.cc/150?img=25",
-    lastMessage: "Всегда готов помочь, не стесняйтесь обращаться снов...",
-    time: "02:00",
-    unreadCount: 0,
-  },
-  {
-    id: "putri",
-    name: "Dr. Putri Anggraheni",
-    avatar: "https://pravatar.cc/150?img=29",
-    lastMessage: "Вы: Спасибо, доктор",
-    isLastMine: true,
-    time: "06:30",
-    unreadCount: 0,
-    status: "Был недавно",
-  },
-];
 
 // ── Inline SVG icons ──────────────────────────────────────────────────────────
 
@@ -437,7 +379,7 @@ export const ChatPage = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState("");
 
-  const [activeChatId, setActiveChatId] = useState<string>("putri");
+  const [activeChatId, setActiveChatId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const [inputText, setInputText] = useState("");
   const [isAttachOpen, setIsAttachOpen] = useState(false);
@@ -446,7 +388,24 @@ export const ChatPage = () => {
   const attachRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const activeChat = MOCK_CHATS.find((c) => c.id === activeChatId);
+  const { data: roomsData } = useQuery({
+    queryKey: chatKeys.rooms(),
+    queryFn: getChatRooms,
+    enabled: !!currentUser,
+  });
+
+  const rooms: Chat[] = (roomsData?.data ?? []).map((r) => ({
+    id: r.room_name,
+    name: r.interlocutor.display_name,
+    avatar: r.interlocutor.avatar ?? "",
+    lastMessage: r.last_message?.content ?? "",
+    isLastMine: r.last_message?.is_mine ?? false,
+    time: r.last_message ? formatTime(r.last_message.timestamp) : "",
+    unreadCount: r.unread_count,
+    isOnline: false,
+  }));
+
+  const activeChat = rooms.find((c) => c.id === activeChatId);
 
   const {
     messages,
@@ -465,6 +424,13 @@ export const ChatPage = () => {
     setIsAttachOpen(false);
   }, [activeChatId]);
 
+  // Auto-select first room when loaded
+  useEffect(() => {
+    if (rooms.length > 0 && !activeChatId) {
+      setActiveChatId(rooms[0].id);
+    }
+  }, [rooms, activeChatId]);
+
   // Close attach popup on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -481,21 +447,11 @@ export const ChatPage = () => {
     setIsLoggingIn(true);
     setLoginError("");
     try {
-      const res = await fetch(`${API_BASE}/api/login/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username }),
-      });
-      if (res.ok) {
-        const data = (await res.json()) as { username: string };
-        setCurrentUser(data.username);
-        localStorage.setItem("chat_username", data.username);
-      } else {
-        setLoginError("Ошибка входа. Попробуйте снова.");
-      }
+      await chatLoginFn(username);
+      setCurrentUser(username);
+      localStorage.setItem("chat_username", username);
     } catch {
-      setLoginError("Нет соединения с сервером.");
+      setLoginError("Ошибка входа. Попробуйте снова.");
     } finally {
       setIsLoggingIn(false);
     }
@@ -525,7 +481,7 @@ export const ChatPage = () => {
     localStorage.removeItem("chat_username");
   };
 
-  const filteredChats = MOCK_CHATS.filter((c) =>
+  const filteredChats = rooms.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 

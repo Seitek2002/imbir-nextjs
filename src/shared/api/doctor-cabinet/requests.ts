@@ -8,6 +8,8 @@ import {
   DoctorPatientFilters,
   DoctorPrivateProfile,
   DoctorSchedule,
+  DoctorServiceBody,
+  DoctorServiceItem,
   DoctorStats,
 } from "./types";
 
@@ -77,4 +79,27 @@ export const getDoctorReviews = async (): Promise<PaginatedReviewsResponse> => {
     "/api/doctor/reviews/",
   );
   return data;
+};
+
+export const getDoctorServices = async (): Promise<{
+  data: DoctorServiceItem[];
+}> => {
+  const { data } = await apiClient.get<{ data: DoctorServiceItem[] }>(
+    "/api/doctor/services/",
+  );
+  return data;
+};
+
+export const addDoctorService = async (
+  body: DoctorServiceBody,
+): Promise<DoctorServiceItem> => {
+  const { data } = await apiClient.post<DoctorServiceItem>(
+    "/api/doctor/services/",
+    body,
+  );
+  return data;
+};
+
+export const deleteDoctorService = async (id: number): Promise<void> => {
+  await apiClient.delete(`/api/doctor/services/${id}/`);
 };

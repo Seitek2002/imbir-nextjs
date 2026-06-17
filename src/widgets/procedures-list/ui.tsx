@@ -9,10 +9,10 @@ import type { Procedure } from "@/entities/clinic-procedure";
 
 type Props = {
   procedures: Procedure[];
+  onDelete?: (id: string) => void;
 };
 
-export const ProceduresList: FC<Props> = ({ procedures }) => {
-  const [items, setItems] = useState(procedures);
+export const ProceduresList: FC<Props> = ({ procedures, onDelete }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -32,10 +32,9 @@ export const ProceduresList: FC<Props> = ({ procedures }) => {
     return () => document.removeEventListener("mousedown", close);
   }, [filterOpen]);
 
-  const handleDelete = (id: string) => setPendingDeleteId(id);
-  const categories = Array.from(new Set(items.map((i) => i.category)));
+  const categories = Array.from(new Set(procedures.map((i) => i.category)));
 
-  const filteredItems = items.filter((item) => {
+  const filteredItems = procedures.filter((item) => {
     const matchesSearch = item.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -95,7 +94,7 @@ export const ProceduresList: FC<Props> = ({ procedures }) => {
             <ProcedureCard
               key={procedure.id}
               {...procedure}
-              onDelete={handleDelete}
+              onDelete={setPendingDeleteId}
             />
           ))}
         </div>
@@ -105,9 +104,7 @@ export const ProceduresList: FC<Props> = ({ procedures }) => {
         isOpen={pendingDeleteId !== null}
         onClose={() => setPendingDeleteId(null)}
         onConfirm={() => {
-          setItems((prev) =>
-            prev.filter((item) => item.id !== pendingDeleteId),
-          );
+          if (pendingDeleteId) onDelete?.(pendingDeleteId);
           setPendingDeleteId(null);
         }}
         title="Удалить процедуру?"

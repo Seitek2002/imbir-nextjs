@@ -4,26 +4,45 @@ import { FC } from "react";
 
 import Link from "next/link";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 import { SpecialistsList } from "@/widgets/specialists-list";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
-import { useSpecialistsStore } from "@/entities/clinic-specialist";
 import type { Specialist } from "@/entities/clinic-specialist";
+
+import {
+  detachClinicDoctor,
+  getClinicDoctors,
+} from "@/shared/api/clinic-cabinet/requests";
+import { clinicCabinetKeys } from "@/shared/api/queryKeys";
 
 export const ClinicSpecialistsPage: FC = () => {
   const { profile } = useClinicCabinet();
-  const { specialists, remove } = useSpecialistsStore();
+  const queryClient = useQueryClient();
 
-  const listItems: Specialist[] = specialists.map((s) => ({
-    id: s.id,
-    name: s.fullName,
-    specialty: s.specialty,
-    clinic: s.workplace,
-    rating: s.rating,
-    reviews: s.reviews,
-    experience: parseInt(s.experienceYears) || 0,
-    image: s.photo || undefined,
+  const { data } = useQuery({
+    queryKey: clinicCabinetKeys.doctors(),
+    queryFn: getClinicDoctors,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => detachClinicDoctor(Number(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.doctors() });
+    },
+  });
+
+  const listItems: Specialist[] = (data?.data ?? []).map((d) => ({
+    id: String(d.id),
+    name: d.full_name,
+    specialty: d.specialty,
+    clinic: profile?.name ?? "",
+    rating: d.rating,
+    reviews: 0,
+    experience: 0,
+    image: d.photo ?? undefined,
   }));
 
   return (
@@ -33,10 +52,10 @@ export const ClinicSpecialistsPage: FC = () => {
           Мои специалисты
         </h1>
         <Link
-          href="/clinic-profile/specialists/new"
+          href="/clinic-profile/invites"
           className="px-4 py-2 rounded-full bg-[#F5653E] text-white text-sm font-medium hover:bg-[#E5542D] transition-colors"
         >
-          Добавить
+          Пригласить
         </Link>
       </div>
 
@@ -58,14 +77,17 @@ export const ClinicSpecialistsPage: FC = () => {
                 Мои специалисты
               </h2>
               <Link
-                href="/clinic-profile/specialists/new"
+                href="/clinic-profile/invites"
                 className="px-6 py-3 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors whitespace-nowrap"
               >
-                Добавить нового
+                Пригласить нового
               </Link>
             </div>
 
-            <SpecialistsList specialists={listItems} onDelete={remove} />
+            <SpecialistsList
+              specialists={listItems}
+              onDelete={(id) => deleteMutation.mutate(id)}
+            />
           </main>
         </div>
       </div>

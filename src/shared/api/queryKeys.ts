@@ -60,6 +60,7 @@ export const doctorCabinetKeys = {
     [...doctorCabinetKeys.all, "patients", filters] as const,
   stats: () => [...doctorCabinetKeys.all, "stats"] as const,
   reviews: () => [...doctorCabinetKeys.all, "reviews"] as const,
+  services: () => [...doctorCabinetKeys.all, "services"] as const,
 };
 
 export const clinicCabinetKeys = {

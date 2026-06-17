@@ -74,3 +74,20 @@ export type DoctorPatientFilters = {
   page?: number;
   page_size?: number;
 };
+
+export type DoctorServiceItem = {
+  id: number;
+  name: string;
+  description?: string;
+  price: number | null;
+  duration_minutes?: number;
+  is_primary: boolean;
+};
+
+export type DoctorServiceBody = {
+  name: string;
+  description?: string;
+  price?: number;
+  duration_minutes?: number;
+  is_primary?: boolean;
+};

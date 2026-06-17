@@ -3,23 +3,20 @@
 import { FC, useState } from "react";
 
 import { Button } from "@/shared";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
+import {
+  createClinicInvite,
+  deleteClinicInvite,
+  getClinicInvites,
+} from "@/shared/api/clinic-cabinet/requests";
+import { clinicCabinetKeys } from "@/shared/api/queryKeys";
 import { GeoIcon, HistoryIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
-
-type InviteLink = {
-  id: string;
-  clinicId: string;
-  branchId: string | null;
-  branchLabel: string;
-  createdAt: string;
-  expiresAt: string;
-  active: boolean;
-};
 
 const LinkIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -87,16 +84,10 @@ const CheckIcon = () => (
   </svg>
 );
 
-function makeExpiryDate() {
-  const d = new Date();
-  d.setDate(d.getDate() + 7);
-  return d.toLocaleDateString("ru-RU");
-}
-
 export const ClinicInvitesPage: FC = () => {
   const { profile, rawProfile } = useClinicCabinet();
+  const queryClient = useQueryClient();
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
-  const [links, setLinks] = useState<InviteLink[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const branchOptions = [
@@ -112,33 +103,47 @@ export const ClinicInvitesPage: FC = () => {
   const selectedBranch =
     branchOptions.find((b) => b.id === selectedBranchId) ?? branchOptions[0];
 
-  const handleCreate = () => {
-    const newLink: InviteLink = {
-      id: crypto.randomUUID(),
-      clinicId,
-      branchId: selectedBranch.id,
-      branchLabel: selectedBranch.label,
-      createdAt: new Date().toLocaleDateString("ru-RU"),
-      expiresAt: makeExpiryDate(),
-      active: true,
-    };
-    setLinks((prev) => [newLink, ...prev]);
-  };
+  const { data: invitesData } = useQuery({
+    queryKey: clinicCabinetKeys.invites(),
+    queryFn: getClinicInvites,
+  });
 
-  const handleCopy = (link: InviteLink) => {
-    const params = new URLSearchParams({ clinicId: link.clinicId });
-    if (link.branchId) params.set("branchId", link.branchId);
+  const links = invitesData?.data ?? [];
+
+  const createMutation = useMutation({
+    mutationFn: () =>
+      createClinicInvite(
+        selectedBranch.id != null ? { branch: Number(selectedBranch.id) } : {},
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.invites() });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteClinicInvite(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.invites() });
+    },
+  });
+
+  const handleCopy = (linkId: string, branchId: number | null) => {
+    const params = new URLSearchParams({ clinicId: String(clinicId) });
+    if (branchId != null) params.set("branchId", String(branchId));
     const url = `${window.location.origin}/register?${params.toString()}`;
     navigator.clipboard.writeText(url);
-    setCopiedId(link.id);
+    setCopiedId(linkId);
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleDeactivate = (id: string) => {
-    setLinks((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, active: false } : l)),
-    );
+  const getBranchLabel = (branchId: number | null) => {
+    if (branchId == null) return profile?.name ?? "Главный офис";
+    const opt = branchOptions.find((b) => b.id === String(branchId));
+    return opt ? `Филиал — ${opt.address}` : `Филиал #${branchId}`;
   };
+
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString("ru-RU");
 
   return (
     <div className="w-full min-h-screen">
@@ -228,8 +233,12 @@ export const ClinicInvitesPage: FC = () => {
                 </div>
               </div>
 
-              <Button className="w-full justify-center" onClick={handleCreate}>
-                Создать ссылку
+              <Button
+                className="w-full justify-center"
+                onClick={() => createMutation.mutate()}
+                disabled={createMutation.isPending}
+              >
+                {createMutation.isPending ? "Создание..." : "Создать ссылку"}
               </Button>
             </div>
 
@@ -244,7 +253,7 @@ export const ClinicInvitesPage: FC = () => {
                     key={link.id}
                     className={cn(
                       "bg-white border rounded-2xl p-4 flex flex-col gap-3",
-                      link.active
+                      link.is_active
                         ? "border-[#E5E6E8]"
                         : "border-[#E5E6E8] opacity-50",
                     )}
@@ -252,65 +261,66 @@ export const ClinicInvitesPage: FC = () => {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-[#191A1B] truncate">
-                          {link.branchLabel}
+                          {getBranchLabel(link.branch)}
                         </p>
                         <p className="text-xs text-[#838A8D] mt-0.5 font-mono truncate">
-                          /register?clinicId={link.clinicId}
-                          {link.branchId && `&branchId=${link.branchId}`}
+                          /register?clinicId={clinicId}
+                          {link.branch != null && `&branchId=${link.branch}`}
                         </p>
                       </div>
                       <span
                         className={cn(
                           "shrink-0 text-xs px-2 py-0.5 rounded-full font-medium",
-                          link.active
+                          link.is_valid
                             ? "bg-green-100 text-green-700"
                             : "bg-[#F2F3F5] text-[#838A8D]",
                         )}
                       >
-                        {link.active ? "Активна" : "Деактивирована"}
+                        {link.is_valid ? "Активна" : "Истекла"}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-4 text-xs text-[#838A8D]">
                       <span className="flex items-center gap-1">
                         <HistoryIcon className="size-3.5 text-[#F5653E]" />
-                        Создана: {link.createdAt}
+                        Создана: {formatDate(link.created_at)}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <HistoryIcon className="size-3.5 text-[#838A8D]" />
-                        До: {link.expiresAt}
-                      </span>
+                      {link.expires_at && (
+                        <span className="flex items-center gap-1">
+                          <HistoryIcon className="size-3.5 text-[#838A8D]" />
+                          До: {formatDate(link.expires_at)}
+                        </span>
+                      )}
                     </div>
 
-                    {link.active && (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 justify-center gap-2"
-                          onClick={() => handleCopy(link)}
-                        >
-                          {copiedId === link.id ? (
-                            <>
-                              <CheckIcon />
-                              Скопировано
-                            </>
-                          ) : (
-                            <>
-                              <CopyIcon />
-                              Копировать ссылку
-                            </>
-                          )}
-                        </Button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeactivate(link.id)}
-                          className="size-9 rounded-xl border border-[#E5E6E8] flex items-center justify-center text-[#838A8D] hover:border-red-300 hover:text-red-500 transition-colors"
-                        >
-                          <TrashIcon />
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 justify-center gap-2"
+                        onClick={() => handleCopy(link.id, link.branch)}
+                      >
+                        {copiedId === link.id ? (
+                          <>
+                            <CheckIcon />
+                            Скопировано
+                          </>
+                        ) : (
+                          <>
+                            <CopyIcon />
+                            Копировать ссылку
+                          </>
+                        )}
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={() => deleteMutation.mutate(link.id)}
+                        disabled={deleteMutation.isPending}
+                        className="size-9 rounded-xl border border-[#E5E6E8] flex items-center justify-center text-[#838A8D] hover:border-red-300 hover:text-red-500 transition-colors"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

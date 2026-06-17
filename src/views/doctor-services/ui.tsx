@@ -2,10 +2,17 @@
 
 import { FC, useCallback, useState } from "react";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
-import { DoctorService } from "@/entities/doctor-profile";
-
+import {
+  addDoctorService,
+  deleteDoctorService,
+  getDoctorServices,
+} from "@/shared/api/doctor-cabinet/requests";
+import type { DoctorServiceBody } from "@/shared/api/doctor-cabinet/types";
+import { doctorCabinetKeys } from "@/shared/api/queryKeys";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 const DURATION = 200;
@@ -13,13 +20,15 @@ const DURATION = 200;
 type AddServiceModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (service: Omit<DoctorService, "id">) => void;
+  onAdd: (service: DoctorServiceBody) => void;
+  isLoading?: boolean;
 };
 
 const AddServiceModal: FC<AddServiceModalProps> = ({
   isOpen,
   onClose,
   onAdd,
+  isLoading,
 }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [name, setName] = useState("");
@@ -39,12 +48,16 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    onAdd({ name, description, isPrimary: false });
+    onAdd({
+      name,
+      description: description || undefined,
+      price: price ? Number(price) : undefined,
+      duration_minutes: duration ? Number(duration) : undefined,
+    });
     setName("");
     setDescription("");
     setPrice("");
     setDuration("");
-    handleClose();
   };
 
   if (!isOpen && !isClosing) return null;
@@ -126,14 +139,14 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
           </div>
           <button
             onClick={handleSubmit}
-            disabled={!name.trim()}
+            disabled={!name.trim() || isLoading}
             className={`w-full py-3.5 rounded-full font-medium transition-colors ${
-              name.trim()
+              name.trim() && !isLoading
                 ? "bg-[#F5653E] text-white hover:bg-[#E5542D] active:scale-95"
                 : "bg-[#E5E6E8] text-[#C4C8CA] cursor-not-allowed"
             }`}
           >
-            Добавить
+            {isLoading ? "Сохранение..." : "Добавить"}
           </button>
         </div>
       </div>
@@ -142,11 +155,30 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
 };
 
 export const DoctorServicesPage: FC = () => {
-  const [services, setServices] = useState<DoctorService[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-  const handleAdd = (s: Omit<DoctorService, "id">) =>
-    setServices((prev) => [...prev, { ...s, id: String(Date.now()) }]);
+  const { data, isLoading } = useQuery({
+    queryKey: doctorCabinetKeys.services(),
+    queryFn: getDoctorServices,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: addDoctorService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.services() });
+      setModalOpen(false);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteDoctorService(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.services() });
+    },
+  });
+
+  const services = data?.data ?? [];
 
   return (
     <>
@@ -188,38 +220,63 @@ export const DoctorServicesPage: FC = () => {
         </div>
 
         <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden">
-          <div className="grid grid-cols-3 px-5 py-3 border-b border-[#E5E6E8]">
+          <div className="grid grid-cols-[1fr_1fr_auto] px-5 py-3 border-b border-[#E5E6E8]">
             <span className="text-[#838A8D] text-sm font-medium">
               Название услуги
             </span>
-            <span className="text-[#838A8D] text-sm font-medium">Описание</span>
             <span className="text-[#838A8D] text-sm font-medium">
-              Первичный приём
+              Стоимость
             </span>
+            <span className="w-8" />
           </div>
-          {services.map((s, i) => (
-            <div
-              key={s.id}
-              className={`grid grid-cols-3 px-5 py-4 items-center ${i !== services.length - 1 ? "border-b border-[#E5E6E8]" : ""}`}
-            >
-              <span className="text-[#191A1B] text-sm font-medium pr-3">
-                {s.name}
-              </span>
-              <span className="text-[#838A8D] text-sm pr-3 truncate">
-                {s.description}
-              </span>
-              <span className="text-[#838A8D] text-sm">
-                {s.isPrimary ? "Да" : "Нет"}
-              </span>
+
+          {isLoading ? (
+            <div className="px-5 py-12 text-center text-[#838A8D] text-sm">
+              Загрузка...
             </div>
-          ))}
+          ) : services.length === 0 ? (
+            <div className="px-5 py-12 text-center text-[#838A8D] text-sm">
+              Услуг пока нет
+            </div>
+          ) : (
+            services.map((s, i) => (
+              <div
+                key={s.id}
+                className={`grid grid-cols-[1fr_1fr_auto] px-5 py-4 items-center ${i !== services.length - 1 ? "border-b border-[#E5E6E8]" : ""}`}
+              >
+                <span className="text-[#191A1B] text-sm font-medium pr-3">
+                  {s.name}
+                </span>
+                <span className="text-[#838A8D] text-sm pr-3">
+                  {s.price != null ? `${s.price} сом` : "—"}
+                </span>
+                <button
+                  onClick={() => deleteMutation.mutate(s.id)}
+                  disabled={deleteMutation.isPending}
+                  className="w-8 h-8 flex items-center justify-center text-[#C4C8CA] hover:text-red-500 transition-colors"
+                  aria-label="Удалить"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M2 4h12M5.333 4V2.667a.667.667 0 01.667-.667h4a.667.667 0 01.667.667V4M6.667 7.333v4M9.333 7.333v4M3.333 4l.667 9.333A1.333 1.333 0 005.333 14.667h5.334a1.333 1.333 0 001.333-1.334L12.667 4"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </DoctorPageLayout>
 
       <AddServiceModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onAdd={handleAdd}
+        onAdd={addMutation.mutate}
+        isLoading={addMutation.isPending}
       />
     </>
   );
