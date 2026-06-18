@@ -5,6 +5,7 @@ type CityStore = {
   city: string;
   isSet: boolean;
   setCity: (city: string) => void;
+  dismiss: () => void;
 };
 
 export const useCityStore = create<CityStore>()(
@@ -13,6 +14,7 @@ export const useCityStore = create<CityStore>()(
       city: "Бишкек",
       isSet: false,
       setCity: (city) => set({ city, isSet: true }),
+      dismiss: () => set({ isSet: true }),
     }),
     {
       name: "user-city-storage",

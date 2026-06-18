@@ -16,7 +16,7 @@ function setCookie(name: string, value: string) {
 }
 
 export const CityConfirmBanner = () => {
-  const { isSet, setCity } = useCityStore();
+  const { isSet, setCity, dismiss } = useCityStore();
   const [detectedCity, setDetectedCity] = useState<string | null>(null);
 
   useEffect(() => {
@@ -34,8 +34,7 @@ export const CityConfirmBanner = () => {
   };
 
   const handleChange = () => {
-    // Just dismiss the banner — user will use the city selector in the header
-    setCookie("imbir-city-set", "1");
+    dismiss();
     setDetectedCity(null);
   };
 

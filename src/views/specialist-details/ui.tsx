@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ReviewsSection } from "@/widgets/reviews/ui";
 
+import { getBlogPosts } from "@/shared/api/blog/requests";
 // ИМПОРТЫ API
 import { api } from "@/shared/api/requests";
 import {
@@ -48,6 +49,20 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
     queryKey: ["reviews", "doctor", id],
     queryFn: () => api.getReviewsByDoctor(id),
   });
+
+  // 3. ПОЛУЧАЕМ ПОСТЫ БЛОГА ДЛЯ СЕКЦИИ «ИНТЕРВЬЮ»
+  const { data: blogData } = useQuery({
+    queryKey: ["blog-posts"],
+    queryFn: () => getBlogPosts({ page_size: 3 }),
+  });
+  const blogVideos = (blogData?.data ?? []).map((post) => ({
+    id: String(post.id),
+    title: post.title,
+    authorName: post.category.name,
+    authorRole: post.category.name,
+    thumbnail: post.image ?? "",
+    youtubeUrl: `/blog/${post.slug}`,
+  }));
 
   if (isDoctorError || (!isDoctorLoading && !doctor)) {
     return (
@@ -326,24 +341,14 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
             </Link>
           </div>
 
-          <VideosSwiper
-            title="Интервью"
-            viewAllHref={ROUTES.VIDEOS}
-            description="Ознакомьтесь с интересными материалами"
-            videos={[
-              {
-                id: "1",
-                title: "Врач онлайн: как это работает за 1 минуту",
-                authorName: doctor.name,
-                authorRole: doctor.specialty,
-                thumbnail:
-                  typeof doctor.image === "string"
-                    ? doctor.image
-                    : doctor.image?.src || "",
-                youtubeUrl: "#",
-              },
-            ]}
-          />
+          {blogVideos.length > 0 && (
+            <VideosSwiper
+              title="Интервью"
+              viewAllHref={ROUTES.VIDEOS}
+              description="Ознакомьтесь с интересными материалами"
+              videos={blogVideos}
+            />
+          )}
         </div>
       </div>
 

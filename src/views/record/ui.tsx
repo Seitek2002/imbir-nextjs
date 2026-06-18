@@ -317,7 +317,9 @@ const SelectionListItem = ({
           <StarIcon className="size-4 text-[#F5653E]" />
           <span className="font-medium text-[#F5653E]">{item.rating}</span>
           <span>({item.reviews})</span>
-          {(isClinic || isDoctor) && <span>• {item.experience} лет опыта</span>}
+          {(isClinic || isDoctor) && item.experience > 0 && (
+            <span>• {item.experience} лет опыта</span>
+          )}
         </div>
 
         {isClinic && (

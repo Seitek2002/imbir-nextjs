@@ -2,6 +2,8 @@
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 
+import Link from "next/link";
+
 import { IconBtn } from "@/shared";
 
 import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets";
@@ -267,7 +269,14 @@ export const AppointmentDateTimePicker: FC<Props> = ({
         </div>
         {!canUseOnline && (
           <p className="text-xs text-[#838A8D]">
-            Онлайн-доступ доступен после авторизации.
+            Онлайн-доступ доступен после{" "}
+            <Link
+              href="/login"
+              className="text-[#F5653E] underline hover:no-underline"
+            >
+              авторизации
+            </Link>
+            .
           </p>
         )}
       </div>
