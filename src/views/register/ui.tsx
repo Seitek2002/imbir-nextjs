@@ -8,7 +8,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Footer, Header } from "@/widgets";
 
-import { registerClientFn } from "@/shared/api/auth/requests";
+import {
+  registerClientFn,
+  registerClinicFn,
+  registerDoctorFn,
+} from "@/shared/api/auth/requests";
 import { getClinicById } from "@/shared/api/clinics/requests";
 import {
   EmailIcon,
@@ -23,8 +27,13 @@ import { useAuthStore } from "@/shared/store/authStore";
 import { Button, IconBtn, Input } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control/ui";
 
-import { ClinicRegistrationForm, ClinicStep } from "./clinic-form";
 import {
+  ClinicFormData,
+  ClinicRegistrationForm,
+  ClinicStep,
+} from "./clinic-form";
+import {
+  DoctorFormData,
   DoctorRegistrationForm,
   DoctorStep,
   InviteClinic,
@@ -179,6 +188,8 @@ export const RegisterPage = () => {
 
   // Clinic form step
   const [clinicStep, setClinicStep] = useState<ClinicStep>(1);
+  const [isLoadingClinic, setIsLoadingClinic] = useState(false);
+  const [isLoadingDoctor, setIsLoadingDoctor] = useState(false);
 
   const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -246,6 +257,178 @@ export const RegisterPage = () => {
       toast.error(msg);
     } finally {
       setIsLoadingClient(false);
+    }
+  };
+
+  const handleSubmitDoctor = async (data: DoctorFormData) => {
+    setIsLoadingDoctor(true);
+    try {
+      const emptyDay = { from: null, to: null, enabled: false };
+      const res = await registerDoctorFn({
+        invite_clinic_id: inviteClinic?.clinicId,
+        invite_branch_id: inviteClinic?.branchId ?? undefined,
+        password: data.password,
+        step1: {
+          full_name: data.fullName,
+          gender: data.gender as "male" | "female",
+          birth_date: data.birthDate,
+          city: data.city,
+          languages: data.languages,
+          phone: data.phone,
+          email: data.email,
+          photo: data.photo ?? undefined,
+        },
+        step2: {
+          country: "kg",
+          city: data.city,
+          address: "",
+          phone: data.phone,
+          email: data.email,
+        },
+        step3: {
+          schedule: {
+            monday: emptyDay,
+            tuesday: emptyDay,
+            wednesday: emptyDay,
+            thursday: emptyDay,
+            friday: emptyDay,
+            saturday: emptyDay,
+            sunday: emptyDay,
+          },
+          lunch_break: { from: "", to: "" },
+          emergency_24_7: false,
+        },
+        step4: {
+          legal_name: data.fullName,
+          reg_number: "",
+          license_number: data.licenseNumber,
+          license_date: "",
+          license_authority: "",
+          documents:
+            data.certificates.length > 0 ? data.certificates : undefined,
+        },
+        step5: {
+          primary_specializations: data.specialization
+            ? [data.specialization]
+            : [],
+          narrow_specializations: data.additionalSpecialization
+            ? [data.additionalSpecialization]
+            : [],
+          additional_services: data.position || undefined,
+        },
+        step6: { equipment: [], patient_conditions: [], payment_methods: [] },
+        step7: {
+          agree_terms: true,
+          agree_privacy: true,
+          agree_data_processing: true,
+          agree_publishing: true,
+        },
+      });
+      setTokens({ access: res.access, refresh: res.refresh });
+      setUser(res.user);
+      toast.success(`Добро пожаловать, ${res.user.first_name}!`);
+      router.push(ROLE_REDIRECT[res.user.role] ?? "/doctor-profile");
+    } catch (err: unknown) {
+      const errData = (
+        err as { response?: { data?: Record<string, string[]> } }
+      )?.response?.data;
+      const msg = errData
+        ? Object.values(errData).flat()[0]
+        : "Ошибка регистрации. Попробуйте снова";
+      toast.error(msg);
+    } finally {
+      setIsLoadingDoctor(false);
+    }
+  };
+
+  const handleSubmitClinic = async (data: ClinicFormData) => {
+    setIsLoadingClinic(true);
+    try {
+      const toApiDate = (ddmmyyyy: string): string => {
+        const [dd, mm, yyyy] = ddmmyyyy.split(".");
+        if (!dd || !mm || !yyyy) return ddmmyyyy;
+        return `${yyyy}-${mm}-${dd}`;
+      };
+      const toDay = (d: { from: string; to: string }) => ({
+        from: d.from || null,
+        to: d.to || null,
+        enabled: !!(d.from && d.to),
+      });
+      const res = await registerClinicFn({
+        password: data.password,
+        step1: {
+          name: data.clinicName,
+          logo: data.logo ?? undefined,
+          type: data.clinicType,
+          description: data.description,
+          photos: data.photos.length > 0 ? data.photos : undefined,
+        },
+        step2: {
+          country: data.country,
+          city: data.city,
+          address: data.fullAddress,
+          phone: data.phone,
+          email: data.email,
+          website: data.website || undefined,
+        },
+        step3: {
+          schedule: {
+            monday: toDay(data.schedule.mon),
+            tuesday: toDay(data.schedule.tue),
+            wednesday: toDay(data.schedule.wed),
+            thursday: toDay(data.schedule.thu),
+            friday: toDay(data.schedule.fri),
+            saturday: toDay(data.schedule.sat),
+            sunday: toDay(data.schedule.sun),
+          },
+          lunch_break: { from: data.lunchBreak.from, to: data.lunchBreak.to },
+          emergency_24_7: data.emergency247,
+        },
+        step4: {
+          legal_name: data.legalName,
+          reg_number: data.registrationNumber,
+          license_number: data.licenseNumber,
+          license_date: toApiDate(data.licenseDate),
+          license_authority: data.licensingAuthority,
+          documents: data.documents.length > 0 ? data.documents : undefined,
+        },
+        step5: {
+          primary_specializations: data.mainDirections
+            .split(/[,.]/)
+            .map((s) => s.trim())
+            .filter(Boolean),
+          narrow_specializations: data.narrowDirections
+            .split(/[,.]/)
+            .map((s) => s.trim())
+            .filter(Boolean),
+          additional_services: data.additionalServices || undefined,
+        },
+        step6: {
+          equipment: data.equipment,
+          patient_conditions: data.patientConditions,
+          payment_methods: data.paymentMethods,
+        },
+        step7: {
+          agree_terms: data.agreeRules,
+          agree_privacy: data.agreePrivacy,
+          agree_data_processing: data.agreeDataProcessing,
+          agree_publishing: data.agreeAccuracy,
+        },
+      });
+      setTokens({ access: res.access, refresh: res.refresh });
+      setUser(res.user);
+      toast.success(`Добро пожаловать, ${data.clinicName}!`);
+      router.push(ROLE_REDIRECT[res.user.role] ?? "/clinic-profile");
+    } catch (err: unknown) {
+      const errData = (
+        err as { response?: { data?: Record<string, string[]> } }
+      )?.response?.data;
+      const msg = errData
+        ? Object.values(errData).flat()[0]
+        : "Ошибка регистрации. Попробуйте снова";
+      toast.error(msg);
+    } finally {
+      setIsLoadingClinic(false);
     }
   };
 
@@ -380,6 +563,8 @@ export const RegisterPage = () => {
                   onContinue={() =>
                     setDoctorStep((s) => Math.min(s + 1, 4) as DoctorStep)
                   }
+                  onSubmit={handleSubmitDoctor}
+                  isLoading={isLoadingDoctor}
                   inviteClinic={inviteClinic}
                 />
               </div>
@@ -393,6 +578,8 @@ export const RegisterPage = () => {
                   onContinue={() =>
                     setClinicStep((s) => Math.min(s + 1, 7) as ClinicStep)
                   }
+                  onSubmit={handleSubmitClinic}
+                  isLoading={isLoadingClinic}
                 />
               </div>
             )}

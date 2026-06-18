@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 
+import { EyeIcon, EyeOffIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
 import {
   Button,
@@ -16,7 +17,7 @@ export type ClinicStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 type ScheduleDay = { from: string; to: string };
 
-type ClinicFormData = {
+export type ClinicFormData = {
   clinicName: string;
   logo: File | null;
   clinicType: string;
@@ -56,6 +57,9 @@ type ClinicFormData = {
   agreePrivacy: boolean;
   agreeDataProcessing: boolean;
   agreeAccuracy: boolean;
+
+  password: string;
+  confirmPassword: string;
 };
 
 const CLINIC_TYPES = [
@@ -119,6 +123,13 @@ const STEP_TITLES: Record<ClinicStep, string> = {
 };
 
 const TOTAL_STEPS = 7;
+
+const maskDate = (raw: string): string => {
+  const digits = raw.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4)}`;
+};
 
 // --- Sub-components ---
 
@@ -264,12 +275,23 @@ const CheckboxGroup = ({
 type Props = {
   step: ClinicStep;
   onContinue: () => void;
+  onSubmit: (data: ClinicFormData) => void;
+  isLoading?: boolean;
 };
 
-export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
+export const ClinicRegistrationForm = ({
+  step,
+  onContinue,
+  onSubmit,
+  isLoading = false,
+}: Props) => {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const photosInputRef = useRef<HTMLInputElement>(null);
   const docsInputRef = useRef<HTMLInputElement>(null);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
   const emptyDay: ScheduleDay = { from: "", to: "" };
 
@@ -318,6 +340,9 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
     agreePrivacy: false,
     agreeDataProcessing: false,
     agreeAccuracy: false,
+
+    password: "",
+    confirmPassword: "",
   });
 
   const set = <K extends keyof ClinicFormData>(
@@ -338,11 +363,23 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
     data.agreeAccuracy;
 
   const isValid =
-    step === 1 ? !!data.clinicName : step === 7 ? allAgreed : true;
+    step === 1
+      ? !!data.clinicName
+      : step === 7
+        ? allAgreed && !!data.password && data.password === data.confirmPassword
+        : true;
 
   const handleContinue = () => {
-    if (step < 7) onContinue();
-    else console.log("Clinic registration:", data);
+    if (step < 7) {
+      onContinue();
+    } else {
+      if (data.password !== data.confirmPassword) {
+        setPasswordError("Пароли не совпадают");
+        return;
+      }
+      setPasswordError("");
+      onSubmit(data);
+    }
   };
 
   return (
@@ -676,7 +713,7 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
             label="Дата выдачи лицензии"
             placeholder="ДД.ММ.ГГГГ"
             value={data.licenseDate}
-            onChange={(e) => set("licenseDate", e.target.value)}
+            onChange={(e) => set("licenseDate", maskDate(e.target.value))}
           />
           <Input
             label="Орган, выдавший лицензию"
@@ -797,6 +834,32 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
       {/* ── Step 7: Completion ── */}
       {step === 7 && (
         <div className="flex flex-col gap-4">
+          <Input
+            label="Пароль"
+            type={showPassword ? "text" : "password"}
+            placeholder="Придумайте пароль"
+            IconRight={showPassword ? EyeIcon : EyeOffIcon}
+            onIconRightClick={() => setShowPassword((v) => !v)}
+            value={data.password}
+            onChange={(e) => {
+              set("password", e.target.value);
+              setPasswordError("");
+            }}
+          />
+          <Input
+            label="Подтвердите пароль"
+            type={showConfirm ? "text" : "password"}
+            placeholder="Повторите пароль"
+            IconRight={showConfirm ? EyeIcon : EyeOffIcon}
+            onIconRightClick={() => setShowConfirm((v) => !v)}
+            value={data.confirmPassword}
+            onChange={(e) => {
+              set("confirmPassword", e.target.value);
+              setPasswordError("");
+            }}
+            error={passwordError}
+          />
+
           <div className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-[#0D0D12]">
               Согласия и политики
@@ -854,7 +917,8 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
           className="w-full justify-center h-14 text-base"
           size="lg"
           onClick={handleContinue}
-          disabled={!isValid}
+          disabled={!isValid || isLoading}
+          loading={isLoading}
         >
           {step === 7 ? "Завершить регистрацию" : "Продолжить"}
         </Button>
@@ -866,7 +930,8 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
           className="w-full justify-center md:h-14 md:text-lg"
           size="lg"
           onClick={handleContinue}
-          disabled={!isValid}
+          disabled={!isValid || isLoading}
+          loading={isLoading}
         >
           {step === 7 ? "Завершить регистрацию" : "Продолжить"}
         </Button>

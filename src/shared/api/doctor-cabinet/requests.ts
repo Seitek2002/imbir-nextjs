@@ -14,20 +14,20 @@ import {
 } from "./types";
 
 export const getDoctorProfile = async (): Promise<DoctorPrivateProfile> => {
-  const { data } = await apiClient.get<{ data: DoctorPrivateProfile }>(
+  const { data } = await apiClient.get<DoctorPrivateProfile>(
     "/api/doctor/profile/",
   );
-  return data.data;
+  return data;
 };
 
 export const updateDoctorProfile = async (
   body: Partial<DoctorPrivateProfile>,
 ): Promise<DoctorPrivateProfile> => {
-  const { data } = await apiClient.put<{ data: DoctorPrivateProfile }>(
+  const { data } = await apiClient.put<DoctorPrivateProfile>(
     "/api/doctor/profile/",
     body,
   );
-  return data.data;
+  return data;
 };
 
 export const getDoctorSchedule = async (): Promise<DoctorSchedule> => {

@@ -16,7 +16,9 @@ import type { DoctorProfileData } from "./model";
 export const mapApiToProfile = (
   api: DoctorPrivateProfile,
 ): DoctorProfileData => ({
-  fullName: api.full_name,
+  fullName:
+    api.full_name ??
+    `${(api as unknown as { first_name?: string }).first_name ?? ""} ${(api as unknown as { last_name?: string }).last_name ?? ""}`.trim(),
   specialty: api.specialty,
   additionalSpecialty: "",
   experienceYears: String(api.experience_years),

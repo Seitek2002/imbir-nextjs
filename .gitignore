@@ -45,3 +45,6 @@ next-env.d.ts
 
 .claude
 .cursorrules
+
+# local credentials (never commit)
+acc.md
