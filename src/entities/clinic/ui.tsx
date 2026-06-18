@@ -11,6 +11,28 @@ import { SaveButton } from "@/shared";
 import { GeoIcon, StarIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
 
+const getInitials = (name: string) =>
+  name
+    .replace(/[«»""]/g, "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+
+const ClinicImageFallback: FC<{ name: string }> = ({ name }) => (
+  <div className="w-full h-full bg-linear-to-br from-[#FFF2F0] to-[#FFD9CC] flex flex-col items-center justify-center gap-2 p-3">
+    <div className="w-12 h-12 rounded-2xl bg-[#F5653E] flex items-center justify-center shrink-0">
+      <span className="text-white font-bold text-lg leading-none">
+        {getInitials(name)}
+      </span>
+    </div>
+    <p className="text-[#F5653E] text-xs font-medium text-center line-clamp-2 leading-tight">
+      {name}
+    </p>
+  </div>
+);
+
 type Props = {
   id?: string;
   name: string;
@@ -37,6 +59,7 @@ export const ClinicCard: FC<Props> = ({
   variant = "vertical",
 }) => {
   const [loaded, setLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const href = id ? ROUTES.CLINIC_DETAILS(id) : "/";
   const stopProp = (e: React.MouseEvent) => {
@@ -51,7 +74,7 @@ export const ClinicCard: FC<Props> = ({
         className="bg-white rounded-2xl border border-[#E3E4E5] overflow-hidden flex items-stretch w-full cursor-pointer hover:border-[#F5653E]/40 transition-colors"
       >
         <div className="relative w-35">
-          {image ? (
+          {image && !imageError ? (
             <>
               {!loaded && <div className="absolute inset-0 skeleton" />}
               <Image
@@ -61,10 +84,11 @@ export const ClinicCard: FC<Props> = ({
                 sizes="140px"
                 className="object-cover"
                 onLoad={() => setLoaded(true)}
+                onError={() => setImageError(true)}
               />
             </>
           ) : (
-            <div className="w-full h-full bg-[#F2F3F5]" />
+            <ClinicImageFallback name={name} />
           )}
         </div>
         <div className="p-3 flex-1 min-w-0">
@@ -107,7 +131,7 @@ export const ClinicCard: FC<Props> = ({
       className="bg-white rounded-3xl border border-[#E3E4E5] w-full h-full flex flex-col p-2 cursor-pointer hover:border-[#F5653E]/40 transition-colors"
     >
       <div className="relative w-full h-55 rounded-2xl overflow-hidden">
-        {image ? (
+        {image && !imageError ? (
           <>
             {!loaded && <div className="absolute inset-0 skeleton" />}
             <Image
@@ -117,10 +141,11 @@ export const ClinicCard: FC<Props> = ({
               sizes="280px"
               className="object-cover"
               onLoad={() => setLoaded(true)}
+              onError={() => setImageError(true)}
             />
           </>
         ) : (
-          <div className="w-full h-full bg-[#F2F3F5]" />
+          <ClinicImageFallback name={name} />
         )}
         <div className="absolute top-2 right-2" onClick={stopProp}>
           <SaveButton
