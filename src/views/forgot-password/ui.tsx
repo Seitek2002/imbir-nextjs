@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -59,13 +59,13 @@ export const ForgotPasswordPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
+    <main className="min-h-screen bg-background flex flex-col">
       <Header backTo={step === "success" ? undefined : ROUTES.LOGIN} />
 
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
         {/* --- ЛЕВАЯ КАРТОЧКА --- */}
         <div className="hidden md:flex md:w-1/2 rounded-2xl p-6 bg-white shrink-0 items-center justify-center">
-          <div className="relative w-full aspect-square rounded-xl bg-[#ADD8E6] flex items-center justify-center border-2 border-dashed border-[#838A8D]/50 text-[#838A8D]">
+          <div className="relative w-full aspect-square rounded-xl bg-[#ADD8E6] flex items-center justify-center border-2 border-dashed border-muted/50 text-muted">
             <span className="text-xl font-medium">Место для картинки</span>
           </div>
         </div>
@@ -89,7 +89,7 @@ export const ForgotPasswordPage = () => {
                 >
                   <path
                     d="M12.5 15L7.5 10L12.5 5"
-                    stroke="#191A1B"
+                    stroke={colors.foreground}
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -102,10 +102,10 @@ export const ForgotPasswordPage = () => {
             {step === "email" && (
               <>
                 <div className="mt-4 mb-6 md:mt-0">
-                  <h2 className="text-2xl font-semibold text-[#191A1B] mb-2">
+                  <h2 className="text-2xl font-semibold text-foreground mb-2">
                     Восстановить пароль
                   </h2>
-                  <p className="text-[#838A8D] text-sm md:text-base">
+                  <p className="text-muted text-sm md:text-base">
                     Введите почту, к которой привязан ваш аккаунт
                   </p>
                 </div>
@@ -134,10 +134,10 @@ export const ForgotPasswordPage = () => {
             {step === "code" && (
               <>
                 <div className="mt-4 mb-6 md:mt-0 text-center md:text-left">
-                  <h2 className="text-2xl font-semibold text-[#191A1B] mb-2">
+                  <h2 className="text-2xl font-semibold text-foreground mb-2">
                     Восстановить пароль
                   </h2>
-                  <p className="text-[#838A8D] text-sm md:text-base">
+                  <p className="text-muted text-sm md:text-base">
                     Введите код подтверждения, отправленный на вашу почту
                   </p>
                 </div>
@@ -152,7 +152,7 @@ export const ForgotPasswordPage = () => {
                       maxLength={1}
                       value={digit}
                       onChange={(e) => handleCodeChange(idx, e.target.value)}
-                      className="size-14 md:size-16 text-center text-2xl font-medium border border-[#E3E4E5] rounded-xl focus:border-[#F5653E] focus:outline-none focus:shadow-[0_0_0_2px_rgba(245,101,62,0.2)] transition-all"
+                      className="size-14 md:size-16 text-center text-2xl font-medium border border-border-soft rounded-xl focus:border-primary focus:outline-none focus:shadow-[0_0_0_2px_rgba(245,101,62,0.2)] transition-all"
                     />
                   ))}
                 </div>
@@ -161,12 +161,12 @@ export const ForgotPasswordPage = () => {
                   <Button
                     variant="text"
                     size="xs"
-                    className="px-0 text-sm text-[#838A8D] hover:text-[#191A1B]"
+                    className="px-0 text-sm text-muted hover:text-foreground"
                   >
                     Получить код повторно через 00:59
                   </Button>
                   {/* Замени текст выше на этот, когда таймер истечет:
-                     <button className="text-sm text-[#F5653E] hover:underline">Получить код повторно</button>
+                     <button className="text-sm text-primary hover:underline">Получить код повторно</button>
                   */}
                 </div>
 
@@ -187,10 +187,10 @@ export const ForgotPasswordPage = () => {
             {step === "new_password" && (
               <>
                 <div className="mt-4 mb-6 md:mt-0">
-                  <h2 className="text-2xl font-semibold text-[#191A1B] mb-2">
+                  <h2 className="text-2xl font-semibold text-foreground mb-2">
                     Восстановить пароль
                   </h2>
-                  <p className="text-[#838A8D] text-sm md:text-base">
+                  <p className="text-muted text-sm md:text-base">
                     Придумайте и подтвердите новый пароль для вашего аккаунта
                   </p>
                 </div>
@@ -218,7 +218,7 @@ export const ForgotPasswordPage = () => {
 
                 {/* Чеклист валидации */}
                 <div className="mt-6 flex flex-col gap-2">
-                  <span className="text-sm text-[#838A8D] mb-1">
+                  <span className="text-sm text-muted mb-1">
                     Пароль должен содержать:
                   </span>
                   <ValidationItem
@@ -253,10 +253,10 @@ export const ForgotPasswordPage = () => {
                   <span className="text-white text-xs">Иконка</span>
                 </div>
 
-                <h2 className="text-2xl md:text-3xl font-semibold text-[#191A1B] mb-2">
+                <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">
                   Пароль успешно сохранён!
                 </h2>
-                <p className="text-[#838A8D] text-sm md:text-base mb-10">
+                <p className="text-muted text-sm md:text-base mb-10">
                   Войдите в свой аккаунт с новым паролем
                 </p>
 
@@ -288,7 +288,7 @@ const ValidationItem = ({
     <div
       className={cn(
         "flex items-center justify-center size-5 rounded-full",
-        isValid ? "bg-[#4CAF50]" : "bg-[#E3E4E5]",
+        isValid ? "bg-[#4CAF50]" : "bg-border-soft",
       )}
     >
       <svg
@@ -310,7 +310,7 @@ const ValidationItem = ({
     <span
       className={cn(
         "text-sm transition-colors",
-        isValid ? "text-[#191A1B]" : "text-[#838A8D]",
+        isValid ? "text-foreground" : "text-muted",
       )}
     >
       {text}

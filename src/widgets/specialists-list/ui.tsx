@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useRef, useState } from "react";
 
@@ -59,13 +59,17 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
         <IconBtn
           ref={filterBtnRef}
           variant="outline"
-          className={`w-12 h-12 shrink-0 ${filterOpen || selectedSpecialty ? "border-[#F5653E]" : ""}`}
+          className={`w-12 h-12 shrink-0 ${filterOpen || selectedSpecialty ? "border-primary" : ""}`}
           onClick={() => setFilterOpen((v) => !v)}
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path
               d="M2.5 5.83333H17.5M5.83333 10H14.1667M8.33333 14.1667H11.6667"
-              stroke={filterOpen || selectedSpecialty ? "#F5653E" : "#686F72"}
+              stroke={
+                filterOpen || selectedSpecialty
+                  ? colors.primary
+                  : colors.secondary
+              }
               strokeWidth="1.5"
               strokeLinecap="round"
             />
@@ -86,8 +90,8 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
       )}
 
       {filteredItems.length === 0 ? (
-        <div className="bg-white rounded-3xl p-10 text-center border border-[#E5E6E8]">
-          <p className="text-[#838A8D] text-lg">
+        <div className="bg-white rounded-3xl p-10 text-center border border-border">
+          <p className="text-muted text-lg">
             {searchQuery || selectedSpecialty
               ? "Специалисты не найдены"
               : "Специалистов пока нет"}
@@ -112,7 +116,7 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
           if (pendingDeleteId) onDelete(pendingDeleteId);
           setPendingDeleteId(null);
         }}
-        icon={<TrashIcon className="w-7 h-7 text-[#F5653E]" />}
+        icon={<TrashIcon className="w-7 h-7 text-primary" />}
         title="Удалить специалиста?"
         description={
           pendingName

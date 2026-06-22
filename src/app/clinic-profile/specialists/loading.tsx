@@ -1,4 +1,4 @@
-export default function Loading() {
+﻿export default function Loading() {
   return (
     <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
       <div className="h-10 w-56 skeleton rounded-xl mb-8" />
@@ -6,7 +6,7 @@ export default function Loading() {
       <div className="flex gap-6">
         {/* Sidebar skeleton */}
         <aside className="w-72 shrink-0 hidden lg:block">
-          <div className="bg-white rounded-3xl p-5 flex items-center gap-4 mb-4 border border-[#E5E6E8]">
+          <div className="bg-white rounded-3xl p-5 flex items-center gap-4 mb-4 border border-border">
             <div className="w-14 h-14 rounded-full skeleton shrink-0" />
             <div className="flex-1">
               <div className="h-5 w-20 skeleton rounded mb-2" />
@@ -46,7 +46,7 @@ export default function Loading() {
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-white rounded-3xl border border-[#E5E6E8] p-2"
+                className="bg-white rounded-3xl border border-border p-2"
               >
                 <div className="aspect-square w-full rounded-2xl skeleton mb-3" />
                 <div className="px-1 pb-1">

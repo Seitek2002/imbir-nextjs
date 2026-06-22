@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC } from "react";
 
@@ -28,7 +28,7 @@ export const Banners: FC = () => {
         <Link href="/services">
           <Button
             size="sm"
-            className="bg-white text-[#191A1B] border-none hover:bg-gray-50"
+            className="bg-white text-foreground border-none hover:bg-gray-50"
           >
             Смотреть
           </Button>
@@ -43,14 +43,14 @@ export const Banners: FC = () => {
   );
 
   const card2 = (
-    <div className="relative bg-[#F8F9FA] rounded-4xl p-6 md:p-8 h-60 md:h-80 overflow-hidden flex flex-col justify-center w-full">
+    <div className="relative bg-surface rounded-4xl p-6 md:p-8 h-60 md:h-80 overflow-hidden flex flex-col justify-center w-full">
       <div className="relative z-10 max-w-[60%] md:max-w-[50%] flex flex-col gap-4 md:gap-5">
-        <h3 className="text-[#191A1B] text-[28px] md:text-[36px] font-bold leading-tight">
+        <h3 className="text-foreground text-[28px] md:text-[36px] font-bold leading-tight">
           Онлайн-
           <br />
           консультация
         </h3>
-        <p className="text-[#686F72] text-sm md:text-base leading-snug">
+        <p className="text-secondary text-sm md:text-base leading-snug">
           Свяжитесь с врачом из любой точки — быстро, удобно и без ожидания
         </p>
         <div>
@@ -70,12 +70,12 @@ export const Banners: FC = () => {
   const card3 = (
     <div className="relative bg-[#F2F4F7] rounded-4xl p-6 md:p-8 h-60 md:h-80 overflow-hidden flex flex-col justify-between w-full">
       <div className="relative z-10">
-        <h3 className="text-[#191A1B] text-[28px] md:text-[32px] font-bold leading-tight mb-2">
+        <h3 className="text-foreground text-[28px] md:text-[32px] font-bold leading-tight mb-2">
           100+
           <br />
           специалистов
         </h3>
-        <p className="text-[#686F72] text-sm md:text-base max-w-45">
+        <p className="text-secondary text-sm md:text-base max-w-45">
           Опытные эксперты для решения ваших задач
         </p>
       </div>
@@ -109,8 +109,8 @@ export const Banners: FC = () => {
           className="pb-10"
           style={
             {
-              "--swiper-pagination-color": "#838A8D",
-              "--swiper-pagination-bullet-inactive-color": "#E3E4E5",
+              "--swiper-pagination-color": colors.muted,
+              "--swiper-pagination-bullet-inactive-color": colors.borderSoft,
               "--swiper-pagination-bullet-inactive-opacity": "1",
               "--swiper-pagination-bottom": "0px",
             } as React.CSSProperties

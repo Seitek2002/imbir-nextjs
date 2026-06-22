@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC } from "react";
 
@@ -121,7 +121,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
   };
 
   return (
-    <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col">
       <Header title="Услуги" backTo={ROUTES.HOME}>
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
@@ -146,16 +146,16 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
         {/* Mobile */}
         <div className="md:hidden p-4">
           {activeQuery && (
-            <h2 className="text-[#191A1B] text-lg font-medium mb-4">
+            <h2 className="text-foreground text-lg font-medium mb-4">
               Результаты по запросу: {activeQuery}
             </h2>
           )}
 
           <div className="flex flex-col gap-2">
             {isLoading ? (
-              <p className="text-center text-[#838A8D] py-10">Загрузка...</p>
+              <p className="text-center text-muted py-10">Загрузка...</p>
             ) : filteredServices.length === 0 ? (
-              <p className="text-center text-[#838A8D] py-10">
+              <p className="text-center text-muted py-10">
                 По вашим параметрам услуги не найдены
               </p>
             ) : (
@@ -189,19 +189,19 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
 
         {/* Desktop */}
         <div className="hidden md:block px-10 py-6">
-          <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
+          <div className="text-sm text-secondary mb-6 flex items-center gap-2">
             <Link
               href={ROUTES.HOME}
-              className="hover:text-[#F5653E] transition-colors"
+              className="hover:text-primary transition-colors"
             >
               Главная
             </Link>
             <span>•</span>
-            <span className={activeQuery ? "" : "text-[#F5653E]"}>
+            <span className={activeQuery ? "" : "text-primary"}>
               {activeQuery ? (
                 <Link
                   href={ROUTES.SERVICES}
-                  className="hover:text-[#F5653E] transition-colors"
+                  className="hover:text-primary transition-colors"
                 >
                   Услуги
                 </Link>
@@ -212,16 +212,14 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
             {activeQuery && (
               <>
                 <span>•</span>
-                <span className="text-[#F5653E]">
-                  По запросу «{activeQuery}»
-                </span>
+                <span className="text-primary">По запросу «{activeQuery}»</span>
               </>
             )}
           </div>
 
           <div className="max-w-200">
             <h2 className="text-[40px] font-semibold">Услуги</h2>
-            <p className="text-[#686F72] text-lg mt-4 mb-6">
+            <p className="text-secondary text-lg mt-4 mb-6">
               Выберите интересующие вас параметры, чтобы ознакомиться с
               подходящими процедурами
             </p>
@@ -277,11 +275,11 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
 
           <div className="mt-2">
             {isLoading ? (
-              <p className="text-center text-[#838A8D] py-20 text-lg">
+              <p className="text-center text-muted py-20 text-lg">
                 Загрузка...
               </p>
             ) : filteredServices.length === 0 ? (
-              <p className="text-center text-[#838A8D] py-20 text-lg">
+              <p className="text-center text-muted py-20 text-lg">
                 По вашим параметрам услуги не найдены
               </p>
             ) : (

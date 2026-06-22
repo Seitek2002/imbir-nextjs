@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, InputHTMLAttributes } from "react";
 
@@ -24,16 +24,16 @@ export const Radio: FC<Props> = ({
 
   const radioVisualBase = cn(
     "relative flex items-center justify-center rounded-full border-4 transition-all duration-200",
-    "border-[#E3E4E5] bg-white",
+    "border-border-soft bg-white",
 
-    "peer-checked:border-[#F5653E]",
+    "peer-checked:border-primary",
 
-    "peer-focus-visible:shadow-[0_0_0.5px_2px_rgba(245,101,62,0.2)] peer-focus-visible:border-[#F5653E]",
+    "peer-focus-visible:shadow-[0_0_0.5px_2px_rgba(245,101,62,0.2)] peer-focus-visible:border-primary",
     sizeClasses[size],
   );
 
   const dotClasses = cn(
-    "rounded-full bg-[#F5653E] opacity-0 scale-0 transition-all duration-200 peer-checked:opacity-100 peer-checked:scale-100",
+    "rounded-full bg-primary opacity-0 scale-0 transition-all duration-200 peer-checked:opacity-100 peer-checked:scale-100",
     size === "small" ? "size-2" : "size-2.5",
   );
 
@@ -53,7 +53,7 @@ export const Radio: FC<Props> = ({
       </div>
 
       {label && (
-        <span className="text-sm font-medium text-[#0D0D12]">{label}</span>
+        <span className="text-sm font-medium text-overlay">{label}</span>
       )}
     </label>
   );

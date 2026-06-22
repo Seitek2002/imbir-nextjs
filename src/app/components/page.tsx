@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -40,18 +40,18 @@ const Components = () => {
 
       {/* --- SEGMENTED CONTROL --- */}
       <div className="flex flex-col gap-2">
-        <h3 className="font-medium text-[#191A1B]">Segmented Control</h3>
+        <h3 className="font-medium text-foreground">Segmented Control</h3>
         <SegmentedControl
           options={segmentOptions}
           value={activeSegment}
           onChange={setActiveSegment}
         />
-        <span className="text-sm text-[#838A8D]">
+        <span className="text-sm text-muted">
           Текущее значение стейта: {activeSegment}
         </span>
       </div>
 
-      <hr className="border-[#E5E6E8]" />
+      <hr className="border-border" />
 
       {/* --- BUTTONS --- */}
       <div className="flex flex-wrap items-center gap-4">
@@ -67,7 +67,7 @@ const Components = () => {
         </IconBtn>
       </div>
 
-      <hr className="border-[#E5E6E8]" />
+      <hr className="border-border" />
 
       {/* --- INPUTS --- */}
       <div className="flex flex-col gap-4 max-w-sm">
@@ -80,7 +80,7 @@ const Components = () => {
         />
       </div>
 
-      <hr className="border-[#E5E6E8]" />
+      <hr className="border-border" />
 
       {/* --- RADIO & CHECKBOX --- */}
       <div className="flex gap-10">
@@ -101,7 +101,7 @@ const Components = () => {
         </div>
       </div>
 
-      <hr className="border-[#E5E6E8]" />
+      <hr className="border-border" />
 
       {/* --- DROPDOWNS --- */}
       <div className="flex flex-col gap-6 max-w-sm">

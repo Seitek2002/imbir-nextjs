@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -19,7 +19,7 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
   const [featuredLoaded, setFeaturedLoaded] = useState(false);
 
   const featuredLinkClassName =
-    "inline-flex w-fit items-center rounded-full bg-[#F5653E] px-4 py-2.5 text-sm font-medium text-white transition-all active:bg-[#C54826] hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]";
+    "inline-flex w-fit items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white transition-all active:bg-[#C54826] hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]";
 
   const featured = posts.find((post) => post.featured);
   const filtered =
@@ -35,7 +35,7 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
         <div className="hidden md:flex gap-5">
           <Link
             href={featured.href}
-            className="relative w-167.5 shrink-0 h-105 rounded-3xl overflow-hidden border border-[#E3E4E5] group block"
+            className="relative w-167.5 shrink-0 h-105 rounded-3xl overflow-hidden border border-border-soft group block"
           >
             {!featuredLoaded && <div className="absolute inset-0 skeleton" />}
             <Image
@@ -48,25 +48,25 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
             />
           </Link>
 
-          <div className="flex flex-col justify-center gap-4 bg-white rounded-3xl border border-[#E3E4E5] p-8 flex-1">
+          <div className="flex flex-col justify-center gap-4 bg-white rounded-3xl border border-border-soft p-8 flex-1">
             <div className="flex items-center gap-3">
               {featured.badge && (
-                <span className="flex items-center gap-1.5 bg-[#FFF3F0] text-[#F5653E] text-xs font-semibold px-3 py-1.5 rounded-full">
+                <span className="flex items-center gap-1.5 bg-[#FFF3F0] text-primary text-xs font-semibold px-3 py-1.5 rounded-full">
                   <ThunderIcon />
                   {featured.badge}
                 </span>
               )}
-              <span className="text-sm text-[#838A8D] border border-[#E3E4E5] px-3 py-1.5 rounded-full">
+              <span className="text-sm text-muted border border-border-soft px-3 py-1.5 rounded-full">
                 {featured.date}
               </span>
             </div>
 
             <div>
-              <h2 className="font-semibold text-[28px] text-[#191A1B] leading-[130%] mb-2">
+              <h2 className="font-semibold text-[28px] text-foreground leading-[130%] mb-2">
                 {featured.title}
               </h2>
               {featured.description && (
-                <p className="text-sm text-[#686F72] leading-relaxed line-clamp-2">
+                <p className="text-sm text-secondary leading-relaxed line-clamp-2">
                   {featured.description}
                 </p>
               )}
@@ -81,23 +81,23 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
 
       {featured && (
         <div className="md:hidden flex flex-col gap-2">
-          <div className="bg-white rounded-3xl border border-[#E3E4E5] p-5 flex flex-col gap-4">
+          <div className="bg-white rounded-3xl border border-border-soft p-5 flex flex-col gap-4">
             <div className="flex items-center gap-3">
               {featured.badge && (
-                <span className="flex items-center gap-1.5 bg-[#FFF3F0] text-[#F5653E] text-xs font-semibold px-3 py-1.5 rounded-full">
+                <span className="flex items-center gap-1.5 bg-[#FFF3F0] text-primary text-xs font-semibold px-3 py-1.5 rounded-full">
                   <ThunderIcon />
                   {featured.badge}
                 </span>
               )}
-              <span className="text-sm text-[#838A8D] border border-[#E3E4E5] px-3 py-1.5 rounded-full">
+              <span className="text-sm text-muted border border-border-soft px-3 py-1.5 rounded-full">
                 {featured.date}
               </span>
             </div>
-            <h2 className="font-bold text-xl text-[#191A1B] leading-snug">
+            <h2 className="font-bold text-xl text-foreground leading-snug">
               {featured.title}
             </h2>
             {featured.description && (
-              <p className="text-sm text-[#686F72] leading-relaxed">
+              <p className="text-sm text-secondary leading-relaxed">
                 {featured.description}
               </p>
             )}
@@ -107,7 +107,7 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
           </div>
           <Link
             href={featured.href}
-            className="relative w-full h-52 rounded-3xl overflow-hidden border border-[#E3E4E5] block"
+            className="relative w-full h-52 rounded-3xl overflow-hidden border border-border-soft block"
           >
             {!featuredLoaded && <div className="absolute inset-0 skeleton" />}
             <Image
@@ -127,8 +127,9 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
           onClick={() => setActiveCategory("all")}
           className="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
           style={{
-            backgroundColor: activeCategory === "all" ? "#F5653E" : "#E3E4E5",
-            color: activeCategory === "all" ? "#fff" : "#686F72",
+            backgroundColor:
+              activeCategory === "all" ? colors.primary : colors.borderSoft,
+            color: activeCategory === "all" ? "#fff" : colors.secondary,
           }}
         >
           Все
@@ -140,8 +141,10 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
             className="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
             style={{
               backgroundColor:
-                activeCategory === category.id ? "#F5653E" : "#E3E4E5",
-              color: activeCategory === category.id ? "#fff" : "#686F72",
+                activeCategory === category.id
+                  ? colors.primary
+                  : colors.borderSoft,
+              color: activeCategory === category.id ? "#fff" : colors.secondary,
             }}
           >
             {category.label}
@@ -164,7 +167,7 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[#838A8D] py-8 text-center">
+        <p className="text-sm text-muted py-8 text-center">
           Нет статей в этой категории
         </p>
       )}

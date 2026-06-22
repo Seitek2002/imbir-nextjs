@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -72,11 +72,11 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
   if (isClinicError || (!isClinicLoading && !clinic)) {
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
-        <p className="text-xl font-semibold text-[#191A1B]">
+        <p className="text-xl font-semibold text-foreground">
           Клиника не найдена
         </p>
         <button
-          className="text-[#F5653E] underline text-sm"
+          className="text-primary underline text-sm"
           onClick={() => router.push(ROUTES.CLINICS)}
         >
           Вернуться к списку клиник
@@ -115,28 +115,28 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
     : [safeImage, safeImage, safeImage];
 
   return (
-    <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col relative pb-20 md:pb-0">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col relative pb-20 md:pb-0">
       <div className="hidden md:block">
         <Header />
       </div>
 
       <div className="flex-1 w-full max-w-350 mx-auto md:px-10 flex flex-col pt-0 md:pt-6 pb-10">
-        <div className="hidden md:flex text-sm text-[#686F72] mb-6 items-center gap-2">
+        <div className="hidden md:flex text-sm text-secondary mb-6 items-center gap-2">
           <Link
             href={ROUTES.HOME}
-            className="hover:text-[#F5653E] transition-colors"
+            className="hover:text-primary transition-colors"
           >
             Главная
           </Link>
           <span>•</span>
           <Link
             href={ROUTES.CLINICS}
-            className="hover:text-[#F5653E] transition-colors"
+            className="hover:text-primary transition-colors"
           >
             Клиники
           </Link>
           <span>•</span>
-          <span className="text-[#F5653E]">{clinic.name}</span>
+          <span className="text-primary">{clinic.name}</span>
         </div>
 
         {/* --- ОСНОВНОЙ БЛОК --- */}
@@ -161,7 +161,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
             </div>
 
             <div className="flex flex-col gap-4">
-              <div className="relative flex overflow-x-auto md:overflow-hidden snap-x snap-mandatory scrollbar-hide h-85 md:h-100 w-full md:rounded-3xl bg-[#E3E4E5]">
+              <div className="relative flex overflow-x-auto md:overflow-hidden snap-x snap-mandatory scrollbar-hide h-85 md:h-100 w-full md:rounded-3xl bg-border-soft">
                 {/* Главное фото */}
                 <Image
                   src={images[activeImageIdx]}
@@ -178,10 +178,10 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                     key={idx}
                     onClick={() => setActiveImageIdx(idx)}
                     className={cn(
-                      "relative size-20 lg:size-24 rounded-2xl bg-[#E3E4E5] shrink-0 cursor-pointer transition-all overflow-hidden",
+                      "relative size-20 lg:size-24 rounded-2xl bg-border-soft shrink-0 cursor-pointer transition-all overflow-hidden",
                       activeImageIdx === idx
-                        ? "border-2 border-[#F5653E]"
-                        : "border-2 border-transparent hover:border-[#F5653E]/50",
+                        ? "border-2 border-primary"
+                        : "border-2 border-transparent hover:border-primary/50",
                     )}
                   >
                     <Image
@@ -197,25 +197,25 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
           </div>
 
           <div className="flex-1 flex flex-col rounded-t-3xl md:rounded-none -mt-6 md:mt-0 relative z-10 p-2 md:p-0">
-            <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
+            <div className="bg-white rounded-[20px] p-4 border border-border-soft">
               <div className="flex justify-center md:justify-between items-start mb-6">
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-semibold text-[#191A1B] mb-1">
+                  <h1 className="text-2xl md:text-3xl font-semibold text-foreground mb-1">
                     {clinic.name}
                   </h1>
-                  <p className="text-[#838A8D] text-center lg:text-left text-base mb-4">
+                  <p className="text-muted text-center lg:text-left text-base mb-4">
                     Многопрофильная клиника
                   </p>
 
-                  <div className="flex flex-col gap-1.5 text-sm text-[#191A1B]">
+                  <div className="flex flex-col gap-1.5 text-sm text-foreground">
                     <div className="flex items-center gap-2">
-                      <span className="text-[#F5653E] flex items-center justify-center">
+                      <span className="text-primary flex items-center justify-center">
                         <GeoIcon className="size-4" />
                       </span>
                       {clinic.address}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[#F5653E] flex items-center justify-center">
+                      <span className="text-primary flex items-center justify-center">
                         <HistoryIcon className="size-4" />
                       </span>
                       {scheduleText}
@@ -238,7 +238,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
             <div className="hidden md:flex gap-4 mb-10 mt-4">
               <Button
                 variant="outline"
-                className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-[#F5653E]"
+                className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-primary"
                 onClick={() =>
                   router.push(`${ROUTES.RECORD}?clinic=${id}&mode=offline`)
                 }
@@ -263,34 +263,34 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
               <InfoCard title="Контакты" expandable={false}>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">
+                    <span className="text-primary">
                       <HistoryIcon className="size-5" />
                     </span>
-                    <span className="text-[#838A8D] text-sm md:text-base">
+                    <span className="text-muted text-sm md:text-base">
                       {scheduleText}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">
+                    <span className="text-primary">
                       <GeoIcon className="size-5" />
                     </span>
-                    <span className="text-[#838A8D] text-sm md:text-base">
+                    <span className="text-muted text-sm md:text-base">
                       {clinic.address}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">
+                    <span className="text-primary">
                       <PhoneIcon className="size-5" />
                     </span>
-                    <span className="text-[#838A8D] text-sm md:text-base">
+                    <span className="text-muted text-sm md:text-base">
                       {phoneText}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">
+                    <span className="text-primary">
                       <EmailIcon className="size-5" />
                     </span>
-                    <span className="text-[#838A8D] text-sm md:text-base">
+                    <span className="text-muted text-sm md:text-base">
                       {emailText}
                     </span>
                   </div>
@@ -303,30 +303,30 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
         {/* --- СЕКЦИЯ: ФИЛИАЛЫ --- */}
         {clinic.branches && clinic.branches.length > 0 && (
           <div className="mt-10 md:mt-20 px-4 md:px-0">
-            <h2 className="text-2xl font-semibold text-[#191A1B] mb-6 md:mb-8">
+            <h2 className="text-2xl font-semibold text-foreground mb-6 md:mb-8">
               Филиалы
             </h2>
             <div className="flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
               {clinic.branches.map((branch, idx) => (
                 <div
                   key={branch.id}
-                  className="bg-white border border-[#E3E4E5] rounded-2xl p-4 flex flex-col gap-3"
+                  className="bg-white border border-border-soft rounded-2xl p-4 flex flex-col gap-3"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-[#191A1B]">
+                    <span className="text-sm font-semibold text-foreground">
                       Филиал №{idx + 1}
                     </span>
-                    <span className="text-xs text-[#F5653E] bg-[#FFF2F0] px-2 py-0.5 rounded-full">
+                    <span className="text-xs text-primary bg-[#FFF2F0] px-2 py-0.5 rounded-full">
                       {branch.schedule ?? "По записи"}
                     </span>
                   </div>
-                  <div className="flex items-start gap-2 text-sm text-[#686F72]">
-                    <GeoIcon className="size-4 text-[#F5653E] mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-2 text-sm text-secondary">
+                    <GeoIcon className="size-4 text-primary mt-0.5 shrink-0" />
                     <span>{branch.address}</span>
                   </div>
                   {branch.phone && (
-                    <div className="flex items-center gap-2 text-sm text-[#686F72]">
-                      <PhoneIcon className="size-4 text-[#F5653E] shrink-0" />
+                    <div className="flex items-center gap-2 text-sm text-secondary">
+                      <PhoneIcon className="size-4 text-primary shrink-0" />
                       <span>{branch.phone}</span>
                     </div>
                   )}
@@ -340,15 +340,15 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
         {services.length > 0 && (
           <div className="mt-10 md:mt-20 px-4 md:px-0">
             <div className="flex items-center justify-between mb-6 md:mb-8">
-              <h2 className="text-2xl font-semibold text-[#191A1B]">Услуги</h2>
+              <h2 className="text-2xl font-semibold text-foreground">Услуги</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {services.map((service) => (
                 <div
                   key={service.id}
-                  className="bg-white border border-[#E3E4E5] rounded-2xl p-4 flex flex-col"
+                  className="bg-white border border-border-soft rounded-2xl p-4 flex flex-col"
                 >
-                  <div className="relative h-32 bg-[#E3E4E5] rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                  <div className="relative h-32 bg-border-soft rounded-xl mb-4 flex items-center justify-center overflow-hidden">
                     <Image
                       src={service.image}
                       alt={service.name}
@@ -356,17 +356,15 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                       className="object-cover"
                     />
                   </div>
-                  <h4 className="font-semibold text-[#191A1B]">
+                  <h4 className="font-semibold text-foreground">
                     {service.name}
                   </h4>
-                  <p className="text-xs text-[#838A8D] mb-2">
-                    {service.category}
-                  </p>
+                  <p className="text-xs text-muted mb-2">{service.category}</p>
                   <div className="flex items-center justify-between mt-auto mb-4">
-                    <span className="font-bold text-[#191A1B]">
+                    <span className="font-bold text-foreground">
                       {service.price} с
                     </span>
-                    <span className="text-xs text-[#838A8D]">
+                    <span className="text-xs text-muted">
                       ⭐ {service.rating} ({service.reviews})
                     </span>
                   </div>
@@ -383,7 +381,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
         {doctors.length > 0 && (
           <div className="mt-10 md:mt-20 px-4 md:px-0">
             <div className="flex items-center justify-between mb-6 md:mb-8">
-              <h2 className="text-2xl font-semibold text-[#191A1B]">
+              <h2 className="text-2xl font-semibold text-foreground">
                 Специалисты клиники
               </h2>
             </div>

@@ -1,4 +1,4 @@
-import { ComponentType, FC, InputHTMLAttributes, SVGProps } from "react";
+﻿import { ComponentType, FC, InputHTMLAttributes, SVGProps } from "react";
 
 import { WarningIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
@@ -40,7 +40,7 @@ export const Input: FC<Props> = ({
   };
 
   const baseStyle =
-    "text-base leading-0 border border-[#E3E4E5] text-[#191A1B] rounded-lg py-2.25 px-3 outline-none focus:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)] disabled:bg-[#F2F3F5] w-full " +
+    "text-base leading-0 border border-border-soft text-foreground rounded-lg py-2.25 px-3 outline-none focus:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)] disabled:bg-background w-full " +
     sizes[size];
 
   const isIconLeft = IconLeft && "pl-10";
@@ -55,14 +55,14 @@ export const Input: FC<Props> = ({
       className={cn("flex flex-col gap-1.5", labelClassName)}
     >
       {label && (
-        <span className="text-[#0D0D12] text-sm font-medium">{label}</span>
+        <span className="text-overlay text-sm font-medium">{label}</span>
       )}
 
       <div className="relative w-full">
         {IconLeft && (
           <IconLeft
             className={cn(
-              "absolute left-3 top-1/2 -translate-y-1/2 size-5 text-[#191A1B]",
+              "absolute left-3 top-1/2 -translate-y-1/2 size-5 text-foreground",
               iconClassName,
             )}
           />
@@ -80,7 +80,7 @@ export const Input: FC<Props> = ({
         {IconRight && (
           <IconRight
             className={cn(
-              "absolute right-3 top-1/2 -translate-y-1/2 size-5 text-[#191A1B] cursor-pointer",
+              "absolute right-3 top-1/2 -translate-y-1/2 size-5 text-foreground cursor-pointer",
               iconClassName,
             )}
             onClick={onIconRightClick}
@@ -95,7 +95,7 @@ export const Input: FC<Props> = ({
         </span>
       )}
 
-      {hint && <span className="text-sm text-[#838A8D] mt-0.5">{hint}</span>}
+      {hint && <span className="text-sm text-muted mt-0.5">{hint}</span>}
     </label>
   );
 };

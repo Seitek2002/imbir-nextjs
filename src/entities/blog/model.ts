@@ -1,4 +1,4 @@
-import { StaticImageData } from "next/image";
+﻿import { StaticImageData } from "next/image";
 
 import {
   BlogBanner,
@@ -6,6 +6,7 @@ import {
   BlogImage2,
   BlogImage3,
 } from "@/shared/assets";
+import { colors } from "@/shared/config/tokens";
 
 export type BlogCategory = {
   id: string;
@@ -49,10 +50,10 @@ export type BlogArticle = {
 };
 
 export const BLOG_CATEGORIES: BlogCategory[] = [
-  { id: "health", label: "Здоровье", color: "#F5653E" },
+  { id: "health", label: "Здоровье", color: colors.primary },
   { id: "telemedicine", label: "Телемедицина", color: "#4A90D9" },
-  { id: "prevention", label: "Профилактика", color: "#F5653E" },
-  { id: "patients", label: "Советы пациентам", color: "#F5653E" },
+  { id: "prevention", label: "Профилактика", color: colors.primary },
+  { id: "patients", label: "Советы пациентам", color: colors.primary },
 ];
 
 const makeHref = (slug: string) => `/blog/${slug}`;
@@ -66,7 +67,7 @@ export const BLOG_POSTS: BlogPost[] = [
       "Простые признаки, при которых самодиагностика может навредить, и когда нужна консультация специалиста",
     categoryId: "health",
     category: "Здоровье",
-    categoryColor: "#F5653E",
+    categoryColor: colors.primary,
     date: "23 октября 2025",
     image: BlogBanner,
     href: makeHref("kak-ponyat-chto-pora-k-vrachu-a-ne-v-google"),
@@ -79,7 +80,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "7 привычек, которые незаметно портят ваше здоровье",
     categoryId: "prevention",
     category: "Профилактика",
-    categoryColor: "#F5653E",
+    categoryColor: colors.primary,
     date: "24 декабря 2025",
     image: BlogImage1,
     href: makeHref("7-privychek-kotorye-portyat-zdorove"),
@@ -90,7 +91,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "Онлайн-консультация с врачом: мифы и реальность",
     categoryId: "telemedicine",
     category: "Телемедицина",
-    categoryColor: "#F5653E",
+    categoryColor: colors.primary,
     date: "12 января 2025",
     image: BlogImage2,
     href: makeHref("onlayn-konsultatsiya-s-vrachom-mify-i-realnost"),
@@ -101,7 +102,7 @@ export const BLOG_POSTS: BlogPost[] = [
     title: "Как выбрать врача: опыт, отзывы или цена?",
     categoryId: "patients",
     category: "Советы пациентам",
-    categoryColor: "#F5653E",
+    categoryColor: colors.primary,
     date: "17 января 2025",
     image: BlogImage3,
     href: makeHref("kak-vybrat-vracha-opyt-otzyvy-ili-tsena"),
@@ -114,7 +115,7 @@ export const BLOG_ARTICLES: BlogArticle[] = [
     title: "Как понять, что пора к врачу, а не в Google",
     categoryId: "health",
     category: "Здоровье",
-    categoryColor: "#F5653E",
+    categoryColor: colors.primary,
     date: "23 октября 2025",
     badge: "Новое",
     image: BlogBanner,
@@ -151,7 +152,7 @@ export const BLOG_ARTICLES: BlogArticle[] = [
     title: "7 привычек, которые незаметно портят ваше здоровье",
     categoryId: "prevention",
     category: "Профилактика",
-    categoryColor: "#F5653E",
+    categoryColor: colors.primary,
     date: "24 декабря 2025",
     image: BlogImage1,
     intro:
@@ -179,7 +180,7 @@ export const BLOG_ARTICLES: BlogArticle[] = [
     title: "Онлайн-консультация с врачом: мифы и реальность",
     categoryId: "telemedicine",
     category: "Телемедицина",
-    categoryColor: "#F5653E",
+    categoryColor: colors.primary,
     date: "12 января 2025",
     image: BlogImage2,
     intro:
@@ -207,7 +208,7 @@ export const BLOG_ARTICLES: BlogArticle[] = [
     title: "Как выбрать врача: опыт, отзывы или цена?",
     categoryId: "patients",
     category: "Советы пациентам",
-    categoryColor: "#F5653E",
+    categoryColor: colors.primary,
     date: "17 января 2025",
     image: BlogImage3,
     intro:

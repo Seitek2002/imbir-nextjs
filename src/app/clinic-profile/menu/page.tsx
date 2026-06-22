@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -64,19 +64,19 @@ export default function ClinicProfileMenuPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       <div className="px-4 py-6">
-        <h1 className="text-2xl font-semibold text-[#191A1B] mb-6">
+        <h1 className="text-2xl font-semibold text-foreground mb-6">
           Мой профиль
         </h1>
 
         {/* Profile Card */}
         <div className="bg-gradient-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl p-6 mb-4 flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-gradient-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center">
+          <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-gradient-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
             <span className="text-white text-3xl font-bold">K</span>
           </div>
-          <h2 className="text-[#191A1B] font-semibold text-lg">K-MED</h2>
+          <h2 className="text-foreground font-semibold text-lg">K-MED</h2>
           <div className="flex items-center gap-1 mt-1">
-            <StarIcon className="w-4 h-4 text-[#F5653E]" />
-            <span className="text-[#F5653E] text-sm font-medium">4.85</span>
+            <StarIcon className="w-4 h-4 text-primary" />
+            <span className="text-primary text-sm font-medium">4.85</span>
           </div>
         </div>
 
@@ -86,16 +86,16 @@ export default function ClinicProfileMenuPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-[#F8F9FA] transition-colors"
+              className="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-surface transition-colors"
             >
-              <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
-                <div className="[&_path]:stroke-[#F5653E]">{item.icon}</div>
+              <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center flex-shrink-0">
+                <div className="[&_path]:stroke-primary">{item.icon}</div>
               </div>
-              <span className="flex-1 font-medium text-base text-[#686F72]">
+              <span className="flex-1 font-medium text-base text-secondary">
                 {item.label}
               </span>
               <svg
-                className="w-5 h-5 text-[#C4C8CA] flex-shrink-0"
+                className="w-5 h-5 text-dim flex-shrink-0"
                 fill="none"
                 viewBox="0 0 20 20"
               >
@@ -112,13 +112,13 @@ export default function ClinicProfileMenuPage() {
         </nav>
 
         {/* Logout */}
-        <button className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-[#686F72] hover:bg-[#F8F9FA] transition-colors w-full">
-          <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center flex-shrink-0">
-            <LogoutIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
+        <button className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-secondary hover:bg-surface transition-colors w-full">
+          <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center flex-shrink-0">
+            <LogoutIcon className="w-5 h-5 [&_path]:stroke-primary" />
           </div>
           <span className="font-medium text-base">Выйти из профиля</span>
           <svg
-            className="w-5 h-5 text-[#C4C8CA] ml-auto flex-shrink-0"
+            className="w-5 h-5 text-dim ml-auto flex-shrink-0"
             fill="none"
             viewBox="0 0 20 20"
           >

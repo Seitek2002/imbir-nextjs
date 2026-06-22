@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -22,12 +22,12 @@ const getInitials = (name: string) =>
 
 const ClinicImageFallback: FC<{ name: string }> = ({ name }) => (
   <div className="w-full h-full bg-linear-to-br from-[#FFF2F0] to-[#FFD9CC] flex flex-col items-center justify-center gap-2 p-3">
-    <div className="w-12 h-12 rounded-2xl bg-[#F5653E] flex items-center justify-center shrink-0">
+    <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shrink-0">
       <span className="text-white font-bold text-lg leading-none">
         {getInitials(name)}
       </span>
     </div>
-    <p className="text-[#F5653E] text-xs font-medium text-center line-clamp-2 leading-tight">
+    <p className="text-primary text-xs font-medium text-center line-clamp-2 leading-tight">
       {name}
     </p>
   </div>
@@ -71,7 +71,7 @@ export const ClinicCard: FC<Props> = ({
     return (
       <Link
         href={href}
-        className="bg-white rounded-2xl border border-[#E3E4E5] overflow-hidden flex items-stretch w-full cursor-pointer hover:border-[#F5653E]/40 transition-colors"
+        className="bg-white rounded-2xl border border-border-soft overflow-hidden flex items-stretch w-full cursor-pointer hover:border-primary/40 transition-colors"
       >
         <div className="relative w-35">
           {image && !imageError ? (
@@ -92,7 +92,7 @@ export const ClinicCard: FC<Props> = ({
           )}
         </div>
         <div className="p-3 flex-1 min-w-0">
-          <p className="font-semibold text-sm text-[#191A1B] truncate">
+          <p className="font-semibold text-sm text-foreground truncate">
             {name}
           </p>
           {(rating !== undefined || reviews !== undefined) && (
@@ -102,15 +102,15 @@ export const ClinicCard: FC<Props> = ({
                 <span className="font-medium text-[#FFA18D]">{rating}</span>
               )}
               {reviews !== undefined && (
-                <span className="text-[#686F72]">({reviews})</span>
+                <span className="text-secondary">({reviews})</span>
               )}
               {experience > 0 && (
-                <span className="text-[#686F72]">• {experience} лет опыта</span>
+                <span className="text-secondary">• {experience} лет опыта</span>
               )}
             </div>
           )}
-          <div className="flex items-center gap-1 mt-1 text-xs text-[#686F72]">
-            <GeoIcon className="size-3.5 text-[#F5653E]" />
+          <div className="flex items-center gap-1 mt-1 text-xs text-secondary">
+            <GeoIcon className="size-3.5 text-primary" />
             <span className="truncate">{address}</span>
           </div>
           <div className="flex justify-end mt-2" onClick={stopProp}>
@@ -128,7 +128,7 @@ export const ClinicCard: FC<Props> = ({
   return (
     <Link
       href={href}
-      className="bg-white rounded-3xl border border-[#E3E4E5] w-full h-full flex flex-col p-2 cursor-pointer hover:border-[#F5653E]/40 transition-colors"
+      className="bg-white rounded-3xl border border-border-soft w-full h-full flex flex-col p-2 cursor-pointer hover:border-primary/40 transition-colors"
     >
       <div className="relative w-full h-55 rounded-2xl overflow-hidden">
         {image && !imageError ? (
@@ -157,7 +157,7 @@ export const ClinicCard: FC<Props> = ({
       </div>
 
       <div className="p-3">
-        <p className="font-semibold text-sm text-[#191A1B] truncate">{name}</p>
+        <p className="font-semibold text-sm text-foreground truncate">{name}</p>
         {(rating !== undefined || reviews !== undefined) && (
           <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">
             <StarIcon className="size-3.5 text-[#FFA18D]" />
@@ -165,15 +165,15 @@ export const ClinicCard: FC<Props> = ({
               <span className="font-medium text-[#FFA18D]">{rating}</span>
             )}
             {reviews !== undefined && (
-              <span className="text-[#686F72]">({reviews})</span>
+              <span className="text-secondary">({reviews})</span>
             )}
             {experience > 0 && (
-              <span className="text-[#686F72]">• {experience} лет опыта</span>
+              <span className="text-secondary">• {experience} лет опыта</span>
             )}
           </div>
         )}
-        <div className="flex items-center gap-1 mt-1 text-xs text-[#686F72]">
-          <GeoIcon className="size-3.5 text-[#F5653E]" />
+        <div className="flex items-center gap-1 mt-1 text-xs text-secondary">
+          <GeoIcon className="size-3.5 text-primary" />
           <span className="truncate">{address}</span>
         </div>
       </div>

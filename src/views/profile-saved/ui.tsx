@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -126,7 +126,7 @@ export const ProfileSavedPage: FC = () => {
     <>
       <MobilePageHeader title="Сохранённое" />
       <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
-        <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden md:block">
+        <h1 className="text-[40px] font-semibold text-foreground mb-8 hidden md:block">
           Мой профиль
         </h1>
 
@@ -136,7 +136,7 @@ export const ProfileSavedPage: FC = () => {
           </aside>
 
           <main className="flex-1 min-w-0">
-            <h2 className="text-[28px] md:text-[32px] font-semibold text-[#191A1B] mb-6 hidden md:block">
+            <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground mb-6 hidden md:block">
               Сохранённое
             </h2>
 
@@ -148,7 +148,7 @@ export const ProfileSavedPage: FC = () => {
             />
 
             {isLoading ? (
-              <div className="bg-white rounded-3xl p-10 text-center border border-[#E5E6E8] text-[#838A8D]">
+              <div className="bg-white rounded-3xl p-10 text-center border border-border text-muted">
                 Загрузка...
               </div>
             ) : (

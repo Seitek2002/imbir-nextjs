@@ -1,8 +1,8 @@
-import { Footer, Header } from "@/widgets";
+﻿import { Footer, Header } from "@/widgets";
 
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col relative pb-20 md:pb-0">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col relative pb-20 md:pb-0">
       {/* Десктопный хедер оставляем настоящим, чтобы можно было сразу пользоваться навигацией */}
       <div className="hidden md:block">
         <Header />
@@ -32,7 +32,7 @@ export default function Loading() {
             </div>
 
             {/* Статистика */}
-            <div className="flex items-center justify-between md:justify-start md:gap-12 bg-white md:bg-transparent border md:border-none border-[#E3E4E5] rounded-2xl p-4 md:p-0 mb-8">
+            <div className="flex items-center justify-between md:justify-start md:gap-12 bg-white md:bg-transparent border md:border-none border-border-soft rounded-2xl p-4 md:p-0 mb-8">
               <div className="h-12 w-16 skeleton rounded-lg" />
               <div className="h-12 w-16 skeleton rounded-lg" />
               <div className="h-12 w-16 skeleton rounded-lg" />
@@ -45,7 +45,7 @@ export default function Loading() {
             </div>
 
             {/* Блоки деталей (Образование, Опыт и т.д.) */}
-            <div className="flex flex-col gap-8 md:gap-10 border-t border-[#E3E4E5] md:border-none pt-8 md:pt-0">
+            <div className="flex flex-col gap-8 md:gap-10 border-t border-border-soft md:border-none pt-8 md:pt-0">
               <div className="flex flex-col gap-3">
                 <div className="h-6 w-32 skeleton rounded-md" />
                 <div className="h-16 w-full skeleton rounded-lg" />
@@ -99,7 +99,7 @@ export default function Loading() {
       </div>
 
       {/* Мобильная липкая кнопка внизу */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#E3E4E5] z-50">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-border-soft z-50">
         <div className="h-13 w-full skeleton rounded-xl" />
       </div>
     </main>

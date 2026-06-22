@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { useClickAway } from "react-use";
@@ -6,12 +6,14 @@ import { useClickAway } from "react-use";
 import { useRouter } from "next/navigation";
 
 import { IconBtn } from "@/shared";
-import { CategoriesGrid, RecentSearches } from "@/widgets";
 
 import { SearchIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
 import { useSearchHistoryStore } from "@/shared/store/useSearchHistoryStore";
 import { SearchInput } from "@/shared/ui";
+
+import { CategoriesGrid } from "./categories-grid";
+import { RecentSearches } from "./recent-searches";
 
 const DURATION = 200;
 
@@ -62,7 +64,7 @@ export const GlobalSearch: FC = () => {
 
       {visible && (
         <div
-          className="modal-overlay fixed inset-0 z-50 flex justify-center items-start pt-[15vh] bg-[#0D0D12]/40 backdrop-blur-[2px]"
+          className="modal-overlay fixed inset-0 z-50 flex justify-center items-start pt-[15vh] bg-overlay/40 backdrop-blur-[2px]"
           data-state={state}
         >
           <div
@@ -82,13 +84,13 @@ export const GlobalSearch: FC = () => {
             <div className="max-h-[60vh] overflow-y-auto scrollbar-hide bg-white rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
               {query ? (
                 <div className="p-4">
-                  <p className="text-[#191A1B] text-sm mb-4">
+                  <p className="text-foreground text-sm mb-4">
                     Ищем: <span className="font-medium">{query}</span>...
                   </p>
 
                   <button
                     onClick={handleSearchSubmit}
-                    className="text-[#F5653E] text-sm font-medium hover:underline"
+                    className="text-primary text-sm font-medium hover:underline"
                   >
                     Все результаты по запросу «{query}»
                   </button>

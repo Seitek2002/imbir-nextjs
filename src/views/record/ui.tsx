@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useMemo, useState } from "react";
 
@@ -113,17 +113,17 @@ const isEmailValid = (value: string) =>
 
 const FieldLabel = ({ label, hint }: { label: string; hint?: string }) => (
   <div className="flex items-center justify-between gap-3 mb-1.5">
-    <span className="text-[#0D0D12] text-sm font-medium">{label}</span>
-    {hint && <span className="text-xs text-[#838A8D]">{hint}</span>}
+    <span className="text-overlay text-sm font-medium">{label}</span>
+    {hint && <span className="text-xs text-muted">{hint}</span>}
   </div>
 );
 
 const StepTitle = ({ number, title }: { number: number; title: string }) => (
   <div className="flex items-center gap-2.5 mb-4">
-    <span className="size-7 rounded-full border border-[#F5653E] text-[#F5653E] text-sm flex items-center justify-center">
+    <span className="size-7 rounded-full border border-primary text-primary text-sm flex items-center justify-center">
       {number}
     </span>
-    <h2 className="text-[28px] text-[#191A1B] leading-[130%] font-semibold">
+    <h2 className="text-[28px] text-foreground leading-[130%] font-semibold">
       {title}
     </h2>
   </div>
@@ -144,7 +144,7 @@ const MobileStepsProgress = ({
       <div className="relative">
         <div className="absolute left-3 right-3 top-1/2 -translate-y-1/2 h-px bg-[#D3D7DA]" />
         <div
-          className="absolute left-3 top-1/2 -translate-y-1/2 h-px bg-[#F5653E] transition-all duration-500 ease-out"
+          className="absolute left-3 top-1/2 -translate-y-1/2 h-px bg-primary transition-all duration-500 ease-out"
           style={{ width: `calc((100% - 24px) * ${progress / 100})` }}
         />
 
@@ -160,7 +160,7 @@ const MobileStepsProgress = ({
                 className={cn(
                   "size-6 rounded-full border text-xs flex items-center justify-center transition-colors duration-300 bg-white",
                   isDone || isCurrent
-                    ? "border-[#F5653E] text-[#F5653E]"
+                    ? "border-primary text-primary"
                     : "border-[#C8CDD1] text-[#A2A9AE]",
                 )}
               >
@@ -188,24 +188,22 @@ const SelectField = ({
   onClick: () => void;
 }) => (
   <div className="space-y-1.5">
-    <span className="text-sm font-medium text-[#0D0D12]">{label}</span>
+    <span className="text-sm font-medium text-overlay">{label}</span>
     <button
       type="button"
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "w-full h-11 rounded-lg border border-[#E3E4E5] px-3 text-left flex items-center justify-between transition-all",
+        "w-full h-11 rounded-lg border border-border-soft px-3 text-left flex items-center justify-between transition-all",
         "focus-visible:outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]",
-        !disabled && "hover:border-[#F5653E]/40",
+        !disabled && "hover:border-primary/40",
         disabled && "bg-[#F7F8F9] text-[#A6ACB0] cursor-not-allowed",
       )}
     >
-      <span
-        className={cn("text-sm", value ? "text-[#191A1B]" : "text-[#838A8D]")}
-      >
+      <span className={cn("text-sm", value ? "text-foreground" : "text-muted")}>
         {value || placeholder}
       </span>
-      <DropdownArrowIcon className="size-5 text-[#838A8D]" />
+      <DropdownArrowIcon className="size-5 text-muted" />
     </button>
   </div>
 );
@@ -236,13 +234,13 @@ const SelectionListItem = ({
         "w-full border rounded-2xl flex items-start transition-colors",
         compact ? "p-2 gap-2" : "p-2.5 gap-2.5",
         selected
-          ? "border-[#F5653E] bg-[#FFF8F5]"
-          : "border-[#E3E4E5] hover:border-[#F5653E]/40",
+          ? "border-primary bg-primary-tint"
+          : "border-border-soft hover:border-primary/40",
       )}
     >
       <div
         className={cn(
-          "relative rounded-xl overflow-hidden bg-[#F2F3F5] shrink-0",
+          "relative rounded-xl overflow-hidden bg-background shrink-0",
           compact ? "size-16" : "size-20",
         )}
       >
@@ -260,7 +258,7 @@ const SelectionListItem = ({
         <div className="flex items-start justify-between gap-2">
           <p
             className={cn(
-              "font-medium text-[#191A1B] leading-snug truncate",
+              "font-medium text-foreground leading-snug truncate",
               compact ? "text-base" : "text-[26px]",
             )}
           >
@@ -269,7 +267,7 @@ const SelectionListItem = ({
           {isService && (
             <span
               className={cn(
-                "font-semibold text-[#191A1B] leading-none shrink-0",
+                "font-semibold text-foreground leading-none shrink-0",
                 compact ? "text-base" : "text-[24px]",
               )}
             >
@@ -281,12 +279,12 @@ const SelectionListItem = ({
         {isDoctor && (
           <p
             className={cn(
-              "text-[#686F72] mt-1",
+              "text-secondary mt-1",
               compact ? "text-xs" : "text-sm",
             )}
           >
             {item.specialty}
-            <span className="text-[#F5653E]">
+            <span className="text-primary">
               {" "}
               • {clinicMap.get(item.clinicId)?.name}
             </span>
@@ -296,12 +294,12 @@ const SelectionListItem = ({
         {isService && (
           <p
             className={cn(
-              "text-[#686F72] mt-1",
+              "text-secondary mt-1",
               compact ? "text-xs" : "text-sm",
             )}
           >
             {item.category}
-            <span className="text-[#F5653E]">
+            <span className="text-primary">
               {" "}
               • {clinicMap.get(item.clinicId)?.name}
             </span>
@@ -310,12 +308,12 @@ const SelectionListItem = ({
 
         <div
           className={cn(
-            "flex items-center gap-1 mt-1 text-[#686F72]",
+            "flex items-center gap-1 mt-1 text-secondary",
             compact ? "text-xs" : "text-sm",
           )}
         >
-          <StarIcon className="size-4 text-[#F5653E]" />
-          <span className="font-medium text-[#F5653E]">{item.rating}</span>
+          <StarIcon className="size-4 text-primary" />
+          <span className="font-medium text-primary">{item.rating}</span>
           <span>({item.reviews})</span>
           {(isClinic || isDoctor) && item.experience > 0 && (
             <span>• {item.experience} лет опыта</span>
@@ -325,18 +323,18 @@ const SelectionListItem = ({
         {isClinic && (
           <div
             className={cn(
-              "flex items-center gap-1 mt-1 text-[#686F72]",
+              "flex items-center gap-1 mt-1 text-secondary",
               compact ? "text-xs" : "text-sm",
             )}
           >
-            <GeoIcon className="size-4 text-[#F5653E]" />
+            <GeoIcon className="size-4 text-primary" />
             <span className="truncate">{item.address}</span>
           </div>
         )}
       </div>
 
       <span className="size-6 rounded-full border shrink-0 mt-1 border-[#D4D8DB] flex items-center justify-center">
-        {selected && <span className="size-3.5 rounded-full bg-[#F5653E]" />}
+        {selected && <span className="size-3.5 rounded-full bg-primary" />}
       </span>
     </button>
   );
@@ -357,12 +355,12 @@ const SummaryCard: FC<{
   };
 
   return (
-    <aside className="relative border border-[#E3E4E5] rounded-3xl bg-white overflow-hidden lg:sticky lg:top-6 flex flex-col lg:w-100 lg:h-128.75">
+    <aside className="relative border border-border-soft rounded-3xl bg-white overflow-hidden lg:sticky lg:top-6 flex flex-col lg:w-100 lg:h-128.75">
       {/* Loading overlay */}
       {isChecking && (
         <div className="absolute inset-0 z-10 bg-white/70 rounded-3xl flex items-center justify-center">
           <svg
-            className="animate-spin size-10 text-[#F5653E]"
+            className="animate-spin size-10 text-primary"
             viewBox="0 0 24 24"
             fill="none"
           >
@@ -383,7 +381,7 @@ const SummaryCard: FC<{
         </div>
       )}
 
-      <div className="relative h-64 lg:flex-1 bg-[#FFF8F5]">
+      <div className="relative h-64 lg:flex-1 bg-primary-tint">
         {doctor.image ? (
           <Image
             src={doctor.image}
@@ -396,19 +394,19 @@ const SummaryCard: FC<{
       </div>
 
       <div className="p-3 shrink-0">
-        <p className="text-base font-semibold text-[#191A1B] text-center leading-snug mt-2">
+        <p className="text-base font-semibold text-foreground text-center leading-snug mt-2">
           {doctor.name}
         </p>
-        <p className="text-sm text-[#686F72] text-center mt-0.5">
+        <p className="text-sm text-secondary text-center mt-0.5">
           {doctor.specialty}
         </p>
 
-        <div className="mt-3 border border-[#E3E4E5] rounded-2xl p-3">
-          <p className="text-sm font-medium text-[#191A1B]">{service.title}</p>
-          <p className="text-sm text-[#686F72] mt-0.5">
+        <div className="mt-3 border border-border-soft rounded-2xl p-3">
+          <p className="text-sm font-medium text-foreground">{service.title}</p>
+          <p className="text-sm text-secondary mt-0.5">
             {mode === "online" ? "Онлайн-консультация" : "Оффлайн-консультация"}
           </p>
-          <div className="flex items-center gap-1.5 text-sm text-[#686F72] mt-1">
+          <div className="flex items-center gap-1.5 text-sm text-secondary mt-1">
             <CalendarIcon className="size-4 shrink-0" />
             <span>
               {selectedDate && selectedTime
@@ -419,15 +417,15 @@ const SummaryCard: FC<{
         </div>
 
         <div className="mt-3 space-y-2">
-          <div className="flex items-center justify-between text-sm text-[#686F72]">
+          <div className="flex items-center justify-between text-sm text-secondary">
             <span>К оплате</span>
-            <span className="text-[#191A1B] font-semibold">
+            <span className="text-foreground font-semibold">
               {formatPrice(service.price)}
             </span>
           </div>
-          <div className="flex items-center justify-between text-sm text-[#686F72]">
+          <div className="flex items-center justify-between text-sm text-secondary">
             <span>Статус</span>
-            <span className="px-2.5 py-1 rounded-full bg-[#FFF3EE] text-[#F5653E] text-xs font-medium">
+            <span className="px-2.5 py-1 rounded-full bg-[#FFF3EE] text-primary text-xs font-medium">
               Ожидает оплаты
             </span>
           </div>
@@ -435,7 +433,7 @@ const SummaryCard: FC<{
 
         <Button
           variant="outline"
-          className="w-full justify-center mt-3 text-[#191A1B]"
+          className="w-full justify-center mt-3 text-foreground"
           disabled={isChecking}
           onClick={handleCheckStatus}
         >
@@ -900,7 +898,7 @@ export const RecordPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-[#F2F3F5] lg:bg-white flex flex-col">
+    <main className="min-h-screen bg-background lg:bg-white flex flex-col">
       <Header
         title="Оформление записи"
         backTo={ROUTES.HOME}
@@ -914,7 +912,7 @@ export const RecordPage = () => {
           <IconBtn variant="outline" size="sm" onClick={() => router.back()}>
             <HeaderBackIcon className="size-4" />
           </IconBtn>
-          <h1 className="text-[28px] font-semibold text-[#191A1B] leading-[130%]">
+          <h1 className="text-[28px] font-semibold text-foreground leading-[130%]">
             Оформление записи
           </h1>
         </div>
@@ -922,7 +920,7 @@ export const RecordPage = () => {
 
       <div className="w-full max-w-340 mx-auto px-4 lg:px-10 py-4 lg:py-6 pb-10 flex-1">
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-6">
-          <div className="rounded-3xl border border-[#E3E4E5] bg-white overflow-hidden">
+          <div className="rounded-3xl border border-border-soft bg-white overflow-hidden">
             <section
               className={cn(
                 "p-4 lg:p-6",
@@ -958,7 +956,7 @@ export const RecordPage = () => {
               </div>
 
               <div className="lg:hidden">
-                <h2 className="text-[40px] text-[#191A1B] leading-none font-semibold">
+                <h2 className="text-[40px] text-foreground leading-none font-semibold">
                   {mobileStep1Config.title}
                 </h2>
 
@@ -983,7 +981,7 @@ export const RecordPage = () => {
                       />
                     ))
                   ) : (
-                    <p className="text-sm text-[#838A8D] text-center py-6">
+                    <p className="text-sm text-muted text-center py-6">
                       Ничего не найдено
                     </p>
                   )}
@@ -1004,7 +1002,7 @@ export const RecordPage = () => {
 
             <section
               className={cn(
-                "p-4 lg:p-6 lg:border-t lg:border-[#E3E4E5]",
+                "p-4 lg:p-6 lg:border-t lg:border-border-soft",
                 mobileStep !== 2 && "hidden",
                 "lg:block",
               )}
@@ -1046,7 +1044,7 @@ export const RecordPage = () => {
 
             <section
               className={cn(
-                "p-4 lg:p-6 lg:border-t lg:border-[#E3E4E5]",
+                "p-4 lg:p-6 lg:border-t lg:border-border-soft",
                 mobileStep !== 3 && "hidden",
                 "lg:block",
               )}
@@ -1077,7 +1075,7 @@ export const RecordPage = () => {
                 />
 
                 <div className="space-y-1.5">
-                  <span className="text-sm font-medium text-[#0D0D12]">
+                  <span className="text-sm font-medium text-overlay">
                     Номер телефона
                   </span>
                   <div
@@ -1085,10 +1083,10 @@ export const RecordPage = () => {
                       "flex items-center h-11 rounded-lg border transition-all overflow-hidden",
                       errors.phone
                         ? "border-red-400"
-                        : "border-[#E3E4E5] focus-within:border-[#F5653E]/60",
+                        : "border-border-soft focus-within:border-primary/60",
                     )}
                   >
-                    <span className="px-3 h-full flex items-center bg-[#F7F8F9] border-r border-[#E3E4E5] text-sm text-[#191A1B] select-none shrink-0">
+                    <span className="px-3 h-full flex items-center bg-[#F7F8F9] border-r border-border-soft text-sm text-foreground select-none shrink-0">
                       +996
                     </span>
                     <input
@@ -1108,7 +1106,7 @@ export const RecordPage = () => {
                             : "Проверьте формат номера",
                         }));
                       }}
-                      className="flex-1 h-full px-3 text-sm text-[#191A1B] outline-none bg-transparent placeholder:text-[#838A8D]"
+                      className="flex-1 h-full px-3 text-sm text-foreground outline-none bg-transparent placeholder:text-muted"
                     />
                   </div>
                   {errors.phone && (
@@ -1196,10 +1194,10 @@ export const RecordPage = () => {
       </div>
 
       {modalConfig && (
-        <div className="fixed inset-0 z-50 bg-[#0D0D12]/40 backdrop-blur-[2px] flex items-center justify-center p-3">
-          <div className="w-full max-w-138 rounded-3xl border border-[#E3E4E5] bg-white p-4 lg:p-5">
+        <div className="fixed inset-0 z-50 bg-overlay/40 backdrop-blur-[2px] flex items-center justify-center p-3">
+          <div className="w-full max-w-138 rounded-3xl border border-border-soft bg-white p-4 lg:p-5">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="text-[28px] text-[#191A1B] leading-[130%] font-semibold">
+              <h3 className="text-[28px] text-foreground leading-[130%] font-semibold">
                 {modalConfig.title}
               </h3>
 
@@ -1233,7 +1231,7 @@ export const RecordPage = () => {
                   />
                 ))
               ) : (
-                <p className="text-sm text-[#838A8D] text-center py-6">
+                <p className="text-sm text-muted text-center py-6">
                   Ничего не найдено
                 </p>
               )}
@@ -1255,16 +1253,16 @@ export const RecordPage = () => {
 
       {/* Success modal */}
       {showSuccess && (
-        <div className="fixed inset-0 z-50 bg-[#0D0D12]/40 backdrop-blur-[2px] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-[#E3E4E5] p-8 max-w-sm w-full flex flex-col items-center text-center gap-5">
+        <div className="fixed inset-0 z-50 bg-overlay/40 backdrop-blur-[2px] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-border-soft p-8 max-w-sm w-full flex flex-col items-center text-center gap-5">
             <SuccessCheckIcon className="size-50" />
             <div>
-              <p className="text-[20px] font-semibold text-[#191A1B] leading-[130%]">
+              <p className="text-[20px] font-semibold text-foreground leading-[130%]">
                 Ваша запись
                 <br />
                 успешно забронирована!
               </p>
-              <p className="text-sm text-[#686F72] mt-2">
+              <p className="text-sm text-secondary mt-2">
                 Ожидайте сообщение от вашего специалиста
               </p>
             </div>

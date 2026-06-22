@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -26,10 +26,12 @@ export const RecentSearches: FC = () => {
     <>
       <div className="bg-white p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[#191A1B] text-lg font-medium">Недавно искали</h2>
+          <h2 className="text-foreground text-lg font-medium">
+            Недавно искали
+          </h2>
           <button
             onClick={() => setConfirmOpen(true)}
-            className="text-[#F5653E] text-base active:scale-95 transition-transform hover:opacity-80"
+            className="text-primary text-base active:scale-95 transition-transform hover:opacity-80"
           >
             Удалить все
           </button>
@@ -42,8 +44,8 @@ export const RecentSearches: FC = () => {
                 onClick={() => handleSearch(item)}
                 className="flex items-center gap-3 flex-1 text-left hover:opacity-70 transition-opacity"
               >
-                <SearchHistory className="size-5 text-[#838A8D] shrink-0" />
-                <span className="text-[#191A1B] text-base truncate">
+                <SearchHistory className="size-5 text-muted shrink-0" />
+                <span className="text-foreground text-base truncate">
                   {item}
                 </span>
               </button>
@@ -64,7 +66,7 @@ export const RecentSearches: FC = () => {
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={clearHistory}
-        icon={<TrashIcon className="w-7 h-7 text-[#F5653E]" />}
+        icon={<TrashIcon className="w-7 h-7 text-primary" />}
         title="Удалить историю поиска?"
         description="История будет удалена без возможности восстановления"
         confirmLabel="Удалить"

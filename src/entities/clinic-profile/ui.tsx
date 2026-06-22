@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, SVGProps, useState } from "react";
 
@@ -27,12 +27,12 @@ const FileIcon: FC<SVGProps<SVGSVGElement>> = (props) => (
     <rect width="32" height="32" rx="8" fill="#F2F4F7" />
     <path
       d="M11 10C11 9.44772 11.4477 9 12 9H19.5858C19.851 9 20.1054 9.10536 20.2929 9.29289L22.7071 11.7071C22.8946 11.8946 23 12.149 23 12.4142V22C23 22.5523 22.5523 23 22 23H12C11.4477 23 11 22.5523 11 22V10Z"
-      stroke="#686F72"
+      stroke={colors.secondary}
       strokeWidth="1.5"
     />
     <path
       d="M19 9V12C19 12.5523 19.4477 13 20 13H23"
-      stroke="#686F72"
+      stroke={colors.secondary}
       strokeWidth="1.5"
     />
   </svg>
@@ -47,8 +47,8 @@ const SectionCard = ({
   title: string;
   children: React.ReactNode;
 }) => (
-  <div className="bg-white rounded-3xl p-8 border border-[#E5E6E8] mb-6">
-    <h3 className="text-xl font-semibold text-[#191A1B] mb-6">{title}</h3>
+  <div className="bg-white rounded-3xl p-8 border border-border mb-6">
+    <h3 className="text-xl font-semibold text-foreground mb-6">{title}</h3>
     {children}
   </div>
 );
@@ -61,8 +61,8 @@ const FieldView = ({
   children: React.ReactNode;
 }) => (
   <div>
-    <div className="text-xs text-[#838A8D] mb-1">{label}</div>
-    <div className="text-[#191A1B] text-sm">{children}</div>
+    <div className="text-xs text-muted mb-1">{label}</div>
+    <div className="text-foreground text-sm">{children}</div>
   </div>
 );
 
@@ -140,11 +140,11 @@ export const ClinicProfileForm: FC<Props> = ({
             </div>
 
             <div className="mb-6">
-              <label className="block text-[#686F72] text-sm mb-2">
+              <label className="block text-secondary text-sm mb-2">
                 Логотип
               </label>
               <div className="flex items-center gap-4">
-                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center">
+                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
                   {logoSrc ? (
                     <Image
                       src={logoSrc}
@@ -174,14 +174,14 @@ export const ClinicProfileForm: FC<Props> = ({
             </div>
 
             <div>
-              <label className="block text-[#686F72] text-sm mb-2">
+              <label className="block text-secondary text-sm mb-2">
                 Фотографии
               </label>
               <div className="flex items-center gap-4 overflow-x-auto pb-2">
                 {photos.map((photo, i) => (
                   <div
                     key={i}
-                    className="w-24 h-24 rounded-2xl overflow-hidden bg-[#F8F9FA] shrink-0"
+                    className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
                   >
                     <Image
                       src={photo}
@@ -192,11 +192,11 @@ export const ClinicProfileForm: FC<Props> = ({
                     />
                   </div>
                 ))}
-                <button className="w-24 h-24 rounded-2xl border-2 border-dashed border-[#E5E6E8] flex items-center justify-center hover:border-[#F5653E] transition-colors shrink-0">
+                <button className="w-24 h-24 rounded-2xl border-2 border-dashed border-border flex items-center justify-center hover:border-primary transition-colors shrink-0">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M12 5V19M5 12H19"
-                      stroke="#C4C8CA"
+                      stroke={colors.dim}
                       strokeWidth="2"
                       strokeLinecap="round"
                     />
@@ -210,8 +210,8 @@ export const ClinicProfileForm: FC<Props> = ({
             <FieldView label="Название">{name}</FieldView>
 
             <div>
-              <div className="text-xs text-[#838A8D] mb-2">Логотип</div>
-              <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center">
+              <div className="text-xs text-muted mb-2">Логотип</div>
+              <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
                 {logoSrc ? (
                   <Image
                     src={logoSrc}
@@ -232,12 +232,12 @@ export const ClinicProfileForm: FC<Props> = ({
             <FieldView label="Описание">{description}</FieldView>
 
             <div>
-              <div className="text-xs text-[#838A8D] mb-2">Фотографии</div>
+              <div className="text-xs text-muted mb-2">Фотографии</div>
               <div className="flex items-center gap-4 overflow-x-auto pb-2">
                 {photos.map((photo, i) => (
                   <div
                     key={i}
-                    className="w-24 h-24 rounded-2xl overflow-hidden bg-[#F8F9FA] shrink-0"
+                    className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
                   >
                     <Image
                       src={photo}
@@ -293,7 +293,7 @@ export const ClinicProfileForm: FC<Props> = ({
       {/* ── 3. Расписание ─────────────────────────────────────────────── */}
       <SectionCard title="Расписание">
         <div className="mb-6">
-          <div className="text-sm font-medium text-[#191A1B] mb-4">
+          <div className="text-sm font-medium text-foreground mb-4">
             График работы
           </div>
 
@@ -303,27 +303,27 @@ export const ClinicProfileForm: FC<Props> = ({
                 const day = days[key] as WorkDaySchedule;
                 return (
                   <div key={key} className="flex items-center gap-3">
-                    <span className="w-8 text-sm text-[#686F72] shrink-0">
+                    <span className="w-8 text-sm text-secondary shrink-0">
                       {ru}
                     </span>
                     <input
                       type="time"
                       defaultValue={day.open}
                       disabled={!day.enabled}
-                      className="border border-[#E3E4E5] rounded-lg px-3 py-2 text-sm focus:border-[#F5653E] focus:outline-none disabled:opacity-40"
+                      className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40"
                     />
-                    <span className="text-[#838A8D]">–</span>
+                    <span className="text-muted">–</span>
                     <input
                       type="time"
                       defaultValue={day.close}
                       disabled={!day.enabled}
-                      className="border border-[#E3E4E5] rounded-lg px-3 py-2 text-sm focus:border-[#F5653E] focus:outline-none disabled:opacity-40"
+                      className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40"
                     />
-                    <label className="flex items-center gap-2 ml-2 text-sm text-[#686F72] cursor-pointer">
+                    <label className="flex items-center gap-2 ml-2 text-sm text-secondary cursor-pointer">
                       <input
                         type="checkbox"
                         defaultChecked={day.enabled}
-                        className="accent-[#F5653E]"
+                        className="accent-primary"
                       />
                       Рабочий
                     </label>
@@ -339,10 +339,10 @@ export const ClinicProfileForm: FC<Props> = ({
                 const day = days[key] as WorkDaySchedule;
                 return (
                   <div key={key} className="flex items-center gap-6">
-                    <span className="w-8 text-sm text-[#686F72]">{ru}</span>
-                    <span className="text-sm text-[#191A1B]">
+                    <span className="w-8 text-sm text-secondary">{ru}</span>
+                    <span className="text-sm text-foreground">
                       {day.open}
-                      <span className="mx-2 text-[#838A8D]">–</span>
+                      <span className="mx-2 text-muted">–</span>
                       {day.close}
                     </span>
                   </div>
@@ -353,7 +353,7 @@ export const ClinicProfileForm: FC<Props> = ({
         </div>
 
         <div className="mb-6">
-          <div className="text-sm font-medium text-[#191A1B] mb-3">
+          <div className="text-sm font-medium text-foreground mb-3">
             Обеденный перерыв
           </div>
           {isEditing ? (
@@ -361,19 +361,19 @@ export const ClinicProfileForm: FC<Props> = ({
               <input
                 type="time"
                 defaultValue={workSchedule.lunchStart}
-                className="border border-[#E3E4E5] rounded-lg px-3 py-2 text-sm focus:border-[#F5653E] focus:outline-none"
+                className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none"
               />
-              <span className="text-[#838A8D]">–</span>
+              <span className="text-muted">–</span>
               <input
                 type="time"
                 defaultValue={workSchedule.lunchEnd}
-                className="border border-[#E3E4E5] rounded-lg px-3 py-2 text-sm focus:border-[#F5653E] focus:outline-none"
+                className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none"
               />
             </div>
           ) : (
-            <span className="text-sm text-[#191A1B]">
+            <span className="text-sm text-foreground">
               {workSchedule.lunchStart}
-              <span className="mx-2 text-[#838A8D]">–</span>
+              <span className="mx-2 text-muted">–</span>
               {workSchedule.lunchEnd}
             </span>
           )}
@@ -384,17 +384,17 @@ export const ClinicProfileForm: FC<Props> = ({
             <input
               type="checkbox"
               defaultChecked={workSchedule.emergency24}
-              className="accent-[#F5653E] w-4 h-4"
+              className="accent-primary w-4 h-4"
             />
-            <span className="text-sm text-[#191A1B]">
+            <span className="text-sm text-foreground">
               Экстренный приём 24/7
             </span>
           </label>
         ) : (
           workSchedule.emergency24 && (
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#F5653E] shrink-0" />
-              <span className="text-sm text-[#191A1B]">
+              <span className="w-3 h-3 rounded-full bg-primary shrink-0" />
+              <span className="text-sm text-foreground">
                 Экстренный приём 24/7
               </span>
             </div>
@@ -422,23 +422,23 @@ export const ClinicProfileForm: FC<Props> = ({
               defaultValue={licenseAuthority}
             />
             <div className="md:col-span-2">
-              <label className="block text-[#686F72] text-sm mb-2">
+              <label className="block text-secondary text-sm mb-2">
                 Документы (лицензии, регистрационные документы)
               </label>
               <div className="flex flex-wrap gap-4">
                 {documents.map((doc, i) => (
                   <div key={i} className="flex flex-col items-center gap-1">
                     <FileIcon />
-                    <span className="text-xs text-[#686F72] max-w-20 text-center truncate">
+                    <span className="text-xs text-secondary max-w-20 text-center truncate">
                       {doc.name}
                     </span>
                   </div>
                 ))}
-                <button className="w-16 h-16 rounded-xl border-2 border-dashed border-[#E5E6E8] flex items-center justify-center hover:border-[#F5653E] transition-colors">
+                <button className="w-16 h-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center hover:border-primary transition-colors">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path
                       d="M10 4V16M4 10H16"
-                      stroke="#C4C8CA"
+                      stroke={colors.dim}
                       strokeWidth="1.5"
                       strokeLinecap="round"
                     />
@@ -461,7 +461,7 @@ export const ClinicProfileForm: FC<Props> = ({
               </FieldView>
             </div>
             <div>
-              <div className="text-xs text-[#838A8D] mb-2">
+              <div className="text-xs text-muted mb-2">
                 Документы (лицензии, регистрационные документы)
               </div>
               <div className="flex flex-wrap gap-4">
@@ -472,7 +472,7 @@ export const ClinicProfileForm: FC<Props> = ({
                     className="flex flex-col items-center gap-1 hover:opacity-70 transition-opacity"
                   >
                     <FileIcon />
-                    <span className="text-xs text-[#686F72] max-w-20 text-center truncate">
+                    <span className="text-xs text-secondary max-w-20 text-center truncate">
                       {doc.name}
                     </span>
                   </a>
@@ -547,42 +547,42 @@ export const ClinicProfileForm: FC<Props> = ({
         ) : (
           <div className="flex flex-col gap-5">
             <div>
-              <div className="text-xs text-[#838A8D] mb-2">Оборудование</div>
+              <div className="text-xs text-muted mb-2">Оборудование</div>
               <ul className="flex flex-col gap-1">
                 {equipment.map((item) => (
                   <li
                     key={item}
-                    className="text-sm text-[#191A1B] flex items-center gap-2"
+                    className="text-sm text-foreground flex items-center gap-2"
                   >
-                    <span className="text-[#838A8D]">–</span> {item}
+                    <span className="text-muted">–</span> {item}
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <div className="text-xs text-[#838A8D] mb-2">
+              <div className="text-xs text-muted mb-2">
                 Условия для пациентов
               </div>
               <ul className="flex flex-col gap-1">
                 {patientConditions.map((item) => (
                   <li
                     key={item}
-                    className="text-sm text-[#191A1B] flex items-center gap-2"
+                    className="text-sm text-foreground flex items-center gap-2"
                   >
-                    <span className="text-[#838A8D]">–</span> {item}
+                    <span className="text-muted">–</span> {item}
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <div className="text-xs text-[#838A8D] mb-2">Способы оплаты</div>
+              <div className="text-xs text-muted mb-2">Способы оплаты</div>
               <ul className="flex flex-col gap-1">
                 {paymentMethods.map((item) => (
                   <li
                     key={item}
-                    className="text-sm text-[#191A1B] flex items-center gap-2"
+                    className="text-sm text-foreground flex items-center gap-2"
                   >
-                    <span className="text-[#838A8D]">–</span> {item}
+                    <span className="text-muted">–</span> {item}
                   </li>
                 ))}
               </ul>

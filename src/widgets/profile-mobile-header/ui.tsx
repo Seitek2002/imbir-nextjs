@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, ReactNode } from "react";
 
@@ -19,17 +19,17 @@ export const MobilePageHeader: FC<Props> = ({
 
   return (
     <div
-      className={`md:hidden flex items-center justify-between px-4 py-4 bg-white${hasBorder ? " border-b border-[#E5E6E8]" : ""}`}
+      className={`md:hidden flex items-center justify-between px-4 py-4 bg-white${hasBorder ? " border-b border-border" : ""}`}
     >
       <button
         onClick={() => router.back()}
-        className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+        className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
         aria-label="Назад"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path
             d="M15 18L9 12L15 6"
-            stroke="#191A1B"
+            stroke={colors.foreground}
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -37,7 +37,7 @@ export const MobilePageHeader: FC<Props> = ({
         </svg>
       </button>
 
-      <h1 className="text-lg font-semibold text-[#191A1B]">{title}</h1>
+      <h1 className="text-lg font-semibold text-foreground">{title}</h1>
 
       <div className="w-10 flex items-center justify-center">
         {rightElement ?? null}

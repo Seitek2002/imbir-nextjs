@@ -1,4 +1,4 @@
-import { Footer, Header } from "@/widgets";
+﻿import { Footer, Header } from "@/widgets";
 
 import { ROUTES } from "@/shared/config/routes";
 
@@ -12,10 +12,10 @@ const Section = ({
   children: React.ReactNode;
 }) => (
   <div className="mb-8">
-    <h2 className="text-lg font-semibold text-[#191A1B] mb-3">
+    <h2 className="text-lg font-semibold text-foreground mb-3">
       {num}. {title}
     </h2>
-    <div className="flex flex-col gap-3 text-[#686F72] text-sm leading-relaxed">
+    <div className="flex flex-col gap-3 text-secondary text-sm leading-relaxed">
       {children}
     </div>
   </div>
@@ -23,25 +23,25 @@ const Section = ({
 
 const DataItem = ({ label, value }: { label: string; value: string }) => (
   <div className="flex items-start gap-2">
-    <span className="mt-1.5 size-1.5 rounded-full bg-[#F5653E] shrink-0" />
+    <span className="mt-1.5 size-1.5 rounded-full bg-primary shrink-0" />
     <span>
-      <span className="font-medium text-[#191A1B]">{label}</span> — {value}
+      <span className="font-medium text-foreground">{label}</span> — {value}
     </span>
   </div>
 );
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
+    <main className="min-h-screen bg-background flex flex-col">
       <Header title="Политика конфиденциальности" backTo={ROUTES.HOME} />
 
       <div className="flex-1 w-full max-w-360 mx-auto px-4 md:px-10 py-10">
         <div className="bg-white rounded-3xl p-6 md:p-12 max-w-3xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-[#191A1B] mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               Политика конфиденциальности
             </h1>
-            <p className="text-[#838A8D] text-sm">
+            <p className="text-muted text-sm">
               Последнее обновление: 1 января 2025 г.
             </p>
           </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -42,13 +42,13 @@ const SaveButton: FC<{
   return (
     <button
       onClick={handleClick}
-      className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shadow-sm shrink-0"
+      className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-surface transition-colors shadow-sm shrink-0"
       aria-label={isSaved ? "Удалить из избранного" : "Добавить в избранное"}
     >
       {isSaved ? (
-        <HeartIcon2 className="w-6 h-6 text-[#F5653E]" />
+        <HeartIcon2 className="w-6 h-6 text-primary" />
       ) : (
-        <HeartIcon className="w-6 h-6 text-[#F5653E]" />
+        <HeartIcon className="w-6 h-6 text-primary" />
       )}
     </button>
   );
@@ -80,9 +80,9 @@ export const ServiceCard: FC<Props> = ({
     return (
       <Link
         href={href}
-        className="bg-white rounded-3xl p-4 flex items-center gap-4 border border-[#E5E6E8] cursor-pointer hover:border-[#F5653E]/40 transition-colors"
+        className="bg-white rounded-3xl p-4 flex items-center gap-4 border border-border cursor-pointer hover:border-primary/40 transition-colors"
       >
-        <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-[#F8F9FA] shrink-0">
+        <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-surface shrink-0">
           {image ? (
             <Image
               src={image}
@@ -92,7 +92,7 @@ export const ServiceCard: FC<Props> = ({
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[#C4C8CA] text-2xl font-semibold">
+            <div className="w-full h-full flex items-center justify-center text-dim text-2xl font-semibold">
               {name.charAt(0)}
             </div>
           )}
@@ -100,22 +100,22 @@ export const ServiceCard: FC<Props> = ({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-2">
-            <h3 className="text-[#191A1B] font-semibold text-base leading-tight">
+            <h3 className="text-foreground font-semibold text-base leading-tight">
               {name}
             </h3>
-            <span className="text-[#191A1B] font-semibold text-base whitespace-nowrap">
+            <span className="text-foreground font-semibold text-base whitespace-nowrap">
               {price} с
             </span>
           </div>
 
-          <p className="text-[#838A8D] text-sm mb-2">
-            {category} <span className="text-[#F5653E]">• {displayClinic}</span>
+          <p className="text-muted text-sm mb-2">
+            {category} <span className="text-primary">• {displayClinic}</span>
           </p>
 
           <div className="flex items-center gap-1 mb-3 text-sm">
-            <StarIcon className="w-4 h-4 text-[#F5653E]" />
-            <span className="text-[#F5653E] font-medium">{rating}</span>
-            <span className="text-[#686F72]">({reviews})</span>
+            <StarIcon className="w-4 h-4 text-primary" />
+            <span className="text-primary font-medium">{rating}</span>
+            <span className="text-secondary">({reviews})</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -140,7 +140,7 @@ export const ServiceCard: FC<Props> = ({
   return (
     <Link
       href={href}
-      className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden flex flex-col h-full cursor-pointer hover:border-[#F5653E]/40 transition-colors"
+      className="bg-white rounded-3xl border border-border overflow-hidden flex flex-col h-full cursor-pointer hover:border-primary/40 transition-colors"
     >
       <div className="relative aspect-4/3 w-full">
         {image ? (
@@ -152,8 +152,8 @@ export const ServiceCard: FC<Props> = ({
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-[#F8F9FA] flex items-center justify-center">
-            <span className="text-[#C4C8CA] text-4xl font-semibold">
+          <div className="w-full h-full bg-surface flex items-center justify-center">
+            <span className="text-dim text-4xl font-semibold">
               {name.charAt(0)}
             </span>
           </div>
@@ -165,22 +165,22 @@ export const ServiceCard: FC<Props> = ({
 
       <div className="flex-1 p-4 flex flex-col">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-[#191A1B] font-semibold text-base leading-tight flex-1">
+          <h3 className="text-foreground font-semibold text-base leading-tight flex-1">
             {name}
           </h3>
-          <span className="text-[#191A1B] font-semibold text-base whitespace-nowrap">
+          <span className="text-foreground font-semibold text-base whitespace-nowrap">
             {price} с
           </span>
         </div>
 
-        <p className="text-[#838A8D] text-sm mb-2">
-          {category} <span className="text-[#F5653E]">• {displayClinic}</span>
+        <p className="text-muted text-sm mb-2">
+          {category} <span className="text-primary">• {displayClinic}</span>
         </p>
 
         <div className="flex items-center gap-1 mb-4 text-sm">
-          <StarIcon className="w-4 h-4 text-[#F5653E]" />
-          <span className="text-[#F5653E] font-medium">{rating}</span>
-          <span className="text-[#686F72]">({reviews})</span>
+          <StarIcon className="w-4 h-4 text-primary" />
+          <span className="text-primary font-medium">{rating}</span>
+          <span className="text-secondary">({reviews})</span>
         </div>
 
         <Button

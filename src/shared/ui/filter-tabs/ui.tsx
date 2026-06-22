@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ReactNode } from "react";
 
@@ -31,8 +31,8 @@ export function FilterTabBar<T extends string>({
           onClick={() => onChange(tab.id)}
           className={`px-4 py-2.5 rounded-full font-medium text-sm whitespace-nowrap transition-all flex items-center gap-2 shrink-0 ${
             value === tab.id
-              ? "bg-[#F5653E] text-white"
-              : "bg-[#F2F4F7] text-[#686F72] hover:bg-[#E5E6E8]"
+              ? "bg-primary text-white"
+              : "bg-[#F2F4F7] text-secondary hover:bg-border"
           }`}
         >
           {tab.icon}

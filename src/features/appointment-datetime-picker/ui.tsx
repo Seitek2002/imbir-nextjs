@@ -204,7 +204,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
   };
 
   const monthNav = (
-    <div className="flex items-center justify-between bg-[#F2F3F5] rounded-xl px-2 py-1.5">
+    <div className="flex items-center justify-between bg-background rounded-xl px-2 py-1.5">
       <IconBtn
         variant="text"
         size="xs"
@@ -216,7 +216,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
       >
         <ArrowLeftIcon className="size-4" />
       </IconBtn>
-      <span className="text-sm font-medium text-[#191A1B]">{monthLabel}</span>
+      <span className="text-sm font-medium text-foreground">{monthLabel}</span>
       <IconBtn
         variant="text"
         size="xs"
@@ -235,7 +235,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
     <div className={cn("space-y-3", className)}>
       {/* Mode toggle */}
       <div className="space-y-2">
-        <div className="relative grid grid-cols-2 items-center bg-[#F2F3F5] p-1 rounded-full">
+        <div className="relative grid grid-cols-2 items-center bg-background p-1 rounded-full">
           <div
             className="absolute top-1 bottom-1 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-transform duration-300"
             style={{
@@ -250,7 +250,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
             disabled={!canUseOnline}
             className={cn(
               "relative z-10 py-2 text-sm font-medium transition-colors rounded-full",
-              mode === "online" ? "text-[#191A1B]" : "text-[#686F72]",
+              mode === "online" ? "text-foreground" : "text-secondary",
               !canUseOnline && "opacity-50 cursor-not-allowed",
             )}
           >
@@ -261,18 +261,18 @@ export const AppointmentDateTimePicker: FC<Props> = ({
             onClick={() => onModeChange("offline")}
             className={cn(
               "relative z-10 py-2 text-sm font-medium transition-colors rounded-full",
-              mode === "offline" ? "text-[#191A1B]" : "text-[#686F72]",
+              mode === "offline" ? "text-foreground" : "text-secondary",
             )}
           >
             Оффлайн
           </button>
         </div>
         {!canUseOnline && (
-          <p className="text-xs text-[#838A8D]">
+          <p className="text-xs text-muted">
             Онлайн-доступ доступен после{" "}
             <Link
               href="/login"
-              className="text-[#F5653E] underline hover:no-underline"
+              className="text-primary underline hover:no-underline"
             >
               авторизации
             </Link>
@@ -283,7 +283,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
 
       {/* MOBILE layout */}
       <div className="lg:hidden space-y-3">
-        <div className="border border-[#E3E4E5] rounded-2xl p-3">
+        <div className="border border-border-soft rounded-2xl p-3">
           {monthNav}
           {/* Scrollable day strip */}
           <div
@@ -308,16 +308,16 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                     className={cn(
                       "flex flex-col items-center justify-center gap-1 w-12 h-14 rounded-xl border text-sm transition-all shrink-0",
                       isSelected
-                        ? "border-[#F5653E] text-[#F5653E] bg-[#FFF3EE]"
-                        : "border-[#E3E4E5] text-[#191A1B] bg-white",
+                        ? "border-primary text-primary bg-[#FFF3EE]"
+                        : "border-border-soft text-foreground bg-white",
                       item.disabled &&
-                        "bg-[#F2F3F5] text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                        "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
                     )}
                   >
                     <span
                       className={cn(
                         "text-[10px]",
-                        isSelected ? "text-[#F5653E]" : "text-[#838A8D]",
+                        isSelected ? "text-primary" : "text-muted",
                       )}
                     >
                       {dayLabel}
@@ -333,10 +333,10 @@ export const AppointmentDateTimePicker: FC<Props> = ({
         </div>
 
         {/* Time slots mobile */}
-        <div className="border border-[#E3E4E5] rounded-2xl p-3 space-y-3">
+        <div className="border border-border-soft rounded-2xl p-3 space-y-3">
           {timeGroups.map((group) => (
             <div key={group.label}>
-              <p className="text-sm text-[#686F72] mb-2">{group.label}</p>
+              <p className="text-sm text-secondary mb-2">{group.label}</p>
               <div className="flex flex-wrap gap-1.5">
                 {group.slots.map((slot) => {
                   const isSelected = selectedTime === slot.value;
@@ -349,10 +349,10 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                       className={cn(
                         "min-w-14 px-2 h-9 rounded-lg border text-sm transition-colors",
                         isSelected
-                          ? "border-[#F5653E] text-[#F5653E] bg-[#FFF3EE]"
-                          : "border-[#E3E4E5] text-[#191A1B]",
+                          ? "border-primary text-primary bg-[#FFF3EE]"
+                          : "border-border-soft text-foreground",
                         slot.disabled &&
-                          "bg-[#F2F3F5] text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                          "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
                       )}
                     >
                       {slot.value}
@@ -367,15 +367,12 @@ export const AppointmentDateTimePicker: FC<Props> = ({
 
       {/* DESKTOP layout */}
       <div className="hidden lg:grid lg:grid-cols-2 gap-3">
-        <div className="border border-[#E3E4E5] rounded-2xl p-3">
+        <div className="border border-border-soft rounded-2xl p-3">
           {monthNav}
           <div className="mt-3">
             <div className="grid grid-cols-7 gap-1 mb-2">
               {WEEK_DAYS.map((d) => (
-                <span
-                  key={d}
-                  className="text-center text-xs text-[#838A8D] py-1"
-                >
+                <span key={d} className="text-center text-xs text-muted py-1">
                   {d}
                 </span>
               ))}
@@ -396,10 +393,10 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                     className={cn(
                       "h-9 rounded-lg border text-sm transition-all",
                       isSelected
-                        ? "border-[#F5653E] text-[#F5653E] bg-[#FFF3EE]"
-                        : "border-[#E3E4E5] text-[#191A1B] hover:border-[#F5653E]/40",
+                        ? "border-primary text-primary bg-[#FFF3EE]"
+                        : "border-border-soft text-foreground hover:border-primary/40",
                       cell.disabled &&
-                        "bg-[#F2F3F5] text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                        "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
                     )}
                   >
                     {pad(date.getDate())}
@@ -410,10 +407,10 @@ export const AppointmentDateTimePicker: FC<Props> = ({
           </div>
         </div>
 
-        <div className="border border-[#E3E4E5] rounded-2xl p-3 space-y-3">
+        <div className="border border-border-soft rounded-2xl p-3 space-y-3">
           {timeGroups.map((group) => (
             <div key={group.label}>
-              <p className="text-sm text-[#686F72] mb-2">{group.label}</p>
+              <p className="text-sm text-secondary mb-2">{group.label}</p>
               <div className="flex flex-wrap gap-1.5">
                 {group.slots.map((slot) => {
                   const isSelected = selectedTime === slot.value;
@@ -426,10 +423,10 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                       className={cn(
                         "min-w-14 px-2 h-9 rounded-lg border text-sm transition-colors",
                         isSelected
-                          ? "border-[#F5653E] text-[#F5653E] bg-[#FFF3EE]"
-                          : "border-[#E3E4E5] text-[#191A1B] hover:border-[#F5653E]/40",
+                          ? "border-primary text-primary bg-[#FFF3EE]"
+                          : "border-border-soft text-foreground hover:border-primary/40",
                         slot.disabled &&
-                          "bg-[#F2F3F5] text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                          "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
                       )}
                     >
                       {slot.value}

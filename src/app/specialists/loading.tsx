@@ -1,10 +1,10 @@
-import { Footer, Header } from "@/widgets";
+﻿import { Footer, Header } from "@/widgets";
 
 import { DoctorSkeleton } from "@/entities/doctor";
 
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col">
       <Header title="Специалисты" />
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
@@ -23,7 +23,7 @@ export default function Loading() {
           </div>
 
           {/* FilterBar skeleton */}
-          <div className="flex items-center gap-3 mb-6 py-3 border-b border-[#E3E4E5]">
+          <div className="flex items-center gap-3 mb-6 py-3 border-b border-border-soft">
             <div className="h-7 w-32 skeleton rounded-lg mr-2" />
             <div className="h-9 w-36 skeleton rounded-full" />
             <div className="h-9 w-28 skeleton rounded-full" />

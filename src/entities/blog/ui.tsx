@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -17,7 +17,7 @@ type Props = {
 export const BlogCard: FC<Props> = ({
   title,
   category,
-  categoryColor = "#F5653E",
+  categoryColor = colors.primary,
   date,
   image,
   href = "#",
@@ -27,7 +27,7 @@ export const BlogCard: FC<Props> = ({
   return (
     <Link
       href={href}
-      className="bg-white rounded-3xl overflow-hidden flex flex-col p-2 group w-full border border-[#E3E4E5]"
+      className="bg-white rounded-3xl overflow-hidden flex flex-col p-2 group w-full border border-border-soft"
     >
       <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
         {!loaded && <div className="absolute inset-0 rounded-2xl skeleton" />}
@@ -46,11 +46,11 @@ export const BlogCard: FC<Props> = ({
           <span style={{ color: categoryColor }} className="font-medium">
             {category}
           </span>
-          <span className="text-[#838A8D]">•</span>
-          <span className="text-[#838A8D]">{date}</span>
+          <span className="text-muted">•</span>
+          <span className="text-muted">{date}</span>
         </div>
         <p
-          className="font-semibold text-sm text-[#191A1B] leading-snug overflow-hidden"
+          className="font-semibold text-sm text-foreground leading-snug overflow-hidden"
           style={{
             display: "-webkit-box",
             WebkitLineClamp: 2,

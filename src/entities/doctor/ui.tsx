@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -61,9 +61,9 @@ export const DoctorCard: FC<Props> = ({
     return (
       <Link
         href={href}
-        className="bg-white rounded-2xl border border-[#E3E4E5] p-2.5 flex items-stretch gap-2.5 w-full cursor-pointer hover:border-[#F5653E]/40 transition-colors"
+        className="bg-white rounded-2xl border border-border-soft p-2.5 flex items-stretch gap-2.5 w-full cursor-pointer hover:border-primary/40 transition-colors"
       >
-        <div className="relative w-30 min-w-30 self-stretch rounded-2xl overflow-hidden bg-[#FFF8F5]">
+        <div className="relative w-30 min-w-30 self-stretch rounded-2xl overflow-hidden bg-primary-tint">
           {image ? (
             <>
               {!loaded && <div className="absolute inset-0 skeleton" />}
@@ -78,14 +78,14 @@ export const DoctorCard: FC<Props> = ({
             </>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <UserCircleIcon className="size-10 text-[#C4C8CA]" />
+              <UserCircleIcon className="size-10 text-dim" />
             </div>
           )}
         </div>
 
         <div className="flex-1 min-w-0 py-0.5 flex flex-col">
           <div className="flex items-start justify-between gap-2">
-            <p className="font-semibold text-[18px] text-[#191A1B] leading-tight truncate">
+            <p className="font-semibold text-[18px] text-foreground leading-tight truncate">
               {name}
             </p>
             {isOnlineAvailable && (
@@ -95,9 +95,9 @@ export const DoctorCard: FC<Props> = ({
             )}
           </div>
 
-          <p className="text-[14px] text-[#686F72] truncate mt-1">
+          <p className="text-[14px] text-secondary truncate mt-1">
             {specialty}
-            <span className="text-[#F5653E]">
+            <span className="text-primary">
               {" "}
               • {primaryClinic}{" "}
               {additionalClinicsCount > 0 && `+ еще ${additionalClinicsCount}`}
@@ -111,9 +111,9 @@ export const DoctorCard: FC<Props> = ({
                 <span className="font-medium text-[#FF7C63]">{rating}</span>
               )}
               {reviews !== undefined && (
-                <span className="text-[#686F72]">({reviews})</span>
+                <span className="text-secondary">({reviews})</span>
               )}
-              <span className="text-[#686F72]">• {experience} лет опыта</span>
+              <span className="text-secondary">• {experience} лет опыта</span>
             </div>
           )}
 
@@ -150,7 +150,7 @@ export const DoctorCard: FC<Props> = ({
   return (
     <Link
       href={href}
-      className="bg-white rounded-3xl border border-[#E3E4E5] p-2 w-full h-full flex flex-col relative cursor-pointer hover:border-[#F5653E]/40 transition-colors"
+      className="bg-white rounded-3xl border border-border-soft p-2 w-full h-full flex flex-col relative cursor-pointer hover:border-primary/40 transition-colors"
     >
       {isOnlineAvailable && (
         <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider">
@@ -170,12 +170,12 @@ export const DoctorCard: FC<Props> = ({
       </div>
 
       <div className="flex-1 px-1 mt-3">
-        <p className="font-semibold text-sm text-[#191A1B] leading-snug truncate">
+        <p className="font-semibold text-sm text-foreground leading-snug truncate">
           {name}
         </p>
-        <p className="text-xs text-[#686F72] truncate mt-0.5">
+        <p className="text-xs text-secondary truncate mt-0.5">
           {specialty}
-          <span className="text-[#F5653E]">
+          <span className="text-primary">
             {" "}
             • {primaryClinic}{" "}
             {additionalClinicsCount > 0 && `+${additionalClinicsCount}`}
@@ -188,9 +188,9 @@ export const DoctorCard: FC<Props> = ({
               <span className="font-medium text-[#FF7C63]">{rating}</span>
             )}
             {reviews !== undefined && (
-              <span className="text-[#686F72]">({reviews})</span>
+              <span className="text-secondary">({reviews})</span>
             )}
-            <span className="text-[#686F72]">• {experience} лет</span>
+            <span className="text-secondary">• {experience} лет</span>
           </div>
         )}
       </div>

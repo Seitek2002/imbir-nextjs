@@ -1,4 +1,4 @@
-import { FC } from "react";
+﻿import { FC } from "react";
 
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
@@ -12,7 +12,7 @@ type Props = {
 
 export const CategoryCard: FC<Props> = ({ title, image, href, onClick }) => {
   const className =
-    "flex items-center gap-3 border border-[#E3E4E5] p-3 rounded-2xl cursor-pointer hover:bg-[#F2F3F5] transition-colors";
+    "flex items-center gap-3 border border-border-soft p-3 rounded-2xl cursor-pointer hover:bg-background transition-colors";
 
   const inner = (
     <>

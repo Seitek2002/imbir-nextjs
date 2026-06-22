@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -37,19 +37,19 @@ export const DoctorAppointmentsPage: FC = () => {
 
   return (
     <DoctorPageLayout title="Записи">
-      <h2 className="text-[28px] font-semibold text-[#191A1B] mb-6 hidden lg:block">
+      <h2 className="text-[28px] font-semibold text-foreground mb-6 hidden lg:block">
         Записи
       </h2>
 
-      <div className="flex gap-1 bg-white rounded-2xl p-1 mb-4 border border-[#E5E6E8]">
+      <div className="flex gap-1 bg-white rounded-2xl p-1 mb-4 border border-border">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${
               tab === t.key
-                ? "bg-[#F5653E] text-white"
-                : "text-[#838A8D] hover:text-[#191A1B]"
+                ? "bg-primary text-white"
+                : "text-muted hover:text-foreground"
             }`}
           >
             {t.label}
@@ -57,21 +57,19 @@ export const DoctorAppointmentsPage: FC = () => {
         ))}
       </div>
 
-      <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden">
-        <div className="grid grid-cols-3 px-5 py-3 border-b border-[#E5E6E8]">
-          <span className="text-[#838A8D] text-sm font-medium">Пациент</span>
-          <span className="text-[#838A8D] text-sm font-medium">
-            Дата / Время
-          </span>
-          <span className="text-[#838A8D] text-sm font-medium">Статус</span>
+      <div className="bg-white rounded-3xl border border-border overflow-hidden">
+        <div className="grid grid-cols-3 px-5 py-3 border-b border-border">
+          <span className="text-muted text-sm font-medium">Пациент</span>
+          <span className="text-muted text-sm font-medium">Дата / Время</span>
+          <span className="text-muted text-sm font-medium">Статус</span>
         </div>
 
         {isLoading ? (
-          <div className="px-5 py-12 text-center text-[#838A8D] text-sm">
+          <div className="px-5 py-12 text-center text-muted text-sm">
             Загрузка...
           </div>
         ) : appointments.length === 0 ? (
-          <div className="px-5 py-12 text-center text-[#838A8D] text-sm">
+          <div className="px-5 py-12 text-center text-muted text-sm">
             Нет записей
           </div>
         ) : (
@@ -79,22 +77,22 @@ export const DoctorAppointmentsPage: FC = () => {
             <div
               key={a.id}
               className={`grid grid-cols-3 px-5 py-4 ${
-                i !== appointments.length - 1 ? "border-b border-[#E5E6E8]" : ""
+                i !== appointments.length - 1 ? "border-b border-border" : ""
               }`}
             >
-              <span className="text-[#191A1B] text-sm font-medium">
+              <span className="text-foreground text-sm font-medium">
                 {a.patient.full_name}
               </span>
-              <span className="text-[#838A8D] text-sm">
+              <span className="text-muted text-sm">
                 {a.date} {a.time}
               </span>
               <span
                 className={`text-sm font-medium ${
                   a.status === "upcoming"
-                    ? "text-[#F5653E]"
+                    ? "text-primary"
                     : a.status === "completed"
                       ? "text-green-600"
-                      : "text-[#838A8D]"
+                      : "text-muted"
                 }`}
               >
                 {STATUS_LABEL[a.status as Tab] ?? a.status}

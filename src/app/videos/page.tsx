@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 
 import { Footer, Header } from "@/widgets";
 
@@ -89,16 +89,16 @@ const VIDEOS = [
 
 export default function VideosPage() {
   return (
-    <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
+    <main className="min-h-screen bg-background flex flex-col">
       <Header title="Интервью" backTo={ROUTES.HOME} />
 
       <div className="flex-1 w-full max-w-360 mx-auto px-4 md:px-10 py-10">
         {/* Header section */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#191A1B] mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
             Интервью с врачами
           </h1>
-          <p className="text-[#686F72] text-base md:text-lg">
+          <p className="text-secondary text-base md:text-lg">
             Наши специалисты делятся знаниями, советами и отвечают на частые
             вопросы
           </p>
@@ -109,10 +109,10 @@ export default function VideosPage() {
           {VIDEOS.map((v) => (
             <div
               key={v.id}
-              className="bg-white rounded-3xl overflow-hidden border border-[#E5E6E8] hover:border-[#F5653E]/40 transition-colors cursor-pointer group"
+              className="bg-white rounded-3xl overflow-hidden border border-border hover:border-primary/40 transition-colors cursor-pointer group"
             >
               {/* Thumbnail */}
-              <div className="relative aspect-video overflow-hidden bg-[#F2F3F5]">
+              <div className="relative aspect-video overflow-hidden bg-background">
                 <Image
                   src={v.thumb}
                   alt={v.title}
@@ -125,7 +125,7 @@ export default function VideosPage() {
                     <svg
                       viewBox="0 0 24 24"
                       fill="currentColor"
-                      className="size-5 text-[#F5653E] translate-x-0.5"
+                      className="size-5 text-primary translate-x-0.5"
                     >
                       <path d="M8 5v14l11-7z" />
                     </svg>
@@ -139,21 +139,21 @@ export default function VideosPage() {
 
               {/* Info */}
               <div className="p-4">
-                <h3 className="text-[#191A1B] font-semibold text-sm leading-snug mb-3 line-clamp-2">
+                <h3 className="text-foreground font-semibold text-sm leading-snug mb-3 line-clamp-2">
                   {v.title}
                 </h3>
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="size-7 rounded-full bg-[#FEF3F0] flex items-center justify-center text-xs font-semibold text-[#F5653E]">
+                  <div className="size-7 rounded-full bg-[#FEF3F0] flex items-center justify-center text-xs font-semibold text-primary">
                     {v.doctor.charAt(0)}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-[#191A1B] truncate">
+                    <p className="text-xs font-medium text-foreground truncate">
                       {v.doctor}
                     </p>
-                    <p className="text-xs text-[#838A8D]">{v.specialty}</p>
+                    <p className="text-xs text-muted">{v.specialty}</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-xs text-[#838A8D]">
+                <div className="flex items-center justify-between text-xs text-muted">
                   <span>{v.date}</span>
                   <span>{v.views} просмотров</span>
                 </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -54,8 +54,8 @@ export const ProfileHistory: FC<Props> = ({ appointments, activeTab }) => {
 
   if (filteredAppointments.length === 0) {
     return (
-      <div className="bg-white rounded-3xl p-10 text-center border border-[#E5E6E8]">
-        <p className="text-[#838A8D] text-lg">
+      <div className="bg-white rounded-3xl p-10 text-center border border-border">
+        <p className="text-muted text-lg">
           {activeTab === "upcoming"
             ? "У вас нет предстоящих записей"
             : "У вас нет прошедших записей"}
@@ -85,7 +85,7 @@ export const ProfileHistory: FC<Props> = ({ appointments, activeTab }) => {
         isOpen={!!cancelTarget}
         onClose={() => setCancelTarget(null)}
         onConfirm={handleCancelConfirm}
-        icon={<WarningIcon className="w-7 h-7 [&_path]:stroke-[#F5653E]" />}
+        icon={<WarningIcon className="w-7 h-7 [&_path]:stroke-primary" />}
         title="Отменить запись на приём?"
         description="История будет удалена без возможности восстановления"
         confirmLabel="Да, отменить"

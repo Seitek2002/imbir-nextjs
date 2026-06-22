@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ButtonHTMLAttributes, forwardRef } from "react";
 
@@ -38,10 +38,10 @@ export const IconBtn = forwardRef<HTMLButtonElement, Props>(
 
     const variants: Record<Variant, string> = {
       default:
-        "bg-[#F5653E] active:bg-[#C54826] hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]",
+        "bg-primary active:bg-[#C54826] hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]",
       outline:
-        "border border-[#E5E6E8] active:bg-[#E3E4E5] hover:shadow-[0_0_1px_3px_rgba(242,243,245,0.8),0_0_0_1px_#E5E6E8] hover:bg-transparent",
-      text: "active:bg-[#E3E4E5] hover:bg-[#F2F3F5]",
+        "border border-border active:bg-border-soft hover:shadow-[0_0_1px_3px_rgba(242,243,245,0.8),0_0_0_1px_#E5E6E8] hover:bg-transparent",
+      text: "active:bg-border-soft hover:bg-background",
     };
 
     return (

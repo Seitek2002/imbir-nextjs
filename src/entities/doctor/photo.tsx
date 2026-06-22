@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -23,7 +23,7 @@ export const DoctorPhoto: FC<Props> = ({
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className="rounded-2xl overflow-hidden bg-[#FFF8F5] absolute inset-0">
+    <div className="rounded-2xl overflow-hidden bg-primary-tint absolute inset-0">
       {image ? (
         <>
           {!loaded && <div className="absolute inset-0 skeleton" />}
@@ -38,7 +38,7 @@ export const DoctorPhoto: FC<Props> = ({
         </>
       ) : (
         <div className="w-full h-full flex items-center justify-center">
-          <UserCircleIcon className={`${fallbackSize} text-[#C4C8CA]`} />
+          <UserCircleIcon className={`${fallbackSize} text-dim`} />
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, SVGProps, useState } from "react";
 
@@ -173,11 +173,11 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
 
       {/* Фото специалиста */}
       <div>
-        <label className="block text-[#191A1B] text-sm font-medium mb-2">
+        <label className="block text-foreground text-sm font-medium mb-2">
           Фото специалиста
         </label>
         <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-[#FFF8F5] flex items-center justify-center shrink-0">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-primary-tint flex items-center justify-center shrink-0">
             {photo ? (
               <Image
                 src={photo}
@@ -188,10 +188,10 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
               />
             ) : (
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="20" fill="#E5E6E8" />
+                <circle cx="20" cy="20" r="20" fill={colors.border} />
                 <path
                   d="M20 10C14.48 10 10 14.48 10 20C10 25.52 14.48 30 20 30C25.52 30 30 25.52 30 20C30 14.48 25.52 10 20 10ZM20 15C21.66 15 23 16.34 23 18C23 19.66 21.66 21 20 21C18.34 21 17 19.66 17 18C17 16.34 18.34 15 20 15ZM20 28C17.33 28 14.94 26.66 13.5 24.65C13.53 22.58 17.6 21.43 20 21.43C22.38 21.43 26.47 22.58 26.5 24.65C25.06 26.66 22.67 28 20 28Z"
-                  fill="#C4C8CA"
+                  fill={colors.dim}
                 />
               </svg>
             )}
@@ -236,12 +236,12 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
       {/* Опыт работы */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <label className="block text-[#191A1B] text-sm font-medium">
+          <label className="block text-foreground text-sm font-medium">
             Опыт работы
           </label>
           <button
             onClick={handleAddExperience}
-            className="text-[#F5653E] text-sm font-medium hover:text-[#E5542D] transition-colors flex items-center gap-1"
+            className="text-primary text-sm font-medium hover:text-primary-dark transition-colors flex items-center gap-1"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path
@@ -259,18 +259,17 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
             <div key={exp.id} className="flex items-start gap-3">
               <div className="w-0.5 h-16 bg-[#FFE5E0] rounded-full shrink-0 mt-1" />
               <div className="flex-1 min-w-0">
-                <p className="text-[#F5653E] text-sm mb-1">
-                  {exp.period}{" "}
-                  <span className="text-[#F5653E]">{exp.years}</span>
+                <p className="text-primary text-sm mb-1">
+                  {exp.period} <span className="text-primary">{exp.years}</span>
                 </p>
-                <p className="text-[#191A1B] font-medium text-base mb-0.5">
+                <p className="text-foreground font-medium text-base mb-0.5">
                   {exp.place}
                 </p>
-                <p className="text-[#686F72] text-sm">{exp.position}</p>
+                <p className="text-secondary text-sm">{exp.position}</p>
               </div>
               <button
                 onClick={() => handleRemoveExperience(exp.id)}
-                className="text-[#C4C8CA] hover:text-[#F5653E] transition-colors mt-1"
+                className="text-dim hover:text-primary transition-colors mt-1"
               >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path
@@ -289,12 +288,12 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
       {/* Профессиональные навыки */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <label className="block text-[#191A1B] text-sm font-medium">
+          <label className="block text-foreground text-sm font-medium">
             Профессиональные навыки
           </label>
           <button
             onClick={handleAddSkill}
-            className="text-[#F5653E] text-sm font-medium hover:text-[#E5542D] transition-colors flex items-center gap-1"
+            className="text-primary text-sm font-medium hover:text-primary-dark transition-colors flex items-center gap-1"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path
@@ -311,10 +310,10 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
           {skills.map((skill) => (
             <div key={skill.id} className="flex items-start gap-3">
               <div className="w-0.5 h-6 bg-[#FFE5E0] rounded-full shrink-0 mt-1" />
-              <p className="flex-1 text-[#191A1B] text-base">{skill.name}</p>
+              <p className="flex-1 text-foreground text-base">{skill.name}</p>
               <button
                 onClick={() => handleRemoveSkill(skill.id)}
-                className="text-[#C4C8CA] hover:text-[#F5653E] transition-colors"
+                className="text-dim hover:text-primary transition-colors"
               >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path
@@ -332,7 +331,7 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
 
       {/* Записи */}
       <div>
-        <label className="block text-[#191A1B] text-sm font-medium mb-3">
+        <label className="block text-foreground text-sm font-medium mb-3">
           Записи
         </label>
 
@@ -351,7 +350,7 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
         <div className="flex gap-6">
           {/* Календарь */}
           <div
-            className="bg-[#FAFAFA] rounded-3xl border border-[#E5E6E8] p-5 shrink-0"
+            className="bg-[#FAFAFA] rounded-3xl border border-border p-5 shrink-0"
             style={{ width: "340px" }}
           >
             <div className="flex items-center justify-between mb-4">
@@ -359,21 +358,21 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path
                     d="M10 12L6 8L10 4"
-                    stroke="#191A1B"
+                    stroke={colors.foreground}
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </svg>
               </button>
-              <span className="text-[#191A1B] font-semibold text-base">
+              <span className="text-foreground font-semibold text-base">
                 {currentMonth}
               </span>
               <button className="w-8 h-8 hover:bg-white rounded-lg transition-colors flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path
                     d="M6 4L10 8L6 12"
-                    stroke="#191A1B"
+                    stroke={colors.foreground}
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -386,7 +385,7 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
               {["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"].map((day) => (
                 <div
                   key={day}
-                  className="text-center text-[#838A8D] text-xs font-medium h-8 flex items-center justify-center"
+                  className="text-center text-muted text-xs font-medium h-8 flex items-center justify-center"
                 >
                   {day}
                 </div>
@@ -400,8 +399,8 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
                   onClick={() => toggleDay(day)}
                   className={`h-10 rounded-xl text-sm font-medium transition-all ${
                     selectedDays.includes(day)
-                      ? "bg-[#F5653E] text-white shadow-sm"
-                      : "bg-white hover:bg-[#F8F9FA] text-[#191A1B]"
+                      ? "bg-primary text-white shadow-sm"
+                      : "bg-white hover:bg-surface text-foreground"
                   }`}
                 >
                   {day.toString().padStart(2, "0")}
@@ -414,7 +413,7 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
           <div className="flex-1 space-y-5">
             {/* Morning */}
             <div>
-              <p className="text-[#838A8D] text-sm font-medium mb-3">Morning</p>
+              <p className="text-muted text-sm font-medium mb-3">Morning</p>
               <div className="flex gap-2 flex-wrap">
                 {morningSlots.map((slot, index) => (
                   <button
@@ -422,8 +421,8 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
                     onClick={() => toggleTimeSlot("morning", index)}
                     className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                       slot.selected
-                        ? "bg-[#F5653E] text-white shadow-sm"
-                        : "bg-[#F8F9FA] text-[#686F72] hover:bg-[#E5E6E8]"
+                        ? "bg-primary text-white shadow-sm"
+                        : "bg-surface text-secondary hover:bg-border"
                     }`}
                   >
                     {slot.time}
@@ -434,9 +433,7 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
 
             {/* Afternoon */}
             <div>
-              <p className="text-[#838A8D] text-sm font-medium mb-3">
-                Afternoon
-              </p>
+              <p className="text-muted text-sm font-medium mb-3">Afternoon</p>
               <div className="flex gap-2 flex-wrap">
                 {afternoonSlots.map((slot, index) => (
                   <button
@@ -444,8 +441,8 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
                     onClick={() => toggleTimeSlot("afternoon", index)}
                     className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                       slot.selected
-                        ? "bg-[#F5653E] text-white shadow-sm"
-                        : "bg-[#F8F9FA] text-[#686F72] hover:bg-[#E5E6E8]"
+                        ? "bg-primary text-white shadow-sm"
+                        : "bg-surface text-secondary hover:bg-border"
                     }`}
                   >
                     {slot.time}
@@ -456,7 +453,7 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
 
             {/* Evening */}
             <div>
-              <p className="text-[#838A8D] text-sm font-medium mb-3">Evening</p>
+              <p className="text-muted text-sm font-medium mb-3">Evening</p>
               <div className="flex gap-2 flex-wrap">
                 {eveningSlots.map((slot, index) => (
                   <button
@@ -464,8 +461,8 @@ export const SpecialistForm: FC<Props> = ({ initialData, onSave }) => {
                     onClick={() => toggleTimeSlot("evening", index)}
                     className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                       slot.selected
-                        ? "bg-[#F5653E] text-white shadow-sm"
-                        : "bg-[#F8F9FA] text-[#686F72] hover:bg-[#E5E6E8]"
+                        ? "bg-primary text-white shadow-sm"
+                        : "bg-surface text-secondary hover:bg-border"
                     }`}
                   >
                     {slot.time}

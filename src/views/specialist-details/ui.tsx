@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC } from "react";
 
@@ -67,11 +67,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
   if (isDoctorError || (!isDoctorLoading && !doctor)) {
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
-        <p className="text-xl font-semibold text-[#191A1B]">
+        <p className="text-xl font-semibold text-foreground">
           Специалист не найден
         </p>
         <button
-          className="text-[#F5653E] underline text-sm"
+          className="text-primary underline text-sm"
           onClick={() => router.push(ROUTES.SPECIALISTS)}
         >
           Вернуться к списку специалистов
@@ -112,28 +112,28 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
   const emailText = doctor.contacts?.email || "doctor@clinic.kg";
 
   return (
-    <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col relative pb-20 md:pb-0">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col relative pb-20 md:pb-0">
       <div className="hidden md:block">
         <Header />
       </div>
 
       <div className="flex-1 w-full max-w-350 mx-auto md:px-10 flex flex-col pt-0 md:pt-6 pb-10">
-        <div className="hidden md:flex text-sm text-[#686F72] mb-6 items-center gap-2">
+        <div className="hidden md:flex text-sm text-secondary mb-6 items-center gap-2">
           <Link
             href={ROUTES.HOME}
-            className="hover:text-[#F5653E] transition-colors"
+            className="hover:text-primary transition-colors"
           >
             Главная
           </Link>
           <span>•</span>
           <Link
             href={ROUTES.SPECIALISTS}
-            className="hover:text-[#F5653E] transition-colors"
+            className="hover:text-primary transition-colors"
           >
             Специалисты
           </Link>
           <span>•</span>
-          <span className="text-[#F5653E]">{doctor.name}</span>
+          <span className="text-primary">{doctor.name}</span>
         </div>
 
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
@@ -174,11 +174,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
           </div>
 
           <div className="flex-1 flex flex-col rounded-t-3xl md:rounded-none -mt-6 md:mt-0 relative z-10 p-2 md:p-0">
-            <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
+            <div className="bg-white rounded-[20px] p-4 border border-border-soft">
               <div className="flex justify-center md:justify-between items-start mb-6">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h1 className="text-2xl md:text-3xl font-semibold text-[#191A1B]">
+                    <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
                       {doctor.name}
                     </h1>
                     {doctor.isOnlineAvailable && (
@@ -187,7 +187,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                       </span>
                     )}
                   </div>
-                  <p className="text-[#838A8D] text-center lg:text-left text-base">
+                  <p className="text-muted text-center lg:text-left text-base">
                     {doctor.specialty}
                   </p>
 
@@ -195,13 +195,13 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                     {doctor.workplaces?.map((workplace) => (
                       <div
                         key={workplace.clinicId}
-                        className="flex items-center gap-2 text-sm text-[#191A1B]"
+                        className="flex items-center gap-2 text-sm text-foreground"
                       >
-                        <span className="text-[#F5653E]">
+                        <span className="text-primary">
                           <GeoIcon className="size-4" />
                         </span>
                         <span>{workplace.clinicName}</span>
-                        <span className="text-[#838A8D] ml-auto font-medium">
+                        <span className="text-muted ml-auto font-medium">
                           {workplace.price} с
                         </span>
                       </div>
@@ -224,7 +224,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
             <div className="hidden md:flex gap-4 mb-10 mt-4">
               <Button
                 variant="outline"
-                className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-[#F5653E]"
+                className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-primary"
                 onClick={() =>
                   router.push(`${ROUTES.RECORD}?doctor=${id}&mode=offline`)
                 }
@@ -255,19 +255,19 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 <div className="flex flex-col gap-5">
                   {workExperience.map((exp, idx) => (
                     <div key={idx} className="relative pl-5">
-                      <span className="absolute left-0 top-2.5 w-2.5 h-0.5 bg-[#F5653E]" />
+                      <span className="absolute left-0 top-2.5 w-2.5 h-0.5 bg-primary" />
                       <div className="mb-1">
-                        <span className="text-[#191A1B] font-medium text-sm md:text-base">
+                        <span className="text-foreground font-medium text-sm md:text-base">
                           {exp.years}{" "}
                         </span>
-                        <span className="text-[#F5653E] text-sm md:text-base">
+                        <span className="text-primary text-sm md:text-base">
                           {exp.duration}
                         </span>
                       </div>
-                      <p className="text-[#191A1B] text-sm md:text-base">
+                      <p className="text-foreground text-sm md:text-base">
                         {exp.place}
                       </p>
-                      <p className="text-[#838A8D] text-sm md:text-base">
+                      <p className="text-muted text-sm md:text-base">
                         {exp.role}
                       </p>
                     </div>
@@ -279,10 +279,10 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 <ul className="flex flex-col gap-3">
                   {skills.map((skill, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      <span className="text-[#F5653E] font-medium text-lg leading-none mt-0.5">
+                      <span className="text-primary font-medium text-lg leading-none mt-0.5">
                         —
                       </span>
-                      <span className="text-[#838A8D] text-sm md:text-base leading-relaxed">
+                      <span className="text-muted text-sm md:text-base leading-relaxed">
                         {skill}
                       </span>
                     </li>
@@ -293,26 +293,26 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               <InfoCard title="Контакты" expandable={false}>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">
+                    <span className="text-primary">
                       <HistoryIcon className="size-5" />
                     </span>
-                    <span className="text-[#838A8D] text-sm md:text-base">
+                    <span className="text-muted text-sm md:text-base">
                       {scheduleText}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">
+                    <span className="text-primary">
                       <PhoneIcon className="size-5" />
                     </span>
-                    <span className="text-[#838A8D] text-sm md:text-base">
+                    <span className="text-muted text-sm md:text-base">
                       {phoneText}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#F5653E]">
+                    <span className="text-primary">
                       <EmailIcon className="size-5" />
                     </span>
-                    <span className="text-[#838A8D] text-sm md:text-base">
+                    <span className="text-muted text-sm md:text-base">
                       {emailText}
                     </span>
                   </div>
@@ -332,10 +332,10 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
 
         <div className="mt-10 md:mt-20 mb-10 md:mb-20 px-4 md:px-0">
           <div className="flex items-center justify-between mb-6 md:mb-8 md:hidden">
-            <h2 className="text-2xl font-semibold text-[#191A1B]">Интервью</h2>
+            <h2 className="text-2xl font-semibold text-foreground">Интервью</h2>
             <Link
               href={ROUTES.VIDEOS}
-              className="text-[#F5653E] text-sm font-medium hover:underline"
+              className="text-primary text-sm font-medium hover:underline"
             >
               Все
             </Link>
@@ -356,9 +356,9 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
         <Footer />
       </div>
 
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#E3E4E5] z-50 flex gap-2 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-border-soft z-50 flex gap-2 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
         <Button
-          className="flex-1 justify-center bg-[#FFF2F0] text-[#F5653E] border border-transparent"
+          className="flex-1 justify-center bg-[#FFF2F0] text-primary border border-transparent"
           size="lg"
           onClick={() =>
             router.push(`${ROUTES.RECORD}?doctor=${id}&mode=offline`)

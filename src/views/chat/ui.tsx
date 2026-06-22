@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -333,7 +333,7 @@ const Avatar = ({
         />
       ) : (
         <div
-          className="flex items-center justify-center rounded-full bg-[#E3E4E5] text-[#838A8D] font-semibold"
+          className="flex items-center justify-center rounded-full bg-border-soft text-muted font-semibold"
           style={{ width: dim, height: dim }}
         >
           {chat.name[0]}
@@ -494,16 +494,16 @@ export const ChatPage = () => {
 
   if (!currentUser) {
     return (
-      <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
+      <main className="min-h-screen bg-background flex flex-col">
         <div className="hidden md:block">
           <Header />
         </div>
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-8 w-full max-w-sm shadow-sm">
-            <h2 className="text-xl font-semibold text-[#191A1B] mb-1">
+            <h2 className="text-xl font-semibold text-foreground mb-1">
               Войти в чат
             </h2>
-            <p className="text-sm text-[#838A8D] mb-6">
+            <p className="text-sm text-muted mb-6">
               Введите ваше имя пользователя
             </p>
             <input
@@ -512,7 +512,7 @@ export const ChatPage = () => {
               value={loginInput}
               onChange={(e) => setLoginInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              className="w-full px-4 py-3 rounded-xl border border-[#E3E4E5] text-[#191A1B] text-sm outline-none focus:border-[#F5653E] transition-colors mb-3"
+              className="w-full px-4 py-3 rounded-xl border border-border-soft text-foreground text-sm outline-none focus:border-primary transition-colors mb-3"
             />
             {loginError && (
               <p className="text-xs text-red-500 mb-3">{loginError}</p>
@@ -520,7 +520,7 @@ export const ChatPage = () => {
             <button
               onClick={handleLogin}
               disabled={!loginInput.trim() || isLoggingIn}
-              className="w-full py-3 rounded-xl bg-[#F5653E] text-white text-sm font-medium disabled:bg-[#E3E4E5] disabled:text-[#838A8D] transition-colors"
+              className="w-full py-3 rounded-xl bg-primary text-white text-sm font-medium disabled:bg-border-soft disabled:text-muted transition-colors"
             >
               {isLoggingIn ? "Вход..." : "Войти"}
             </button>
@@ -533,17 +533,17 @@ export const ChatPage = () => {
   // ── Main chat UI ──────────────────────────────────────────────────────────
 
   return (
-    <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
+    <main className="min-h-screen bg-background flex flex-col">
       <div className="hidden md:block">
         <Header />
       </div>
 
       <div className="flex-1 w-full max-w-350 mx-auto md:px-10 flex flex-col pt-0 md:pt-8 pb-0 md:pb-10">
         <div className="hidden md:flex items-center justify-between mb-6">
-          <h1 className="text-[28px] font-semibold text-[#191A1B]">Чаты</h1>
+          <h1 className="text-[28px] font-semibold text-foreground">Чаты</h1>
           <button
             onClick={handleLogout}
-            className="text-xs text-[#838A8D] hover:text-[#191A1B] transition-colors"
+            className="text-xs text-muted hover:text-foreground transition-colors"
           >
             {currentUser} · Выйти
           </button>
@@ -561,17 +561,17 @@ export const ChatPage = () => {
           >
             {/* Search + filter */}
             <div className="flex gap-2">
-              <div className="flex-1 bg-white border border-[#E3E4E5] rounded-full px-4 py-2.5 flex items-center gap-2">
-                <SearchIcon className="size-4 text-[#838A8D] shrink-0" />
+              <div className="flex-1 bg-white border border-border-soft rounded-full px-4 py-2.5 flex items-center gap-2">
+                <SearchIcon className="size-4 text-muted shrink-0" />
                 <input
                   type="text"
                   placeholder="Поиск"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full outline-none bg-transparent text-[#191A1B] text-sm placeholder:text-[#838A8D]"
+                  className="w-full outline-none bg-transparent text-foreground text-sm placeholder:text-muted"
                 />
               </div>
-              <button className="flex items-center justify-center size-10.5 shrink-0 bg-white border border-[#E3E4E5] rounded-full hover:bg-gray-50 transition-colors text-[#191A1B]">
+              <button className="flex items-center justify-center size-10.5 shrink-0 bg-white border border-border-soft rounded-full hover:bg-gray-50 transition-colors text-foreground">
                 <FilterSample className="size-4" />
               </button>
             </div>
@@ -593,24 +593,24 @@ export const ChatPage = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-0.5">
                         <div className="flex items-baseline gap-1 min-w-0 mr-2">
-                          <span className="font-semibold text-[#191A1B] text-sm truncate">
+                          <span className="font-semibold text-foreground text-sm truncate">
                             {chat.name}
                           </span>
                           {chat.role && (
-                            <span className="text-xs text-[#838A8D] truncate shrink-0">
+                            <span className="text-xs text-muted truncate shrink-0">
                               ({chat.role})
                             </span>
                           )}
                         </div>
-                        <span className="text-xs text-[#838A8D] shrink-0">
+                        <span className="text-xs text-muted shrink-0">
                           {chat.time}
                         </span>
                       </div>
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs text-[#838A8D] truncate">
+                        <p className="text-xs text-muted truncate">
                           {chat.isLastMine ? (
                             <span>
-                              <span className="text-[#191A1B]">Вы: </span>
+                              <span className="text-foreground">Вы: </span>
                               {chat.lastMessage.replace("Вы: ", "")}
                             </span>
                           ) : (
@@ -618,7 +618,7 @@ export const ChatPage = () => {
                           )}
                         </p>
                         {chat.unreadCount > 0 && (
-                          <div className="flex items-center justify-center min-w-5 h-5 px-1 bg-[#F5653E] rounded-full shrink-0">
+                          <div className="flex items-center justify-center min-w-5 h-5 px-1 bg-primary rounded-full shrink-0">
                             <span className="text-[10px] font-medium text-white">
                               {chat.unreadCount}
                             </span>
@@ -635,7 +635,7 @@ export const ChatPage = () => {
           {/* ── RIGHT: chat window ─────────────────────────────────────── */}
           <div
             className={cn(
-              "flex-1 bg-white border border-[#E3E4E5] rounded-3xl flex flex-col overflow-hidden",
+              "flex-1 bg-white border border-border-soft rounded-3xl flex flex-col overflow-hidden",
               !activeChatId
                 ? "hidden md:flex"
                 : "flex absolute inset-0 z-20 md:relative",
@@ -644,20 +644,20 @@ export const ChatPage = () => {
             {activeChat ? (
               <>
                 {/* Chat header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-[#E3E4E5]">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-border-soft">
                   <div className="flex items-center gap-3">
                     <button
-                      className="md:hidden flex items-center justify-center size-9 rounded-full hover:bg-gray-50 text-[#191A1B] mr-1"
+                      className="md:hidden flex items-center justify-center size-9 rounded-full hover:bg-gray-50 text-foreground mr-1"
                       onClick={() => setActiveChatId("")}
                     >
                       <HeaderBackIcon className="size-5" />
                     </button>
                     <Avatar chat={activeChat} size={40} />
                     <div>
-                      <p className="font-semibold text-[#191A1B] text-sm leading-tight">
+                      <p className="font-semibold text-foreground text-sm leading-tight">
                         {activeChat.name}
                         {activeChat.role && (
-                          <span className="font-normal text-[#838A8D]">
+                          <span className="font-normal text-muted">
                             {" "}
                             ({activeChat.role})
                           </span>
@@ -665,7 +665,7 @@ export const ChatPage = () => {
                       </p>
                       <p className="text-xs leading-tight mt-0.5 flex items-center gap-1">
                         {typingLabel ? (
-                          <span className="text-[#F5653E] animate-pulse">
+                          <span className="text-primary animate-pulse">
                             {typingLabel}
                           </span>
                         ) : isConnected ? (
@@ -674,7 +674,7 @@ export const ChatPage = () => {
                             <span className="text-[#4CAF50]">В сети</span>
                           </>
                         ) : (
-                          <span className="text-[#838A8D]">
+                          <span className="text-muted">
                             {isLoading ? "Загрузка..." : "Подключение..."}
                           </span>
                         )}
@@ -682,10 +682,10 @@ export const ChatPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button className="flex items-center justify-center size-9 rounded-full hover:bg-[#F2F3F5] transition-colors text-[#191A1B]">
+                    <button className="flex items-center justify-center size-9 rounded-full hover:bg-background transition-colors text-foreground">
                       <VideoIcon />
                     </button>
-                    <button className="flex items-center justify-center size-9 rounded-full hover:bg-[#F2F3F5] transition-colors text-[#191A1B]">
+                    <button className="flex items-center justify-center size-9 rounded-full hover:bg-background transition-colors text-foreground">
                       <ShareIcon />
                     </button>
                   </div>
@@ -694,19 +694,19 @@ export const ChatPage = () => {
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-2 scrollbar-hide">
                   {isLoading ? (
-                    <div className="flex-1 flex items-center justify-center text-[#838A8D] text-sm">
+                    <div className="flex-1 flex items-center justify-center text-muted text-sm">
                       Загрузка истории...
                     </div>
                   ) : (
                     <>
                       <div className="flex justify-center mb-2">
-                        <span className="bg-[#F2F3F5] text-[#838A8D] text-xs px-4 py-1 rounded-full">
+                        <span className="bg-background text-muted text-xs px-4 py-1 rounded-full">
                           Сегодня
                         </span>
                       </div>
 
                       {messages.length === 0 && (
-                        <p className="text-center text-sm text-[#838A8D] mt-8">
+                        <p className="text-center text-sm text-muted mt-8">
                           Сообщений пока нет. Начните общение!
                         </p>
                       )}
@@ -723,8 +723,8 @@ export const ChatPage = () => {
                             className={cn(
                               "px-4 py-2.5 text-[14px] leading-normal",
                               msg.isMe
-                                ? "bg-[#F5653E] text-white rounded-2xl rounded-br-sm"
-                                : "bg-[#F2F3F5] text-[#191A1B] rounded-2xl rounded-bl-sm",
+                                ? "bg-primary text-white rounded-2xl rounded-br-sm"
+                                : "bg-background text-foreground rounded-2xl rounded-bl-sm",
                             )}
                           >
                             {msg.content}
@@ -735,7 +735,7 @@ export const ChatPage = () => {
                               msg.isMe ? "self-end" : "self-start",
                             )}
                           >
-                            <span className="text-[11px] text-[#838A8D]">
+                            <span className="text-[11px] text-muted">
                               {formatTime(msg.timestamp)}
                             </span>
                             {msg.isMe && <ReadCheck isRead={msg.isRead} />}
@@ -749,22 +749,22 @@ export const ChatPage = () => {
 
                 {/* Input area */}
                 <div
-                  className="px-4 py-3 border-t border-[#E3E4E5] relative"
+                  className="px-4 py-3 border-t border-border-soft relative"
                   ref={attachRef}
                 >
                   {/* Attach popup */}
                   {isAttachOpen && (
-                    <div className="absolute bottom-[calc(100%+6px)] right-14 bg-white border border-[#E3E4E5] rounded-2xl shadow-lg py-1 w-48 z-50">
-                      <button className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-[#F2F3F5] text-sm text-[#191A1B] transition-colors">
-                        <ImageAttachIcon className="text-[#838A8D]" />
+                    <div className="absolute bottom-[calc(100%+6px)] right-14 bg-white border border-border-soft rounded-2xl shadow-lg py-1 w-48 z-50">
+                      <button className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-background text-sm text-foreground transition-colors">
+                        <ImageAttachIcon className="text-muted" />
                         Изображение
                       </button>
-                      <button className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-[#F2F3F5] text-sm text-[#191A1B] transition-colors">
-                        <LinkIcon className="text-[#838A8D]" />
+                      <button className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-background text-sm text-foreground transition-colors">
+                        <LinkIcon className="text-muted" />
                         Ссылка
                       </button>
-                      <button className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-[#F2F3F5] text-sm text-[#191A1B] transition-colors">
-                        <FileIcon className="text-[#838A8D]" />
+                      <button className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-background text-sm text-foreground transition-colors">
+                        <FileIcon className="text-muted" />
                         Файл
                       </button>
                     </div>
@@ -772,7 +772,7 @@ export const ChatPage = () => {
 
                   <div className="flex gap-2 items-center">
                     {/* Input */}
-                    <div className="flex-1 bg-white border border-[#E3E4E5] rounded-full flex items-center px-4 py-2.5 gap-2 focus-within:border-[#F5653E] transition-colors min-h-11.5">
+                    <div className="flex-1 bg-white border border-border-soft rounded-full flex items-center px-4 py-2.5 gap-2 focus-within:border-primary transition-colors min-h-11.5">
                       <input
                         type="text"
                         placeholder="Введите текст"
@@ -780,15 +780,15 @@ export const ChatPage = () => {
                         onChange={handleInputChange}
                         onKeyDown={(e) => e.key === "Enter" && handleSend()}
                         onBlur={() => sendTyping(false)}
-                        className="flex-1 outline-none text-[#191A1B] text-sm bg-transparent placeholder:text-[#838A8D]"
+                        className="flex-1 outline-none text-foreground text-sm bg-transparent placeholder:text-muted"
                       />
                       <button
                         onClick={() => setIsAttachOpen((v) => !v)}
                         className={cn(
                           "shrink-0 transition-colors",
                           isAttachOpen
-                            ? "text-[#F5653E]"
-                            : "text-[#838A8D] hover:text-[#191A1B]",
+                            ? "text-primary"
+                            : "text-muted hover:text-foreground",
                         )}
                       >
                         <MicIcon />
@@ -799,7 +799,7 @@ export const ChatPage = () => {
                     <button
                       onClick={handleSend}
                       disabled={!inputText.trim() || !isConnected}
-                      className="flex items-center justify-center size-11.5 shrink-0 rounded-full bg-[#F5653E] disabled:bg-[#E3E4E5] text-white disabled:text-[#838A8D] transition-colors"
+                      className="flex items-center justify-center size-11.5 shrink-0 rounded-full bg-primary disabled:bg-border-soft text-white disabled:text-muted transition-colors"
                     >
                       <SendIcon />
                     </button>
@@ -807,8 +807,8 @@ export const ChatPage = () => {
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-[#838A8D] gap-3">
-                <div className="size-16 bg-[#F2F3F5] rounded-full flex items-center justify-center text-3xl">
+              <div className="flex-1 flex flex-col items-center justify-center text-muted gap-3">
+                <div className="size-16 bg-background rounded-full flex items-center justify-center text-3xl">
                   💬
                 </div>
                 <p className="text-sm">Выберите чат для начала общения</p>

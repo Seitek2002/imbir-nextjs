@@ -1,0 +1,1 @@
+export { ClinicInvitesPage } from "./ui";

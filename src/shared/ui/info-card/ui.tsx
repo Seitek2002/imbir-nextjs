@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, ReactNode, useState } from "react";
 
@@ -22,13 +22,13 @@ export const InfoCard: FC<Props> = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="bg-white rounded-[20px] p-4 border border-[#E3E4E5]">
+    <div className="bg-white rounded-[20px] p-4 border border-border-soft">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-[#191A1B]">{title}</h3>
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         {expandable && (
           <Button
             variant="text"
-            className="text-sm text-[#F5653E] hover:text-[#D94F2B] px-0 h-auto font-medium"
+            className="text-sm text-primary hover:text-[#D94F2B] px-0 h-auto font-medium"
             onClick={() => setIsExpanded(!isExpanded)}
           >
             {isExpanded ? "Скрыть" : "Подробнее"}
@@ -39,7 +39,7 @@ export const InfoCard: FC<Props> = ({
       {/* Контейнер для контента. Используем инлайн-стили для line-clamp, чтобы можно было передавать любое число строк */}
       <div
         className={cn(
-          "text-[#838A8D] text-sm md:text-base leading-relaxed transition-all duration-300",
+          "text-muted text-sm md:text-base leading-relaxed transition-all duration-300",
           // Если есть children сложной структуры (не текст), line-clamp не сработает, но для текста это идеальное решение
         )}
         style={

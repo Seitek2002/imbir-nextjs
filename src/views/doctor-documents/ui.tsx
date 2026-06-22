@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useRef, useState } from "react";
 
@@ -16,17 +16,17 @@ const { inp } = formStyles;
 
 const FileIcon = () => (
   <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-    <rect width="32" height="32" rx="8" fill="#F8F9FA" />
+    <rect width="32" height="32" rx="8" fill={colors.surface} />
     <path
       d="M20 6H11C10.4696 6 9.96086 6.21071 9.58579 6.58579C9.21071 6.96086 9 7.46957 9 8V24C9 24.5304 9.21071 25.0391 9.58579 25.4142C9.96086 25.7893 10.4696 26 11 26H21C21.5304 26 22.0391 25.7893 22.4142 25.4142C22.7893 25.0391 23 24.5304 23 24V9L20 6Z"
-      stroke="#838A8D"
+      stroke={colors.muted}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M20 6V9H23M13 16H19M13 20H19"
-      stroke="#838A8D"
+      stroke={colors.muted}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -76,7 +76,7 @@ export const DoctorDocumentsPage: FC = () => {
   if (isLoading) {
     return (
       <DoctorPageLayout title="Сертификаты и документы">
-        <div className="flex items-center justify-center py-20 text-[#838A8D]">
+        <div className="flex items-center justify-center py-20 text-muted">
           Загрузка...
         </div>
       </DoctorPageLayout>
@@ -90,11 +90,11 @@ export const DoctorDocumentsPage: FC = () => {
       onEditToggle={isEditing ? handleSave : () => setIsEditing(true)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
-        <h2 className="text-[28px] font-semibold text-[#191A1B]">{title}</h2>
+        <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
         <button
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-[#F5653E] text-white hover:bg-[#E5542D]" : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"}`}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-primary text-white hover:bg-primary-dark" : "border border-border text-secondary hover:bg-surface"}`}
         >
           {isSaving
             ? "Сохранение..."
@@ -104,10 +104,10 @@ export const DoctorDocumentsPage: FC = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl border border-[#E5E6E8] p-5 lg:p-8 space-y-6">
+      <div className="bg-white rounded-3xl border border-border p-5 lg:p-8 space-y-6">
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[#838A8D] text-sm">Сертификаты</p>
+            <p className="text-muted text-sm">Сертификаты</p>
             {isEditing && (
               <>
                 <input
@@ -119,7 +119,7 @@ export const DoctorDocumentsPage: FC = () => {
                 />
                 <button
                   onClick={() => certRef.current?.click()}
-                  className="text-[#F5653E] text-sm font-medium flex items-center gap-1"
+                  className="text-primary text-sm font-medium flex items-center gap-1"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path
@@ -137,14 +137,14 @@ export const DoctorDocumentsPage: FC = () => {
 
           <div className="flex flex-wrap gap-3">
             {certs.length === 0 ? (
-              <div className="text-[#C4C8CA] text-sm py-2">
+              <div className="text-dim text-sm py-2">
                 Нет загруженных документов
               </div>
             ) : null}
             {certs.map((cert, i) => (
               <div
                 key={i}
-                className="relative w-16 h-16 rounded-xl overflow-hidden border border-[#E5E6E8] bg-[#F8F9FA]"
+                className="relative w-16 h-16 rounded-xl overflow-hidden border border-border bg-surface"
               >
                 <Image
                   src={cert}
@@ -158,7 +158,7 @@ export const DoctorDocumentsPage: FC = () => {
                     onClick={() =>
                       setCerts((prev) => prev.filter((_, j) => j !== i))
                     }
-                    className="absolute top-0 right-0 w-1/2 aspect-square bg-[#F5653E] flex items-center justify-center"
+                    className="absolute top-0 right-0 w-1/2 aspect-square bg-primary flex items-center justify-center"
                   >
                     <svg className="w-1/2 h-1/2" viewBox="0 0 8 8" fill="none">
                       <path
@@ -175,7 +175,7 @@ export const DoctorDocumentsPage: FC = () => {
             {isEditing && certs.length === 0 && (
               <button
                 onClick={() => certRef.current?.click()}
-                className="w-16 h-16 rounded-xl border-2 border-dashed border-[#E5E6E8] flex items-center justify-center text-[#C4C8CA] hover:border-[#F5653E] hover:text-[#F5653E] transition-colors"
+                className="w-16 h-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center text-dim hover:border-primary hover:text-primary transition-colors"
               >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path

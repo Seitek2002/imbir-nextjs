@@ -1,4 +1,4 @@
-import { FC } from "react";
+﻿import { FC } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -19,12 +19,12 @@ export const Hero: FC = () => {
 
       <div className="relative z-10 w-full max-w-300 mx-auto h-full flex flex-col md:flex-row justify-between">
         <div className="flex flex-col items-start w-full md:w-1/2 z-20">
-          <h1 className="font-semibold text-[32px] leading-[1.1] md:text-5xl text-[#191A1B] mb-3 md:mb-5">
+          <h1 className="font-semibold text-[32px] leading-[1.1] md:text-5xl text-foreground mb-3 md:mb-5">
             Лучшие специалисты <br className="hidden md:block" /> и честные
             отзывы
           </h1>
 
-          <p className="text-[#686F72] text-sm md:text-lg mb-6 md:mb-8 max-w-[320px] md:max-w-112.5">
+          <p className="text-secondary text-sm md:text-lg mb-6 md:mb-8 max-w-[320px] md:max-w-112.5">
             Свяжитесь со специалистом из любой точки — быстро, удобно и без
             ожидания
           </p>
@@ -35,7 +35,7 @@ export const Hero: FC = () => {
             </Button>
           </Link>
 
-          <div className="border border-[#F5653E] rounded-3xl bg-white p-4 w-full md:w-105 flex flex-col gap-4">
+          <div className="border border-primary rounded-3xl bg-white p-4 w-full md:w-105 flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 overflow-hidden rounded-full shrink-0">
                 <Image
@@ -44,7 +44,7 @@ export const Hero: FC = () => {
                   className="w-full h-full object-cover object-top"
                 />
               </div>
-              <p className="text-sm text-[#686F72] leading-tight">
+              <p className="text-sm text-secondary leading-tight">
                 Что вас беспокоит? <br /> Я помогу подобрать вам специалиста
               </p>
             </div>

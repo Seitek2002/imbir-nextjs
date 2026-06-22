@@ -35,11 +35,11 @@ export const VideosSwiper: FC<Props> = ({
     <section className="flex flex-col gap-6 w-full px-4">
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-1.5">
-          <h2 className="font-semibold text-xl md:text-[28px] text-[#191A1B] leading-tight">
+          <h2 className="font-semibold text-xl md:text-[28px] text-foreground leading-tight">
             {title}
           </h2>
           {description && (
-            <p className="hidden md:block text-sm text-[#686F72]">
+            <p className="hidden md:block text-sm text-secondary">
               {description}
             </p>
           )}
@@ -48,7 +48,7 @@ export const VideosSwiper: FC<Props> = ({
         {viewAllHref && (
           <Link
             href={viewAllHref}
-            className="text-sm md:text-base text-[#F5653E] shrink-0 hover:opacity-70 transition-opacity mt-1 md:mt-2"
+            className="text-sm md:text-base text-primary shrink-0 hover:opacity-70 transition-opacity mt-1 md:mt-2"
           >
             Все
           </Link>

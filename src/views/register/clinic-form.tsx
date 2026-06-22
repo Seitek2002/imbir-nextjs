@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 
@@ -137,13 +137,13 @@ const UploadIcon = () => (
   <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
     <path
       d="M22 18v3a1 1 0 01-1 1H7a1 1 0 01-1-1v-3"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
       strokeLinecap="round"
     />
     <path
       d="M14 6v12M10 10l4-4 4 4"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -159,10 +159,10 @@ const InfoIcon = () => (
     fill="none"
     className="shrink-0 mt-0.5"
   >
-    <circle cx="9" cy="9" r="8" stroke="#838A8D" strokeWidth="1.5" />
+    <circle cx="9" cy="9" r="8" stroke={colors.muted} strokeWidth="1.5" />
     <path
       d="M9 8v5M9 6h.01"
-      stroke="#838A8D"
+      stroke={colors.muted}
       strokeWidth="1.5"
       strokeLinecap="round"
     />
@@ -173,10 +173,10 @@ const MapPinIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
     <path
       d="M10 1.667A5.833 5.833 0 0110 13.333C6.667 13.333 4.167 8.333 4.167 7.5a5.833 5.833 0 015.833-5.833z"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
     />
-    <circle cx="10" cy="7.5" r="2" fill="#F5653E" />
+    <circle cx="10" cy="7.5" r="2" fill={colors.primary} />
   </svg>
 );
 
@@ -188,7 +188,7 @@ const PhotoThumb = ({
   onRemove: () => void;
 }) => (
   <div className="relative flex flex-col items-center gap-1">
-    <div className="relative size-16 rounded-lg overflow-hidden border border-[#E5E6E8] bg-[#F2F3F5]">
+    <div className="relative size-16 rounded-lg overflow-hidden border border-border bg-background">
       {file.type.startsWith("image/") ? (
         <img
           src={URL.createObjectURL(file)}
@@ -196,7 +196,7 @@ const PhotoThumb = ({
           className="w-full h-full object-cover"
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-[10px] text-[#838A8D] font-bold">
+        <div className="w-full h-full flex items-center justify-center text-[10px] text-muted font-bold">
           FILE
         </div>
       )}
@@ -207,7 +207,7 @@ const PhotoThumb = ({
         ×
       </button>
     </div>
-    <span className="text-[10px] text-[#838A8D] max-w-[64px] truncate">
+    <span className="text-[10px] text-muted max-w-[64px] truncate">
       {file.name}
     </span>
   </div>
@@ -225,14 +225,14 @@ const TimeRange = ({
       type="time"
       value={value.from}
       onChange={(e) => onChange({ ...value, from: e.target.value })}
-      className="flex-1 py-2 px-3 rounded-lg border border-[#E5E6E8] text-sm text-[#191A1B] text-center outline-none focus:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]"
+      className="flex-1 py-2 px-3 rounded-lg border border-border text-sm text-foreground text-center outline-none focus:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]"
     />
-    <span className="text-[#838A8D] shrink-0">—</span>
+    <span className="text-muted shrink-0">—</span>
     <input
       type="time"
       value={value.to}
       onChange={(e) => onChange({ ...value, to: e.target.value })}
-      className="flex-1 py-2 px-3 rounded-lg border border-[#E5E6E8] text-sm text-[#191A1B] text-center outline-none focus:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]"
+      className="flex-1 py-2 px-3 rounded-lg border border-border text-sm text-foreground text-center outline-none focus:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]"
     />
   </div>
 );
@@ -249,8 +249,8 @@ const CheckboxGroup = ({
   onChange: (v: string[]) => void;
 }) => (
   <div className="flex flex-col gap-1.5">
-    <span className="text-sm font-medium text-[#0D0D12]">{label}</span>
-    <div className="rounded-xl border border-[#E5E6E8] divide-y divide-[#E5E6E8]">
+    <span className="text-sm font-medium text-overlay">{label}</span>
+    <div className="rounded-xl border border-border divide-y divide-border">
       {options.map((opt) => (
         <div key={opt} className="px-4 py-3">
           <Checkbox
@@ -391,13 +391,13 @@ export const ClinicRegistrationForm = ({
             key={i}
             className={cn(
               "flex-1 h-1 rounded-full transition-colors",
-              i < step ? "bg-[#F5653E]" : "bg-[#E3E4E5]",
+              i < step ? "bg-primary" : "bg-border-soft",
             )}
           />
         ))}
       </div>
 
-      <h2 className="text-2xl font-semibold text-[#191A1B] mb-6">
+      <h2 className="text-2xl font-semibold text-foreground mb-6">
         {STEP_TITLES[step]}
       </h2>
 
@@ -413,7 +413,7 @@ export const ClinicRegistrationForm = ({
 
           {/* Logo upload */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#0D0D12]">Логотип</span>
+            <span className="text-sm font-medium text-overlay">Логотип</span>
             <input
               ref={logoInputRef}
               type="file"
@@ -425,7 +425,7 @@ export const ClinicRegistrationForm = ({
               }}
             />
             {data.logo ? (
-              <div className="flex items-center gap-3 p-3 rounded-xl border border-[#E5E6E8]">
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-border">
                 <div className="relative size-14 rounded-lg overflow-hidden shrink-0">
                   <img
                     src={URL.createObjectURL(data.logo)}
@@ -439,12 +439,12 @@ export const ClinicRegistrationForm = ({
                     ×
                   </button>
                 </div>
-                <span className="text-sm text-[#838A8D] truncate flex-1">
+                <span className="text-sm text-muted truncate flex-1">
                   {data.logo.name}
                 </span>
                 <button
                   onClick={() => logoInputRef.current?.click()}
-                  className="px-3 py-1.5 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors shrink-0"
+                  className="px-3 py-1.5 rounded-full border border-border text-secondary text-sm hover:bg-surface transition-colors shrink-0"
                 >
                   Заменить
                 </button>
@@ -452,10 +452,10 @@ export const ClinicRegistrationForm = ({
             ) : (
               <button
                 onClick={() => logoInputRef.current?.click()}
-                className="flex items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-[#E5E6E8] hover:border-[#F5653E]/40 transition-colors w-full"
+                className="flex items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary/40 transition-colors w-full"
               >
                 <UploadIcon />
-                <span className="text-sm font-medium text-[#0D0D12]">
+                <span className="text-sm font-medium text-overlay">
                   Загрузить логотип
                 </span>
               </button>
@@ -479,7 +479,7 @@ export const ClinicRegistrationForm = ({
 
           {/* Clinic photos upload */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#0D0D12]">
+            <span className="text-sm font-medium text-overlay">
               Фотографии клиники
             </span>
             <input
@@ -494,7 +494,7 @@ export const ClinicRegistrationForm = ({
                 e.target.value = "";
               }}
             />
-            <div className="p-3 rounded-xl border border-[#E5E6E8] min-h-[88px]">
+            <div className="p-3 rounded-xl border border-border min-h-[88px]">
               {data.photos.length > 0 ? (
                 <div className="flex flex-wrap gap-3">
                   {data.photos.map((file, i) => (
@@ -511,7 +511,7 @@ export const ClinicRegistrationForm = ({
                   ))}
                   <button
                     onClick={() => photosInputRef.current?.click()}
-                    className="size-16 rounded-lg border-2 border-dashed border-[#E5E6E8] flex items-center justify-center text-[#F5653E] text-2xl hover:border-[#F5653E]/40 transition-colors"
+                    className="size-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-primary text-2xl hover:border-primary/40 transition-colors"
                   >
                     +
                   </button>
@@ -522,7 +522,7 @@ export const ClinicRegistrationForm = ({
                   className="w-full min-h-[72px] flex items-center justify-center gap-2"
                 >
                   <UploadIcon />
-                  <span className="text-sm font-medium text-[#0D0D12]">
+                  <span className="text-sm font-medium text-overlay">
                     Загрузить фото
                   </span>
                 </button>
@@ -576,10 +576,8 @@ export const ClinicRegistrationForm = ({
 
           {/* Map placeholder */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#0D0D12]">
-              Геолокация
-            </span>
-            <div className="rounded-xl overflow-hidden border border-[#E5E6E8]">
+            <span className="text-sm font-medium text-overlay">Геолокация</span>
+            <div className="rounded-xl overflow-hidden border border-border">
               {/* Map tile placeholder */}
               <div className="relative h-44 bg-[#E8EAED] flex items-center justify-center">
                 <div className="absolute inset-0 opacity-20">
@@ -605,7 +603,7 @@ export const ClinicRegistrationForm = ({
                 </div>
                 {/* Map pin */}
                 <div className="relative z-10 flex flex-col items-center gap-1">
-                  <div className="size-10 rounded-full bg-[#F5653E] flex items-center justify-center shadow-lg">
+                  <div className="size-10 rounded-full bg-primary flex items-center justify-center shadow-lg">
                     <MapPinIcon />
                   </div>
                 </div>
@@ -614,7 +612,7 @@ export const ClinicRegistrationForm = ({
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
                       d="M8 1l2.5 13L8 11.5 5.5 14 8 1z"
-                      stroke="#F5653E"
+                      stroke={colors.primary}
                       strokeWidth="1.5"
                       strokeLinejoin="round"
                     />
@@ -632,12 +630,12 @@ export const ClinicRegistrationForm = ({
                 >
                   <path
                     d="M8 1.333A4.667 4.667 0 018 10.667C5.333 10.667 3.333 6.667 3.333 6a4.667 4.667 0 014.667-4.667z"
-                    stroke="#838A8D"
+                    stroke={colors.muted}
                     strokeWidth="1.2"
                   />
-                  <circle cx="8" cy="6" r="1.5" fill="#838A8D" />
+                  <circle cx="8" cy="6" r="1.5" fill={colors.muted} />
                 </svg>
-                <span className="text-sm text-[#191A1B]">
+                <span className="text-sm text-foreground">
                   {data.fullAddress || "Выберите адрес на карте"}
                 </span>
               </div>
@@ -649,7 +647,7 @@ export const ClinicRegistrationForm = ({
       {/* ── Step 3: Work schedule ── */}
       {step === 3 && (
         <div className="flex flex-col gap-5">
-          <p className="text-sm text-[#838A8D] -mt-2">
+          <p className="text-sm text-muted -mt-2">
             Укажите время проведения процедуры (с какого времени до какого),
             оставьте поля пустыми, если в какой-то день процедура не проводится
           </p>
@@ -657,7 +655,7 @@ export const ClinicRegistrationForm = ({
           <div className="flex flex-col gap-3">
             {DAYS.map(({ key, label }) => (
               <div key={key} className="flex items-center gap-3">
-                <span className="text-sm font-medium text-[#0D0D12] w-6 shrink-0">
+                <span className="text-sm font-medium text-overlay w-6 shrink-0">
                   {label}
                 </span>
                 <div className="flex-1">
@@ -671,7 +669,7 @@ export const ClinicRegistrationForm = ({
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium text-[#0D0D12]">
+            <span className="text-sm font-medium text-overlay">
               Обеденный перерыв
             </span>
             <TimeRange
@@ -724,7 +722,7 @@ export const ClinicRegistrationForm = ({
 
           {/* Documents upload */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#0D0D12]">
+            <span className="text-sm font-medium text-overlay">
               Документы (лицензия, регистрационные документы)
             </span>
             <input
@@ -742,7 +740,7 @@ export const ClinicRegistrationForm = ({
                 e.target.value = "";
               }}
             />
-            <div className="p-4 rounded-xl border-2 border-dashed border-[#E5E6E8] min-h-[112px]">
+            <div className="p-4 rounded-xl border-2 border-dashed border-border min-h-[112px]">
               {data.documents.length > 0 ? (
                 <div className="flex flex-wrap gap-3">
                   {data.documents.map((file, i) => (
@@ -759,7 +757,7 @@ export const ClinicRegistrationForm = ({
                   ))}
                   <button
                     onClick={() => docsInputRef.current?.click()}
-                    className="size-16 rounded-lg border-2 border-dashed border-[#E5E6E8] flex items-center justify-center text-[#F5653E] text-2xl hover:border-[#F5653E]/40 transition-colors"
+                    className="size-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-primary text-2xl hover:border-primary/40 transition-colors"
                   >
                     +
                   </button>
@@ -770,7 +768,7 @@ export const ClinicRegistrationForm = ({
                   className="w-full min-h-[80px] flex items-center justify-center gap-2"
                 >
                   <UploadIcon />
-                  <span className="text-sm font-medium text-[#0D0D12]">
+                  <span className="text-sm font-medium text-overlay">
                     Загрузить документы
                   </span>
                 </button>
@@ -861,10 +859,10 @@ export const ClinicRegistrationForm = ({
           />
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#0D0D12]">
+            <span className="text-sm font-medium text-overlay">
               Согласия и политики
             </span>
-            <div className="rounded-xl border border-[#E5E6E8] divide-y divide-[#E5E6E8]">
+            <div className="rounded-xl border border-border divide-y divide-border">
               {(
                 [
                   {
@@ -897,9 +895,9 @@ export const ClinicRegistrationForm = ({
             </div>
           </div>
 
-          <div className="flex gap-3 p-4 rounded-xl bg-[#F2F3F5] mt-2">
+          <div className="flex gap-3 p-4 rounded-xl bg-background mt-2">
             <InfoIcon />
-            <p className="text-sm text-[#838A8D]">
+            <p className="text-sm text-muted">
               После регистрации вы получите доступ к личному кабинету врача, где
               сможете управлять расписанием, просматривать записи пациентов и
               вести историю приёмов
@@ -912,7 +910,7 @@ export const ClinicRegistrationForm = ({
       <div className="h-24 md:hidden" />
 
       {/* Mobile: fixed bottom button */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] bg-white border-t border-[#E5E6E8]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] bg-white border-t border-border">
         <Button
           className="w-full justify-center h-14 text-base"
           size="lg"

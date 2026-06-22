@@ -1,11 +1,10 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Button, Dropdown, Radio, RangeSlider } from "@/shared";
-import { Header } from "@/widgets";
+import { Button, Dropdown, PageHeader, Radio, RangeSlider } from "@/shared";
 
 import { StarIcon } from "@/shared/assets";
 
@@ -143,9 +142,9 @@ export const MobileFiltersModal: FC<Props> = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 bg-[#F2F3F5] flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? "translate-y-0" : "translate-y-full"}`}
+      className={`fixed inset-0 z-50 bg-background flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? "translate-y-0" : "translate-y-full"}`}
     >
-      <Header title="Фильтр" />
+      <PageHeader title="Фильтр" />
 
       <div className="flex-1 overflow-y-auto mt-2 px-2 pb-10 space-y-3">
         {/* ЧЕКБОКС ОНЛАЙН */}
@@ -154,11 +153,11 @@ export const MobileFiltersModal: FC<Props> = ({
             className="bg-white p-4 rounded-2xl flex items-center justify-between cursor-pointer"
             onClick={() => setIsOnline(!isOnline)}
           >
-            <span className="text-base font-medium text-[#191A1B]">
+            <span className="text-base font-medium text-foreground">
               Только онлайн-консультация
             </span>
             <div
-              className={`w-12 h-6 rounded-full transition-colors relative ${isOnline ? "bg-[#F5653E]" : "bg-[#E3E4E5]"}`}
+              className={`w-12 h-6 rounded-full transition-colors relative ${isOnline ? "bg-primary" : "bg-border-soft"}`}
             >
               <div
                 className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isOnline ? "left-7" : "left-1"}`}
@@ -170,7 +169,7 @@ export const MobileFiltersModal: FC<Props> = ({
         {/* БЛОК: УСЛУГА (категория) */}
         {fields?.category && (
           <div className="bg-white p-4 rounded-2xl">
-            <span className="block text-sm font-medium text-[#191A1B] mb-2">
+            <span className="block text-sm font-medium text-foreground mb-2">
               Услуга
             </span>
             <Dropdown
@@ -186,7 +185,7 @@ export const MobileFiltersModal: FC<Props> = ({
         {/* БЛОК: КЛИНИКА */}
         {fields?.clinic && (
           <div className="bg-white p-4 rounded-2xl">
-            <span className="block text-sm font-medium text-[#191A1B] mb-2">
+            <span className="block text-sm font-medium text-foreground mb-2">
               Клиника
             </span>
             <Dropdown
@@ -202,7 +201,7 @@ export const MobileFiltersModal: FC<Props> = ({
         {/* БЛОК 1: СПЕЦИАЛИЗАЦИЯ */}
         {fields?.specialty && (
           <div className="bg-white p-4 rounded-2xl">
-            <span className="block text-sm font-medium text-[#191A1B] mb-2">
+            <span className="block text-sm font-medium text-foreground mb-2">
               Специализация
             </span>
             <Dropdown
@@ -235,7 +234,7 @@ export const MobileFiltersModal: FC<Props> = ({
         {/* БЛОК 3: ОЦЕНКА */}
         {fields?.rating && (
           <div className="bg-white p-4 rounded-2xl">
-            <span className="block text-sm font-medium text-[#191A1B] mb-3">
+            <span className="block text-sm font-medium text-foreground mb-3">
               Оценка
             </span>
             <div className="flex flex-col gap-4">
@@ -245,8 +244,8 @@ export const MobileFiltersModal: FC<Props> = ({
                   className="flex items-center justify-between cursor-pointer group"
                 >
                   <div className="flex items-center gap-2">
-                    <StarIcon className="size-5 text-[#F5653E]" />
-                    <span className="text-base text-[#191A1B]">{rate}</span>
+                    <StarIcon className="size-5 text-primary" />
+                    <span className="text-base text-foreground">{rate}</span>
                   </div>
                   <Radio
                     name={`rating-mobile-${prefix}`}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, ReactNode } from "react";
 
@@ -126,7 +126,7 @@ export const FilterBar: FC<Props> = ({
             <div className="max-w-200 flex items-center">
               <h2 className="text-[40px] font-semibold pr-6">{title}</h2>
             </div>
-            <p className="text-[#686F72] text-lg mt-4 mb-6">
+            <p className="text-secondary text-lg mt-4 mb-6">
               Выберите интересующие вас параметры, чтобы ознакомиться с
               подходящими вариантами
             </p>
@@ -144,7 +144,7 @@ export const FilterBar: FC<Props> = ({
                   onChange={(e) => handleOnlineChange(e.target.checked)}
                   className="peer sr-only"
                 />
-                <div className="w-6 h-6 border-2 border-[#E3E4E5] rounded-md peer-checked:bg-[#F5653E] peer-checked:border-[#F5653E] transition-colors"></div>
+                <div className="w-6 h-6 border-2 border-border-soft rounded-md peer-checked:bg-primary peer-checked:border-primary transition-colors"></div>
                 <svg
                   className="absolute w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
                   viewBox="0 0 24 24"
@@ -157,7 +157,7 @@ export const FilterBar: FC<Props> = ({
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
               </div>
-              <span className="text-[#191A1B] font-medium group-hover:text-[#F5653E] transition-colors">
+              <span className="text-foreground font-medium group-hover:text-primary transition-colors">
                 Только онлайн-консультация
               </span>
             </label>

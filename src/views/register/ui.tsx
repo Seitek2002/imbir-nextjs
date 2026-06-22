@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { JSX, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -45,20 +45,20 @@ const ClinicIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <path
       d="M3 10L12 3l9 7v10a1 1 0 01-1 1H4a1 1 0 01-1-1V10z"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
       strokeLinejoin="round"
     />
     <path
       d="M9 21V14h6v7"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M10.5 9.5h3M12 8v3"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
       strokeLinecap="round"
     />
@@ -67,17 +67,23 @@ const ClinicIcon = () => (
 
 const DoctorIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="7" r="4" stroke="#F5653E" strokeWidth="1.5" />
+    <circle cx="12" cy="7" r="4" stroke={colors.primary} strokeWidth="1.5" />
     <path
       d="M4 20c0-3.314 3.134-6 8-6"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
       strokeLinecap="round"
     />
-    <circle cx="18.5" cy="18.5" r="2.5" stroke="#F5653E" strokeWidth="1.5" />
+    <circle
+      cx="18.5"
+      cy="18.5"
+      r="2.5"
+      stroke={colors.primary}
+      strokeWidth="1.5"
+    />
     <path
       d="M17 18.5h3M18.5 17v3"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
       strokeLinecap="round"
     />
@@ -86,10 +92,10 @@ const DoctorIcon = () => (
 
 const ClientIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="8" r="4" stroke="#F5653E" strokeWidth="1.5" />
+    <circle cx="12" cy="8" r="4" stroke={colors.primary} strokeWidth="1.5" />
     <path
       d="M4 21c0-4.418 3.582-8 8-8s8 3.582 8 8"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
       strokeLinecap="round"
     />
@@ -447,7 +453,7 @@ export const RegisterPage = () => {
   );
 
   return (
-    <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
+    <main className="min-h-screen bg-background flex flex-col">
       <Header onBack={handleBack}>{AuthTabs}</Header>
 
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
@@ -481,10 +487,10 @@ export const RegisterPage = () => {
             {activeForm === "role" && (
               <>
                 <div className="mt-8 mb-6 md:mt-12">
-                  <h2 className="text-2xl font-semibold text-[#191A1B] mb-2">
+                  <h2 className="text-2xl font-semibold text-foreground mb-2">
                     Выберите свою роль
                   </h2>
-                  <p className="text-[#838A8D] text-sm md:text-base">
+                  <p className="text-muted text-sm md:text-base">
                     Выберите вашу роль для продолжения регистрации
                   </p>
                 </div>
@@ -496,8 +502,8 @@ export const RegisterPage = () => {
                       className={cn(
                         "flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer",
                         selectedRole === value
-                          ? "border-[#F5653E] bg-[#FFF8F6]"
-                          : "border-[#E5E6E8] bg-white hover:border-[#F5653E]/40",
+                          ? "border-primary bg-[#FFF8F6]"
+                          : "border-border bg-white hover:border-primary/40",
                       )}
                     >
                       <input
@@ -512,19 +518,19 @@ export const RegisterPage = () => {
                         <Icon />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-[#191A1B]">{label}</p>
-                        <p className="text-sm text-[#838A8D]">{description}</p>
+                        <p className="font-semibold text-foreground">{label}</p>
+                        <p className="text-sm text-muted">{description}</p>
                       </div>
                       <div
                         className={cn(
                           "shrink-0 size-5 rounded-full border-4 transition-all flex items-center justify-center",
                           selectedRole === value
-                            ? "border-[#F5653E]"
-                            : "border-[#E3E4E5]",
+                            ? "border-primary"
+                            : "border-border-soft",
                         )}
                       >
                         {selectedRole === value && (
-                          <div className="size-2.5 rounded-full bg-[#F5653E]" />
+                          <div className="size-2.5 rounded-full bg-primary" />
                         )}
                       </div>
                     </label>
@@ -548,9 +554,9 @@ export const RegisterPage = () => {
             {activeForm === "doctor" && (
               <div className="mt-8 md:mt-12 flex-1 flex flex-col">
                 {inviteClinic && (
-                  <div className="mb-4 px-4 py-3 rounded-xl bg-[#FFF8F5] border border-[#FDDDD5] text-sm text-[#686F72]">
+                  <div className="mb-4 px-4 py-3 rounded-xl bg-primary-tint border border-[#FDDDD5] text-sm text-secondary">
                     Вы приглашены клиникой{" "}
-                    <span className="font-semibold text-[#191A1B]">
+                    <span className="font-semibold text-foreground">
                       {inviteClinic.clinicName}
                     </span>
                     {inviteClinic.branchId && (
@@ -588,10 +594,10 @@ export const RegisterPage = () => {
             {activeForm === "client" && (
               <>
                 <div className="mt-8 mb-6 md:mt-12">
-                  <h2 className="text-2xl font-semibold text-[#191A1B] mb-2">
+                  <h2 className="text-2xl font-semibold text-foreground mb-2">
                     Добро пожаловать в Imbir
                   </h2>
-                  <p className="text-[#838A8D] text-sm md:text-base">
+                  <p className="text-muted text-sm md:text-base">
                     {clientStep === 1
                       ? "Заполните данные, чтобы создать аккаунт"
                       : "Придумайте и подтвердите пароль вашего аккаунта"}

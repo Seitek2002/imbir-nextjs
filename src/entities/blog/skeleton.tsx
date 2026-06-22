@@ -1,10 +1,10 @@
-type Props = {
+﻿type Props = {
   count?: number;
 };
 
 const BlogCardSkeleton = () => {
   return (
-    <div className="bg-white rounded-3xl overflow-hidden flex flex-col p-2 w-full border border-[#E3E4E5]">
+    <div className="bg-white rounded-3xl overflow-hidden flex flex-col p-2 w-full border border-border-soft">
       <div className="relative w-full aspect-video rounded-2xl skeleton" />
 
       <div className="p-3">

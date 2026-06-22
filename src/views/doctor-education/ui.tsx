@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useState } from "react";
 
@@ -74,7 +74,7 @@ export const DoctorEducationPage: FC = () => {
   if (isLoading) {
     return (
       <DoctorPageLayout title="Образование">
-        <div className="flex items-center justify-center py-20 text-[#838A8D]">
+        <div className="flex items-center justify-center py-20 text-muted">
           Загрузка...
         </div>
       </DoctorPageLayout>
@@ -91,11 +91,11 @@ export const DoctorEducationPage: FC = () => {
       onEditToggle={isEditing ? handleSave : () => setIsEditing(true)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
-        <h2 className="text-[28px] font-semibold text-[#191A1B]">{title}</h2>
+        <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
         <button
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-[#F5653E] text-white hover:bg-[#E5542D]" : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"}`}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-primary text-white hover:bg-primary-dark" : "border border-border text-secondary hover:bg-surface"}`}
         >
           {isSaving
             ? "Сохранение..."
@@ -105,7 +105,7 @@ export const DoctorEducationPage: FC = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl border border-[#E5E6E8] p-5 lg:p-8">
+      <div className="bg-white rounded-3xl border border-border p-5 lg:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div>
             {isEditing ? (
@@ -187,15 +187,13 @@ export const DoctorEducationPage: FC = () => {
           </div>
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[#838A8D] text-sm">
-                Дополнительное образование
-              </p>
+              <p className="text-muted text-sm">Дополнительное образование</p>
               {isEditing && (
                 <button
                   onClick={() =>
                     set("additionalEducation", [...d.additionalEducation, ""])
                   }
-                  className="text-[#F5653E] text-sm font-medium flex items-center gap-1"
+                  className="text-primary text-sm font-medium flex items-center gap-1"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path
@@ -212,7 +210,7 @@ export const DoctorEducationPage: FC = () => {
             {isEditing ? (
               <div className="space-y-2">
                 {d.additionalEducation.length === 0 && (
-                  <div className="text-[#C4C8CA] text-sm px-4 py-3 rounded-2xl border border-dashed border-[#E5E6E8] text-center">
+                  <div className="text-dim text-sm px-4 py-3 rounded-2xl border border-dashed border-border text-center">
                     Нажмите «Добавить»
                   </div>
                 )}
@@ -238,7 +236,7 @@ export const DoctorEducationPage: FC = () => {
                           d.additionalEducation.filter((_, j) => j !== i),
                         )
                       }
-                      className="w-9 h-9 flex items-center justify-center text-[#C4C8CA] hover:text-[#F5653E] transition-colors"
+                      className="w-9 h-9 flex items-center justify-center text-dim hover:text-primary transition-colors"
                     >
                       <svg
                         width="16"

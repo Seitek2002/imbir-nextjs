@@ -1,4 +1,4 @@
-import { ClinicInvitesPage } from "@/views/clinic-invites/ui";
+import { ClinicInvitesPage } from "@/views/clinic-invites";
 
 export default function Page() {
   return <ClinicInvitesPage />;

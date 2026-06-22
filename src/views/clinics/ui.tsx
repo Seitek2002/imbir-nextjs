@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC } from "react";
 
@@ -84,7 +84,7 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
   };
 
   return (
-    <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col">
       <Header title="Клиники" backTo={ROUTES.HOME}>
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
@@ -107,7 +107,7 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
         {/* --- МОБИЛЬНАЯ ВЕРСИЯ --- */}
         <div className="md:hidden p-4">
           {activeQuery && (
-            <h2 className="text-[#191A1B] text-lg font-medium mb-4">
+            <h2 className="text-foreground text-lg font-medium mb-4">
               Результаты по запросу: {activeQuery}
             </h2>
           )}
@@ -116,7 +116,7 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
             {isLoading ? (
               <ClinicSkeleton count={4} variant="horizontal" />
             ) : filteredClinics.length === 0 ? (
-              <p className="text-center text-[#838A8D] py-10">
+              <p className="text-center text-muted py-10">
                 По вашим параметрам клиники не найдены
               </p>
             ) : (
@@ -142,19 +142,19 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
 
         {/* --- ДЕСКТОПНАЯ ВЕРСИЯ --- */}
         <div className="hidden md:block px-10 py-6">
-          <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
+          <div className="text-sm text-secondary mb-6 flex items-center gap-2">
             <Link
               href={ROUTES.HOME}
-              className="hover:text-[#F5653E] transition-colors"
+              className="hover:text-primary transition-colors"
             >
               Главная
             </Link>
             <span>•</span>
-            <span className={activeQuery ? "" : "text-[#F5653E]"}>
+            <span className={activeQuery ? "" : "text-primary"}>
               {activeQuery ? (
                 <Link
                   href={ROUTES.CLINICS}
-                  className="hover:text-[#F5653E] transition-colors"
+                  className="hover:text-primary transition-colors"
                 >
                   Клиники
                 </Link>
@@ -165,9 +165,7 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
             {activeQuery && (
               <>
                 <span>•</span>
-                <span className="text-[#F5653E]">
-                  По запросу «{activeQuery}»
-                </span>
+                <span className="text-primary">По запросу «{activeQuery}»</span>
               </>
             )}
           </div>
@@ -178,7 +176,7 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
             {isLoading ? (
               <ClinicSkeleton count={8} variant="vertical" />
             ) : filteredClinics.length === 0 ? (
-              <p className="col-span-4 text-center text-[#838A8D] py-20 text-lg">
+              <p className="col-span-4 text-center text-muted py-20 text-lg">
                 По вашим параметрам клиники не найдены
               </p>
             ) : (

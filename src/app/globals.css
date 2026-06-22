@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+@theme {
+  /* Brand */
+  --color-primary: #f5653e;
+  --color-primary-dark: #e5542d;
+  --color-primary-tint: #fff8f5;
+
+  /* Text */
+  --color-foreground: #191a1b;
+  --color-secondary: #686f72;
+  --color-muted: #838a8d;
+  --color-dim: #c4c8ca;
+
+  /* Surfaces */
+  --color-background: #f2f3f5;
+  --color-surface: #f8f9fa;
+
+  /* Borders */
+  --color-border: #e5e6e8;
+  --color-border-soft: #e3e4e5;
+
+  /* Overlay */
+  --color-overlay: #0d0d12;
+}
+
 @utility scrollbar-hide {
   -ms-overflow-style: none; /* IE и Edge */
   scrollbar-width: none; /* Firefox */

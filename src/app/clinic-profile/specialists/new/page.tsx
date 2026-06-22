@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 
@@ -19,8 +19,8 @@ import {
 import { PhoneInput } from "@/shared/ui";
 
 const inp =
-  "w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors bg-white";
-const lbl = "block text-[#838A8D] text-sm mb-1.5";
+  "w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors bg-white";
+const lbl = "block text-muted text-sm mb-1.5";
 
 export default function NewSpecialistPage() {
   const router = useRouter();
@@ -77,7 +77,7 @@ export default function NewSpecialistPage() {
 
   return (
     <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
-      <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8">
+      <h1 className="text-[40px] font-semibold text-foreground mb-8">
         Мой профиль
       </h1>
 
@@ -92,13 +92,13 @@ export default function NewSpecialistPage() {
           <div className="flex items-center gap-3 mb-6">
             <button
               onClick={() => router.back()}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shrink-0"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors shrink-0"
               aria-label="Назад"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M15 18L9 12L15 6"
-                  stroke="#191A1B"
+                  stroke={colors.foreground}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -106,7 +106,7 @@ export default function NewSpecialistPage() {
               </svg>
             </button>
 
-            <h2 className="text-[28px] font-semibold text-[#191A1B] flex-1">
+            <h2 className="text-[28px] font-semibold text-foreground flex-1">
               Добавить специалиста
             </h2>
 
@@ -115,25 +115,25 @@ export default function NewSpecialistPage() {
               disabled={isSubmitting}
               className={`px-6 py-2.5 rounded-full font-medium transition-colors shrink-0 ${
                 isSubmitting
-                  ? "bg-[#C4C8CA] text-white cursor-not-allowed"
-                  : "bg-[#F5653E] text-white hover:bg-[#E5542D]"
+                  ? "bg-dim text-white cursor-not-allowed"
+                  : "bg-primary text-white hover:bg-primary-dark"
               }`}
             >
               {isSubmitting ? "Сохранение..." : "Сохранить"}
             </button>
           </div>
 
-          <div className="bg-white rounded-3xl border border-[#E5E6E8] divide-y divide-[#E5E6E8]">
+          <div className="bg-white rounded-3xl border border-border divide-y divide-border">
             {/* 1. Основная информация */}
             <div className="p-8">
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+              <h3 className="text-foreground font-semibold text-lg mb-6">
                 Основная информация
               </h3>
               <div className="flex gap-8">
                 <div className="flex-1 grid grid-cols-2 gap-x-6 gap-y-5">
                   <div className="col-span-2">
                     <label className={lbl}>
-                      ФИО <span className="text-[#F5653E]">*</span>
+                      ФИО <span className="text-primary">*</span>
                     </label>
                     <input
                       type="text"
@@ -143,10 +143,10 @@ export default function NewSpecialistPage() {
                         if (e.target.value.trim()) setFullNameError(false);
                       }}
                       placeholder="Введите ФИО"
-                      className={`${inp} ${fullNameError ? "border-[#F5653E]" : ""}`}
+                      className={`${inp} ${fullNameError ? "border-primary" : ""}`}
                     />
                     {fullNameError && (
-                      <p className="text-[#F5653E] text-xs mt-1">
+                      <p className="text-primary text-xs mt-1">
                         Обязательное поле
                       </p>
                     )}
@@ -219,7 +219,7 @@ export default function NewSpecialistPage() {
                 </div>
 
                 <div className="shrink-0 flex flex-col items-center gap-3 pt-6">
-                  <div className="w-30 h-30 rounded-2xl overflow-hidden bg-[#F8F9FA] border border-[#E5E6E8] flex items-center justify-center">
+                  <div className="w-30 h-30 rounded-2xl overflow-hidden bg-surface border border-border flex items-center justify-center">
                     {d.photo ? (
                       <Image
                         src={d.photo}
@@ -235,10 +235,10 @@ export default function NewSpecialistPage() {
                         viewBox="0 0 48 48"
                         fill="none"
                       >
-                        <circle cx="24" cy="24" r="24" fill="#E5E6E8" />
+                        <circle cx="24" cy="24" r="24" fill={colors.border} />
                         <path
                           d="M24 12C17.37 12 12 17.37 12 24s5.37 12 12 12 12-5.37 12-12-5.37-12-12-12zm0 6c1.99 0 3.6 1.61 3.6 3.6S25.99 25.2 24 25.2s-3.6-1.61-3.6-3.6S22.01 18 24 18zm0 15.6c-3.2 0-6-.8-7.8-3.42.04-2.47 4.92-3.86 7.8-3.86 2.86 0 7.76 1.39 7.8 3.86C29.8 32.8 27.2 33.6 24 33.6z"
-                          fill="#C4C8CA"
+                          fill={colors.dim}
                         />
                       </svg>
                     )}
@@ -252,7 +252,7 @@ export default function NewSpecialistPage() {
                   />
                   <button
                     onClick={() => photoRef.current?.click()}
-                    className="px-4 py-1.5 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors"
+                    className="px-4 py-1.5 rounded-full border border-border text-secondary text-sm hover:bg-surface transition-colors"
                   >
                     Добавить фото
                   </button>
@@ -262,7 +262,7 @@ export default function NewSpecialistPage() {
 
             {/* 2. Профессиональные данные */}
             <div className="p-8">
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+              <h3 className="text-foreground font-semibold text-lg mb-6">
                 Профессиональные данные
               </h3>
               <div className="grid grid-cols-2 gap-x-6 gap-y-5">
@@ -352,7 +352,7 @@ export default function NewSpecialistPage() {
 
             {/* 3. Образование */}
             <div className="p-8">
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+              <h3 className="text-foreground font-semibold text-lg mb-6">
                 Образование
               </h3>
               <div className="grid grid-cols-2 gap-x-6 gap-y-5">
@@ -413,7 +413,7 @@ export default function NewSpecialistPage() {
 
                 <div className="col-span-2">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-[#838A8D] text-sm">
+                    <div className="text-muted text-sm">
                       Дополнительное образование
                     </div>
                     <button
@@ -423,7 +423,7 @@ export default function NewSpecialistPage() {
                           "",
                         ])
                       }
-                      className="text-[#F5653E] text-sm font-medium flex items-center gap-1 hover:text-[#E5542D] transition-colors"
+                      className="text-primary text-sm font-medium flex items-center gap-1 hover:text-primary-dark transition-colors"
                     >
                       <svg
                         width="14"
@@ -443,7 +443,7 @@ export default function NewSpecialistPage() {
                   </div>
                   <div className="space-y-2">
                     {d.additionalEducation.length === 0 ? (
-                      <div className="text-[#C4C8CA] text-sm px-4 py-3 rounded-2xl border border-dashed border-[#E5E6E8] text-center">
+                      <div className="text-dim text-sm px-4 py-3 rounded-2xl border border-dashed border-border text-center">
                         Нажмите «Добавить» для добавления записи
                       </div>
                     ) : (
@@ -470,7 +470,7 @@ export default function NewSpecialistPage() {
                                 d.additionalEducation.filter((_, j) => j !== i),
                               )
                             }
-                            className="w-9 h-9 flex items-center justify-center text-[#C4C8CA] hover:text-[#F5653E] transition-colors shrink-0"
+                            className="w-9 h-9 flex items-center justify-center text-dim hover:text-primary transition-colors shrink-0"
                           >
                             <svg
                               width="16"
@@ -496,7 +496,7 @@ export default function NewSpecialistPage() {
 
             {/* 4. Сертификаты и документы */}
             <div className="p-8">
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+              <h3 className="text-foreground font-semibold text-lg mb-6">
                 Сертификаты и документы
               </h3>
 
@@ -513,7 +513,7 @@ export default function NewSpecialistPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="text-[#838A8D] text-sm">Сертификаты</div>
+                  <div className="text-muted text-sm">Сертификаты</div>
                   <>
                     <input
                       ref={certRef}
@@ -524,7 +524,7 @@ export default function NewSpecialistPage() {
                     />
                     <button
                       onClick={() => certRef.current?.click()}
-                      className="text-[#F5653E] text-sm font-medium flex items-center gap-1 hover:text-[#E5542D] transition-colors"
+                      className="text-primary text-sm font-medium flex items-center gap-1 hover:text-primary-dark transition-colors"
                     >
                       <svg
                         width="14"
@@ -544,7 +544,7 @@ export default function NewSpecialistPage() {
                   </>
                 </div>
                 {certs.length === 0 ? (
-                  <div className="text-[#C4C8CA] text-sm">
+                  <div className="text-dim text-sm">
                     Нажмите «Добавить» для загрузки сертификата
                   </div>
                 ) : (
@@ -552,7 +552,7 @@ export default function NewSpecialistPage() {
                     {certs.map((cert, i) => (
                       <div
                         key={i}
-                        className="relative w-24 h-24 rounded-2xl overflow-hidden border border-[#E5E6E8] bg-[#F8F9FA]"
+                        className="relative w-24 h-24 rounded-2xl overflow-hidden border border-border bg-surface"
                       >
                         <Image
                           src={cert}
@@ -565,7 +565,7 @@ export default function NewSpecialistPage() {
                           onClick={() =>
                             setCerts((prev) => prev.filter((_, j) => j !== i))
                           }
-                          className="absolute top-0 right-0 w-1/2 aspect-square bg-[#F5653E] flex items-center justify-center"
+                          className="absolute top-0 right-0 w-1/2 aspect-square bg-primary flex items-center justify-center"
                         >
                           <svg
                             className="w-1/2 h-1/2"

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 
@@ -84,7 +84,7 @@ export default function NewProcedurePage() {
 
   return (
     <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
-      <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8">
+      <h1 className="text-[40px] font-semibold text-foreground mb-8">
         Мой профиль
       </h1>
 
@@ -100,13 +100,13 @@ export default function NewProcedurePage() {
           <div className="flex items-center gap-4 mb-6">
             <button
               onClick={() => router.back()}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
               aria-label="Назад"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M15 18L9 12L15 6"
-                  stroke="#191A1B"
+                  stroke={colors.foreground}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -114,7 +114,7 @@ export default function NewProcedurePage() {
               </svg>
             </button>
 
-            <h2 className="text-[32px] font-semibold text-[#191A1B] flex-1">
+            <h2 className="text-[32px] font-semibold text-foreground flex-1">
               Добавить процедуру
             </h2>
 
@@ -123,8 +123,8 @@ export default function NewProcedurePage() {
               disabled={isSubmitting}
               className={`px-6 py-3 rounded-full font-medium transition-colors ${
                 isSubmitting
-                  ? "bg-[#C4C8CA] text-white cursor-not-allowed"
-                  : "bg-[#F5653E] text-white hover:bg-[#E5542D]"
+                  ? "bg-dim text-white cursor-not-allowed"
+                  : "bg-primary text-white hover:bg-primary-dark"
               }`}
             >
               {isSubmitting ? "Сохранение..." : "Сохранить"}
@@ -132,20 +132,20 @@ export default function NewProcedurePage() {
           </div>
 
           {/* Form */}
-          <div className="bg-white rounded-3xl p-8 border border-[#E5E6E8] space-y-8">
+          <div className="bg-white rounded-3xl p-8 border border-border space-y-8">
             {/* Личные данные */}
             <div>
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-4">
+              <h3 className="text-foreground font-semibold text-lg mb-4">
                 Личные данные
               </h3>
 
               {/* Фото процедуры */}
               <div className="mb-4">
-                <label className="block text-[#191A1B] text-sm font-medium mb-2">
+                <label className="block text-foreground text-sm font-medium mb-2">
                   Фото процедуры
                 </label>
                 <div className="flex items-center gap-4">
-                  <div className="w-28 h-28 rounded-full overflow-hidden bg-[#FFF8F5] border border-[#E5E6E8] flex items-center justify-center flex-shrink-0">
+                  <div className="w-28 h-28 rounded-full overflow-hidden bg-primary-tint border border-border flex items-center justify-center flex-shrink-0">
                     {photo ? (
                       <Image
                         src={photo}
@@ -161,7 +161,7 @@ export default function NewProcedurePage() {
                         viewBox="0 0 48 48"
                         fill="none"
                       >
-                        <circle cx="24" cy="24" r="24" fill="#E5E6E8" />
+                        <circle cx="24" cy="24" r="24" fill={colors.border} />
                       </svg>
                     )}
                   </div>
@@ -174,7 +174,7 @@ export default function NewProcedurePage() {
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors flex items-center gap-2"
+                    className="px-4 py-2 rounded-full border border-border text-secondary text-sm hover:bg-surface transition-colors flex items-center gap-2"
                   >
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path
@@ -192,8 +192,8 @@ export default function NewProcedurePage() {
               <div className="space-y-4">
                 {/* Название процедуры */}
                 <div>
-                  <label className="block text-[#191A1B] text-sm font-medium mb-2">
-                    Название процедуры <span className="text-[#F5653E]">*</span>
+                  <label className="block text-foreground text-sm font-medium mb-2">
+                    Название процедуры <span className="text-primary">*</span>
                   </label>
                   <input
                     type="text"
@@ -203,12 +203,12 @@ export default function NewProcedurePage() {
                       if (e.target.value.trim()) setNameError(false);
                     }}
                     placeholder="Введите название"
-                    className={`w-full px-4 py-3 rounded-2xl border text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors ${
-                      nameError ? "border-[#F5653E]" : "border-[#E5E6E8]"
+                    className={`w-full px-4 py-3 rounded-2xl border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors ${
+                      nameError ? "border-primary" : "border-border"
                     }`}
                   />
                   {nameError && (
-                    <p className="text-[#F5653E] text-xs mt-1">
+                    <p className="text-primary text-xs mt-1">
                       Обязательное поле
                     </p>
                   )}
@@ -230,7 +230,7 @@ export default function NewProcedurePage() {
 
                 {/* Стоимость */}
                 <div>
-                  <label className="block text-[#191A1B] text-sm font-medium mb-2">
+                  <label className="block text-foreground text-sm font-medium mb-2">
                     Стоимость
                   </label>
                   <input
@@ -238,13 +238,13 @@ export default function NewProcedurePage() {
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     placeholder="0 сом"
-                    className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
+                    className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
 
                 {/* Клиника */}
                 <div>
-                  <label className="block text-[#191A1B] text-sm font-medium mb-2">
+                  <label className="block text-foreground text-sm font-medium mb-2">
                     Клиника, проводящая процедуру
                   </label>
                   <input
@@ -252,13 +252,13 @@ export default function NewProcedurePage() {
                     value={clinic}
                     onChange={(e) => setClinic(e.target.value)}
                     placeholder="Введите название клиники"
-                    className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
+                    className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
 
                 {/* Адрес */}
                 <div>
-                  <label className="block text-[#191A1B] text-sm font-medium mb-2">
+                  <label className="block text-foreground text-sm font-medium mb-2">
                     Адрес клиники, проводящей процедуру
                   </label>
                   <input
@@ -266,7 +266,7 @@ export default function NewProcedurePage() {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Введите адрес клиники"
-                    className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors"
+                    className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
               </div>
@@ -274,10 +274,10 @@ export default function NewProcedurePage() {
 
             {/* График проведения процедуры */}
             <div>
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-2">
+              <h3 className="text-foreground font-semibold text-lg mb-2">
                 График проведения процедуры
               </h3>
-              <p className="text-[#838A8D] text-sm mb-4 leading-relaxed">
+              <p className="text-muted text-sm mb-4 leading-relaxed">
                 Укажите время проведения процедуры (с какого времени до какого),
                 оставьте поля пустыми, если в какой-то день процедура не
                 проводится.
@@ -286,7 +286,7 @@ export default function NewProcedurePage() {
               <div className="space-y-3">
                 {schedule.map((item, index) => (
                   <div key={item.day} className="flex items-center gap-4">
-                    <span className="text-[#191A1B] text-sm font-medium w-8">
+                    <span className="text-foreground text-sm font-medium w-8">
                       {item.day}
                     </span>
                     <input
@@ -295,23 +295,23 @@ export default function NewProcedurePage() {
                       onChange={(e) =>
                         updateSchedule(index, "from", e.target.value)
                       }
-                      className="w-28 px-3 py-2 rounded-xl border border-[#E5E6E8] text-[#C4C8CA] text-sm focus:outline-none focus:border-[#F5653E] transition-colors"
+                      className="w-28 px-3 py-2 rounded-xl border border-border text-dim text-sm focus:outline-none focus:border-primary transition-colors"
                     />
-                    <span className="text-[#838A8D]">—</span>
+                    <span className="text-muted">—</span>
                     <input
                       type="time"
                       value={item.to}
                       onChange={(e) =>
                         updateSchedule(index, "to", e.target.value)
                       }
-                      className="w-28 px-3 py-2 rounded-xl border border-[#E5E6E8] text-[#C4C8CA] text-sm focus:outline-none focus:border-[#F5653E] transition-colors"
+                      className="w-28 px-3 py-2 rounded-xl border border-border text-dim text-sm focus:outline-none focus:border-primary transition-colors"
                     />
                   </div>
                 ))}
 
                 {/* Обеденный перерыв */}
                 <div className="flex items-center gap-4 pt-1">
-                  <span className="text-[#191A1B] text-sm font-medium whitespace-nowrap">
+                  <span className="text-foreground text-sm font-medium whitespace-nowrap">
                     Обеденный перерыв
                   </span>
                   <input
@@ -320,16 +320,16 @@ export default function NewProcedurePage() {
                     onChange={(e) =>
                       setLunchBreak({ ...lunchBreak, from: e.target.value })
                     }
-                    className="w-28 px-3 py-2 rounded-xl border border-[#E5E6E8] text-[#C4C8CA] text-sm focus:outline-none focus:border-[#F5653E] transition-colors"
+                    className="w-28 px-3 py-2 rounded-xl border border-border text-dim text-sm focus:outline-none focus:border-primary transition-colors"
                   />
-                  <span className="text-[#838A8D]">—</span>
+                  <span className="text-muted">—</span>
                   <input
                     type="time"
                     value={lunchBreak.to}
                     onChange={(e) =>
                       setLunchBreak({ ...lunchBreak, to: e.target.value })
                     }
-                    className="w-28 px-3 py-2 rounded-xl border border-[#E5E6E8] text-[#C4C8CA] text-sm focus:outline-none focus:border-[#F5653E] transition-colors"
+                    className="w-28 px-3 py-2 rounded-xl border border-border text-dim text-sm focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
               </div>

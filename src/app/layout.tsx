@@ -1,9 +1,9 @@
-import { Toaster } from "react-hot-toast";
+﻿import { Toaster } from "react-hot-toast";
 
 import type { Metadata } from "next";
 import { Onest } from "next/font/google";
 
-import { CityConfirmBanner } from "@/features/city-confirm/ui";
+import { CityConfirmBanner } from "@/features/city-confirm";
 
 import "./globals.css";
 import { Providers } from "./providers";
@@ -33,7 +33,7 @@ export default function RootLayout({
       <head suppressHydrationWarning />
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col bg-[#F2F3F5] lg:bg-white"
+        className="min-h-full flex flex-col bg-background lg:bg-white"
       >
         <Providers>{children}</Providers>
         <CityConfirmBanner />

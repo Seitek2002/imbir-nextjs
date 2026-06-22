@@ -1,4 +1,4 @@
-function FieldRow() {
+﻿function FieldRow() {
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-5">
       {[0, 1, 2, 3].map((i) => (
@@ -19,7 +19,7 @@ export default function Loading() {
       <div className="flex gap-6">
         {/* Sidebar skeleton */}
         <aside className="w-72 shrink-0 hidden lg:block">
-          <div className="bg-white rounded-3xl p-5 flex items-center gap-4 mb-4 border border-[#E5E6E8]">
+          <div className="bg-white rounded-3xl p-5 flex items-center gap-4 mb-4 border border-border">
             <div className="w-14 h-14 rounded-full skeleton shrink-0" />
             <div className="flex-1">
               <div className="h-5 w-20 skeleton rounded mb-2" />
@@ -51,7 +51,7 @@ export default function Loading() {
           </div>
 
           {/* Card */}
-          <div className="bg-white rounded-3xl border border-[#E5E6E8] divide-y divide-[#E5E6E8]">
+          <div className="bg-white rounded-3xl border border-border divide-y divide-border">
             {/* Section 1: Основная информация */}
             <div className="p-8">
               <div className="h-6 w-48 skeleton rounded mb-6" />

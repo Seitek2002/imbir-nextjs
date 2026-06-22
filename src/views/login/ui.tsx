@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -73,7 +73,7 @@ export const LoginPage = () => {
   );
 
   return (
-    <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
+    <main className="min-h-screen bg-background flex flex-col">
       <Header backTo={ROUTES.HOME}>{AuthTabs}</Header>
 
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
@@ -97,10 +97,10 @@ export const LoginPage = () => {
             <div className="hidden md:block">{AuthTabs}</div>
 
             <div className="mt-8 mb-6 md:mt-12">
-              <h2 className="text-2xl font-semibold text-[#191A1B] mb-2">
+              <h2 className="text-2xl font-semibold text-foreground mb-2">
                 С возвращением!
               </h2>
-              <p className="text-[#838A8D] text-sm md:text-base">
+              <p className="text-muted text-sm md:text-base">
                 Заполните данные, чтобы войти в свой аккаунт
               </p>
             </div>
@@ -138,7 +138,7 @@ export const LoginPage = () => {
                   />
                   <Link
                     href={ROUTES.FORGOT_PASSWORD}
-                    className="text-sm font-medium text-[#F5653E] hover:underline"
+                    className="text-sm font-medium text-primary hover:underline"
                   >
                     Забыли пароль?
                   </Link>

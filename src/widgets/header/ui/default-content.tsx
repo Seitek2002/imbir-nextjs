@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { FC, Suspense, useState } from "react";
 
 import Link from "next/link";
@@ -54,7 +54,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             </Button>
           </div>
 
-          <nav className="hidden md:flex text-[#191A1B] text-xs lg:text-base gap-6 items-center">
+          <nav className="hidden md:flex text-foreground text-xs lg:text-base gap-6 items-center">
             <Link href={ROUTES.CLINICS}>Клиники</Link>
             <Link href={ROUTES.SPECIALISTS}>Специалисты</Link>
             <Link href={ROUTES.SERVICES}>Услуги</Link>
@@ -103,10 +103,10 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
           <div className="w-full flex items-center justify-center mt-4 md:hidden">
             <Link
               href={ROUTES.SEARCH()}
-              className="flex items-center w-full gap-2 border border-[#E5E6E8] px-3 py-2 rounded-full transition-transform active:scale-95"
+              className="flex items-center w-full gap-2 border border-border px-3 py-2 rounded-full transition-transform active:scale-95"
             >
               <SearchIcon className="size-5" />
-              <span className="text-[#686F72] text-base">Поиск клиники</span>
+              <span className="text-secondary text-base">Поиск клиники</span>
             </Link>
           </div>
         )}

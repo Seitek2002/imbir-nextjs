@@ -1,4 +1,4 @@
-import { FC } from "react";
+﻿import { FC } from "react";
 
 import Image from "next/image";
 
@@ -21,17 +21,17 @@ export const ReviewCard: FC<ReviewProps> = ({
   avatarUrl,
 }) => {
   return (
-    <div className="bg-white border border-[#E3E4E5] rounded-[20px] flex flex-col">
+    <div className="bg-white border border-border-soft rounded-[20px] flex flex-col">
       {/* Верхняя часть: Текст отзыва */}
-      <div className="p-5 border-b border-[#E3E4E5]">
-        <p className="text-[#686F72] text-[15px] leading-relaxed">{text}</p>
+      <div className="p-5 border-b border-border-soft">
+        <p className="text-secondary text-[15px] leading-relaxed">{text}</p>
       </div>
 
       {/* Нижняя часть: Автор и Оценка */}
       <div className="p-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* Аватарка */}
-          <div className="size-10.5 rounded-full bg-[#E3E4E5] shrink-0 overflow-hidden relative">
+          <div className="size-10.5 rounded-full bg-border-soft shrink-0 overflow-hidden relative">
             {avatarUrl && (
               <Image
                 src={avatarUrl}
@@ -43,10 +43,10 @@ export const ReviewCard: FC<ReviewProps> = ({
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[#191A1B] font-medium text-base">
+            <span className="text-foreground font-medium text-base">
               {author}
             </span>
-            <span className="text-[#838A8D] text-sm mt-0.5">{date}</span>
+            <span className="text-muted text-sm mt-0.5">{date}</span>
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -54,7 +54,7 @@ export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
   if (filteredReviews.length === 0) {
     return (
       <div className="bg-white rounded-3xl p-10 text-center">
-        <p className="text-[#838A8D] text-lg">Отзывов пока нет</p>
+        <p className="text-muted text-lg">Отзывов пока нет</p>
       </div>
     );
   }
@@ -76,7 +76,7 @@ export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
-        icon={<RemoveIcon className="w-7 h-7 [&_path]:stroke-[#F5653E]" />}
+        icon={<RemoveIcon className="w-7 h-7 [&_path]:stroke-primary" />}
         title="Удалить отзыв?"
         description="Отзыв будет удалён без возможности восстановления"
         confirmLabel="Удалить"

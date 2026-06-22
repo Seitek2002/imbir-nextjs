@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC } from "react";
 
@@ -24,7 +24,7 @@ export const StarRating: FC<Props> = ({
       {Array.from({ length: maxRating }).map((_, index) => (
         <StarBoldIcon
           key={index}
-          className="text-[#F5653E]"
+          className="text-primary"
           style={{ width: size, height: size }}
         />
       ))}

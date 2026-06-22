@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useCallback, useState } from "react";
 
@@ -64,8 +64,8 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
   const state = isClosing ? "closed" : "open";
 
   const inp =
-    "w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors";
-  const lbl = "block text-[#838A8D] text-sm mb-1.5";
+    "w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors";
+  const lbl = "block text-muted text-sm mb-1.5";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -78,18 +78,18 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
         className="modal-panel relative bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md overflow-hidden"
         data-state={state}
       >
-        <div className="flex items-center justify-between p-5 border-b border-[#E5E6E8]">
-          <h2 className="text-lg font-semibold text-[#191A1B]">
+        <div className="flex items-center justify-between p-5 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">
             Добавить услугу
           </h2>
           <button
             onClick={handleClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M13.5 4.5L4.5 13.5M4.5 4.5L13.5 13.5"
-                stroke="#686F72"
+                stroke={colors.secondary}
                 strokeWidth="1.5"
                 strokeLinecap="round"
               />
@@ -142,8 +142,8 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
             disabled={!name.trim() || isLoading}
             className={`w-full py-3.5 rounded-full font-medium transition-colors ${
               name.trim() && !isLoading
-                ? "bg-[#F5653E] text-white hover:bg-[#E5542D] active:scale-95"
-                : "bg-[#E5E6E8] text-[#C4C8CA] cursor-not-allowed"
+                ? "bg-primary text-white hover:bg-primary-dark active:scale-95"
+                : "bg-border text-dim cursor-not-allowed"
             }`}
           >
             {isLoading ? "Сохранение..." : "Добавить"}
@@ -187,7 +187,7 @@ export const DoctorServicesPage: FC = () => {
         headerRight={
           <button
             onClick={() => setModalOpen(true)}
-            className="w-10 h-10 rounded-full bg-[#F5653E] flex items-center justify-center hover:bg-[#E5542D] transition-colors"
+            className="w-10 h-10 rounded-full bg-primary flex items-center justify-center hover:bg-primary-dark transition-colors"
             aria-label="Добавить услугу"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -202,10 +202,10 @@ export const DoctorServicesPage: FC = () => {
         }
       >
         <div className="hidden lg:flex items-center justify-between mb-6">
-          <h2 className="text-[28px] font-semibold text-[#191A1B]">Услуги</h2>
+          <h2 className="text-[28px] font-semibold text-foreground">Услуги</h2>
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path
@@ -219,41 +219,39 @@ export const DoctorServicesPage: FC = () => {
           </button>
         </div>
 
-        <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden">
-          <div className="grid grid-cols-[1fr_1fr_auto] px-5 py-3 border-b border-[#E5E6E8]">
-            <span className="text-[#838A8D] text-sm font-medium">
+        <div className="bg-white rounded-3xl border border-border overflow-hidden">
+          <div className="grid grid-cols-[1fr_1fr_auto] px-5 py-3 border-b border-border">
+            <span className="text-muted text-sm font-medium">
               Название услуги
             </span>
-            <span className="text-[#838A8D] text-sm font-medium">
-              Стоимость
-            </span>
+            <span className="text-muted text-sm font-medium">Стоимость</span>
             <span className="w-8" />
           </div>
 
           {isLoading ? (
-            <div className="px-5 py-12 text-center text-[#838A8D] text-sm">
+            <div className="px-5 py-12 text-center text-muted text-sm">
               Загрузка...
             </div>
           ) : services.length === 0 ? (
-            <div className="px-5 py-12 text-center text-[#838A8D] text-sm">
+            <div className="px-5 py-12 text-center text-muted text-sm">
               Услуг пока нет
             </div>
           ) : (
             services.map((s, i) => (
               <div
                 key={s.id}
-                className={`grid grid-cols-[1fr_1fr_auto] px-5 py-4 items-center ${i !== services.length - 1 ? "border-b border-[#E5E6E8]" : ""}`}
+                className={`grid grid-cols-[1fr_1fr_auto] px-5 py-4 items-center ${i !== services.length - 1 ? "border-b border-border" : ""}`}
               >
-                <span className="text-[#191A1B] text-sm font-medium pr-3">
+                <span className="text-foreground text-sm font-medium pr-3">
                   {s.name}
                 </span>
-                <span className="text-[#838A8D] text-sm pr-3">
+                <span className="text-muted text-sm pr-3">
                   {s.price != null ? `${s.price} сом` : "—"}
                 </span>
                 <button
                   onClick={() => deleteMutation.mutate(s.id)}
                   disabled={deleteMutation.isPending}
-                  className="w-8 h-8 flex items-center justify-center text-[#C4C8CA] hover:text-red-500 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center text-dim hover:text-red-500 transition-colors"
                   aria-label="Удалить"
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

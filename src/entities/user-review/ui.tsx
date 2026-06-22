@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC } from "react";
 
@@ -33,23 +33,23 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
     switch (review.type) {
       case "clinic":
         return (
-          <div className="flex items-center gap-1 text-[#838A8D] text-sm mt-0.5">
-            <GeoIcon className="w-4 h-4 [&_path]:stroke-[#838A8D] shrink-0" />
+          <div className="flex items-center gap-1 text-muted text-sm mt-0.5">
+            <GeoIcon className="w-4 h-4 [&_path]:stroke-muted shrink-0" />
             <span className="truncate">{review.clinicAddress}</span>
           </div>
         );
       case "doctor":
         return (
-          <p className="text-[#838A8D] text-sm mt-0.5">
+          <p className="text-muted text-sm mt-0.5">
             {review.doctorSpecialty}{" "}
-            <span className="text-[#F5653E]">• {review.doctorClinic}</span>
+            <span className="text-primary">• {review.doctorClinic}</span>
           </p>
         );
       case "service":
         return (
-          <p className="text-[#838A8D] text-sm mt-0.5">
+          <p className="text-muted text-sm mt-0.5">
             {review.serviceCategory}{" "}
-            <span className="text-[#F5653E]">• {review.serviceClinic}</span>
+            <span className="text-primary">• {review.serviceClinic}</span>
           </p>
         );
       default:
@@ -58,7 +58,7 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-[#E5E6E8] flex flex-col gap-5">
+    <div className="bg-white rounded-3xl p-6 border border-border flex flex-col gap-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           {review.image ? (
@@ -72,12 +72,12 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
               />
             </div>
           ) : (
-            <div className="w-12 h-12 rounded-full bg-[#F8F9FA] flex items-center justify-center text-[#838A8D] text-lg font-semibold shrink-0">
+            <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center text-muted text-lg font-semibold shrink-0">
               {getTitle()?.charAt(0) || "?"}
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <h3 className="text-[#191A1B] font-semibold text-base leading-tight">
+            <h3 className="text-foreground font-semibold text-base leading-tight">
               {getTitle()}
             </h3>
             {getSubtitle()}
@@ -88,19 +88,19 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
           {onEdit && (
             <button
               onClick={() => onEdit(review.id)}
-              className="w-10 h-10 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+              className="w-10 h-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-surface transition-colors"
               aria-label="Редактировать"
             >
-              <EditIcon className="w-5 h-5 text-[#686F72]" />
+              <EditIcon className="w-5 h-5 text-secondary" />
             </button>
           )}
           {onDelete && (
             <button
               onClick={() => onDelete(review.id)}
-              className="w-10 h-10 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center hover:bg-[#FFE5E0] hover:border-[#FFE5E0] transition-colors"
+              className="w-10 h-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-[#FFE5E0] hover:border-[#FFE5E0] transition-colors"
               aria-label="Удалить"
             >
-              <RemoveIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
+              <RemoveIcon className="w-5 h-5 [&_path]:stroke-primary" />
             </button>
           )}
         </div>
@@ -110,11 +110,11 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
         <StarRating rating={review.rating} size={20} />
       </div>
 
-      <p className="text-[#686F72] text-base leading-relaxed">
+      <p className="text-secondary text-base leading-relaxed">
         {review.comment}
       </p>
 
-      <p className="text-[#838A8D] text-sm">{review.date}</p>
+      <p className="text-muted text-sm">{review.date}</p>
     </div>
   );
 };

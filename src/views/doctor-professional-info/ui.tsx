@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useState } from "react";
 
@@ -67,7 +67,7 @@ export const DoctorProfessionalInfoPage: FC = () => {
   if (isLoading) {
     return (
       <DoctorPageLayout title="Профессиональные данные">
-        <div className="flex items-center justify-center py-20 text-[#838A8D]">
+        <div className="flex items-center justify-center py-20 text-muted">
           Загрузка...
         </div>
       </DoctorPageLayout>
@@ -81,11 +81,11 @@ export const DoctorProfessionalInfoPage: FC = () => {
       onEditToggle={isEditing ? handleSave : () => setIsEditing(true)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
-        <h2 className="text-[28px] font-semibold text-[#191A1B]">{title}</h2>
+        <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
         <button
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-[#F5653E] text-white hover:bg-[#E5542D]" : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"}`}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-primary text-white hover:bg-primary-dark" : "border border-border text-secondary hover:bg-surface"}`}
         >
           {isSaving
             ? "Сохранение..."
@@ -95,7 +95,7 @@ export const DoctorProfessionalInfoPage: FC = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl border border-[#E5E6E8] p-5 lg:p-8">
+      <div className="bg-white rounded-3xl border border-border p-5 lg:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div>
             {isEditing ? (

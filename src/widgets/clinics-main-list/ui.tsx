@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, Suspense } from "react";
 
@@ -61,7 +61,7 @@ const ClinicsListContent = () => {
     <div className="flex flex-col gap-3 lg:mt-10">
       <div className="flex flex-col gap-2 md:hidden">
         {filteredClinics.length === 0 && (
-          <p className="text-center text-[#838A8D] py-10">Клиники не найдены</p>
+          <p className="text-center text-muted py-10">Клиники не найдены</p>
         )}
         {filteredClinics.map((clinic) => (
           <ClinicCard
@@ -81,7 +81,7 @@ const ClinicsListContent = () => {
       {/* ДОБАВИЛ items-stretch ДЛЯ ВЫРАВНИВАНИЯ */}
       <div className="hidden md:grid md:grid-cols-4 gap-3 items-stretch">
         {filteredClinics.length === 0 && (
-          <p className="col-span-4 text-center text-[#838A8D] py-20 text-lg">
+          <p className="col-span-4 text-center text-muted py-20 text-lg">
             По вашим параметрам клиники не найдены
           </p>
         )}
@@ -133,7 +133,7 @@ export const ClinicsMainList: FC = () => {
       </div>
 
       <div className="flex items-center justify-between lg:hidden">
-        <h2 className="text-[18px] font-medium text-[#191A1B]">Клиники</h2>
+        <h2 className="text-[18px] font-medium text-foreground">Клиники</h2>
         <Link href="/clinics">
           <Button
             variant="text"

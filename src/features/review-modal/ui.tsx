@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useCallback, useState } from "react";
 
@@ -61,7 +61,7 @@ export const ReviewModal: FC<Props> = ({
   const body = (
     <div className="p-5 space-y-4">
       {/* Doctor Info */}
-      <div className="flex items-center gap-3 p-4 bg-[#F8F9FA] rounded-2xl">
+      <div className="flex items-center gap-3 p-4 bg-surface rounded-2xl">
         <div className="w-14 h-14 rounded-full overflow-hidden bg-white shrink-0">
           {doctorImage ? (
             <Image
@@ -72,20 +72,20 @@ export const ReviewModal: FC<Props> = ({
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[#C4C8CA] text-lg font-semibold">
+            <div className="w-full h-full flex items-center justify-center text-dim text-lg font-semibold">
               {doctorName.charAt(0)}
             </div>
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-[#191A1B] font-semibold text-base leading-tight">
+          <h3 className="text-foreground font-semibold text-base leading-tight">
             {doctorName}
           </h3>
           {(doctorSpecialty || doctorClinic) && (
-            <p className="text-[#838A8D] text-sm mt-0.5">
+            <p className="text-muted text-sm mt-0.5">
               {doctorSpecialty}{" "}
               {doctorClinic && (
-                <span className="text-[#F5653E]">• {doctorClinic}</span>
+                <span className="text-primary">• {doctorClinic}</span>
               )}
             </p>
           )}
@@ -94,10 +94,10 @@ export const ReviewModal: FC<Props> = ({
 
       {/* Rating */}
       <div>
-        <label className="block text-[#191A1B] font-medium text-base mb-3">
+        <label className="block text-foreground font-medium text-base mb-3">
           Оцените специалиста
         </label>
-        <div className="flex items-center gap-2 p-4 bg-[#F8F9FA] rounded-2xl justify-center">
+        <div className="flex items-center gap-2 p-4 bg-surface rounded-2xl justify-center">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
@@ -105,9 +105,9 @@ export const ReviewModal: FC<Props> = ({
               className="transition-transform hover:scale-110"
             >
               {star <= rating ? (
-                <StarBoldIcon className="w-10 h-10 text-[#F5653E]" />
+                <StarBoldIcon className="w-10 h-10 text-primary" />
               ) : (
-                <StarOutlineIcon className="w-10 h-10 text-[#E5E6E8]" />
+                <StarOutlineIcon className="w-10 h-10 text-border" />
               )}
             </button>
           ))}
@@ -116,7 +116,7 @@ export const ReviewModal: FC<Props> = ({
 
       {/* Comment */}
       <div>
-        <label className="block text-[#191A1B] font-medium text-base mb-3">
+        <label className="block text-foreground font-medium text-base mb-3">
           Поделитесь своим мнением о специалисте
         </label>
         <textarea
@@ -124,7 +124,7 @@ export const ReviewModal: FC<Props> = ({
           onChange={(e) => setComment(e.target.value)}
           placeholder="Введите текст"
           rows={5}
-          className="w-full p-4 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] resize-none transition-colors"
+          className="w-full p-4 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary resize-none transition-colors"
         />
       </div>
 
@@ -153,15 +153,15 @@ export const ReviewModal: FC<Props> = ({
         data-state={state}
       >
         <div className="flex items-center justify-between px-5 pt-5 pb-0">
-          <h2 className="text-lg font-semibold text-[#191A1B]">{title}</h2>
+          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
           <button
             onClick={handleClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M13.5 4.5L4.5 13.5M4.5 4.5L13.5 13.5"
-                stroke="#686F72"
+                stroke={colors.secondary}
                 strokeWidth="1.5"
                 strokeLinecap="round"
               />
@@ -177,15 +177,15 @@ export const ReviewModal: FC<Props> = ({
         data-state={state}
       >
         <div className="flex items-center justify-between px-6 pt-6 pb-0">
-          <h2 className="text-xl font-semibold text-[#191A1B]">{title}</h2>
+          <h2 className="text-xl font-semibold text-foreground">{title}</h2>
           <button
             onClick={handleClose}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path
                 d="M15 5L5 15M5 5L15 15"
-                stroke="#686F72"
+                stroke={colors.secondary}
                 strokeWidth="1.5"
                 strokeLinecap="round"
               />

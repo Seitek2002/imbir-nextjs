@@ -1,11 +1,11 @@
-type Props = {
+﻿type Props = {
   count?: number;
   variant?: "vertical" | "horizontal";
 };
 
 const ClinicCardSkeletonVertical = () => (
   // Добавил p-2, как в реальной карточке
-  <div className="bg-white rounded-3xl border border-[#E3E4E5] w-full h-full flex flex-col p-2">
+  <div className="bg-white rounded-3xl border border-border-soft w-full h-full flex flex-col p-2">
     {/* Картинка: h-55 и rounded-2xl как в оригинале */}
     <div className="w-full h-55 rounded-2xl skeleton" />
 
@@ -29,7 +29,7 @@ const ClinicCardSkeletonVertical = () => (
 );
 
 const ClinicCardSkeletonHorizontal = () => (
-  <div className="bg-white rounded-2xl border border-[#E3E4E5] p-2.5 flex items-stretch gap-2.5 w-full">
+  <div className="bg-white rounded-2xl border border-border-soft p-2.5 flex items-stretch gap-2.5 w-full">
     <div className="w-20 h-20 rounded-xl skeleton shrink-0" />
     <div className="flex-1 py-1 space-y-2">
       <div className="h-4 w-3/4 skeleton rounded-md" />

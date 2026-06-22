@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -24,9 +24,9 @@ type D = {
 };
 
 const Field: FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className="py-3 border-b border-[#F2F3F5] last:border-0">
-    <p className="text-[#838A8D] text-xs mb-1">{label}</p>
-    <p className="text-[#191A1B] text-base">{value || "—"}</p>
+  <div className="py-3 border-b border-background last:border-0">
+    <p className="text-muted text-xs mb-1">{label}</p>
+    <p className="text-foreground text-base">{value || "—"}</p>
   </div>
 );
 
@@ -115,19 +115,19 @@ export const ProfileMyDataPage: FC = () => {
   const title = isEditing ? "Редактировать" : "Мои данные";
 
   const inp =
-    "w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors bg-white text-base";
-  const lbl = "block text-[#838A8D] text-xs mb-1";
+    "w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors bg-white text-base";
+  const lbl = "block text-muted text-xs mb-1";
 
   const mobileRight = (
     <button
       onClick={isEditing ? handleSave : () => setIsEditing(true)}
       disabled={isSaving}
-      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
     >
       {isEditing ? (
-        <CheckIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
+        <CheckIcon className="w-5 h-5 [&_path]:stroke-primary" />
       ) : (
-        <EditIcon className="w-5 h-5 [&_path]:stroke-[#838A8D]" />
+        <EditIcon className="w-5 h-5 [&_path]:stroke-muted" />
       )}
     </button>
   );
@@ -137,7 +137,7 @@ export const ProfileMyDataPage: FC = () => {
       <MobilePageHeader title={title} rightElement={mobileRight} />
 
       <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
-        <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden md:block">
+        <h1 className="text-[40px] font-semibold text-foreground mb-8 hidden md:block">
           Мой профиль
         </h1>
 
@@ -148,7 +148,7 @@ export const ProfileMyDataPage: FC = () => {
 
           <main className="flex-1 min-w-0">
             <div className="hidden md:flex items-center justify-between mb-6">
-              <h2 className="text-[28px] font-semibold text-[#191A1B]">
+              <h2 className="text-[28px] font-semibold text-foreground">
                 Мои данные
               </h2>
               <button
@@ -156,8 +156,8 @@ export const ProfileMyDataPage: FC = () => {
                 disabled={isSaving}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${
                   isEditing
-                    ? "bg-[#F5653E] text-white hover:bg-[#E5542D]"
-                    : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"
+                    ? "bg-primary text-white hover:bg-primary-dark"
+                    : "border border-border text-secondary hover:bg-surface"
                 }`}
               >
                 {isSaving
@@ -168,16 +168,16 @@ export const ProfileMyDataPage: FC = () => {
               </button>
             </div>
 
-            <h3 className="text-base font-semibold text-[#191A1B] mb-3">
+            <h3 className="text-base font-semibold text-foreground mb-3">
               Основная информация
             </h3>
 
-            <div className="bg-white rounded-3xl border border-[#E5E6E8] p-5">
+            <div className="bg-white rounded-3xl border border-border p-5">
               {/* Photo */}
-              <div className="py-3 border-b border-[#F2F3F5]">
+              <div className="py-3 border-b border-background">
                 <p className={lbl}>Фото</p>
                 <div className="relative w-20 h-20 mt-2">
-                  <div className="w-20 h-20 rounded-full overflow-hidden bg-[#F8F9FA]">
+                  <div className="w-20 h-20 rounded-full overflow-hidden bg-surface">
                     {d.photo ? (
                       <Image
                         src={d.photo}
@@ -187,7 +187,7 @@ export const ProfileMyDataPage: FC = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[#838A8D] text-2xl font-semibold">
+                      <div className="w-full h-full flex items-center justify-center text-muted text-2xl font-semibold">
                         {d.firstName.charAt(0) || "?"}
                       </div>
                     )}
@@ -203,9 +203,9 @@ export const ProfileMyDataPage: FC = () => {
                       />
                       <button
                         onClick={() => photoRef.current?.click()}
-                        className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center shadow-sm"
+                        className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-white border border-border flex items-center justify-center shadow-sm"
                       >
-                        <EditIcon className="w-3.5 h-3.5 [&_path]:stroke-[#686F72]" />
+                        <EditIcon className="w-3.5 h-3.5 [&_path]:stroke-secondary" />
                       </button>
                     </>
                   )}

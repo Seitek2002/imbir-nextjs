@@ -1,10 +1,10 @@
-type Props = {
+﻿type Props = {
   count?: number;
   variant?: "vertical" | "horizontal";
 };
 
 const DoctorCardSkeletonVertical = () => (
-  <div className="bg-white rounded-3xl border border-[#E3E4E5] p-2 w-full h-full flex flex-col relative">
+  <div className="bg-white rounded-3xl border border-border-soft p-2 w-full h-full flex flex-col relative">
     {/* Блок фото: квадратный, скругление 2xl, как в DoctorPhoto */}
     <div className="relative aspect-square w-full rounded-2xl skeleton" />
 
@@ -31,7 +31,7 @@ const DoctorCardSkeletonVertical = () => (
 );
 
 const DoctorCardSkeletonHorizontal = () => (
-  <div className="bg-white rounded-2xl border border-[#E3E4E5] p-2.5 flex items-stretch gap-2.5 w-full">
+  <div className="bg-white rounded-2xl border border-border-soft p-2.5 flex items-stretch gap-2.5 w-full">
     {/* Фото */}
     <div className="w-30 min-w-30 self-stretch rounded-2xl skeleton" />
 

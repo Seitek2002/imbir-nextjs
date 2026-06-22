@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 
@@ -79,13 +79,13 @@ const UploadIcon = () => (
   <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
     <path
       d="M22 18v3a1 1 0 01-1 1H7a1 1 0 01-1-1v-3"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
       strokeLinecap="round"
     />
     <path
       d="M14 6v12M10 10l4-4 4 4"
-      stroke="#F5653E"
+      stroke={colors.primary}
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -101,10 +101,10 @@ const InfoIcon = () => (
     fill="none"
     className="shrink-0 mt-0.5"
   >
-    <circle cx="9" cy="9" r="8" stroke="#838A8D" strokeWidth="1.5" />
+    <circle cx="9" cy="9" r="8" stroke={colors.muted} strokeWidth="1.5" />
     <path
       d="M9 8v5M9 6h.01"
-      stroke="#838A8D"
+      stroke={colors.muted}
       strokeWidth="1.5"
       strokeLinecap="round"
     />
@@ -119,10 +119,10 @@ const PdfIcon = () => (
       width="26"
       height="30"
       rx="3"
-      stroke="#E3E4E5"
+      stroke={colors.borderSoft}
       strokeWidth="1.5"
     />
-    <text x="4" y="21" fontSize="8" fill="#F5653E" fontWeight="bold">
+    <text x="4" y="21" fontSize="8" fill={colors.primary} fontWeight="bold">
       PDF
     </text>
   </svg>
@@ -136,7 +136,7 @@ const DocIcon = () => (
       width="26"
       height="30"
       rx="3"
-      stroke="#E3E4E5"
+      stroke={colors.borderSoft}
       strokeWidth="1.5"
     />
     <text x="3" y="21" fontSize="7.5" fill="#4B89DC" fontWeight="bold">
@@ -157,7 +157,7 @@ const CertificateThumb = ({
 
   return (
     <div className="relative flex flex-col items-center gap-1">
-      <div className="relative size-16 rounded-lg overflow-hidden border border-[#E5E6E8] bg-[#F2F3F5] flex items-center justify-center">
+      <div className="relative size-16 rounded-lg overflow-hidden border border-border bg-background flex items-center justify-center">
         {isImage ? (
           <img
             src={URL.createObjectURL(file)}
@@ -176,7 +176,7 @@ const CertificateThumb = ({
           ×
         </button>
       </div>
-      <span className="text-[10px] text-[#838A8D] max-w-[64px] truncate">
+      <span className="text-[10px] text-muted max-w-[64px] truncate">
         {file.name}
       </span>
     </div>
@@ -284,13 +284,13 @@ export const DoctorRegistrationForm = ({
             key={i}
             className={cn(
               "flex-1 h-1 rounded-full transition-colors",
-              i < step ? "bg-[#F5653E]" : "bg-[#E3E4E5]",
+              i < step ? "bg-primary" : "bg-border-soft",
             )}
           />
         ))}
       </div>
 
-      <h2 className="text-2xl font-semibold text-[#191A1B] mb-6">
+      <h2 className="text-2xl font-semibold text-foreground mb-6">
         {STEP_TITLES[step]}
       </h2>
 
@@ -305,7 +305,7 @@ export const DoctorRegistrationForm = ({
           />
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#0D0D12]">Пол</span>
+            <span className="text-sm font-medium text-overlay">Пол</span>
             <div className="flex gap-3">
               {(
                 [
@@ -317,9 +317,7 @@ export const DoctorRegistrationForm = ({
                   key={value}
                   className={cn(
                     "flex-1 flex items-center gap-2.5 p-3 rounded-xl border-2 cursor-pointer transition-all",
-                    data.gender === value
-                      ? "border-[#F5653E]"
-                      : "border-[#E5E6E8]",
+                    data.gender === value ? "border-primary" : "border-border",
                   )}
                 >
                   <input
@@ -334,15 +332,15 @@ export const DoctorRegistrationForm = ({
                     className={cn(
                       "size-5 rounded-full border-4 flex items-center justify-center shrink-0 transition-all",
                       data.gender === value
-                        ? "border-[#F5653E]"
-                        : "border-[#E3E4E5]",
+                        ? "border-primary"
+                        : "border-border-soft",
                     )}
                   >
                     {data.gender === value && (
-                      <div className="size-2.5 rounded-full bg-[#F5653E]" />
+                      <div className="size-2.5 rounded-full bg-primary" />
                     )}
                   </div>
-                  <span className="text-sm font-medium text-[#0D0D12]">
+                  <span className="text-sm font-medium text-overlay">
                     {label}
                   </span>
                 </label>
@@ -389,7 +387,7 @@ export const DoctorRegistrationForm = ({
           />
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#0D0D12]">Фото</span>
+            <span className="text-sm font-medium text-overlay">Фото</span>
             <input
               ref={photoInputRef}
               type="file"
@@ -401,7 +399,7 @@ export const DoctorRegistrationForm = ({
               }}
             />
             {data.photo ? (
-              <div className="flex items-center gap-3 p-3 rounded-xl border border-[#E5E6E8]">
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-border">
                 <div className="relative size-14 rounded-lg overflow-hidden shrink-0">
                   <img
                     src={URL.createObjectURL(data.photo)}
@@ -415,12 +413,12 @@ export const DoctorRegistrationForm = ({
                     ×
                   </button>
                 </div>
-                <span className="text-sm text-[#838A8D] truncate flex-1">
+                <span className="text-sm text-muted truncate flex-1">
                   {data.photo.name}
                 </span>
                 <button
                   onClick={() => photoInputRef.current?.click()}
-                  className="px-3 py-1.5 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors shrink-0"
+                  className="px-3 py-1.5 rounded-full border border-border text-secondary text-sm hover:bg-surface transition-colors shrink-0"
                 >
                   Заменить
                 </button>
@@ -428,10 +426,10 @@ export const DoctorRegistrationForm = ({
             ) : (
               <button
                 onClick={() => photoInputRef.current?.click()}
-                className="flex items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-[#E5E6E8] hover:border-[#F5653E]/40 transition-colors w-full"
+                className="flex items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary/40 transition-colors w-full"
               >
                 <UploadIcon />
-                <span className="text-sm font-medium text-[#0D0D12]">
+                <span className="text-sm font-medium text-overlay">
                   Загрузить фото
                 </span>
               </button>
@@ -472,14 +470,14 @@ export const DoctorRegistrationForm = ({
           />
           {inviteClinic ? (
             <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-[#0D0D12]">
+              <span className="text-sm font-medium text-overlay">
                 Место работы (клиника)
               </span>
-              <div className="h-11 px-3 rounded-lg border border-[#E3E4E5] bg-[#F7F8F9] flex items-center justify-between gap-2">
-                <span className="text-sm text-[#191A1B] flex-1 truncate">
+              <div className="h-11 px-3 rounded-lg border border-border-soft bg-[#F7F8F9] flex items-center justify-between gap-2">
+                <span className="text-sm text-foreground flex-1 truncate">
                   {inviteClinic.clinicName}
                   {inviteClinic.branchId && (
-                    <span className="text-[#838A8D] ml-1">
+                    <span className="text-muted ml-1">
                       — {inviteClinic.branchAddress}
                     </span>
                   )}
@@ -489,7 +487,7 @@ export const DoctorRegistrationForm = ({
                   height="14"
                   viewBox="0 0 14 14"
                   fill="none"
-                  className="shrink-0 text-[#838A8D]"
+                  className="shrink-0 text-muted"
                 >
                   <path d="M11 6H3M5 3L2 6l3 3M9 3l3 3-3 3" stroke="none" />
                   <rect
@@ -515,7 +513,7 @@ export const DoctorRegistrationForm = ({
                   />
                 </svg>
               </div>
-              <p className="text-xs text-[#838A8D]">
+              <p className="text-xs text-muted">
                 Заполнено клиникой при приглашении
               </p>
             </div>
@@ -588,7 +586,7 @@ export const DoctorRegistrationForm = ({
       {step === 4 && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-[#0D0D12]">
+            <span className="text-sm font-medium text-overlay">
               Сертификаты
             </span>
             <input
@@ -606,7 +604,7 @@ export const DoctorRegistrationForm = ({
                 e.target.value = "";
               }}
             />
-            <div className="p-4 rounded-xl border-2 border-dashed border-[#E5E6E8] min-h-[112px]">
+            <div className="p-4 rounded-xl border-2 border-dashed border-border min-h-[112px]">
               {data.certificates.length > 0 ? (
                 <div className="flex flex-wrap gap-3">
                   {data.certificates.map((file, i) => (
@@ -623,7 +621,7 @@ export const DoctorRegistrationForm = ({
                   ))}
                   <button
                     onClick={() => certInputRef.current?.click()}
-                    className="size-16 rounded-lg border-2 border-dashed border-[#E5E6E8] flex items-center justify-center text-[#F5653E] text-2xl hover:border-[#F5653E]/40 transition-colors"
+                    className="size-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-primary text-2xl hover:border-primary/40 transition-colors"
                   >
                     +
                   </button>
@@ -634,7 +632,7 @@ export const DoctorRegistrationForm = ({
                   className="w-full min-h-[80px] flex items-center justify-center gap-2"
                 >
                   <UploadIcon />
-                  <span className="text-sm font-medium text-[#0D0D12]">
+                  <span className="text-sm font-medium text-overlay">
                     Загрузить документы
                   </span>
                 </button>
@@ -675,9 +673,9 @@ export const DoctorRegistrationForm = ({
             error={passwordError}
           />
 
-          <div className="flex gap-3 p-4 rounded-xl bg-[#F2F3F5] mt-2">
+          <div className="flex gap-3 p-4 rounded-xl bg-background mt-2">
             <InfoIcon />
-            <p className="text-sm text-[#838A8D]">
+            <p className="text-sm text-muted">
               После регистрации вы получите доступ к личному кабинету врача, где
               сможете управлять расписанием, просматривать записи пациентов и
               вести историю приёмов
@@ -690,7 +688,7 @@ export const DoctorRegistrationForm = ({
       <div className="h-24 md:hidden" />
 
       {/* Mobile: fixed bottom button */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] bg-white border-t border-[#E5E6E8]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] bg-white border-t border-border">
         <Button
           className="w-full justify-center h-14 text-base"
           size="lg"

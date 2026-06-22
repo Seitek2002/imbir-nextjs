@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, Suspense } from "react";
 
@@ -20,10 +20,10 @@ const MobileFiltersModal = dynamic(() =>
 );
 const Footer = dynamic(() => import("@/widgets").then((mod) => mod.Footer));
 const CategoriesGrid = dynamic(() =>
-  import("@/widgets").then((mod) => mod.CategoriesGrid),
+  import("@/features/global-search").then((mod) => mod.CategoriesGrid),
 );
 const RecentSearches = dynamic(() =>
-  import("@/widgets").then((mod) => mod.RecentSearches),
+  import("@/features/global-search").then((mod) => mod.RecentSearches),
 );
 const FilterBar = dynamic(() =>
   import("@/features/filter-bar/ui").then((mod) => mod.FilterBar),
@@ -141,7 +141,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
     filteredServices.length > 0;
 
   return (
-    <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col">
       <Header title="Поиск" backTo={ROUTES.HOME}>
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
@@ -175,19 +175,19 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
         {activeQuery ? (
           isLoading ? (
-            <div className="flex justify-center items-center py-20 text-[#838A8D]">
+            <div className="flex justify-center items-center py-20 text-muted">
               Выполняем поиск...
             </div>
           ) : (
             <>
               {/* === МОБИЛЬНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ === */}
               <div className="md:hidden p-4 flex flex-col gap-8">
-                <h2 className="text-[#191A1B] text-lg font-medium">
+                <h2 className="text-foreground text-lg font-medium">
                   Результаты по запросу: {activeQuery}
                 </h2>
 
                 {!hasAnyResults && (
-                  <p className="text-center text-[#838A8D] py-10">
+                  <p className="text-center text-muted py-10">
                     Ничего не найдено
                   </p>
                 )}
@@ -195,7 +195,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                 {/* Блок Врачей */}
                 {filteredDoctors.length > 0 && (
                   <div className="flex flex-col gap-3">
-                    <h3 className="font-semibold text-[#191A1B] text-base border-b border-[#E3E4E5] pb-2">
+                    <h3 className="font-semibold text-foreground text-base border-b border-border-soft pb-2">
                       Врачи
                     </h3>
                     <div className="flex flex-col gap-2">
@@ -213,7 +213,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                 {/* Блок Клиник */}
                 {filteredClinics.length > 0 && (
                   <div className="flex flex-col gap-3">
-                    <h3 className="font-semibold text-[#191A1B] text-base border-b border-[#E3E4E5] pb-2">
+                    <h3 className="font-semibold text-foreground text-base border-b border-border-soft pb-2">
                       Клиники
                     </h3>
                     <div className="flex flex-col gap-2">
@@ -231,24 +231,24 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                 {/* Блок Услуг */}
                 {filteredServices.length > 0 && (
                   <div className="flex flex-col gap-3">
-                    <h3 className="font-semibold text-[#191A1B] text-base border-b border-[#E3E4E5] pb-2">
+                    <h3 className="font-semibold text-foreground text-base border-b border-border-soft pb-2">
                       Услуги
                     </h3>
                     <div className="flex flex-col gap-2">
                       {filteredServices.map((service) => (
                         <div
                           key={service.id}
-                          className="bg-white p-3 rounded-xl border border-[#E3E4E5] flex justify-between items-center"
+                          className="bg-white p-3 rounded-xl border border-border-soft flex justify-between items-center"
                         >
                           <div>
-                            <p className="font-semibold text-sm text-[#191A1B]">
+                            <p className="font-semibold text-sm text-foreground">
                               {service.name}
                             </p>
-                            <p className="text-xs text-[#838A8D]">
+                            <p className="text-xs text-muted">
                               {service.category}
                             </p>
                           </div>
-                          <div className="font-bold text-[#191A1B] text-sm">
+                          <div className="font-bold text-foreground text-sm">
                             {service.price} с
                           </div>
                         </div>
@@ -260,25 +260,25 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
 
               {/* === ДЕСКТОПНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ === */}
               <div className="hidden md:block px-10 py-6">
-                <div className="text-sm text-[#686F72] mb-6 flex items-center gap-2">
+                <div className="text-sm text-secondary mb-6 flex items-center gap-2">
                   <Link
                     href={ROUTES.HOME}
-                    className="hover:text-[#F5653E] transition-colors"
+                    className="hover:text-primary transition-colors"
                   >
                     Главная
                   </Link>
                   <span>•</span>
-                  <span className="text-[#F5653E]">
+                  <span className="text-primary">
                     По запросу «{activeQuery}»
                   </span>
                 </div>
 
                 {!hasAnyResults ? (
                   <div className="text-center py-20">
-                    <h1 className="text-[40px] font-semibold text-[#191A1B] leading-none mb-4">
+                    <h1 className="text-[40px] font-semibold text-foreground leading-none mb-4">
                       По запросу «{activeQuery}»
                     </h1>
-                    <p className="text-[#838A8D] text-lg">
+                    <p className="text-muted text-lg">
                       По вашим параметрам ничего не найдено
                     </p>
                   </div>
@@ -298,10 +298,10 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                           }}
                         >
                           <div className="flex items-end gap-3 mb-6">
-                            <h2 className="text-[32px] font-semibold text-[#191A1B] leading-none">
+                            <h2 className="text-[32px] font-semibold text-foreground leading-none">
                               Врачи
                             </h2>
-                            <span className="text-[#838A8D] text-lg pb-1">
+                            <span className="text-muted text-lg pb-1">
                               {filteredDoctors.length} совпадений
                             </span>
                           </div>
@@ -322,10 +322,10 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                     {filteredClinics.length > 0 && (
                       <div>
                         <div className="flex items-end gap-3 mb-6">
-                          <h2 className="text-[32px] font-semibold text-[#191A1B] leading-none">
+                          <h2 className="text-[32px] font-semibold text-foreground leading-none">
                             Клиники
                           </h2>
-                          <span className="text-[#838A8D] text-lg pb-1">
+                          <span className="text-muted text-lg pb-1">
                             {filteredClinics.length} совпадений
                           </span>
                         </div>
@@ -345,10 +345,10 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                     {filteredServices.length > 0 && (
                       <div>
                         <div className="flex items-end gap-3 mb-6">
-                          <h2 className="text-[32px] font-semibold text-[#191A1B] leading-none">
+                          <h2 className="text-[32px] font-semibold text-foreground leading-none">
                             Услуги
                           </h2>
-                          <span className="text-[#838A8D] text-lg pb-1">
+                          <span className="text-muted text-lg pb-1">
                             {filteredServices.length} совпадений
                           </span>
                         </div>
@@ -356,16 +356,16 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                           {filteredServices.map((service) => (
                             <div
                               key={`desk-service-${service.id}`}
-                              className="bg-white border border-[#E3E4E5] rounded-2xl p-4 flex flex-col"
+                              className="bg-white border border-border-soft rounded-2xl p-4 flex flex-col"
                             >
-                              <h4 className="font-semibold text-[#191A1B]">
+                              <h4 className="font-semibold text-foreground">
                                 {service.name}
                               </h4>
-                              <p className="text-xs text-[#838A8D] mb-4">
+                              <p className="text-xs text-muted mb-4">
                                 {service.category}
                               </p>
                               <div className="flex items-center justify-between mt-auto">
-                                <span className="font-bold text-[#191A1B] text-lg">
+                                <span className="font-bold text-foreground text-lg">
                                   {service.price} с
                                 </span>
                                 <Button variant="outline" size="sm">

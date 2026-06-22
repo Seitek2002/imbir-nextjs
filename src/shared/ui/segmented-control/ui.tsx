@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ReactNode } from "react";
 
@@ -22,7 +22,7 @@ export const SegmentedControl = <T extends string>({
   const selectedIndex = options.findIndex((opt) => opt.value === value);
 
   return (
-    <div className="relative flex items-center bg-[#F2F3F5] p-1 rounded-full w-full select-none">
+    <div className="relative flex items-center bg-background p-1 rounded-full w-full select-none">
       {/* Анимированная белая подложка */}
       <div
         className="absolute top-1 bottom-1 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-transform duration-300 ease-in-out"
@@ -43,8 +43,8 @@ export const SegmentedControl = <T extends string>({
             onClick={() => onChange(option.value)}
             className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors duration-300 outline-none ${
               isSelected
-                ? "text-[#191A1B]"
-                : "text-[#686F72] hover:text-[#191A1B]"
+                ? "text-foreground"
+                : "text-secondary hover:text-foreground"
             }`}
           >
             {option.label}

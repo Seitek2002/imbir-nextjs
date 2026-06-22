@@ -1,6 +1,6 @@
-export default function Loading() {
+﻿export default function Loading() {
   return (
-    <main className="min-h-screen bg-[#F2F3F5]">
+    <main className="min-h-screen bg-background">
       <span className="sr-only">loading...</span>
 
       <div className="md:hidden h-16 bg-white" />
@@ -64,7 +64,7 @@ export default function Loading() {
               {Array.from({ length: 3 }, (_, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-3xl overflow-hidden flex flex-col p-2 w-full border border-[#E3E4E5]"
+                  className="bg-white rounded-3xl overflow-hidden flex flex-col p-2 w-full border border-border-soft"
                 >
                   <div className="relative w-full aspect-video rounded-2xl skeleton" />
 

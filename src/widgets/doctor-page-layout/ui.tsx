@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, ReactNode } from "react";
 
@@ -39,9 +39,7 @@ export const DoctorPageLayout: FC<Props> = ({
       <button
         onClick={onEditToggle}
         className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-          editAction === "save"
-            ? "text-[#F5653E]"
-            : "text-[#838A8D] hover:bg-[#F8F9FA]"
+          editAction === "save" ? "text-primary" : "text-muted hover:bg-surface"
         }`}
         aria-label={editAction === "save" ? "Сохранить" : "Редактировать"}
       >
@@ -58,16 +56,16 @@ export const DoctorPageLayout: FC<Props> = ({
   return (
     <div className="w-full min-h-screen bg-[#FAFAFA]">
       {/* Mobile header */}
-      <div className="lg:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-[#E5E6E8]">
+      <div className="lg:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
         <button
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
           aria-label="Назад"
         >
           <HeaderBackIcon className="w-5 h-5" />
         </button>
 
-        <h1 className="text-base font-semibold text-[#191A1B] truncate mx-2">
+        <h1 className="text-base font-semibold text-foreground truncate mx-2">
           {title}
         </h1>
 
@@ -76,7 +74,7 @@ export const DoctorPageLayout: FC<Props> = ({
 
       {/* Desktop layout */}
       <div className="max-w-360 mx-auto px-4 lg:px-10 py-4 lg:py-8">
-        <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden lg:block">
+        <h1 className="text-[40px] font-semibold text-foreground mb-8 hidden lg:block">
           Мой профиль
         </h1>
 

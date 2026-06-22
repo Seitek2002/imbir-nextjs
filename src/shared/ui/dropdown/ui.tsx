@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { useClickAway } from "react-use";
@@ -83,7 +83,7 @@ export const Dropdown: FC<DropdownProps> = ({
       ref={containerRef}
     >
       {label && (
-        <span className="text-[#0D0D12] text-sm font-medium">{label}</span>
+        <span className="text-overlay text-sm font-medium">{label}</span>
       )}
 
       <div className="relative">
@@ -100,7 +100,7 @@ export const Dropdown: FC<DropdownProps> = ({
         {isMounted && (
           <div
             className={cn(
-              "fixed inset-0 z-40 bg-[#0D0D12]/40 backdrop-blur-[2px] md:hidden transition-opacity duration-300 ease-out",
+              "fixed inset-0 z-40 bg-overlay/40 backdrop-blur-[2px] md:hidden transition-opacity duration-300 ease-out",
               isActive ? "opacity-100" : "opacity-0",
             )}
             onClick={closeDropdown}
@@ -120,7 +120,7 @@ export const Dropdown: FC<DropdownProps> = ({
             {isMulti && !searchQuery && (
               <>
                 <div
-                  className="p-4 md:px-3 md:py-2.5 flex items-center justify-between border-b border-[#E3E4E5] md:border-none md:hover:bg-[#F2F3F5] cursor-pointer transition-colors"
+                  className="p-4 md:px-3 md:py-2.5 flex items-center justify-between border-b border-border-soft md:border-none md:hover:bg-background cursor-pointer transition-colors"
                   onClick={() =>
                     // Явно указываем TS, что здесь onChange работает с массивом
                     (onChange as (val: string[]) => void)?.(
@@ -130,7 +130,7 @@ export const Dropdown: FC<DropdownProps> = ({
                     )
                   }
                 >
-                  <span className="text-[#191A1B] text-base md:text-sm flex-1">
+                  <span className="text-foreground text-base md:text-sm flex-1">
                     Все
                   </span>
                   <div className="pointer-events-none">
@@ -142,7 +142,7 @@ export const Dropdown: FC<DropdownProps> = ({
                     />
                   </div>
                 </div>
-                <div className="hidden md:block h-px bg-[#F2F3F5] my-1 mx-3" />
+                <div className="hidden md:block h-px bg-background my-1 mx-3" />
               </>
             )}
 
@@ -161,7 +161,7 @@ export const Dropdown: FC<DropdownProps> = ({
                 />
               ))
             ) : (
-              <div className="p-6 text-center text-sm text-[#838A8D]">
+              <div className="p-6 text-center text-sm text-muted">
                 Ничего не найдено
               </div>
             )}
@@ -169,7 +169,7 @@ export const Dropdown: FC<DropdownProps> = ({
         )}
       </div>
 
-      {hint && <span className="text-sm text-[#838A8D] ml-1">{hint}</span>}
+      {hint && <span className="text-sm text-muted ml-1">{hint}</span>}
     </div>
   );
 };

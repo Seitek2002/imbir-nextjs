@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, ReactNode, useCallback, useEffect, useState } from "react";
 
@@ -70,9 +70,9 @@ export const ConfirmDialog: FC<Props> = ({
           </div>
         )}
         <div className="text-center">
-          <h2 className="text-lg font-bold text-[#191A1B]">{title}</h2>
+          <h2 className="text-lg font-bold text-foreground">{title}</h2>
           {description && (
-            <p className="text-sm text-[#838A8D] mt-1.5 leading-snug">
+            <p className="text-sm text-muted mt-1.5 leading-snug">
               {description}
             </p>
           )}
@@ -80,7 +80,7 @@ export const ConfirmDialog: FC<Props> = ({
         <div className="flex gap-3 w-full mt-2">
           <button
             onClick={handleClose}
-            className="flex-1 py-3.5 rounded-full border border-[#E3E4E5] text-[#191A1B] font-medium text-base hover:bg-[#F2F3F5] transition-colors active:scale-95"
+            className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium text-base hover:bg-background transition-colors active:scale-95"
           >
             {cancelLabel}
           </button>
@@ -89,7 +89,7 @@ export const ConfirmDialog: FC<Props> = ({
               onConfirm();
               handleClose();
             }}
-            className="flex-1 py-3.5 rounded-full bg-[#F5653E] text-white font-medium text-base hover:bg-[#E0532D] transition-colors active:scale-95"
+            className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium text-base hover:bg-[#E0532D] transition-colors active:scale-95"
           >
             {confirmLabel}
           </button>
@@ -107,9 +107,9 @@ export const ConfirmDialog: FC<Props> = ({
           </div>
         )}
         <div className="text-center">
-          <h2 className="text-lg font-bold text-[#191A1B]">{title}</h2>
+          <h2 className="text-lg font-bold text-foreground">{title}</h2>
           {description && (
-            <p className="text-sm text-[#838A8D] mt-1.5 leading-snug">
+            <p className="text-sm text-muted mt-1.5 leading-snug">
               {description}
             </p>
           )}
@@ -117,7 +117,7 @@ export const ConfirmDialog: FC<Props> = ({
         <div className="flex gap-3 w-full mt-2">
           <button
             onClick={handleClose}
-            className="flex-1 py-3.5 rounded-full border border-[#E3E4E5] text-[#191A1B] font-medium text-base hover:bg-[#F2F3F5] transition-colors active:scale-95"
+            className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium text-base hover:bg-background transition-colors active:scale-95"
           >
             {cancelLabel}
           </button>
@@ -126,7 +126,7 @@ export const ConfirmDialog: FC<Props> = ({
               onConfirm();
               handleClose();
             }}
-            className="flex-1 py-3.5 rounded-full bg-[#F5653E] text-white font-medium text-base hover:bg-[#E0532D] transition-colors active:scale-95"
+            className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium text-base hover:bg-[#E0532D] transition-colors active:scale-95"
           >
             {confirmLabel}
           </button>

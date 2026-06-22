@@ -1,4 +1,4 @@
-import { FC, TextareaHTMLAttributes } from "react";
+﻿import { FC, TextareaHTMLAttributes } from "react";
 
 import { WarningIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
@@ -22,7 +22,7 @@ export const Textarea: FC<Props> = ({
   ...props
 }) => {
   const baseStyle =
-    "text-base border border-[#E3E4E5] text-[#191A1B] rounded-lg py-2.5 px-3 outline-none focus:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)] disabled:bg-[#F2F3F5] w-full resize-none";
+    "text-base border border-border-soft text-foreground rounded-lg py-2.5 px-3 outline-none focus:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)] disabled:bg-background w-full resize-none";
 
   const isError =
     error &&
@@ -31,7 +31,7 @@ export const Textarea: FC<Props> = ({
   return (
     <label htmlFor={id} className={cn("flex flex-col gap-1.5", labelClassName)}>
       {label && (
-        <span className="text-[#0D0D12] text-sm font-medium">{label}</span>
+        <span className="text-overlay text-sm font-medium">{label}</span>
       )}
 
       <textarea
@@ -48,7 +48,7 @@ export const Textarea: FC<Props> = ({
         </span>
       )}
 
-      {hint && <span className="text-sm text-[#838A8D] mt-0.5">{hint}</span>}
+      {hint && <span className="text-sm text-muted mt-0.5">{hint}</span>}
     </label>
   );
 };

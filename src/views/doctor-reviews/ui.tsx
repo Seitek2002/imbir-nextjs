@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useCallback, useState } from "react";
 
@@ -20,7 +20,7 @@ const resolveAuthorName = (author: ReviewAuthor): string => {
 const DURATION = 200;
 
 const StarFilled = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="#F5653E">
+  <svg width="14" height="14" viewBox="0 0 14 14" fill={colors.primary}>
     <path d="M7 1L8.85 4.83L13 5.43L10 8.36L10.71 12.5L7 10.54L3.29 12.5L4 8.36L1 5.43L5.15 4.83L7 1Z" />
   </svg>
 );
@@ -72,18 +72,18 @@ const ReplyModal: FC<ReplyModalProps> = ({
         className="modal-panel relative bg-white rounded-3xl w-full sm:max-w-md overflow-hidden"
         data-state={state}
       >
-        <div className="flex items-center justify-between p-5 border-b border-[#E5E6E8]">
-          <h2 className="text-lg font-semibold text-[#191A1B]">
+        <div className="flex items-center justify-between p-5 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">
             Ответ на отзыв
           </h2>
           <button
             onClick={handleClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M13.5 4.5L4.5 13.5M4.5 4.5L13.5 13.5"
-                stroke="#686F72"
+                stroke={colors.secondary}
                 strokeWidth="1.5"
                 strokeLinecap="round"
               />
@@ -91,24 +91,24 @@ const ReplyModal: FC<ReplyModalProps> = ({
           </button>
         </div>
         <div className="p-5 space-y-4">
-          <p className="text-[#838A8D] text-sm">В ответ {reviewAuthor}</p>
+          <p className="text-muted text-sm">В ответ {reviewAuthor}</p>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Введите текст"
             rows={4}
-            className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] resize-none transition-colors"
+            className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary resize-none transition-colors"
           />
           <div className="flex gap-3">
             <button
               onClick={handleClose}
-              className="flex-1 py-3.5 rounded-full border border-[#E3E4E5] text-[#191A1B] font-medium hover:bg-[#F2F3F5] transition-colors"
+              className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium hover:bg-background transition-colors"
             >
               Отмена
             </button>
             <button
               onClick={handleSubmit}
-              className="flex-1 py-3.5 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors"
+              className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors"
             >
               Отправить
             </button>
@@ -161,16 +161,18 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
         className="modal-panel relative bg-white rounded-3xl w-full sm:max-w-md overflow-hidden"
         data-state={state}
       >
-        <div className="flex items-center justify-between p-5 border-b border-[#E5E6E8]">
-          <h2 className="text-lg font-semibold text-[#191A1B]">Пожаловаться</h2>
+        <div className="flex items-center justify-between p-5 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">
+            Пожаловаться
+          </h2>
           <button
             onClick={handleClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M13.5 4.5L4.5 13.5M4.5 4.5L13.5 13.5"
-                stroke="#686F72"
+                stroke={colors.secondary}
                 strokeWidth="1.5"
                 strokeLinecap="round"
               />
@@ -178,7 +180,7 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
         <div className="p-5 space-y-3">
-          <p className="text-[#838A8D] text-sm mb-1">Выберите причину жалобы</p>
+          <p className="text-muted text-sm mb-1">Выберите причину жалобы</p>
           {COMPLAINT_REASONS.map((r) => (
             <label
               key={r}
@@ -186,21 +188,21 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
               onClick={() => setReason(r)}
             >
               <div
-                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${reason === r ? "border-[#F5653E]" : "border-[#C4C8CA]"}`}
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${reason === r ? "border-primary" : "border-dim"}`}
               >
                 {reason === r && (
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#F5653E]" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary" />
                 )}
               </div>
               <span
-                className={`text-sm ${reason === r ? "text-[#F5653E] font-medium" : "text-[#191A1B]"}`}
+                className={`text-sm ${reason === r ? "text-primary font-medium" : "text-foreground"}`}
               >
                 {r}
               </span>
             </label>
           ))}
           <div className="pt-2">
-            <label className="block text-[#838A8D] text-sm mb-1.5">
+            <label className="block text-muted text-sm mb-1.5">
               Опишите причину
             </label>
             <textarea
@@ -208,13 +210,13 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
               onChange={(e) => setComment(e.target.value)}
               placeholder="Введите текст"
               rows={3}
-              className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] resize-none transition-colors"
+              className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary resize-none transition-colors"
             />
           </div>
           <div className="flex gap-3 pt-1">
             <button
               onClick={handleClose}
-              className="flex-1 py-3.5 rounded-full border border-[#E3E4E5] text-[#191A1B] font-medium hover:bg-[#F2F3F5] transition-colors"
+              className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium hover:bg-background transition-colors"
             >
               Отмена
             </button>
@@ -224,7 +226,7 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
                 setComment("");
                 handleClose();
               }}
-              className="flex-1 py-3.5 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors"
+              className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors"
             >
               Отправить
             </button>
@@ -242,16 +244,16 @@ type ReviewCardProps = {
 };
 
 const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
-  <div className="p-5 border-b border-[#E5E6E8] last:border-0">
+  <div className="p-5 border-b border-border last:border-0">
     <div className="flex items-start justify-between gap-3">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-[#FFF0EE] flex items-center justify-center shrink-0">
-          <span className="text-[#F5653E] font-semibold text-sm">
+          <span className="text-primary font-semibold text-sm">
             {review.authorInitial}
           </span>
         </div>
         <div>
-          <p className="text-[#191A1B] font-medium text-sm">
+          <p className="text-foreground font-medium text-sm">
             {review.authorName}
           </p>
           <div className="flex items-center gap-0.5 mt-0.5">
@@ -261,16 +263,18 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
           </div>
         </div>
       </div>
-      <span className="text-[#838A8D] text-xs shrink-0">{review.date}</span>
+      <span className="text-muted text-xs shrink-0">{review.date}</span>
     </div>
-    <p className="text-[#191A1B] text-sm mt-3 leading-relaxed">{review.text}</p>
+    <p className="text-foreground text-sm mt-3 leading-relaxed">
+      {review.text}
+    </p>
     {review.replyTime && (
-      <p className="text-[#838A8D] text-xs mt-2">{review.replyTime}</p>
+      <p className="text-muted text-xs mt-2">{review.replyTime}</p>
     )}
     <div className="flex items-center gap-4 mt-3">
       <button
         onClick={() => onReply(review)}
-        className="text-[#838A8D] text-xs flex items-center gap-1 hover:text-[#F5653E] transition-colors"
+        className="text-muted text-xs flex items-center gap-1 hover:text-primary transition-colors"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path
@@ -285,7 +289,7 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
       </button>
       <button
         onClick={() => onComplain(review)}
-        className="text-[#838A8D] text-xs flex items-center gap-1 hover:text-[#F5653E] transition-colors"
+        className="text-muted text-xs flex items-center gap-1 hover:text-primary transition-colors"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path
@@ -336,13 +340,13 @@ export const DoctorReviewsPage: FC = () => {
   return (
     <>
       <DoctorPageLayout title="Отзывы">
-        <h2 className="text-[28px] font-semibold text-[#191A1B] mb-6 hidden lg:block">
+        <h2 className="text-[28px] font-semibold text-foreground mb-6 hidden lg:block">
           Отзывы
         </h2>
 
-        <div className="bg-white rounded-3xl border border-[#E5E6E8] p-5 mb-4 flex items-center gap-6">
+        <div className="bg-white rounded-3xl border border-border p-5 mb-4 flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <span className="text-3xl font-bold text-[#191A1B]">
+            <span className="text-3xl font-bold text-foreground">
               {profile?.rating ?? "—"}
             </span>
             <div className="flex flex-col">
@@ -351,27 +355,25 @@ export const DoctorReviewsPage: FC = () => {
                   <StarFilled key={i} />
                 ))}
               </div>
-              <span className="text-[#838A8D] text-xs mt-0.5">
-                Средняя оценка
-              </span>
+              <span className="text-muted text-xs mt-0.5">Средняя оценка</span>
             </div>
           </div>
-          <div className="w-px h-10 bg-[#E5E6E8]" />
+          <div className="w-px h-10 bg-border" />
           <div>
-            <span className="text-3xl font-bold text-[#191A1B]">
+            <span className="text-3xl font-bold text-foreground">
               {profile?.totalReviews ?? "—"}
             </span>
-            <p className="text-[#838A8D] text-xs mt-0.5">Всего отзывов</p>
+            <p className="text-muted text-xs mt-0.5">Всего отзывов</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden">
+        <div className="bg-white rounded-3xl border border-border overflow-hidden">
           {isLoading ? (
-            <div className="p-10 text-center text-[#838A8D] text-sm">
+            <div className="p-10 text-center text-muted text-sm">
               Загрузка...
             </div>
           ) : reviews.length === 0 ? (
-            <div className="p-10 text-center text-[#838A8D] text-sm">
+            <div className="p-10 text-center text-muted text-sm">
               Отзывов пока нет
             </div>
           ) : (

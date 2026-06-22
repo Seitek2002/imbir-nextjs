@@ -1,7 +1,5 @@
 export { Header } from "./header";
 export { Hero } from "./hero";
-export { CategoriesGrid } from "./categories-grid";
-export { RecentSearches } from "./recent-searches";
 export { BlogSection } from "./blog-section";
 export type { BlogPost } from "./blog-section";
 export { ClinicsSwiper } from "./clinics-swiper";

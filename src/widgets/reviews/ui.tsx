@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -54,10 +54,10 @@ export const ReviewsSection: FC<Props> = ({
   return (
     <div className="mt-10 md:mt-20 mb-10 md:mb-20 md:px-0 bg-white rounded-[20px] p-4 mx-2">
       <div className="flex items-center justify-between mb-6 md:mb-8">
-        <h2 className="text-2xl font-semibold text-[#191A1B]">Отзывы</h2>
+        <h2 className="text-2xl font-semibold text-foreground">Отзывы</h2>
         <Link
           href="#"
-          className="md:hidden text-[#F5653E] text-sm font-medium hover:underline"
+          className="md:hidden text-primary text-sm font-medium hover:underline"
         >
           Все
         </Link>
@@ -67,28 +67,28 @@ export const ReviewsSection: FC<Props> = ({
         <div className="w-full md:w-[320px] shrink-0 flex flex-col gap-5">
           {/* Статистика */}
           <div className="flex gap-4">
-            <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-6 flex flex-col items-center md:items-start justify-center">
+            <div className="flex-1 bg-white md:bg-transparent border border-border-soft rounded-2xl p-6 flex flex-col items-center md:items-start justify-center">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-[#FFA18D] p-2.5 rounded-xl size-10 flex items-center justify-center">
                   <StarIcon className="size-5 text-white" />
                 </div>
-                <span className="text-[24px] font-semibold text-[#191A1B]">
+                <span className="text-[24px] font-semibold text-foreground">
                   {averageRating}
                 </span>
               </div>
-              <span className="text-[#838A8D]">Средняя оценка</span>
+              <span className="text-muted">Средняя оценка</span>
             </div>
 
-            <div className="flex-1 bg-white md:bg-transparent border border-[#E3E4E5] rounded-2xl p-6 flex flex-col items-center md:items-start justify-center">
+            <div className="flex-1 bg-white md:bg-transparent border border-border-soft rounded-2xl p-6 flex flex-col items-center md:items-start justify-center">
               <div className="flex items-center gap-3 mb-3">
                 <div className="bg-[#FFA18D] p-2.5 rounded-xl size-10 flex items-center justify-center">
                   <ChatIcon className="size-5 text-white" />
                 </div>
-                <span className="text-[24px] font-semibold text-[#191A1B]">
+                <span className="text-[24px] font-semibold text-foreground">
                   {reviews.length}
                 </span>
               </div>
-              <span className="text-[#838A8D]">Всего отзывов</span>
+              <span className="text-muted">Всего отзывов</span>
             </div>
           </div>
 
@@ -100,23 +100,21 @@ export const ReviewsSection: FC<Props> = ({
           </Button>
 
           {/* Форма */}
-          <div className="hidden md:flex flex-col bg-white border border-[#E3E4E5] rounded-2xl p-4">
-            <h3 className="font-medium text-[20px] text-[#191A1B] mb-6">
+          <div className="hidden md:flex flex-col bg-white border border-border-soft rounded-2xl p-4">
+            <h3 className="font-medium text-[20px] text-foreground mb-6">
               Оставьте свой отзыв
             </h3>
             <span className="text-base mb-2">Оцените специалиста</span>
 
             {/* Интерактивные Звездочки */}
-            <div className="flex justify-center gap-5 py-4 mb-6 border border-[#E5E6E8] rounded-xl">
+            <div className="flex justify-center gap-5 py-4 mb-6 border border-border rounded-xl">
               {[1, 2, 3, 4, 5].map((star) => (
                 <StarIcon
                   key={star}
                   onClick={() => setNewReviewRating(star)}
                   className={cn(
                     "size-10 cursor-pointer transition-colors",
-                    star <= newReviewRating
-                      ? "text-[#F5653E]"
-                      : "text-[#E5E6E8]",
+                    star <= newReviewRating ? "text-primary" : "text-border",
                   )}
                 />
               ))}
@@ -126,7 +124,7 @@ export const ReviewsSection: FC<Props> = ({
             <textarea
               value={newReviewText}
               onChange={(e) => setNewReviewText(e.target.value)}
-              className="w-full border border-[#E3E4E5] rounded-xl p-3 text-sm outline-none focus:border-[#F5653E] resize-none h-24 mb-4"
+              className="w-full border border-border-soft rounded-xl p-3 text-sm outline-none focus:border-primary resize-none h-24 mb-4"
               placeholder="Введите текст"
             />
 

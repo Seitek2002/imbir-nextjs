@@ -1,4 +1,4 @@
-import { FC } from "react";
+﻿import { FC } from "react";
 
 import { DropdownArrowIcon, DropdownRemoveIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
@@ -29,10 +29,10 @@ export const DropdownTrigger: FC<TriggerProps> = ({
       onClick={onToggle}
       className={cn(
         "flex items-center justify-between min-h-10.5 p-3 border rounded-lg cursor-pointer transition-all duration-200 bg-white select-none",
-        "border-[#E3E4E5]",
+        "border-border-soft",
         isActive
-          ? "border-[#F5653E] shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]"
-          : "hover:border-[#F5653E]/50",
+          ? "border-primary shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]"
+          : "hover:border-primary/50",
       )}
     >
       <div className="flex flex-wrap gap-1.5 flex-1 overflow-hidden">
@@ -40,7 +40,7 @@ export const DropdownTrigger: FC<TriggerProps> = ({
           value.map((val) => (
             <div
               key={val}
-              className="flex items-center gap-1 px-2 py-0.5 border border-[#E3E4E5] rounded-md bg-white text-sm"
+              className="flex items-center gap-1 px-2 py-0.5 border border-border-soft rounded-md bg-white text-sm"
             >
               {options.find((o) => o.value === val)?.label}
               <button
@@ -49,14 +49,14 @@ export const DropdownTrigger: FC<TriggerProps> = ({
                   e.stopPropagation();
                   onRemove(val);
                 }}
-                className="hover:text-[#F5653E] transition-colors"
+                className="hover:text-primary transition-colors"
               >
                 <DropdownRemoveIcon className="size-3.5" />
               </button>
             </div>
           ))
         ) : (
-          <span className={cn(value ? "text-[#191A1B]" : "text-[#838A8D]")}>
+          <span className={cn(value ? "text-foreground" : "text-muted")}>
             {/* Для не-multi мы уверены, что value это строка (или undefined) */}
             {options.find((o) => o.value === (value as string))?.label ||
               placeholder}
@@ -65,7 +65,7 @@ export const DropdownTrigger: FC<TriggerProps> = ({
       </div>
       <DropdownArrowIcon
         className={cn(
-          "text-[#838A8D] transition-transform duration-300 size-5",
+          "text-muted transition-transform duration-300 size-5",
           isActive && "rotate-180",
         )}
       />

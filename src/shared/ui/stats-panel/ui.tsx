@@ -1,4 +1,4 @@
-import { FC } from "react";
+﻿import { FC } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
@@ -24,27 +24,27 @@ export const StatsPanel: FC<Props> = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-between bg-white border border-[#E3E4E5] rounded-2xl p-4 divide-x divide-[#E3E4E5]",
+        "flex items-center justify-between bg-white border border-border-soft rounded-2xl p-4 divide-x divide-border-soft",
         className,
       )}
     >
       <div className="flex flex-col items-center flex-1">
-        <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
+        <span className="text-base md:text-[20px] font-medium text-foreground">
           {rating}
         </span>
-        <span className="text-sm text-[#838A8D]">{ratingLabel}</span>
+        <span className="text-sm text-muted">{ratingLabel}</span>
       </div>
       <div className="flex flex-col items-center flex-1">
-        <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
+        <span className="text-base md:text-[20px] font-medium text-foreground">
           {experience}
         </span>
-        <span className="text-sm text-[#838A8D]">{experienceLabel}</span>
+        <span className="text-sm text-muted">{experienceLabel}</span>
       </div>
       <div className="flex flex-col items-center flex-1">
-        <span className="text-base md:text-[20px] font-medium text-[#191A1B]">
+        <span className="text-base md:text-[20px] font-medium text-foreground">
           {reviews}
         </span>
-        <span className="text-sm text-[#838A8D]">{reviewsLabel}</span>
+        <span className="text-sm text-muted">{reviewsLabel}</span>
       </div>
     </div>
   );

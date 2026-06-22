@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ChangeEvent, FC, useCallback, useEffect, useState } from "react";
 
@@ -60,7 +60,7 @@ export const RangeSlider: FC<Props> = ({
       {label && (
         <span
           className={cn(
-            "block text-[#0D0D12] text-sm font-medium mb-1.5",
+            "block text-overlay text-sm font-medium mb-1.5",
             labelClassName,
           )}
         >
@@ -69,9 +69,9 @@ export const RangeSlider: FC<Props> = ({
       )}
 
       {/* Контейнер в стиле инпута (с бордером) */}
-      <div className="border border-[#E3E4E5] rounded-lg p-3 pt-2">
+      <div className="border border-border-soft rounded-lg p-3 pt-2">
         {/* Значения по краям */}
-        <div className="flex justify-between text-sm text-[#191A1B] leading-none">
+        <div className="flex justify-between text-sm text-foreground leading-none">
           <span>{minVal}</span>
           <span>{maxVal}</span>
         </div>
@@ -79,11 +79,11 @@ export const RangeSlider: FC<Props> = ({
         {/* Трек и ползунки */}
         <div className="relative w-full flex items-center h-4">
           {/* Фоновая (серая) полоса */}
-          <div className="absolute w-full h-0.5 bg-[#E3E4E5] rounded-full" />
+          <div className="absolute w-full h-0.5 bg-border-soft rounded-full" />
 
           {/* Активная (оранжевая) полоса */}
           <div
-            className="absolute h-0.5 bg-[#F5653E] rounded-full"
+            className="absolute h-0.5 bg-primary rounded-full"
             style={{
               left: `${getPercent(minVal)}%`,
               width: `${getPercent(maxVal) - getPercent(minVal)}%`,
@@ -99,7 +99,7 @@ export const RangeSlider: FC<Props> = ({
             step={step}
             value={minVal}
             onChange={handleMinChange}
-            className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:bg-[#F5653E] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer z-20"
+            className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer z-20"
           />
 
           {/* Ползунок MAX */}
@@ -111,7 +111,7 @@ export const RangeSlider: FC<Props> = ({
             step={step}
             value={maxVal}
             onChange={handleMaxChange}
-            className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:bg-[#F5653E] [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer z-20"
+            className="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-2 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer z-20"
           />
         </div>
       </div>

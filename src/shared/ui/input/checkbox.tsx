@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, InputHTMLAttributes, useEffect, useRef } from "react";
 
@@ -34,11 +34,11 @@ export const Checkbox: FC<Props> = ({
 
   const visualBase = cn(
     "relative flex items-center justify-center rounded-full border transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none",
-    "border-[#E3E4E5] bg-white",
+    "border-border-soft bg-white",
     // Стили для самого круга при разных состояниях
-    "peer-checked:bg-[#F5653E] peer-checked:border-[#F5653E]",
-    "peer-indeterminate:bg-[#F5653E] peer-indeterminate:border-[#F5653E]",
-    "peer-focus-visible:shadow-[0_0_0.5px_2px_rgba(245,101,62,0.2)] peer-focus-visible:border-[#F5653E]",
+    "peer-checked:bg-primary peer-checked:border-primary",
+    "peer-indeterminate:bg-primary peer-indeterminate:border-primary",
+    "peer-focus-visible:shadow-[0_0_0.5px_2px_rgba(245,101,62,0.2)] peer-focus-visible:border-primary",
 
     // МАГИЯ ЗДЕСЬ: Управляем иконками через родителя
     // Когда peer checked — показываем первый div (галочку)
@@ -97,7 +97,7 @@ export const Checkbox: FC<Props> = ({
       </div>
 
       {label && (
-        <span className="text-sm font-medium text-[#0D0D12]">{label}</span>
+        <span className="text-sm font-medium text-overlay">{label}</span>
       )}
     </label>
   );

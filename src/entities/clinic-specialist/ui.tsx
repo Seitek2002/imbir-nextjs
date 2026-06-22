@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useState } from "react";
 
@@ -33,18 +33,18 @@ export const SpecialistCard: FC<Props> = ({
   const [loaded, setLoaded] = useState(false);
 
   return (
-    <div className="bg-white rounded-3xl border border-[#E3E4E5] p-2 relative group">
+    <div className="bg-white rounded-3xl border border-border-soft p-2 relative group">
       {/* Delete Button */}
       {onDelete && (
         <button
           onClick={() => onDelete(id)}
-          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white border border-[#E5E6E8] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#FFF8F5] hover:border-[#F5653E]"
+          className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary-tint hover:border-primary"
           aria-label="Удалить"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path
               d="M12 4L4 12M4 4L12 12"
-              stroke="#686F72"
+              stroke={colors.secondary}
               strokeWidth="1.5"
               strokeLinecap="round"
             />
@@ -54,7 +54,7 @@ export const SpecialistCard: FC<Props> = ({
 
       <Link href={`/clinic-profile/specialists/${id}`}>
         {/* Photo */}
-        <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-[#FFF8F5] mb-3">
+        <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-primary-tint mb-3">
           {image ? (
             <>
               {!loaded && <div className="absolute inset-0 skeleton" />}
@@ -69,25 +69,25 @@ export const SpecialistCard: FC<Props> = ({
             </>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <UserCircleIcon className="size-20 text-[#C4C8CA]" />
+              <UserCircleIcon className="size-20 text-dim" />
             </div>
           )}
         </div>
 
         {/* Info */}
         <div className="px-1">
-          <h3 className="font-semibold text-base text-[#191A1B] leading-tight truncate mb-1">
+          <h3 className="font-semibold text-base text-foreground leading-tight truncate mb-1">
             {name}
           </h3>
-          <p className="text-sm text-[#838A8D] truncate mb-2">
-            {specialty} <span className="text-[#F5653E]">• {clinic}</span>
+          <p className="text-sm text-muted truncate mb-2">
+            {specialty} <span className="text-primary">• {clinic}</span>
           </p>
 
           <div className="flex items-center gap-1 text-sm flex-wrap">
-            <StarIcon className="w-4 h-4 text-[#F5653E]" />
-            <span className="font-medium text-[#F5653E]">{rating}</span>
-            <span className="text-[#838A8D]">({reviews})</span>
-            <span className="text-[#838A8D]">• {experience} лет опыта</span>
+            <StarIcon className="w-4 h-4 text-primary" />
+            <span className="font-medium text-primary">{rating}</span>
+            <span className="text-muted">({reviews})</span>
+            <span className="text-muted">• {experience} лет опыта</span>
           </div>
         </div>
       </Link>

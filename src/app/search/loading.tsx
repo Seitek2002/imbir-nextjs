@@ -1,16 +1,16 @@
-import { Header } from "@/widgets";
+﻿import { Header } from "@/widgets";
 
 import { SearchIcon } from "@/shared/assets";
 
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col">
       {/* Шапка со статичной обманкой вместо настоящего инпута */}
       <Header title="Поиск" backTo="/">
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">
-            <div className="flex items-center w-full gap-2 border border-[#E3E4E5] px-3 py-2.25 rounded-full bg-white opacity-70">
-              <SearchIcon className="size-5 text-[#191A1B]" />
+            <div className="flex items-center w-full gap-2 border border-border-soft px-3 py-2.25 rounded-full bg-white opacity-70">
+              <SearchIcon className="size-5 text-foreground" />
               <div className="w-1/2 h-4 skeleton rounded" />
             </div>
           </div>

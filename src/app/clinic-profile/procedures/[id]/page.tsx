@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 
@@ -144,7 +144,7 @@ export default function ProcedureDetailsPage() {
 
   return (
     <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
-      <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8">
+      <h1 className="text-[40px] font-semibold text-foreground mb-8">
         Мой профиль
       </h1>
 
@@ -160,7 +160,7 @@ export default function ProcedureDetailsPage() {
           <div className="flex items-center gap-4 mb-6">
             <button
               onClick={() => router.back()}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
               aria-label="Назад"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -174,13 +174,13 @@ export default function ProcedureDetailsPage() {
               </svg>
             </button>
 
-            <h2 className="text-[32px] font-semibold text-[#191A1B] flex-1">
+            <h2 className="text-[32px] font-semibold text-foreground flex-1">
               Назад
             </h2>
 
             <button
               onClick={handleSave}
-              className="px-6 py-3 rounded-full border border-[#E5E6E8] text-[#686F72] font-medium hover:bg-[#F8F9FA] transition-colors flex items-center gap-2"
+              className="px-6 py-3 rounded-full border border-border text-secondary font-medium hover:bg-surface transition-colors flex items-center gap-2"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path
@@ -196,7 +196,7 @@ export default function ProcedureDetailsPage() {
 
             <button
               onClick={handleDelete}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#FFF8F5] transition-colors"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-tint transition-colors"
               aria-label="Удалить"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -212,27 +212,27 @@ export default function ProcedureDetailsPage() {
           </div>
 
           {/* Form */}
-          <div className="bg-white rounded-3xl p-8 border border-[#E5E6E8] space-y-6">
+          <div className="bg-white rounded-3xl p-8 border border-border space-y-6">
             {/* Процедура */}
             <div>
-              <label className="block text-[#191A1B] text-sm font-medium mb-2">
+              <label className="block text-foreground text-sm font-medium mb-2">
                 Процедура
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors"
+                className="w-full px-4 py-3 rounded-2xl border border-border text-foreground focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
             {/* Фото процедуры */}
             <div>
-              <label className="block text-[#191A1B] text-sm font-medium mb-2">
+              <label className="block text-foreground text-sm font-medium mb-2">
                 Фото процедуры
               </label>
               <div className="flex items-center gap-4">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-[#FFF8F5] border border-[#E5E6E8] flex items-center justify-center flex-shrink-0">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-primary-tint border border-border flex items-center justify-center flex-shrink-0">
                   {photo ? (
                     <Image
                       src={photo}
@@ -256,7 +256,7 @@ export default function ProcedureDetailsPage() {
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors flex items-center gap-2"
+                  className="px-4 py-2 rounded-full border border-border text-secondary text-sm hover:bg-surface transition-colors flex items-center gap-2"
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
@@ -274,50 +274,50 @@ export default function ProcedureDetailsPage() {
 
             {/* Стоимость */}
             <div>
-              <label className="block text-[#191A1B] text-sm font-medium mb-2">
+              <label className="block text-foreground text-sm font-medium mb-2">
                 Стоимость
               </label>
               <input
                 type="text"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors"
+                className="w-full px-4 py-3 rounded-2xl border border-border text-foreground focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
             {/* Адрес */}
             <div>
-              <label className="block text-[#191A1B] text-sm font-medium mb-2">
+              <label className="block text-foreground text-sm font-medium mb-2">
                 Адрес
               </label>
               <input
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors"
+                className="w-full px-4 py-3 rounded-2xl border border-border text-foreground focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
             {/* График работы */}
             <div>
-              <label className="block text-[#191A1B] text-sm font-medium mb-2">
+              <label className="block text-foreground text-sm font-medium mb-2">
                 График работы
               </label>
               <input
                 type="text"
                 value={schedule}
                 onChange={(e) => setSchedule(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] focus:outline-none focus:border-[#F5653E] transition-colors"
+                className="w-full px-4 py-3 rounded-2xl border border-border text-foreground focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
             {/* Специалисты */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="block text-[#191A1B] text-sm font-medium">
+                <label className="block text-foreground text-sm font-medium">
                   Специалисты, выполняющие услугу
                 </label>
-                <button className="text-[#F5653E] text-sm font-medium hover:text-[#E5542D] transition-colors flex items-center gap-1">
+                <button className="text-primary text-sm font-medium hover:text-primary-dark transition-colors flex items-center gap-1">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
                       d="M8 3.33334V12.6667M3.33333 8H12.6667"
@@ -333,14 +333,14 @@ export default function ProcedureDetailsPage() {
                 {specialists.map((specialist) => (
                   <div
                     key={specialist.id}
-                    className="flex items-center justify-between px-4 py-3 rounded-2xl bg-[#F8F9FA]"
+                    className="flex items-center justify-between px-4 py-3 rounded-2xl bg-surface"
                   >
-                    <span className="text-[#191A1B] text-base">
+                    <span className="text-foreground text-base">
                       {specialist.name}
                     </span>
                     <button
                       onClick={() => removeSpecialist(specialist.id)}
-                      className="text-[#C4C8CA] hover:text-[#F5653E] transition-colors"
+                      className="text-dim hover:text-primary transition-colors"
                     >
                       <svg
                         width="20"
@@ -363,18 +363,18 @@ export default function ProcedureDetailsPage() {
 
             {/* График процедуры */}
             <div>
-              <label className="block text-[#191A1B] text-sm font-medium mb-3">
+              <label className="block text-foreground text-sm font-medium mb-3">
                 График процедуры
               </label>
 
               {/* Онлайн/Оффлайн табы */}
-              <div className="inline-flex gap-0 mb-6 bg-[#F8F9FA] rounded-full p-1">
+              <div className="inline-flex gap-0 mb-6 bg-surface rounded-full p-1">
                 <button
                   onClick={() => setScheduleType("online")}
                   className={`px-8 py-2.5 rounded-full font-medium text-sm transition-all ${
                     scheduleType === "online"
-                      ? "bg-white text-[#191A1B] shadow-sm"
-                      : "bg-transparent text-[#686F72]"
+                      ? "bg-white text-foreground shadow-sm"
+                      : "bg-transparent text-secondary"
                   }`}
                 >
                   Онлайн
@@ -383,8 +383,8 @@ export default function ProcedureDetailsPage() {
                   onClick={() => setScheduleType("offline")}
                   className={`px-8 py-2.5 rounded-full font-medium text-sm transition-all ${
                     scheduleType === "offline"
-                      ? "bg-white text-[#191A1B] shadow-sm"
-                      : "bg-transparent text-[#686F72]"
+                      ? "bg-white text-foreground shadow-sm"
+                      : "bg-transparent text-secondary"
                   }`}
                 >
                   Оффлайн
@@ -394,7 +394,7 @@ export default function ProcedureDetailsPage() {
               <div className="flex gap-6">
                 {/* Календарь */}
                 <div
-                  className="bg-[#FAFAFA] rounded-3xl border border-[#E5E6E8] p-5 flex-shrink-0"
+                  className="bg-[#FAFAFA] rounded-3xl border border-border p-5 flex-shrink-0"
                   style={{ width: "340px" }}
                 >
                   <div className="flex items-center justify-between mb-4">
@@ -414,7 +414,7 @@ export default function ProcedureDetailsPage() {
                         />
                       </svg>
                     </button>
-                    <span className="text-[#191A1B] font-semibold text-base">
+                    <span className="text-foreground font-semibold text-base">
                       {currentMonth}
                     </span>
                     <button className="w-8 h-8 hover:bg-white rounded-lg transition-colors flex items-center justify-center">
@@ -439,7 +439,7 @@ export default function ProcedureDetailsPage() {
                     {["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"].map((day) => (
                       <div
                         key={day}
-                        className="text-center text-[#838A8D] text-xs font-medium h-8 flex items-center justify-center"
+                        className="text-center text-muted text-xs font-medium h-8 flex items-center justify-center"
                       >
                         {day}
                       </div>
@@ -453,8 +453,8 @@ export default function ProcedureDetailsPage() {
                         onClick={() => toggleDay(day)}
                         className={`h-10 rounded-xl text-sm font-medium transition-all ${
                           selectedDays.includes(day)
-                            ? "bg-[#F5653E] text-white shadow-sm"
-                            : "bg-white hover:bg-[#F8F9FA] text-[#191A1B]"
+                            ? "bg-primary text-white shadow-sm"
+                            : "bg-white hover:bg-surface text-foreground"
                         }`}
                       >
                         {day.toString().padStart(2, "0")}
@@ -467,7 +467,7 @@ export default function ProcedureDetailsPage() {
                 <div className="flex-1 space-y-5">
                   {/* Morning */}
                   <div>
-                    <p className="text-[#838A8D] text-sm font-medium mb-3">
+                    <p className="text-muted text-sm font-medium mb-3">
                       Morning
                     </p>
                     <div className="flex gap-2 flex-wrap">
@@ -477,8 +477,8 @@ export default function ProcedureDetailsPage() {
                           onClick={() => toggleTimeSlot("morning", index)}
                           className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                             slot.selected
-                              ? "bg-[#F5653E] text-white shadow-sm"
-                              : "bg-[#F8F9FA] text-[#686F72] hover:bg-[#E5E6E8]"
+                              ? "bg-primary text-white shadow-sm"
+                              : "bg-surface text-secondary hover:bg-border"
                           }`}
                         >
                           {slot.time}
@@ -489,7 +489,7 @@ export default function ProcedureDetailsPage() {
 
                   {/* Afternoon */}
                   <div>
-                    <p className="text-[#838A8D] text-sm font-medium mb-3">
+                    <p className="text-muted text-sm font-medium mb-3">
                       Afternoon
                     </p>
                     <div className="flex gap-2 flex-wrap">
@@ -499,8 +499,8 @@ export default function ProcedureDetailsPage() {
                           onClick={() => toggleTimeSlot("afternoon", index)}
                           className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                             slot.selected
-                              ? "bg-[#F5653E] text-white shadow-sm"
-                              : "bg-[#F8F9FA] text-[#686F72] hover:bg-[#E5E6E8]"
+                              ? "bg-primary text-white shadow-sm"
+                              : "bg-surface text-secondary hover:bg-border"
                           }`}
                         >
                           {slot.time}
@@ -511,7 +511,7 @@ export default function ProcedureDetailsPage() {
 
                   {/* Evening */}
                   <div>
-                    <p className="text-[#838A8D] text-sm font-medium mb-3">
+                    <p className="text-muted text-sm font-medium mb-3">
                       Evening
                     </p>
                     <div className="flex gap-2 flex-wrap">
@@ -521,8 +521,8 @@ export default function ProcedureDetailsPage() {
                           onClick={() => toggleTimeSlot("evening", index)}
                           className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                             slot.selected
-                              ? "bg-[#F5653E] text-white shadow-sm"
-                              : "bg-[#F8F9FA] text-[#686F72] hover:bg-[#E5E6E8]"
+                              ? "bg-primary text-white shadow-sm"
+                              : "bg-surface text-secondary hover:bg-border"
                           }`}
                         >
                           {slot.time}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -104,7 +104,7 @@ export const CitySelectorModal: FC<Props> = ({ isOpen, onClose }) => {
       <div className="flex flex-col gap-5">
         <Button
           variant="outline"
-          className="w-full justify-center border-[#E5E6E8] text-[#191A1B] hover:border-[#F5653E] hover:text-[#F5653E]"
+          className="w-full justify-center border-border text-foreground hover:border-primary hover:text-primary"
           IconLeft={GeoIcon}
           onClick={handleGeoDetect}
           disabled={isDetecting}

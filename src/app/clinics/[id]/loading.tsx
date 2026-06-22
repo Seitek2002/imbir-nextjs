@@ -1,8 +1,8 @@
-import { Footer, Header } from "@/widgets";
+﻿import { Footer, Header } from "@/widgets";
 
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-[#F2F3F5] md:bg-white flex flex-col relative pb-20 md:pb-0">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col relative pb-20 md:pb-0">
       {/* Десктопный хедер */}
       <div className="hidden md:block">
         <Header />
@@ -44,7 +44,7 @@ export default function Loading() {
             </div>
 
             {/* Статистика */}
-            <div className="flex items-center justify-between md:justify-start md:gap-12 bg-white md:bg-transparent border md:border-none border-[#E3E4E5] rounded-2xl p-4 md:p-0 mb-8">
+            <div className="flex items-center justify-between md:justify-start md:gap-12 bg-white md:bg-transparent border md:border-none border-border-soft rounded-2xl p-4 md:p-0 mb-8">
               <div className="h-12 w-16 skeleton rounded-lg" />
               <div className="h-12 w-16 skeleton rounded-lg" />
               <div className="h-12 w-16 skeleton rounded-lg" />
@@ -57,7 +57,7 @@ export default function Loading() {
             </div>
 
             {/* О клинике и контакты */}
-            <div className="flex flex-col gap-8 md:gap-10 border-t border-[#E3E4E5] md:border-none pt-8 md:pt-0">
+            <div className="flex flex-col gap-8 md:gap-10 border-t border-border-soft md:border-none pt-8 md:pt-0">
               <div className="flex flex-col gap-3">
                 <div className="h-6 w-32 skeleton rounded-md" />
                 <div className="h-24 w-full skeleton rounded-lg" />
@@ -82,7 +82,7 @@ export default function Loading() {
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="bg-white border border-[#E3E4E5] rounded-2xl p-4 flex flex-col"
+                className="bg-white border border-border-soft rounded-2xl p-4 flex flex-col"
               >
                 <div className="h-32 skeleton rounded-xl mb-4" />
                 <div className="h-5 w-3/4 skeleton rounded mb-2" />
@@ -104,7 +104,7 @@ export default function Loading() {
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="bg-white border border-[#E3E4E5] rounded-2xl p-4 flex flex-col"
+                className="bg-white border border-border-soft rounded-2xl p-4 flex flex-col"
               >
                 <div className="h-48 skeleton rounded-xl mb-4" />
                 <div className="h-5 w-3/4 skeleton rounded mb-2" />
@@ -137,7 +137,7 @@ export default function Loading() {
       </div>
 
       {/* Липкая кнопка для мобилки */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#E3E4E5] z-50">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-border-soft z-50">
         <div className="h-[52px] w-full skeleton rounded-xl" />
       </div>
     </main>

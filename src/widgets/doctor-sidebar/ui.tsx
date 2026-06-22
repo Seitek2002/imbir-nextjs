@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, ReactNode, useState } from "react";
 
@@ -129,9 +129,9 @@ export const DoctorSidebar: FC<Props> = ({
     <aside className="w-72 shrink-0 hidden lg:block">
       <Link
         href="/doctor-profile"
-        className="bg-white rounded-3xl p-5 flex items-center gap-4 mb-4 border border-[#E5E6E8] hover:border-[#F5653E] transition-colors"
+        className="bg-white rounded-3xl p-5 flex items-center gap-4 mb-4 border border-border hover:border-primary transition-colors"
       >
-        <div className="w-14 h-14 rounded-full overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center shrink-0">
+        <div className="w-14 h-14 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
           {photo ? (
             <Image
               src={photo}
@@ -147,13 +147,13 @@ export const DoctorSidebar: FC<Props> = ({
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[#191A1B] font-semibold text-base truncate">
+          <p className="text-foreground font-semibold text-base truncate">
             {fullName}
           </p>
           <div className="flex items-center gap-1 mt-0.5">
-            <StarIcon className="w-4 h-4 text-[#F5653E]" />
-            <span className="text-[#F5653E] text-sm font-medium">{rating}</span>
-            <span className="text-[#838A8D] text-sm ml-1">{specialty}</span>
+            <StarIcon className="w-4 h-4 text-primary" />
+            <span className="text-primary text-sm font-medium">{rating}</span>
+            <span className="text-muted text-sm ml-1">{specialty}</span>
           </div>
         </div>
       </Link>
@@ -163,7 +163,7 @@ export const DoctorSidebar: FC<Props> = ({
         className="bg-white rounded-3xl p-2 flex flex-col gap-1 mb-4 relative"
       >
         <div
-          className="absolute inset-x-2 rounded-2xl bg-[#FFF8F5] transition-all duration-200 ease-out pointer-events-none"
+          className="absolute inset-x-2 rounded-2xl bg-primary-tint transition-all duration-200 ease-out pointer-events-none"
           style={{ top: indicator.top, height: indicator.height }}
         />
 
@@ -177,15 +177,15 @@ export const DoctorSidebar: FC<Props> = ({
               key={item.href}
               href={item.href}
               data-active={isActive ? "true" : undefined}
-              className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl relative z-10 ${!isActive && "hover:bg-[#F8F9FA]"}`}
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl relative z-10 ${!isActive && "hover:bg-surface"}`}
             >
               <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200 ${isActive ? "bg-[#F5653E] text-white" : "bg-[#FFF8F5] text-[#F5653E]"}`}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200 ${isActive ? "bg-primary text-white" : "bg-primary-tint text-primary"}`}
               >
                 {item.icon}
               </div>
               <span
-                className={`flex-1 font-medium text-base transition-colors duration-200 ${isActive ? "text-[#191A1B]" : "text-[#686F72]"}`}
+                className={`flex-1 font-medium text-base transition-colors duration-200 ${isActive ? "text-foreground" : "text-secondary"}`}
               >
                 {item.label}
               </span>
@@ -196,9 +196,9 @@ export const DoctorSidebar: FC<Props> = ({
 
       <button
         onClick={() => setLogoutOpen(true)}
-        className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-[#686F72] hover:bg-[#F8F9FA] transition-colors w-full"
+        className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-secondary hover:bg-surface transition-colors w-full"
       >
-        <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0 text-[#F5653E]">
+        <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center shrink-0 text-primary">
           <LogoutIcon className="w-5 h-5" />
         </div>
         <span className="font-medium text-base">Выйти из профиля</span>
@@ -210,7 +210,7 @@ export const DoctorSidebar: FC<Props> = ({
         onConfirm={() => {
           window.location.href = "/";
         }}
-        icon={<LogoutIcon className="w-7 h-7 text-[#F5653E]" />}
+        icon={<LogoutIcon className="w-7 h-7 text-primary" />}
         title="Выйти из профиля?"
         description="Для продолжения работы потребуется снова войти в аккаунт"
         confirmLabel="Выйти"

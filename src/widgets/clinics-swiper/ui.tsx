@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useRef, useState } from "react";
 
@@ -85,14 +85,14 @@ export const ClinicsSwiper: FC<Props> = ({
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-wrap">
-              <h2 className="font-semibold text-xl text-[#191A1B]">{title}</h2>
-              <button className="flex items-center gap-1.5 border border-[#E5E6E8] rounded-full px-3 py-1.5 text-sm">
+              <h2 className="font-semibold text-xl text-foreground">{title}</h2>
+              <button className="flex items-center gap-1.5 border border-border rounded-full px-3 py-1.5 text-sm">
                 <GeoIcon className="size-4" />
                 <span className="flex flex-col items-start leading-tight">
-                  <span className="text-xs font-semibold text-[#191A1B]">
+                  <span className="text-xs font-semibold text-foreground">
                     {city}
                   </span>
-                  <span className="text-[10px] text-[#686F72]">{district}</span>
+                  <span className="text-[10px] text-secondary">{district}</span>
                 </span>
                 <GeoBtnArrowIcon className="size-3.5" />
               </button>
@@ -100,14 +100,14 @@ export const ClinicsSwiper: FC<Props> = ({
             {viewAllHref && (
               <Link
                 href={viewAllHref}
-                className="text-sm text-[#F5653E] shrink-0 hover:opacity-70 transition-opacity"
+                className="text-sm text-primary shrink-0 hover:opacity-70 transition-opacity"
               >
                 Все
               </Link>
             )}
           </div>
           {description && (
-            <p className="text-sm text-[#686F72]">{description}</p>
+            <p className="text-sm text-secondary">{description}</p>
           )}
         </div>
 
@@ -132,7 +132,7 @@ export const ClinicsSwiper: FC<Props> = ({
                 setSpecialty("all");
                 setRating("all");
               }}
-              className="flex items-center gap-1.5 text-sm text-[#F5653E] cursor-pointer transition-opacity hover:opacity-70"
+              className="flex items-center gap-1.5 text-sm text-primary cursor-pointer transition-opacity hover:opacity-70"
             >
               <RemoveIcon className="size-4" />
               Сбросить фильтры
@@ -143,11 +143,11 @@ export const ClinicsSwiper: FC<Props> = ({
 
       {/* Заголовок мобиль — только title + Все */}
       <div className="md:hidden px-4 flex items-center justify-between">
-        <h2 className="font-semibold text-xl text-[#191A1B]">{title}</h2>
+        <h2 className="font-semibold text-xl text-foreground">{title}</h2>
         {viewAllHref && (
           <Link
             href={viewAllHref}
-            className="text-sm text-[#F5653E] hover:opacity-70 transition-opacity"
+            className="text-sm text-primary hover:opacity-70 transition-opacity"
           >
             Все
           </Link>
@@ -155,7 +155,7 @@ export const ClinicsSwiper: FC<Props> = ({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-[#686F72] px-4 py-4">
+        <p className="text-sm text-secondary px-4 py-4">
           Ничего не найдено по выбранным фильтрам
         </p>
       ) : (

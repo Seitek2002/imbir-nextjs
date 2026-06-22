@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 
@@ -40,26 +40,26 @@ export const CityConfirmBanner = () => {
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
-      <div className="bg-white rounded-2xl shadow-lg border border-[#E5E6E8] px-4 py-3 flex items-center gap-3">
+      <div className="bg-white rounded-2xl shadow-lg border border-border px-4 py-3 flex items-center gap-3">
         <div className="size-8 rounded-full bg-[#FEF3F0] flex items-center justify-center shrink-0">
-          <GeoIcon className="size-4 text-[#F5653E]" />
+          <GeoIcon className="size-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-[#838A8D]">Ваш город</p>
-          <p className="text-sm font-semibold text-[#191A1B] truncate">
+          <p className="text-sm text-muted">Ваш город</p>
+          <p className="text-sm font-semibold text-foreground truncate">
             {detectedCity}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleChange}
-            className="text-xs text-[#838A8D] hover:text-[#191A1B] transition-colors px-2 py-1"
+            className="text-xs text-muted hover:text-foreground transition-colors px-2 py-1"
           >
             Изменить
           </button>
           <button
             onClick={handleConfirm}
-            className="text-xs font-medium text-white bg-[#F5653E] hover:bg-[#e05535] transition-colors px-3 py-1.5 rounded-lg"
+            className="text-xs font-medium text-white bg-primary hover:bg-[#e05535] transition-colors px-3 py-1.5 rounded-lg"
           >
             Верно
           </button>

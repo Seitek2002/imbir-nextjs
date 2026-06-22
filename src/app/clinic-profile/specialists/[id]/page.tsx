@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef, useState } from "react";
 
@@ -38,8 +38,8 @@ const TrashIcon = () => (
 );
 
 const inp =
-  "w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors bg-white";
-const lbl = "block text-[#838A8D] text-sm mb-1.5";
+  "w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors bg-white";
+const lbl = "block text-muted text-sm mb-1.5";
 
 export default function SpecialistDetailsPage() {
   const router = useRouter();
@@ -133,7 +133,7 @@ export default function SpecialistDetailsPage() {
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => router.back()}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors"
+            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path
@@ -146,8 +146,8 @@ export default function SpecialistDetailsPage() {
             </svg>
           </button>
         </div>
-        <div className="bg-white rounded-3xl border border-[#E5E6E8] p-16 text-center">
-          <p className="text-[#838A8D] text-lg">Специалист не найден</p>
+        <div className="bg-white rounded-3xl border border-border p-16 text-center">
+          <p className="text-muted text-lg">Специалист не найден</p>
         </div>
       </div>
     );
@@ -155,7 +155,7 @@ export default function SpecialistDetailsPage() {
 
   return (
     <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
-      <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8">
+      <h1 className="text-[40px] font-semibold text-foreground mb-8">
         Мой профиль
       </h1>
 
@@ -170,7 +170,7 @@ export default function SpecialistDetailsPage() {
           <div className="flex items-center gap-3 mb-6">
             <button
               onClick={() => router.back()}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F8F9FA] transition-colors shrink-0"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors shrink-0"
               aria-label="Назад"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -184,21 +184,21 @@ export default function SpecialistDetailsPage() {
               </svg>
             </button>
 
-            <h2 className="text-[28px] font-semibold text-[#191A1B] flex-1 truncate">
+            <h2 className="text-[28px] font-semibold text-foreground flex-1 truncate">
               {isEditing ? "Редактировать" : d.fullName}
             </h2>
 
             {isEditing ? (
               <button
                 onClick={handleSave}
-                className="px-6 py-2.5 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors shrink-0"
+                className="px-6 py-2.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors shrink-0"
               >
                 Сохранить
               </button>
             ) : (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-5 py-2.5 rounded-full border border-[#E5E6E8] text-[#686F72] font-medium hover:bg-[#F8F9FA] transition-colors flex items-center gap-2 shrink-0"
+                className="px-5 py-2.5 rounded-full border border-border text-secondary font-medium hover:bg-surface transition-colors flex items-center gap-2 shrink-0"
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path
@@ -216,7 +216,7 @@ export default function SpecialistDetailsPage() {
             {!isEditing && (
               <button
                 onClick={() => setConfirmOpen(true)}
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#FFF8F5] transition-colors shrink-0"
+                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-tint transition-colors shrink-0"
                 aria-label="Удалить"
               >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -232,10 +232,10 @@ export default function SpecialistDetailsPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-3xl border border-[#E5E6E8] divide-y divide-[#E5E6E8]">
+          <div className="bg-white rounded-3xl border border-border divide-y divide-border">
             {/* 1. Основная информация */}
             <div className="p-8">
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+              <h3 className="text-foreground font-semibold text-lg mb-6">
                 Основная информация
               </h3>
               <div className="flex gap-8">
@@ -254,8 +254,8 @@ export default function SpecialistDetailsPage() {
                       </>
                     ) : (
                       <>
-                        <div className="text-[#838A8D] text-sm mb-1">ФИО</div>
-                        <div className="text-[#191A1B] text-base font-medium">
+                        <div className="text-muted text-sm mb-1">ФИО</div>
+                        <div className="text-foreground text-base font-medium">
                           {d.fullName}
                         </div>
                       </>
@@ -275,8 +275,8 @@ export default function SpecialistDetailsPage() {
                       />
                     ) : (
                       <>
-                        <div className="text-[#838A8D] text-sm mb-1">Пол</div>
-                        <div className="text-[#191A1B] text-base">
+                        <div className="text-muted text-sm mb-1">Пол</div>
+                        <div className="text-foreground text-base">
                           {d.gender || "—"}
                         </div>
                       </>
@@ -296,10 +296,10 @@ export default function SpecialistDetailsPage() {
                       </>
                     ) : (
                       <>
-                        <div className="text-[#838A8D] text-sm mb-1">
+                        <div className="text-muted text-sm mb-1">
                           Дата рождения
                         </div>
-                        <div className="text-[#191A1B] text-base">
+                        <div className="text-foreground text-base">
                           {d.birthDate || "—"}
                         </div>
                       </>
@@ -319,8 +319,8 @@ export default function SpecialistDetailsPage() {
                       </>
                     ) : (
                       <>
-                        <div className="text-[#838A8D] text-sm mb-1">Город</div>
-                        <div className="text-[#191A1B] text-base">
+                        <div className="text-muted text-sm mb-1">Город</div>
+                        <div className="text-foreground text-base">
                           {d.city || "—"}
                         </div>
                       </>
@@ -340,10 +340,10 @@ export default function SpecialistDetailsPage() {
                       </>
                     ) : (
                       <>
-                        <div className="text-[#838A8D] text-sm mb-1">
+                        <div className="text-muted text-sm mb-1">
                           Языки общения
                         </div>
-                        <div className="text-[#191A1B] text-base">
+                        <div className="text-foreground text-base">
                           {d.languages || "—"}
                         </div>
                       </>
@@ -358,10 +358,8 @@ export default function SpecialistDetailsPage() {
                       />
                     ) : (
                       <>
-                        <div className="text-[#838A8D] text-sm mb-1">
-                          Телефон
-                        </div>
-                        <div className="text-[#191A1B] text-base">
+                        <div className="text-muted text-sm mb-1">Телефон</div>
+                        <div className="text-foreground text-base">
                           {d.phone || "—"}
                         </div>
                       </>
@@ -381,8 +379,8 @@ export default function SpecialistDetailsPage() {
                       </>
                     ) : (
                       <>
-                        <div className="text-[#838A8D] text-sm mb-1">Почта</div>
-                        <div className="text-[#191A1B] text-base">
+                        <div className="text-muted text-sm mb-1">Почта</div>
+                        <div className="text-foreground text-base">
                           {d.email || "—"}
                         </div>
                       </>
@@ -390,7 +388,7 @@ export default function SpecialistDetailsPage() {
                   </div>
                 </div>
                 <div className="shrink-0 flex flex-col items-center gap-3 pt-6">
-                  <div className="w-30 h-30 rounded-2xl overflow-hidden bg-[#F8F9FA] border border-[#E5E6E8] flex items-center justify-center">
+                  <div className="w-30 h-30 rounded-2xl overflow-hidden bg-surface border border-border flex items-center justify-center">
                     {d.photo ? (
                       <Image
                         src={d.photo}
@@ -425,7 +423,7 @@ export default function SpecialistDetailsPage() {
                       />
                       <button
                         onClick={() => photoRef.current?.click()}
-                        className="px-4 py-1.5 rounded-full border border-[#E5E6E8] text-[#686F72] text-sm hover:bg-[#F8F9FA] transition-colors"
+                        className="px-4 py-1.5 rounded-full border border-border text-secondary text-sm hover:bg-surface transition-colors"
                       >
                         Изменить фото
                       </button>
@@ -437,7 +435,7 @@ export default function SpecialistDetailsPage() {
 
             {/* 2. Профессиональные данные */}
             <div className="p-8">
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+              <h3 className="text-foreground font-semibold text-lg mb-6">
                 Профессиональные данные
               </h3>
               <div className="grid grid-cols-2 gap-x-6 gap-y-5">
@@ -455,10 +453,10 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
+                      <div className="text-muted text-sm mb-1">
                         Специализация
                       </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-foreground text-base">
                         {d.specialty || "—"}
                       </div>
                     </>
@@ -482,10 +480,10 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
+                      <div className="text-muted text-sm mb-1">
                         Дополнительная специализация
                       </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-foreground text-base">
                         {d.additionalSpecialty || "—"}
                       </div>
                     </>
@@ -506,10 +504,10 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
+                      <div className="text-muted text-sm mb-1">
                         Стаж работы (лет)
                       </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-foreground text-base">
                         {d.experienceYears || "—"}
                       </div>
                     </>
@@ -529,10 +527,10 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
+                      <div className="text-muted text-sm mb-1">
                         Текущая должность
                       </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-foreground text-base">
                         {d.currentPosition || "—"}
                       </div>
                     </>
@@ -552,10 +550,10 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
+                      <div className="text-muted text-sm mb-1">
                         Место работы (клиника)
                       </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-foreground text-base">
                         {d.workplace || "—"}
                       </div>
                     </>
@@ -577,10 +575,10 @@ export default function SpecialistDetailsPage() {
                     />
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
+                      <div className="text-muted text-sm mb-1">
                         Категория / Квалификация
                       </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-foreground text-base">
                         {d.qualification || "—"}
                       </div>
                     </>
@@ -602,10 +600,10 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
+                      <div className="text-muted text-sm mb-1">
                         Научная степень
                       </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-foreground text-base">
                         {d.scientificDegree || "—"}
                       </div>
                     </>
@@ -616,7 +614,7 @@ export default function SpecialistDetailsPage() {
 
             {/* 3. Образование */}
             <div className="p-8">
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+              <h3 className="text-foreground font-semibold text-lg mb-6">
                 Образование
               </h3>
               <div className="grid grid-cols-2 gap-x-6 gap-y-5">
@@ -634,8 +632,8 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">ВУЗ</div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-muted text-sm mb-1">ВУЗ</div>
+                      <div className="text-foreground text-base">
                         {d.university || "—"}
                       </div>
                     </>
@@ -655,10 +653,10 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
+                      <div className="text-muted text-sm mb-1">
                         Год окончания
                       </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-foreground text-base">
                         {d.graduationYear || "—"}
                       </div>
                     </>
@@ -678,10 +676,8 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
-                        Интернатура
-                      </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-muted text-sm mb-1">Интернатура</div>
+                      <div className="text-foreground text-base">
                         {d.internship || "—"}
                       </div>
                     </>
@@ -701,10 +697,8 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
-                        Ординатура
-                      </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-muted text-sm mb-1">Ординатура</div>
+                      <div className="text-foreground text-base">
                         {d.residency || "—"}
                       </div>
                     </>
@@ -726,10 +720,10 @@ export default function SpecialistDetailsPage() {
                     </>
                   ) : (
                     <>
-                      <div className="text-[#838A8D] text-sm mb-1">
+                      <div className="text-muted text-sm mb-1">
                         Специализация по диплому
                       </div>
-                      <div className="text-[#191A1B] text-base">
+                      <div className="text-foreground text-base">
                         {d.diplomaSpecialty || "—"}
                       </div>
                     </>
@@ -737,7 +731,7 @@ export default function SpecialistDetailsPage() {
                 </div>
                 <div className="col-span-2">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-[#838A8D] text-sm">
+                    <div className="text-muted text-sm">
                       Дополнительное образование
                     </div>
                     {isEditing && (
@@ -748,7 +742,7 @@ export default function SpecialistDetailsPage() {
                             "",
                           ])
                         }
-                        className="text-[#F5653E] text-sm font-medium flex items-center gap-1 hover:text-[#E5542D] transition-colors"
+                        className="text-primary text-sm font-medium flex items-center gap-1 hover:text-primary-dark transition-colors"
                       >
                         <svg
                           width="14"
@@ -770,7 +764,7 @@ export default function SpecialistDetailsPage() {
                   {isEditing ? (
                     <div className="space-y-2">
                       {d.additionalEducation.length === 0 ? (
-                        <div className="text-[#C4C8CA] text-sm px-4 py-3 rounded-2xl border border-dashed border-[#E5E6E8] text-center">
+                        <div className="text-dim text-sm px-4 py-3 rounded-2xl border border-dashed border-border text-center">
                           Нажмите «Добавить» для добавления записи
                         </div>
                       ) : (
@@ -799,7 +793,7 @@ export default function SpecialistDetailsPage() {
                                   ),
                                 )
                               }
-                              className="w-9 h-9 flex items-center justify-center text-[#C4C8CA] hover:text-[#F5653E] transition-colors shrink-0"
+                              className="w-9 h-9 flex items-center justify-center text-dim hover:text-primary transition-colors shrink-0"
                             >
                               <svg
                                 width="16"
@@ -822,10 +816,10 @@ export default function SpecialistDetailsPage() {
                   ) : (
                     <div className="space-y-1 mt-1">
                       {d.additionalEducation.length === 0 ? (
-                        <div className="text-[#191A1B] text-base">—</div>
+                        <div className="text-foreground text-base">—</div>
                       ) : (
                         d.additionalEducation.map((item, i) => (
-                          <div key={i} className="text-[#191A1B] text-base">
+                          <div key={i} className="text-foreground text-base">
                             {item}
                           </div>
                         ))
@@ -838,7 +832,7 @@ export default function SpecialistDetailsPage() {
 
             {/* 4. Сертификаты и документы */}
             <div className="p-8">
-              <h3 className="text-[#191A1B] font-semibold text-lg mb-6">
+              <h3 className="text-foreground font-semibold text-lg mb-6">
                 Сертификаты и документы
               </h3>
               <div className="mb-6">
@@ -855,10 +849,10 @@ export default function SpecialistDetailsPage() {
                   </>
                 ) : (
                   <>
-                    <div className="text-[#838A8D] text-sm mb-1">
+                    <div className="text-muted text-sm mb-1">
                       Номер лицензии
                     </div>
-                    <div className="text-[#191A1B] text-base">
+                    <div className="text-foreground text-base">
                       {d.licenseNumber || "—"}
                     </div>
                   </>
@@ -866,7 +860,7 @@ export default function SpecialistDetailsPage() {
               </div>
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="text-[#838A8D] text-sm">Сертификаты</div>
+                  <div className="text-muted text-sm">Сертификаты</div>
                   {isEditing && (
                     <>
                       <input
@@ -878,7 +872,7 @@ export default function SpecialistDetailsPage() {
                       />
                       <button
                         onClick={() => certRef.current?.click()}
-                        className="text-[#F5653E] text-sm font-medium flex items-center gap-1 hover:text-[#E5542D] transition-colors"
+                        className="text-primary text-sm font-medium flex items-center gap-1 hover:text-primary-dark transition-colors"
                       >
                         <svg
                           width="14"
@@ -899,7 +893,7 @@ export default function SpecialistDetailsPage() {
                   )}
                 </div>
                 {certs.length === 0 ? (
-                  <div className="text-[#C4C8CA] text-sm">
+                  <div className="text-dim text-sm">
                     {isEditing
                       ? "Нажмите «Добавить» для загрузки сертификата"
                       : "—"}
@@ -909,7 +903,7 @@ export default function SpecialistDetailsPage() {
                     {certs.map((cert, i) => (
                       <div
                         key={i}
-                        className="relative w-24 h-24 rounded-2xl overflow-hidden border border-[#E5E6E8] bg-[#F8F9FA]"
+                        className="relative w-24 h-24 rounded-2xl overflow-hidden border border-border bg-surface"
                       >
                         <Image
                           src={cert}
@@ -923,7 +917,7 @@ export default function SpecialistDetailsPage() {
                             onClick={() =>
                               setCerts((prev) => prev.filter((_, j) => j !== i))
                             }
-                            className="absolute top-0 right-0 w-1/2 aspect-square bg-[#F5653E] flex items-center justify-center"
+                            className="absolute top-0 right-0 w-1/2 aspect-square bg-primary flex items-center justify-center"
                           >
                             <svg
                               className="w-1/2 h-1/2"

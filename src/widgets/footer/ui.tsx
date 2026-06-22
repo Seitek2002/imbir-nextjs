@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+﻿import { FC, ReactNode } from "react";
 
 import Link from "next/link";
 
@@ -21,7 +21,7 @@ const SocialLink: FC<{ href: string; Icon: FC<{ className?: string }> }> = ({
     href={href}
     target="_blank"
     rel="noopener noreferrer"
-    className="size-10 rounded-full bg-[#F5653E] flex items-center justify-center text-white hover:bg-[#E0542E] transition-colors"
+    className="size-10 rounded-full bg-primary flex items-center justify-center text-white hover:bg-[#E0542E] transition-colors"
   >
     {/* Добавил fill-white на случай, если svg экспортировались с другим цветом */}
     <Icon className="size-5 [&_path]:fill-white" />
@@ -29,7 +29,7 @@ const SocialLink: FC<{ href: string; Icon: FC<{ className?: string }> }> = ({
 );
 
 const ColumnHeading: FC<{ children: ReactNode }> = ({ children }) => (
-  <h3 className="text-[#191A1B] font-semibold text-base mb-4 md:mb-6">
+  <h3 className="text-foreground font-semibold text-base mb-4 md:mb-6">
     {children}
   </h3>
 );
@@ -40,14 +40,14 @@ const FooterLink: FC<{ href: string; children: ReactNode }> = ({
 }) => (
   <Link
     href={href}
-    className="text-[#686F72] text-sm md:text-base hover:text-[#F5653E] transition-colors block mb-3 md:mb-4"
+    className="text-secondary text-sm md:text-base hover:text-primary transition-colors block mb-3 md:mb-4"
   >
     {children}
   </Link>
 );
 
 const FooterText: FC<{ children: ReactNode }> = ({ children }) => (
-  <p className="text-[#686F72] text-sm md:text-base mb-3 md:mb-4">{children}</p>
+  <p className="text-secondary text-sm md:text-base mb-3 md:mb-4">{children}</p>
 );
 
 // --- Основной компонент Footer ---
@@ -103,8 +103,8 @@ export const Footer: FC = () => {
         </div>
 
         {/* Нижняя часть: Копирайт */}
-        <div className="flex justify-center items-center md:mt-10 pt-6 md:pt-0 border-t border-[#E3E4E5]/50 md:border-none">
-          <p className="text-[#191A1B] text-sm text-center">
+        <div className="flex justify-center items-center md:mt-10 pt-6 md:pt-0 border-t border-border-soft/50 md:border-none">
+          <p className="text-foreground text-sm text-center">
             © 2026 Imbir. Все права защищены
           </p>
         </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useState } from "react";
 
@@ -32,8 +32,8 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
 
   if (filteredItems.length === 0) {
     return (
-      <div className="bg-white rounded-3xl p-10 text-center border border-[#E5E6E8]">
-        <p className="text-[#838A8D] text-lg">Список пуст</p>
+      <div className="bg-white rounded-3xl p-10 text-center border border-border">
+        <p className="text-muted text-lg">Список пуст</p>
       </div>
     );
   }

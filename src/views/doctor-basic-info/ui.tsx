@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC, useEffect, useRef, useState } from "react";
 
@@ -76,7 +76,7 @@ export const DoctorBasicInfoPage: FC = () => {
   if (isLoading) {
     return (
       <DoctorPageLayout title="Основная информация">
-        <div className="flex items-center justify-center py-20 text-[#838A8D]">
+        <div className="flex items-center justify-center py-20 text-muted">
           Загрузка...
         </div>
       </DoctorPageLayout>
@@ -90,11 +90,11 @@ export const DoctorBasicInfoPage: FC = () => {
       onEditToggle={isEditing ? handleSave : () => setIsEditing(true)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
-        <h2 className="text-[28px] font-semibold text-[#191A1B]">{title}</h2>
+        <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
         <button
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-[#F5653E] text-white hover:bg-[#E5542D]" : "border border-[#E5E6E8] text-[#686F72] hover:bg-[#F8F9FA]"}`}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-primary text-white hover:bg-primary-dark" : "border border-border text-secondary hover:bg-surface"}`}
         >
           {isSaving
             ? "Сохранение..."
@@ -104,10 +104,10 @@ export const DoctorBasicInfoPage: FC = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl border border-[#E5E6E8] p-5 lg:p-8">
+      <div className="bg-white rounded-3xl border border-border p-5 lg:p-8">
         <div className="flex justify-center mb-6">
           <div className="relative">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
               {d.photo ? (
                 <Image
                   src={d.photo}
@@ -133,7 +133,7 @@ export const DoctorBasicInfoPage: FC = () => {
                 />
                 <button
                   onClick={() => photoRef.current?.click()}
-                  className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#F5653E] flex items-center justify-center"
+                  className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary flex items-center justify-center"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path
@@ -178,13 +178,13 @@ export const DoctorBasicInfoPage: FC = () => {
                       onClick={() => set("gender", g)}
                     >
                       <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${d.gender === g ? "border-[#F5653E]" : "border-[#C4C8CA]"}`}
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${d.gender === g ? "border-primary" : "border-dim"}`}
                       >
                         {d.gender === g && (
-                          <div className="w-2.5 h-2.5 rounded-full bg-[#F5653E]" />
+                          <div className="w-2.5 h-2.5 rounded-full bg-primary" />
                         )}
                       </div>
-                      <span className="text-[#191A1B] text-sm">{g}</span>
+                      <span className="text-foreground text-sm">{g}</span>
                     </label>
                   ))}
                 </div>

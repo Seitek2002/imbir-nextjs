@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FC } from "react";
 
@@ -47,20 +47,20 @@ export const ClinicSpecialistsPage: FC = () => {
 
   return (
     <div className="w-full min-h-screen">
-      <div className="md:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-[#E5E6E8]">
-        <h1 className="text-lg font-semibold text-[#191A1B]">
+      <div className="md:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
+        <h1 className="text-lg font-semibold text-foreground">
           Мои специалисты
         </h1>
         <Link
           href="/clinic-profile/invites"
-          className="px-4 py-2 rounded-full bg-[#F5653E] text-white text-sm font-medium hover:bg-[#E5542D] transition-colors"
+          className="px-4 py-2 rounded-full bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors"
         >
           Пригласить
         </Link>
       </div>
 
       <div className="max-w-360 mx-auto px-4 md:px-10 py-4 md:py-8">
-        <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8 hidden md:block">
+        <h1 className="text-[40px] font-semibold text-foreground mb-8 hidden md:block">
           Мой профиль
         </h1>
 
@@ -73,12 +73,12 @@ export const ClinicSpecialistsPage: FC = () => {
 
           <main className="flex-1 min-w-0">
             <div className="hidden md:flex items-center justify-between mb-6">
-              <h2 className="text-[32px] font-semibold text-[#191A1B]">
+              <h2 className="text-[32px] font-semibold text-foreground">
                 Мои специалисты
               </h2>
               <Link
                 href="/clinic-profile/invites"
-                className="px-6 py-3 rounded-full bg-[#F5653E] text-white font-medium hover:bg-[#E5542D] transition-colors whitespace-nowrap"
+                className="px-6 py-3 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors whitespace-nowrap"
               >
                 Пригласить нового
               </Link>

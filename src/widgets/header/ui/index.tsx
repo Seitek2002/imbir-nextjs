@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+﻿import { FC, ReactNode } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
@@ -23,10 +23,10 @@ export const Header: FC<Props> = ({
   return (
     <header
       className={cn(
-        "px-4 pt-1 pb-4 bg-white md:border md:border-[#E3E4E5] md:mt-6 md:py-3 w-full max-w-360 md:max-w-340 mx-auto",
+        "px-4 pt-1 pb-4 bg-white md:border md:border-border-soft md:mt-6 md:py-3 w-full max-w-360 md:max-w-340 mx-auto",
         !(title || backTo)
           ? "rounded-bl-2xl rounded-br-2xl md:rounded-full"
-          : "border-b border-[#E3E4E5] md:rounded-full",
+          : "border-b border-border-soft md:rounded-full",
       )}
     >
       <div className="hidden md:block">
