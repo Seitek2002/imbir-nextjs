@@ -16,6 +16,7 @@ import {
   useSpecialistsStore,
 } from "@/entities/clinic-specialist";
 
+import { colors } from "@/shared/config/tokens";
 import { PhoneInput } from "@/shared/ui";
 
 const inp =

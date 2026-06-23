@@ -7,6 +7,7 @@ import Link from "next/link";
 import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
 import { ChevronRightIcon } from "@/shared/assets";
+import { colors } from "@/shared/config/tokens";
 
 const SECTIONS = [
   {

@@ -12,6 +12,8 @@ import {
   useDoctorCabinet,
 } from "@/entities/doctor-profile";
 
+import { colors } from "@/shared/config/tokens";
+
 const { inp } = formStyles;
 
 const FileIcon = () => (

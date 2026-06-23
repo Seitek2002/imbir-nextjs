@@ -8,6 +8,7 @@ import { Header } from "@/widgets";
 
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
+import { colors } from "@/shared/config/tokens";
 import { cn } from "@/shared/lib/utils";
 import { Button, IconBtn, Input } from "@/shared/ui";
 

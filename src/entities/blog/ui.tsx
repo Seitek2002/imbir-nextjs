@@ -5,6 +5,8 @@ import { FC, useState } from "react";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 
+import { colors } from "@/shared/config/tokens";
+
 type Props = {
   title: string;
   category: string;

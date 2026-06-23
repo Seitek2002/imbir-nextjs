@@ -11,6 +11,8 @@ import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
+import { colors } from "@/shared/config/tokens";
+
 type WorkSchedule = {
   day: string;
   from: string;

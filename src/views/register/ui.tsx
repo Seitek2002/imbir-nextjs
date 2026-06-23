@@ -22,6 +22,7 @@ import {
   ProfileIcon,
 } from "@/shared/assets";
 import { ROUTES } from "@/shared/config/routes";
+import { colors } from "@/shared/config/tokens";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store/authStore";
 import { Button, IconBtn, Input } from "@/shared/ui";

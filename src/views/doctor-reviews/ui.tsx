@@ -10,6 +10,7 @@ import { DoctorReview, useDoctorCabinet } from "@/entities/doctor-profile";
 
 import { getReviews } from "@/shared/api/reviews/requests";
 import type { ReviewAuthor } from "@/shared/api/reviews/types";
+import { colors } from "@/shared/config/tokens";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 const resolveAuthorName = (author: ReviewAuthor): string => {

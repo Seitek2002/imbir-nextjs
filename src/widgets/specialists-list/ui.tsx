@@ -8,6 +8,7 @@ import { SpecialistCard } from "@/entities/clinic-specialist";
 import type { Specialist } from "@/entities/clinic-specialist";
 
 import { TrashIcon } from "@/shared/assets";
+import { colors } from "@/shared/config/tokens";
 
 type Props = {
   specialists: Specialist[];

@@ -7,6 +7,8 @@ import { ConfirmDialog, FilterPanel, IconBtn, SearchInput } from "@/shared";
 import { ProcedureCard } from "@/entities/clinic-procedure";
 import type { Procedure } from "@/entities/clinic-procedure";
 
+import { colors } from "@/shared/config/tokens";
+
 type Props = {
   procedures: Procedure[];
   onDelete?: (id: string) => void;

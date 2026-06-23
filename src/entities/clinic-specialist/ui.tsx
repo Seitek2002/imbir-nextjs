@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { StarIcon, UserCircleIcon } from "@/shared/assets";
+import { colors } from "@/shared/config/tokens";
 
 type Props = {
   id: string;

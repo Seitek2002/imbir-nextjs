@@ -13,6 +13,7 @@ import {
 } from "@/shared/api/doctor-cabinet/requests";
 import type { DoctorServiceBody } from "@/shared/api/doctor-cabinet/types";
 import { doctorCabinetKeys } from "@/shared/api/queryKeys";
+import { colors } from "@/shared/config/tokens";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 const DURATION = 200;

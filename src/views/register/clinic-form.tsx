@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 
 import { EyeIcon, EyeOffIcon } from "@/shared/assets";
+import { colors } from "@/shared/config/tokens";
 import { cn } from "@/shared/lib/utils";
 import {
   Button,

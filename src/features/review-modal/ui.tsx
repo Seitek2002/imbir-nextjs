@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Button } from "@/shared";
 
 import { StarBoldIcon, StarOutlineIcon } from "@/shared/assets";
+import { colors } from "@/shared/config/tokens";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 type Props = {

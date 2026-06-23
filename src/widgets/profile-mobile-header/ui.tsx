@@ -4,6 +4,8 @@ import { FC, ReactNode } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { colors } from "@/shared/config/tokens";
+
 type Props = {
   title: string;
   rightElement?: ReactNode;

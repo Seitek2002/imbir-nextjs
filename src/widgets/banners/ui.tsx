@@ -12,6 +12,7 @@ import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 import { BannerImage1, BannerImage2, BannerImage3 } from "@/shared/assets";
+import { colors } from "@/shared/config/tokens";
 
 export const Banners: FC = () => {
   const card1 = (

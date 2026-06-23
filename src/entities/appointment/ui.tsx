@@ -10,6 +10,7 @@ import {
   MedicalServiceIcon,
   StarIcon,
 } from "@/shared/assets";
+import { colors } from "@/shared/config/tokens";
 
 import type { Appointment } from "./model";
 

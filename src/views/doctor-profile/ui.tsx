@@ -10,6 +10,7 @@ import { DoctorSidebar } from "@/widgets/doctor-sidebar";
 import { useDoctorCabinet } from "@/entities/doctor-profile";
 
 import { ChevronRightIcon, LogoutIcon, StarIcon } from "@/shared/assets";
+import { colors } from "@/shared/config/tokens";
 
 const MENU_ITEMS = [
   {
