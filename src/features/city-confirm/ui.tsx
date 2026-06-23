@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 import { GeoIcon } from "@/shared/assets";
 import { useCityStore } from "@/shared/store/cityStore";
@@ -15,23 +15,39 @@ function setCookie(name: string, value: string) {
   document.cookie = `${name}=${value}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 }
 
+// Cookies don't change during the lifetime of this component, so the
+// subscribe callback is a no-op — we only need the server/client split.
+const noopSubscribe = () => () => {};
+
+/**
+ * Reads the detected-city cookie. On the server the snapshot is always null,
+ * so the first client render matches the server (both render nothing) and the
+ * banner only appears on a subsequent client render — no hydration mismatch.
+ */
+function useDetectedCity(): string | null {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => getCookie("imbir-detected-city"),
+    () => null,
+  );
+}
+
 export const CityConfirmBanner = () => {
   const { isSet, setCity, dismiss } = useCityStore();
-  const [detectedCity, setDetectedCity] = useState<string | null>(() =>
-    getCookie("imbir-detected-city"),
-  );
+  const detectedCity = useDetectedCity();
+  const [closed, setClosed] = useState(false);
 
-  if (!detectedCity || isSet) return null;
+  if (closed || !detectedCity || isSet) return null;
 
   const handleConfirm = () => {
     setCity(detectedCity);
     setCookie("imbir-city-set", "1");
-    setDetectedCity(null);
+    setClosed(true);
   };
 
   const handleChange = () => {
     dismiss();
-    setDetectedCity(null);
+    setClosed(true);
   };
 
   return (
