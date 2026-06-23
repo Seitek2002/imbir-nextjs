@@ -1,3 +1,5 @@
+import type { MobileSelectionStage } from "./types";
+
 const MONTHS_GENITIVE = [
   "января",
   "февраля",
@@ -13,4 +15,16 @@ const MONTHS_GENITIVE = [
   "декабря",
 ];
 
-export { MONTHS_GENITIVE };
+const SELECTION_LABELS: Record<
+  MobileSelectionStage,
+  { title: string; searchPlaceholder: string }
+> = {
+  clinic: { title: "Выберите клинику", searchPlaceholder: "Поиск клиники" },
+  doctor: {
+    title: "Выберите специалиста",
+    searchPlaceholder: "Поиск специалиста",
+  },
+  service: { title: "Выберите услугу", searchPlaceholder: "Поиск услуги" },
+};
+
+export { MONTHS_GENITIVE, SELECTION_LABELS };
