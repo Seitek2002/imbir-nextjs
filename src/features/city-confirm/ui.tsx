@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { GeoIcon } from "@/shared/assets";
 import { useCityStore } from "@/shared/store/cityStore";
@@ -17,13 +17,9 @@ function setCookie(name: string, value: string) {
 
 export const CityConfirmBanner = () => {
   const { isSet, setCity, dismiss } = useCityStore();
-  const [detectedCity, setDetectedCity] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isSet) return;
-    const city = getCookie("imbir-detected-city");
-    if (city) setDetectedCity(city);
-  }, [isSet]);
+  const [detectedCity, setDetectedCity] = useState<string | null>(() =>
+    getCookie("imbir-detected-city"),
+  );
 
   if (!detectedCity || isSet) return null;
 
