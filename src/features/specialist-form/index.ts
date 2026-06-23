@@ -1,1 +1,0 @@
-export { SpecialistForm } from "./ui";
