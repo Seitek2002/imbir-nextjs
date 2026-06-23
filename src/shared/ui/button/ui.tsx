@@ -38,7 +38,7 @@ export const Button: FC<Props> = ({
 
   const variants: Record<Variant, string> = {
     default:
-      "bg-primary text-white active:bg-[#C54826] hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]",
+      "bg-primary text-white active:bg-primary-dark hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]",
     outline:
       "border border-border active:bg-border-soft hover:shadow-[0_0_1px_3px_rgba(242,243,245,0.8),0_0_0_1px_#E5E6E8] hover:bg-transparent",
     text: "text-foreground active:bg-border-soft hover:bg-background",

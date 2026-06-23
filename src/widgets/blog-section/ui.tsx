@@ -20,7 +20,7 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
   const [featuredLoaded, setFeaturedLoaded] = useState(false);
 
   const featuredLinkClassName =
-    "inline-flex w-fit items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white transition-all active:bg-[#C54826] hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]";
+    "inline-flex w-fit items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white transition-all active:bg-primary-dark hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]";
 
   const featured = posts.find((post) => post.featured);
   const filtered =

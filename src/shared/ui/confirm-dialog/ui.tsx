@@ -89,7 +89,7 @@ export const ConfirmDialog: FC<Props> = ({
               onConfirm();
               handleClose();
             }}
-            className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium text-base hover:bg-[#E0532D] transition-colors active:scale-95"
+            className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium text-base hover:bg-primary-dark transition-colors active:scale-95"
           >
             {confirmLabel}
           </button>
@@ -126,7 +126,7 @@ export const ConfirmDialog: FC<Props> = ({
               onConfirm();
               handleClose();
             }}
-            className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium text-base hover:bg-[#E0532D] transition-colors active:scale-95"
+            className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium text-base hover:bg-primary-dark transition-colors active:scale-95"
           >
             {confirmLabel}
           </button>

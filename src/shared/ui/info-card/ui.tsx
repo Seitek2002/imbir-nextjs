@@ -28,7 +28,7 @@ export const InfoCard: FC<Props> = ({
         {expandable && (
           <Button
             variant="text"
-            className="text-sm text-primary hover:text-[#D94F2B] px-0 h-auto font-medium"
+            className="text-sm text-primary hover:text-primary-dark px-0 h-auto font-medium"
             onClick={() => setIsExpanded(!isExpanded)}
           >
             {isExpanded ? "Скрыть" : "Подробнее"}

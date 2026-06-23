@@ -59,7 +59,7 @@ export const CityConfirmBanner = () => {
           </button>
           <button
             onClick={handleConfirm}
-            className="text-xs font-medium text-white bg-primary hover:bg-[#e05535] transition-colors px-3 py-1.5 rounded-lg"
+            className="text-xs font-medium text-white bg-primary hover:bg-primary-dark transition-colors px-3 py-1.5 rounded-lg"
           >
             Верно
           </button>
