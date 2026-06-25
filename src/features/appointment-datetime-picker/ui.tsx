@@ -4,10 +4,9 @@ import { FC, useEffect, useMemo, useRef, useState } from "react";
 
 import Link from "next/link";
 
-import { IconBtn } from "@/shared";
-
-import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets";
+import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
+import { IconBtn } from "@/shared/ui";
 
 export type ConsultationMode = "online" | "offline";
 

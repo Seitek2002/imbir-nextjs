@@ -7,7 +7,7 @@ import { ReviewModal } from "@/features/review-modal";
 import { AppointmentCard } from "@/entities/appointment";
 import type { Appointment, AppointmentStatus } from "@/entities/appointment";
 
-import { WarningIcon } from "@/shared/assets";
+import { WarningIcon } from "@/shared/assets/icons";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 type Props = {

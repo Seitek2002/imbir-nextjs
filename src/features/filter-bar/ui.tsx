@@ -4,9 +4,8 @@ import { FC, ReactNode } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Button, Dropdown, RangeSlider } from "@/shared";
-
-import { RemoveIcon } from "@/shared/assets";
+import { RemoveIcon } from "@/shared/assets/icons";
+import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 
 type Props = {
   title?: string;

@@ -7,8 +7,8 @@ import Link from "next/link";
 
 import { BlogCard, BlogCategory, BlogPost } from "@/entities/blog";
 
-import { ThunderIcon } from "@/shared/assets";
-import { colors } from "@/shared/config/tokens";
+import { ThunderIcon } from "@/shared/assets/icons";
+import { colors } from "@/shared/config";
 
 type Props = {
   posts: BlogPost[];

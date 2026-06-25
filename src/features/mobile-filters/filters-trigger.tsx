@@ -4,9 +4,8 @@ import { FC } from "react";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { IconBtn } from "@/shared";
-
-import { FilterSample } from "@/shared/assets";
+import { FilterSample } from "@/shared/assets/icons";
+import { IconBtn } from "@/shared/ui";
 
 export const FiltersTrigger: FC = () => {
   const router = useRouter();

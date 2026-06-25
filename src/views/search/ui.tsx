@@ -5,20 +5,24 @@ import { FC, Suspense } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { ActiveFiltersChips, FiltersTrigger } from "@/features";
-import { Header } from "@/widgets";
 import { useQuery } from "@tanstack/react-query";
 
-import { UrlSearchInput } from "@/features/search-by-query/ui";
+import { Header } from "@/widgets/header";
+
+import { ActiveFiltersChips } from "@/features/active-filters-chips";
+import { FiltersTrigger } from "@/features/mobile-filters";
+import { UrlSearchInput } from "@/features/search-by-query";
 
 import { api } from "@/shared/api/requests";
 import { ROUTES } from "@/shared/config/routes";
 import { Button } from "@/shared/ui";
 
 const MobileFiltersModal = dynamic(() =>
-  import("@/features").then((mod) => mod.MobileFiltersModal),
+  import("@/features/mobile-filters").then((mod) => mod.MobileFiltersModal),
 );
-const Footer = dynamic(() => import("@/widgets").then((mod) => mod.Footer));
+const Footer = dynamic(() =>
+  import("@/widgets/footer").then((mod) => mod.Footer),
+);
 const CategoriesGrid = dynamic(() =>
   import("@/features/global-search").then((mod) => mod.CategoriesGrid),
 );

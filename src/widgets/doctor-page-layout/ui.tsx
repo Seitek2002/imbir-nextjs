@@ -8,7 +8,7 @@ import { DoctorSidebar } from "@/widgets/doctor-sidebar";
 
 import { useDoctorCabinet } from "@/entities/doctor-profile";
 
-import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets";
+import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets/icons";
 
 type Props = {
   title: string;

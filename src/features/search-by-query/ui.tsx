@@ -4,7 +4,7 @@ import { FC, useEffect, useState } from "react";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { useSearchHistoryStore } from "@/shared/store/useSearchHistoryStore";
+import { useSearchHistoryStore } from "@/shared/store";
 import { SearchInput } from "@/shared/ui";
 
 const QUERY_KEY = "q";

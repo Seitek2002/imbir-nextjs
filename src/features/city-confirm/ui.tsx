@@ -2,8 +2,8 @@
 
 import { useState, useSyncExternalStore } from "react";
 
-import { GeoIcon } from "@/shared/assets";
-import { useCityStore } from "@/shared/store/cityStore";
+import { GeoIcon } from "@/shared/assets/icons";
+import { useCityStore } from "@/shared/store";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;

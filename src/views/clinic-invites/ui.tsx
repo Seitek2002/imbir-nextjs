@@ -2,7 +2,6 @@
 
 import { FC, useState } from "react";
 
-import { Button } from "@/shared";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
@@ -15,8 +14,9 @@ import {
   getClinicInvites,
 } from "@/shared/api/clinic-cabinet/requests";
 import { clinicCabinetKeys } from "@/shared/api/queryKeys";
-import { GeoIcon, HistoryIcon } from "@/shared/assets";
+import { GeoIcon, HistoryIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui";
 
 const LinkIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

@@ -7,7 +7,7 @@ import {
   DropdownArrowIcon,
   DropdownRemoveIcon,
   WarningIcon,
-} from "@/shared/assets";
+} from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 import { Button } from "../button";

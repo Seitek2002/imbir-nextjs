@@ -5,7 +5,7 @@ import { FC, useState } from "react";
 import { StaticImageData } from "next/image";
 import Image from "next/image";
 
-import { UserCircleIcon } from "@/shared/assets";
+import { UserCircleIcon } from "@/shared/assets/icons";
 
 type Props = {
   image?: StaticImageData | string;

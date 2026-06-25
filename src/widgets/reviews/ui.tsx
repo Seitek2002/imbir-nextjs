@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { ReviewCard } from "@/entities/review/ui/ReviewCard";
 
-import { ChatIcon, StarIcon } from "@/shared/assets";
+import { ChatIcon, StarIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
 

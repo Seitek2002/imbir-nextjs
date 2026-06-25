@@ -1,6 +1,6 @@
 ﻿import { FC, TextareaHTMLAttributes } from "react";
 
-import { WarningIcon } from "@/shared/assets";
+import { WarningIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 type Props = {

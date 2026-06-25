@@ -1,4 +1,4 @@
-﻿import { Header } from "@/widgets";
+﻿import { Header } from "@/widgets/header";
 
 export default function Loading() {
   return (

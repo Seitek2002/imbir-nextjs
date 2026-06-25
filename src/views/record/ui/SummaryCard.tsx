@@ -4,11 +4,10 @@ import { FC, useState } from "react";
 
 import Image from "next/image";
 
-import { Button } from "@/shared";
-
 import { type ConsultationMode } from "@/features/appointment-datetime-picker";
 
-import { CalendarIcon } from "@/shared/assets";
+import { CalendarIcon } from "@/shared/assets/icons";
+import { Button } from "@/shared/ui";
 
 import { formatDateLabel, formatPrice } from "../model/lib";
 import type { Doctor, Service } from "../model/types";

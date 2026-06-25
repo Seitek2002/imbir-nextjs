@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 
-import { Footer, Header } from "@/widgets";
+import { Footer } from "@/widgets/footer";
+import { Header } from "@/widgets/header";
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {
   return (

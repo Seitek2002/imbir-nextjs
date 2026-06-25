@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Header } from "@/widgets";
 import { useQuery } from "@tanstack/react-query";
+
+import { Header } from "@/widgets/header";
 
 import {
   chatLoginFn,

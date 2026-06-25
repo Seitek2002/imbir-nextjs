@@ -10,8 +10,8 @@ import { ProfileSidebar } from "@/widgets/profile-sidebar";
 
 import { updateProfile } from "@/shared/api/profile/requests";
 import { uploadFile } from "@/shared/api/upload/requests";
-import { CheckIcon, EditIcon } from "@/shared/assets";
-import { useAuthStore } from "@/shared/store/authStore";
+import { CheckIcon, EditIcon } from "@/shared/assets/icons";
+import { useAuthStore } from "@/shared/store";
 import { PhoneInput } from "@/shared/ui";
 
 type D = {

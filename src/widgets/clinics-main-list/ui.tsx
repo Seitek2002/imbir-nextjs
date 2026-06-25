@@ -5,8 +5,9 @@ import { FC, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { FilterBar } from "@/features";
 import { useQuery } from "@tanstack/react-query";
+
+import { FilterBar } from "@/features/filter-bar";
 
 import { ClinicCard, ClinicSkeleton } from "@/entities/clinic";
 

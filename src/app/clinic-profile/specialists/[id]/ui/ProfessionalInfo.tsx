@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { Dropdown } from "@/shared";
+import { Dropdown } from "@/shared/ui";
 
 import { IProps } from "../model/types";
 import { inp, lbl } from "./constants";

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import { EyeIcon, EyeOffIcon } from "@/shared/assets";
-import { colors } from "@/shared/config/tokens";
+import { EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
+import { colors } from "@/shared/config";
 import { Checkbox, Input } from "@/shared/ui";
 
 import type { ClinicFormData } from "../model/types";

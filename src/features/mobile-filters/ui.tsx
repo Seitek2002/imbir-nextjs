@@ -4,9 +4,8 @@ import { FC, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Button, Dropdown, PageHeader, Radio, RangeSlider } from "@/shared";
-
-import { StarIcon } from "@/shared/assets";
+import { StarIcon } from "@/shared/assets/icons";
+import { Button, Dropdown, PageHeader, Radio, RangeSlider } from "@/shared/ui";
 
 type DropdownOption = { value: string; label: string };
 

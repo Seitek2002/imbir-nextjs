@@ -8,7 +8,7 @@ import {
   LinkedinIcon,
   Logo,
   TwitterIcon,
-} from "@/shared/assets";
+} from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
 
 // --- Вспомогательные микро-компоненты для чистоты кода ---

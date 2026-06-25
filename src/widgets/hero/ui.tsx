@@ -3,9 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Button } from "@/shared";
-
-import { HeroAvatar, HeroBg } from "@/shared/assets";
+import { HeroAvatar, HeroBg } from "@/shared/assets/images";
+import { Button } from "@/shared/ui";
 
 export const Hero: FC = () => {
   return (

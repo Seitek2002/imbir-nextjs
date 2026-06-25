@@ -4,9 +4,8 @@ import { FC } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { IconBtn } from "@/shared";
-
-import { HeaderBackIcon } from "@/shared/assets";
+import { HeaderBackIcon } from "@/shared/assets/icons";
+import { IconBtn } from "@/shared/ui";
 
 interface BackButtonProps {
   backTo?: string;

@@ -1,4 +1,4 @@
-import { AuthUser } from "@/shared/store/authStore";
+import { AuthUser } from "@/shared/store";
 
 export type LoginRequest = {
   email: string;

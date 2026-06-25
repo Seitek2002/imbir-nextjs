@@ -5,11 +5,10 @@ import { FC, useState } from "react";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 
-import { Button, SaveButton } from "@/shared";
-
-import { StarIcon, UserCircleIcon } from "@/shared/assets";
+import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
-import { Workplace } from "@/shared/constants/mocks";
+import { Workplace } from "@/shared/dummies";
+import { Button, SaveButton } from "@/shared/ui";
 
 import { DoctorPhoto } from "./photo";
 

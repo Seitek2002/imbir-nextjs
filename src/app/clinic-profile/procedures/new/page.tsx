@@ -5,13 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { Dropdown } from "@/shared";
-
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
-import { colors } from "@/shared/config/tokens";
+import { colors } from "@/shared/config";
+import { Dropdown } from "@/shared/ui";
 
 type WorkSchedule = {
   day: string;

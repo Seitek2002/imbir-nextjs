@@ -16,7 +16,7 @@ import {
   ClinicBuildingIcon,
   DoctorPersonIcon,
   ServiceRadialIcon,
-} from "@/shared/assets";
+} from "@/shared/assets/icons";
 import { FilterTabBar } from "@/shared/ui";
 
 const TABS = [

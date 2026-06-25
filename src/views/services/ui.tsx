@@ -5,20 +5,19 @@ import { FC } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import {
-  ActiveFiltersChips,
-  FiltersTrigger,
-  MobileFiltersModal,
-} from "@/features";
-import { Footer, Header } from "@/widgets";
 import { useQuery } from "@tanstack/react-query";
 
-import { UrlSearchInput } from "@/features/search-by-query/ui";
+import { Footer } from "@/widgets/footer";
+import { Header } from "@/widgets/header";
+
+import { ActiveFiltersChips } from "@/features/active-filters-chips";
+import { FiltersTrigger, MobileFiltersModal } from "@/features/mobile-filters";
+import { UrlSearchInput } from "@/features/search-by-query";
 
 import { ServiceCard } from "@/entities/service";
 
 import { api } from "@/shared/api/requests";
-import { RemoveIcon } from "@/shared/assets";
+import { RemoveIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
 import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 

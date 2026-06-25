@@ -1,8 +1,8 @@
 ﻿import { Suspense } from "react";
 
-import { Footer, Header } from "@/widgets";
-
 import { BlogSectionServer } from "@/widgets/blog-section";
+import { Footer } from "@/widgets/footer";
+import { Header } from "@/widgets/header";
 
 import { BLOG_CATEGORIES, BLOG_POSTS, BlogSkeleton } from "@/entities/blog";
 

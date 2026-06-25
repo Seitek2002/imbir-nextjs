@@ -6,10 +6,9 @@ import { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 
-import { SaveButton } from "@/shared";
-
-import { GeoIcon, StarIcon } from "@/shared/assets";
+import { GeoIcon, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
+import { SaveButton } from "@/shared/ui";
 
 const getInitials = (name: string) =>
   name

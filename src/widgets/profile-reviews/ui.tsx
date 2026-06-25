@@ -7,7 +7,7 @@ import { ReviewModal } from "@/features/review-modal";
 import { UserReviewCard } from "@/entities/user-review";
 import type { ReviewType, UserReview } from "@/entities/user-review";
 
-import { RemoveIcon } from "@/shared/assets";
+import { RemoveIcon } from "@/shared/assets/icons";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 type Props = {

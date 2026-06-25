@@ -4,24 +4,21 @@ import { FC } from "react";
 
 import Link from "next/link";
 
-// <-- ИМПОРТ REACT QUERY
-
-import {
-  ActiveFiltersChips,
-  FiltersTrigger,
-  MobileFiltersModal,
-} from "@/features";
-import { Footer, Header } from "@/widgets";
 import { useQuery } from "@tanstack/react-query";
 
-import { FilterBar } from "@/features/filter-bar/ui";
-import { UrlSearchInput } from "@/features/search-by-query/ui";
+import { Footer } from "@/widgets/footer";
+import { Header } from "@/widgets/header";
+
+import { ActiveFiltersChips } from "@/features/active-filters-chips";
+import { FilterBar } from "@/features/filter-bar";
+import { FiltersTrigger, MobileFiltersModal } from "@/features/mobile-filters";
+import { UrlSearchInput } from "@/features/search-by-query";
 
 import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 
 import { api } from "@/shared/api/requests";
 import { ROUTES } from "@/shared/config/routes";
-import { useCityStore } from "@/shared/store/cityStore";
+import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
 // <-- ИМПОРТ НАШЕГО API

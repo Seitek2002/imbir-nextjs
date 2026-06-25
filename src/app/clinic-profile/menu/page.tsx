@@ -1,9 +1,8 @@
 ﻿"use client";
 
-import Image from "next/image";
 import Link from "next/link";
 
-import { LogoutIcon, StarIcon } from "@/shared/assets";
+import { LogoutIcon, StarIcon } from "@/shared/assets/icons";
 
 const MENU_ITEMS = [
   {

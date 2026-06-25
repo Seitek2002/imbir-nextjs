@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 
-import { Footer, Header } from "@/widgets";
+import { Footer } from "@/widgets/footer";
+import { Header } from "@/widgets/header";
 
 import { BlogArticle, BlogCard, BlogPost } from "@/entities/blog";
 
-import { ThunderIcon } from "@/shared/assets";
+import { ThunderIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
 
 import { ArticleImage } from "./article-image";

@@ -5,10 +5,9 @@ import { FC, useState } from "react";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 
-import { Button } from "@/shared";
-
-import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets";
+import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
+import { Button } from "@/shared/ui";
 
 type Props = {
   id?: string;

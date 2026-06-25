@@ -2,7 +2,7 @@
 
 import { FC, ReactNode, useCallback, useEffect, useState } from "react";
 
-import { RemoveIcon } from "@/shared/assets";
+import { RemoveIcon } from "@/shared/assets/icons";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 type Props = {

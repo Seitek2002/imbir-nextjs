@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 
-import { EyeIcon, EyeOffIcon } from "@/shared/assets";
-import { colors } from "@/shared/config/tokens";
+import { EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
+import { colors } from "@/shared/config";
 import { Input } from "@/shared/ui";
 
 import type { DoctorFormData } from "../model/types";

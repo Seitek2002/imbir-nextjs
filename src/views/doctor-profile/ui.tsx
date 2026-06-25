@@ -9,8 +9,8 @@ import { DoctorSidebar } from "@/widgets/doctor-sidebar";
 
 import { useDoctorCabinet } from "@/entities/doctor-profile";
 
-import { ChevronRightIcon, LogoutIcon, StarIcon } from "@/shared/assets";
-import { colors } from "@/shared/config/tokens";
+import { ChevronRightIcon, LogoutIcon, StarIcon } from "@/shared/assets/icons";
+import { colors } from "@/shared/config";
 
 const MENU_ITEMS = [
   {

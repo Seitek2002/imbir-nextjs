@@ -4,8 +4,6 @@ import { FC, useRef, useState } from "react";
 
 import Link from "next/link";
 
-import { Dropdown } from "@/shared";
-
 import { ClinicCard } from "@/entities/clinic";
 
 import {
@@ -14,7 +12,8 @@ import {
   GeoBtnArrowIcon,
   GeoIcon,
   RemoveIcon,
-} from "@/shared/assets";
+} from "@/shared/assets/icons";
+import { Dropdown } from "@/shared/ui";
 
 type Clinic = {
   id: string;

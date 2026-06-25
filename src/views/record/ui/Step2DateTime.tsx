@@ -1,8 +1,7 @@
-import { Button } from "@/shared";
-
 import { AppointmentDateTimePicker } from "@/features/appointment-datetime-picker";
 
 import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
 import { StepTitle } from "./StepTitle";

@@ -5,8 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { Dropdown } from "@/shared";
-
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
@@ -16,7 +14,8 @@ import {
   useSpecialistsStore,
 } from "@/entities/clinic-specialist";
 
-import { colors } from "@/shared/config/tokens";
+import { colors } from "@/shared/config";
+import { Dropdown } from "@/shared/ui";
 import { PhoneInput } from "@/shared/ui";
 
 const inp =

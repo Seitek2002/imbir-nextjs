@@ -6,11 +6,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { DoctorCard } from "@/entities";
-import { Footer, Header } from "@/widgets";
 import { useQuery } from "@tanstack/react-query";
 
+import { Footer } from "@/widgets/footer";
+import { Header } from "@/widgets/header";
 import { ReviewsSection } from "@/widgets/reviews/ui";
+
+import { DoctorCard } from "@/entities/doctor";
 
 // ИМПОРТЫ API
 import { api } from "@/shared/api/requests";
@@ -21,7 +23,7 @@ import {
   HeartIcon,
   HistoryIcon,
   PhoneIcon,
-} from "@/shared/assets";
+} from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
 import { cn } from "@/shared/lib/utils";
 import { Button, IconBtn } from "@/shared/ui";

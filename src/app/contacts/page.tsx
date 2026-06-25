@@ -1,6 +1,7 @@
-﻿import { Footer, Header } from "@/widgets";
+﻿import { Footer } from "@/widgets/footer";
+import { Header } from "@/widgets/header";
 
-import { ROUTES } from "@/shared/config/routes";
+import { ROUTES } from "@/shared/config";
 
 const ContactCard = ({
   icon,

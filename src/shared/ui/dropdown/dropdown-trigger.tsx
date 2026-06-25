@@ -1,6 +1,6 @@
 ﻿import { FC } from "react";
 
-import { DropdownArrowIcon, DropdownRemoveIcon } from "@/shared/assets";
+import { DropdownArrowIcon, DropdownRemoveIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 import { Option } from "./types";

@@ -6,7 +6,8 @@ import toast from "react-hot-toast";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Footer, Header } from "@/widgets";
+import { Footer } from "@/widgets/footer";
+import { Header } from "@/widgets/header";
 
 import {
   registerClientFn,
@@ -20,11 +21,11 @@ import {
   EyeOffIcon,
   HeaderBackIcon,
   ProfileIcon,
-} from "@/shared/assets";
+} from "@/shared/assets/icons";
+import { colors } from "@/shared/config";
 import { ROUTES } from "@/shared/config/routes";
-import { colors } from "@/shared/config/tokens";
 import { cn } from "@/shared/lib/utils";
-import { useAuthStore } from "@/shared/store/authStore";
+import { useAuthStore } from "@/shared/store";
 import { Button, IconBtn, Input } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control/ui";
 

@@ -4,8 +4,6 @@ import { useState } from "react";
 
 import { useParams, useRouter } from "next/navigation";
 
-import { ConfirmDialog } from "@/shared";
-
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
@@ -14,6 +12,8 @@ import {
   type SpecialistFormData,
   useSpecialistsStore,
 } from "@/entities/clinic-specialist";
+
+import { ConfirmDialog } from "@/shared/ui";
 
 import { BasicInfo, Certificates, Education, ProfessionalInfo } from "./ui";
 

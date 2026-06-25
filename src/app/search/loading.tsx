@@ -1,6 +1,6 @@
-﻿import { Header } from "@/widgets";
+﻿import { Header } from "@/widgets/header";
 
-import { SearchIcon } from "@/shared/assets";
+import { SearchIcon } from "@/shared/assets/icons";
 
 export default function Loading() {
   return (

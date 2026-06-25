@@ -1,6 +1,5 @@
-import { Button, SearchInput } from "@/shared";
-
 import { cn } from "@/shared/lib/utils";
+import { Button, SearchInput } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
 import { SelectField } from "./SelectField";

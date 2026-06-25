@@ -2,10 +2,9 @@
 
 import { ChangeEvent, FC } from "react";
 
-import { Input } from "@/shared";
-
 // Импортируем иконку крестика (RemoveIcon)
-import { RemoveIcon, SearchIcon } from "@/shared/assets";
+import { RemoveIcon, SearchIcon } from "@/shared/assets/icons";
+import { Input } from "@/shared/ui";
 
 type Props = {
   placeholder?: string;

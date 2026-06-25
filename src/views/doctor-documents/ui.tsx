@@ -12,7 +12,7 @@ import {
   useDoctorCabinet,
 } from "@/entities/doctor-profile";
 
-import { colors } from "@/shared/config/tokens";
+import { colors } from "@/shared/config";
 
 const { inp } = formStyles;
 

@@ -4,11 +4,10 @@ import { FC, useCallback, useState } from "react";
 
 import Image from "next/image";
 
-import { Button } from "@/shared";
-
-import { StarBoldIcon, StarOutlineIcon } from "@/shared/assets";
-import { colors } from "@/shared/config/tokens";
+import { StarBoldIcon, StarOutlineIcon } from "@/shared/assets/icons";
+import { colors } from "@/shared/config";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
+import { Button } from "@/shared/ui";
 
 type Props = {
   isOpen: boolean;

@@ -1,4 +1,4 @@
-import type { AuthUser } from "@/shared/store/authStore";
+import type { AuthUser } from "@/shared/store";
 
 import { apiClient } from "../client";
 import {

@@ -1,4 +1,4 @@
-import { DropdownArrowIcon } from "@/shared/assets";
+import { DropdownArrowIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 export const SelectField = ({

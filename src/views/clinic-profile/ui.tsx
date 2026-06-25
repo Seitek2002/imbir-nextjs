@@ -2,11 +2,11 @@
 
 import { FC, useState } from "react";
 
-import { Button } from "@/shared";
-
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
 import { ClinicProfileForm, useClinicCabinet } from "@/entities/clinic-profile";
+
+import { Button } from "@/shared/ui";
 
 const PencilIcon = () => (
   <svg

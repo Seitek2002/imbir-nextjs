@@ -7,12 +7,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Header } from "@/widgets";
+import { Header } from "@/widgets/header";
 
 import { loginFn } from "@/shared/api/auth/requests";
-import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets";
+import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
-import { useAuthStore } from "@/shared/store/authStore";
+import { useAuthStore } from "@/shared/store";
 import { Button, Checkbox, Input } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control/ui";
 

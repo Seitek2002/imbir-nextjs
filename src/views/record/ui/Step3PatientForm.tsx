@@ -1,6 +1,5 @@
-import { Button, Input, Textarea } from "@/shared";
-
 import { cn } from "@/shared/lib/utils";
+import { Button, Input, Textarea } from "@/shared/ui";
 
 import { isPhoneValid, normalizeLocalPhone } from "../model/lib";
 import type { RecordForm } from "../model/use-record-form";

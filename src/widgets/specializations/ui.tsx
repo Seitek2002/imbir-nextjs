@@ -1,8 +1,8 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
 
+import { SPECIALIZATIONS } from "@/shared/config";
 import { ROUTES } from "@/shared/config/routes";
-import { SPECIALIZATIONS } from "@/shared/config/specializations";
 
 export const SpecializationsSection = () => {
   return (

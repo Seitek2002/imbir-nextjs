@@ -5,8 +5,8 @@ import {
   BlogImage1,
   BlogImage2,
   BlogImage3,
-} from "@/shared/assets";
-import { colors } from "@/shared/config/tokens";
+} from "@/shared/assets/images";
+import { colors } from "@/shared/config";
 
 export type BlogCategory = {
   id: string;

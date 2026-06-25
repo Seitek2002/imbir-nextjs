@@ -1,9 +1,8 @@
 ﻿import { FC, ReactNode } from "react";
 
-import { Button } from "@/shared";
-
-import { DropdownRemoveIcon } from "@/shared/assets";
+import { DropdownRemoveIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui";
 
 import { useDropdownSwipe } from "./use-dropdown-swipe";
 

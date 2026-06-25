@@ -4,7 +4,7 @@ import { FC, SVGProps, useState } from "react";
 
 import Image from "next/image";
 
-import { colors } from "@/shared/config/tokens";
+import { colors } from "@/shared/config";
 import { Button, Input, PhoneInput, Textarea } from "@/shared/ui";
 
 import type { ClinicProfile, WorkDaySchedule } from "./model";

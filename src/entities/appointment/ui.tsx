@@ -9,8 +9,8 @@ import {
   GeoIcon,
   MedicalServiceIcon,
   StarIcon,
-} from "@/shared/assets";
-import { colors } from "@/shared/config/tokens";
+} from "@/shared/assets/icons";
+import { colors } from "@/shared/config";
 
 import type { Appointment } from "./model";
 

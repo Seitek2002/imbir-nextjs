@@ -9,7 +9,7 @@ import {
   ServiceNevrology,
   ServiceOphthalmology,
   ServicePulmonology,
-} from "@/shared/assets";
+} from "../assets/images";
 
 export type Specialization = {
   name: string;

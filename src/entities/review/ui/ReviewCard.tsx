@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { StarIcon } from "@/shared/assets";
+import { StarIcon } from "@/shared/assets/icons";
 
 export type ReviewProps = {
   id?: string | number;

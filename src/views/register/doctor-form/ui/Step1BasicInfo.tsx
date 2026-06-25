@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 
-import { colors } from "@/shared/config/tokens";
+import { colors } from "@/shared/config";
 import { cn } from "@/shared/lib/utils";
 import { Dropdown, Input, PhoneInput } from "@/shared/ui";
 

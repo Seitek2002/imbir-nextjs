@@ -4,7 +4,7 @@ import { FC } from "react";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { RemoveIcon, StarIcon } from "@/shared/assets";
+import { RemoveIcon, StarIcon } from "@/shared/assets/icons";
 
 type Props = {
   prefix: string; // Обязательный префикс (doc или clinic)

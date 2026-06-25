@@ -6,10 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Footer, Header, VideosSwiper } from "@/widgets";
 import { useQuery } from "@tanstack/react-query";
 
-import { ReviewsSection } from "@/widgets/reviews/ui";
+import { Footer } from "@/widgets/footer";
+import { Header } from "@/widgets/header";
+import { ReviewsSection } from "@/widgets/reviews";
+import { VideosSwiper } from "@/widgets/videos-swiper";
 
 import { getBlogPosts } from "@/shared/api/blog/requests";
 // ИМПОРТЫ API
@@ -21,7 +23,7 @@ import {
   HeartIcon,
   HistoryIcon,
   PhoneIcon,
-} from "@/shared/assets";
+} from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
 import { Button, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card/ui";

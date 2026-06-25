@@ -10,8 +10,8 @@ import {
   PersonIcon,
   ReviewsIcon,
   SavedIcon,
-} from "@/shared/assets";
-import { useAuthStore } from "@/shared/store/authStore";
+} from "@/shared/assets/icons";
+import { useAuthStore } from "@/shared/store";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 const MENU_ITEMS = [

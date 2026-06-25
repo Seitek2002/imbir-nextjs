@@ -3,8 +3,8 @@
 import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import { GeoIcon } from "@/shared/assets";
-import { useCityStore } from "@/shared/store/cityStore";
+import { GeoIcon } from "@/shared/assets/icons";
+import { useCityStore } from "@/shared/store";
 import { Button, Dropdown, Modal } from "@/shared/ui";
 
 const COUNTRIES_DATA: Record<string, string[]> = {

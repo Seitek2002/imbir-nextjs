@@ -3,8 +3,8 @@ import { FC, Suspense, useState } from "react";
 
 import Link from "next/link";
 
-import { CitySelectorModal, GlobalSearch } from "@/features";
-import { Button, IconBtn } from "@/shared";
+import { CitySelectorModal } from "@/features/city-selector";
+import { GlobalSearch } from "@/features/global-search";
 
 import {
   ChatIcon,
@@ -13,10 +13,11 @@ import {
   Logo,
   ProfileIcon,
   SearchIcon,
-} from "@/shared/assets";
+} from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
-import { useAuthStore } from "@/shared/store/authStore";
-import { useCityStore } from "@/shared/store/cityStore";
+import { useAuthStore } from "@/shared/store";
+import { useCityStore } from "@/shared/store";
+import { Button, IconBtn } from "@/shared/ui";
 
 const ROLE_ROUTE: Record<string, string> = {
   patient: "/profile",

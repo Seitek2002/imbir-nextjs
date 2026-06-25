@@ -11,9 +11,9 @@ import {
   PersonIcon,
   ReviewsIcon,
   SavedIcon,
-} from "@/shared/assets";
+} from "@/shared/assets/icons";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
-import { useAuthStore } from "@/shared/store/authStore";
+import { useAuthStore } from "@/shared/store";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 const MENU_ITEMS = [

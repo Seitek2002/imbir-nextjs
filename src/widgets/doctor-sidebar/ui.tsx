@@ -5,7 +5,7 @@ import { FC, ReactNode, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { LogoutIcon, StarIcon } from "@/shared/assets";
+import { LogoutIcon, StarIcon } from "@/shared/assets/icons";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 

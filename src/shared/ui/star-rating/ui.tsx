@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 
-import { StarBoldIcon } from "@/shared/assets";
+import { StarBoldIcon } from "@/shared/assets/icons";
 
 type Props = {
   rating: number;

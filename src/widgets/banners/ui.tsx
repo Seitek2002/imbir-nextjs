@@ -5,14 +5,18 @@ import { FC } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Button } from "@/shared";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
-import { BannerImage1, BannerImage2, BannerImage3 } from "@/shared/assets";
-import { colors } from "@/shared/config/tokens";
+import {
+  BannerImage1,
+  BannerImage2,
+  BannerImage3,
+} from "@/shared/assets/images";
+import { colors } from "@/shared/config";
+import { Button } from "@/shared/ui";
 
 export const Banners: FC = () => {
   const card1 = (

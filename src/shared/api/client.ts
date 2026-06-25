@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-import { useAuthStore } from "@/shared/store/authStore";
+import { useAuthStore } from "@/shared/store";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://155.212.216.197:8030";

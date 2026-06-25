@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { GeoIcon, StarIcon } from "@/shared/assets";
+import { GeoIcon, StarIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 import { formatPrice } from "../model/lib";

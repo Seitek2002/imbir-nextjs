@@ -1,9 +1,9 @@
 ﻿import { FC } from "react";
 
-import { CategoryCard } from "@/entities/category/ui";
+import { CategoryCard } from "@/entities/category";
 
+import { SPECIALIZATIONS } from "@/shared/config";
 import { ROUTES } from "@/shared/config/routes";
-import { SPECIALIZATIONS } from "@/shared/config/specializations";
 
 type Props = {
   onItemClick?: () => void;

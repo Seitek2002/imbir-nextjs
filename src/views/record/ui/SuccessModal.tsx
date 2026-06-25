@@ -1,6 +1,5 @@
-import { Button } from "@/shared";
-
-import { SuccessCheckIcon } from "@/shared/assets";
+import { SuccessCheckIcon } from "@/shared/assets/icons";
+import { Button } from "@/shared/ui";
 
 export const SuccessModal = ({ onClose }: { onClose: () => void }) => (
   <div className="fixed inset-0 z-50 bg-overlay/40 backdrop-blur-[2px] flex items-center justify-center p-4">

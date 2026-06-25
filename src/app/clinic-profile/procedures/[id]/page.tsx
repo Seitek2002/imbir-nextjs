@@ -5,11 +5,11 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 
-import { ConfirmDialog } from "@/shared";
-
 import { ClinicSidebar } from "@/widgets/clinic-sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
+
+import { ConfirmDialog } from "@/shared/ui";
 
 type Specialist = {
   id: string;

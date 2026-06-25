@@ -2,7 +2,7 @@
 
 import { FC, useState } from "react";
 
-import { HeartIcon2 } from "@/shared/assets";
+import { HeartIcon2 } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 type Props = {

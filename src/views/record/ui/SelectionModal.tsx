@@ -1,6 +1,5 @@
-import { Button, IconBtn, SearchInput } from "@/shared";
-
-import { RemoveIcon } from "@/shared/assets";
+import { RemoveIcon } from "@/shared/assets/icons";
+import { Button, IconBtn, SearchInput } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
 import { SelectionListItem } from "./SelectionListItem";

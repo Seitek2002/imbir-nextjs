@@ -4,8 +4,7 @@ import { ChangeEvent, FC, useRef } from "react";
 
 import Image from "next/image";
 
-import { Dropdown } from "@/shared";
-
+import { Dropdown } from "@/shared/ui";
 import { PhoneInput } from "@/shared/ui";
 
 import { IProps } from "../model/types";

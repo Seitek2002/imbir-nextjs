@@ -4,7 +4,7 @@ import { FC } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { HeaderBackIcon } from "@/shared/assets";
+import { HeaderBackIcon } from "@/shared/assets/icons";
 
 import { IconBtn } from "./icon-button";
 

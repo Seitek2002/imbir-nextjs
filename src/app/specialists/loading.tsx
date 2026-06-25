@@ -1,4 +1,5 @@
-﻿import { Footer, Header } from "@/widgets";
+﻿import { Footer } from "@/widgets/footer";
+import { Header } from "@/widgets/header";
 
 import { DoctorSkeleton } from "@/entities/doctor";
 

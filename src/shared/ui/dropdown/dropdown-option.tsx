@@ -1,9 +1,8 @@
 ﻿import { FC } from "react";
 
-import { Checkbox, Radio } from "@/shared";
-
-import { DropdownCheckIcon } from "@/shared/assets";
+import { DropdownCheckIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
+import { Checkbox, Radio } from "@/shared/ui";
 
 import { DropdownType, Option } from "./types";
 

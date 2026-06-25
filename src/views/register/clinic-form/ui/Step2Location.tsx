@@ -1,4 +1,4 @@
-import { colors } from "@/shared/config/tokens";
+import { colors } from "@/shared/config";
 import { Dropdown, Input, PhoneInput } from "@/shared/ui";
 
 import { CITIES, COUNTRIES } from "../model/constants";

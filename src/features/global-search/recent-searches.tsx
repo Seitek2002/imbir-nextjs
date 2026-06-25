@@ -4,12 +4,15 @@ import { FC, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { ConfirmDialog, IconBtn } from "@/shared";
-
-import { SearchHistory, SearchRemoveHistory, TrashIcon } from "@/shared/assets";
+import {
+  SearchHistory,
+  SearchRemoveHistory,
+  TrashIcon,
+} from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
 import { useMounted } from "@/shared/lib/useMounted";
-import { useSearchHistoryStore } from "@/shared/store/useSearchHistoryStore";
+import { useSearchHistoryStore } from "@/shared/store";
+import { ConfirmDialog, IconBtn } from "@/shared/ui";
 
 export const RecentSearches: FC = () => {
   const router = useRouter();

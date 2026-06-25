@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 
-import { colors } from "@/shared/config/tokens";
+import { colors } from "@/shared/config";
 import { Dropdown, Input } from "@/shared/ui";
 
 import { CLINIC_TYPES } from "../model/constants";

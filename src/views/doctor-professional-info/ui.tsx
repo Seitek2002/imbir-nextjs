@@ -2,8 +2,6 @@
 
 import { FC, useEffect, useState } from "react";
 
-import { Dropdown } from "@/shared";
-
 import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
 import {
@@ -11,6 +9,8 @@ import {
   formStyles,
   useDoctorCabinet,
 } from "@/entities/doctor-profile";
+
+import { Dropdown } from "@/shared/ui";
 
 const { inp, lbl } = formStyles;
 

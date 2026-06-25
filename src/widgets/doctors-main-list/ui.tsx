@@ -5,11 +5,11 @@ import { FC, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { DoctorCard } from "@/entities";
-import { FilterBar } from "@/features";
 import { useQuery } from "@tanstack/react-query";
 
-import { DoctorSkeleton } from "@/entities/doctor";
+import { FilterBar } from "@/features/filter-bar";
+
+import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 
 import { api } from "@/shared/api/requests";
 import { Button } from "@/shared/ui";

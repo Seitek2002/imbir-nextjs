@@ -3,30 +3,34 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { Header, Hero } from "@/widgets";
-
 import { BlogSectionServer } from "@/widgets/blog-section";
+import { Header } from "@/widgets/header";
+import { Hero } from "@/widgets/hero";
 
 import {
   VideoThumbnail1,
   VideoThumbnail2,
   VideoThumbnail3,
-} from "@/shared/assets";
+} from "@/shared/assets/images";
 import { ROUTES } from "@/shared/config/routes";
 
 const DoctorsMainList = dynamic(() =>
-  import("@/widgets").then((mod) => mod.DoctorsMainList),
+  import("@/widgets/doctors-main-list").then((mod) => mod.DoctorsMainList),
 );
 const ClinicsMainList = dynamic(() =>
-  import("@/widgets").then((mod) => mod.ClinicsMainList),
+  import("@/widgets/clinics-main-list").then((mod) => mod.ClinicsMainList),
 );
-const Banners = dynamic(() => import("@/widgets").then((mod) => mod.Banners));
+const Banners = dynamic(() =>
+  import("@/widgets/banners").then((mod) => mod.Banners),
+);
 const VideosSwiper = dynamic(() =>
-  import("@/widgets").then((mod) => mod.VideosSwiper),
+  import("@/widgets/videos-swiper").then((mod) => mod.VideosSwiper),
 );
-const Footer = dynamic(() => import("@/widgets").then((mod) => mod.Footer));
+const Footer = dynamic(() =>
+  import("@/widgets/footer").then((mod) => mod.Footer),
+);
 const SpecializationsSection = dynamic(() =>
-  import("@/widgets").then((mod) => mod.SpecializationsSection),
+  import("@/widgets/specializations").then((mod) => mod.SpecializationsSection),
 );
 
 export const HomePage = () => {

@@ -5,8 +5,8 @@ import { FC, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { StarIcon } from "@/shared/assets";
-import { colors } from "@/shared/config/tokens";
+import { StarIcon } from "@/shared/assets/icons";
+import { colors } from "@/shared/config";
 
 type Props = {
   id: string;

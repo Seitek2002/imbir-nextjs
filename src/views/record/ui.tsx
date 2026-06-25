@@ -1,10 +1,10 @@
 "use client";
 
-import { IconBtn } from "@/shared";
-import { Header } from "@/widgets";
+import { Header } from "@/widgets/header";
 
-import { HeaderBackIcon } from "@/shared/assets";
+import { HeaderBackIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
+import { IconBtn } from "@/shared/ui";
 
 import { useRecordForm } from "./model/use-record-form";
 import { MobileStepsProgress } from "./ui/MobileStepsProgress";

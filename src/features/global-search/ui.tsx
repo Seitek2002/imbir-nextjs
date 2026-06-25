@@ -5,11 +5,10 @@ import { useClickAway } from "react-use";
 
 import { useRouter } from "next/navigation";
 
-import { IconBtn } from "@/shared";
-
-import { SearchIcon } from "@/shared/assets";
+import { SearchIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config/routes";
-import { useSearchHistoryStore } from "@/shared/store/useSearchHistoryStore";
+import { useSearchHistoryStore } from "@/shared/store";
+import { IconBtn } from "@/shared/ui";
 import { SearchInput } from "@/shared/ui";
 
 import { CategoriesGrid } from "./categories-grid";

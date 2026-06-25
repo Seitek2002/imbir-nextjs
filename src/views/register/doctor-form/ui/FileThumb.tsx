@@ -1,4 +1,4 @@
-import { colors } from "@/shared/config/tokens";
+import { colors } from "@/shared/config";
 
 const PdfIcon = () => (
   <svg width="28" height="32" viewBox="0 0 28 32" fill="none">

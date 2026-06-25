@@ -3,9 +3,8 @@
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 
-import { Checkbox } from "@/shared";
-
 import { cn } from "@/shared/lib/utils";
+import { Checkbox } from "@/shared/ui";
 
 import { DropdownMenu } from "./dropdown-menu";
 import { DropdownOption } from "./dropdown-option";
