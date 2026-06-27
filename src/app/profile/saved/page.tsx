@@ -1,4 +1,4 @@
-import { ProfileSaved } from "@/views/profile-saved";
+import { ProfileSaved } from "@/pages/profile-saved";
 
 export default function Page() {
   return <ProfileSaved />;

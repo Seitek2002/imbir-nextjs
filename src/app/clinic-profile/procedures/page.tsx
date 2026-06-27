@@ -1,4 +1,4 @@
-import { ClinicProcedures } from "@/views/clinic-procedures";
+import { ClinicProcedures } from "@/pages/clinic-procedures";
 
 export default function Page() {
   return <ClinicProcedures />;

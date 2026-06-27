@@ -4,8 +4,8 @@ import { ChangeEvent, Dispatch, FC, SetStateAction, useRef } from "react";
 
 import Image from "next/image";
 
-import { inp, lbl } from "./model/constants";
-import { IProps } from "./model/types";
+import { inp, lbl } from "../model/constants";
+import { IProps } from "../model/types";
 
 interface ICert extends IProps {
   certs: string[];

@@ -1,4 +1,4 @@
-import { ClinicsPage } from "@/views/clinics/ui";
+import { ClinicsPage } from "@/pages/clinics/ui";
 
 export default async function Page({
   searchParams,

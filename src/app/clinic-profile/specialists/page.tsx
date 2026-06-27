@@ -1,4 +1,4 @@
-import { ClinicSpecialists } from "@/views/clinic-specialists";
+import { ClinicSpecialists } from "@/pages/clinic/clinic-specialists";
 
 export default function Page() {
   return <ClinicSpecialists />;
