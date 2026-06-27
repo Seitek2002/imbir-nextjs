@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 
+import {
+  CLINIC_STEP_TITLES as STEP_TITLES,
+  CLINIC_TOTAL_STEPS as TOTAL_STEPS,
+} from "../model/constants";
+import type { ClinicFormData, ClinicStep, ScheduleDay } from "../model/types";
 import { FormSubmitButton } from "./FormSubmitButton";
 import { ProgressBar } from "./ProgressBar";
 import { Step1BasicInfo } from "./Step1BasicInfo";
@@ -11,8 +16,6 @@ import { Step4Legal } from "./Step4Legal";
 import { Step5Specialization } from "./Step5Specialization";
 import { Step6Equipment } from "./Step6Equipment";
 import { Step7Completion } from "./Step7Completion";
-import { STEP_TITLES, TOTAL_STEPS } from "./model/constants";
-import type { ClinicFormData, ClinicStep, ScheduleDay } from "./model/types";
 
 type Props = {
   step: ClinicStep;

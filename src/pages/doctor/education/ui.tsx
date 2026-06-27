@@ -3,12 +3,8 @@
 import { FC, useEffect, useState } from "react";
 
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
-
-import {
-  FieldView,
-  formStyles,
-  useDoctorCabinet,
-} from "@/entities/doctor-profile";
+import { useDoctorCabinet } from "@/widgets/doctor/layout";
+import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
 const { inp, lbl } = formStyles;
 

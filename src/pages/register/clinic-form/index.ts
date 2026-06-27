@@ -1,2 +1,2 @@
 export { ClinicRegistrationForm } from "./ui";
-export type { ClinicFormData, ClinicStep } from "./model/types";
+export type { ClinicFormData, ClinicStep } from "../model/types";

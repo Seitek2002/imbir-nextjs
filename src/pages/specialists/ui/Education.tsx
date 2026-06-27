@@ -1,7 +1,7 @@
 import { FC } from "react";
 
-import { inp, lbl } from "./model/constants";
-import { IProps } from "./model/types";
+import { inp, lbl } from "../model/constants";
+import { IProps } from "../model/types";
 
 export const Education: FC<IProps> = ({ isEditing, d, set }) => {
   return (

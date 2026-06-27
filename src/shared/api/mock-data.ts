@@ -3,7 +3,7 @@ import type {
   DoctorListItem,
   ReviewItem,
   ServiceItem,
-} from "../constants/mocks";
+} from "../dummies/mocks";
 
 export const MOCK_DOCTORS: DoctorListItem[] = [
   {

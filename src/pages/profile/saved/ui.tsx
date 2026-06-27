@@ -15,8 +15,8 @@ import {
 } from "@/shared/assets/icons";
 import { FilterTabBar } from "@/shared/ui";
 
-import { SavedItem, SavedType } from "./ProfileSaved/model";
 import { ProfileSaved } from "./ProfileSaved/ui";
+import { SavedItem, SavedType } from "./model";
 
 const TABS = [
   {

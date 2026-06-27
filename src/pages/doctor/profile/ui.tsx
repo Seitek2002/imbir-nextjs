@@ -5,9 +5,8 @@ import { FC } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { DoctorSidebar } from "@/widgets/doctor-sidebar";
-
-import { useDoctorCabinet } from "@/entities/doctor-profile";
+import { useDoctorCabinet } from "@/widgets/doctor/layout";
+import { DoctorSidebar } from "@/widgets/doctor/layout";
 
 import { ChevronRightIcon, LogoutIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";

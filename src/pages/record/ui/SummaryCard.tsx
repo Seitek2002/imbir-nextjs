@@ -4,13 +4,12 @@ import { FC, useState } from "react";
 
 import Image from "next/image";
 
-import { type ConsultationMode } from "@/features/appointment-datetime-picker";
-
 import { CalendarIcon } from "@/shared/assets/icons";
 import { Button } from "@/shared/ui";
 
 import { formatDateLabel, formatPrice } from "../model/lib";
 import type { Doctor, Service } from "../model/types";
+import { type ConsultationMode } from "./appointment-datetime-picker";
 
 export const SummaryCard: FC<{
   doctor: Doctor;

@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 
-import { STEP_TITLES, TOTAL_STEPS } from "./model/constants";
-import type { DoctorFormData, DoctorStep, InviteClinic } from "./model/types";
-import { FormSubmitButton } from "./ui/FormSubmitButton";
-import { ProgressBar } from "./ui/ProgressBar";
-import { Step1BasicInfo } from "./ui/Step1BasicInfo";
-import { Step2Professional } from "./ui/Step2Professional";
-import { Step3Education } from "./ui/Step3Education";
-import { Step4Certificates } from "./ui/Step4Certificates";
+import { STEP_TITLES, TOTAL_STEPS } from "../model/constants";
+import type { DoctorFormData, DoctorStep, InviteClinic } from "../model/types";
+import { FormSubmitButton } from "./FormSubmitButton";
+import { ProgressBar } from "./ProgressBar";
+import { Step1BasicInfo } from "./Step1BasicInfo";
+import { Step2Professional } from "./Step2Professional";
+import { Step3Education } from "./Step3Education";
+import { Step4Certificates } from "./Step4Certificates";
 
 type Props = {
   step: DoctorStep;

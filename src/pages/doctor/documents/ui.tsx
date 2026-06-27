@@ -5,12 +5,8 @@ import { FC, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
-
-import {
-  FieldView,
-  formStyles,
-  useDoctorCabinet,
-} from "@/entities/doctor-profile";
+import { useDoctorCabinet } from "@/widgets/doctor/layout";
+import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
 import { colors } from "@/shared/config";
 

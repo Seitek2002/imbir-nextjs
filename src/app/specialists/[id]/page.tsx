@@ -1,4 +1,4 @@
-import { SpecialistDetailsPage } from "@/views";
+import { SpecialistDetailsPage } from "@/pages/specialist-details";
 
 export default async function Page({
   params,

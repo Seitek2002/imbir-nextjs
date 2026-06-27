@@ -10,7 +10,7 @@ import type {
   DoctorListItem as MockDoctorListItem,
   ReviewItem as MockReviewItem,
   ServiceItem as MockServiceItem,
-} from "../constants/mocks";
+} from "../dummies/mocks";
 import { createAppointment as _createAppointment } from "./appointments/requests";
 import {
   getClinicById as _getClinicById,

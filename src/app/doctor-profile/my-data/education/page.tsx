@@ -1,4 +1,4 @@
-import { DoctorEducationPage } from "@/pages/doctor-education";
+import { DoctorEducationPage } from "@/pages/doctor/education";
 
 export default function Page() {
   return <DoctorEducationPage />;

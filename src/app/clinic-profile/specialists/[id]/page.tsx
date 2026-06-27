@@ -4,8 +4,12 @@ import { useState } from "react";
 
 import { useParams, useRouter } from "next/navigation";
 
-import { Certificates, Education, ProfessionalInfo } from "@/pages/specialists";
-import { BasicInfo } from "@/pages/specialists/ui/BasicInfo";
+import {
+  BasicInfo,
+  Certificates,
+  Education,
+  ProfessionalInfo,
+} from "@/pages/specialists";
 
 import { ClinicSidebar } from "@/widgets/clinic/sidebar";
 
