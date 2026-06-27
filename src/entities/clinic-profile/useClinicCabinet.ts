@@ -5,11 +5,11 @@ import toast from "react-hot-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  ClinicPrivateProfile,
+  clinicCabinetKeys,
   getClinicProfile,
   updateClinicProfile,
-} from "@/shared/api/clinic-cabinet/requests";
-import type { ClinicPrivateProfile } from "@/shared/api/clinic-cabinet/types";
-import { clinicCabinetKeys } from "@/shared/api/queryKeys";
+} from "@/shared/api";
 
 import type { ClinicProfile } from "./model";
 

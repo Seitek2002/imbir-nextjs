@@ -6,7 +6,7 @@ import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 
 import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config/routes";
+import { ROUTES } from "@/shared/config";
 import { Button } from "@/shared/ui";
 
 type Props = {

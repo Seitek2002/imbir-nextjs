@@ -1,6 +1,6 @@
-import type { ClinicListItem as ApiClinic } from "@/shared/api/clinics/types";
+import { ClinicListItem } from "@/shared/api";
 
-export const adaptClinic = (c: ApiClinic) => ({
+export const adaptClinic = (c: ClinicListItem) => ({
   id: String(c.id),
   name: c.name,
   experience: c.experience_years ?? 0,

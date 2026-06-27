@@ -1,1 +1,0 @@
-export { ClinicsMainList } from "./ui";

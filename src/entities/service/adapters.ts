@@ -1,4 +1,4 @@
-import type { ServiceListItem as ApiService } from "@/shared/api/services/types";
+import type { ServiceListItem as ApiService } from "@/shared/api";
 
 // ServiceList from real API is minimal — clinic/rating/image are not in the list endpoint
 export const adaptService = (s: ApiService) => ({

@@ -7,7 +7,7 @@ import Link from "next/link";
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 
-import { VideoCard } from "@/entities/video";
+import { VideoCard } from "./video/ui";
 
 type Video = {
   id: string;

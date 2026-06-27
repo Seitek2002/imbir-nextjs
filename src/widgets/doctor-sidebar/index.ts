@@ -1,1 +1,0 @@
-export { DoctorSidebar } from "./ui";

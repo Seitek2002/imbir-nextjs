@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useParams, useRouter } from "next/navigation";
 
-import { ClinicSidebar } from "@/widgets/clinic-sidebar";
+import { ClinicSidebar } from "@/widgets/clinic/sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 import {

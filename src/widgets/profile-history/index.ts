@@ -1,1 +1,0 @@
-export { ProfileHistory } from "./ui";

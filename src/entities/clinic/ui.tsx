@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { GeoIcon, StarIcon } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config/routes";
+import { ROUTES } from "@/shared/config";
 import { SaveButton } from "@/shared/ui";
 
 const getInitials = (name: string) =>

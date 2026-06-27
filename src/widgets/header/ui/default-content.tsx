@@ -3,7 +3,6 @@ import { FC, Suspense, useState } from "react";
 
 import Link from "next/link";
 
-import { CitySelectorModal } from "@/features/city-selector";
 import { GlobalSearch } from "@/features/global-search";
 
 import {
@@ -14,10 +13,12 @@ import {
   ProfileIcon,
   SearchIcon,
 } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config/routes";
+import { ROUTES } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
 import { useCityStore } from "@/shared/store";
 import { Button, IconBtn } from "@/shared/ui";
+
+import { CitySelectorModal } from "./city-selector";
 
 const ROLE_ROUTE: Record<string, string> = {
   patient: "/profile",

@@ -1,1 +1,0 @@
-export { SpecializationsSection } from "./ui";

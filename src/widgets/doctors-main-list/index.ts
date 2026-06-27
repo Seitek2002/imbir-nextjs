@@ -1,1 +1,0 @@
-export { DoctorsMainList } from "./ui";

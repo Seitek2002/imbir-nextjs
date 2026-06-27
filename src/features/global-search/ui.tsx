@@ -6,7 +6,7 @@ import { useClickAway } from "react-use";
 import { useRouter } from "next/navigation";
 
 import { SearchIcon } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config/routes";
+import { ROUTES } from "@/shared/config";
 import { useSearchHistoryStore } from "@/shared/store";
 import { IconBtn } from "@/shared/ui";
 import { SearchInput } from "@/shared/ui";

@@ -3,7 +3,7 @@
 import { CategoryCard } from "@/entities/category";
 
 import { SPECIALIZATIONS } from "@/shared/config";
-import { ROUTES } from "@/shared/config/routes";
+import { ROUTES } from "@/shared/config";
 
 type Props = {
   onItemClick?: () => void;

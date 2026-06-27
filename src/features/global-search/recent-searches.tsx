@@ -9,7 +9,7 @@ import {
   SearchRemoveHistory,
   TrashIcon,
 } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config/routes";
+import { ROUTES } from "@/shared/config";
 import { useMounted } from "@/shared/lib/useMounted";
 import { useSearchHistoryStore } from "@/shared/store";
 import { ConfirmDialog, IconBtn } from "@/shared/ui";

@@ -9,7 +9,7 @@ import {
   Logo,
   TwitterIcon,
 } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config/routes";
+import { ROUTES } from "@/shared/config";
 
 // --- Вспомогательные микро-компоненты для чистоты кода ---
 

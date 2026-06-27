@@ -1,4 +1,4 @@
-import { ProfileReviews } from "@/views/profile-reviews";
+import { ProfileReviews } from "@/pages/profile/profile-reviews";
 
 export default function Page() {
   return <ProfileReviews />;

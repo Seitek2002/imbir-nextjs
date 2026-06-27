@@ -6,7 +6,7 @@ import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 
 import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config/routes";
+import { ROUTES } from "@/shared/config";
 import { Workplace } from "@/shared/dummies";
 import { Button, SaveButton } from "@/shared/ui";
 

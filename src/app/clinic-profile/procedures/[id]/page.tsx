@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 
-import { ClinicSidebar } from "@/widgets/clinic-sidebar";
+import { ClinicSidebar } from "@/widgets/clinic/sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 

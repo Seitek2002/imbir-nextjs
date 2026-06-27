@@ -1,4 +1,4 @@
-import type { DoctorListItem as ApiDoctor } from "@/shared/api/doctors/types";
+import { DoctorListItem as ApiDoctor } from "@/shared/api";
 
 const emptySchedule = {
   mon: null,
