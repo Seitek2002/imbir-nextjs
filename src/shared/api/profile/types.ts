@@ -26,6 +26,8 @@ export type ProfileAppointment = {
   service: string;
   can_review: string;
   created_at: string;
+  is_online: boolean;
+  google_meet_link: string | null;
 };
 
 export type FavoriteItem = {

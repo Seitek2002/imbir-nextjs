@@ -9,6 +9,7 @@ import {
   GeoIcon,
   MedicalServiceIcon,
   StarIcon,
+  VideoCallIcon,
 } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 
@@ -18,6 +19,40 @@ type Props = {
   appointment: Appointment;
   onCancel?: (id: string) => void;
   onReview?: (id: string) => void;
+};
+
+// Shown whenever an appointment is online and has a generated Meet link.
+const GoogleMeetButton: FC<{ href: string; compact?: boolean }> = ({
+  href,
+  compact,
+}) => {
+  const sharedProps = {
+    href,
+    target: "_blank",
+    rel: "noopener noreferrer",
+  } as const;
+
+  if (compact) {
+    return (
+      <a
+        {...sharedProps}
+        aria-label="Подключиться к Google Meet"
+        className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0 hover:bg-primary-dark transition-colors"
+      >
+        <VideoCallIcon className="w-4.5 h-4.5 text-white" />
+      </a>
+    );
+  }
+
+  return (
+    <a
+      {...sharedProps}
+      className="px-5 py-2.5 rounded-full bg-primary text-white font-medium text-sm hover:bg-primary-dark transition-colors flex items-center gap-2 whitespace-nowrap"
+    >
+      <VideoCallIcon className="w-4 h-4" />
+      Подключиться
+    </a>
+  );
 };
 
 export const AppointmentCard: FC<Props> = ({
@@ -76,51 +111,56 @@ export const AppointmentCard: FC<Props> = ({
         </div>
 
         <div className="flex flex-col items-end gap-6 pt-1">
-          {appointment.status === "upcoming" && onCancel && (
-            <button
-              onClick={() => onCancel(appointment.id)}
-              className="px-5 py-2.5 rounded-full bg-primary-tint text-primary font-medium text-sm hover:bg-[#FFE5E0] transition-colors flex items-center gap-2 whitespace-nowrap"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                className="shrink-0"
+          <div className="flex flex-col items-end gap-2">
+            {appointment.isOnline && appointment.googleMeetLink && (
+              <GoogleMeetButton href={appointment.googleMeetLink} />
+            )}
+            {appointment.status === "upcoming" && onCancel && (
+              <button
+                onClick={() => onCancel(appointment.id)}
+                className="px-5 py-2.5 rounded-full bg-primary-tint text-primary font-medium text-sm hover:bg-[#FFE5E0] transition-colors flex items-center gap-2 whitespace-nowrap"
               >
-                <path
-                  d="M12 4L4 12M4 4L12 12"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-              Отменить
-            </button>
-          )}
-          {appointment.status === "completed" && onReview && (
-            <button
-              onClick={() => onReview(appointment.id)}
-              className="px-5 py-2.5 rounded-full bg-primary-tint text-primary font-medium text-sm hover:bg-[#FFE5E0] transition-colors flex items-center gap-2 whitespace-nowrap"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                className="shrink-0"
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  className="shrink-0"
+                >
+                  <path
+                    d="M12 4L4 12M4 4L12 12"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                Отменить
+              </button>
+            )}
+            {appointment.status === "completed" && onReview && (
+              <button
+                onClick={() => onReview(appointment.id)}
+                className="px-5 py-2.5 rounded-full bg-primary-tint text-primary font-medium text-sm hover:bg-[#FFE5E0] transition-colors flex items-center gap-2 whitespace-nowrap"
               >
-                <path
-                  d="M2 2h12v9H9l-3 2.5V11H2V2z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Оставить отзыв
-            </button>
-          )}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  className="shrink-0"
+                >
+                  <path
+                    d="M2 2h12v9H9l-3 2.5V11H2V2z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Оставить отзыв
+              </button>
+            )}
+          </div>
           <div className="text-right">
             <p className="text-foreground font-semibold text-base mb-1">
               {appointment.service}
@@ -189,6 +229,9 @@ export const AppointmentCard: FC<Props> = ({
             <GeoIcon className="w-4 h-4 shrink-0 [&_path]:stroke-secondary" />
             <span className="flex-1 truncate">{appointment.address}</span>
           </div>
+          {appointment.isOnline && appointment.googleMeetLink && (
+            <GoogleMeetButton href={appointment.googleMeetLink} compact />
+          )}
           {appointment.status === "upcoming" && onCancel && (
             <button
               onClick={() => onCancel(appointment.id)}

@@ -14,6 +14,8 @@ export type Appointment = {
   price: number;
   address: string;
   status: AppointmentStatus;
+  isOnline: boolean;
+  googleMeetLink: string | null;
 };
 
 export const MOCK_APPOINTMENTS: Appointment[] = [
@@ -30,6 +32,8 @@ export const MOCK_APPOINTMENTS: Appointment[] = [
     price: 1700,
     address: "г. Бишкек, ул. Тынystanova, 189",
     status: "upcoming",
+    isOnline: true,
+    googleMeetLink: "https://meet.google.com/abc-defg-hij",
   },
   {
     id: "2",
@@ -44,6 +48,8 @@ export const MOCK_APPOINTMENTS: Appointment[] = [
     price: 1700,
     address: "г. Бишкек, ул. Тынystanova, 189",
     status: "upcoming",
+    isOnline: false,
+    googleMeetLink: null,
   },
   {
     id: "3",
@@ -58,6 +64,8 @@ export const MOCK_APPOINTMENTS: Appointment[] = [
     price: 1700,
     address: "г. Бишкек, ул. Тынystanova, 189",
     status: "completed",
+    isOnline: false,
+    googleMeetLink: null,
   },
   {
     id: "4",
@@ -72,5 +80,7 @@ export const MOCK_APPOINTMENTS: Appointment[] = [
     price: 1700,
     address: "г. Бишкек, ул. Тынystanova, 189",
     status: "completed",
+    isOnline: false,
+    googleMeetLink: null,
   },
 ];

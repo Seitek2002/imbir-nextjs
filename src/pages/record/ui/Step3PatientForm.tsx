@@ -122,6 +122,10 @@ export const Step3PatientForm = ({ form }: { form: RecordForm }) => {
         </div>
       </div>
 
+      {errors.submit && (
+        <p className="mt-4 text-sm text-red-500">{errors.submit}</p>
+      )}
+
       <div className="mt-6">
         <Button
           className="w-full lg:w-auto lg:min-w-50 justify-center"

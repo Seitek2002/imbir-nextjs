@@ -4,14 +4,25 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { api, getServices } from "@/shared/api";
+import { api, createAppointment, getServices, profileKeys } from "@/shared/api";
+import type {
+  AppointmentResponse,
+  CreateAppointmentRequest,
+} from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { useAuthStore } from "@/shared/store";
 
 import { ConsultationMode } from "../ui/appointment-datetime-picker";
 import { SELECTION_LABELS } from "./constants";
-import { filterSelectionItems, isEmailValid, isPhoneValid } from "./lib";
+import {
+  filterSelectionItems,
+  isEmailValid,
+  isPhoneValid,
+  toApiDate,
+  toApiTime,
+} from "./lib";
 import type {
   Clinic,
   Doctor,
@@ -55,6 +66,19 @@ export const useRecordForm = () => {
   const [errors, setErrors] = useState<OptionalFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [appointmentResult, setAppointmentResult] =
+    useState<AppointmentResponse | null>(null);
+
+  const queryClient = useQueryClient();
+  const createAppointmentMutation = useMutation({
+    mutationFn: createAppointment,
+    onSuccess: () => {
+      // Keep the profile history fresh with the newly created appointment.
+      queryClient.invalidateQueries({
+        queryKey: [...profileKeys.all, "appointments"],
+      });
+    },
+  });
 
   const { data: clinicsData = [] } = useQuery({
     queryKey: ["record-clinics"],
@@ -120,15 +144,9 @@ export const useRecordForm = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const canUseOnline = useMemo(() => {
-    if (typeof window === "undefined") return false;
-
-    return (
-      Boolean(window.localStorage.getItem("accessToken")) ||
-      Boolean(window.localStorage.getItem("token")) ||
-      Boolean(window.localStorage.getItem("imbir_access_token"))
-    );
-  }, []);
+  // Online consultations require an authenticated user (the backend rejects
+  // guest bookings with is_online). Reads the real auth token from the store.
+  const canUseOnline = useAuthStore((state) => Boolean(state.accessToken));
 
   const clinicMap = useMemo(
     () => new Map(CLINICS.map((clinic) => [clinic.id, clinic])),
@@ -357,7 +375,32 @@ export const useRecordForm = () => {
     closeModal();
   };
 
-  const validateAndSubmit = () => {
+  const buildAppointmentRequest = (): CreateAppointmentRequest | null => {
+    if (!selectedDate || !selectedTime) return null;
+
+    const request: CreateAppointmentRequest = {
+      date: toApiDate(selectedDate),
+      time: toApiTime(selectedTime),
+      is_online: mode === "online" && canUseOnline,
+    };
+
+    if (selectedDoctorId) request.doctor_id = Number(selectedDoctorId);
+    if (selectedClinicId) request.clinic_id = Number(selectedClinicId);
+    if (selectedServiceId) request.service_id = Number(selectedServiceId);
+    if (comment.trim()) request.notes = comment.trim();
+
+    // Guests pass their contacts explicitly; authenticated bookings are tied
+    // to the logged-in user on the server, so no guest_* fields are sent.
+    if (!canUseOnline) {
+      request.guest_name = `${firstName.trim()} ${lastName.trim()}`.trim();
+      request.guest_phone = `+996 ${phone.trim()}`;
+      if (email.trim()) request.guest_email = email.trim();
+    }
+
+    return request;
+  };
+
+  const validateAndSubmit = async () => {
     const nextErrors: OptionalFormErrors = {};
 
     if (!firstName.trim()) nextErrors.firstName = "Введите ваше имя";
@@ -376,28 +419,28 @@ export const useRecordForm = () => {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    const payload = {
-      clinicId: selectedClinicId,
-      doctorId: selectedDoctorId,
-      serviceId: selectedServiceId,
-      mode,
-      date: selectedDate ? selectedDate.toISOString() : null,
-      time: selectedTime,
-      patient: {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        phone: `+996 ${phone.trim()}`,
-        email: email.trim() || null,
-        comment: comment.trim() || null,
-      },
-    };
+    const request = buildAppointmentRequest();
+    if (!request) {
+      setErrors((prev) => ({
+        ...prev,
+        submit: "Выберите дату и время приёма",
+      }));
+      return;
+    }
 
-    console.log("Record payload:", payload);
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const result = await createAppointmentMutation.mutateAsync(request);
+      setAppointmentResult(result);
       setShowSuccess(true);
-    }, 3000);
+    } catch {
+      setErrors((prev) => ({
+        ...prev,
+        submit: "Не удалось создать запись. Попробуйте ещё раз.",
+      }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return {
@@ -430,6 +473,7 @@ export const useRecordForm = () => {
     isSubmitting,
     showSuccess,
     setShowSuccess,
+    googleMeetLink: appointmentResult?.google_meet_link ?? null,
     canUseOnline,
     clinicMap,
     selectedClinic,

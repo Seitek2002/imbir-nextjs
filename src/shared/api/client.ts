@@ -85,11 +85,3 @@ apiClient.interceptors.response.use(
     }
   },
 );
-
-// Separate client for the Chat service (different base URL)
-export const chatClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_CHAT_URL ?? "http://155.212.216.197:8054",
-  headers: { "Content-Type": "application/json" },
-  withCredentials: true, // chat uses session cookies
-  timeout: 15_000,
-});

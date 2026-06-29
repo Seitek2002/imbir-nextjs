@@ -44,6 +44,7 @@ type OptionalFormErrors = {
   lastName?: string;
   phone?: string;
   email?: string;
+  submit?: string;
 };
 export type {
   SelectionModalType,

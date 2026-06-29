@@ -25,6 +25,7 @@ import StarIcon from "./common/star.svg";
 import SuccessCheckIcon from "./common/success-check.svg";
 import TrashIcon from "./common/trash.svg";
 import UserCircleIcon from "./common/user-circle.svg";
+import VideoCallIcon from "./common/video-call.svg";
 import PhoneIcon from "./details/phone.svg";
 import DropdownArrowIcon from "./dropdown/arrow.svg";
 import DropdownCheckIcon from "./dropdown/check.svg";
@@ -109,6 +110,7 @@ export {
   StarOutlineIcon,
   SuccessCheckIcon,
   UserCircleIcon,
+  VideoCallIcon,
   HistoryIcon,
   LogoutIcon,
   ReviewsIcon,

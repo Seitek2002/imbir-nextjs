@@ -1,34 +1,59 @@
-export type ChatInterlocutor = {
-  username: string;
-  display_name: string;
-  role: "doctor" | "client" | "clinic";
-  avatar: string | null;
+// ── User-to-user chat ───────────────────────────────────────────────────────
+
+export type ChatParticipant = {
+  id: number;
+  full_name: string;
 };
 
-export type ChatLastMessage = {
+export type ChatRoomLastMessage = {
   content: string;
-  timestamp: string;
-  is_mine: boolean;
+  created_at: string;
 };
 
 export type ChatRoom = {
-  room_name: string;
-  interlocutor: ChatInterlocutor;
-  last_message: ChatLastMessage | null;
-  unread_count: number;
+  id: number;
+  participants: ChatParticipant[];
+  last_message: ChatRoomLastMessage | null;
+  created_at: string;
 };
 
 export type ChatMessage = {
   id: number;
+  sender: ChatParticipant;
   content: string;
-  username: string;
-  timestamp: string;
+  created_at: string;
+  is_read: boolean;
 };
 
 export type CreateChatRoomRequest = {
-  target_user_id: number;
+  user_id: number;
 };
 
-export type CreateChatRoomResponse = {
-  room_name: string;
+// WebSocket payloads. The client sends only the text; the server broadcasts a
+// full message object to every participant (including the sender — see echo
+// handling in the chat-room hook).
+export type OutgoingChatMessage = {
+  content: string;
+};
+
+export type IncomingChatMessage = {
+  id: number;
+  sender: ChatParticipant;
+  content: string;
+  created_at: string;
+};
+
+// ── AI assistant chat (room 0) ──────────────────────────────────────────────
+
+export type AiChatRole = "user" | "assistant";
+
+export type AiChatMessage = {
+  id: number;
+  role: AiChatRole;
+  content: string;
+  created_at: string;
+};
+
+export type SendAiMessageRequest = {
+  message: string;
 };

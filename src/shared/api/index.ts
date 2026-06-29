@@ -1,5 +1,5 @@
 // Core
-export { apiClient, chatClient } from "./client";
+export { apiClient } from "./client";
 export * from "./types";
 export * from "./queryKeys";
 

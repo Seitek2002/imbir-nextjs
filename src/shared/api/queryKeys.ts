@@ -101,6 +101,6 @@ export const notificationKeys = {
 export const chatKeys = {
   all: ["chat"] as const,
   rooms: () => [...chatKeys.all, "rooms"] as const,
-  messages: (roomName: string) =>
-    [...chatKeys.all, "messages", roomName] as const,
+  messages: (roomId: number) => [...chatKeys.all, "messages", roomId] as const,
+  ai: () => [...chatKeys.all, "ai"] as const,
 };

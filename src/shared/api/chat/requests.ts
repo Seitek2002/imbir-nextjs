@@ -1,37 +1,56 @@
-import { chatClient } from "../client";
+import { apiClient } from "../client";
 import {
+  AiChatMessage,
   ChatMessage,
   ChatRoom,
   CreateChatRoomRequest,
-  CreateChatRoomResponse,
+  SendAiMessageRequest,
 } from "./types";
 
-export const getChatRooms = async (): Promise<{ data: ChatRoom[] }> => {
-  const { data } = await chatClient.get<{ data: ChatRoom[] }>(
-    "/api/chat/rooms/",
+// ── User-to-user chat ───────────────────────────────────────────────────────
+
+export const getChatRooms = async (): Promise<ChatRoom[]> => {
+  const { data } = await apiClient.get<ChatRoom[]>("/api/chat/rooms/");
+  return data;
+};
+
+// Creates a room with another user, or returns the existing one (no duplicates).
+export const createChatRoom = async (
+  body: CreateChatRoomRequest,
+): Promise<ChatRoom> => {
+  const { data } = await apiClient.post<ChatRoom>("/api/chat/rooms/", body);
+  return data;
+};
+
+// Loads the room history. Incoming unread messages are marked read server-side.
+export const getRoomMessages = async (
+  roomId: number,
+): Promise<ChatMessage[]> => {
+  const { data } = await apiClient.get<ChatMessage[]>(
+    `/api/chat/rooms/${roomId}/messages/`,
   );
   return data;
 };
 
-export const createChatRoom = async (
-  body: CreateChatRoomRequest,
-): Promise<CreateChatRoomResponse> => {
-  const { data } = await chatClient.post<CreateChatRoomResponse>(
-    "/api/chat/rooms/",
+// ── AI assistant chat (room 0) ──────────────────────────────────────────────
+
+export const getAiChatHistory = async (): Promise<AiChatMessage[]> => {
+  const { data } = await apiClient.get<AiChatMessage[]>("/api/chat/ai/");
+  return data;
+};
+
+// Returns only the assistant reply; the user message is persisted server-side.
+// May take 3–10s, so callers must show a loader.
+export const sendAiMessage = async (
+  body: SendAiMessageRequest,
+): Promise<AiChatMessage> => {
+  const { data } = await apiClient.post<AiChatMessage>(
+    "/api/chat/ai/send/",
     body,
   );
   return data;
 };
 
-export const getChatMessages = async (
-  roomName: string,
-): Promise<ChatMessage[]> => {
-  const { data } = await chatClient.get<ChatMessage[]>(
-    `/api/messages/${roomName}/`,
-  );
-  return data;
-};
-
-export const chatLoginFn = async (username: string): Promise<void> => {
-  await chatClient.post("/api/login/", { username });
+export const clearAiChat = async (): Promise<void> => {
+  await apiClient.delete("/api/chat/ai/");
 };

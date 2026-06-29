@@ -40,7 +40,12 @@ export const ProfileHistoryPage: FC = () => {
     service: a.service,
     price: 0,
     address: "",
-    status: a.status === "confirmed" ? "upcoming" : a.status,
+    status:
+      a.status === "confirmed" || a.status === "pending"
+        ? "upcoming"
+        : a.status,
+    isOnline: a.is_online,
+    googleMeetLink: a.google_meet_link,
   }));
 
   return (

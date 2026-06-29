@@ -28,6 +28,7 @@ export const RecordPage = () => {
     selectedTime,
     showSuccess,
     setShowSuccess,
+    googleMeetLink,
   } = form;
 
   return (
@@ -75,7 +76,12 @@ export const RecordPage = () => {
 
       <SelectionModal form={form} />
 
-      {showSuccess && <SuccessModal onClose={() => setShowSuccess(false)} />}
+      {showSuccess && (
+        <SuccessModal
+          onClose={() => setShowSuccess(false)}
+          googleMeetLink={googleMeetLink}
+        />
+      )}
     </main>
   );
 };
