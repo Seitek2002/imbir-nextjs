@@ -33,6 +33,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
   const profileHref = user
     ? (ROLE_ROUTE[user.role] ?? ROUTES.PROFILE)
     : ROUTES.LOGIN;
+  const chatHref = user ? ROUTES.CHATS : ROUTES.LOGIN;
 
   return (
     <>
@@ -63,7 +64,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
 
           {/* Mobile right icons */}
           <div className="flex md:hidden gap-2">
-            <Link href={ROUTES.LOGIN}>
+            <Link href={chatHref}>
               <IconBtn variant="outline" size="sm">
                 <ChatIcon className="size-5" />
               </IconBtn>
@@ -86,7 +87,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             >
               <GlobalSearch />
             </Suspense>
-            <Link href={ROUTES.LOGIN}>
+            <Link href={chatHref}>
               <IconBtn variant="outline" size="sm">
                 <ChatIcon className="size-5" />
               </IconBtn>

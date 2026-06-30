@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactCompiler: true,
 
+  // Не срезать завершающий слэш редиректом — иначе прокси к чату (/chat-api/*)
+  // теряет слэш и Django-бэкенд отвечает ошибкой на POST.
+  skipTrailingSlashRedirect: true,
+
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
@@ -47,6 +51,22 @@ const nextConfig: NextConfig = {
         as: "*.tsx", // или '*.tsx', если хочешь типы React
       },
     },
+  },
+
+  // Прокси к чат-сервису: ходим с того же origin, чтобы браузер не блокировал
+  // запросы CORS-ом (сам чат-бэкенд не отдаёт Access-Control-* заголовков) и
+  // чтобы сессионная кука чата ставилась на наш домен.
+  async rewrites() {
+    const chatBase =
+      process.env.NEXT_PUBLIC_CHAT_URL ?? "http://155.212.216.197:8054";
+    return [
+      {
+        // (.*) сохраняет хвост дословно вместе с завершающим слэшем,
+        // который :path* отбрасывает (Django требует слэш на POST).
+        source: "/chat-api/:path(.*)",
+        destination: `${chatBase}/:path`,
+      },
+    ];
   },
 };
 

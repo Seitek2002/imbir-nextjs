@@ -10,11 +10,17 @@ import {
   SearchIcon,
 } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
+import { useAuthStore } from "@/shared/store/authStore";
 
 // ── Backend config ────────────────────────────────────────────────────────────
 
-const API_BASE = "http://155.212.216.197:8054";
-const WS_BASE = "ws://155.212.216.197:8054";
+// HTTP к чату идёт через same-origin прокси (см. rewrites в next.config.ts):
+// сам чат-бэкенд не отдаёт CORS-заголовков, поэтому прямые запросы из браузера
+// блокируются. WebSocket проксировать нельзя (Next не пробрасывает upgrade),
+// поэтому он подключается напрямую к чат-серверу.
+const API_BASE = "/chat-api";
+const WS_BASE =
+  process.env.NEXT_PUBLIC_CHAT_WS_URL ?? "ws://155.212.216.197:8054";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -428,6 +434,7 @@ const ReadCheck = ({ isRead }: { isRead?: boolean }) => (
 // ── Main component ────────────────────────────────────────────────────────────
 
 export const ChatPage = () => {
+  const authUser = useAuthStore((s) => s.user);
   const [currentUser, setCurrentUser] = useState<string | null>(() => {
     if (typeof window !== "undefined")
       return localStorage.getItem("chat_username");
@@ -500,6 +507,34 @@ export const ChatPage = () => {
       setIsLoggingIn(false);
     }
   };
+
+  // Автоматический вход в чат для уже авторизованного пользователя:
+  // используем стабильный идентификатор аккаунта вместо ручного ввода имени.
+  useEffect(() => {
+    if (currentUser || !authUser) return;
+    const username = authUser.email || authUser.phone || `user_${authUser.id}`;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/login/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username }),
+        });
+        if (res.ok && !cancelled) {
+          const data = (await res.json()) as { username: string };
+          setCurrentUser(data.username);
+          localStorage.setItem("chat_username", data.username);
+        }
+      } catch {
+        // молча откатываемся на экран ручного входа
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser, currentUser]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
