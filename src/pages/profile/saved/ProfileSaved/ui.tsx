@@ -2,9 +2,13 @@
 
 import { FC, useEffect, useState } from "react";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { ClinicCard } from "@/entities/clinic";
 import { DoctorCard } from "@/entities/doctor";
 import { ServiceCard } from "@/entities/service";
+
+import { profileKeys, removeFavorite } from "@/shared/api";
 
 import { SavedItem, SavedType } from "../model";
 
@@ -26,8 +30,15 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
 
   const filteredItems = savedItems.filter((item) => item.type === activeTab);
 
+  const queryClient = useQueryClient();
+  const { mutate: removeFromSaved } = useMutation({
+    mutationFn: (id: string) => removeFavorite(Number(id)),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: profileKeys.favorites() }),
+  });
+
   const handleUnsave = (id: string) => {
-    console.log("Unsave:", id);
+    removeFromSaved(id);
     setSavedItems((prev) => prev.filter((item) => item.id !== id));
   };
 

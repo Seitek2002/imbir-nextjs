@@ -2,8 +2,11 @@
 
 import { FC, useState } from "react";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { ReviewModal } from "@/features/review-modal";
 
+import { cancelAppointment, profileKeys } from "@/shared/api";
 import { WarningIcon } from "@/shared/assets/icons";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
@@ -28,8 +31,18 @@ export const ProfileHistory: FC<Props> = ({ appointments, activeTab }) => {
       : apt.status === "completed",
   );
 
+  const queryClient = useQueryClient();
+  const { mutate: cancel } = useMutation({
+    mutationFn: (id: string) => cancelAppointment(Number(id)),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: [...profileKeys.all, "appointments"],
+      }),
+  });
+
   const handleCancelConfirm = () => {
     if (!cancelTarget) return;
+    cancel(cancelTarget);
     setAppointmentsList((prev) =>
       prev.map((apt) =>
         apt.id === cancelTarget
