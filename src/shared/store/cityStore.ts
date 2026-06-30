@@ -1,6 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// Default city used before the user picks one — also what the server prefetches
+// for SSR, so the dehydrated doctors query matches the client's initial key.
+export const DEFAULT_CITY = "Бишкек";
+
 type CityStore = {
   city: string;
   isSet: boolean;
@@ -11,7 +15,7 @@ type CityStore = {
 export const useCityStore = create<CityStore>()(
   persist(
     (set) => ({
-      city: "Бишкек",
+      city: DEFAULT_CITY,
       isSet: false,
       setCity: (city) => set({ city, isSet: true }),
       dismiss: () => set({ isSet: true }),
