@@ -4,9 +4,6 @@ import { FC } from "react";
 
 import Link from "next/link";
 
-import "swiper/css";
-import { Swiper, SwiperSlide } from "swiper/react";
-
 import { VideoCard } from "./video/ui";
 
 type Video = {
@@ -55,20 +52,20 @@ export const VideosSwiper: FC<Props> = ({
         )}
       </div>
 
-      <div className="md:hidden">
-        <Swiper slidesPerView={1.15} spaceBetween={16} className="pb-2">
-          {videos.map((video) => (
-            <SwiperSlide key={video.id}>
-              <VideoCard
-                title={video.title}
-                authorName={video.authorName}
-                authorRole={video.authorRole}
-                thumbnail={video.thumbnail}
-                youtubeUrl={video.youtubeUrl}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
+      {/* Mobile: native horizontal scroll-snap (no JS carousel lib). Slides are
+          ~87% wide so the next one peeks, matching the old slidesPerView 1.15. */}
+      <div className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">
+        {videos.map((video) => (
+          <div key={video.id} className="snap-start shrink-0 w-[87%]">
+            <VideoCard
+              title={video.title}
+              authorName={video.authorName}
+              authorRole={video.authorRole}
+              thumbnail={video.thumbnail}
+              youtubeUrl={video.youtubeUrl}
+            />
+          </div>
+        ))}
       </div>
 
       <div className="hidden md:grid md:grid-cols-3 gap-5">

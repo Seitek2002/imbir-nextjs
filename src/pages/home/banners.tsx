@@ -1,24 +1,47 @@
 ﻿"use client";
 
-import { FC } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
-
-import "swiper/css";
-import "swiper/css/pagination";
-import { Pagination } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
 
 import {
   BannerImage1,
   BannerImage2,
   BannerImage3,
 } from "@/shared/assets/images";
-import { colors } from "@/shared/config";
 import { Button } from "@/shared/ui";
 
 export const Banners: FC = () => {
+  const [active, setActive] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Track the centred slide to drive the dots (replaces Swiper's pagination).
+  useEffect(() => {
+    const root = trackRef.current;
+    if (!root || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const idx = slideRefs.current.indexOf(entry.target as HTMLDivElement);
+          if (idx >= 0) setActive(idx);
+        });
+      },
+      { root, threshold: 0.6 },
+    );
+    slideRefs.current.forEach((slide) => slide && observer.observe(slide));
+    return () => observer.disconnect();
+  }, []);
+
+  const goTo = (index: number) =>
+    slideRefs.current[index]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "start",
+      block: "nearest",
+    });
+
   const card1 = (
     <div className="relative bg-[#F49A82] rounded-4xl p-6 md:p-8 h-60 md:h-80 overflow-hidden flex flex-col justify-between w-full">
       <div className="relative z-10">
@@ -105,26 +128,38 @@ export const Banners: FC = () => {
 
   return (
     <section className="w-full max-w-360 mx-auto px-4 md:px-10 py-6">
+      {/* Mobile: native scroll-snap carousel with custom dots (no Swiper). */}
       <div className="md:hidden">
-        <Swiper
-          modules={[Pagination]}
-          pagination={{ clickable: true }}
-          spaceBetween={16}
-          slidesPerView={1}
-          className="pb-10"
-          style={
-            {
-              "--swiper-pagination-color": colors.muted,
-              "--swiper-pagination-bullet-inactive-color": colors.borderSoft,
-              "--swiper-pagination-bullet-inactive-opacity": "1",
-              "--swiper-pagination-bottom": "0px",
-            } as React.CSSProperties
-          }
+        <div
+          ref={trackRef}
+          className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         >
-          <SwiperSlide>{card1}</SwiperSlide>
-          <SwiperSlide>{card2}</SwiperSlide>
-          <SwiperSlide>{card3}</SwiperSlide>
-        </Swiper>
+          {[card1, card2, card3].map((card, i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                slideRefs.current[i] = el;
+              }}
+              className="snap-start shrink-0 w-full"
+            >
+              {card}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-center gap-2 mt-4">
+          {[0, 1, 2].map((i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-label={`Перейти к слайду ${i + 1}`}
+              className={`h-2 rounded-full transition-all ${
+                i === active ? "w-6 bg-muted" : "w-2 bg-border-soft"
+              }`}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="hidden md:grid grid-cols-4 gap-5">
