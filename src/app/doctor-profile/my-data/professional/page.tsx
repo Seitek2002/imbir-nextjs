@@ -1,4 +1,4 @@
-import { DoctorProfessionalInfoPage } from "@/pages/doctor/professional-info";
+import { DoctorProfessionalInfoPage } from "@/screens/doctor/professional-info";
 
 export default function Page() {
   return <DoctorProfessionalInfoPage />;

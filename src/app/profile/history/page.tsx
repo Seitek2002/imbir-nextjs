@@ -1,4 +1,4 @@
-import { ProfileHistory } from "@/pages/profile/history";
+import { ProfileHistory } from "@/screens/profile/history";
 
 export default function Page() {
   return <ProfileHistory />;

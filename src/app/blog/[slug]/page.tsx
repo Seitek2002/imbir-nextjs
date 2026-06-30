@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { BlogArticlePage } from "@/pages/blog-article";
+import { BlogArticlePage } from "@/screens/blog-article";
 
 import {
   BLOG_POSTS,

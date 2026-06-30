@@ -1,4 +1,4 @@
-import { DoctorDocumentsPage } from "@/pages/doctor/documents";
+import { DoctorDocumentsPage } from "@/screens/doctor/documents";
 
 export default function Page() {
   return <DoctorDocumentsPage />;

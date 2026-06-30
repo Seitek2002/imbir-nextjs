@@ -9,7 +9,7 @@ import {
   Certificates,
   Education,
   ProfessionalInfo,
-} from "@/pages/specialists";
+} from "@/screens/specialists";
 
 import { ClinicSidebar } from "@/widgets/clinic/sidebar";
 

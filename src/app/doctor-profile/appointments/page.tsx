@@ -1,4 +1,4 @@
-import { DoctorAppointmentsPage } from "@/pages/doctor/appointments";
+import { DoctorAppointmentsPage } from "@/screens/doctor/appointments";
 
 export default function Page() {
   return <DoctorAppointmentsPage />;

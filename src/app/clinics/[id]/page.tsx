@@ -1,4 +1,4 @@
-import { ClinicDetailsPage } from "@/pages/clinic/clinic-details";
+import { ClinicDetailsPage } from "@/screens/clinic/clinic-details";
 
 export default async function Page({
   params,

@@ -1,4 +1,4 @@
-import { SpecialistsPage } from "@/pages/specialists";
+import { SpecialistsPage } from "@/screens/specialists";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

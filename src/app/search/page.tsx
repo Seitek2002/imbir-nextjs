@@ -1,4 +1,4 @@
-import { SearchPage } from "@/pages/search";
+import { SearchPage } from "@/screens/search";
 
 export default async function Page({
   searchParams,

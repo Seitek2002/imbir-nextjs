@@ -5,7 +5,7 @@
     "^next",
     "<THIRD_PARTY_MODULES>",
     "^@/app/(.*)$",
-    "^@/pages/(.*)$",
+    "^@/screens/(.*)$",
     "^@/widgets/(.*)$",
     "^@/features/(.*)$",
     "^@/entities/(.*)$",

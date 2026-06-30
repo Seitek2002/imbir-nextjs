@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { RegisterPage } from "@/pages/register";
+import { RegisterPage } from "@/screens/register";
 
 export default function Page() {
   return (
