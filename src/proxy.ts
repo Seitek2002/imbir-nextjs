@@ -14,7 +14,7 @@ const CITY_MAP: Record<string, string> = {
   Batken: "Баткен",
 };
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const response = NextResponse.next();
 
   // Don't overwrite if user already confirmed/selected their city

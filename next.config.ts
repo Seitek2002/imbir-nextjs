@@ -45,6 +45,9 @@ const nextConfig: NextConfig = {
   },
 
   turbopack: {
+    // Явно фиксируем корень проекта — иначе Next находит лишний lockfile
+    // в домашней папке и выводит предупреждение про workspace root.
+    root: __dirname,
     rules: {
       "*.svg": {
         loaders: ["@svgr/webpack"],
