@@ -13,9 +13,17 @@ import { colors } from "@/shared/config";
 type Props = {
   posts: BlogPost[];
   categories: BlogCategory[];
+  // On the dedicated /blog page the grid is near the top, so eager-load the
+  // first card (its image is the mobile LCP). Off by default (e.g. on home,
+  // where the section sits far below the fold).
+  prioritizeFirstCard?: boolean;
 };
 
-export const BlogSection: FC<Props> = ({ posts, categories }) => {
+export const BlogSection: FC<Props> = ({
+  posts,
+  categories,
+  prioritizeFirstCard = false,
+}) => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [featuredLoaded, setFeaturedLoaded] = useState(false);
 
@@ -155,7 +163,7 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
 
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {filtered.map((post) => (
+          {filtered.map((post, index) => (
             <BlogCard
               key={post.id}
               title={post.title}
@@ -164,6 +172,7 @@ export const BlogSection: FC<Props> = ({ posts, categories }) => {
               date={post.date}
               image={post.image}
               href={post.href}
+              priority={prioritizeFirstCard && index === 0}
             />
           ))}
         </div>

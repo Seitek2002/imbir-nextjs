@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 
 import Link from "next/link";
 
@@ -25,9 +25,11 @@ import { Button } from "@/shared/ui";
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
+  // City the server prefetched doctors for (from the city cookie).
+  initialCity: string;
 };
 
-export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
+export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
   // 1. Читаем параметры из пропсов
   const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
   const isFiltersModalOpen = searchParams?.modal === "filters";
@@ -44,7 +46,15 @@ export const SpecialistsPage: FC<Props> = ({ searchParams }) => {
     typeof searchParams?.doc_price === "string" ? searchParams.doc_price : null;
   const isOnlineOnly = searchParams?.doc_online === "true";
 
-  const selectedCity = useCityStore((s) => s.city);
+  const storeCity = useCityStore((s) => s.city);
+  // Until the client store has hydrated, use the server-provided city so the
+  // first render (and its query key) matches the SSR/dehydrated data. After
+  // hydration we follow the store, so changing city in the header still works.
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    queueMicrotask(() => setIsHydrated(true));
+  }, []);
+  const selectedCity = isHydrated ? storeCity : initialCity;
 
   // 2. ПОЛУЧАЕМ ДАННЫЕ С СЕРВЕРА (city фильтр передаём в API)
   const { data: doctors = [], isLoading } = useQuery({

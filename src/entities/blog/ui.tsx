@@ -14,6 +14,9 @@ type Props = {
   date: string;
   image: StaticImageData | string;
   href?: string;
+  // Eager-load this card's image (use for the first card above the fold so it
+  // isn't lazy and can become the LCP element sooner).
+  priority?: boolean;
 };
 
 export const BlogCard: FC<Props> = ({
@@ -23,6 +26,7 @@ export const BlogCard: FC<Props> = ({
   date,
   image,
   href = "#",
+  priority = false,
 }) => {
   const [loaded, setLoaded] = useState(false);
 
@@ -37,6 +41,7 @@ export const BlogCard: FC<Props> = ({
           src={image}
           alt={title}
           fill
+          priority={priority}
           sizes="(max-width: 768px) 100vw, 440px"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           onLoad={() => setLoaded(true)}

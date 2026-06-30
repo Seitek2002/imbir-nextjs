@@ -73,7 +73,7 @@ export const BlogPage = () => {
           Блог
         </h1>
         <Suspense fallback={<BlogFallback />}>
-          <BlogSectionServer />
+          <BlogSectionServer prioritizeFirstCard />
         </Suspense>
       </div>
 
