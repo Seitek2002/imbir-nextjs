@@ -6,6 +6,7 @@ export type ClientProfile = {
   last_name: string;
   email: string;
   phone?: string;
+  avatar?: string | null;
   blood_type?: string;
   allergies?: string[];
   emergency_contact_name?: string;
@@ -13,7 +14,13 @@ export type ClientProfile = {
   emergency_contact_relation?: string;
 };
 
-export type UpdateProfileRequest = Partial<Omit<ClientProfile, "email">>;
+// `avatar` is read-only (a URL); the API accepts a new image via the binary
+// `avatar_upload` field as multipart/form-data (see PatientProfileRequest).
+export type UpdateProfileRequest = Partial<
+  Omit<ClientProfile, "email" | "avatar">
+> & {
+  avatar_upload?: File;
+};
 
 export type ProfileAppointment = {
   id: number;

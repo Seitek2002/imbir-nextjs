@@ -17,7 +17,22 @@ export const getProfile = async (): Promise<ClientProfile> => {
 export const updateProfile = async (
   body: UpdateProfileRequest,
 ): Promise<ClientProfile> => {
-  const { data } = await apiClient.put<ClientProfile>("/api/profile/", body);
+  const { avatar_upload, ...rest } = body;
+
+  // A new avatar must go as multipart/form-data (binary `avatar_upload`);
+  // plain JSON is enough when only text fields change.
+  if (avatar_upload) {
+    const form = new FormData();
+    Object.entries(rest).forEach(([key, value]) => {
+      if (value !== undefined && value !== null)
+        form.append(key, String(value));
+    });
+    form.append("avatar_upload", avatar_upload);
+    const { data } = await apiClient.put<ClientProfile>("/api/profile/", form);
+    return data;
+  }
+
+  const { data } = await apiClient.put<ClientProfile>("/api/profile/", rest);
   return data;
 };
 

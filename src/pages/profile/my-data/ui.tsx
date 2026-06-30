@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import Image from "next/image";
@@ -8,7 +8,7 @@ import Image from "next/image";
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
 import { ProfileSidebar } from "@/widgets/profile/sidebar";
 
-import { updateProfile, uploadFile } from "@/shared/api";
+import { getProfile, updateProfile } from "@/shared/api";
 import { CheckIcon, EditIcon } from "@/shared/assets/icons";
 import { useAuthStore } from "@/shared/store";
 import { PhoneInput } from "@/shared/ui";
@@ -47,11 +47,33 @@ export const ProfileMyDataPage: FC = () => {
     patronymic: savedPatronymic,
     phone: user?.phone ?? "",
     email: user?.email ?? "",
+    photo: user?.avatar ?? undefined,
   });
   const photoRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof D>(k: K, v: D[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));
+
+  // Pull the current avatar once so it shows even when the persisted auth user
+  // predates the avatar field; also caches it in the store for other pages.
+  useEffect(() => {
+    let cancelled = false;
+    getProfile()
+      .then((profile) => {
+        if (cancelled || !profile.avatar) return;
+        setD((prev) => ({ ...prev, photo: profile.avatar ?? prev.photo }));
+        const current = useAuthStore.getState().user;
+        if (current) {
+          useAuthStore
+            .getState()
+            .setUser({ ...current, avatar: profile.avatar });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -65,41 +87,31 @@ export const ProfileMyDataPage: FC = () => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // 1. Save text fields to API
+      // Text fields + new avatar (if any) go in one multipart request — the
+      // API stores the image and returns its URL in `avatar`.
       const updated = await updateProfile({
         first_name: d.firstName,
         last_name: d.lastName,
         phone: d.phone || undefined,
+        ...(pendingPhoto ? { avatar_upload: pendingPhoto } : {}),
       });
 
-      // 2. Patronymic — localStorage only (not in API schema)
+      // Patronymic — localStorage only (not in API schema)
       localStorage.setItem("profile_patronymic", d.patronymic);
 
-      // 3. Update authStore so name updates everywhere
+      const newAvatar = updated.avatar ?? d.photo;
+      if (newAvatar) set("photo", newAvatar);
+      setPendingPhoto(null);
+
+      // Keep authStore in sync so name and avatar update everywhere
       if (user) {
         setUser({
           ...user,
           first_name: updated.first_name,
           last_name: updated.last_name,
           phone: updated.phone ?? user.phone,
+          avatar: newAvatar ?? user.avatar,
         });
-      }
-
-      // 4. Upload photo separately — don't block save if it fails
-      if (pendingPhoto) {
-        try {
-          const uploaded = await uploadFile(pendingPhoto);
-          set("photo", uploaded.url);
-        } catch {
-          toast.error(
-            "Данные сохранены, но фото не загрузилось — попробуйте позже",
-          );
-          setIsSaving(false);
-          setIsEditing(false);
-          setPendingPhoto(null);
-          return;
-        }
-        setPendingPhoto(null);
       }
 
       toast.success("Данные сохранены");
@@ -184,6 +196,7 @@ export const ProfileMyDataPage: FC = () => {
                         width={80}
                         height={80}
                         className="w-full h-full object-cover"
+                        unoptimized={d.photo.startsWith("data:")}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted text-2xl font-semibold">

@@ -12,6 +12,7 @@ export type AuthUser = {
   email: string;
   phone: string;
   date_joined: string;
+  avatar?: string | null;
 };
 
 type AuthStore = {
