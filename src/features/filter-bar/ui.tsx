@@ -50,7 +50,7 @@ export const FilterBar: FC<Props> = ({
   children,
 }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
 
   // Все значения — единственный источник правды: URL.
   // router.replace обновляет useSearchParams синхронно через React,

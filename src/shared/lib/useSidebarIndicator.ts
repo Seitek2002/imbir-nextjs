@@ -5,7 +5,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 export function useSidebarIndicator() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const navRef = useRef<HTMLElement>(null);
   const [indicator, setIndicator] = useState({ top: 0, height: 0 });
 

@@ -13,8 +13,8 @@ export const UrlSearchInput: FC<{ placeholder?: string }> = ({
   placeholder = "Поиск клиники, специалиста, услуги",
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const pathname = usePathname() ?? "";
+  const searchParams = useSearchParams() ?? new URLSearchParams();
 
   const addSearch = useSearchHistoryStore((state) => state.addSearch);
 

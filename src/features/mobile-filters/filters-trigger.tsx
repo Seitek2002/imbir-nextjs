@@ -9,8 +9,8 @@ import { IconBtn } from "@/shared/ui";
 
 export const FiltersTrigger: FC = () => {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const pathname = usePathname() ?? "";
+  const searchParams = useSearchParams() ?? new URLSearchParams();
 
   const handleOpen = () => {
     // Берем все текущие параметры (чтобы не сбросить поиск)

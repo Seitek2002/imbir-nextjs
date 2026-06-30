@@ -43,7 +43,7 @@ export const MobileFiltersModal: FC<Props> = ({
   clinicOptions = [],
 }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
 
   const initialExp = searchParams.get(`${prefix}_exp`)?.split("-").map(Number);
   const [experience, setExperience] = useState<[number, number]>([

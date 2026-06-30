@@ -12,8 +12,8 @@ type Props = {
 
 export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const pathname = usePathname() ?? "";
+  const searchParams = useSearchParams() ?? new URLSearchParams();
 
   // Достаем параметры из URL с учетом префикса
   const specs =
