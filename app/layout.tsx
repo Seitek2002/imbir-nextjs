@@ -27,7 +27,12 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${onest.className} h-full antialiased`}
     >
-      <head suppressHydrationWarning />
+      <head suppressHydrationWarning>
+        {/* Warm up the connection to the API/media host so the first data and
+            image requests don't pay DNS + TLS setup. */}
+        <link rel="preconnect" href="https://imbir.sino0on.ru" />
+        <link rel="dns-prefetch" href="https://imbir.sino0on.ru" />
+      </head>
       <body
         suppressHydrationWarning
         className="min-h-full flex flex-col bg-background lg:bg-white"

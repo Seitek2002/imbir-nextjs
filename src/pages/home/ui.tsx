@@ -12,6 +12,7 @@ import {
   VideoThumbnail3,
 } from "@/shared/assets/images";
 import { ROUTES } from "@/shared/config";
+import { LazyInView } from "@/shared/ui";
 
 import { Hero } from "./hero";
 
@@ -38,12 +39,22 @@ export const HomePage = () => {
       <Header searchable />
       <Hero />
 
+      {/* First content block: kept eager-ish (mounts as the hero scrolls). */}
       <DoctorsMainList />
       <SpecializationsSection />
-      <ClinicsList />
-      <Banners />
 
-      <div className="max-w-340 mx-auto">
+      {/* Below-the-fold client widgets — mount only when scrolled near, so their
+          hydration (incl. Swiper carousels) doesn't block the initial load.
+          minHeight reserves space to keep CLS at 0. */}
+      <LazyInView minHeight={520}>
+        <ClinicsList />
+      </LazyInView>
+
+      <LazyInView minHeight={440}>
+        <Banners />
+      </LazyInView>
+
+      <LazyInView minHeight={380} className="max-w-340 mx-auto">
         <VideosSwiper
           title="Интервью"
           viewAllHref="/videos"
@@ -75,7 +86,7 @@ export const HomePage = () => {
             },
           ]}
         />
-      </div>
+      </LazyInView>
 
       <section className="w-full max-w-360 mx-auto px-4 md:px-10 py-8 md:py-12">
         <div className="flex items-start justify-between mb-6 md:mb-8">
@@ -99,7 +110,9 @@ export const HomePage = () => {
         </Suspense>
       </section>
 
-      <Footer />
+      <LazyInView minHeight={300}>
+        <Footer />
+      </LazyInView>
     </main>
   );
 };

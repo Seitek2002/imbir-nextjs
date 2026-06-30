@@ -29,6 +29,11 @@ export const Hero: FC = () => {
         src={HeroBg}
         alt=""
         priority
+        // Decorative full-bleed background (opacity 75) — cap the candidate so
+        // mobile doesn't fetch/decode a 3840px image, and drop quality since the
+        // detail is invisible under the overlay. This is the LCP element.
+        sizes="(max-width: 1360px) 100vw, 1360px"
+        quality={55}
         className="absolute inset-0 w-full h-full object-cover opacity-75"
       />
 
@@ -56,6 +61,7 @@ export const Hero: FC = () => {
                 <Image
                   src={HeroAvatar}
                   alt=""
+                  sizes="48px"
                   className="w-full h-full object-cover object-top"
                 />
               </div>
@@ -85,6 +91,7 @@ export const Hero: FC = () => {
             src={HeroAvatar}
             alt=""
             priority
+            sizes="(max-width: 768px) 100vw, 700px"
             className="w-auto h-full object-contain object-bottom"
           />
         </div>
