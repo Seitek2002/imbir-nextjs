@@ -196,13 +196,19 @@ function useChatRoom(roomName: string, currentUser: string | null) {
 
 // ── AI-ассистент (основной API, не WebSocket) ───────────────────────────────────
 
-function useAIChat(enabled: boolean) {
+const AI_GUEST_PROMPT =
+  "Чтобы я подобрал специалиста и ответил на ваш вопрос, войдите или " +
+  "зарегистрируйтесь — это займёт меньше минуты.";
+
+function useAIChat(enabled: boolean, isAuthed: boolean) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isThinking, setIsThinking] = useState(false);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !isAuthed) {
+      // История ИИ доступна только авторизованным — для гостя просто пусто.
+      setMessages([]);
       setIsLoading(false);
       return;
     }
@@ -228,40 +234,59 @@ function useAIChat(enabled: boolean) {
     return () => {
       cancelled = true;
     };
-  }, [enabled]);
+  }, [enabled, isAuthed]);
 
-  const sendMessage = useCallback(async (text: string) => {
-    if (!text.trim()) return;
-    // Optimistic add нашего сообщения
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        content: text,
-        timestamp: new Date().toISOString(),
-        isMe: true,
-        isRead: true,
-      },
-    ]);
-    setIsThinking(true);
-    try {
-      const reply = await sendAIMessage(text);
+  const sendMessage = useCallback(
+    async (text: string) => {
+      if (!text.trim()) return;
+      // Optimistic add нашего сообщения
       setMessages((prev) => [
         ...prev,
         {
-          id: reply.id,
-          content: reply.content,
-          timestamp: reply.created_at,
-          isMe: false,
+          id: Date.now(),
+          content: text,
+          timestamp: new Date().toISOString(),
+          isMe: true,
           isRead: true,
         },
       ]);
-    } catch {
-      // ошибку показываем тихо — пользователь может повторить
-    } finally {
-      setIsThinking(false);
-    }
-  }, []);
+
+      // Гость: ИИ-эндпоинт требует JWT — отвечаем подсказкой про вход.
+      if (!isAuthed) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            content: AI_GUEST_PROMPT,
+            timestamp: new Date().toISOString(),
+            isMe: false,
+            isRead: true,
+          },
+        ]);
+        return;
+      }
+
+      setIsThinking(true);
+      try {
+        const reply = await sendAIMessage(text);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: reply.id,
+            content: reply.content,
+            timestamp: reply.created_at,
+            isMe: false,
+            isRead: true,
+          },
+        ]);
+      } catch {
+        // ошибку показываем тихо — пользователь может повторить
+      } finally {
+        setIsThinking(false);
+      }
+    },
+    [isAuthed],
+  );
 
   return { messages, isLoading, isThinking, sendMessage };
 }
@@ -517,7 +542,8 @@ export const ChatPage = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState("");
 
-  const [activeChatId, setActiveChatId] = useState<string>("putri");
+  // ИИ-ассистент — основной чат: открыт по умолчанию (на него ведёт hero).
+  const [activeChatId, setActiveChatId] = useState<string>("ai");
   const [searchQuery, setSearchQuery] = useState("");
   const [inputText, setInputText] = useState("");
   const [isAttachOpen, setIsAttachOpen] = useState(false);
@@ -532,7 +558,7 @@ export const ChatPage = () => {
   // WebSocket-комнаты (живые чаты) и AI-ассистент (основной API) — разные
   // транспорты. Хуки вызываются всегда, но активный отключается через флаг.
   const room = useChatRoom(isAIChat ? "" : activeChatId, currentUser);
-  const ai = useAIChat(isAIChat);
+  const ai = useAIChat(isAIChat, !!authUser);
 
   const messages = isAIChat ? ai.messages : room.messages;
   const isLoading = isAIChat ? ai.isLoading : room.isLoading;
@@ -562,6 +588,29 @@ export const ChatPage = () => {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Ждём гидратации authStore, чтобы знать, авторизован ли пользователь, прежде
+  // чем отправлять вопрос из hero (иначе залогиненный отправит как гость).
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    if (useAuthStore.persist.hasHydrated()) {
+      setHydrated(true);
+      return;
+    }
+    return useAuthStore.persist.onFinishHydration(() => setHydrated(true));
+  }, []);
+
+  // Вопрос, переданный из hero через ?ask=..., сразу уходит ИИ-ассистенту.
+  const askSentRef = useRef(false);
+  useEffect(() => {
+    if (!hydrated || askSentRef.current || !isAIChat) return;
+    const ask = new URLSearchParams(window.location.search).get("ask")?.trim();
+    if (!ask) return;
+    askSentRef.current = true;
+    sendMessage(ask);
+    // убираем параметр, чтобы при обновлении вопрос не отправился повторно
+    window.history.replaceState(null, "", "/chat");
+  }, [hydrated, isAIChat, sendMessage]);
 
   const handleLogin = async () => {
     const username = loginInput.trim();
@@ -651,8 +700,10 @@ export const ChatPage = () => {
       : null;
 
   // ── Login screen ──────────────────────────────────────────────────────────
+  // ИИ-ассистент доступен и без входа в чат-сервис (он работает по JWT основного
+  // API), поэтому экраном входа гейтим только живые WebSocket-чаты.
 
-  if (!currentUser) {
+  if (!currentUser && !isAIChat) {
     return (
       <main className="min-h-screen bg-[#F2F3F5] flex flex-col">
         <div className="hidden md:block">

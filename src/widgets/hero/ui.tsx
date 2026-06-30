@@ -1,13 +1,25 @@
-import { FC } from "react";
+"use client";
+
+import { FC, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/shared";
 
 import { HeroAvatar, HeroBg } from "@/shared/assets";
 
 export const Hero: FC = () => {
+  const router = useRouter();
+  const [symptom, setSymptom] = useState("");
+
+  // Уводим вопрос в ИИ-чат: страница /chat прочитает ?ask и сразу отправит его.
+  const askAssistant = () => {
+    const q = symptom.trim();
+    router.push(q ? `/chat?ask=${encodeURIComponent(q)}` : "/chat");
+  };
+
   return (
     <section className="relative max-w-340 mx-auto mt-6 overflow-hidden rounded-3xl bg-[#FFF0E9] pt-8 px-4 pb-0 md:p-12 md:pb-0 flex flex-col md:block min-h-150">
       <Image
@@ -48,10 +60,19 @@ export const Hero: FC = () => {
                 Что вас беспокоит? <br /> Я помогу подобрать вам специалиста
               </p>
             </div>
+
+            <input
+              value={symptom}
+              onChange={(e) => setSymptom(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && askAssistant()}
+              placeholder="Опишите, что вас беспокоит…"
+              className="w-full px-4 py-2.5 rounded-full border border-[#E3E4E5] text-sm text-[#191A1B] outline-none focus:border-[#F5653E] transition-colors"
+            />
+
             <div className="flex justify-end">
-              <Link href="/search">
-                <Button size="sm">Описать симптомы</Button>
-              </Link>
+              <Button size="sm" onClick={askAssistant}>
+                Описать симптомы
+              </Button>
             </div>
           </div>
         </div>
