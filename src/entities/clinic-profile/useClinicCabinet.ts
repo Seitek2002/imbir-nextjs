@@ -16,18 +16,20 @@ import type { ClinicProfile } from "./model";
 export const mapApiToClinicProfile = (
   api: ClinicPrivateProfile,
 ): ClinicProfile => ({
-  id: String(api.id),
+  id: api.id ? String(api.id) : "",
   name: api.name,
   logo: api.logo ?? undefined,
   type: api.clinic_type ?? "",
-  description: api.about ?? "",
-  photos: api.photos ?? [],
-  country: "Кыргызстан",
+  description: api.description ?? "",
+  photos: [],
+  country: api.country || "Кыргызстан",
   city: api.city,
   fullAddress: api.address ?? "",
   phone: api.phone ?? "",
   email: api.email ?? "",
   website: api.website ?? "",
+  latitude: api.latitude,
+  longitude: api.longitude,
   workSchedule: {
     mon: { enabled: true, open: "09:00", close: "18:00" },
     tue: { enabled: true, open: "09:00", close: "18:00" },
@@ -47,12 +49,17 @@ export const mapApiToClinicProfile = (
   licenseAuthority: api.license_authority ?? "",
   documents: [],
   mainDirections: api.primary_specializations ?? [],
-  narrowDirections: [],
-  additionalServices: [],
+  narrowDirections: api.narrow_specializations ?? [],
+  additionalServices: api.additional_services
+    ? api.additional_services
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [],
   equipment: api.equipment ?? [],
   patientConditions: api.patient_conditions ?? [],
   paymentMethods: api.payment_methods ?? [],
-  rating: api.rating,
+  rating: Number(api.rating) || 0,
 });
 
 export const useClinicCabinet = () => {

@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { LogoutIcon, StarIcon } from "@/shared/assets";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
+import { useAuthStore } from "@/shared/store/authStore";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 type Props = {
@@ -116,6 +117,7 @@ export const ClinicSidebar: FC<Props> = ({
 }) => {
   const { navRef, indicator, pathname } = useSidebarIndicator();
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const logout = useAuthStore((s) => s.logout);
 
   return (
     <aside className="w-72 shrink-0 hidden lg:block">
@@ -203,6 +205,7 @@ export const ClinicSidebar: FC<Props> = ({
         isOpen={logoutOpen}
         onClose={() => setLogoutOpen(false)}
         onConfirm={() => {
+          logout();
           window.location.href = "/";
         }}
         icon={<LogoutIcon className="w-7 h-7 text-[#F5653E]" />}

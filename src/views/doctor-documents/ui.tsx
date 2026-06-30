@@ -58,15 +58,9 @@ export const DoctorDocumentsPage: FC = () => {
   };
 
   const handleSave = async () => {
+    // certs (сертификаты) бэк в профиле не хранит — сохраняем номер лицензии
     await saveProfile({
-      legal: {
-        license_number: licenseNumber,
-        documents: certs,
-        company_name: "",
-        reg_number: "",
-        license_date: "",
-        license_authority: "",
-      },
+      license_number: licenseNumber,
     });
     setIsEditing(false);
   };

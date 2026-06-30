@@ -8,7 +8,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Footer, Header } from "@/widgets";
 
-import { registerClientFn } from "@/shared/api/auth/requests";
+import {
+  registerClientFn,
+  registerClinicFn,
+  registerDoctorFn,
+} from "@/shared/api/auth/requests";
+import type {
+  RegisterClinicRequest,
+  RegisterDoctorRequest,
+} from "@/shared/api/auth/types";
 import { MOCK_CLINICS } from "@/shared/api/mock-data";
 import {
   EmailIcon,
@@ -23,8 +31,13 @@ import { useAuthStore } from "@/shared/store/authStore";
 import { Button, IconBtn, Input } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control/ui";
 
-import { ClinicRegistrationForm, ClinicStep } from "./clinic-form";
 import {
+  ClinicFormData,
+  ClinicRegistrationForm,
+  ClinicStep,
+} from "./clinic-form";
+import {
+  DoctorFormData,
   DoctorRegistrationForm,
   DoctorStep,
   InviteClinic,
@@ -130,6 +143,31 @@ const ROLE_REDIRECT: Record<string, string> = {
   clinic: "/clinic-profile",
 };
 
+// Достаём первую строковую ошибку из ответа бэка любой вложенности
+// (ошибки могут быть вида { step2: { email: ["..."] } }).
+const firstErrorString = (val: unknown): string | null => {
+  if (typeof val === "string") return val;
+  if (Array.isArray(val)) {
+    for (const item of val) {
+      const s = firstErrorString(item);
+      if (s) return s;
+    }
+    return null;
+  }
+  if (val && typeof val === "object") {
+    for (const v of Object.values(val)) {
+      const s = firstErrorString(v);
+      if (s) return s;
+    }
+  }
+  return null;
+};
+
+const getRegisterErrorMessage = (err: unknown): string => {
+  const data = (err as { response?: { data?: unknown } })?.response?.data;
+  return firstErrorString(data) ?? "Ошибка регистрации. Попробуйте снова";
+};
+
 export const RegisterPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -175,9 +213,11 @@ export const RegisterPage = () => {
 
   // Doctor form step (owned here for unified back navigation)
   const [doctorStep, setDoctorStep] = useState<DoctorStep>(1);
+  const [isLoadingDoctor, setIsLoadingDoctor] = useState(false);
 
   // Clinic form step
   const [clinicStep, setClinicStep] = useState<ClinicStep>(1);
+  const [isLoadingClinic, setIsLoadingClinic] = useState(false);
 
   const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -237,14 +277,133 @@ export const RegisterPage = () => {
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
       router.push(ROLE_REDIRECT[res.user.role] ?? "/profile");
     } catch (err: unknown) {
-      const data = (err as { response?: { data?: Record<string, string[]> } })
-        ?.response?.data;
-      const msg = data
-        ? Object.values(data).flat()[0]
-        : "Ошибка регистрации. Попробуйте снова";
-      toast.error(msg);
+      toast.error(getRegisterErrorMessage(err));
     } finally {
       setIsLoadingClient(false);
+    }
+  };
+
+  // "ДД.ММ.ГГГГ" → "ГГГГ-ММ-ДД" (формат date бэкенда), иначе null
+  const toISODate = (value: string): string | null => {
+    const m = value.trim().match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : null;
+  };
+
+  const handleSubmitDoctor = async (d: DoctorFormData) => {
+    setIsLoadingDoctor(true);
+    try {
+      const payload: RegisterDoctorRequest = {
+        password: d.password,
+        step1: {
+          full_name: d.fullName,
+          email: d.email,
+          phone: d.phone,
+          gender: d.gender,
+          birth_date: toISODate(d.birthDate),
+          city: d.city,
+          languages: d.languages,
+        },
+        step2: {},
+        step3: {},
+        step4: { license_number: d.licenseNumber },
+        step5: {
+          primary_specializations: [d.specialization].filter(Boolean),
+          narrow_specializations: [d.additionalSpecialization].filter(Boolean),
+          additional_services: d.additionalEducation,
+        },
+        step6: {},
+        step7: {
+          agree_terms: d.agree,
+          agree_privacy: d.agree,
+          agree_data_processing: d.agree,
+          agree_publishing: d.agree,
+        },
+        ...(inviteClinic
+          ? {
+              invite_clinic_id: Number(inviteClinic.clinicId),
+              ...(inviteClinic.branchId
+                ? { invite_branch_id: Number(inviteClinic.branchId) }
+                : {}),
+            }
+          : {}),
+      };
+
+      const res = await registerDoctorFn(payload);
+      setTokens({ access: res.access, refresh: res.refresh });
+      setUser(res.user);
+      toast.success(`Добро пожаловать, ${res.user.first_name}!`);
+      router.push(ROLE_REDIRECT[res.user.role] ?? "/doctor-profile");
+    } catch (err: unknown) {
+      toast.error(getRegisterErrorMessage(err));
+    } finally {
+      setIsLoadingDoctor(false);
+    }
+  };
+
+  const handleSubmitClinic = async (c: ClinicFormData) => {
+    setIsLoadingClinic(true);
+    try {
+      const payload: RegisterClinicRequest = {
+        password: c.password,
+        step1: {
+          name: c.clinicName,
+          type: c.clinicType,
+          description: c.description,
+        },
+        step2: {
+          country: c.country,
+          city: c.city,
+          address: c.fullAddress,
+          phone: c.phone,
+          email: c.email,
+          website: c.website,
+        },
+        step3: {
+          schedule: c.schedule,
+          lunch_break: c.lunchBreak,
+          emergency_24_7: c.emergency247,
+        },
+        step4: {
+          legal_name: c.legalName,
+          reg_number: c.registrationNumber,
+          license_number: c.licenseNumber,
+          license_date: toISODate(c.licenseDate),
+          license_authority: c.licensingAuthority,
+        },
+        step5: {
+          primary_specializations: c.mainDirections
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          narrow_specializations: c.narrowDirections
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          additional_services: c.additionalServices,
+        },
+        step6: {
+          equipment: c.equipment,
+          patient_conditions: c.patientConditions,
+          payment_methods: c.paymentMethods,
+        },
+        step7: {
+          agree_terms: c.agreeRules,
+          agree_privacy: c.agreePrivacy,
+          agree_data_processing: c.agreeDataProcessing,
+          agree_publishing: c.agreeAccuracy,
+        },
+        ...(c.logo ? { logo: c.logo } : {}),
+      };
+
+      const res = await registerClinicFn(payload);
+      setTokens({ access: res.access, refresh: res.refresh });
+      setUser(res.user);
+      toast.success(`Добро пожаловать, ${res.user.first_name}!`);
+      router.push(ROLE_REDIRECT[res.user.role] ?? "/clinic-profile");
+    } catch (err: unknown) {
+      toast.error(getRegisterErrorMessage(err));
+    } finally {
+      setIsLoadingClinic(false);
     }
   };
 
@@ -379,6 +538,8 @@ export const RegisterPage = () => {
                   onContinue={() =>
                     setDoctorStep((s) => Math.min(s + 1, 4) as DoctorStep)
                   }
+                  onSubmit={handleSubmitDoctor}
+                  isSubmitting={isLoadingDoctor}
                   inviteClinic={inviteClinic}
                 />
               </div>
@@ -392,6 +553,8 @@ export const RegisterPage = () => {
                   onContinue={() =>
                     setClinicStep((s) => Math.min(s + 1, 7) as ClinicStep)
                   }
+                  onSubmit={handleSubmitClinic}
+                  isSubmitting={isLoadingClinic}
                 />
               </div>
             )}

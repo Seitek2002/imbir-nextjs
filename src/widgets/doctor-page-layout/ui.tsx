@@ -81,9 +81,16 @@ export const DoctorPageLayout: FC<Props> = ({
         <div className="flex gap-6">
           <div className="hidden lg:block">
             <DoctorSidebar
-              fullName={profile?.full_name ?? "—"}
+              fullName={
+                profile
+                  ? [profile.last_name, profile.first_name]
+                      .filter(Boolean)
+                      .join(" ")
+                      .trim()
+                  : "—"
+              }
               photo={profile?.photo ?? undefined}
-              specialty={profile?.specialty ?? ""}
+              specialty={profile?.primary_specializations?.[0] ?? ""}
               rating={profile ? parseFloat(String(profile.rating)) : 0}
             />
           </div>

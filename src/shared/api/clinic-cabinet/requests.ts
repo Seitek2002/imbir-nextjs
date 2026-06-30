@@ -15,20 +15,21 @@ import {
 } from "./types";
 
 export const getClinicProfile = async (): Promise<ClinicPrivateProfile> => {
-  const { data } = await apiClient.get<{ data: ClinicPrivateProfile }>(
+  // Ответ — плоский объект (ClinicOwnProfile), без обёртки { data }.
+  const { data } = await apiClient.get<ClinicPrivateProfile>(
     "/api/clinic/profile/",
   );
-  return data.data;
+  return data;
 };
 
 export const updateClinicProfile = async (
   body: Partial<ClinicPrivateProfile>,
 ): Promise<ClinicPrivateProfile> => {
-  const { data } = await apiClient.put<{ data: ClinicPrivateProfile }>(
+  const { data } = await apiClient.put<ClinicPrivateProfile>(
     "/api/clinic/profile/",
     body,
   );
-  return data.data;
+  return data;
 };
 
 export const updateClinicBranch = async (

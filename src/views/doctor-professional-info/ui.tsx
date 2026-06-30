@@ -56,7 +56,8 @@ export const DoctorProfessionalInfoPage: FC = () => {
 
   const handleSave = async () => {
     await saveProfile({
-      specialty: d.specialty,
+      primary_specializations: [d.specialty].filter(Boolean),
+      narrow_specializations: [d.additionalSpecialty].filter(Boolean),
       experience_years: parseInt(d.experienceYears) || 0,
     });
     setIsEditing(false);

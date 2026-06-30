@@ -58,15 +58,19 @@ export const DoctorBasicInfoPage: FC = () => {
   };
 
   const handleSave = async () => {
+    // ФИО хранится как фамилия + имя/отчество (см. mapApiToProfile)
+    const parts = d.fullName.trim().split(/\s+/);
     await saveProfile({
-      full_name: d.fullName,
+      last_name: parts[0] ?? "",
+      first_name: parts.slice(1).join(" "),
+      gender: d.gender || undefined,
+      birth_date: d.birthDate || null,
       city: d.city,
       languages: d.languages
         .split(",")
         .map((l) => l.trim())
         .filter(Boolean),
       phone: d.phone || undefined,
-      email: d.email || undefined,
     });
     setIsEditing(false);
   };

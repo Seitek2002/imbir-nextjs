@@ -1,11 +1,19 @@
 "use client";
 
 import { FC, useCallback, useState } from "react";
+import toast from "react-hot-toast";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
-import { DoctorService, MOCK_SERVICES } from "@/entities/doctor-profile";
-
+import {
+  createDoctorService,
+  deleteDoctorService,
+  getDoctorServices,
+} from "@/shared/api/doctor-cabinet/requests";
+import type { DoctorServiceWrite } from "@/shared/api/doctor-cabinet/types";
+import { doctorCabinetKeys } from "@/shared/api/queryKeys";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 const DURATION = 200;
@@ -13,16 +21,19 @@ const DURATION = 200;
 type AddServiceModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (service: Omit<DoctorService, "id">) => void;
+  onAdd: (service: DoctorServiceWrite) => void;
+  isSaving: boolean;
 };
 
 const AddServiceModal: FC<AddServiceModalProps> = ({
   isOpen,
   onClose,
   onAdd,
+  isSaving,
 }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
@@ -38,9 +49,16 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
   }, [onClose]);
 
   const handleSubmit = () => {
-    if (!name.trim()) return;
-    onAdd({ name, description, isPrimary: false });
+    if (!name.trim() || !category.trim()) return;
+    onAdd({
+      name: name.trim(),
+      category: category.trim(),
+      description: description.trim(),
+      price: price ? price : null,
+      duration: duration ? parseInt(duration) : null,
+    });
     setName("");
+    setCategory("");
     setDescription("");
     setPrice("");
     setDuration("");
@@ -53,6 +71,7 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
   const inp =
     "w-full px-4 py-3 rounded-2xl border border-[#E5E6E8] text-[#191A1B] placeholder:text-[#C4C8CA] focus:outline-none focus:border-[#F5653E] transition-colors";
   const lbl = "block text-[#838A8D] text-sm mb-1.5";
+  const valid = name.trim() && category.trim();
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -94,6 +113,15 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
             />
           </div>
           <div>
+            <label className={lbl}>Категория</label>
+            <input
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="Например, Консультация"
+              className={inp}
+            />
+          </div>
+          <div>
             <label className={lbl}>Описание услуги</label>
             <input
               value={description}
@@ -126,14 +154,14 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
           </div>
           <button
             onClick={handleSubmit}
-            disabled={!name.trim()}
+            disabled={!valid || isSaving}
             className={`w-full py-3.5 rounded-full font-medium transition-colors ${
-              name.trim()
+              valid && !isSaving
                 ? "bg-[#F5653E] text-white hover:bg-[#E5542D] active:scale-95"
                 : "bg-[#E5E6E8] text-[#C4C8CA] cursor-not-allowed"
             }`}
           >
-            Добавить
+            {isSaving ? "Добавление..." : "Добавить"}
           </button>
         </div>
       </div>
@@ -142,11 +170,36 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
 };
 
 export const DoctorServicesPage: FC = () => {
-  const [services, setServices] = useState<DoctorService[]>(MOCK_SERVICES);
+  const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
 
-  const handleAdd = (s: Omit<DoctorService, "id">) =>
-    setServices((prev) => [...prev, { ...s, id: String(Date.now()) }]);
+  const { data, isLoading } = useQuery({
+    queryKey: doctorCabinetKeys.services(),
+    queryFn: getDoctorServices,
+  });
+  const services = data?.data ?? [];
+
+  const { mutate: addService, isPending: isSaving } = useMutation({
+    mutationFn: (body: DoctorServiceWrite) => createDoctorService(body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: doctorCabinetKeys.services(),
+      });
+      toast.success("Услуга добавлена");
+    },
+    onError: () => toast.error("Не удалось добавить услугу"),
+  });
+
+  const { mutate: removeService } = useMutation({
+    mutationFn: (id: number) => deleteDoctorService(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: doctorCabinetKeys.services(),
+      });
+      toast.success("Услуга удалена");
+    },
+    onError: () => toast.error("Не удалось удалить услугу"),
+  });
 
   return (
     <>
@@ -187,39 +240,75 @@ export const DoctorServicesPage: FC = () => {
           </button>
         </div>
 
-        <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden">
-          <div className="grid grid-cols-3 px-5 py-3 border-b border-[#E5E6E8]">
-            <span className="text-[#838A8D] text-sm font-medium">
-              Название услуги
-            </span>
-            <span className="text-[#838A8D] text-sm font-medium">Описание</span>
-            <span className="text-[#838A8D] text-sm font-medium">
-              Первичный приём
-            </span>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20 text-[#838A8D]">
+            Загрузка...
           </div>
-          {services.map((s, i) => (
-            <div
-              key={s.id}
-              className={`grid grid-cols-3 px-5 py-4 items-center ${i !== services.length - 1 ? "border-b border-[#E5E6E8]" : ""}`}
-            >
-              <span className="text-[#191A1B] text-sm font-medium pr-3">
-                {s.name}
+        ) : (
+          <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden">
+            <div className="grid grid-cols-[2fr_2fr_1fr_1fr_auto] gap-3 px-5 py-3 border-b border-[#E5E6E8]">
+              <span className="text-[#838A8D] text-sm font-medium">
+                Название услуги
               </span>
-              <span className="text-[#838A8D] text-sm pr-3 truncate">
-                {s.description}
+              <span className="text-[#838A8D] text-sm font-medium">
+                Категория
               </span>
-              <span className="text-[#838A8D] text-sm">
-                {s.isPrimary ? "Да" : "Нет"}
+              <span className="text-[#838A8D] text-sm font-medium">Цена</span>
+              <span className="text-[#838A8D] text-sm font-medium">
+                Длит., мин
               </span>
+              <span className="w-9" />
             </div>
-          ))}
-        </div>
+
+            {services.length === 0 && (
+              <div className="text-center text-[#838A8D] py-12">
+                Услуги не добавлены
+              </div>
+            )}
+
+            {services.map((s, i) => (
+              <div
+                key={s.id}
+                className={`grid grid-cols-[2fr_2fr_1fr_1fr_auto] gap-3 px-5 py-4 items-center ${i !== services.length - 1 ? "border-b border-[#E5E6E8]" : ""}`}
+              >
+                <span className="text-[#191A1B] text-sm font-medium pr-3">
+                  {s.name}
+                </span>
+                <span className="text-[#838A8D] text-sm pr-3 truncate">
+                  {s.category}
+                </span>
+                <span className="text-[#838A8D] text-sm">
+                  {s.price ? `${s.price} сом` : "—"}
+                </span>
+                <span className="text-[#838A8D] text-sm">
+                  {s.duration ?? "—"}
+                </span>
+                <button
+                  onClick={() => removeService(s.id)}
+                  className="w-9 h-9 flex items-center justify-center text-[#C4C8CA] hover:text-[#F5653E] transition-colors"
+                  aria-label="Удалить услугу"
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path
+                      d="M3 5h12M7 5V3.5a1 1 0 011-1h2a1 1 0 011 1V5m2 0v9a1 1 0 01-1 1H5a1 1 0 01-1-1V5"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </DoctorPageLayout>
 
       <AddServiceModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onAdd={handleAdd}
+        onAdd={addService}
+        isSaving={isSaving}
       />
     </>
   );

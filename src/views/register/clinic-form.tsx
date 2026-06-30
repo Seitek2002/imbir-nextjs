@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 
+import { EyeIcon, EyeOffIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
 import {
   Button,
@@ -16,7 +17,10 @@ export type ClinicStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 type ScheduleDay = { from: string; to: string };
 
-type ClinicFormData = {
+export type ClinicFormData = {
+  password: string;
+  confirmPassword: string;
+
   clinicName: string;
   logo: File | null;
   clinicType: string;
@@ -264,16 +268,27 @@ const CheckboxGroup = ({
 type Props = {
   step: ClinicStep;
   onContinue: () => void;
+  onSubmit: (data: ClinicFormData) => void;
+  isSubmitting?: boolean;
 };
 
-export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
+export const ClinicRegistrationForm = ({
+  step,
+  onContinue,
+  onSubmit,
+  isSubmitting = false,
+}: Props) => {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const photosInputRef = useRef<HTMLInputElement>(null);
   const docsInputRef = useRef<HTMLInputElement>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const emptyDay: ScheduleDay = { from: "", to: "" };
 
   const [data, setData] = useState<ClinicFormData>({
+    password: "",
+    confirmPassword: "",
     clinicName: "",
     logo: null,
     clinicType: "",
@@ -337,12 +352,22 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
     data.agreeDataProcessing &&
     data.agreeAccuracy;
 
+  const passwordError =
+    data.confirmPassword && data.password !== data.confirmPassword
+      ? "Пароли не совпадают"
+      : "";
+
+  const isStep7Valid =
+    allAgreed &&
+    data.password.length >= 8 &&
+    data.password === data.confirmPassword;
+
   const isValid =
-    step === 1 ? !!data.clinicName : step === 7 ? allAgreed : true;
+    step === 1 ? !!data.clinicName : step === 7 ? isStep7Valid : true;
 
   const handleContinue = () => {
     if (step < 7) onContinue();
-    else console.log("Clinic registration:", data);
+    else onSubmit(data);
   };
 
   return (
@@ -797,6 +822,26 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
       {/* ── Step 7: Completion ── */}
       {step === 7 && (
         <div className="flex flex-col gap-4">
+          <Input
+            label="Пароль"
+            type={showPassword ? "text" : "password"}
+            placeholder="Минимум 8 символов"
+            IconRight={showPassword ? EyeIcon : EyeOffIcon}
+            onIconRightClick={() => setShowPassword(!showPassword)}
+            value={data.password}
+            onChange={(e) => set("password", e.target.value)}
+          />
+          <Input
+            label="Подтвердите пароль"
+            type={showConfirm ? "text" : "password"}
+            placeholder="Введите пароль повторно"
+            IconRight={showConfirm ? EyeIcon : EyeOffIcon}
+            onIconRightClick={() => setShowConfirm(!showConfirm)}
+            value={data.confirmPassword}
+            onChange={(e) => set("confirmPassword", e.target.value)}
+            error={passwordError}
+          />
+
           <div className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-[#0D0D12]">
               Согласия и политики
@@ -854,7 +899,8 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
           className="w-full justify-center h-14 text-base"
           size="lg"
           onClick={handleContinue}
-          disabled={!isValid}
+          disabled={!isValid || isSubmitting}
+          loading={step === 7 && isSubmitting}
         >
           {step === 7 ? "Завершить регистрацию" : "Продолжить"}
         </Button>
@@ -866,7 +912,8 @@ export const ClinicRegistrationForm = ({ step, onContinue }: Props) => {
           className="w-full justify-center md:h-14 md:text-lg"
           size="lg"
           onClick={handleContinue}
-          disabled={!isValid}
+          disabled={!isValid || isSubmitting}
+          loading={step === 7 && isSubmitting}
         >
           {step === 7 ? "Завершить регистрацию" : "Продолжить"}
         </Button>

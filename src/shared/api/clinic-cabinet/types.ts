@@ -1,14 +1,45 @@
-import { ClinicDetail } from "../clinics/types";
+export type ClinicProfileBranch = {
+  id: number;
+  address: string;
+};
 
-export type ClinicPrivateProfile = ClinicDetail & {
-  legal_name?: string;
-  reg_number?: string;
-  license_number?: string;
-  license_date?: string;
-  license_authority?: string;
+// Соответствует схеме ClinicOwnProfile (GET/PUT /api/clinic/profile/) —
+// плоский объект, отличается от публичной карточки клиники.
+export type ClinicPrivateProfile = {
+  id?: number;
+  name: string;
+  clinic_type: string;
+  description: string;
+  logo: string | null;
+  email: string;
+  phone: string;
+  website: string;
+  country: string;
+  city: string;
+  address: string;
+  latitude: string | null;
+  longitude: string | null;
+  schedule: Record<string, unknown>;
+  lunch_break: Record<string, unknown>;
+  emergency_24_7: boolean;
+  legal_name: string;
+  reg_number: string;
+  license_number: string;
+  license_date: string | null;
+  license_authority: string;
+  primary_specializations: string[];
+  narrow_specializations: string[];
+  additional_services: string;
+  equipment: string[];
+  patient_conditions: string[];
+  payment_methods: string[];
+  experience_years: number;
+  rating: string;
+  reviews_count: number;
+  doctors_count: number;
   is_published: boolean;
   profile_views: number;
-  appointments_total: number;
+  branches: ClinicProfileBranch[];
 };
 
 export type ClinicDoctorItem = {

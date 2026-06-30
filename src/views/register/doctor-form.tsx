@@ -2,12 +2,20 @@
 
 import { useRef, useState } from "react";
 
+import { EyeIcon, EyeOffIcon } from "@/shared/assets";
 import { cn } from "@/shared/lib/utils";
-import { Button, Dropdown, Input, PhoneInput, Textarea } from "@/shared/ui";
+import {
+  Button,
+  Checkbox,
+  Dropdown,
+  Input,
+  PhoneInput,
+  Textarea,
+} from "@/shared/ui";
 
 export type DoctorStep = 1 | 2 | 3 | 4;
 
-type DoctorFormData = {
+export type DoctorFormData = {
   fullName: string;
   gender: "male" | "female" | "";
   birthDate: string;
@@ -34,6 +42,10 @@ type DoctorFormData = {
 
   certificates: File[];
   licenseNumber: string;
+
+  password: string;
+  confirmPassword: string;
+  agree: boolean;
 };
 
 const CITIES = [
@@ -189,12 +201,16 @@ export type InviteClinic = {
 type Props = {
   step: DoctorStep;
   onContinue: () => void;
+  onSubmit: (data: DoctorFormData) => void;
+  isSubmitting?: boolean;
   inviteClinic?: InviteClinic;
 };
 
 export const DoctorRegistrationForm = ({
   step,
   onContinue,
+  onSubmit,
+  isSubmitting = false,
   inviteClinic,
 }: Props) => {
   const [data, setData] = useState<DoctorFormData>({
@@ -221,10 +237,15 @@ export const DoctorRegistrationForm = ({
     additionalEducation: "",
     certificates: [],
     licenseNumber: "",
+    password: "",
+    confirmPassword: "",
+    agree: false,
   });
 
   const photoInputRef = useRef<HTMLInputElement>(null);
   const certInputRef = useRef<HTMLInputElement>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const set = <K extends keyof DoctorFormData>(
     key: K,
@@ -240,13 +261,21 @@ export const DoctorRegistrationForm = ({
     data.email
   );
 
-  const isValid = step === 1 ? isStep1Valid : true;
+  const passwordError =
+    data.confirmPassword && data.password !== data.confirmPassword
+      ? "Пароли не совпадают"
+      : "";
+
+  const isStep4Valid =
+    data.password.length >= 8 &&
+    data.password === data.confirmPassword &&
+    data.agree;
+
+  const isValid = step === 1 ? isStep1Valid : step === 4 ? isStep4Valid : true;
 
   const handleContinue = () => {
     if (step < 4) onContinue();
-    else {
-      console.log("Doctor registration:", data);
-    }
+    else onSubmit(data);
   };
 
   return (
@@ -623,6 +652,33 @@ export const DoctorRegistrationForm = ({
             onChange={(e) => set("licenseNumber", e.target.value)}
           />
 
+          <Input
+            label="Пароль"
+            type={showPassword ? "text" : "password"}
+            placeholder="Минимум 8 символов"
+            IconRight={showPassword ? EyeIcon : EyeOffIcon}
+            onIconRightClick={() => setShowPassword(!showPassword)}
+            value={data.password}
+            onChange={(e) => set("password", e.target.value)}
+          />
+
+          <Input
+            label="Подтвердите пароль"
+            type={showConfirm ? "text" : "password"}
+            placeholder="Введите пароль повторно"
+            IconRight={showConfirm ? EyeIcon : EyeOffIcon}
+            onIconRightClick={() => setShowConfirm(!showConfirm)}
+            value={data.confirmPassword}
+            onChange={(e) => set("confirmPassword", e.target.value)}
+            error={passwordError}
+          />
+
+          <Checkbox
+            checked={data.agree}
+            onChange={(e) => set("agree", e.target.checked)}
+            label="Принимаю условия использования и политику конфиденциальности"
+          />
+
           <div className="flex gap-3 p-4 rounded-xl bg-[#F2F3F5] mt-2">
             <InfoIcon />
             <p className="text-sm text-[#838A8D]">
@@ -643,7 +699,8 @@ export const DoctorRegistrationForm = ({
           className="w-full justify-center h-14 text-base"
           size="lg"
           onClick={handleContinue}
-          disabled={!isValid}
+          disabled={!isValid || isSubmitting}
+          loading={step === 4 && isSubmitting}
         >
           {step === 4 ? "Завершить регистрацию" : "Продолжить"}
         </Button>
@@ -655,7 +712,8 @@ export const DoctorRegistrationForm = ({
           className="w-full justify-center md:h-14 md:text-lg"
           size="lg"
           onClick={handleContinue}
-          disabled={!isValid}
+          disabled={!isValid || isSubmitting}
+          loading={step === 4 && isSubmitting}
         >
           {step === 4 ? "Завершить регистрацию" : "Продолжить"}
         </Button>

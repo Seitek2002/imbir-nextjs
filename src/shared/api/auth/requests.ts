@@ -50,10 +50,11 @@ export const registerClientFn = async (
 export const registerDoctorFn = async (
   body: RegisterDoctorRequest,
 ): Promise<AuthResponse> => {
+  // Бэк ждёт вложенные step-объекты — отправляем JSON (multipart со
+  // step-полями он не принимает). Фото грузится отдельно, в кабинете.
   const { data } = await apiClient.post<AuthResponse>(
     "/api/auth/register/doctor/",
-    toFormData(body as unknown as Record<string, unknown>),
-    { headers: { "Content-Type": "multipart/form-data" } },
+    body,
   );
   return data;
 };

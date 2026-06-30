@@ -34,18 +34,13 @@ export const ProfileMyDataPage: FC = () => {
   const accessToken = useAuthStore((s) => s.accessToken);
   const setUser = useAuthStore((s) => s.setUser);
 
-  const savedPatronymic =
-    typeof window !== "undefined"
-      ? (localStorage.getItem("profile_patronymic") ?? "")
-      : "";
-
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
   const [d, setD] = useState<D>({
     firstName: user?.first_name ?? "",
     lastName: user?.last_name ?? "",
-    patronymic: savedPatronymic,
+    patronymic: "",
     phone: user?.phone ?? "",
     email: user?.email ?? "",
     // Init avatar from authStore (persisted across refreshes)
@@ -55,6 +50,13 @@ export const ProfileMyDataPage: FC = () => {
 
   const setField = <K extends keyof D>(k: K, v: D[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));
+
+  // Отчество хранится только в localStorage — читаем после монтирования,
+  // чтобы серверный и клиентский рендер совпали (иначе ошибка гидратации).
+  useEffect(() => {
+    const saved = localStorage.getItem("profile_patronymic");
+    if (saved) setField("patronymic", saved);
+  }, []);
 
   // Sync form text fields when Zustand rehydrates from localStorage
   useEffect(() => {

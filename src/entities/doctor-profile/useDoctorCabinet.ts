@@ -16,17 +16,18 @@ import type { DoctorProfileData } from "./model";
 export const mapApiToProfile = (
   api: DoctorPrivateProfile,
 ): DoctorProfileData => ({
-  fullName: api.full_name,
-  specialty: api.specialty,
-  additionalSpecialty: "",
-  experienceYears: String(api.experience_years),
+  // Бэк хранит ФИО как фамилия (last_name) + имя/отчество (first_name)
+  fullName: [api.last_name, api.first_name].filter(Boolean).join(" ").trim(),
+  specialty: api.primary_specializations?.[0] ?? "",
+  additionalSpecialty: api.narrow_specializations?.[0] ?? "",
+  experienceYears: String(api.experience_years ?? 0),
   currentPosition: api.work_experience?.[0]?.position ?? "",
   workplace: api.work_experience?.[0]?.clinic ?? "",
   qualification: "",
   scientificDegree: "",
-  gender: "",
-  birthDate: "",
-  city: api.city,
+  gender: api.gender ?? "",
+  birthDate: api.birth_date ?? "",
+  city: api.city ?? "",
   languages: api.languages?.join(", ") ?? "",
   phone: api.phone ?? "",
   email: api.email ?? "",
@@ -37,10 +38,10 @@ export const mapApiToProfile = (
   residency: "",
   diplomaSpecialty: "",
   additionalEducation: api.education?.slice(1).map((e) => e.institution) ?? [],
-  licenseNumber: api.legal?.license_number ?? "",
-  certificates: api.legal?.documents ?? [],
-  rating: api.rating,
-  totalReviews: api.reviews_count,
+  licenseNumber: api.license_number ?? "",
+  certificates: [],
+  rating: Number(api.rating) || 0,
+  totalReviews: api.reviews_count ?? 0,
 });
 
 export const useDoctorCabinet = () => {

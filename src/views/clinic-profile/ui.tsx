@@ -33,7 +33,7 @@ export const ClinicProfilePage: FC = () => {
     if (profile) {
       await saveProfile({
         name: profile.name,
-        about: profile.description,
+        description: profile.description,
         phone: profile.phone || undefined,
         email: profile.email || undefined,
         website: profile.website || undefined,

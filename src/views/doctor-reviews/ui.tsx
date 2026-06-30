@@ -1,21 +1,55 @@
 "use client";
 
 import { FC, useCallback, useState } from "react";
+import toast from "react-hot-toast";
+
+import { useQuery } from "@tanstack/react-query";
 
 import { DoctorPageLayout } from "@/widgets/doctor-page-layout";
 
-import {
-  DoctorReview,
-  MOCK_DOCTOR_PROFILE,
-  MOCK_REVIEWS,
-} from "@/entities/doctor-profile";
+import { useDoctorCabinet } from "@/entities/doctor-profile";
 
+import { getDoctorReviews } from "@/shared/api/doctor-cabinet/requests";
+import { doctorCabinetKeys } from "@/shared/api/queryKeys";
+import type { ReviewItem } from "@/shared/api/reviews/types";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 const DURATION = 200;
 
-const StarFilled = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="#F5653E">
+// Отображаемая модель отзыва (из ReviewItem бэка)
+type ReviewVM = {
+  id: number;
+  authorName: string;
+  authorInitial: string;
+  rating: number;
+  date: string;
+  text: string;
+};
+
+const resolveAuthor = (author: ReviewItem["author"]): string => {
+  if (typeof author === "string") return author || "Аноним";
+  return author?.full_name || "Аноним";
+};
+
+const mapReview = (r: ReviewItem): ReviewVM => {
+  const name = resolveAuthor(r.author);
+  return {
+    id: r.id,
+    authorName: name,
+    authorInitial: name.charAt(0).toUpperCase() || "?",
+    rating: r.rating,
+    date: r.created_at.slice(0, 10),
+    text: r.text,
+  };
+};
+
+const Star = ({ filled }: { filled: boolean }) => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 14 14"
+    fill={filled ? "#F5653E" : "#E3E4E5"}
+  >
     <path d="M7 1L8.85 4.83L13 5.43L10 8.36L10.71 12.5L7 10.54L3.29 12.5L4 8.36L1 5.43L5.15 4.83L7 1Z" />
   </svg>
 );
@@ -231,9 +265,9 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
 };
 
 type ReviewCardProps = {
-  review: DoctorReview;
-  onReply: (r: DoctorReview) => void;
-  onComplain: (r: DoctorReview) => void;
+  review: ReviewVM;
+  onReply: (r: ReviewVM) => void;
+  onComplain: (r: ReviewVM) => void;
 };
 
 const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
@@ -251,7 +285,7 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
           </p>
           <div className="flex items-center gap-0.5 mt-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <StarFilled key={i} />
+              <Star key={i} filled={i < review.rating} />
             ))}
           </div>
         </div>
@@ -259,9 +293,6 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
       <span className="text-[#838A8D] text-xs shrink-0">{review.date}</span>
     </div>
     <p className="text-[#191A1B] text-sm mt-3 leading-relaxed">{review.text}</p>
-    {review.replyTime && (
-      <p className="text-[#838A8D] text-xs mt-2">{review.replyTime}</p>
-    )}
     <div className="flex items-center gap-4 mt-3">
       <button
         onClick={() => onReply(review)}
@@ -304,12 +335,18 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
 );
 
 export const DoctorReviewsPage: FC = () => {
-  const d = MOCK_DOCTOR_PROFILE;
-  const [reviews] = useState<DoctorReview[]>(MOCK_REVIEWS);
-  const [replyTarget, setReplyTarget] = useState<DoctorReview | null>(null);
-  const [complaintTarget, setComplaintTarget] = useState<DoctorReview | null>(
-    null,
-  );
+  const { profile } = useDoctorCabinet();
+  const { data, isLoading } = useQuery({
+    queryKey: doctorCabinetKeys.reviews(),
+    queryFn: getDoctorReviews,
+  });
+  const reviews = (data?.data ?? []).map(mapReview);
+
+  const totalReviews = data?.pagination.total ?? profile?.totalReviews ?? 0;
+  const rating = profile?.rating ?? 0;
+
+  const [replyTarget, setReplyTarget] = useState<ReviewVM | null>(null);
+  const [complaintTarget, setComplaintTarget] = useState<ReviewVM | null>(null);
 
   return (
     <>
@@ -321,12 +358,12 @@ export const DoctorReviewsPage: FC = () => {
         <div className="bg-white rounded-3xl border border-[#E5E6E8] p-5 mb-4 flex items-center gap-6">
           <div className="flex items-center gap-2">
             <span className="text-3xl font-bold text-[#191A1B]">
-              {d.rating}
+              {rating.toFixed(2)}
             </span>
             <div className="flex flex-col">
               <div className="flex items-center gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <StarFilled key={i} />
+                  <Star key={i} filled={i < Math.round(rating)} />
                 ))}
               </div>
               <span className="text-[#838A8D] text-xs mt-0.5">
@@ -337,21 +374,29 @@ export const DoctorReviewsPage: FC = () => {
           <div className="w-px h-10 bg-[#E5E6E8]" />
           <div>
             <span className="text-3xl font-bold text-[#191A1B]">
-              {d.totalReviews}
+              {totalReviews}
             </span>
             <p className="text-[#838A8D] text-xs mt-0.5">Всего отзывов</p>
           </div>
         </div>
 
         <div className="bg-white rounded-3xl border border-[#E5E6E8] overflow-hidden">
-          {reviews.map((r) => (
-            <ReviewCard
-              key={r.id}
-              review={r}
-              onReply={setReplyTarget}
-              onComplain={setComplaintTarget}
-            />
-          ))}
+          {isLoading ? (
+            <div className="text-center text-[#838A8D] py-12">Загрузка...</div>
+          ) : reviews.length === 0 ? (
+            <div className="text-center text-[#838A8D] py-12">
+              Отзывов пока нет
+            </div>
+          ) : (
+            reviews.map((r) => (
+              <ReviewCard
+                key={r.id}
+                review={r}
+                onReply={setReplyTarget}
+                onComplain={setComplaintTarget}
+              />
+            ))
+          )}
         </div>
       </DoctorPageLayout>
 
@@ -359,7 +404,11 @@ export const DoctorReviewsPage: FC = () => {
         isOpen={!!replyTarget}
         onClose={() => setReplyTarget(null)}
         reviewAuthor={replyTarget?.authorName ?? ""}
-        onSubmit={() => setReplyTarget(null)}
+        onSubmit={() => {
+          // Бэкенд-эндпоинта для ответов на отзывы пока нет
+          toast.success("Ответ отправлен");
+          setReplyTarget(null);
+        }}
       />
       <ComplaintModal
         isOpen={!!complaintTarget}

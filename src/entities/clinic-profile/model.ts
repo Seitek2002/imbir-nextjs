@@ -39,6 +39,8 @@ export type ClinicProfile = {
   phone: string;
   email: string;
   website: string;
+  latitude?: string | null;
+  longitude?: string | null;
 
   // Расписание
   workSchedule: ClinicScheduleData;

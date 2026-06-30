@@ -66,6 +66,48 @@ const FieldView = ({
   </div>
 );
 
+// ─── Геолокация (карта OpenStreetMap, без ключей) ───────────────────────────
+
+const GeoMap = ({
+  lat,
+  lon,
+  caption,
+}: {
+  lat?: string | null;
+  lon?: string | null;
+  caption: string;
+}) => {
+  const hasCoords = !!lat && !!lon;
+  const la = parseFloat(String(lat));
+  const lo = parseFloat(String(lon));
+  const d = 0.005;
+  const src = hasCoords
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${lo - d}%2C${la - d}%2C${lo + d}%2C${la + d}&layer=mapnik&marker=${la}%2C${lo}`
+    : "";
+
+  return (
+    <div className="rounded-2xl overflow-hidden border border-[#E5E6E8]">
+      {hasCoords ? (
+        <iframe
+          title="Геолокация"
+          src={src}
+          className="w-full h-44 border-0"
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-full h-44 bg-[#F2F3F5] flex items-center justify-center text-[#838A8D] text-sm">
+          Координаты не указаны
+        </div>
+      )}
+      {caption && (
+        <div className="px-4 py-3 text-sm text-[#191A1B] bg-white border-t border-[#E5E6E8]">
+          {caption}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── Schedule helpers ────────────────────────────────────────────────────────
 
 const DAY_LABELS: {
@@ -110,6 +152,8 @@ export const ClinicProfileForm: FC<Props> = ({
   phone,
   email,
   website,
+  latitude,
+  longitude,
   workSchedule,
   legalName,
   registrationNumber,
@@ -277,15 +321,35 @@ export const ClinicProfileForm: FC<Props> = ({
               defaultValue={website}
               className="md:col-span-2"
             />
+            <div className="md:col-span-2">
+              <label className="block text-[#686F72] text-sm mb-2">
+                Геолокация
+              </label>
+              <GeoMap
+                lat={latitude}
+                lon={longitude}
+                caption={[city, fullAddress].filter(Boolean).join(", ")}
+              />
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <FieldView label="Страна">{country}</FieldView>
-            <FieldView label="Город">{city}</FieldView>
-            <FieldView label="Полный адрес">{fullAddress}</FieldView>
-            <FieldView label="Телефон">{phone}</FieldView>
-            <FieldView label="Почта">{email}</FieldView>
-            <FieldView label="Сайт">{website}</FieldView>
+          <div className="flex flex-col gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <FieldView label="Страна">{country}</FieldView>
+              <FieldView label="Город">{city}</FieldView>
+              <FieldView label="Полный адрес">{fullAddress}</FieldView>
+              <FieldView label="Телефон">{phone}</FieldView>
+              <FieldView label="Почта">{email}</FieldView>
+              <FieldView label="Сайт">{website}</FieldView>
+            </div>
+            <div>
+              <div className="text-xs text-[#838A8D] mb-2">Геолокация</div>
+              <GeoMap
+                lat={latitude}
+                lon={longitude}
+                caption={[city, fullAddress].filter(Boolean).join(", ")}
+              />
+            </div>
           </div>
         )}
       </SectionCard>

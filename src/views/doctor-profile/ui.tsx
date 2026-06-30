@@ -5,11 +5,12 @@ import { FC } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { DoctorSidebar } from "@/widgets/doctor-sidebar";
-
 import { useDoctorCabinet } from "@/entities/doctor-profile";
 
 import { ChevronRightIcon, LogoutIcon, StarIcon } from "@/shared/assets";
+import { useAuthStore } from "@/shared/store/authStore";
+
+import { DoctorMyDataPage } from "../doctor-my-data";
 
 const MENU_ITEMS = [
   {
@@ -105,6 +106,13 @@ const MENU_ITEMS = [
 
 export const DoctorProfilePage: FC = () => {
   const { profile: d } = useDoctorCabinet();
+  const logout = useAuthStore((s) => s.logout);
+
+  const handleLogout = () => {
+    logout();
+    window.location.href = "/";
+  };
+
   if (!d) return null;
 
   return (
@@ -158,7 +166,10 @@ export const DoctorProfilePage: FC = () => {
             ))}
           </nav>
 
-          <button className="mt-3 w-full bg-white rounded-3xl px-6 py-4 flex items-center gap-3 hover:bg-[#F8F9FA] transition-colors">
+          <button
+            onClick={handleLogout}
+            className="mt-3 w-full bg-white rounded-3xl px-6 py-4 flex items-center gap-3 hover:bg-[#F8F9FA] transition-colors"
+          >
             <div className="w-9 h-9 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
               <LogoutIcon className="w-5 h-5 [&_path]:stroke-[#F5653E]" />
             </div>
@@ -169,74 +180,10 @@ export const DoctorProfilePage: FC = () => {
         </div>
       </div>
 
-      {/* Desktop layout */}
-      <div className="hidden lg:block max-w-360 mx-auto px-10 py-8">
-        <h1 className="text-[40px] font-semibold text-[#191A1B] mb-8">
-          Мой профиль
-        </h1>
-        <div className="flex gap-6">
-          <DoctorSidebar
-            fullName={d.fullName}
-            photo={d.photo}
-            specialty={d.specialty}
-            rating={d.rating}
-          />
-          <main className="flex-1 min-w-0">
-            <div className="bg-white rounded-3xl border border-[#E5E6E8] p-8">
-              <div className="flex items-center gap-6 mb-8">
-                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-[#F5653E] to-[#FF8A6B] flex items-center justify-center shrink-0">
-                  {d.photo ? (
-                    <Image
-                      src={d.photo}
-                      alt={d.fullName}
-                      width={96}
-                      height={96}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-3xl font-bold">
-                      {d.fullName.charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <h2 className="text-2xl font-semibold text-[#191A1B]">
-                    {d.fullName}
-                  </h2>
-                  <p className="text-[#838A8D] mt-1">
-                    {d.specialty} · {d.additionalSpecialty}
-                  </p>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <StarIcon className="w-4 h-4 text-[#F5653E]" />
-                    <span className="text-[#F5653E] font-medium">
-                      {d.rating}
-                    </span>
-                    <span className="text-[#838A8D] text-sm">
-                      ({d.totalReviews} отзывов)
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {MENU_ITEMS.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex items-center gap-3 p-4 rounded-2xl border border-[#E5E6E8] hover:border-[#F5653E] hover:bg-[#FFF8F5] transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-[#FFF8F5] flex items-center justify-center shrink-0">
-                      {item.icon}
-                    </div>
-                    <span className="font-medium text-[#191A1B] flex-1">
-                      {item.label}
-                    </span>
-                    <ChevronRightIcon className="w-5 h-5 text-[#C4C8CA]" />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </main>
-        </div>
+      {/* Desktop layout — единая страница «Мои данные» (сайдбар + данные).
+          Раньше тут дублировалось навигационное меню рядом с сайдбаром. */}
+      <div className="hidden lg:block">
+        <DoctorMyDataPage />
       </div>
     </div>
   );
