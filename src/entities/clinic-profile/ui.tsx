@@ -152,6 +152,7 @@ export const ClinicProfileForm: FC<Props> = ({
                       alt="Logo"
                       width={96}
                       height={96}
+                      sizes="96px"
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -189,6 +190,7 @@ export const ClinicProfileForm: FC<Props> = ({
                       alt={`Photo ${i + 1}`}
                       width={96}
                       height={96}
+                      sizes="96px"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -219,6 +221,7 @@ export const ClinicProfileForm: FC<Props> = ({
                     alt="Logo"
                     width={96}
                     height={96}
+                    sizes="96px"
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -245,6 +248,7 @@ export const ClinicProfileForm: FC<Props> = ({
                       alt={`Photo ${i + 1}`}
                       width={96}
                       height={96}
+                      sizes="96px"
                       className="w-full h-full object-cover"
                     />
                   </div>

@@ -32,6 +32,8 @@ export const Hero: FC = () => {
         // Decorative full-bleed background (opacity 75) — cap the candidate so
         // mobile doesn't fetch/decode a 3840px image, and drop quality since the
         // detail is invisible under the overlay. This is the LCP element.
+        // `blur` paints an instant low-res preview from the static import.
+        placeholder="blur"
         sizes="(max-width: 1360px) 100vw, 1360px"
         quality={55}
         className="absolute inset-0 w-full h-full object-cover opacity-75"
