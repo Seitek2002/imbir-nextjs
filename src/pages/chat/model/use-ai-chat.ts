@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { clearAiChat, getAiChatHistory, sendAiMessage } from "@/shared/api";
 import type { AiChatMessage } from "@/shared/api";
@@ -25,12 +25,18 @@ type UseAiChatResult = {
 
 // Drives the AI assistant ("room 0"). Plain request/response over HTTP — no
 // socket. Sending can take several seconds, hence the explicit `isSending` flag.
-export const useAiChat = (): UseAiChatResult => {
+// `initialMessage` (e.g. a symptom typed on the home hero) is sent once, after
+// history has loaded; `onAutoSent` lets the caller drop it so it isn't resent.
+export const useAiChat = (
+  initialMessage?: string,
+  onAutoSent?: () => void,
+): UseAiChatResult => {
   const [messages, setMessages] = useState<ChatThreadMessage[]>([]);
   // Starts loading on mount; setState stays inside the async callbacks below.
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const autoSentRef = useRef(false);
 
   useEffect(() => {
     let isActive = true;
@@ -76,6 +82,15 @@ export const useAiChat = (): UseAiChatResult => {
       setIsSending(false);
     }
   }, []);
+
+  // Fire the handed-in message once, after history finished loading so it lands
+  // at the bottom of the thread.
+  useEffect(() => {
+    if (autoSentRef.current || isLoadingHistory || !initialMessage) return;
+    autoSentRef.current = true;
+    sendMessage(initialMessage);
+    onAutoSent?.();
+  }, [isLoadingHistory, initialMessage, sendMessage, onAutoSent]);
 
   const clearHistory = useCallback(async () => {
     setError(null);

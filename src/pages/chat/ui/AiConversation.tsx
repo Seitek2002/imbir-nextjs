@@ -10,9 +10,15 @@ import { MessageThread } from "./MessageThread";
 
 type Props = {
   onBack: () => void;
+  initialMessage?: string;
+  onInitialSent?: () => void;
 };
 
-export const AiConversation: FC<Props> = ({ onBack }) => {
+export const AiConversation: FC<Props> = ({
+  onBack,
+  initialMessage,
+  onInitialSent,
+}) => {
   const {
     messages,
     isLoadingHistory,
@@ -20,7 +26,7 @@ export const AiConversation: FC<Props> = ({ onBack }) => {
     error,
     sendMessage,
     clearHistory,
-  } = useAiChat();
+  } = useAiChat(initialMessage, onInitialSent);
 
   return (
     <>

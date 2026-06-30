@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 
 import Link from "next/link";
 
@@ -73,9 +73,27 @@ const EmptyState = () => (
   </div>
 );
 
+// A symptom typed on the home hero arrives as `?ask=`. Read it on the client
+// only — this workspace mounts after the auth gate, so there is no SSR pass to
+// mismatch against.
+const readAsk = (): string | undefined => {
+  if (typeof window === "undefined") return undefined;
+  return (
+    new URLSearchParams(window.location.search).get("ask")?.trim() || undefined
+  );
+};
+
 const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const [pendingAsk, setPendingAsk] = useState<string | undefined>(readAsk);
+  const [activeId, setActiveId] = useState<number | null>(
+    pendingAsk ? AI_ROOM_ID : null,
+  );
   const [search, setSearch] = useState("");
+
+  // Strip the param so a refresh doesn't resend the question (no state change).
+  useEffect(() => {
+    if (pendingAsk) window.history.replaceState(null, "", ROUTES.CHATS);
+  }, [pendingAsk]);
 
   const { data: rooms } = useQuery({
     queryKey: chatKeys.rooms(),
@@ -132,7 +150,11 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
             )}
           >
             {activeConversation?.isAi ? (
-              <AiConversation onBack={() => setActiveId(null)} />
+              <AiConversation
+                onBack={() => setActiveId(null)}
+                initialMessage={pendingAsk}
+                onInitialSent={() => setPendingAsk(undefined)}
+              />
             ) : activeConversation ? (
               <UserConversation
                 key={activeConversation.id}

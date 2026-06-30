@@ -1,12 +1,28 @@
-﻿import { FC } from "react";
+﻿"use client";
+
+import { FC, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { HeroAvatar, HeroBg } from "@/shared/assets/images";
+import { ROUTES } from "@/shared/config";
 import { Button } from "@/shared/ui";
 
 export const Hero: FC = () => {
+  const router = useRouter();
+  const [symptom, setSymptom] = useState("");
+
+  // Hand the question to the AI assistant: the chat page reads `?ask` and sends
+  // it automatically.
+  const askAssistant = () => {
+    const query = symptom.trim();
+    router.push(
+      query ? `${ROUTES.CHATS}?ask=${encodeURIComponent(query)}` : ROUTES.CHATS,
+    );
+  };
+
   return (
     <section className="relative max-w-340 mx-auto mt-6 overflow-hidden rounded-3xl bg-[#FFF0E9] pt-8 px-4 pb-0 md:p-12 md:pb-0 flex flex-col md:block min-h-150">
       <Image
@@ -47,10 +63,19 @@ export const Hero: FC = () => {
                 Что вас беспокоит? <br /> Я помогу подобрать вам специалиста
               </p>
             </div>
+
+            <input
+              value={symptom}
+              onChange={(e) => setSymptom(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && askAssistant()}
+              placeholder="Опишите, что вас беспокоит…"
+              className="w-full px-4 py-2.5 rounded-full border border-border text-sm text-foreground outline-none focus:border-primary transition-colors"
+            />
+
             <div className="flex justify-end">
-              <Link href="/search">
-                <Button size="sm">Описать симптомы</Button>
-              </Link>
+              <Button size="sm" onClick={askAssistant}>
+                Описать симптомы
+              </Button>
             </div>
           </div>
         </div>
