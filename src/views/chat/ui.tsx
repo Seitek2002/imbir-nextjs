@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Header } from "@/widgets";
 
+import { getAIMessages, sendAIMessage } from "@/shared/api/chat/requests";
 import {
   FilterSample,
   HeaderBackIcon,
@@ -191,6 +192,78 @@ function useChatRoom(roomName: string, currentUser: string | null) {
     sendMessage,
     sendTyping,
   };
+}
+
+// ── AI-ассистент (основной API, не WebSocket) ───────────────────────────────────
+
+function useAIChat(enabled: boolean) {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isThinking, setIsThinking] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    let cancelled = false;
+    getAIMessages()
+      .then((history) => {
+        if (cancelled) return;
+        setMessages(
+          history.map((m) => ({
+            id: m.id,
+            content: m.content,
+            timestamp: m.created_at,
+            isMe: m.role === "user",
+            isRead: true,
+          })),
+        );
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled]);
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim()) return;
+    // Optimistic add нашего сообщения
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        content: text,
+        timestamp: new Date().toISOString(),
+        isMe: true,
+        isRead: true,
+      },
+    ]);
+    setIsThinking(true);
+    try {
+      const reply = await sendAIMessage(text);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: reply.id,
+          content: reply.content,
+          timestamp: reply.created_at,
+          isMe: false,
+          isRead: true,
+        },
+      ]);
+    } catch {
+      // ошибку показываем тихо — пользователь может повторить
+    } finally {
+      setIsThinking(false);
+    }
+  }, []);
+
+  return { messages, isLoading, isThinking, sendMessage };
 }
 
 const MOCK_CHATS: Chat[] = [
@@ -454,15 +527,23 @@ export const ChatPage = () => {
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const activeChat = MOCK_CHATS.find((c) => c.id === activeChatId);
+  const isAIChat = activeChat?.isAI ?? false;
 
-  const {
-    messages,
-    isConnected,
-    isLoading,
-    typingUsers,
-    sendMessage,
-    sendTyping,
-  } = useChatRoom(activeChatId, currentUser);
+  // WebSocket-комнаты (живые чаты) и AI-ассистент (основной API) — разные
+  // транспорты. Хуки вызываются всегда, но активный отключается через флаг.
+  const room = useChatRoom(isAIChat ? "" : activeChatId, currentUser);
+  const ai = useAIChat(isAIChat);
+
+  const messages = isAIChat ? ai.messages : room.messages;
+  const isLoading = isAIChat ? ai.isLoading : room.isLoading;
+  const isConnected = isAIChat ? true : room.isConnected;
+  const typingUsers = isAIChat
+    ? ai.isThinking
+      ? new Set([activeChat?.name ?? "Имбирь"])
+      : new Set<string>()
+    : room.typingUsers;
+  const sendMessage = isAIChat ? ai.sendMessage : room.sendMessage;
+  const sendTyping = isAIChat ? () => {} : room.sendTyping;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

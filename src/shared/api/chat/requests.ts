@@ -1,5 +1,6 @@
-import { chatClient } from "../client";
+import { apiClient, chatClient } from "../client";
 import {
+  AIMessage,
   ChatMessage,
   ChatRoom,
   CreateChatRoomRequest,
@@ -34,4 +35,21 @@ export const getChatMessages = async (
 
 export const chatLoginFn = async (username: string): Promise<void> => {
   await chatClient.post("/api/login/", { username });
+};
+
+// ── AI-ассистент (основной API, JWT через apiClient) ────────────────────────
+
+export const getAIMessages = async (): Promise<AIMessage[]> => {
+  const { data } = await apiClient.get<AIMessage[]>("/api/chat/ai/");
+  return data;
+};
+
+export const sendAIMessage = async (message: string): Promise<AIMessage> => {
+  // Генерация ответа ИИ дольше обычного запроса — даём запас по таймауту.
+  const { data } = await apiClient.post<AIMessage>(
+    "/api/chat/ai/send/",
+    { message },
+    { timeout: 60_000 },
+  );
+  return data;
 };
