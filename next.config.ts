@@ -32,6 +32,11 @@ const nextConfig: NextConfig = {
         hostname: "imbir.sino0on.ru",
         pathname: "/**",
       },
+      {
+        protocol: "http",
+        hostname: "imbir.sino0on.ru",
+        pathname: "/**",
+      },
     ],
   },
 
