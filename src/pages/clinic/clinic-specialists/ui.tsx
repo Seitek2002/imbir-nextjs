@@ -9,7 +9,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClinicSidebar } from "@/widgets/clinic/sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
-import type { Specialist } from "@/entities/clinic-specialist";
 
 import {
   clinicCabinetKeys,
@@ -17,7 +16,7 @@ import {
   getClinicDoctors,
 } from "@/shared/api";
 
-import { SpecialistsList } from "./specialists-list";
+import { type Specialist, SpecialistsList } from "./specialists-list";
 
 export const ClinicSpecialistsPage: FC = () => {
   const { profile } = useClinicCabinet();

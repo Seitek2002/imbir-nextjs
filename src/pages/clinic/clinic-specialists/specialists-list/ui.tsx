@@ -2,12 +2,11 @@
 
 import { FC, useEffect, useRef, useState } from "react";
 
-import { SpecialistCard } from "@/entities/clinic-specialist";
-import type { Specialist } from "@/entities/clinic-specialist";
-
 import { TrashIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { ConfirmDialog, FilterPanel, IconBtn, SearchInput } from "@/shared/ui";
+
+import { type Specialist, SpecialistCard } from "./SpecialistCard";
 
 type Props = {
   specialists: Specialist[];
