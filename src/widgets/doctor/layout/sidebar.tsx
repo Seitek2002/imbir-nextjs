@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { LogoutIcon, StarIcon } from "@/shared/assets/icons";
+import { useLogout } from "@/shared/lib/useLogout";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
@@ -124,6 +125,7 @@ export const DoctorSidebar: FC<Props> = ({
 }) => {
   const { navRef, indicator, pathname } = useSidebarIndicator();
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const handleLogout = useLogout();
 
   return (
     <aside className="w-72 shrink-0 hidden lg:block">
@@ -207,9 +209,7 @@ export const DoctorSidebar: FC<Props> = ({
       <ConfirmDialog
         isOpen={logoutOpen}
         onClose={() => setLogoutOpen(false)}
-        onConfirm={() => {
-          window.location.href = "/";
-        }}
+        onConfirm={handleLogout}
         icon={<LogoutIcon className="w-7 h-7 text-primary" />}
         title="Выйти из профиля?"
         description="Для продолжения работы потребуется снова войти в аккаунт"

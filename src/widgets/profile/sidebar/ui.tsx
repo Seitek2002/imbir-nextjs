@@ -3,7 +3,6 @@
 import { FC, useState } from "react";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import {
   HistoryIcon,
@@ -12,6 +11,7 @@ import {
   ReviewsIcon,
   SavedIcon,
 } from "@/shared/assets/icons";
+import { useLogout } from "@/shared/lib/useLogout";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
 import { useAuthStore } from "@/shared/store";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
@@ -42,20 +42,14 @@ const CHEVRON = (
 export const ProfileSidebar: FC = () => {
   const { navRef, indicator, pathname } = useSidebarIndicator();
   const [logoutOpen, setLogoutOpen] = useState(false);
-  const router = useRouter();
+  const handleLogout = useLogout();
 
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
 
   const displayName = user
     ? `${user.first_name} ${user.last_name ?? ""}`.trim()
     : "—";
   const initials = user?.first_name?.charAt(0)?.toUpperCase() ?? "?";
-
-  const handleLogout = () => {
-    logout();
-    router.push("/");
-  };
 
   return (
     <>
