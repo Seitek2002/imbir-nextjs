@@ -119,19 +119,21 @@ const ROLES: RoleOption[] = [
   {
     value: "clinic",
     label: "Клиника",
-    description: "Для медицинских учреждений",
+    description: "Управляйте врачами, услугами и записями пациентов",
     Icon: ClinicIcon,
   },
   {
     value: "doctor",
     label: "Врач",
-    description: "Для медицинских специалистов",
+    description:
+      "Управляйте расписанием, принимайте пациентов и ведите документацию",
     Icon: DoctorIcon,
   },
   {
     value: "client",
-    label: "Клиент",
-    description: "Для пациентов и их родственников",
+    label: "Пациент",
+    description:
+      "Записывайтесь к врачам, следите за приёмами и храните важные медицинские данные",
     Icon: ClientIcon,
   },
 ];
@@ -487,12 +489,12 @@ export const RegisterPage = () => {
             {/* Step: role selection */}
             {activeForm === "role" && (
               <>
-                <div className="mt-8 mb-6 md:mt-12">
+                <div className="mt-8 mb-6 md:mt-12 text-center">
                   <h2 className="text-2xl font-semibold text-foreground mb-2">
                     Выберите свою роль
                   </h2>
                   <p className="text-muted text-sm md:text-base">
-                    Выберите вашу роль для продолжения регистрации
+                    Это поможет настроить для вас нужный функционал
                   </p>
                 </div>
 
