@@ -48,10 +48,10 @@ export const getProfileAppointments = async (
 };
 
 export const getFavorites = async (): Promise<FavoriteItem[]> => {
-  const { data } = await apiClient.get<FavoriteItem[]>(
+  const { data } = await apiClient.get<PaginatedResponse<FavoriteItem>>(
     "/api/profile/favorites/",
   );
-  return data;
+  return data.data;
 };
 
 export const addFavorite = async (
