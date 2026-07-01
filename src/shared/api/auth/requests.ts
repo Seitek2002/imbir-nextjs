@@ -50,10 +50,17 @@ export const registerClientFn = async (
 export const registerDoctorFn = async (
   body: RegisterDoctorRequest,
 ): Promise<AuthResponse> => {
+  // Бэк ждёт вложенные step-объекты в JSON; multipart со stringified-шагами
+  // он отклоняет ("stepN: Обязательное поле"). Файлы (фото, документы) в JSON
+  // не уходят — грузятся отдельно в кабинете после регистрации.
+  const payload = {
+    ...body,
+    step1: { ...body.step1, photo: undefined },
+    step4: { ...body.step4, documents: undefined },
+  };
   const { data } = await apiClient.post<AuthResponse>(
     "/api/auth/register/doctor/",
-    toFormData(body as unknown as Record<string, unknown>),
-    { headers: { "Content-Type": "multipart/form-data" } },
+    payload,
   );
   return data;
 };

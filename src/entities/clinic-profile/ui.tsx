@@ -1,13 +1,22 @@
-﻿"use client";
+"use client";
 
-import { FC, SVGProps, useState } from "react";
+import {
+  type FC,
+  type SVGProps,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 import Image from "next/image";
 
+import type { UpdateClinicProfileBody } from "@/shared/api";
 import { colors } from "@/shared/config";
 import { Button, Input, PhoneInput, Textarea } from "@/shared/ui";
 
-import type { ClinicProfile, WorkDaySchedule } from "./model";
+import type { ClinicProfile } from "./model";
 
 // ─── Icons ─────────────────────────────────────────────────────────────────
 
@@ -69,10 +78,9 @@ const FieldView = ({
 
 // ─── Schedule helpers ────────────────────────────────────────────────────────
 
-const DAY_LABELS: {
-  key: keyof Omit<ReturnType<typeof getDays>, never>;
-  ru: string;
-}[] = [
+type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+
+const DAY_LABELS: { key: DayKey; ru: string }[] = [
   { key: "mon", ru: "ПН" },
   { key: "tue", ru: "ВТ" },
   { key: "wed", ru: "СР" },
@@ -82,73 +90,320 @@ const DAY_LABELS: {
   { key: "sun", ru: "ВС" },
 ];
 
-function getDays(ws: ClinicProfile["workSchedule"]) {
-  return {
-    mon: ws.mon,
-    tue: ws.tue,
-    wed: ws.wed,
-    thu: ws.thu,
-    fri: ws.fri,
-    sat: ws.sat,
-    sun: ws.sun,
-  };
-}
+// Ключ формы → английское название дня (формат бэка)
+const DAY_API: Record<DayKey, string> = {
+  mon: "monday",
+  tue: "tuesday",
+  wed: "wednesday",
+  thu: "thursday",
+  fri: "friday",
+  sat: "saturday",
+  sun: "sunday",
+};
+
+type DayState = { open: string; close: string; enabled: boolean };
+
+type FormState = {
+  name: string;
+  type: string;
+  description: string;
+  country: string;
+  city: string;
+  fullAddress: string;
+  phone: string;
+  website: string;
+  legalName: string;
+  registrationNumber: string;
+  licenseNumber: string;
+  licenseDate: string;
+  licenseAuthority: string;
+  mainDirections: string;
+  narrowDirections: string;
+  additionalServices: string;
+  equipment: string;
+  patientConditions: string;
+  paymentMethods: string;
+  days: Record<DayKey, DayState>;
+  lunchStart: string;
+  lunchEnd: string;
+  emergency24: boolean;
+};
+
+const buildState = (p: ClinicProfile): FormState => ({
+  name: p.name ?? "",
+  type: p.type ?? "",
+  description: p.description ?? "",
+  country: p.country ?? "",
+  city: p.city ?? "",
+  fullAddress: p.fullAddress ?? "",
+  phone: p.phone ?? "",
+  website: p.website ?? "",
+  legalName: p.legalName ?? "",
+  registrationNumber: p.registrationNumber ?? "",
+  licenseNumber: p.licenseNumber ?? "",
+  licenseDate: p.licenseDate ?? "",
+  licenseAuthority: p.licenseAuthority ?? "",
+  mainDirections: p.mainDirections.join(", "),
+  narrowDirections: p.narrowDirections.join(", "),
+  additionalServices: p.additionalServices.join(", "),
+  equipment: p.equipment.join(", "),
+  patientConditions: p.patientConditions.join(", "),
+  paymentMethods: p.paymentMethods.join(", "),
+  days: {
+    mon: toDay(p.workSchedule.mon),
+    tue: toDay(p.workSchedule.tue),
+    wed: toDay(p.workSchedule.wed),
+    thu: toDay(p.workSchedule.thu),
+    fri: toDay(p.workSchedule.fri),
+    sat: toDay(p.workSchedule.sat),
+    sun: toDay(p.workSchedule.sun),
+  },
+  lunchStart: p.workSchedule.lunchStart ?? "",
+  lunchEnd: p.workSchedule.lunchEnd ?? "",
+  emergency24: p.workSchedule.emergency24 ?? false,
+});
+
+const toDay = (d: {
+  open?: string;
+  close?: string;
+  enabled?: boolean;
+}): DayState => ({
+  open: d?.open ?? "",
+  close: d?.close ?? "",
+  enabled: d?.enabled ?? false,
+});
+
+const csv = (s: string): string[] =>
+  s
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+// "ДД.ММ.ГГГГ" → "ГГГГ-ММ-ДД"; уже-ISO/пусто отдаём как есть
+const toApiDate = (v: string): string | null => {
+  const t = v.trim();
+  if (!t) return null;
+  const m = t.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : t;
+};
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
+export type ClinicProfileFormHandle = {
+  getPayload: () => UpdateClinicProfileBody;
+};
+
 type Props = ClinicProfile & { isEditing?: boolean };
 
-export const ClinicProfileForm: FC<Props> = ({
-  isEditing = false,
-  name,
-  logo,
-  type,
-  description,
-  photos,
-  country,
-  city,
-  fullAddress,
-  phone,
-  email,
-  website,
-  workSchedule,
-  legalName,
-  registrationNumber,
-  licenseNumber,
-  licenseDate,
-  licenseAuthority,
-  documents,
-  mainDirections,
-  narrowDirections,
-  additionalServices,
-  equipment,
-  patientConditions,
-  paymentMethods,
-}) => {
-  const [logoSrc] = useState<string | undefined>(logo);
-  const [phoneValue, setPhoneValue] = useState("");
+export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
+  (props, ref) => {
+    const {
+      isEditing = false,
+      name,
+      logo,
+      type,
+      description,
+      photos,
+      country,
+      city,
+      fullAddress,
+      phone,
+      email,
+      website,
+      workSchedule,
+      legalName,
+      registrationNumber,
+      licenseNumber,
+      licenseDate,
+      licenseAuthority,
+      documents,
+      mainDirections,
+      narrowDirections,
+      additionalServices,
+      equipment,
+      patientConditions,
+      paymentMethods,
+    } = props;
 
-  const days = getDays(workSchedule);
+    const [d, setD] = useState<FormState>(() => buildState(props));
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string | undefined>(logo);
+    const logoInputRef = useRef<HTMLInputElement>(null);
 
-  return (
-    <>
-      {/* ── 1. Основная информация ─────────────────────────────────────── */}
-      <SectionCard title="Основная информация">
-        {isEditing ? (
-          <>
-            <div className="mb-6">
-              <Input label="Название" defaultValue={name} />
-            </div>
+    // При входе в режим редактирования подхватываем актуальные значения профиля
+    useEffect(() => {
+      if (isEditing) {
+        setD(buildState(props));
+        setLogoFile(null);
+        setLogoPreview(logo);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEditing]);
 
-            <div className="mb-6">
-              <label className="block text-secondary text-sm mb-2">
-                Логотип
-              </label>
-              <div className="flex items-center gap-4">
+    useImperativeHandle(ref, () => ({
+      getPayload: (): UpdateClinicProfileBody => ({
+        name: d.name,
+        clinic_type: d.type,
+        description: d.description,
+        phone: d.phone || undefined,
+        website: d.website || undefined,
+        country: d.country || undefined,
+        city: d.city || undefined,
+        address: d.fullAddress || undefined,
+        legal_name: d.legalName || undefined,
+        reg_number: d.registrationNumber || undefined,
+        license_number: d.licenseNumber || undefined,
+        license_date: toApiDate(d.licenseDate),
+        license_authority: d.licenseAuthority || undefined,
+        primary_specializations: csv(d.mainDirections),
+        narrow_specializations: csv(d.narrowDirections),
+        additional_services: d.additionalServices,
+        equipment: csv(d.equipment),
+        patient_conditions: csv(d.patientConditions),
+        payment_methods: csv(d.paymentMethods),
+        emergency_24_7: d.emergency24,
+        schedule: Object.fromEntries(
+          DAY_LABELS.map(({ key }) => [
+            DAY_API[key],
+            {
+              from: d.days[key].open,
+              to: d.days[key].close,
+              enabled: d.days[key].enabled,
+            },
+          ]),
+        ),
+        lunch_break: { from: d.lunchStart, to: d.lunchEnd },
+        ...(logoFile ? { logo: logoFile } : {}),
+      }),
+    }));
+
+    const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
+      setD((prev) => ({ ...prev, [k]: v }));
+
+    const setDay = (key: DayKey, patch: Partial<DayState>) =>
+      setD((prev) => ({
+        ...prev,
+        days: { ...prev.days, [key]: { ...prev.days[key], ...patch } },
+      }));
+
+    const handleLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setLogoPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    };
+
+    const days = d.days;
+
+    return (
+      <>
+        {/* ── 1. Основная информация ─────────────────────────────────────── */}
+        <SectionCard title="Основная информация">
+          {isEditing ? (
+            <>
+              <div className="mb-6">
+                <Input
+                  label="Название"
+                  value={d.name}
+                  onChange={(e) => set("name", e.target.value)}
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-secondary text-sm mb-2">
+                  Логотип
+                </label>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleLogo}
+                />
+                <div className="flex items-center gap-4">
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
+                    {logoPreview ? (
+                      <Image
+                        src={logoPreview}
+                        alt="Logo"
+                        width={96}
+                        height={96}
+                        sizes="96px"
+                        unoptimized={logoPreview.startsWith("data:")}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white text-4xl font-bold">
+                        {d.name.charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    IconLeft={UploadIcon}
+                    onClick={() => logoInputRef.current?.click()}
+                  >
+                    Новый логотип
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <Input
+                  label="Тип клиники"
+                  value={d.type}
+                  onChange={(e) => set("type", e.target.value)}
+                />
+              </div>
+
+              <div className="mb-6">
+                <Textarea
+                  label="Описание"
+                  value={d.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  rows={5}
+                />
+              </div>
+
+              <div>
+                <label className="block text-secondary text-sm mb-2">
+                  Фотографии
+                </label>
+                <div className="flex items-center gap-4 overflow-x-auto pb-2">
+                  {photos.map((photo, i) => (
+                    <div
+                      key={i}
+                      className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
+                    >
+                      <Image
+                        src={photo}
+                        alt={`Photo ${i + 1}`}
+                        width={96}
+                        height={96}
+                        sizes="96px"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted mt-2">
+                  Загрузка галереи фото — в разработке
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col gap-5">
+              <FieldView label="Название">{name}</FieldView>
+
+              <div>
+                <div className="text-xs text-muted mb-2">Логотип</div>
                 <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-                  {logoSrc ? (
+                  {logo ? (
                     <Image
-                      src={logoSrc}
+                      src={logo}
                       alt="Logo"
                       width={96}
                       height={96}
@@ -161,440 +416,405 @@ export const ClinicProfileForm: FC<Props> = ({
                     </span>
                   )}
                 </div>
-                <Button variant="outline" size="sm" IconLeft={UploadIcon}>
-                  Новый логотип
-                </Button>
+              </div>
+
+              <FieldView label="Тип">{type}</FieldView>
+              <FieldView label="Описание">{description}</FieldView>
+
+              <div>
+                <div className="text-xs text-muted mb-2">Фотографии</div>
+                <div className="flex items-center gap-4 overflow-x-auto pb-2">
+                  {photos.map((photo, i) => (
+                    <div
+                      key={i}
+                      className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
+                    >
+                      <Image
+                        src={photo}
+                        alt={`Photo ${i + 1}`}
+                        width={96}
+                        height={96}
+                        sizes="96px"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
+          )}
+        </SectionCard>
 
-            <div className="mb-6">
-              <Input label="Тип клиники" defaultValue={type} />
+        {/* ── 2. Локация и контакты ──────────────────────────────────────── */}
+        <SectionCard title="Локация и контакты">
+          {isEditing ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                label="Страна"
+                value={d.country}
+                onChange={(e) => set("country", e.target.value)}
+              />
+              <Input
+                label="Город"
+                value={d.city}
+                onChange={(e) => set("city", e.target.value)}
+              />
+              <Input
+                label="Полный адрес"
+                value={d.fullAddress}
+                onChange={(e) => set("fullAddress", e.target.value)}
+                className="md:col-span-2"
+              />
+              <PhoneInput
+                label="Телефон"
+                value={d.phone}
+                onChange={(v) => set("phone", v)}
+              />
+              <Input label="Почта" type="email" value={email} disabled />
+              <Input
+                label="Сайт"
+                type="url"
+                value={d.website}
+                onChange={(e) => set("website", e.target.value)}
+                className="md:col-span-2"
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <FieldView label="Страна">{country}</FieldView>
+              <FieldView label="Город">{city}</FieldView>
+              <FieldView label="Полный адрес">{fullAddress}</FieldView>
+              <FieldView label="Телефон">{phone}</FieldView>
+              <FieldView label="Почта">{email}</FieldView>
+              <FieldView label="Сайт">{website}</FieldView>
+            </div>
+          )}
+        </SectionCard>
+
+        {/* ── 3. Расписание ─────────────────────────────────────────────── */}
+        <SectionCard title="Расписание">
+          <div className="mb-6">
+            <div className="text-sm font-medium text-foreground mb-4">
+              График работы
             </div>
 
-            <div className="mb-6">
-              <Textarea label="Описание" defaultValue={description} rows={5} />
-            </div>
-
-            <div>
-              <label className="block text-secondary text-sm mb-2">
-                Фотографии
-              </label>
-              <div className="flex items-center gap-4 overflow-x-auto pb-2">
-                {photos.map((photo, i) => (
-                  <div
-                    key={i}
-                    className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
-                  >
-                    <Image
-                      src={photo}
-                      alt={`Photo ${i + 1}`}
-                      width={96}
-                      height={96}
-                      sizes="96px"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-                <button className="w-24 h-24 rounded-2xl border-2 border-dashed border-border flex items-center justify-center hover:border-primary transition-colors shrink-0">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 5V19M5 12H19"
-                      stroke={colors.dim}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
+            {isEditing ? (
+              <div className="flex flex-col gap-3">
+                {DAY_LABELS.map(({ key, ru }) => {
+                  const day = days[key];
+                  return (
+                    <div key={key} className="flex items-center gap-3">
+                      <span className="w-8 text-sm text-secondary shrink-0">
+                        {ru}
+                      </span>
+                      <input
+                        type="time"
+                        value={day.open}
+                        disabled={!day.enabled}
+                        onChange={(e) => setDay(key, { open: e.target.value })}
+                        className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40"
+                      />
+                      <span className="text-muted">–</span>
+                      <input
+                        type="time"
+                        value={day.close}
+                        disabled={!day.enabled}
+                        onChange={(e) => setDay(key, { close: e.target.value })}
+                        className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40"
+                      />
+                      <label className="flex items-center gap-2 ml-2 text-sm text-secondary cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={day.enabled}
+                          onChange={(e) =>
+                            setDay(key, { enabled: e.target.checked })
+                          }
+                          className="accent-primary"
+                        />
+                        Рабочий
+                      </label>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col gap-5">
-            <FieldView label="Название">{name}</FieldView>
-
-            <div>
-              <div className="text-xs text-muted mb-2">Логотип</div>
-              <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-                {logoSrc ? (
-                  <Image
-                    src={logoSrc}
-                    alt="Logo"
-                    width={96}
-                    height={96}
-                    sizes="96px"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-white text-4xl font-bold">
-                    {name.charAt(0)}
-                  </span>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {DAY_LABELS.filter(({ key }) => days[key].enabled).map(
+                  ({ key, ru }) => {
+                    const day = days[key];
+                    return (
+                      <div key={key} className="flex items-center gap-6">
+                        <span className="w-8 text-sm text-secondary">{ru}</span>
+                        <span className="text-sm text-foreground">
+                          {day.open}
+                          <span className="mx-2 text-muted">–</span>
+                          {day.close}
+                        </span>
+                      </div>
+                    );
+                  },
                 )}
               </div>
+            )}
+          </div>
+
+          <div className="mb-6">
+            <div className="text-sm font-medium text-foreground mb-3">
+              Обеденный перерыв
             </div>
-
-            <FieldView label="Тип">{type}</FieldView>
-            <FieldView label="Описание">{description}</FieldView>
-
-            <div>
-              <div className="text-xs text-muted mb-2">Фотографии</div>
-              <div className="flex items-center gap-4 overflow-x-auto pb-2">
-                {photos.map((photo, i) => (
-                  <div
-                    key={i}
-                    className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
-                  >
-                    <Image
-                      src={photo}
-                      alt={`Photo ${i + 1}`}
-                      width={96}
-                      height={96}
-                      sizes="96px"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
+            {isEditing ? (
+              <div className="flex items-center gap-3">
+                <input
+                  type="time"
+                  value={d.lunchStart}
+                  onChange={(e) => set("lunchStart", e.target.value)}
+                  className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                />
+                <span className="text-muted">–</span>
+                <input
+                  type="time"
+                  value={d.lunchEnd}
+                  onChange={(e) => set("lunchEnd", e.target.value)}
+                  className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                />
               </div>
-            </div>
-          </div>
-        )}
-      </SectionCard>
-
-      {/* ── 2. Локация и контакты ──────────────────────────────────────── */}
-      <SectionCard title="Локация и контакты">
-        {isEditing ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Input label="Страна" defaultValue={country} />
-            <Input label="Город" defaultValue={city} />
-            <Input
-              label="Полный адрес"
-              defaultValue={fullAddress}
-              className="md:col-span-2"
-            />
-            <PhoneInput
-              label="Телефон"
-              value={phoneValue}
-              onChange={setPhoneValue}
-            />
-            <Input label="Почта" type="email" defaultValue={email} />
-            <Input
-              label="Сайт"
-              type="url"
-              defaultValue={website}
-              className="md:col-span-2"
-            />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <FieldView label="Страна">{country}</FieldView>
-            <FieldView label="Город">{city}</FieldView>
-            <FieldView label="Полный адрес">{fullAddress}</FieldView>
-            <FieldView label="Телефон">{phone}</FieldView>
-            <FieldView label="Почта">{email}</FieldView>
-            <FieldView label="Сайт">{website}</FieldView>
-          </div>
-        )}
-      </SectionCard>
-
-      {/* ── 3. Расписание ─────────────────────────────────────────────── */}
-      <SectionCard title="Расписание">
-        <div className="mb-6">
-          <div className="text-sm font-medium text-foreground mb-4">
-            График работы
+            ) : (
+              <span className="text-sm text-foreground">
+                {workSchedule.lunchStart}
+                <span className="mx-2 text-muted">–</span>
+                {workSchedule.lunchEnd}
+              </span>
+            )}
           </div>
 
           {isEditing ? (
-            <div className="flex flex-col gap-3">
-              {DAY_LABELS.map(({ key, ru }) => {
-                const day = days[key] as WorkDaySchedule;
-                return (
-                  <div key={key} className="flex items-center gap-3">
-                    <span className="w-8 text-sm text-secondary shrink-0">
-                      {ru}
-                    </span>
-                    <input
-                      type="time"
-                      defaultValue={day.open}
-                      disabled={!day.enabled}
-                      className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40"
-                    />
-                    <span className="text-muted">–</span>
-                    <input
-                      type="time"
-                      defaultValue={day.close}
-                      disabled={!day.enabled}
-                      className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40"
-                    />
-                    <label className="flex items-center gap-2 ml-2 text-sm text-secondary cursor-pointer">
-                      <input
-                        type="checkbox"
-                        defaultChecked={day.enabled}
-                        className="accent-primary"
-                      />
-                      Рабочий
-                    </label>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {DAY_LABELS.filter(
-                ({ key }) => (days[key] as WorkDaySchedule).enabled,
-              ).map(({ key, ru }) => {
-                const day = days[key] as WorkDaySchedule;
-                return (
-                  <div key={key} className="flex items-center gap-6">
-                    <span className="w-8 text-sm text-secondary">{ru}</span>
-                    <span className="text-sm text-foreground">
-                      {day.open}
-                      <span className="mx-2 text-muted">–</span>
-                      {day.close}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        <div className="mb-6">
-          <div className="text-sm font-medium text-foreground mb-3">
-            Обеденный перерыв
-          </div>
-          {isEditing ? (
-            <div className="flex items-center gap-3">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
-                type="time"
-                defaultValue={workSchedule.lunchStart}
-                className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                type="checkbox"
+                checked={d.emergency24}
+                onChange={(e) => set("emergency24", e.target.checked)}
+                className="accent-primary w-4 h-4"
               />
-              <span className="text-muted">–</span>
-              <input
-                type="time"
-                defaultValue={workSchedule.lunchEnd}
-                className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none"
-              />
-            </div>
-          ) : (
-            <span className="text-sm text-foreground">
-              {workSchedule.lunchStart}
-              <span className="mx-2 text-muted">–</span>
-              {workSchedule.lunchEnd}
-            </span>
-          )}
-        </div>
-
-        {isEditing ? (
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              defaultChecked={workSchedule.emergency24}
-              className="accent-primary w-4 h-4"
-            />
-            <span className="text-sm text-foreground">
-              Экстренный приём 24/7
-            </span>
-          </label>
-        ) : (
-          workSchedule.emergency24 && (
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-primary shrink-0" />
               <span className="text-sm text-foreground">
                 Экстренный приём 24/7
               </span>
-            </div>
-          )
-        )}
-      </SectionCard>
+            </label>
+          ) : (
+            workSchedule.emergency24 && (
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-primary shrink-0" />
+                <span className="text-sm text-foreground">
+                  Экстренный приём 24/7
+                </span>
+              </div>
+            )
+          )}
+        </SectionCard>
 
-      {/* ── 4. Юридическая информация ─────────────────────────────────── */}
-      <SectionCard title="Юридическая информация">
-        {isEditing ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Input
-              label="Юридическое название"
-              defaultValue={legalName}
-              className="md:col-span-2"
-            />
-            <Input
-              label="Регистрационный номер"
-              defaultValue={registrationNumber}
-            />
-            <Input label="Номер лицензии" defaultValue={licenseNumber} />
-            <Input label="Дата выдачи лицензии" defaultValue={licenseDate} />
-            <Input
-              label="Орган, выдавший лицензию"
-              defaultValue={licenseAuthority}
-            />
-            <div className="md:col-span-2">
-              <label className="block text-secondary text-sm mb-2">
-                Документы (лицензии, регистрационные документы)
-              </label>
-              <div className="flex flex-wrap gap-4">
-                {documents.map((doc, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1">
-                    <FileIcon />
-                    <span className="text-xs text-secondary max-w-20 text-center truncate">
-                      {doc.name}
-                    </span>
-                  </div>
-                ))}
-                <button className="w-16 h-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center hover:border-primary transition-colors">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path
-                      d="M10 4V16M4 10H16"
-                      stroke={colors.dim}
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
+        {/* ── 4. Юридическая информация ─────────────────────────────────── */}
+        <SectionCard title="Юридическая информация">
+          {isEditing ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                label="Юридическое название"
+                value={d.legalName}
+                onChange={(e) => set("legalName", e.target.value)}
+                className="md:col-span-2"
+              />
+              <Input
+                label="Регистрационный номер"
+                value={d.registrationNumber}
+                onChange={(e) => set("registrationNumber", e.target.value)}
+              />
+              <Input
+                label="Номер лицензии"
+                value={d.licenseNumber}
+                onChange={(e) => set("licenseNumber", e.target.value)}
+              />
+              <Input
+                label="Дата выдачи лицензии"
+                value={d.licenseDate}
+                onChange={(e) => set("licenseDate", e.target.value)}
+                placeholder="ГГГГ-ММ-ДД"
+              />
+              <Input
+                label="Орган, выдавший лицензию"
+                value={d.licenseAuthority}
+                onChange={(e) => set("licenseAuthority", e.target.value)}
+              />
+              <div className="md:col-span-2">
+                <label className="block text-secondary text-sm mb-2">
+                  Документы (лицензии, регистрационные документы)
+                </label>
+                <div className="flex flex-wrap gap-4">
+                  {documents.map((doc, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1">
+                      <FileIcon />
+                      <span className="text-xs text-secondary max-w-20 text-center truncate">
+                        {doc.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted mt-2">
+                  Загрузка документов — в разработке
+                </p>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-5">
-            <FieldView label="Юридическое название">{legalName}</FieldView>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <FieldView label="Регистрационный номер">
-                {registrationNumber}
+          ) : (
+            <div className="flex flex-col gap-5">
+              <FieldView label="Юридическое название">{legalName}</FieldView>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <FieldView label="Регистрационный номер">
+                  {registrationNumber}
+                </FieldView>
+                <FieldView label="Номер лицензии">{licenseNumber}</FieldView>
+                <FieldView label="Дата выдачи лицензии">
+                  {licenseDate}
+                </FieldView>
+                <FieldView label="Орган, выдавший лицензию">
+                  {licenseAuthority}
+                </FieldView>
+              </div>
+              <div>
+                <div className="text-xs text-muted mb-2">
+                  Документы (лицензии, регистрационные документы)
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  {documents.map((doc, i) => (
+                    <a
+                      key={i}
+                      href={doc.url}
+                      className="flex flex-col items-center gap-1 hover:opacity-70 transition-opacity"
+                    >
+                      <FileIcon />
+                      <span className="text-xs text-secondary max-w-20 text-center truncate">
+                        {doc.name}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </SectionCard>
+
+        {/* ── 5. Специализация и услуги ─────────────────────────────────── */}
+        <SectionCard title="Специализация и услуги">
+          {isEditing ? (
+            <div className="flex flex-col gap-6">
+              <Textarea
+                label="Основные направления"
+                value={d.mainDirections}
+                onChange={(e) => set("mainDirections", e.target.value)}
+                rows={2}
+                hint="Введите через запятую"
+              />
+              <Textarea
+                label="Узкие направления"
+                value={d.narrowDirections}
+                onChange={(e) => set("narrowDirections", e.target.value)}
+                rows={2}
+                hint="Введите через запятую"
+              />
+              <Textarea
+                label="Дополнительные услуги"
+                value={d.additionalServices}
+                onChange={(e) => set("additionalServices", e.target.value)}
+                rows={2}
+                hint="Введите через запятую"
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-5">
+              <FieldView label="Основные направления">
+                {mainDirections.join(", ")}
               </FieldView>
-              <FieldView label="Номер лицензии">{licenseNumber}</FieldView>
-              <FieldView label="Дата выдачи лицензии">{licenseDate}</FieldView>
-              <FieldView label="Орган, выдавший лицензию">
-                {licenseAuthority}
+              <FieldView label="Узкие направления">
+                {narrowDirections.join(", ")}
+              </FieldView>
+              <FieldView label="Дополнительные услуги">
+                {additionalServices.join(", ")}
               </FieldView>
             </div>
-            <div>
-              <div className="text-xs text-muted mb-2">
-                Документы (лицензии, регистрационные документы)
-              </div>
-              <div className="flex flex-wrap gap-4">
-                {documents.map((doc, i) => (
-                  <a
-                    key={i}
-                    href={doc.url}
-                    className="flex flex-col items-center gap-1 hover:opacity-70 transition-opacity"
-                  >
-                    <FileIcon />
-                    <span className="text-xs text-secondary max-w-20 text-center truncate">
-                      {doc.name}
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </SectionCard>
+          )}
+        </SectionCard>
 
-      {/* ── 5. Специализация и услуги ─────────────────────────────────── */}
-      <SectionCard title="Специализация и услуги">
-        {isEditing ? (
-          <div className="flex flex-col gap-6">
-            <Textarea
-              label="Основные направления"
-              defaultValue={mainDirections.join(", ")}
-              rows={2}
-              hint="Введите через запятую"
-            />
-            <Textarea
-              label="Узкие направления"
-              defaultValue={narrowDirections.join(", ")}
-              rows={2}
-              hint="Введите через запятую"
-            />
-            <Textarea
-              label="Дополнительные услуги"
-              defaultValue={additionalServices.join(", ")}
-              rows={2}
-              hint="Введите через запятую"
-            />
-          </div>
-        ) : (
-          <div className="flex flex-col gap-5">
-            <FieldView label="Основные направления">
-              {mainDirections.join(", ")}
-            </FieldView>
-            <FieldView label="Узкие направления">
-              {narrowDirections.join(", ")}
-            </FieldView>
-            <FieldView label="Дополнительные услуги">
-              {additionalServices.join(", ")}
-            </FieldView>
-          </div>
-        )}
-      </SectionCard>
-
-      {/* ── 6. Оборудование и условия ─────────────────────────────────── */}
-      <SectionCard title="Оборудование и условия">
-        {isEditing ? (
-          <div className="flex flex-col gap-6">
-            <Textarea
-              label="Оборудование"
-              defaultValue={equipment.join(", ")}
-              rows={2}
-              hint="Введите через запятую"
-            />
-            <Textarea
-              label="Условия для пациентов"
-              defaultValue={patientConditions.join(", ")}
-              rows={2}
-              hint="Введите через запятую"
-            />
-            <Textarea
-              label="Способы оплаты"
-              defaultValue={paymentMethods.join(", ")}
-              rows={2}
-              hint="Введите через запятую"
-            />
-          </div>
-        ) : (
-          <div className="flex flex-col gap-5">
-            <div>
-              <div className="text-xs text-muted mb-2">Оборудование</div>
-              <ul className="flex flex-col gap-1">
-                {equipment.map((item) => (
-                  <li
-                    key={item}
-                    className="text-sm text-foreground flex items-center gap-2"
-                  >
-                    <span className="text-muted">–</span> {item}
-                  </li>
-                ))}
-              </ul>
+        {/* ── 6. Оборудование и условия ─────────────────────────────────── */}
+        <SectionCard title="Оборудование и условия">
+          {isEditing ? (
+            <div className="flex flex-col gap-6">
+              <Textarea
+                label="Оборудование"
+                value={d.equipment}
+                onChange={(e) => set("equipment", e.target.value)}
+                rows={2}
+                hint="Введите через запятую"
+              />
+              <Textarea
+                label="Условия для пациентов"
+                value={d.patientConditions}
+                onChange={(e) => set("patientConditions", e.target.value)}
+                rows={2}
+                hint="Введите через запятую"
+              />
+              <Textarea
+                label="Способы оплаты"
+                value={d.paymentMethods}
+                onChange={(e) => set("paymentMethods", e.target.value)}
+                rows={2}
+                hint="Введите через запятую"
+              />
             </div>
-            <div>
-              <div className="text-xs text-muted mb-2">
-                Условия для пациентов
+          ) : (
+            <div className="flex flex-col gap-5">
+              <div>
+                <div className="text-xs text-muted mb-2">Оборудование</div>
+                <ul className="flex flex-col gap-1">
+                  {equipment.map((item) => (
+                    <li
+                      key={item}
+                      className="text-sm text-foreground flex items-center gap-2"
+                    >
+                      <span className="text-muted">–</span> {item}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="flex flex-col gap-1">
-                {patientConditions.map((item) => (
-                  <li
-                    key={item}
-                    className="text-sm text-foreground flex items-center gap-2"
-                  >
-                    <span className="text-muted">–</span> {item}
-                  </li>
-                ))}
-              </ul>
+              <div>
+                <div className="text-xs text-muted mb-2">
+                  Условия для пациентов
+                </div>
+                <ul className="flex flex-col gap-1">
+                  {patientConditions.map((item) => (
+                    <li
+                      key={item}
+                      className="text-sm text-foreground flex items-center gap-2"
+                    >
+                      <span className="text-muted">–</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <div className="text-xs text-muted mb-2">Способы оплаты</div>
+                <ul className="flex flex-col gap-1">
+                  {paymentMethods.map((item) => (
+                    <li
+                      key={item}
+                      className="text-sm text-foreground flex items-center gap-2"
+                    >
+                      <span className="text-muted">–</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-            <div>
-              <div className="text-xs text-muted mb-2">Способы оплаты</div>
-              <ul className="flex flex-col gap-1">
-                {paymentMethods.map((item) => (
-                  <li
-                    key={item}
-                    className="text-sm text-foreground flex items-center gap-2"
-                  >
-                    <span className="text-muted">–</span> {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
-      </SectionCard>
-    </>
-  );
-};
+          )}
+        </SectionCard>
+      </>
+    );
+  },
+);
+
+ClinicProfileForm.displayName = "ClinicProfileForm";

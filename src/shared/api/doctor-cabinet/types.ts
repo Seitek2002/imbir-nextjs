@@ -75,19 +75,23 @@ export type DoctorPatientFilters = {
   page_size?: number;
 };
 
+// Соответствует схеме DoctorServiceRead / DoctorServiceWriteRequest.
 export type DoctorServiceItem = {
   id: number;
   name: string;
+  category: string;
   description?: string;
-  price: number | null;
-  duration_minutes?: number;
-  is_primary: boolean;
+  price: string | null;
+  duration?: number | null;
+  is_active?: boolean;
+  created_at?: string;
 };
 
 export type DoctorServiceBody = {
   name: string;
+  category: string; // обязательное поле на бэке
   description?: string;
-  price?: number;
-  duration_minutes?: number;
-  is_primary?: boolean;
+  price?: string;
+  duration?: number;
+  is_active?: boolean;
 };

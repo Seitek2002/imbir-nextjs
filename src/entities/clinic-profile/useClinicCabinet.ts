@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ClinicPrivateProfile,
   ClinicSchedule,
+  type UpdateClinicProfileBody,
   clinicCabinetKeys,
   getClinicProfile,
   updateClinicProfile,
@@ -79,8 +80,7 @@ export const useClinicCabinet = () => {
   });
 
   const { mutateAsync: saveProfile, isPending: isSaving } = useMutation({
-    mutationFn: (body: Partial<ClinicPrivateProfile>) =>
-      updateClinicProfile(body),
+    mutationFn: (body: UpdateClinicProfileBody) => updateClinicProfile(body),
     onSuccess: (updated) => {
       queryClient.setQueryData(clinicCabinetKeys.profile(), updated);
       toast.success("Данные сохранены");

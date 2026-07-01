@@ -56,15 +56,10 @@ export const DoctorDocumentsPage: FC = () => {
   };
 
   const handleSave = async () => {
+    // API хранит номер лицензии плоским полем (объекта legal нет).
+    // Файлы сертификатов (certs) профиль-эндпоинт не принимает.
     await saveProfile({
-      legal: {
-        license_number: licenseNumber,
-        documents: certs,
-        company_name: "",
-        reg_number: "",
-        license_date: "",
-        license_authority: "",
-      },
+      license_number: licenseNumber,
     });
     setIsEditing(false);
   };

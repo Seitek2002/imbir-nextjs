@@ -21,9 +21,57 @@ export const getClinicProfile = async (): Promise<ClinicPrivateProfile> => {
   return data;
 };
 
+// Писчие поля PUT /api/clinic/profile/ (схема ClinicOwnProfileRequest).
+// Заданы явно: ClinicPrivateProfile унаследован от публичного типа и
+// не совпадает с реальным ответом (description, logo-binary и т.д.).
+export type UpdateClinicProfileBody = {
+  name?: string;
+  clinic_type?: string;
+  description?: string;
+  logo?: File | string | null;
+  phone?: string;
+  website?: string;
+  country?: string;
+  city?: string;
+  address?: string;
+  legal_name?: string;
+  reg_number?: string;
+  license_number?: string;
+  license_date?: string | null;
+  license_authority?: string;
+  primary_specializations?: string[];
+  narrow_specializations?: string[];
+  additional_services?: string;
+  equipment?: string[];
+  patient_conditions?: string[];
+  payment_methods?: string[];
+  emergency_24_7?: boolean;
+  schedule?: Record<string, { from: string; to: string; enabled: boolean }>;
+  lunch_break?: { from: string; to: string };
+};
+
 export const updateClinicProfile = async (
-  body: Partial<ClinicPrivateProfile>,
+  body: UpdateClinicProfileBody,
 ): Promise<ClinicPrivateProfile> => {
+  // Логотип (File) требует multipart; массивы/объекты сериализуем в JSON-строку.
+  const hasFile = Object.values(body).some((v) => v instanceof File);
+
+  if (hasFile) {
+    const form = new FormData();
+    Object.entries(body).forEach(([key, value]) => {
+      if (value === undefined || value === null) return;
+      if (value instanceof File) form.append(key, value);
+      else if (typeof value === "object")
+        form.append(key, JSON.stringify(value));
+      else form.append(key, String(value));
+    });
+    const { data } = await apiClient.put<ClinicPrivateProfile>(
+      "/api/clinic/profile/",
+      form,
+    );
+    return data;
+  }
+
   const { data } = await apiClient.put<ClinicPrivateProfile>(
     "/api/clinic/profile/",
     body,

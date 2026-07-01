@@ -54,16 +54,23 @@ export const ProfileMyDataPage: FC = () => {
   const set = <K extends keyof D>(k: K, v: D[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));
 
-  // Pull the current avatar once so it shows even when the persisted auth user
-  // predates the avatar field; also caches it in the store for other pages.
+  // Подтягиваем актуальный профиль с бэка и сидируем ВСЕ поля — иначе после
+  // жёсткой перезагрузки (когда authStore ещё не гидратировался) форма пустая.
   useEffect(() => {
     let cancelled = false;
     getProfile()
       .then((profile) => {
-        if (cancelled || !profile.avatar) return;
-        setD((prev) => ({ ...prev, photo: profile.avatar ?? prev.photo }));
+        if (cancelled) return;
+        setD((prev) => ({
+          ...prev,
+          firstName: profile.first_name ?? prev.firstName,
+          lastName: profile.last_name ?? prev.lastName,
+          phone: profile.phone ?? prev.phone,
+          email: profile.email ?? prev.email,
+          photo: profile.avatar ?? prev.photo,
+        }));
         const current = useAuthStore.getState().user;
-        if (current) {
+        if (current && profile.avatar) {
           useAuthStore
             .getState()
             .setUser({ ...current, avatar: profile.avatar });
@@ -260,8 +267,10 @@ export const ProfileMyDataPage: FC = () => {
                       {key === "phone" ? (
                         <PhoneInput
                           label={label}
-                          value={d.phone}
-                          onChange={(v) => set("phone", v)}
+                          // PhoneInput работает с национальной частью; храним
+                          // полный номер с кодом +996, конвертируем на границе
+                          value={d.phone.replace(/^\+?996/, "")}
+                          onChange={(v) => set("phone", v ? `+996${v}` : "")}
                         />
                       ) : (
                         <>

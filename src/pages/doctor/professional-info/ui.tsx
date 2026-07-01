@@ -51,9 +51,14 @@ export const DoctorProfessionalInfoPage: FC = () => {
     setD((prev) => ({ ...prev, [k]: v }));
 
   const handleSave = async () => {
+    // API использует primary/narrow_specializations (не specialty)
     await saveProfile({
-      specialty: d.specialty,
+      primary_specializations: d.specialty ? [d.specialty] : [],
+      narrow_specializations: d.additionalSpecialty
+        ? [d.additionalSpecialty]
+        : [],
       experience_years: parseInt(d.experienceYears) || 0,
+      additional_services: d.currentPosition || undefined,
     });
     setIsEditing(false);
   };

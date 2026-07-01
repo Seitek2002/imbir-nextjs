@@ -32,6 +32,13 @@ const nextConfig: NextConfig = {
         hostname: "imbir.sino0on.ru",
         pathname: "/**",
       },
+      {
+        // API отдаёт media-URL по http (аватары/фото) — иначе next/image
+        // отклоняет ссылку и картинка не отображается
+        protocol: "http",
+        hostname: "imbir.sino0on.ru",
+        pathname: "/**",
+      },
     ],
   },
 

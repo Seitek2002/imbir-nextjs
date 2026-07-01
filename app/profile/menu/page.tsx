@@ -11,6 +11,7 @@ import {
   ReviewsIcon,
   SavedIcon,
 } from "@/shared/assets/icons";
+import { useLogout } from "@/shared/lib/useLogout";
 import { useAuthStore } from "@/shared/store";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
@@ -23,6 +24,7 @@ const MENU_ITEMS = [
 
 export default function ProfileMenuPage() {
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const handleLogout = useLogout();
   const { user } = useAuthStore();
   const userName = user
     ? `${user.first_name} ${user.last_name?.charAt(0) ?? ""}`.trim()
@@ -158,9 +160,7 @@ export default function ProfileMenuPage() {
       <ConfirmDialog
         isOpen={logoutOpen}
         onClose={() => setLogoutOpen(false)}
-        onConfirm={() => {
-          window.location.href = "/";
-        }}
+        onConfirm={handleLogout}
         icon={<LogoutIcon className="w-7 h-7 [&_path]:stroke-primary" />}
         title="Выйти из профиля?"
         description="Для продолжения работы потребуется снова войти в аккаунт"

@@ -33,6 +33,7 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
 }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
@@ -48,14 +49,18 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
   }, [onClose]);
 
   const handleSubmit = () => {
-    if (!name.trim()) return;
+    // category обязателен на бэке; price уходит строкой, длительность — duration
+    if (!name.trim() || !category.trim()) return;
     onAdd({
-      name,
+      name: name.trim(),
+      category: category.trim(),
       description: description || undefined,
-      price: price ? Number(price) : undefined,
-      duration_minutes: duration ? Number(duration) : undefined,
+      price: price ? String(price) : undefined,
+      duration: duration ? Number(duration) : undefined,
+      is_active: true,
     });
     setName("");
+    setCategory("");
     setDescription("");
     setPrice("");
     setDuration("");
@@ -108,6 +113,15 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
             />
           </div>
           <div>
+            <label className={lbl}>Категория</label>
+            <input
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="Например, Приём, Диагностика"
+              className={inp}
+            />
+          </div>
+          <div>
             <label className={lbl}>Описание услуги</label>
             <input
               value={description}
@@ -140,9 +154,9 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
           </div>
           <button
             onClick={handleSubmit}
-            disabled={!name.trim() || isLoading}
+            disabled={!name.trim() || !category.trim() || isLoading}
             className={`w-full py-3.5 rounded-full font-medium transition-colors ${
-              name.trim() && !isLoading
+              name.trim() && category.trim() && !isLoading
                 ? "bg-primary text-white hover:bg-primary-dark active:scale-95"
                 : "bg-border text-dim cursor-not-allowed"
             }`}

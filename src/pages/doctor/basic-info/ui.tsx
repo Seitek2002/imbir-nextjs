@@ -12,6 +12,11 @@ import { PhoneInput } from "@/shared/ui";
 
 const { inp, lbl } = formStyles;
 
+const GENDER_OPTIONS = [
+  { label: "Мужской", value: "male" },
+  { label: "Женский", value: "female" },
+];
+
 export const DoctorBasicInfoPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);
@@ -26,6 +31,7 @@ export const DoctorBasicInfoPage: FC = () => {
     photo: undefined as string | undefined,
   });
   const photoRef = useRef<HTMLInputElement>(null);
+  const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
 
   useEffect(() => {
     if (profile) {
@@ -48,22 +54,37 @@ export const DoctorBasicInfoPage: FC = () => {
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setPendingPhoto(file);
     const reader = new FileReader();
     reader.onloadend = () => set("photo", reader.result as string);
     reader.readAsDataURL(file);
   };
 
+  // "ДД.ММ.ГГГГ" → "ГГГГ-ММ-ДД"; уже-ISO значение оставляем как есть
+  const toApiDate = (v: string): string | null => {
+    const t = v.trim();
+    if (!t) return null;
+    const m = t.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : t;
+  };
+
   const handleSave = async () => {
+    // Бэк требует first_name + last_name (full_name он игнорирует и падает 400)
+    const parts = d.fullName.trim().split(/\s+/);
     await saveProfile({
-      full_name: d.fullName,
+      first_name: parts[0] ?? "",
+      last_name: parts.slice(1).join(" ") || (parts[0] ?? ""),
+      gender: d.gender || undefined,
+      birth_date: toApiDate(d.birthDate),
       city: d.city,
       languages: d.languages
         .split(",")
         .map((l) => l.trim())
         .filter(Boolean),
       phone: d.phone || undefined,
-      email: d.email || undefined,
+      ...(pendingPhoto ? { photo: pendingPhoto } : {}),
     });
+    setPendingPhoto(null);
     setIsEditing(false);
   };
 
@@ -167,26 +188,32 @@ export const DoctorBasicInfoPage: FC = () => {
               <>
                 <label className={lbl}>Пол</label>
                 <div className="flex gap-4">
-                  {["Мужской", "Женский"].map((g) => (
+                  {GENDER_OPTIONS.map(({ label, value }) => (
                     <label
-                      key={g}
+                      key={value}
                       className="flex items-center gap-2 cursor-pointer"
-                      onClick={() => set("gender", g)}
+                      onClick={() => set("gender", value)}
                     >
                       <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${d.gender === g ? "border-primary" : "border-dim"}`}
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${d.gender === value ? "border-primary" : "border-dim"}`}
                       >
-                        {d.gender === g && (
+                        {d.gender === value && (
                           <div className="w-2.5 h-2.5 rounded-full bg-primary" />
                         )}
                       </div>
-                      <span className="text-foreground text-sm">{g}</span>
+                      <span className="text-foreground text-sm">{label}</span>
                     </label>
                   ))}
                 </div>
               </>
             ) : (
-              <FieldView label="Пол" value={d.gender} />
+              <FieldView
+                label="Пол"
+                value={
+                  GENDER_OPTIONS.find((g) => g.value === d.gender)?.label ??
+                  d.gender
+                }
+              />
             )}
           </div>
           <div>
@@ -238,8 +265,9 @@ export const DoctorBasicInfoPage: FC = () => {
             {isEditing ? (
               <PhoneInput
                 label="Телефон"
-                value={d.phone}
-                onChange={(v) => set("phone", v)}
+                // PhoneInput ждёт нац. часть; храним полный номер с +996
+                value={d.phone.replace(/^\+?996/, "")}
+                onChange={(v) => set("phone", v ? `+996${v}` : "")}
               />
             ) : (
               <FieldView label="Телефон" value={d.phone} />

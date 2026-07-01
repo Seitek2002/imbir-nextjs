@@ -10,6 +10,7 @@ import { DoctorSidebar } from "@/widgets/doctor/layout";
 
 import { ChevronRightIcon, LogoutIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { useLogout } from "@/shared/lib/useLogout";
 
 const MENU_ITEMS = [
   {
@@ -105,6 +106,7 @@ const MENU_ITEMS = [
 
 export const DoctorProfilePage: FC = () => {
   const { profile: d } = useDoctorCabinet();
+  const handleLogout = useLogout();
   if (!d) return null;
 
   return (
@@ -160,7 +162,10 @@ export const DoctorProfilePage: FC = () => {
             ))}
           </nav>
 
-          <button className="mt-3 w-full bg-white rounded-3xl px-6 py-4 flex items-center gap-3 hover:bg-surface transition-colors">
+          <button
+            onClick={handleLogout}
+            className="mt-3 w-full bg-white rounded-3xl px-6 py-4 flex items-center gap-3 hover:bg-surface transition-colors"
+          >
             <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
               <LogoutIcon className="w-5 h-5 [&_path]:stroke-primary" />
             </div>

@@ -1,10 +1,14 @@
 ﻿"use client";
 
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 
 import { ClinicSidebar } from "@/widgets/clinic/sidebar";
 
-import { ClinicProfileForm, useClinicCabinet } from "@/entities/clinic-profile";
+import {
+  ClinicProfileForm,
+  type ClinicProfileFormHandle,
+  useClinicCabinet,
+} from "@/entities/clinic-profile";
 
 import { Button } from "@/shared/ui";
 
@@ -29,18 +33,12 @@ const PencilIcon = () => (
 export const ClinicProfilePage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
   const [isEditing, setIsEditing] = useState(false);
+  const formRef = useRef<ClinicProfileFormHandle>(null);
 
   const handleSave = async () => {
-    if (profile) {
-      await saveProfile({
-        name: profile.name,
-        about: profile.description,
-        phone: profile.phone || undefined,
-        email: profile.email || undefined,
-        website: profile.website || undefined,
-        address: profile.fullAddress || undefined,
-      });
-    }
+    // Берём реально введённые значения из формы (включая логотип-файл)
+    const payload = formRef.current?.getPayload();
+    if (payload) await saveProfile(payload);
     setIsEditing(false);
   };
   const handleEdit = () => setIsEditing(true);
@@ -108,7 +106,11 @@ export const ClinicProfilePage: FC = () => {
             </div>
 
             {profile && (
-              <ClinicProfileForm {...profile} isEditing={isEditing} />
+              <ClinicProfileForm
+                ref={formRef}
+                {...profile}
+                isEditing={isEditing}
+              />
             )}
           </main>
         </div>

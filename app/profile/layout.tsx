@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 
+import { AuthGuard } from "@/shared/lib/AuthGuard";
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 
@@ -9,7 +10,7 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
       <div className="hidden md:block">
         <Header />
       </div>
-      {children}
+      <AuthGuard>{children}</AuthGuard>
       <div className="hidden md:block">
         <Footer />
       </div>

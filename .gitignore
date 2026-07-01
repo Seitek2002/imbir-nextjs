@@ -48,3 +48,6 @@ next-env.d.ts
 
 # local credentials (never commit)
 acc.md
+
+# Playwright MCP session artifacts (snapshots, console logs, screenshots)
+.playwright-mcp/
