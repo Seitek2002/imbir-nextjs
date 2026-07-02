@@ -24,7 +24,7 @@ const SocialLink: FC<{ href: string; Icon: FC<{ className?: string }> }> = ({
     className="size-10 rounded-full bg-primary flex items-center justify-center text-white hover:bg-primary-dark transition-colors"
   >
     {/* Добавил fill-white на случай, если svg экспортировались с другим цветом */}
-    <Icon className="size-5 [&_path]:fill-white" />
+    <Icon className="[&_path]:fill-white" />
   </a>
 );
 
