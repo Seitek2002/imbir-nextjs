@@ -23,7 +23,7 @@ const ClinicsListContent = () => {
   // --- МАГИЯ REACT QUERY ---
   const { data: clinics = [], isLoading } = useQuery({
     queryKey: ["clinics"],
-    queryFn: api.getClinics,
+    queryFn: () => api.getClinics(),
   });
 
   // Если данные грузятся, показываем наши новые красивые скелетоны

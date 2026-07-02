@@ -65,3 +65,13 @@ export type DoctorFilters = {
   page?: number;
   page_size?: number;
 };
+
+export type AvailableSlot = {
+  time: string; // "HH:mm"
+  available: boolean;
+};
+
+export type AvailableSlotsResponse = {
+  date: string;
+  slots: AvailableSlot[];
+};

@@ -16,6 +16,10 @@ export type RefreshResponse = {
   refresh: string;
 };
 
+export type PasswordResetRequest = {
+  email: string;
+};
+
 export type RegisterClientRequest = {
   first_name: string;
   last_name: string;

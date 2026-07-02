@@ -10,16 +10,25 @@ import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 
 import { ActiveFiltersChips } from "@/features/active-filters-chips";
+import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { FilterBar } from "@/features/filter-bar";
 import { FiltersTrigger, MobileFiltersModal } from "@/features/mobile-filters";
 import { UrlSearchInput } from "@/features/search-by-query";
 
 import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 
-import { api } from "@/shared/api";
+import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { useCityStore } from "@/shared/store";
-import { Button } from "@/shared/ui";
+
+// Бэк не поддерживает фильтр по стажу (нет такого query-параметра в
+// /api/doctors/), а фильтр specialization есть в контракте, но на практике
+// всегда возвращает пустой список даже для точных совпадений (проверено
+// прямыми запросами) — это баг бэкенда. Оставляем оба фильтра клиентскими.
+// page_size увеличен, чтобы клиентская фильтрация не резала выборку до
+// дефолтных 20 записей (макет не предполагает пагинацию — карточки не
+// ограничены страницами).
+const FULL_LIST_PAGE_SIZE = 200;
 
 // <-- ИМПОРТ НАШЕГО API
 
@@ -56,13 +65,33 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
   }, []);
   const selectedCity = isHydrated ? storeCity : initialCity;
 
-  // 2. ПОЛУЧАЕМ ДАННЫЕ С СЕРВЕРА (city фильтр передаём в API)
+  // 2. Собираем реальные фильтры и отдаём их API — специализация/стаж
+  // остаются клиентскими (см. комментарий у FULL_LIST_PAGE_SIZE), город/
+  // онлайн/оценка/цена уходят в query-параметры и реально сужают выборку
+  // на бэке.
+  const [priceMin, priceMax] = currentPrice
+    ? currentPrice.split("-").map(Number)
+    : [undefined, undefined];
+
+  const filters: DoctorFilters = {
+    city: selectedCity || undefined,
+    is_online: isOnlineOnly || undefined,
+    min_rating:
+      currentRating && currentRating !== "all"
+        ? parseFloat(currentRating)
+        : undefined,
+    min_price: priceMin,
+    max_price: priceMax,
+    page_size: FULL_LIST_PAGE_SIZE,
+  };
+
   const { data: doctors = [], isLoading } = useQuery({
-    queryKey: ["doctors", selectedCity],
-    queryFn: () => api.getDoctors(selectedCity),
+    queryKey: doctorKeys.list(filters),
+    queryFn: () => api.getDoctors(filters),
   });
 
-  // 3. Фильтруем данные перед рендером
+  // 3. Специализация и стаж — фильтруем на клиенте (бэк их не поддерживает
+  // рабочим образом), плюс текстовый поиск.
   const filteredDoctors = doctors.filter((doc) => {
     if (activeQuery) {
       const q = activeQuery.toLowerCase();
@@ -74,16 +103,9 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
       }
     }
 
-    if (isOnlineOnly && !doc.isOnlineAvailable) return false;
-
     if (currentSpec) {
       const selectedSpecs = currentSpec.split(",");
       if (!selectedSpecs.includes(doc.specialty)) return false;
-    }
-
-    if (currentRating && currentRating !== "all") {
-      const minRating = parseFloat(currentRating);
-      if (doc.rating < minRating) return false;
     }
 
     if (currentExp) {
@@ -91,18 +113,10 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
       if (doc.experience < minExp || doc.experience > maxExp) return false;
     }
 
-    if (currentPrice) {
-      const [minPrice, maxPrice] = currentPrice.split("-").map(Number);
-      const docMinPrice =
-        doc.workplaces.length > 0
-          ? Math.min(...doc.workplaces.map((w) => w.price))
-          : 0;
-
-      if (docMinPrice < minPrice || docMinPrice > maxPrice) return false;
-    }
-
     return true;
   });
+
+  const { isSaved, toggle } = useFavoriteToggle("doctor");
 
   return (
     <main className="min-h-screen bg-background md:bg-white flex flex-col">
@@ -152,19 +166,12 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
                   key={`mob-${doc.id}`}
                   {...doc}
                   variant="horizontal"
+                  initialSaved={isSaved(Number(doc.id))}
+                  onSave={() => toggle(Number(doc.id))}
                 />
               ))
             )}
           </div>
-
-          {!isLoading && filteredDoctors.length > 0 && (
-            <Button
-              variant="outline"
-              className="w-full mt-6 bg-white justify-center"
-            >
-              Показать еще
-            </Button>
-          )}
         </div>
 
         {/* --- ДЕСКТОПНАЯ ВЕРСИЯ --- */}
@@ -219,19 +226,16 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
             ) : (
               <div className="grid grid-cols-4 gap-5 items-stretch">
                 {filteredDoctors.map((doc) => (
-                  <DoctorCard key={`desk-${doc.id}`} {...doc} />
+                  <DoctorCard
+                    key={`desk-${doc.id}`}
+                    {...doc}
+                    initialSaved={isSaved(Number(doc.id))}
+                    onSave={() => toggle(Number(doc.id))}
+                  />
                 ))}
               </div>
             )}
           </div>
-
-          {!isLoading && filteredDoctors.length > 0 && (
-            <div className="flex justify-center mt-10">
-              <Button variant="outline" className="bg-white">
-                Показать еще
-              </Button>
-            </div>
-          )}
         </div>
       </div>
 

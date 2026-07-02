@@ -11,7 +11,8 @@ import { FilterBar } from "@/features/filter-bar";
 
 import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 
-import { api } from "@/shared/api";
+import { api, doctorKeys } from "@/shared/api";
+import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
 const DoctorsListContent = () => {
@@ -23,9 +24,15 @@ const DoctorsListContent = () => {
   const currentPrice = searchParams.get("doc_price");
   const isOnlineOnly = searchParams.get("doc_online") === "true";
 
+  // Раньше карусель на Главной игнорировала выбранный город (в отличие от
+  // /specialists, где город уже учитывался) — теперь оба списка врачей
+  // ведут себя одинаково.
+  const selectedCity = useCityStore((s) => s.city);
+  const filters = { city: selectedCity || undefined };
+
   const { data: doctors = [], isLoading } = useQuery({
-    queryKey: ["doctors"], // Уникальный ключ. По нему React Query понимает, где лежат эти данные
-    queryFn: () => api.getDoctors(),
+    queryKey: doctorKeys.list(filters),
+    queryFn: () => api.getDoctors(filters),
   });
 
   if (isLoading) {

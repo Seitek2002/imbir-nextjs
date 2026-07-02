@@ -6,18 +6,26 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { api, createAppointment, getServices, profileKeys } from "@/shared/api";
+import {
+  api,
+  createAppointment,
+  getDoctorAvailableSlots,
+  getServices,
+  profileKeys,
+} from "@/shared/api";
 import type {
   AppointmentResponse,
   CreateAppointmentRequest,
 } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { useAuthStore } from "@/shared/store";
 
 import { ConsultationMode } from "../ui/appointment-datetime-picker";
 import { SELECTION_LABELS } from "./constants";
 import {
   filterSelectionItems,
+  groupAvailableSlots,
   isEmailValid,
   isPhoneValid,
   toApiDate,
@@ -98,6 +106,31 @@ export const useRecordForm = () => {
         ...(selectedDoctorId ? { doctor_id: selectedDoctorId } : {}),
       }),
   });
+
+  const selectedDateStr = selectedDate ? toApiDate(selectedDate) : null;
+
+  const { data: slotsData, isLoading: isLoadingSlots } = useQuery({
+    queryKey: ["record-available-slots", selectedDoctorId, selectedDateStr],
+    queryFn: () =>
+      getDoctorAvailableSlots(
+        selectedDoctorId as string,
+        selectedDateStr as string,
+      ),
+    enabled: Boolean(selectedDoctorId) && Boolean(selectedDateStr),
+  });
+
+  const timeGroups = useMemo(
+    () => groupAvailableSlots(slotsData?.slots ?? []),
+    [slotsData],
+  );
+
+  // Слоты зависят от врача и даты — старый выбор времени может не совпасть
+  // ни с одним реальным слотом новой пары, сбрасываем, чтобы не отправить
+  // невалидное время молча.
+  useEffect(() => {
+    setSelectedTime(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDoctorId, selectedDateStr]);
 
   const CLINICS: Clinic[] = clinicsData.map((c) => ({
     id: c.id,
@@ -438,10 +471,18 @@ export const useRecordForm = () => {
       const result = await createAppointmentMutation.mutateAsync(request);
       setAppointmentResult(result);
       setShowSuccess(true);
-    } catch {
+    } catch (err: unknown) {
+      // Бэк теперь отклоняет 400 при неопубликованном враче/клинике или
+      // is_online_available: false — показываем настоящую причину, а не
+      // общую заглушку.
+      const errData = (err as { response?: { data?: unknown } })?.response
+        ?.data;
       setErrors((prev) => ({
         ...prev,
-        submit: "Не удалось создать запись. Попробуйте ещё раз.",
+        submit: extractErrorMessage(
+          errData,
+          "Не удалось создать запись. Попробуйте ещё раз.",
+        ),
       }));
     } finally {
       setIsSubmitting(false);
@@ -458,6 +499,8 @@ export const useRecordForm = () => {
     setSelectedDate,
     selectedTime,
     setSelectedTime,
+    timeGroups,
+    isLoadingSlots,
     activeModal,
     searchQuery,
     setSearchQuery,

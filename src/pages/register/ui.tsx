@@ -23,6 +23,7 @@ import {
   ProfileIcon,
 } from "@/shared/assets/icons";
 import { ROUTES, colors } from "@/shared/config";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import { Button, IconBtn, Input } from "@/shared/ui";
@@ -151,31 +152,6 @@ const toApiDate = (ddmmyyyy: string): string => {
   const [dd, mm, yyyy] = ddmmyyyy.split(".");
   if (!dd || !mm || !yyyy) return ddmmyyyy;
   return `${yyyy}-${mm}-${dd}`;
-};
-
-// Ошибки DRF на регистрации приходят по шагам (step1.birth_date: [...]),
-// а не плоским объектом — рекурсивно ищем первую строку, иначе в toast
-// прилетает объект и React падает с "Objects are not valid as a React child".
-const extractErrorMessage = (
-  value: unknown,
-  fallback = "Ошибка регистрации. Попробуйте снова",
-): string => {
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      const found = extractErrorMessage(item, "");
-      if (found) return found;
-    }
-    return fallback;
-  }
-  if (value && typeof value === "object") {
-    for (const item of Object.values(value)) {
-      const found = extractErrorMessage(item, "");
-      if (found) return found;
-    }
-    return fallback;
-  }
-  return fallback;
 };
 
 export const RegisterPage = () => {
@@ -307,7 +283,9 @@ export const RegisterPage = () => {
       router.push(ROLE_REDIRECT[res.user.role] ?? "/profile");
     } catch (err: unknown) {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
-      toast.error(extractErrorMessage(data));
+      toast.error(
+        extractErrorMessage(data, "Ошибка регистрации. Попробуйте снова"),
+      );
     } finally {
       setIsLoadingClient(false);
     }
@@ -384,7 +362,9 @@ export const RegisterPage = () => {
     } catch (err: unknown) {
       const errData = (err as { response?: { data?: unknown } })?.response
         ?.data;
-      toast.error(extractErrorMessage(errData));
+      toast.error(
+        extractErrorMessage(errData, "Ошибка регистрации. Попробуйте снова"),
+      );
     } finally {
       setIsLoadingDoctor(false);
     }
@@ -466,7 +446,9 @@ export const RegisterPage = () => {
     } catch (err: unknown) {
       const errData = (err as { response?: { data?: unknown } })?.response
         ?.data;
-      toast.error(extractErrorMessage(errData));
+      toast.error(
+        extractErrorMessage(errData, "Ошибка регистрации. Попробуйте снова"),
+      );
     } finally {
       setIsLoadingClinic(false);
     }

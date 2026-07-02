@@ -18,35 +18,33 @@ export type ReviewItem = {
   text: string;
   rating: number;
   avatarUrl?: string;
+  reply?: { text: string; date: string } | null;
 };
 
 type Props = {
   initialReviews: ReviewItem[];
   averageRating: number;
-  // В будущем сюда можно будет передать функцию onAddReview для отправки на бэк
+  // Отправка отзыва на бэк. Если не передана — форма не показывается.
+  onSubmitReview?: (rating: number, text: string) => void;
+  isSubmitting?: boolean;
 };
 
 export const ReviewsSection: FC<Props> = ({
   initialReviews,
   averageRating,
+  onSubmitReview,
+  isSubmitting,
 }) => {
-  // Локальный стейт для отзывов и формы
-  const [reviews, setReviews] = useState<ReviewItem[]>(initialReviews);
+  // Источник истины — проп (данные из query); локально держим только форму.
+  const reviews = initialReviews;
   const [newReviewText, setNewReviewText] = useState("");
   const [newReviewRating, setNewReviewRating] = useState(0);
 
   const handleAddReview = () => {
-    if (!newReviewText.trim() || newReviewRating === 0) return;
+    if (!newReviewText.trim() || newReviewRating === 0 || !onSubmitReview)
+      return;
 
-    const newReview: ReviewItem = {
-      id: Date.now(),
-      author: "Вы (Сейтек)", // Заглушка до подключения авторизации
-      date: "Только что",
-      text: newReviewText,
-      rating: newReviewRating,
-    };
-
-    setReviews([newReview, ...reviews]);
+    onSubmitReview(newReviewRating, newReviewText);
     setNewReviewText("");
     setNewReviewRating(0);
   };
@@ -99,44 +97,48 @@ export const ReviewsSection: FC<Props> = ({
             Оставить свой отзыв
           </Button>
 
-          {/* Форма */}
-          <div className="hidden md:flex flex-col bg-white border border-border-soft rounded-2xl p-4">
-            <h3 className="font-medium text-[20px] text-foreground mb-6">
-              Оставьте свой отзыв
-            </h3>
-            <span className="text-base mb-2">Оцените специалиста</span>
+          {/* Форма — только если подключена отправка на бэк */}
+          {onSubmitReview && (
+            <div className="hidden md:flex flex-col bg-white border border-border-soft rounded-2xl p-4">
+              <h3 className="font-medium text-[20px] text-foreground mb-6">
+                Оставьте свой отзыв
+              </h3>
+              <span className="text-base mb-2">Оцените специалиста</span>
 
-            {/* Интерактивные Звездочки */}
-            <div className="flex justify-center gap-5 py-4 mb-6 border border-border rounded-xl">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <StarIcon
-                  key={star}
-                  onClick={() => setNewReviewRating(star)}
-                  className={cn(
-                    "size-10 cursor-pointer transition-colors",
-                    star <= newReviewRating ? "text-primary" : "text-border",
-                  )}
-                />
-              ))}
+              {/* Интерактивные Звездочки */}
+              <div className="flex justify-center gap-5 py-4 mb-6 border border-border rounded-xl">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <StarIcon
+                    key={star}
+                    onClick={() => setNewReviewRating(star)}
+                    className={cn(
+                      "size-10 cursor-pointer transition-colors",
+                      star <= newReviewRating ? "text-primary" : "text-border",
+                    )}
+                  />
+                ))}
+              </div>
+
+              <span className="text-base mb-2">Поделитесь своим мнением</span>
+              <textarea
+                value={newReviewText}
+                onChange={(e) => setNewReviewText(e.target.value)}
+                className="w-full border border-border-soft rounded-xl p-3 text-sm outline-none focus:border-primary resize-none h-24 mb-4"
+                placeholder="Введите текст"
+              />
+
+              <Button
+                size="md"
+                className="w-full justify-center"
+                onClick={handleAddReview}
+                disabled={
+                  !newReviewText.trim() || newReviewRating === 0 || isSubmitting
+                }
+              >
+                {isSubmitting ? "Отправка..." : "Отправить"}
+              </Button>
             </div>
-
-            <span className="text-base mb-2">Поделитесь своим мнением</span>
-            <textarea
-              value={newReviewText}
-              onChange={(e) => setNewReviewText(e.target.value)}
-              className="w-full border border-border-soft rounded-xl p-3 text-sm outline-none focus:border-primary resize-none h-24 mb-4"
-              placeholder="Введите текст"
-            />
-
-            <Button
-              size="md"
-              className="w-full justify-center"
-              onClick={handleAddReview}
-              disabled={!newReviewText.trim() || newReviewRating === 0}
-            >
-              Отправить
-            </Button>
-          </div>
+          )}
         </div>
 
         {/* Список отзывов */}
@@ -149,6 +151,7 @@ export const ReviewsSection: FC<Props> = ({
               text={review.text}
               rating={review.rating}
               avatarUrl={review.avatarUrl}
+              reply={review.reply}
             />
           ))}
         </div>

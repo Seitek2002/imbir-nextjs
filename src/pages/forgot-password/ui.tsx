@@ -1,14 +1,19 @@
 ﻿"use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 import { useRouter } from "next/navigation";
 
+import { useMutation } from "@tanstack/react-query";
+
 import { Header } from "@/widgets/header";
 
+import { requestPasswordResetFn } from "@/shared/api";
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { ROUTES } from "@/shared/config";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { Button, IconBtn, Input } from "@/shared/ui";
 
@@ -26,6 +31,20 @@ export const ForgotPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const requestResetMutation = useMutation({
+    mutationFn: requestPasswordResetFn,
+    onSuccess: () => setStep("code"),
+    onError: (err) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(
+        extractErrorMessage(
+          data,
+          "Не удалось отправить письмо. Попробуйте снова",
+        ),
+      );
+    },
+  });
 
   // Валидация пароля
   const isLengthValid = password.length >= 8;
@@ -122,16 +141,24 @@ export const ForgotPasswordPage = () => {
                   <Button
                     className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
-                    onClick={() => setStep("code")}
-                    disabled={!email}
+                    onClick={() => requestResetMutation.mutate({ email })}
+                    disabled={!email || requestResetMutation.isPending}
                   >
-                    Получить код
+                    {requestResetMutation.isPending
+                      ? "Отправка..."
+                      : "Получить код"}
                   </Button>
                 </div>
               </>
             )}
 
-            {/* === ШАГ 2: ВВОД КОДА (Твой 1-й скрин) === */}
+            {/* === ШАГ 2: ВВОД КОДА (Твой 1-й скрин) ===
+                ВАЖНО: бэк не поддерживает подтверждение по коду — POST
+                /api/auth/password-reset/confirm/ принимает { token, password },
+                без поля кода. Ссылка из письма должна содержать token, которым
+                этот шаг сейчас не оперирует. Подключать нельзя, пока бэк не
+                добавит код-эндпоинт либо флоу не поменяют на переход по ссылке
+                с token в query. См. отчёт по Стадии 1 (категория D). */}
             {step === "code" && (
               <>
                 <div className="mt-4 mb-6 md:mt-0 text-center md:text-left">

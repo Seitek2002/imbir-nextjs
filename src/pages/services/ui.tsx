@@ -11,17 +11,23 @@ import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 
 import { ActiveFiltersChips } from "@/features/active-filters-chips";
+import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { FiltersTrigger, MobileFiltersModal } from "@/features/mobile-filters";
 import { UrlSearchInput } from "@/features/search-by-query";
 
 import { ServiceCard } from "@/entities/service";
 
-import { api } from "@/shared/api";
+import { ServiceFilters, api, serviceKeys } from "@/shared/api";
 import { RemoveIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 
 const MAX_PRICE = 10000;
+// Реальный ServiceListItem с бэка не содержит ни rating, ни clinic вообще —
+// эти поля сейчас всегда фабрикуются на фронте (0 / пустая строка), поэтому
+// фильтры "Оценка" и "Клиника" гарантированно возвращали бы пустой список.
+// Отключены до тех пор, пока бэк не добавит эти поля в /api/services/.
+const DISABLED_FILTERS_NOTE = "скоро";
 
 const CATEGORY_OPTIONS = [
   { value: "Кардиология", label: "Кардиология" },
@@ -29,19 +35,6 @@ const CATEGORY_OPTIONS = [
   { value: "Неврология", label: "Неврология" },
   { value: "Хирургия", label: "Хирургия" },
   { value: "Диагностика", label: "Диагностика" },
-];
-
-const CLINIC_OPTIONS = [
-  { value: "Nova Clinic", label: "Nova Clinic" },
-  { value: "MedCenter", label: "MedCenter" },
-  { value: "Vita Clinic", label: "Vita Clinic" },
-];
-
-const RATING_OPTIONS = [
-  { value: "all", label: "Все" },
-  { value: "5.0", label: "5.0" },
-  { value: "4.0", label: "4.0" },
-  { value: "3.0", label: "3.0" },
 ];
 
 const PREFIX = "svc";
@@ -58,8 +51,6 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
   const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
 
   const currentCategory = urlSearchParams.get(`${PREFIX}_spec`) ?? null;
-  const currentClinic = urlSearchParams.get(`${PREFIX}_clinic`) ?? null;
-  const currentRating = urlSearchParams.get(`${PREFIX}_rating`) ?? "all";
   const priceParts = urlSearchParams
     .get(`${PREFIX}_price`)
     ?.split("-")
@@ -82,15 +73,21 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
   const handleReset = () => {
     const params = new URLSearchParams(urlSearchParams.toString());
     params.delete(`${PREFIX}_spec`);
-    params.delete(`${PREFIX}_clinic`);
-    params.delete(`${PREFIX}_rating`);
     params.delete(`${PREFIX}_price`);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
+  // Категория и цена — реальные query-параметры /api/services/ (проверено
+  // напрямую). "Оценка"/"Клиника" не отправляем — см. DISABLED_FILTERS_NOTE.
+  const filters: ServiceFilters = {
+    category: currentCategory ?? undefined,
+    min_price: priceParts ? priceRange[0] : undefined,
+    max_price: priceParts ? priceRange[1] : undefined,
+  };
+
   const { data: services = [], isLoading } = useQuery({
-    queryKey: ["services"],
-    queryFn: api.getServices,
+    queryKey: serviceKeys.list(filters),
+    queryFn: () => api.getServices(filters),
   });
 
   const filteredServices = services.filter((s) => {
@@ -102,22 +99,15 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
       )
         return false;
     }
-    if (currentCategory && s.category !== currentCategory) return false;
-    if (currentClinic && s.clinicId !== currentClinic) return false;
-    if (currentRating && currentRating !== "all") {
-      if (s.rating < parseFloat(currentRating)) return false;
-    }
-    if (priceParts && (s.price < priceRange[0] || s.price > priceRange[1]))
-      return false;
     return true;
   });
 
   const mobileFilters = {
     category: true as const,
-    clinic: true as const,
-    rating: true as const,
     price: true as const,
   };
+
+  const { isSaved, toggle } = useFavoriteToggle("service");
 
   return (
     <main className="min-h-screen bg-background md:bg-white flex flex-col">
@@ -138,7 +128,6 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
         prefix={PREFIX}
         fields={mobileFilters}
         categoryOptions={CATEGORY_OPTIONS}
-        clinicOptions={CLINIC_OPTIONS}
       />
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
@@ -171,19 +160,12 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                   price={s.price}
                   image={s.image}
                   variant="horizontal"
+                  initialSaved={isSaved(Number(s.id))}
+                  onSave={() => toggle(Number(s.id))}
                 />
               ))
             )}
           </div>
-
-          {!isLoading && filteredServices.length > 0 && (
-            <Button
-              variant="outline"
-              className="w-full mt-6 bg-white justify-center"
-            >
-              Показать еще
-            </Button>
-          )}
         </div>
 
         {/* Desktop */}
@@ -232,23 +214,21 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
               value={currentCategory ?? ""}
               onChange={(val) => updateURL("spec", val || null)}
             />
-            <Dropdown
-              label="Клиника"
-              placeholder="Все"
-              options={CLINIC_OPTIONS}
-              value={currentClinic ?? ""}
-              onChange={(val) => updateURL("clinic", val || null)}
-            />
-            <Dropdown
-              label="Оценка"
-              placeholder="Все"
-              type="radio"
-              options={RATING_OPTIONS}
-              value={currentRating || "all"}
-              onChange={(val) =>
-                updateURL("rating", val === "all" ? null : val)
-              }
-            />
+            {/* Клиника/Оценка отключены — см. DISABLED_FILTERS_NOTE */}
+            <div className="flex flex-col gap-1.5 w-full">
+              <span className="text-overlay text-sm font-medium">Клиника</span>
+              <div className="h-12 px-4 flex items-center justify-between rounded-xl border border-border-soft bg-background text-muted text-sm cursor-not-allowed">
+                <span>Все</span>
+                <span className="text-xs">{DISABLED_FILTERS_NOTE}</span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5 w-full">
+              <span className="text-overlay text-sm font-medium">Оценка</span>
+              <div className="h-12 px-4 flex items-center justify-between rounded-xl border border-border-soft bg-background text-muted text-sm cursor-not-allowed">
+                <span>Все</span>
+                <span className="text-xs">{DISABLED_FILTERS_NOTE}</span>
+              </div>
+            </div>
             <RangeSlider
               id="price-desktop-svc"
               label="Стоимость, с"
@@ -295,19 +275,13 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                     reviews={s.reviews}
                     price={s.price}
                     image={s.image}
+                    initialSaved={isSaved(Number(s.id))}
+                    onSave={() => toggle(Number(s.id))}
                   />
                 ))}
               </div>
             )}
           </div>
-
-          {!isLoading && filteredServices.length > 0 && (
-            <div className="flex justify-center mt-10">
-              <Button variant="outline" className="bg-white">
-                Показать еще
-              </Button>
-            </div>
-          )}
         </div>
       </div>
 

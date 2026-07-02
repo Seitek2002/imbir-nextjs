@@ -17,6 +17,8 @@ type Props = {
   doctorSpecialty: string;
   doctorClinic: string;
   doctorImage?: string;
+  initialRating?: number;
+  initialComment?: string;
   onSubmit: (rating: number, comment: string) => void;
 };
 
@@ -30,10 +32,12 @@ export const ReviewModal: FC<Props> = ({
   doctorSpecialty,
   doctorClinic,
   doctorImage,
+  initialRating = 0,
+  initialComment = "",
   onSubmit,
 }) => {
-  const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState("");
+  const [rating, setRating] = useState(initialRating);
+  const [comment, setComment] = useState(initialComment);
   const [isClosing, setIsClosing] = useState(false);
 
   useScrollLock(isOpen);

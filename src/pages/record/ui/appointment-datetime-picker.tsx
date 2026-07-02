@@ -29,6 +29,7 @@ type Props = {
   selectedTime: string | null;
   onTimeChange: (time: string) => void;
   timeGroups?: TimeGroup[];
+  isLoadingSlots?: boolean;
   isDateDisabled?: (date: Date) => boolean;
   className?: string;
 };
@@ -48,38 +49,6 @@ const MONTHS = [
   "Октябрь",
   "Ноябрь",
   "Декабрь",
-];
-
-const DEFAULT_TIME_GROUPS: TimeGroup[] = [
-  {
-    label: "Утро",
-    slots: [
-      { value: "08:00" },
-      { value: "09:00" },
-      { value: "10:00" },
-      { value: "11:00", disabled: true },
-      { value: "12:00" },
-    ],
-  },
-  {
-    label: "Обед",
-    slots: [
-      { value: "13:00" },
-      { value: "14:00" },
-      { value: "15:00", disabled: true },
-      { value: "16:00", disabled: true },
-      { value: "17:00" },
-    ],
-  },
-  {
-    label: "Вечер",
-    slots: [
-      { value: "18:00" },
-      { value: "19:00", disabled: true },
-      { value: "20:00" },
-      { value: "21:00", disabled: true },
-    ],
-  },
 ];
 
 const toMondayIndex = (day: number) => (day + 6) % 7;
@@ -105,10 +74,18 @@ export const AppointmentDateTimePicker: FC<Props> = ({
   onDateChange,
   selectedTime,
   onTimeChange,
-  timeGroups = DEFAULT_TIME_GROUPS,
+  timeGroups = [],
+  isLoadingSlots,
   isDateDisabled,
   className,
 }) => {
+  const slotsMessage = isLoadingSlots
+    ? "Загрузка свободного времени..."
+    : !selectedDate
+      ? "Выберите дату, чтобы увидеть свободное время"
+      : timeGroups.length === 0
+        ? "Нет свободного времени на выбранную дату"
+        : null;
   const scrollRef = useRef<HTMLDivElement>(null);
   const selectedBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -333,6 +310,11 @@ export const AppointmentDateTimePicker: FC<Props> = ({
 
         {/* Time slots mobile */}
         <div className="border border-border-soft rounded-2xl p-3 space-y-3">
+          {slotsMessage && (
+            <p className="text-sm text-muted text-center py-2">
+              {slotsMessage}
+            </p>
+          )}
           {timeGroups.map((group) => (
             <div key={group.label}>
               <p className="text-sm text-secondary mb-2">{group.label}</p>
@@ -407,6 +389,11 @@ export const AppointmentDateTimePicker: FC<Props> = ({
         </div>
 
         <div className="border border-border-soft rounded-2xl p-3 space-y-3">
+          {slotsMessage && (
+            <p className="text-sm text-muted text-center py-2">
+              {slotsMessage}
+            </p>
+          )}
           {timeGroups.map((group) => (
             <div key={group.label}>
               <p className="text-sm text-secondary mb-2">{group.label}</p>

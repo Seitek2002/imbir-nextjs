@@ -7,6 +7,8 @@ export type UserReview = {
   comment: string;
   date: string;
   image?: string;
+  // Ответ врача/клиники на отзыв, если есть.
+  reply?: { text: string; date: string } | null;
 
   // Для клиник
   clinicName?: string;

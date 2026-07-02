@@ -4,6 +4,7 @@ import { apiClient } from "../client";
 import {
   AuthResponse,
   LoginRequest,
+  PasswordResetRequest,
   RefreshResponse,
   RegisterClientRequest,
   RegisterClinicRequest,
@@ -92,5 +93,17 @@ export const logoutFn = async (refreshToken: string): Promise<void> => {
 
 export const getMeFn = async (): Promise<AuthUser> => {
   const { data } = await apiClient.get<AuthUser>("/api/auth/me/");
+  return data;
+};
+
+// Бэк отвечает одинаковым detail независимо от того, существует email —
+// это ожидаемо (защита от перебора почт), не ошибка.
+export const requestPasswordResetFn = async (
+  body: PasswordResetRequest,
+): Promise<{ detail: string }> => {
+  const { data } = await apiClient.post<{ detail: string }>(
+    "/api/auth/password-reset/",
+    body,
+  );
   return data;
 };

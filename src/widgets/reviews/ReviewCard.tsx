@@ -11,6 +11,7 @@ export type ReviewProps = {
   text: string;
   rating: number;
   avatarUrl?: string; // Для будущих реальных фото
+  reply?: { text: string; date: string } | null;
 };
 
 export const ReviewCard: FC<ReviewProps> = ({
@@ -19,12 +20,24 @@ export const ReviewCard: FC<ReviewProps> = ({
   text,
   rating,
   avatarUrl,
+  reply,
 }) => {
   return (
     <div className="bg-white border border-border-soft rounded-[20px] flex flex-col">
       {/* Верхняя часть: Текст отзыва */}
       <div className="p-5 border-b border-border-soft">
         <p className="text-secondary text-[15px] leading-relaxed">{text}</p>
+        {reply && (
+          <div className="mt-3 rounded-2xl bg-surface border border-border-soft p-3">
+            <p className="text-foreground font-medium text-sm mb-1">Ответ</p>
+            <p className="text-secondary text-sm leading-relaxed">
+              {reply.text}
+            </p>
+            {reply.date && (
+              <p className="text-muted text-xs mt-1">{reply.date}</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Нижняя часть: Автор и Оценка */}

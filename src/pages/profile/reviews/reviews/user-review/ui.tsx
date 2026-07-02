@@ -114,6 +114,20 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
         {review.comment}
       </p>
 
+      {review.reply && (
+        <div className="rounded-2xl bg-surface border border-border-soft p-4">
+          <p className="text-foreground font-medium text-sm mb-1">
+            Ответ {review.type === "clinic" ? "клиники" : "врача"}
+          </p>
+          <p className="text-secondary text-sm leading-relaxed">
+            {review.reply.text}
+          </p>
+          {review.reply.date && (
+            <p className="text-muted text-xs mt-1">{review.reply.date}</p>
+          )}
+        </div>
+      )}
+
       <p className="text-muted text-sm">{review.date}</p>
     </div>
   );

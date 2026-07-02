@@ -97,7 +97,7 @@ export default function NewProcedurePage() {
   };
 
   return (
-    <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
+    <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
       <h1 className="text-[40px] font-semibold text-foreground mb-8">
         Мой профиль
       </h1>
@@ -159,7 +159,7 @@ export default function NewProcedurePage() {
                   Фото процедуры
                 </label>
                 <div className="flex items-center gap-4">
-                  <div className="w-28 h-28 rounded-full overflow-hidden bg-primary-tint border border-border flex items-center justify-center flex-shrink-0">
+                  <div className="w-28 h-28 rounded-full overflow-hidden bg-primary-tint border border-border flex items-center justify-center shrink-0">
                     {photo ? (
                       <Image
                         src={photo}

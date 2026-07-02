@@ -1,10 +1,15 @@
 ﻿"use client";
 
 import { FC, useState } from "react";
+import toast from "react-hot-toast";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ReviewModal } from "@/features/review-modal";
 
+import { deleteReview, profileKeys, updateReview } from "@/shared/api";
 import { RemoveIcon } from "@/shared/assets/icons";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 import type { ReviewType, UserReview } from "./user-review/model";
@@ -16,17 +21,43 @@ type Props = {
 };
 
 export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
-  const [reviewsList, setReviewsList] = useState(reviews);
+  const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [editTarget, setEditTarget] = useState<UserReview | null>(null);
 
-  const filteredReviews = reviewsList.filter(
-    (review) => review.type === activeTab,
-  );
+  const filteredReviews = reviews.filter((review) => review.type === activeTab);
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: profileKeys.reviews() });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteReview(Number(id)),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Отзыв удалён");
+    },
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось удалить отзыв"));
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (vars: { id: string; rating: number; text: string }) =>
+      updateReview(Number(vars.id), { rating: vars.rating, text: vars.text }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("Отзыв обновлён");
+    },
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось обновить отзыв"));
+    },
+  });
 
   const handleDeleteConfirm = () => {
     if (!deleteTarget) return;
-    setReviewsList((prev) => prev.filter((r) => r.id !== deleteTarget));
+    deleteMutation.mutate(deleteTarget);
     setDeleteTarget(null);
   };
 
@@ -95,12 +126,14 @@ export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
               doctorClinic={data.clinic}
               doctorImage={editTarget.image}
               title="Редактировать отзыв"
+              initialRating={editTarget.rating}
+              initialComment={editTarget.comment}
               onSubmit={(rating, comment) => {
-                setReviewsList((prev) =>
-                  prev.map((r) =>
-                    r.id === editTarget.id ? { ...r, rating, comment } : r,
-                  ),
-                );
+                updateMutation.mutate({
+                  id: editTarget.id,
+                  rating,
+                  text: comment,
+                });
                 setEditTarget(null);
               }}
             />

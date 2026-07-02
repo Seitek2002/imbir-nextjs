@@ -1,12 +1,13 @@
 ﻿"use client";
 
 import { FC, useState } from "react";
+import toast from "react-hot-toast";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -15,7 +16,7 @@ import { ReviewsSection } from "@/widgets/reviews";
 import { DoctorCard } from "@/entities/doctor";
 
 // ИМПОРТЫ API
-import { api } from "@/shared/api";
+import { api, createReview } from "@/shared/api";
 import {
   EmailIcon,
   GeoIcon,
@@ -25,7 +26,9 @@ import {
   PhoneIcon,
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
+import { useAuthStore } from "@/shared/store";
 import { Button, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
@@ -66,9 +69,29 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
     },
   });
 
+  const queryClient = useQueryClient();
+  const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
   const { data: reviews = [] } = useQuery({
     queryKey: ["reviews", "clinic", id],
     queryFn: () => api.getReviewsByClinic(id),
+  });
+
+  const createReviewMutation = useMutation({
+    mutationFn: (vars: { rating: number; text: string }) =>
+      createReview({
+        target_type: "clinic",
+        target_id: Number(id),
+        rating: vars.rating,
+        text: vars.text,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reviews", "clinic", id] });
+      toast.success("Спасибо за отзыв!");
+    },
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось отправить отзыв"));
+    },
   });
 
   if (isClinicError || (!isClinicLoading && !clinic)) {
@@ -396,10 +419,17 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
         )}
 
         {/* --- СЕКЦИЯ: ОТЗЫВЫ --- */}
-        {reviews.length > 0 && (
+        {(reviews.length > 0 || isAuthed) && (
           <ReviewsSection
             initialReviews={reviews}
             averageRating={clinic.rating}
+            onSubmitReview={
+              isAuthed
+                ? (rating, text) =>
+                    createReviewMutation.mutate({ rating, text })
+                : undefined
+            }
+            isSubmitting={createReviewMutation.isPending}
           />
         )}
       </div>

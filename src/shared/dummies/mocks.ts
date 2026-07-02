@@ -11,6 +11,8 @@ export type ReviewItem = {
   date: string;
   text: string;
   rating: number;
+  // Ответ врача/клиники на отзыв, если есть.
+  reply?: { text: string; date: string } | null;
 
   // СВЯЗИ (Foreign Keys)
   doctorId: string;

@@ -1,3 +1,6 @@
+import type { AvailableSlot } from "@/shared/api";
+
+import type { TimeGroup } from "../ui/appointment-datetime-picker";
 import { MONTHS_GENITIVE } from "./constants";
 import type { SelectionItem } from "./types";
 
@@ -35,6 +38,32 @@ const isPhoneValid = (value: string) => {
 const isEmailValid = (value: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.toLowerCase());
 
+// Реальный API отдаёт плоский список 30-минутных слотов без группировки —
+// бьём по тем же границам, что раньше были в хардкоде (Утро/Обед/Вечер).
+const groupAvailableSlots = (slots: AvailableSlot[]): TimeGroup[] => {
+  const groups: { label: string; slots: AvailableSlot[] }[] = [
+    { label: "Утро", slots: [] },
+    { label: "Обед", slots: [] },
+    { label: "Вечер", slots: [] },
+  ];
+
+  for (const slot of slots) {
+    const hour = Number(slot.time.slice(0, 2));
+    const group = hour < 13 ? groups[0] : hour < 18 ? groups[1] : groups[2];
+    group.slots.push(slot);
+  }
+
+  return groups
+    .filter((group) => group.slots.length > 0)
+    .map((group) => ({
+      label: group.label,
+      slots: group.slots.map((slot) => ({
+        value: slot.time,
+        disabled: !slot.available,
+      })),
+    }));
+};
+
 const filterSelectionItems = (items: SelectionItem[], query: string) => {
   const normalizedQuery = query.trim().toLowerCase();
   if (!normalizedQuery) return items;
@@ -71,4 +100,5 @@ export {
   isPhoneValid,
   isEmailValid,
   filterSelectionItems,
+  groupAvailableSlots,
 };

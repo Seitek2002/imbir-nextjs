@@ -1,12 +1,13 @@
 ﻿"use client";
 
 import { FC } from "react";
+import toast from "react-hot-toast";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -14,7 +15,7 @@ import { ReviewsSection } from "@/widgets/reviews";
 import { VideosSwiper } from "@/widgets/videos-swiper";
 
 // ИМПОРТЫ API
-import { api, getBlogPosts } from "@/shared/api";
+import { api, createReview, getBlogPosts } from "@/shared/api";
 import {
   EmailIcon,
   GeoIcon,
@@ -24,6 +25,8 @@ import {
   PhoneIcon,
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
+import { extractErrorMessage } from "@/shared/lib/errors";
+import { useAuthStore } from "@/shared/store";
 import { Button, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
@@ -46,9 +49,29 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
   });
 
   // 2. ПОЛУЧАЕМ ОТЗЫВЫ ЭТОГО ВРАЧА
+  const queryClient = useQueryClient();
+  const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
   const { data: reviews = [] } = useQuery({
     queryKey: ["reviews", "doctor", id],
     queryFn: () => api.getReviewsByDoctor(id),
+  });
+
+  const createReviewMutation = useMutation({
+    mutationFn: (vars: { rating: number; text: string }) =>
+      createReview({
+        target_type: "doctor",
+        target_id: Number(id),
+        rating: vars.rating,
+        text: vars.text,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reviews", "doctor", id] });
+      toast.success("Спасибо за отзыв!");
+    },
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось отправить отзыв"));
+    },
   });
 
   // 3. ПОЛУЧАЕМ ПОСТЫ БЛОГА ДЛЯ СЕКЦИИ «ИНТЕРВЬЮ»
@@ -323,11 +346,18 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
           </div>
         </div>
 
-        {/* Секция отзывов показывается только если есть отзывы */}
-        {reviews.length > 0 && (
+        {/* Секция отзывов: форма доступна авторизованным, список — всегда */}
+        {(reviews.length > 0 || isAuthed) && (
           <ReviewsSection
             initialReviews={reviews}
             averageRating={doctor.rating}
+            onSubmitReview={
+              isAuthed
+                ? (rating, text) =>
+                    createReviewMutation.mutate({ rating, text })
+                : undefined
+            }
+            isSubmitting={createReviewMutation.isPending}
           />
         )}
 

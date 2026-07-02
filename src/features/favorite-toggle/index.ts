@@ -1,0 +1,1 @@
+export { useFavoriteToggle } from "./model";

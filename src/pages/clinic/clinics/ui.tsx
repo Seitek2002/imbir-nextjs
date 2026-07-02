@@ -10,16 +10,23 @@ import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 
 import { ActiveFiltersChips } from "@/features/active-filters-chips";
+import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { FilterBar } from "@/features/filter-bar";
 import { FiltersTrigger, MobileFiltersModal } from "@/features/mobile-filters";
 import { UrlSearchInput } from "@/features/search-by-query";
 
 import { ClinicCard, ClinicSkeleton } from "@/entities/clinic";
 
-import { api } from "@/shared/api";
+import { ClinicFilters, api, clinicKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { useCityStore } from "@/shared/store";
-import { Button } from "@/shared/ui";
+
+// Специализация остаётся клиентским фильтром: ClinicFilters.specialization —
+// такое же одно-строковое поле, как у /api/doctors/, где этот же параметр на
+// практике не находит совпадений (проверено). Пока бэк не подтвердит, что
+// для клиник он работает иначе, безопаснее не полагаться на него.
+// page_size увеличен для той же клиентской фильтрации (макет без пагинации).
+const FULL_LIST_PAGE_SIZE = 200;
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -41,23 +48,28 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
 
   const selectedCity = useCityStore((s) => s.city);
 
-  // 2. ПОЛУЧАЕМ ДАННЫЕ С СЕРВЕРА
+  // 2. Город и оценка уходят в реальные query-параметры API.
+  const filters: ClinicFilters = {
+    city: selectedCity || undefined,
+    min_rating:
+      currentRating && currentRating !== "all"
+        ? parseFloat(currentRating)
+        : undefined,
+    page_size: FULL_LIST_PAGE_SIZE,
+  };
+
   const { data: clinics = [], isLoading } = useQuery({
-    queryKey: ["clinics"],
-    queryFn: api.getClinics,
+    queryKey: clinicKeys.list(filters),
+    queryFn: () => api.getClinics(filters),
   });
 
-  // 3. Фильтруем массив клиник (уже реальных)
+  // 3. Специализация и текстовый поиск — клиентские.
   const filteredClinics = clinics.filter((clinic) => {
-    if (clinic.city !== selectedCity) return false;
-
-    // Поиск по названию клиники
     if (activeQuery) {
       const q = activeQuery.toLowerCase();
       if (!clinic.name.toLowerCase().includes(q)) return false;
     }
 
-    // Фильтр по специальности (проверяем массив специальностей клиники)
     if (currentSpec) {
       const selectedSpecs = currentSpec.split(",");
       const hasMatch = clinic.specialties?.some((spec) =>
@@ -66,14 +78,10 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
       if (!hasMatch) return false;
     }
 
-    // Фильтр по рейтингу
-    if (currentRating && currentRating !== "all") {
-      const minRating = parseFloat(currentRating);
-      if (clinic.rating < minRating) return false;
-    }
-
     return true;
   });
+
+  const { isSaved, toggle } = useFavoriteToggle("clinic");
 
   const clinicFilters = {
     specialty: true,
@@ -124,19 +132,12 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
                   key={`mob-${clinic.id}`}
                   {...clinic}
                   variant="horizontal"
+                  initialSaved={isSaved(Number(clinic.id))}
+                  onSave={() => toggle(Number(clinic.id))}
                 />
               ))
             )}
           </div>
-
-          {!isLoading && filteredClinics.length > 0 && (
-            <Button
-              variant="outline"
-              className="w-full mt-6 bg-white justify-center"
-            >
-              Показать еще
-            </Button>
-          )}
         </div>
 
         {/* --- ДЕСКТОПНАЯ ВЕРСИЯ --- */}
@@ -181,19 +182,16 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
             ) : (
               <div className="grid grid-cols-4 gap-5 items-stretch">
                 {filteredClinics.map((clinic) => (
-                  <ClinicCard key={`desk-${clinic.id}`} {...clinic} />
+                  <ClinicCard
+                    key={`desk-${clinic.id}`}
+                    {...clinic}
+                    initialSaved={isSaved(Number(clinic.id))}
+                    onSave={() => toggle(Number(clinic.id))}
+                  />
                 ))}
               </div>
             )}
           </div>
-
-          {!isLoading && filteredClinics.length > 0 && (
-            <div className="flex justify-center mt-10">
-              <Button variant="outline" className="bg-white">
-                Показать еще
-              </Button>
-            </div>
-          )}
         </div>
       </div>
 

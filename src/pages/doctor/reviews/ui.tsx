@@ -1,8 +1,9 @@
 ﻿"use client";
 
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   DoctorPageLayout,
@@ -10,19 +11,33 @@ import {
   useDoctorCabinet,
 } from "@/widgets/doctor/layout";
 
-import { type ReviewAuthor, getReviews } from "@/shared/api";
+import {
+  type ReviewAuthor,
+  doctorCabinetKeys,
+  getDoctorReviews,
+  replyToReview,
+} from "@/shared/api";
 import { colors } from "@/shared/config";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
-const resolveAuthorName = (author: ReviewAuthor): string => {
+const resolveAuthorName = (author?: ReviewAuthor): string => {
+  if (!author) return "Аноним";
   if (typeof author === "string") return author;
   return author.full_name;
 };
 
 const DURATION = 200;
 
-const StarFilled = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill={colors.primary}>
+const StarFilled = ({ filled = true }: { filled?: boolean }) => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 14 14"
+    fill={filled ? colors.primary : "none"}
+    stroke={filled ? colors.primary : colors.border}
+    strokeWidth="1"
+  >
     <path d="M7 1L8.85 4.83L13 5.43L10 8.36L10.71 12.5L7 10.54L3.29 12.5L4 8.36L1 5.43L5.15 4.83L7 1Z" />
   </svg>
 );
@@ -31,6 +46,7 @@ type ReplyModalProps = {
   isOpen: boolean;
   onClose: () => void;
   reviewAuthor: string;
+  initialText?: string;
   onSubmit: (text: string) => void;
 };
 
@@ -38,10 +54,17 @@ const ReplyModal: FC<ReplyModalProps> = ({
   isOpen,
   onClose,
   reviewAuthor,
+  initialText = "",
   onSubmit,
 }) => {
   const [isClosing, setIsClosing] = useState(false);
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initialText);
+
+  // Модалка не размонтируется между открытиями — подставляем текущий текст
+  // ответа (для правки) при каждом открытии.
+  useEffect(() => {
+    if (isOpen) setText(initialText);
+  }, [isOpen, initialText]);
 
   useScrollLock(isOpen);
 
@@ -260,7 +283,7 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
           </p>
           <div className="flex items-center gap-0.5 mt-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <StarFilled key={i} />
+              <StarFilled key={i} filled={i < review.rating} />
             ))}
           </div>
         </div>
@@ -270,8 +293,14 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
     <p className="text-foreground text-sm mt-3 leading-relaxed">
       {review.text}
     </p>
-    {review.replyTime && (
-      <p className="text-muted text-xs mt-2">{review.replyTime}</p>
+    {review.reply && (
+      <div className="mt-3 rounded-2xl bg-surface border border-border-soft p-3">
+        <p className="text-foreground font-medium text-xs mb-1">Ваш ответ</p>
+        <p className="text-secondary text-sm leading-relaxed">{review.reply}</p>
+        {review.replyTime && (
+          <p className="text-muted text-xs mt-1">{review.replyTime}</p>
+        )}
+      </div>
     )}
     <div className="flex items-center gap-4 mt-3">
       <button
@@ -287,7 +316,7 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
             strokeLinejoin="round"
           />
         </svg>
-        Ответить
+        {review.reply ? "Изменить ответ" : "Ответить"}
       </button>
       <button
         onClick={() => onComplain(review)}
@@ -315,16 +344,18 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
 );
 
 export const DoctorReviewsPage: FC = () => {
-  const { profile, rawProfile } = useDoctorCabinet();
+  const { profile } = useDoctorCabinet();
+  const queryClient = useQueryClient();
   const [replyTarget, setReplyTarget] = useState<DoctorReview | null>(null);
   const [complaintTarget, setComplaintTarget] = useState<DoctorReview | null>(
     null,
   );
 
+  // Кабинетный эндпоинт отдаёт отзывы на текущего врача без необходимости
+  // знать его id (в /api/doctor/profile/ id вообще нет).
   const { data: reviewsData, isLoading } = useQuery({
-    queryKey: ["doctor-reviews", rawProfile?.id],
-    queryFn: () => getReviews("doctor", rawProfile!.id),
-    enabled: !!rawProfile?.id,
+    queryKey: doctorCabinetKeys.reviews(),
+    queryFn: getDoctorReviews,
   });
 
   const reviews: DoctorReview[] = (reviewsData?.data ?? []).map((r) => {
@@ -336,7 +367,22 @@ export const DoctorReviewsPage: FC = () => {
       rating: r.rating,
       date: r.created_at.slice(0, 10),
       text: r.text,
+      reply: r.reply?.text,
+      replyTime: r.reply ? r.reply.created_at.slice(0, 10) : undefined,
     };
+  });
+
+  const replyMutation = useMutation({
+    mutationFn: (vars: { id: number; text: string }) =>
+      replyToReview(vars.id, { text: vars.text }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.reviews() });
+      toast.success("Ответ отправлен");
+    },
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось отправить ответ"));
+    },
   });
 
   return (
@@ -395,7 +441,13 @@ export const DoctorReviewsPage: FC = () => {
         isOpen={!!replyTarget}
         onClose={() => setReplyTarget(null)}
         reviewAuthor={replyTarget?.authorName ?? ""}
-        onSubmit={() => setReplyTarget(null)}
+        initialText={replyTarget?.reply ?? ""}
+        onSubmit={(text) => {
+          if (replyTarget) {
+            replyMutation.mutate({ id: Number(replyTarget.id), text });
+          }
+          setReplyTarget(null);
+        }}
       />
       <ComplaintModal
         isOpen={!!complaintTarget}

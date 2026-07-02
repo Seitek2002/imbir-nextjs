@@ -6,7 +6,7 @@ import {
 
 import { ServicesPage } from "@/pages/services";
 
-import { api } from "@/shared/api";
+import { api, serviceKeys } from "@/shared/api";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -15,12 +15,12 @@ type Props = {
 const Services = async ({ searchParams }: Props) => {
   const resolvedSearchParams = await searchParams;
 
-  // Prefetch on the server so the list ships in the initial HTML; the client's
-  // useQuery(["services"]) hydrates it instead of fetching again.
+  // Prefetch on the server so the list ships in the initial HTML; the
+  // client's default (no-filter) query hydrates this instead of refetching.
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
-    queryKey: ["services"],
-    queryFn: api.getServices,
+    queryKey: serviceKeys.list({}),
+    queryFn: () => api.getServices(),
   });
 
   return (

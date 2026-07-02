@@ -69,12 +69,12 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
 
   const { data: clinics = [], isLoading: isClinicsLoading } = useQuery({
     queryKey: ["clinics"],
-    queryFn: api.getClinics,
+    queryFn: () => api.getClinics(),
   });
 
   const { data: services = [], isLoading: isServicesLoading } = useQuery({
     queryKey: ["services"],
-    queryFn: api.getServices,
+    queryFn: () => api.getServices(),
   });
 
   const isLoading = isDocsLoading || isClinicsLoading || isServicesLoading;

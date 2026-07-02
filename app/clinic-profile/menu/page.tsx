@@ -91,8 +91,8 @@ export default function ClinicProfileMenuPage() {
         </h1>
 
         {/* Profile Card */}
-        <div className="bg-gradient-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl p-6 mb-4 flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-gradient-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
+        <div className="bg-linear-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl p-6 mb-4 flex flex-col items-center">
+          <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
             {clinicLogo ? (
               <Image
                 src={clinicLogo}
@@ -128,14 +128,14 @@ export default function ClinicProfileMenuPage() {
               href={item.href}
               className="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-surface transition-colors"
             >
-              <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center flex-shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
                 <div className="[&_path]:stroke-primary">{item.icon}</div>
               </div>
               <span className="flex-1 font-medium text-base text-secondary">
                 {item.label}
               </span>
               <svg
-                className="w-5 h-5 text-dim flex-shrink-0"
+                className="w-5 h-5 text-dim shrink-0"
                 fill="none"
                 viewBox="0 0 20 20"
               >
@@ -156,12 +156,12 @@ export default function ClinicProfileMenuPage() {
           onClick={() => setLogoutOpen(true)}
           className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-secondary hover:bg-surface transition-colors w-full"
         >
-          <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
             <LogoutIcon className="w-5 h-5 [&_path]:stroke-primary" />
           </div>
           <span className="font-medium text-base">Выйти из профиля</span>
           <svg
-            className="w-5 h-5 text-dim ml-auto flex-shrink-0"
+            className="w-5 h-5 text-dim ml-auto shrink-0"
             fill="none"
             viewBox="0 0 20 20"
           >

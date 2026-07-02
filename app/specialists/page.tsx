@@ -8,8 +8,12 @@ import {
 
 import { SpecialistsPage } from "@/pages/specialists";
 
-import { api } from "@/shared/api";
+import { api, doctorKeys } from "@/shared/api";
 import { CITY_COOKIE, DEFAULT_CITY } from "@/shared/store";
+
+// Должно совпадать с FULL_LIST_PAGE_SIZE в SpecialistsPage.tsx, иначе
+// ключ запроса тут разойдётся с клиентским и SSR-префетч не подхватится.
+const FULL_LIST_PAGE_SIZE = 200;
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -25,10 +29,11 @@ const Specialists = async ({ searchParams }: Props) => {
   const raw = cookieStore.get(CITY_COOKIE)?.value;
   const city = raw ? decodeURIComponent(raw) : DEFAULT_CITY;
 
+  const filters = { city, page_size: FULL_LIST_PAGE_SIZE };
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
-    queryKey: ["doctors", city],
-    queryFn: () => api.getDoctors(city),
+    queryKey: doctorKeys.list(filters),
+    queryFn: () => api.getDoctors(filters),
   });
 
   return (

@@ -15,6 +15,8 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
     setSelectedDate,
     selectedTime,
     setSelectedTime,
+    timeGroups,
+    isLoadingSlots,
     isStep2Complete,
     setMobileStep,
   } = form;
@@ -37,6 +39,8 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
         onDateChange={setSelectedDate}
         selectedTime={selectedTime}
         onTimeChange={setSelectedTime}
+        timeGroups={timeGroups}
+        isLoadingSlots={isLoadingSlots}
         isDateDisabled={(date) => {
           const now = new Date();
           const startOfToday = new Date(

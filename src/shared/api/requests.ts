@@ -16,16 +16,25 @@ import {
   getClinicById as _getClinicById,
   getClinics,
 } from "./clinics/requests";
-import type { ClinicListItem as ApiClinic } from "./clinics/types";
+import type {
+  ClinicListItem as ApiClinic,
+  ClinicFilters,
+} from "./clinics/types";
 import {
   getDoctorById as _getDoctorById,
   getDoctors,
 } from "./doctors/requests";
-import type { DoctorListItem as ApiDoctor } from "./doctors/types";
+import type {
+  DoctorListItem as ApiDoctor,
+  DoctorFilters,
+} from "./doctors/types";
 import { getReviews } from "./reviews/requests";
 import type { ReviewItem as ApiReview } from "./reviews/types";
 import { getServices } from "./services/requests";
-import type { ServiceListItem as ApiService } from "./services/types";
+import type {
+  ServiceListItem as ApiService,
+  ServiceFilters,
+} from "./services/types";
 
 const toHttps = (url: string | null | undefined): string | undefined => {
   if (!url) return undefined;
@@ -103,23 +112,33 @@ const adaptReview = (r: ApiReview): MockReviewItem => ({
   date: r.created_at.slice(0, 10),
   text: r.text ?? "",
   rating: r.rating,
+  reply: r.reply
+    ? { text: r.reply.text, date: r.reply.created_at.slice(0, 10) }
+    : null,
   doctorId: "",
   clinicId: "",
 });
 
 export const api = {
-  getDoctors: (city?: string) =>
-    getDoctors(city ? { city } : {}).then((r) => r.data.map(adaptDoctor)),
+  // Принимает либо просто город (как раньше), либо полный набор фильтров —
+  // так вызовы api.getDoctors(city) на других страницах остаются рабочими.
+  getDoctors: (filters?: string | DoctorFilters) => {
+    const resolved: DoctorFilters =
+      typeof filters === "string" ? { city: filters } : (filters ?? {});
+    return getDoctors(resolved).then((r) => r.data.map(adaptDoctor));
+  },
 
   getDoctorById: (id: string) =>
     _getDoctorById(id).then((d) => (d ? adaptDoctor(d) : null)),
 
-  getClinics: () => getClinics().then((r) => r.data.map(adaptClinic)),
+  getClinics: (filters?: ClinicFilters) =>
+    getClinics(filters).then((r) => r.data.map(adaptClinic)),
 
   getClinicById: (id: string) =>
     _getClinicById(id).then((c) => (c ? adaptClinic(c) : null)),
 
-  getServices: () => getServices().then((r) => r.data.map(adaptService)),
+  getServices: (filters?: ServiceFilters) =>
+    getServices(filters).then((r) => r.data.map(adaptService)),
 
   getReviews: () =>
     getReviews("doctor", 0).then((r) => r.data.map(adaptReview)),

@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
 import { ProfileSidebar } from "@/widgets/profile/sidebar";
 
-import { getProfileReviews, profileKeys } from "@/shared/api";
+import { getMyReviews, profileKeys } from "@/shared/api";
 import {
   ClinicBuildingIcon,
   DoctorPersonIcon,
@@ -41,16 +41,30 @@ export const ProfileReviewsPage: FC = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: profileKeys.reviews(),
-    queryFn: getProfileReviews,
+    queryFn: getMyReviews,
   });
 
-  const reviews: UserReview[] = (data?.data ?? []).map((r) => ({
-    id: String(r.id),
-    type: r.target_type as ReviewType,
-    rating: r.rating,
-    comment: r.text ?? "",
-    date: r.created_at.slice(0, 10),
-  }));
+  const reviews: UserReview[] = (data?.data ?? []).map((r) => {
+    const type = r.target_type as ReviewType;
+    const targetName = r.target?.full_name ?? "";
+    return {
+      id: String(r.id),
+      type,
+      rating: r.rating,
+      comment: r.text ?? "",
+      date: r.created_at.slice(0, 10),
+      reply: r.reply
+        ? { text: r.reply.text, date: r.reply.created_at.slice(0, 10) }
+        : null,
+      // /api/profile/reviews/ отдаёт только target.full_name — раскладываем
+      // его в поле, которое рендерит карточка для этого типа.
+      ...(type === "clinic"
+        ? { clinicName: targetName }
+        : type === "service"
+          ? { serviceName: targetName }
+          : { doctorName: targetName }),
+    };
+  });
 
   return (
     <>
