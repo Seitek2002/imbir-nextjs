@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { HeroAvatar, HeroBg } from "@/shared/assets/images";
+import { HeroAssiatant, HeroAvatar, HeroBg } from "@/shared/assets/images";
 import { ROUTES } from "@/shared/config";
 import { Button } from "@/shared/ui";
 
@@ -61,7 +61,7 @@ export const Hero: FC = () => {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 overflow-hidden rounded-full shrink-0">
                 <Image
-                  src={HeroAvatar}
+                  src={HeroAssiatant}
                   alt=""
                   sizes="48px"
                   className="w-full h-full object-cover object-top"

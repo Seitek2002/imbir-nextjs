@@ -17,6 +17,7 @@ import DoctorImage5 from "./doctors/doctor-5.png";
 import DoctorImage6 from "./doctors/doctor-6.png";
 import DoctorImage7 from "./doctors/doctor-7.png";
 import DoctorImage8 from "./doctors/doctor-8.png";
+import HeroAssiatant from "./hero/assistant.png";
 import HeroAvatar from "./hero/avatar.png";
 import HeroBg from "./hero/bg.png";
 import ServiceCardiology from "./services/cardiology.png";
@@ -64,4 +65,5 @@ export {
   BlogImage1,
   BlogImage2,
   BlogImage3,
+  HeroAssiatant,
 };
