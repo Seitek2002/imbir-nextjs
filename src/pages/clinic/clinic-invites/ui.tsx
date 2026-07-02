@@ -144,7 +144,7 @@ export const ClinicInvitesPage: FC = () => {
 
   const getBranchLabel = (branchId: number | null) => {
     if (branchId == null) return profile?.name ?? "Главный офис";
-    const opt = branchOptions.find((b) => b.id === String(branchId));
+    const opt = branchOptions.find((b) => b.id === branchId);
     return opt ? `Филиал — ${opt.address}` : `Филиал #${branchId}`;
   };
 
@@ -214,7 +214,7 @@ export const ClinicInvitesPage: FC = () => {
                     <button
                       key={opt.id ?? "main"}
                       type="button"
-                      onClick={() => setSelectedBranchId(opt.id)}
+                      onClick={() => setSelectedBranchId(opt.id + "")}
                       className={cn(
                         "w-full rounded-xl border-2 p-3 text-left flex items-start gap-3 transition-colors",
                         selectedBranchId === opt.id
