@@ -19,7 +19,7 @@ import type {
 } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
-import { useAuthStore } from "@/shared/store";
+import { useAuthStore, useCityStore } from "@/shared/store";
 
 import { ConsultationMode } from "../ui/appointment-datetime-picker";
 import { SELECTION_LABELS } from "./constants";
@@ -93,9 +93,12 @@ export const useRecordForm = () => {
     queryFn: () => api.getClinics(),
   });
 
+  // Врачи выбранного города; page_size поднят, иначе бэк отдаст только
+  // первую страницу (20 записей) и в форме будут видны не все врачи.
+  const selectedCity = useCityStore((s) => s.city);
   const { data: doctorsData = [] } = useQuery({
-    queryKey: ["record-doctors"],
-    queryFn: () => api.getDoctors(),
+    queryKey: ["record-doctors", selectedCity],
+    queryFn: () => api.getDoctors({ city: selectedCity, page_size: 200 }),
   });
 
   const { data: servicesRaw } = useQuery({
@@ -129,7 +132,6 @@ export const useRecordForm = () => {
   // невалидное время молча.
   useEffect(() => {
     setSelectedTime(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDoctorId, selectedDateStr]);
 
   const CLINICS: Clinic[] = clinicsData.map((c) => ({
