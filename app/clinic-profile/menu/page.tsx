@@ -1,8 +1,15 @@
 ﻿"use client";
 
+import { useState } from "react";
+
+import Image from "next/image";
 import Link from "next/link";
 
+import { useClinicCabinet } from "@/entities/clinic-profile";
+
 import { LogoutIcon, StarIcon } from "@/shared/assets/icons";
+import { useLogout } from "@/shared/lib/useLogout";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 const MENU_ITEMS = [
   {
@@ -60,6 +67,22 @@ const MENU_ITEMS = [
 ];
 
 export default function ClinicProfileMenuPage() {
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const handleLogout = useLogout();
+  const { profile, isLoading } = useClinicCabinet();
+
+  const clinicName = profile?.name ?? "";
+  const clinicLogo = profile?.logo;
+  const rating = profile?.rating ?? 0;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center text-muted">
+        Загрузка...
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       <div className="px-4 py-6">
@@ -70,13 +93,31 @@ export default function ClinicProfileMenuPage() {
         {/* Profile Card */}
         <div className="bg-gradient-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl p-6 mb-4 flex flex-col items-center">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-gradient-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-            <span className="text-white text-3xl font-bold">K</span>
+            {clinicLogo ? (
+              <Image
+                src={clinicLogo}
+                alt={clinicName}
+                width={96}
+                height={96}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-white text-3xl font-bold">
+                {clinicName.charAt(0)}
+              </span>
+            )}
           </div>
-          <h2 className="text-foreground font-semibold text-lg">K-MED</h2>
-          <div className="flex items-center gap-1 mt-1">
-            <StarIcon className="w-4 h-4 text-primary" />
-            <span className="text-primary text-sm font-medium">4.85</span>
-          </div>
+          <h2 className="text-foreground font-semibold text-lg">
+            {clinicName}
+          </h2>
+          {rating > 0 && (
+            <div className="flex items-center gap-1 mt-1">
+              <StarIcon className="w-4 h-4 text-primary" />
+              <span className="text-primary text-sm font-medium">
+                {rating}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Menu */}
@@ -111,7 +152,10 @@ export default function ClinicProfileMenuPage() {
         </nav>
 
         {/* Logout */}
-        <button className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-secondary hover:bg-surface transition-colors w-full">
+        <button
+          onClick={() => setLogoutOpen(true)}
+          className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-secondary hover:bg-surface transition-colors w-full"
+        >
           <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center flex-shrink-0">
             <LogoutIcon className="w-5 h-5 [&_path]:stroke-primary" />
           </div>
@@ -131,6 +175,17 @@ export default function ClinicProfileMenuPage() {
           </svg>
         </button>
       </div>
+
+      <ConfirmDialog
+        isOpen={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        onConfirm={handleLogout}
+        icon={<LogoutIcon className="w-7 h-7 [&_path]:stroke-primary" />}
+        title="Выйти из профиля?"
+        description="Для продолжения работы потребуется снова войти в аккаунт"
+        confirmLabel="Выйти"
+        cancelLabel="Отмена"
+      />
     </div>
   );
 }

@@ -403,13 +403,18 @@ export const useRecordForm = () => {
   const validateAndSubmit = async () => {
     const nextErrors: OptionalFormErrors = {};
 
-    if (!firstName.trim()) nextErrors.firstName = "Введите ваше имя";
-    if (!lastName.trim()) nextErrors.lastName = "Введите вашу фамилию";
+    // Для авторизованных пользователей имя/фамилия/телефон не уходят на бэк
+    // (запись привязывается к JWT-юзеру, см. buildAppointmentRequest) —
+    // требовать их незачем.
+    if (!canUseOnline) {
+      if (!firstName.trim()) nextErrors.firstName = "Введите ваше имя";
+      if (!lastName.trim()) nextErrors.lastName = "Введите вашу фамилию";
 
-    if (!phone.trim()) {
-      nextErrors.phone = "Введите номер телефона";
-    } else if (!isPhoneValid(phone)) {
-      nextErrors.phone = "Проверьте формат телефона";
+      if (!phone.trim()) {
+        nextErrors.phone = "Введите номер телефона";
+      } else if (!isPhoneValid(phone)) {
+        nextErrors.phone = "Проверьте формат телефона";
+      }
     }
 
     if (email && !isEmailValid(email)) {

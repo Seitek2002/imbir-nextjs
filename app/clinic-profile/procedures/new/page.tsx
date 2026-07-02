@@ -1,45 +1,37 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicSidebar } from "@/widgets/clinic/sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
+import { addClinicService, clinicCabinetKeys } from "@/shared/api";
 import { colors } from "@/shared/config";
 import { Dropdown } from "@/shared/ui";
 
-type WorkSchedule = {
-  day: string;
-  from: string;
-  to: string;
-};
-
 export default function NewProcedurePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { profile } = useClinicCabinet();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [photo, setPhoto] = useState<string>();
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
-    undefined,
-  );
-
-  useEffect(() => {
-    return () => clearTimeout(submitTimeoutRef.current);
-  }, []);
   const [specialty, setSpecialty] = useState("");
   const [price, setPrice] = useState("0");
+  const [duration, setDuration] = useState("");
   const [clinic, setClinic] = useState("");
   const [address, setAddress] = useState("");
 
-  const [schedule, setSchedule] = useState<WorkSchedule[]>([
+  const [schedule, setSchedule] = useState([
     { day: "ПН", from: "00:00", to: "00:00" },
     { day: "ВТ", from: "00:00", to: "00:00" },
     { day: "СР", from: "00:00", to: "00:00" },
@@ -50,6 +42,23 @@ export default function NewProcedurePage() {
   ]);
 
   const [lunchBreak, setLunchBreak] = useState({ from: "00:00", to: "00:00" });
+
+  const addMutation = useMutation({
+    mutationFn: addClinicService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.services() });
+      toast.success("Процедура добавлена");
+      router.push("/clinic-profile/procedures");
+    },
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: Record<string, string[]> } })
+        ?.response?.data;
+      const msg = data
+        ? Object.values(data).flat()[0]
+        : "Не удалось сохранить процедуру. Попробуйте снова";
+      toast.error(msg);
+    },
+  });
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -68,9 +77,13 @@ export default function NewProcedurePage() {
       return;
     }
     setNameError(false);
-    setIsSubmitting(true);
-    router.push("/clinic-profile/procedures");
-    submitTimeoutRef.current = setTimeout(() => setIsSubmitting(false), 5000);
+    addMutation.mutate({
+      name: name.trim(),
+      category: specialty,
+      price: price.trim() || undefined,
+      duration: duration ? Number(duration) : undefined,
+      is_active: true,
+    });
   };
 
   const updateSchedule = (
@@ -121,14 +134,14 @@ export default function NewProcedurePage() {
 
             <button
               onClick={handleSave}
-              disabled={isSubmitting}
+              disabled={addMutation.isPending}
               className={`px-6 py-3 rounded-full font-medium transition-colors ${
-                isSubmitting
+                addMutation.isPending
                   ? "bg-dim text-white cursor-not-allowed"
                   : "bg-primary text-white hover:bg-primary-dark"
               }`}
             >
-              {isSubmitting ? "Сохранение..." : "Сохранить"}
+              {addMutation.isPending ? "Сохранение..." : "Сохранить"}
             </button>
           </div>
 
@@ -188,6 +201,9 @@ export default function NewProcedurePage() {
                     Добавить фото
                   </button>
                 </div>
+                <p className="text-xs text-muted mt-2">
+                  Загрузка фото процедуры — в разработке
+                </p>
               </div>
 
               <div className="space-y-4">
@@ -215,7 +231,7 @@ export default function NewProcedurePage() {
                   )}
                 </div>
 
-                {/* Специализация */}
+                {/* Специализация (используется как категория услуги) */}
                 <Dropdown
                   label="Специализация"
                   placeholder="Выберите из списка"
@@ -229,18 +245,35 @@ export default function NewProcedurePage() {
                   onChange={(val) => setSpecialty(val)}
                 />
 
-                {/* Стоимость */}
-                <div>
-                  <label className="block text-foreground text-sm font-medium mb-2">
-                    Стоимость
-                  </label>
-                  <input
-                    type="text"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="0 сом"
-                    className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Стоимость */}
+                  <div>
+                    <label className="block text-foreground text-sm font-medium mb-2">
+                      Стоимость, сом
+                    </label>
+                    <input
+                      type="text"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder="0"
+                      className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
+
+                  {/* Длительность */}
+                  <div>
+                    <label className="block text-foreground text-sm font-medium mb-2">
+                      Длительность, мин
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                      placeholder="0"
+                      className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors"
+                    />
+                  </div>
                 </div>
 
                 {/* Клиника */}
@@ -270,6 +303,10 @@ export default function NewProcedurePage() {
                     className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors"
                   />
                 </div>
+                <p className="text-xs text-muted">
+                  Привязка процедуры к конкретной клинике/адресу — в разработке.
+                  Пока процедура сохраняется в общий список услуг вашей клиники.
+                </p>
               </div>
             </div>
 
@@ -282,6 +319,9 @@ export default function NewProcedurePage() {
                 Укажите время проведения процедуры (с какого времени до какого),
                 оставьте поля пустыми, если в какой-то день процедура не
                 проводится.
+              </p>
+              <p className="text-xs text-muted mb-4">
+                Расписание процедуры — в разработке, пока не сохраняется.
               </p>
 
               <div className="space-y-3">

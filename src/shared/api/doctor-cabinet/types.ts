@@ -27,7 +27,6 @@ export type DoctorAppointmentPatient = {
   id: number;
   full_name: string;
   phone: string;
-  avatar: string | null;
 };
 
 export type DoctorAppointment = {
@@ -36,7 +35,6 @@ export type DoctorAppointment = {
   service: { id: number; name: string; price: number } | null;
   date: string;
   time: string;
-  format: "offline" | "online";
   status: "upcoming" | "completed" | "cancelled";
   notes?: string;
 };

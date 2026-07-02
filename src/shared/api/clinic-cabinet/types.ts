@@ -1,14 +1,46 @@
-import { ClinicDetail } from "../clinics/types";
+export type ClinicProfileBranch = {
+  id: number;
+  address: string;
+};
 
-export type ClinicPrivateProfile = ClinicDetail & {
-  legal_name?: string;
-  reg_number?: string;
-  license_number?: string;
-  license_date?: string;
-  license_authority?: string;
+// Соответствует реальному ответу GET/PUT /api/clinic/profile/ — плоский
+// объект, ОТЛИЧАЕТСЯ от публичной карточки клиники (ClinicDetail), у которой
+// другие имена полей (about вместо description, нет id и т.д.). Не путать!
+export type ClinicPrivateProfile = {
+  id?: number;
+  name: string;
+  clinic_type: string;
+  description: string;
+  logo: string | null;
+  email: string;
+  phone: string;
+  website: string;
+  country: string;
+  city: string;
+  address: string;
+  latitude: string | null;
+  longitude: string | null;
+  schedule: Record<string, { from: string; to: string; enabled: boolean }>;
+  lunch_break: { from: string; to: string } | null;
+  emergency_24_7: boolean;
+  legal_name: string;
+  reg_number: string;
+  license_number: string;
+  license_date: string | null;
+  license_authority: string;
+  primary_specializations: string[];
+  narrow_specializations: string[];
+  additional_services: string;
+  equipment: string[];
+  patient_conditions: string[];
+  payment_methods: string[];
+  experience_years: number;
+  rating: string;
+  reviews_count: number;
+  doctors_count: number;
   is_published: boolean;
   profile_views: number;
-  appointments_total: number;
+  branches: ClinicProfileBranch[];
 };
 
 export type ClinicDoctorItem = {
@@ -21,15 +53,16 @@ export type ClinicDoctorItem = {
   is_active: boolean;
 };
 
+// Соответствует реальной схеме ClinicServiceWriteRequest
+// (POST/PUT /api/clinic/services/). doctor_ids/image/schedule в схеме нет —
+// были придуманы по ошибке, бэк их не принимает и не хранит.
 export type ClinicServiceBody = {
   name: string;
   category: string;
   description?: string;
-  price: number;
-  duration_minutes?: number;
-  image?: string;
-  doctor_ids?: number[];
-  schedule?: string;
+  price?: string | null;
+  duration?: number | null;
+  is_active?: boolean;
 };
 
 export type ClinicAppointmentFilters = {

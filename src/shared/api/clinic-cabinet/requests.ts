@@ -157,10 +157,8 @@ export const getClinicReviews = async (): Promise<PaginatedReviewsResponse> => {
   return data;
 };
 
-export const getClinicInvites = async (): Promise<{ data: InviteLink[] }> => {
-  const { data } = await apiClient.get<{ data: InviteLink[] }>(
-    "/api/clinic/invites/",
-  );
+export const getClinicInvites = async (): Promise<InviteLink[]> => {
+  const { data } = await apiClient.get<InviteLink[]>("/api/clinic/invites/");
   return data;
 };
 

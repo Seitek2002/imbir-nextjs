@@ -144,7 +144,7 @@ export const ClinicSidebar: FC<Props> = ({
           <p className="text-foreground font-semibold text-base truncate">
             {clinicName}
           </p>
-          {rating && (
+          {!!rating && rating > 0 && (
             <div className="flex items-center gap-1 mt-0.5">
               <StarIcon className="w-4 h-4 text-primary" />
               <span className="text-primary text-sm font-medium">{rating}</span>

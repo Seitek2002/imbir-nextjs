@@ -18,6 +18,20 @@ const TABS = [
   { value: "completed" as const, label: "Прошедшие" },
 ];
 
+// Бэк на /api/profile/appointments/ иногда отдаёт doctor/clinic/service
+// объектом ({id, full_name}), хотя тип описывает их строкой — рендерить
+// объект напрямую в JSX нельзя (React падает с "Objects are not valid as
+// a React child"). Достаём отображаемое имя безопасно, с fallback на "".
+const toDisplayName = (value: unknown): string => {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    if (typeof obj.full_name === "string") return obj.full_name;
+    if (typeof obj.name === "string") return obj.name;
+  }
+  return "";
+};
+
 export const ProfileHistoryPage: FC = () => {
   const [activeTab, setActiveTab] = useState<"upcoming" | "completed">(
     "upcoming",
@@ -31,13 +45,13 @@ export const ProfileHistoryPage: FC = () => {
   const appointments: Appointment[] = (data?.data ?? []).map((a) => ({
     id: String(a.id),
     doctorId: "",
-    doctorName: a.doctor,
+    doctorName: toDisplayName(a.doctor),
     doctorSpecialty: "",
-    doctorClinic: a.clinic,
+    doctorClinic: toDisplayName(a.clinic),
     doctorRating: 0,
     date: a.date,
     time: a.time,
-    service: a.service,
+    service: toDisplayName(a.service),
     price: 0,
     address: "",
     status:

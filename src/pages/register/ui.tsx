@@ -146,6 +146,38 @@ const ROLE_REDIRECT: Record<string, string> = {
   clinic: "/clinic-profile",
 };
 
+// Поля дат вводятся как ДД.ММ.ГГГГ, бэк принимает только YYYY-MM-DD.
+const toApiDate = (ddmmyyyy: string): string => {
+  const [dd, mm, yyyy] = ddmmyyyy.split(".");
+  if (!dd || !mm || !yyyy) return ddmmyyyy;
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+// Ошибки DRF на регистрации приходят по шагам (step1.birth_date: [...]),
+// а не плоским объектом — рекурсивно ищем первую строку, иначе в toast
+// прилетает объект и React падает с "Objects are not valid as a React child".
+const extractErrorMessage = (
+  value: unknown,
+  fallback = "Ошибка регистрации. Попробуйте снова",
+): string => {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = extractErrorMessage(item, "");
+      if (found) return found;
+    }
+    return fallback;
+  }
+  if (value && typeof value === "object") {
+    for (const item of Object.values(value)) {
+      const found = extractErrorMessage(item, "");
+      if (found) return found;
+    }
+    return fallback;
+  }
+  return fallback;
+};
+
 export const RegisterPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
@@ -160,21 +192,37 @@ export const RegisterPage = () => {
     const clinicId = searchParams.get("clinicId");
     if (!clinicId) return;
     const branchId = searchParams.get("branchId");
+
+    // Привязка врача (invite_clinic_id) идёт по id из ссылки и не зависит от
+    // того, опубликована ли клиника публично. Публичный /api/clinics/{id}/
+    // нужен только чтобы КРАСИВО показать имя/адрес клиники — если он
+    // недоступен (клиника ещё не опубликована), инвайт всё равно должен
+    // сработать при сабмите, просто с нейтральным превью вместо названия.
+    setInviteClinic({
+      clinicId,
+      clinicName: "Клиника",
+      branchId: branchId ?? null,
+      branchAddress: "",
+    });
+    setSelectedRole("doctor");
+    setActiveForm("doctor");
+
     getClinicById(clinicId)
       .then((clinic) => {
         const branch = branchId
           ? clinic.branches?.find((b) => b.id === branchId)
           : null;
         setInviteClinic({
-          clinicId: String(clinic.id),
+          clinicId,
           clinicName: clinic.name,
           branchId: branchId ?? null,
           branchAddress: branch?.address ?? clinic.address ?? "",
         });
-        setSelectedRole("doctor");
-        setActiveForm("doctor");
       })
-      .catch(() => {});
+      .catch(() => {
+        // Клиника не опубликована или недоступна для публичного просмотра —
+        // оставляем нейтральное превью, заданное выше; сама привязка не блокируется.
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -258,12 +306,8 @@ export const RegisterPage = () => {
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
       router.push(ROLE_REDIRECT[res.user.role] ?? "/profile");
     } catch (err: unknown) {
-      const data = (err as { response?: { data?: Record<string, string[]> } })
-        ?.response?.data;
-      const msg = data
-        ? Object.values(data).flat()[0]
-        : "Ошибка регистрации. Попробуйте снова";
-      toast.error(msg);
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data));
     } finally {
       setIsLoadingClient(false);
     }
@@ -280,7 +324,7 @@ export const RegisterPage = () => {
         step1: {
           full_name: data.fullName,
           gender: data.gender as "male" | "female",
-          birth_date: data.birthDate,
+          birth_date: toApiDate(data.birthDate),
           city: data.city,
           languages: data.languages,
           phone: data.phone,
@@ -311,7 +355,7 @@ export const RegisterPage = () => {
           legal_name: data.fullName,
           reg_number: "",
           license_number: data.licenseNumber,
-          license_date: "",
+          license_date: undefined,
           license_authority: "",
           documents:
             data.certificates.length > 0 ? data.certificates : undefined,
@@ -338,13 +382,9 @@ export const RegisterPage = () => {
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
       router.push(ROLE_REDIRECT[res.user.role] ?? "/doctor-profile");
     } catch (err: unknown) {
-      const errData = (
-        err as { response?: { data?: Record<string, string[]> } }
-      )?.response?.data;
-      const msg = errData
-        ? Object.values(errData).flat()[0]
-        : "Ошибка регистрации. Попробуйте снова";
-      toast.error(msg);
+      const errData = (err as { response?: { data?: unknown } })?.response
+        ?.data;
+      toast.error(extractErrorMessage(errData));
     } finally {
       setIsLoadingDoctor(false);
     }
@@ -353,11 +393,6 @@ export const RegisterPage = () => {
   const handleSubmitClinic = async (data: ClinicFormData) => {
     setIsLoadingClinic(true);
     try {
-      const toApiDate = (ddmmyyyy: string): string => {
-        const [dd, mm, yyyy] = ddmmyyyy.split(".");
-        if (!dd || !mm || !yyyy) return ddmmyyyy;
-        return `${yyyy}-${mm}-${dd}`;
-      };
       const toDay = (d: { from: string; to: string }) => ({
         from: d.from || null,
         to: d.to || null,
@@ -429,13 +464,9 @@ export const RegisterPage = () => {
       toast.success(`Добро пожаловать, ${data.clinicName}!`);
       router.push(ROLE_REDIRECT[res.user.role] ?? "/clinic-profile");
     } catch (err: unknown) {
-      const errData = (
-        err as { response?: { data?: Record<string, string[]> } }
-      )?.response?.data;
-      const msg = errData
-        ? Object.values(errData).flat()[0]
-        : "Ошибка регистрации. Попробуйте снова";
-      toast.error(msg);
+      const errData = (err as { response?: { data?: unknown } })?.response
+        ?.data;
+      toast.error(extractErrorMessage(errData));
     } finally {
       setIsLoadingClinic(false);
     }
@@ -562,7 +593,7 @@ export const RegisterPage = () => {
                     <span className="font-semibold text-foreground">
                       {inviteClinic.clinicName}
                     </span>
-                    {inviteClinic.branchId && (
+                    {inviteClinic.branchId && inviteClinic.branchAddress && (
                       <> — {inviteClinic.branchAddress}</>
                     )}
                   </div>

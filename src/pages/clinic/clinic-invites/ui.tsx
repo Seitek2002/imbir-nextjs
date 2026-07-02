@@ -14,8 +14,9 @@ import {
   deleteClinicInvite,
   getClinicInvites,
 } from "@/shared/api";
-import { GeoIcon, HistoryIcon } from "@/shared/assets/icons";
+import { GeoIcon, HistoryIcon, WarningIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
+import { useAuthStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
 const LinkIcon = () => (
@@ -86,6 +87,7 @@ const CheckIcon = () => (
 
 export const ClinicInvitesPage: FC = () => {
   const { profile, rawProfile } = useClinicCabinet();
+  const authUser = useAuthStore((s) => s.user);
   const queryClient = useQueryClient();
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -99,7 +101,11 @@ export const ClinicInvitesPage: FC = () => {
     })),
   ];
 
-  const clinicId = profile?.id ?? "";
+  // /api/clinic/profile/ не отдаёт id клиники, но invite_clinic_id на бэке —
+  // это тот же id, что и id залогиненного пользователя (см. подтверждение через
+  // POST /api/auth/register/doctor/ с invite_clinic_id = user.id).
+  const clinicId = authUser?.id ? String(authUser.id) : "";
+  const hasClinicId = clinicId !== "";
   const selectedBranch =
     branchOptions.find((b) => b.id === selectedBranchId) ?? branchOptions[0];
 
@@ -108,7 +114,7 @@ export const ClinicInvitesPage: FC = () => {
     queryFn: getClinicInvites,
   });
 
-  const links = invitesData?.data ?? [];
+  const links = invitesData ?? [];
 
   const createMutation = useMutation({
     mutationFn: () =>
@@ -181,6 +187,19 @@ export const ClinicInvitesPage: FC = () => {
                 </p>
               </div>
             </div>
+
+            {!hasClinicId && (
+              <div className="bg-[#FFF8E6] border border-[#F5D889] rounded-2xl p-4 flex gap-3">
+                <div className="size-9 rounded-xl bg-[#F5D889] flex items-center justify-center shrink-0 mt-0.5">
+                  <WarningIcon className="text-foreground" />
+                </div>
+                <p className="text-sm text-secondary">
+                  Не удалось определить ID вашей клиники — ссылка-приглашение
+                  будет недоступна для копирования. Попробуйте обновить страницу
+                  или обратитесь в поддержку.
+                </p>
+              </div>
+            )}
 
             {/* Generator */}
             <div className="bg-white border border-border rounded-2xl p-5 flex flex-col gap-4">
@@ -262,8 +281,9 @@ export const ClinicInvitesPage: FC = () => {
                           {getBranchLabel(link.branch)}
                         </p>
                         <p className="text-xs text-muted mt-0.5 font-mono truncate">
-                          /register?clinicId={clinicId}
-                          {link.branch != null && `&branchId=${link.branch}`}
+                          {hasClinicId
+                            ? `/register?clinicId=${clinicId}${link.branch != null ? `&branchId=${link.branch}` : ""}`
+                            : "ID клиники недоступен"}
                         </p>
                       </div>
                       <span
@@ -297,6 +317,7 @@ export const ClinicInvitesPage: FC = () => {
                         size="sm"
                         className="flex-1 justify-center gap-2"
                         onClick={() => handleCopy(link.id, link.branch)}
+                        disabled={!hasClinicId}
                       >
                         {copiedId === link.id ? (
                           <>

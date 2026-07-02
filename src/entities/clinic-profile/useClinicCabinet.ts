@@ -6,7 +6,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   ClinicPrivateProfile,
-  ClinicSchedule,
   type UpdateClinicProfileBody,
   clinicCabinetKeys,
   getClinicProfile,
@@ -19,43 +18,59 @@ import type {
   WorkDaySchedule,
 } from "./model";
 
-const mapDay = (day?: ClinicSchedule[string]): WorkDaySchedule => ({
+type ApiScheduleDay = { from: string; to: string; enabled: boolean };
+type ApiSchedule = Record<string, ApiScheduleDay> | undefined;
+
+const mapDay = (day?: ApiScheduleDay): WorkDaySchedule => ({
   enabled: day?.enabled ?? false,
   open: day?.from ?? "",
   close: day?.to ?? "",
 });
 
-// The API may key days as "monday" or "mon" — handle both. Lunch break and
-// emergency24 aren't part of the clinic profile response yet, so they default.
-const mapWorkSchedule = (schedule?: ClinicSchedule): ClinicScheduleData => ({
-  mon: mapDay(schedule?.monday ?? schedule?.mon),
-  tue: mapDay(schedule?.tuesday ?? schedule?.tue),
-  wed: mapDay(schedule?.wednesday ?? schedule?.wed),
-  thu: mapDay(schedule?.thursday ?? schedule?.thu),
-  fri: mapDay(schedule?.friday ?? schedule?.fri),
-  sat: mapDay(schedule?.saturday ?? schedule?.sat),
-  sun: mapDay(schedule?.sunday ?? schedule?.sun),
-  lunchStart: "",
-  lunchEnd: "",
-  emergency24: false,
-});
+// Расписание, обед и экстренный режим — все реально приходят с бэка
+// (см. GET /api/clinic/profile/: schedule, lunch_break, emergency_24_7).
+const mapWorkSchedule = (api: ClinicPrivateProfile): ClinicScheduleData => {
+  const schedule = api.schedule as ApiSchedule;
+  return {
+    mon: mapDay(schedule?.monday),
+    tue: mapDay(schedule?.tuesday),
+    wed: mapDay(schedule?.wednesday),
+    thu: mapDay(schedule?.thursday),
+    fri: mapDay(schedule?.friday),
+    sat: mapDay(schedule?.saturday),
+    sun: mapDay(schedule?.sunday),
+    lunchStart: api.lunch_break?.from ?? "",
+    lunchEnd: api.lunch_break?.to ?? "",
+    emergency24: api.emergency_24_7 ?? false,
+  };
+};
+
+// "Анализы, УЗИ, Рентген" → ["Анализы", "УЗИ", "Рентген"]
+const parseCsv = (value?: string): string[] =>
+  value
+    ? value
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
 
 export const mapApiToClinicProfile = (
   api: ClinicPrivateProfile,
 ): ClinicProfile => ({
-  id: String(api.id),
+  // API не всегда отдаёт id клиники — не превращаем undefined в строку "undefined"
+  id: api.id ? String(api.id) : "",
   name: api.name,
   logo: api.logo ?? undefined,
   type: api.clinic_type ?? "",
-  description: api.about ?? "",
-  photos: api.photos ?? [],
-  country: "Кыргызстан",
+  description: api.description ?? "",
+  photos: [],
+  country: api.country || "Кыргызстан",
   city: api.city,
   fullAddress: api.address ?? "",
   phone: api.phone ?? "",
   email: api.email ?? "",
   website: api.website ?? "",
-  workSchedule: mapWorkSchedule(api.schedule),
+  workSchedule: mapWorkSchedule(api),
   legalName: api.legal_name ?? "",
   registrationNumber: api.reg_number ?? "",
   licenseNumber: api.license_number ?? "",
@@ -63,12 +78,14 @@ export const mapApiToClinicProfile = (
   licenseAuthority: api.license_authority ?? "",
   documents: [],
   mainDirections: api.primary_specializations ?? [],
-  narrowDirections: [],
-  additionalServices: [],
+  narrowDirections: api.narrow_specializations ?? [],
+  additionalServices: parseCsv(api.additional_services),
   equipment: api.equipment ?? [],
   patientConditions: api.patient_conditions ?? [],
   paymentMethods: api.payment_methods ?? [],
-  rating: api.rating,
+  // API отдаёт rating строкой ("0.00") — приводим к number, иначе непустая
+  // строка всегда truthy и бейдж рейтинга показывается даже без реальных отзывов.
+  rating: Number(api.rating) || 0,
 });
 
 export const useClinicCabinet = () => {

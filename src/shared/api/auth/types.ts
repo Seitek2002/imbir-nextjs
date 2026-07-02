@@ -77,7 +77,7 @@ export type RegisterDoctorRequest = {
     legal_name: string;
     reg_number: string;
     license_number: string;
-    license_date: string;
+    license_date?: string;
     license_authority: string;
     documents?: File[];
   };
