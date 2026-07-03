@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 
 import { loginFn } from "@/shared/api";
@@ -160,6 +161,7 @@ export const LoginPage = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </main>
   );
 };
