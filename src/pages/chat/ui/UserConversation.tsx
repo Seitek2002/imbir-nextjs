@@ -34,6 +34,8 @@ export const UserConversation: FC<Props> = ({
     useChatRoom(roomId, currentUserId);
   const isOpen = connectionState === "open";
 
+  console.log(connectionState, isLoadingHistory, error);
+
   return (
     <>
       <ChatHeader
