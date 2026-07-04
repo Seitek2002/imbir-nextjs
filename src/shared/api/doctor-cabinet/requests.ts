@@ -84,21 +84,21 @@ export const updateDoctorProfile = async (
   return data;
 };
 
+// Ответ плоский ({schedule, lunch_break, emergency_24_7}), без обёртки data —
+// проверено живым запросом.
 export const getDoctorSchedule = async (): Promise<DoctorSchedule> => {
-  const { data } = await apiClient.get<{ data: DoctorSchedule }>(
-    "/api/doctor/schedule/",
-  );
-  return data.data;
+  const { data } = await apiClient.get<DoctorSchedule>("/api/doctor/schedule/");
+  return data;
 };
 
 export const updateDoctorSchedule = async (
   body: DoctorSchedule,
 ): Promise<DoctorSchedule> => {
-  const { data } = await apiClient.put<{ data: DoctorSchedule }>(
+  const { data } = await apiClient.put<DoctorSchedule>(
     "/api/doctor/schedule/",
     body,
   );
-  return data.data;
+  return data;
 };
 
 export const getDoctorAppointments = async (
