@@ -39,6 +39,9 @@ export const mapApiToProfile = (
     license_number?: string;
     rating?: number | string;
     reviews_count?: number;
+    equipment?: string[];
+    patient_conditions?: string[];
+    payment_methods?: string[];
   };
 
   return {
@@ -51,6 +54,9 @@ export const mapApiToProfile = (
     workplace: a.work_experience?.[0]?.clinic ?? "",
     qualification: "",
     scientificDegree: "",
+    equipment: a.equipment?.join(", ") ?? "",
+    patientConditions: a.patient_conditions?.join(", ") ?? "",
+    paymentMethods: a.payment_methods?.join(", ") ?? "",
     gender: a.gender ?? "",
     birthDate: a.birth_date ?? "",
     city: a.city ?? "",

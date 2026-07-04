@@ -18,7 +18,17 @@ type D = {
   workplace: string;
   qualification: string;
   scientificDegree: string;
+  equipment: string;
+  patientConditions: string;
+  paymentMethods: string;
 };
+
+// "УЗИ, ЭКГ" → ["УЗИ", "ЭКГ"]
+const csv = (value: string): string[] =>
+  value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
 export const DoctorProfessionalInfoPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
@@ -31,6 +41,9 @@ export const DoctorProfessionalInfoPage: FC = () => {
     workplace: "",
     qualification: "",
     scientificDegree: "",
+    equipment: "",
+    patientConditions: "",
+    paymentMethods: "",
   });
 
   useEffect(() => {
@@ -43,6 +56,9 @@ export const DoctorProfessionalInfoPage: FC = () => {
         workplace: profile.workplace,
         qualification: profile.qualification,
         scientificDegree: profile.scientificDegree,
+        equipment: profile.equipment,
+        patientConditions: profile.patientConditions,
+        paymentMethods: profile.paymentMethods,
       });
     }
   }, [profile]);
@@ -59,6 +75,9 @@ export const DoctorProfessionalInfoPage: FC = () => {
         : [],
       experience_years: parseInt(d.experienceYears) || 0,
       additional_services: d.currentPosition || undefined,
+      equipment: csv(d.equipment),
+      patient_conditions: csv(d.patientConditions),
+      payment_methods: csv(d.paymentMethods),
     });
     setIsEditing(false);
   };
@@ -213,6 +232,51 @@ export const DoctorProfessionalInfoPage: FC = () => {
               </>
             ) : (
               <FieldView label="Научная степень" value={d.scientificDegree} />
+            )}
+          </div>
+          <div className="lg:col-span-2">
+            {isEditing ? (
+              <>
+                <label className={lbl}>Оборудование (через запятую)</label>
+                <input
+                  value={d.equipment}
+                  onChange={(e) => set("equipment", e.target.value)}
+                  placeholder="УЗИ, ЭКГ, Рентген"
+                  className={inp}
+                />
+              </>
+            ) : (
+              <FieldView label="Оборудование" value={d.equipment} />
+            )}
+          </div>
+          <div>
+            {isEditing ? (
+              <>
+                <label className={lbl}>Условия приёма (через запятую)</label>
+                <input
+                  value={d.patientConditions}
+                  onChange={(e) => set("patientConditions", e.target.value)}
+                  placeholder="Приём детей, Приём на дому"
+                  className={inp}
+                />
+              </>
+            ) : (
+              <FieldView label="Условия приёма" value={d.patientConditions} />
+            )}
+          </div>
+          <div>
+            {isEditing ? (
+              <>
+                <label className={lbl}>Способы оплаты (через запятую)</label>
+                <input
+                  value={d.paymentMethods}
+                  onChange={(e) => set("paymentMethods", e.target.value)}
+                  placeholder="Наличные, Карта, Перевод"
+                  className={inp}
+                />
+              </>
+            ) : (
+              <FieldView label="Способы оплаты" value={d.paymentMethods} />
             )}
           </div>
         </div>
