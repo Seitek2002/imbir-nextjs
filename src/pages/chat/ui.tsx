@@ -73,9 +73,10 @@ const EmptyState = () => (
   </div>
 );
 
-// A symptom typed on the home hero arrives as `?ask=`. Read it on the client
-// only — this workspace mounts after the auth gate, so there is no SSR pass to
-// mismatch against.
+// One-shot query params, read on the client only — this workspace mounts after
+// the auth gate, so there is no SSR pass to mismatch against.
+// `?ask=` — a symptom typed on the home hero, goes to the AI assistant.
+// `?room=` — a room id to open right away (e.g. after "Написать" on a doctor page).
 const readAsk = (): string | undefined => {
   if (typeof window === "undefined") return undefined;
   return (
@@ -83,17 +84,25 @@ const readAsk = (): string | undefined => {
   );
 };
 
+const readRoomParam = (): number | null => {
+  if (typeof window === "undefined") return null;
+  const raw = new URLSearchParams(window.location.search).get("room");
+  const id = raw ? Number(raw) : NaN;
+  return Number.isInteger(id) && id > 0 ? id : null;
+};
+
 const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
   const [pendingAsk, setPendingAsk] = useState<string | undefined>(readAsk);
-  const [activeId, setActiveId] = useState<number | null>(
-    pendingAsk ? AI_ROOM_ID : null,
+  const [activeId, setActiveId] = useState<number | null>(() =>
+    pendingAsk ? AI_ROOM_ID : readRoomParam(),
   );
   const [search, setSearch] = useState("");
 
-  // Strip the param so a refresh doesn't resend the question (no state change).
+  // Strip the one-shot params so a refresh doesn't repeat them (no state change).
   useEffect(() => {
-    if (pendingAsk) window.history.replaceState(null, "", ROUTES.CHATS);
-  }, [pendingAsk]);
+    if (window.location.search)
+      window.history.replaceState(null, "", ROUTES.CHATS);
+  }, []);
 
   const { data: rooms } = useQuery({
     queryKey: chatKeys.rooms(),

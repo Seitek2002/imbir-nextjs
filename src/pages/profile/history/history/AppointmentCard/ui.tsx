@@ -4,6 +4,8 @@ import { FC } from "react";
 
 import Image from "next/image";
 
+import { StartChatButton } from "@/features/start-chat";
+
 import {
   CalendarIcon,
   GeoIcon,
@@ -114,6 +116,14 @@ export const AppointmentCard: FC<Props> = ({
           <div className="flex flex-col items-end gap-2">
             {appointment.isOnline && appointment.googleMeetLink && (
               <GoogleMeetButton href={appointment.googleMeetLink} />
+            )}
+            {appointment.doctorId && (
+              <StartChatButton
+                userId={Number(appointment.doctorId)}
+                size="sm"
+                label="Написать врачу"
+                className="whitespace-nowrap"
+              />
             )}
             {appointment.status === "upcoming" && onCancel && (
               <button
@@ -231,6 +241,13 @@ export const AppointmentCard: FC<Props> = ({
           </div>
           {appointment.isOnline && appointment.googleMeetLink && (
             <GoogleMeetButton href={appointment.googleMeetLink} compact />
+          )}
+          {appointment.doctorId && (
+            <StartChatButton
+              userId={Number(appointment.doctorId)}
+              label="Написать врачу"
+              compact
+            />
           )}
           {appointment.status === "upcoming" && onCancel && (
             <button

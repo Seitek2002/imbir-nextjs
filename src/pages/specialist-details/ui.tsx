@@ -14,6 +14,8 @@ import { Header } from "@/widgets/header";
 import { ReviewsSection } from "@/widgets/reviews";
 import { VideosSwiper } from "@/widgets/videos-swiper";
 
+import { StartChatButton } from "@/features/start-chat";
+
 // ИМПОРТЫ API
 import { api, createReview, getBlogPosts } from "@/shared/api";
 import {
@@ -265,6 +267,10 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                   Видео-консультация
                 </Button>
               )}
+              <StartChatButton
+                userId={Number(id)}
+                className="flex-1 justify-center"
+              />
             </div>
 
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
@@ -408,6 +414,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
             Онлайн
           </Button>
         )}
+        <StartChatButton
+          userId={Number(id)}
+          size="lg"
+          className="flex-1 justify-center"
+        />
       </div>
     </main>
   );

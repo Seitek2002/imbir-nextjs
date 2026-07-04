@@ -32,6 +32,15 @@ const toDisplayName = (value: unknown): string => {
   return "";
 };
 
+// Из того же объекта достаём id (нужен кнопке «Написать врачу»).
+const toEntityId = (value: unknown): string => {
+  if (value && typeof value === "object") {
+    const id = (value as Record<string, unknown>).id;
+    if (typeof id === "number" || typeof id === "string") return String(id);
+  }
+  return "";
+};
+
 export const ProfileHistoryPage: FC = () => {
   const [activeTab, setActiveTab] = useState<"upcoming" | "completed">(
     "upcoming",
@@ -44,7 +53,7 @@ export const ProfileHistoryPage: FC = () => {
 
   const appointments: Appointment[] = (data?.data ?? []).map((a) => ({
     id: String(a.id),
-    doctorId: "",
+    doctorId: toEntityId(a.doctor),
     doctorName: toDisplayName(a.doctor),
     doctorSpecialty: "",
     doctorClinic: toDisplayName(a.clinic),
