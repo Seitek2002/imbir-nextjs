@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useRef, useState } from "react";
 
 import Image from "next/image";
 
@@ -33,20 +33,22 @@ export const DoctorBasicInfoPage: FC = () => {
   const photoRef = useRef<HTMLInputElement>(null);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
 
-  useEffect(() => {
-    if (profile) {
-      setD({
-        fullName: profile.fullName,
-        gender: profile.gender,
-        birthDate: profile.birthDate,
-        city: profile.city,
-        languages: profile.languages,
-        phone: profile.phone,
-        email: profile.email,
-        photo: profile.photo,
-      });
-    }
-  }, [profile]);
+  // Синхронизация формы с профилем прямо в рендере («adjust state during
+  // render» вместо setState в эффекте).
+  const [syncedProfile, setSyncedProfile] = useState(profile);
+  if (profile && profile !== syncedProfile) {
+    setSyncedProfile(profile);
+    setD({
+      fullName: profile.fullName,
+      gender: profile.gender,
+      birthDate: profile.birthDate,
+      city: profile.city,
+      languages: profile.languages,
+      phone: profile.phone,
+      email: profile.email,
+      photo: profile.photo,
+    });
+  }
 
   const set = <K extends keyof typeof d>(k: K, v: (typeof d)[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));

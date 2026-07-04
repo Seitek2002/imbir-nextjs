@@ -24,7 +24,9 @@ export const StarRating: FC<Props> = ({
       {Array.from({ length: maxRating }).map((_, index) => (
         <StarBoldIcon
           key={index}
-          className="text-primary"
+          className={
+            index < Math.round(rating) ? "text-primary" : "text-border"
+          }
           style={{ width: size, height: size }}
         />
       ))}

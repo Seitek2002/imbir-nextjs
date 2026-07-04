@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
@@ -30,18 +30,19 @@ export const DoctorEducationPage: FC = () => {
     additionalEducation: [],
   });
 
-  useEffect(() => {
-    if (profile) {
-      setD({
-        university: profile.university,
-        graduationYear: profile.graduationYear,
-        internship: profile.internship,
-        residency: profile.residency,
-        diplomaSpecialty: profile.diplomaSpecialty,
-        additionalEducation: [...profile.additionalEducation],
-      });
-    }
-  }, [profile]);
+  // Синхронизация с профилем прямо в рендере («adjust state during render»).
+  const [syncedProfile, setSyncedProfile] = useState(profile);
+  if (profile && profile !== syncedProfile) {
+    setSyncedProfile(profile);
+    setD({
+      university: profile.university,
+      graduationYear: profile.graduationYear,
+      internship: profile.internship,
+      residency: profile.residency,
+      diplomaSpecialty: profile.diplomaSpecialty,
+      additionalEducation: [...profile.additionalEducation],
+    });
+  }
 
   const set = <K extends keyof D>(k: K, v: D[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));

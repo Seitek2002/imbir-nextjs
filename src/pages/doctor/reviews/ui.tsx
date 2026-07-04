@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -61,10 +61,12 @@ const ReplyModal: FC<ReplyModalProps> = ({
   const [text, setText] = useState(initialText);
 
   // Модалка не размонтируется между открытиями — подставляем текущий текст
-  // ответа (для правки) при каждом открытии.
-  useEffect(() => {
+  // ответа (для правки) при каждом открытии («adjust state during render»).
+  const [wasOpen, setWasOpen] = useState(false);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
     if (isOpen) setText(initialText);
-  }, [isOpen, initialText]);
+  }
 
   useScrollLock(isOpen);
 

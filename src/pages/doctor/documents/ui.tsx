@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useRef, useState } from "react";
 
 import Image from "next/image";
 
@@ -8,29 +8,7 @@ import { DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
-import { colors } from "@/shared/config";
-
 const { inp } = formStyles;
-
-const FileIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-    <rect width="32" height="32" rx="8" fill={colors.surface} />
-    <path
-      d="M20 6H11C10.4696 6 9.96086 6.21071 9.58579 6.58579C9.21071 6.96086 9 7.46957 9 8V24C9 24.5304 9.21071 25.0391 9.58579 25.4142C9.96086 25.7893 10.4696 26 11 26H21C21.5304 26 22.0391 25.7893 22.4142 25.4142C22.7893 25.0391 23 24.5304 23 24V9L20 6Z"
-      stroke={colors.muted}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M20 6V9H23M13 16H19M13 20H19"
-      stroke={colors.muted}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 export const DoctorDocumentsPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
@@ -39,12 +17,13 @@ export const DoctorDocumentsPage: FC = () => {
   const [certs, setCerts] = useState<string[]>([]);
   const certRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (profile) {
-      setLicenseNumber(profile.licenseNumber);
-      setCerts(profile.certificates);
-    }
-  }, [profile]);
+  // Синхронизация с профилем прямо в рендере («adjust state during render»).
+  const [syncedProfile, setSyncedProfile] = useState(profile);
+  if (profile && profile !== syncedProfile) {
+    setSyncedProfile(profile);
+    setLicenseNumber(profile.licenseNumber);
+    setCerts(profile.certificates);
+  }
 
   const handleCertUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

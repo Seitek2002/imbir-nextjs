@@ -20,7 +20,8 @@ export const AuthGuard = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (hydrated) return;
     if (useAuthStore.persist.hasHydrated()) {
-      setHydrated(true);
+      // Микротаска: не вызываем setState синхронно в теле эффекта.
+      queueMicrotask(() => setHydrated(true));
       return;
     }
     return useAuthStore.persist.onFinishHydration(() => setHydrated(true));
