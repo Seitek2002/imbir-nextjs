@@ -1,8 +1,9 @@
 ﻿"use client";
 
 import { FC, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicSidebar } from "@/widgets/clinic/sidebar";
 
@@ -12,7 +13,12 @@ import {
   useClinicCabinet,
 } from "@/entities/clinic-profile";
 
-import { clinicCabinetKeys, getClinicStats } from "@/shared/api";
+import {
+  type ClinicProfileBranch,
+  clinicCabinetKeys,
+  getClinicStats,
+  updateClinicBranch,
+} from "@/shared/api";
 import { Button } from "@/shared/ui";
 
 // Плитки статистики кабинета (GET /api/clinic/stats/).
@@ -48,6 +54,86 @@ const ClinicStatsTiles: FC = () => {
   );
 };
 
+// Филиалы клиники: список с inline-правкой адреса (PUT /api/clinic/branches/{id}/).
+const BranchesCard: FC<{ branches: ClinicProfileBranch[] }> = ({
+  branches,
+}) => {
+  const queryClient = useQueryClient();
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [address, setAddress] = useState("");
+
+  const { mutate: save, isPending } = useMutation({
+    mutationFn: (vars: { id: number; address: string }) =>
+      updateClinicBranch(String(vars.id), { address: vars.address }),
+    onSuccess: () => {
+      toast.success("Филиал обновлён");
+      queryClient.invalidateQueries({
+        queryKey: clinicCabinetKeys.profile(),
+      });
+      setEditingId(null);
+    },
+    onError: () => toast.error("Не удалось сохранить филиал"),
+  });
+
+  if (branches.length === 0) return null;
+
+  return (
+    <div className="bg-white rounded-3xl border border-border p-5 lg:p-6 mb-6">
+      <h3 className="text-lg font-semibold text-foreground mb-3">Филиалы</h3>
+      <div className="flex flex-col gap-2">
+        {branches.map((branch) => (
+          <div
+            key={branch.id}
+            className="flex items-center gap-3 py-2 border-b border-background last:border-0"
+          >
+            {editingId === branch.id ? (
+              <>
+                <input
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-xl border border-border text-sm text-foreground focus:outline-none focus:border-primary"
+                  placeholder="Адрес филиала"
+                />
+                <Button
+                  size="sm"
+                  disabled={!address.trim() || isPending}
+                  onClick={() =>
+                    save({ id: branch.id, address: address.trim() })
+                  }
+                >
+                  {isPending ? "..." : "Сохранить"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setEditingId(null)}
+                >
+                  Отмена
+                </Button>
+              </>
+            ) : (
+              <>
+                <span className="flex-1 text-sm text-foreground truncate">
+                  {branch.address || "Адрес не указан"}
+                </span>
+                <button
+                  onClick={() => {
+                    setEditingId(branch.id);
+                    setAddress(branch.address ?? "");
+                  }}
+                  className="text-primary text-sm font-medium hover:underline"
+                >
+                  Изменить
+                </button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const PencilIcon = () => (
   <svg
     width="16"
@@ -67,7 +153,8 @@ const PencilIcon = () => (
 );
 
 export const ClinicProfilePage: FC = () => {
-  const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
+  const { profile, isLoading, isSaving, saveProfile, rawProfile } =
+    useClinicCabinet();
   const [isEditing, setIsEditing] = useState(false);
   const formRef = useRef<ClinicProfileFormHandle>(null);
 
@@ -142,6 +229,9 @@ export const ClinicProfilePage: FC = () => {
             </div>
 
             {!isEditing && <ClinicStatsTiles />}
+            {!isEditing && (
+              <BranchesCard branches={rawProfile?.branches ?? []} />
+            )}
 
             {profile && (
               <ClinicProfileForm
