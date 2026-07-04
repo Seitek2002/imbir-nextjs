@@ -19,6 +19,7 @@ import { useCityStore } from "@/shared/store";
 import { Button, IconBtn } from "@/shared/ui";
 
 import { CitySelectorModal } from "./city-selector";
+import { NotificationsBell } from "./notifications-bell";
 
 const ROLE_ROUTE: Record<string, string> = {
   patient: "/profile",
@@ -66,6 +67,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
 
           {/* Mobile right icons */}
           <div className="flex md:hidden gap-2">
+            <NotificationsBell />
             <Link href={chatHref}>
               <IconBtn variant="outline" size="sm">
                 <ChatIcon className="size-5" />
@@ -89,6 +91,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             >
               <GlobalSearch />
             </Suspense>
+            <NotificationsBell />
             <Link href={chatHref}>
               <IconBtn variant="outline" size="sm">
                 <ChatIcon className="size-5" />
