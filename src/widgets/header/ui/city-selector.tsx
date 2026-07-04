@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import toast from "react-hot-toast";
 
 import { GeoIcon } from "@/shared/assets/icons";
@@ -39,7 +39,11 @@ export const CitySelectorModal: FC<Props> = ({ isOpen, onClose }) => {
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
 
-  useEffect(() => {
+  // Синхронизация выбора при открытии — прямо в рендере (паттерн
+  // «adjust state during render» вместо setState в эффекте).
+  const [wasOpen, setWasOpen] = useState(false);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
     if (isOpen) {
       const country =
         Object.entries(COUNTRIES_DATA).find(([, cities]) =>
@@ -48,7 +52,7 @@ export const CitySelectorModal: FC<Props> = ({ isOpen, onClose }) => {
       setSelectedCountry(country);
       setSelectedCity(currentCity ?? "");
     }
-  }, [isOpen, currentCity]);
+  }
 
   const cityOptions = selectedCountry
     ? COUNTRIES_DATA[selectedCountry].map((c) => ({ value: c, label: c }))
