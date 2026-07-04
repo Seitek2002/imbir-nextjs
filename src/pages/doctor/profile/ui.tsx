@@ -5,12 +5,49 @@ import { FC } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { DoctorSidebar } from "@/widgets/doctor/layout";
 
+import { doctorCabinetKeys, getDoctorStats } from "@/shared/api";
 import { ChevronRightIcon, LogoutIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { useLogout } from "@/shared/lib/useLogout";
+
+// Плитки статистики кабинета (GET /api/doctor/stats/).
+const DoctorStatsTiles: FC = () => {
+  const { data: stats } = useQuery({
+    queryKey: doctorCabinetKeys.stats(),
+    queryFn: getDoctorStats,
+  });
+
+  if (!stats) return null;
+
+  const tiles = [
+    { label: "Просмотры профиля", value: stats.profile_views },
+    { label: "Записей всего", value: stats.appointments.total },
+    {
+      label: "Предстоящие записи",
+      value: stats.appointments.pending + stats.appointments.confirmed,
+    },
+    { label: "Пациентов", value: stats.patients_count },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+      {tiles.map((tile) => (
+        <div
+          key={tile.label}
+          className="bg-white rounded-2xl border border-border p-4"
+        >
+          <p className="text-2xl font-semibold text-foreground">{tile.value}</p>
+          <p className="text-muted text-xs mt-1">{tile.label}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const MENU_ITEMS = [
   {
@@ -144,6 +181,7 @@ export const DoctorProfilePage: FC = () => {
         </div>
 
         <div className="px-4 pb-6">
+          <DoctorStatsTiles />
           <nav className="bg-white rounded-3xl p-2 flex flex-col gap-1">
             {MENU_ITEMS.map((item) => (
               <Link
@@ -189,6 +227,7 @@ export const DoctorProfilePage: FC = () => {
             rating={d.rating}
           />
           <main className="flex-1 min-w-0">
+            <DoctorStatsTiles />
             <div className="bg-white rounded-3xl border border-border p-8">
               <div className="flex items-center gap-6 mb-8">
                 <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">

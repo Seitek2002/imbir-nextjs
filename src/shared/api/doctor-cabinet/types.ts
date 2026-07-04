@@ -48,14 +48,20 @@ export type DoctorPatient = {
   total_visits: number;
 };
 
+// Реальный ответ GET /api/doctor/stats/ (проверен живым запросом) — плоский,
+// записи приходят с разбивкой по статусам.
 export type DoctorStats = {
   profile_views: number;
-  profile_views_this_month: number;
-  appointments_total: number;
-  appointments_this_month: number;
-  average_rating: number;
+  rating: number;
   reviews_count: number;
-  patients_total: number;
+  appointments: {
+    total: number;
+    pending: number;
+    confirmed: number;
+    completed: number;
+    cancelled: number;
+  };
+  patients_count: number;
   completion_rate: number;
 };
 

@@ -143,11 +143,10 @@ export const getClinicAppointments = async (
   return data;
 };
 
+// Ответ плоский (без обёртки data) — проверено живым запросом.
 export const getClinicStats = async (): Promise<ClinicStats> => {
-  const { data } = await apiClient.get<{ data: ClinicStats }>(
-    "/api/clinic/stats/",
-  );
-  return data.data;
+  const { data } = await apiClient.get<ClinicStats>("/api/clinic/stats/");
+  return data;
 };
 
 export const getClinicReviews = async (): Promise<PaginatedReviewsResponse> => {

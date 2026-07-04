@@ -2,6 +2,8 @@
 
 import { FC, useRef, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { ClinicSidebar } from "@/widgets/clinic/sidebar";
 
 import {
@@ -10,7 +12,41 @@ import {
   useClinicCabinet,
 } from "@/entities/clinic-profile";
 
+import { clinicCabinetKeys, getClinicStats } from "@/shared/api";
 import { Button } from "@/shared/ui";
+
+// Плитки статистики кабинета (GET /api/clinic/stats/).
+const ClinicStatsTiles: FC = () => {
+  const { data: stats } = useQuery({
+    queryKey: clinicCabinetKeys.stats(),
+    queryFn: getClinicStats,
+  });
+
+  if (!stats) return null;
+
+  const tiles = [
+    { label: "Просмотры профиля", value: stats.profile_views },
+    { label: "Записей всего", value: stats.appointments_total },
+    { label: "Записей за месяц", value: stats.appointments_this_month },
+    { label: "Врачей", value: stats.doctors_count },
+    { label: "Пациентов", value: stats.patients_total },
+    { label: "Отзывов", value: stats.reviews_count },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+      {tiles.map((tile) => (
+        <div
+          key={tile.label}
+          className="bg-white rounded-2xl border border-border p-4"
+        >
+          <p className="text-2xl font-semibold text-foreground">{tile.value}</p>
+          <p className="text-muted text-xs mt-1">{tile.label}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const PencilIcon = () => (
   <svg
@@ -104,6 +140,8 @@ export const ClinicProfilePage: FC = () => {
                 </Button>
               )}
             </div>
+
+            {!isEditing && <ClinicStatsTiles />}
 
             {profile && (
               <ClinicProfileForm

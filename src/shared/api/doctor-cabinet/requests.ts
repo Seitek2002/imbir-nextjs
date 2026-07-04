@@ -121,11 +121,10 @@ export const getDoctorPatients = async (
   return data;
 };
 
+// Ответ плоский (без обёртки data) — проверено живым запросом.
 export const getDoctorStats = async (): Promise<DoctorStats> => {
-  const { data } = await apiClient.get<{ data: DoctorStats }>(
-    "/api/doctor/stats/",
-  );
-  return data.data;
+  const { data } = await apiClient.get<DoctorStats>("/api/doctor/stats/");
+  return data;
 };
 
 export const getDoctorReviews = async (): Promise<PaginatedReviewsResponse> => {
