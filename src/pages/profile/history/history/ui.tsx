@@ -1,13 +1,20 @@
 ﻿"use client";
 
 import { FC, useState } from "react";
+import toast from "react-hot-toast";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ReviewModal } from "@/features/review-modal";
 
-import { cancelAppointment, profileKeys } from "@/shared/api";
+import {
+  cancelAppointment,
+  createReview,
+  profileKeys,
+  reviewKeys,
+} from "@/shared/api";
 import { WarningIcon } from "@/shared/assets/icons";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 import type { Appointment, AppointmentStatus } from "./AppointmentCard/model";
@@ -61,8 +68,39 @@ export const ProfileHistory: FC<Props> = ({ appointments, activeTab }) => {
     }
   };
 
+  const { mutate: submitReview } = useMutation({
+    mutationFn: (vars: {
+      rating: number;
+      comment: string;
+      appointment: Appointment;
+    }) =>
+      createReview({
+        target_type: "doctor",
+        target_id: Number(vars.appointment.doctorId),
+        appointment_id: Number(vars.appointment.id),
+        rating: vars.rating,
+        text: vars.comment.trim() || undefined,
+      }),
+    onSuccess: () => {
+      toast.success("Спасибо за отзыв!");
+      queryClient.invalidateQueries({ queryKey: reviewKeys.all });
+      queryClient.invalidateQueries({ queryKey: profileKeys.reviews() });
+    },
+    onError: (err: unknown) => {
+      const errData = (err as { response?: { data?: unknown } })?.response
+        ?.data;
+      toast.error(extractErrorMessage(errData, "Не удалось отправить отзыв"));
+    },
+  });
+
   const handleSubmitReview = (rating: number, comment: string) => {
-    console.log("Submit review:", { rating, comment });
+    if (!selectedAppointment) return;
+    if (!selectedAppointment.doctorId) {
+      // Старые записи могли прийти без id врача — без цели отзыв не создать.
+      toast.error("Не удалось определить врача для отзыва");
+      return;
+    }
+    submitReview({ rating, comment, appointment: selectedAppointment });
   };
 
   if (filteredAppointments.length === 0) {
