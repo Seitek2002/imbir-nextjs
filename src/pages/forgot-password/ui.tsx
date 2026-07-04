@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useRouter } from "next/navigation";
@@ -9,8 +9,17 @@ import { useMutation } from "@tanstack/react-query";
 
 import { Header } from "@/widgets/header";
 
-import { requestPasswordResetFn } from "@/shared/api";
-import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
+import {
+  confirmPasswordResetFn,
+  requestPasswordResetFn,
+  verifyPasswordResetFn,
+} from "@/shared/api";
+import {
+  CheckIcon,
+  EmailIcon,
+  EyeIcon,
+  EyeOffIcon,
+} from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
@@ -32,15 +41,51 @@ export const ForgotPasswordPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  // Таймер повторной отправки кода (59с, как в макете).
+  const [resendLeft, setResendLeft] = useState(59);
+
+  useEffect(() => {
+    if (step !== "code" || resendLeft <= 0) return;
+    const timer = setInterval(() => setResendLeft((s) => s - 1), 1000);
+    return () => clearInterval(timer);
+  }, [step, resendLeft]);
+
   const requestResetMutation = useMutation({
     mutationFn: requestPasswordResetFn,
-    onSuccess: () => setStep("code"),
+    onSuccess: () => {
+      setStep("code");
+      setResendLeft(59);
+      setCode(["", "", "", ""]);
+    },
     onError: (err) => {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
       toast.error(
         extractErrorMessage(
           data,
           "Не удалось отправить письмо. Попробуйте снова",
+        ),
+      );
+    },
+  });
+
+  const verifyMutation = useMutation({
+    mutationFn: verifyPasswordResetFn,
+    onSuccess: () => setStep("new_password"),
+    onError: (err) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Неверный или истёкший код"));
+    },
+  });
+
+  const confirmMutation = useMutation({
+    mutationFn: confirmPasswordResetFn,
+    onSuccess: () => setStep("success"),
+    onError: (err) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(
+        extractErrorMessage(
+          data,
+          "Не удалось сохранить пароль. Попробуйте снова",
         ),
       );
     },
@@ -152,13 +197,7 @@ export const ForgotPasswordPage = () => {
               </>
             )}
 
-            {/* === ШАГ 2: ВВОД КОДА (Твой 1-й скрин) ===
-                ВАЖНО: бэк не поддерживает подтверждение по коду — POST
-                /api/auth/password-reset/confirm/ принимает { token, password },
-                без поля кода. Ссылка из письма должна содержать token, которым
-                этот шаг сейчас не оперирует. Подключать нельзя, пока бэк не
-                добавит код-эндпоинт либо флоу не поменяют на переход по ссылке
-                с token в query. См. отчёт по Стадии 1 (категория D). */}
+            {/* === ШАГ 2: ВВОД КОДА === */}
             {step === "code" && (
               <>
                 <div className="mt-4 mb-6 md:mt-0 text-center md:text-left">
@@ -186,26 +225,34 @@ export const ForgotPasswordPage = () => {
                 </div>
 
                 <div className="text-center md:text-left">
-                  <Button
-                    variant="text"
-                    size="xs"
-                    className="px-0 text-sm text-muted hover:text-foreground"
-                  >
-                    Получить код повторно через 00:59
-                  </Button>
-                  {/* Замени текст выше на этот, когда таймер истечет:
-                     <button className="text-sm text-primary hover:underline">Получить код повторно</button>
-                  */}
+                  {resendLeft > 0 ? (
+                    <span className="text-sm text-muted">
+                      Получить код повторно через 00:
+                      {String(resendLeft).padStart(2, "0")}
+                    </span>
+                  ) : (
+                    <button
+                      className="text-sm text-primary hover:underline disabled:opacity-50"
+                      disabled={requestResetMutation.isPending}
+                      onClick={() => requestResetMutation.mutate({ email })}
+                    >
+                      Получить код повторно
+                    </button>
+                  )}
                 </div>
 
                 <div className="mt-auto pt-10 md:mt-10">
                   <Button
                     className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
-                    onClick={() => setStep("new_password")}
-                    disabled={code.join("").length < 4}
+                    onClick={() =>
+                      verifyMutation.mutate({ email, code: code.join("") })
+                    }
+                    disabled={
+                      code.join("").length < 4 || verifyMutation.isPending
+                    }
                   >
-                    Подтвердить
+                    {verifyMutation.isPending ? "Проверка..." : "Подтвердить"}
                   </Button>
                 </div>
               </>
@@ -264,21 +311,28 @@ export const ForgotPasswordPage = () => {
                   <Button
                     className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
-                    onClick={() => setStep("success")}
-                    disabled={!isPasswordValid}
+                    onClick={() =>
+                      confirmMutation.mutate({
+                        email,
+                        code: code.join(""),
+                        password,
+                      })
+                    }
+                    disabled={!isPasswordValid || confirmMutation.isPending}
                   >
-                    Сохранить пароль
+                    {confirmMutation.isPending
+                      ? "Сохранение..."
+                      : "Сохранить пароль"}
                   </Button>
                 </div>
               </>
             )}
 
-            {/* === ШАГ 4: УСПЕХ (Твой 3-й скрин) === */}
+            {/* === ШАГ 4: УСПЕХ === */}
             {step === "success" && (
               <div className="flex flex-col items-center justify-center h-full my-auto py-10 md:py-20 text-center">
-                {/* Синий квадрат-заглушка вместо галочки */}
-                <div className="size-24 md:size-32 bg-[#ADD8E6] rounded-2xl mb-6 flex items-center justify-center">
-                  <span className="text-white text-xs">Иконка</span>
+                <div className="size-24 md:size-32 bg-primary-tint rounded-full mb-6 flex items-center justify-center">
+                  <CheckIcon className="size-12 md:size-16 [&_path]:stroke-primary" />
                 </div>
 
                 <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">

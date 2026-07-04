@@ -4,7 +4,9 @@ import { apiClient } from "../client";
 import {
   AuthResponse,
   LoginRequest,
+  PasswordResetConfirmRequest,
   PasswordResetRequest,
+  PasswordResetVerifyRequest,
   RefreshResponse,
   RegisterClientRequest,
   RegisterClinicRequest,
@@ -103,6 +105,28 @@ export const requestPasswordResetFn = async (
 ): Promise<{ detail: string }> => {
   const { data } = await apiClient.post<{ detail: string }>(
     "/api/auth/password-reset/",
+    body,
+  );
+  return data;
+};
+
+// Проверка кода из письма. 400 — неверный/истёкший код.
+export const verifyPasswordResetFn = async (
+  body: PasswordResetVerifyRequest,
+): Promise<{ detail: string }> => {
+  const { data } = await apiClient.post<{ detail: string }>(
+    "/api/auth/password-reset/verify/",
+    body,
+  );
+  return data;
+};
+
+// Финальный шаг: установка нового пароля по email+коду.
+export const confirmPasswordResetFn = async (
+  body: PasswordResetConfirmRequest,
+): Promise<{ detail: string }> => {
+  const { data } = await apiClient.post<{ detail: string }>(
+    "/api/auth/password-reset/confirm/",
     body,
   );
   return data;

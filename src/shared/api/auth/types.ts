@@ -20,6 +20,17 @@ export type PasswordResetRequest = {
   email: string;
 };
 
+export type PasswordResetVerifyRequest = {
+  email: string;
+  code: string;
+};
+
+export type PasswordResetConfirmRequest = {
+  email: string;
+  code: string;
+  password: string;
+};
+
 export type RegisterClientRequest = {
   first_name: string;
   last_name: string;
