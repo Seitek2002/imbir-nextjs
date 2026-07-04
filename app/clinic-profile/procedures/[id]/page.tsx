@@ -1,149 +1,120 @@
-﻿"use client";
+"use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
-import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicSidebar } from "@/widgets/clinic/sidebar";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
+import {
+  type ClinicServiceBody,
+  type ServiceListItem,
+  clinicCabinetKeys,
+  deleteClinicService,
+  getClinicServices,
+  updateClinicService,
+} from "@/shared/api";
+import { WarningIcon } from "@/shared/assets/icons";
+import { colors } from "@/shared/config";
 import { ConfirmDialog } from "@/shared/ui";
 
-type Specialist = {
-  id: string;
+type FormState = {
   name: string;
+  category: string;
+  price: string;
+  duration: string;
 };
 
-type TimeSlot = {
-  time: string;
-  selected: boolean;
-};
+const inp =
+  "w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors bg-white text-base";
+const lbl = "block text-muted text-xs mb-1";
 
-const MOCK_PROCEDURE_DATA = {
-  name: "Чистка лица",
-  photo: "/procedure-photo.jpg",
-  price: "1 700",
-  address: "г. Бишкек, ул. Тыныстанова, 189",
-  schedule: "ПН-ПТ, 10:00-17:00",
-  specialists: [
-    { id: "1", name: "Мамбетова Назгуль Бакытовна" },
-    { id: "2", name: "Мухамедова Мухаббат Раскуловна" },
-    { id: "3", name: "Нурбаев Данияр Кадырбаевич" },
-    { id: "4", name: "Сүюмбаева Арсен Акимович" },
-    { id: "5", name: "Токтогулова Жарыныай Мамакуловна" },
-    { id: "6", name: "Чолпонкулова Мейрамкан Бекешовна" },
-  ],
-};
-
-export default function ProcedureDetailsPage() {
+export default function EditProcedurePage() {
   const router = useRouter();
-  const params = useParams();
-  const id = params?.id as string;
+  const queryClient = useQueryClient();
+  const params = useParams<{ id: string }>() ?? { id: "" };
+  const serviceId = Number(params.id);
   const { profile } = useClinicCabinet();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [name, setName] = useState(MOCK_PROCEDURE_DATA.name);
-  const [photo, setPhoto] = useState<string | undefined>(
-    MOCK_PROCEDURE_DATA.photo,
-  );
-  const [price, setPrice] = useState(MOCK_PROCEDURE_DATA.price);
-  const [address, setAddress] = useState(MOCK_PROCEDURE_DATA.address);
-  const [schedule, setSchedule] = useState(MOCK_PROCEDURE_DATA.schedule);
-  const [specialists, setSpecialists] = useState<Specialist[]>(
-    MOCK_PROCEDURE_DATA.specialists,
-  );
-  const [scheduleType, setScheduleType] = useState<"online" | "offline">(
-    "online",
-  );
-  const [currentMonth, setCurrentMonth] = useState("Декабрь 2026");
-  const [selectedDays, setSelectedDays] = useState<number[]>([16, 19]);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [form, setForm] = useState<FormState | null>(null);
+  const [nameError, setNameError] = useState(false);
 
-  const [morningSlots, setMorningSlots] = useState<TimeSlot[]>([
-    { time: "08:00", selected: false },
-    { time: "09:00", selected: false },
-    { time: "10:00", selected: false },
-    { time: "11:00", selected: false },
-    { time: "12:00", selected: false },
-  ]);
+  // Отдельного GET /api/clinic/services/{id}/ нет — берём из общего списка.
+  const { data, isLoading } = useQuery({
+    queryKey: clinicCabinetKeys.services(),
+    queryFn: getClinicServices,
+  });
+  const service = (data?.data ?? []).find((s) => s.id === serviceId) ?? null;
 
-  const [afternoonSlots, setAfternoonSlots] = useState<TimeSlot[]>([
-    { time: "01:00", selected: false },
-    { time: "02:00", selected: false },
-    { time: "03:00", selected: true },
-    { time: "04:00", selected: false },
-    { time: "05:00", selected: false },
-  ]);
+  // Инициализация формы из найденной услуги (adjust-state-during-render).
+  const [synced, setSynced] = useState<ServiceListItem | null>(null);
+  if (service && service !== synced) {
+    setSynced(service);
+    setForm({
+      name: service.name,
+      category: service.category ?? "",
+      price: service.price ?? "",
+      duration: service.duration != null ? String(service.duration) : "",
+    });
+  }
 
-  const [eveningSlots, setEveningSlots] = useState<TimeSlot[]>([
-    { time: "06:00", selected: false },
-    { time: "07:00", selected: false },
-    { time: "08:00", selected: false },
-    { time: "09:00", selected: false },
-  ]);
+  const saveMutation = useMutation({
+    mutationFn: (body: ClinicServiceBody) =>
+      updateClinicService(serviceId, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.services() });
+      toast.success("Процедура сохранена");
+      router.push("/clinic-profile/procedures");
+    },
+    onError: (err: unknown) => {
+      const errData = (
+        err as { response?: { data?: Record<string, string[]> } }
+      )?.response?.data;
+      toast.error(
+        errData
+          ? Object.values(errData).flat()[0]
+          : "Не удалось сохранить. Попробуйте снова",
+      );
+    },
+  });
 
-  const daysInMonth = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-    22, 23, 24, 25, 26, 27, 28, 29, 30, 21,
-  ];
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhoto(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteClinicService(serviceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.services() });
+      toast.success("Процедура удалена");
+      router.push("/clinic-profile/procedures");
+    },
+    onError: () => toast.error("Не удалось удалить процедуру"),
+  });
 
   const handleSave = () => {
-    console.log("Save procedure data");
-    router.push("/clinic-profile/procedures");
-  };
-
-  const handleDelete = () => setConfirmOpen(true);
-
-  const removeSpecialist = (id: string) => {
-    setSpecialists((prev) => prev.filter((spec) => spec.id !== id));
-  };
-
-  const toggleDay = (day: number) => {
-    setSelectedDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
-    );
-  };
-
-  const toggleTimeSlot = (
-    type: "morning" | "afternoon" | "evening",
-    index: number,
-  ) => {
-    if (type === "morning") {
-      setMorningSlots((prev) =>
-        prev.map((slot, i) =>
-          i === index ? { ...slot, selected: !slot.selected } : slot,
-        ),
-      );
-    } else if (type === "afternoon") {
-      setAfternoonSlots((prev) =>
-        prev.map((slot, i) =>
-          i === index ? { ...slot, selected: !slot.selected } : slot,
-        ),
-      );
-    } else {
-      setEveningSlots((prev) =>
-        prev.map((slot, i) =>
-          i === index ? { ...slot, selected: !slot.selected } : slot,
-        ),
-      );
+    if (!form) return;
+    if (!form.name.trim()) {
+      setNameError(true);
+      return;
     }
+    setNameError(false);
+    saveMutation.mutate({
+      name: form.name.trim(),
+      category: form.category.trim(),
+      price: form.price.trim() || undefined,
+      duration: form.duration ? Number(form.duration) : undefined,
+      is_active: true,
+    });
   };
+
+  const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
+    setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
 
   return (
-    <div className="w-full max-w-[1440px] mx-auto px-4 md:px-10 py-8">
+    <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
       <h1 className="text-[40px] font-semibold text-foreground mb-8">
         Мой профиль
       </h1>
@@ -156,7 +127,6 @@ export default function ProcedureDetailsPage() {
         />
 
         <main className="flex-1 min-w-0">
-          {/* Header */}
           <div className="flex items-center gap-4 mb-6">
             <button
               onClick={() => router.back()}
@@ -166,7 +136,7 @@ export default function ProcedureDetailsPage() {
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M15 18L9 12L15 6"
-                  stroke="#191A1B"
+                  stroke={colors.foreground}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -175,365 +145,100 @@ export default function ProcedureDetailsPage() {
             </button>
 
             <h2 className="text-[32px] font-semibold text-foreground flex-1">
-              Назад
+              Редактировать процедуру
             </h2>
 
             <button
               onClick={handleSave}
-              className="px-6 py-3 rounded-full border border-border text-secondary font-medium hover:bg-surface transition-colors flex items-center gap-2"
+              disabled={saveMutation.isPending || !form}
+              className={`px-6 py-3 rounded-full font-medium transition-colors ${
+                saveMutation.isPending || !form
+                  ? "bg-dim text-white cursor-not-allowed"
+                  : "bg-primary text-white hover:bg-primary-dark"
+              }`}
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M11.3334 2.00001C11.5086 1.82491 11.7164 1.68605 11.9452 1.59129C12.174 1.49653 12.4193 1.44775 12.6667 1.44775C12.9142 1.44775 13.1595 1.49653 13.3883 1.59129C13.6171 1.68605 13.8249 1.82491 14.0001 2.00001C14.1752 2.17511 14.314 2.38293 14.4088 2.61173C14.5036 2.84053 14.5523 3.08584 14.5523 3.33334C14.5523 3.58084 14.5036 3.82615 14.4088 4.05495C14.314 4.28375 14.1752 4.49157 14.0001 4.66668L5.00008 13.6667L1.33341 14.6667L2.33341 11L11.3334 2.00001Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Редактировать
-            </button>
-
-            <button
-              onClick={handleDelete}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-primary-tint transition-colors"
-              aria-label="Удалить"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M2.5 5H4.16667M4.16667 5H17.5M4.16667 5V16.6667C4.16667 17.1087 4.34226 17.5326 4.65482 17.8452C4.96738 18.1577 5.39131 18.3333 5.83333 18.3333H14.1667C14.6087 18.3333 15.0326 18.1577 15.3452 17.8452C15.6577 17.5326 15.8333 17.1087 15.8333 16.6667V5H4.16667ZM6.66667 5V3.33333C6.66667 2.89131 6.84226 2.46738 7.15482 2.15482C7.46738 1.84226 7.89131 1.66667 8.33333 1.66667H11.6667C12.1087 1.66667 12.5326 1.84226 12.8452 2.15482C13.1577 2.46738 13.3333 2.89131 13.3333 3.33333V5"
-                  stroke="#F5653E"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              {saveMutation.isPending ? "Сохранение..." : "Сохранить"}
             </button>
           </div>
 
-          {/* Form */}
-          <div className="bg-white rounded-3xl p-8 border border-border space-y-6">
-            {/* Процедура */}
-            <div>
-              <label className="block text-foreground text-sm font-medium mb-2">
-                Процедура
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-border text-foreground focus:outline-none focus:border-primary transition-colors"
-              />
+          {isLoading ? (
+            <div className="bg-white rounded-3xl border border-border px-5 py-12 text-center text-muted">
+              Загрузка...
             </div>
-
-            {/* Фото процедуры */}
-            <div>
-              <label className="block text-foreground text-sm font-medium mb-2">
-                Фото процедуры
-              </label>
-              <div className="flex items-center gap-4">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-primary-tint border border-border flex items-center justify-center flex-shrink-0">
-                  {photo ? (
-                    <Image
-                      src={photo}
-                      alt={name}
-                      width={96}
-                      height={96}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                      <circle cx="20" cy="20" r="20" fill="#E5E6E8" />
-                    </svg>
-                  )}
-                </div>
+          ) : !service || !form ? (
+            <div className="bg-white rounded-3xl border border-border px-5 py-12 text-center text-muted">
+              Процедура не найдена
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl border border-border p-5 lg:p-8 flex flex-col gap-4">
+              <div>
+                <label className={lbl}>Название процедуры</label>
                 <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  className="hidden"
+                  value={form.name}
+                  onChange={(e) => set("name", e.target.value)}
+                  placeholder="Введите название"
+                  className={`${inp} ${nameError ? "border-red-400" : ""}`}
                 />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 rounded-full border border-border text-secondary text-sm hover:bg-surface transition-colors flex items-center gap-2"
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path
-                      d="M11.3334 2.00001C11.5086 1.82491 11.7164 1.68605 11.9452 1.59129C12.174 1.49653 12.4193 1.44775 12.6667 1.44775C12.9142 1.44775 13.1595 1.49653 13.3883 1.59129C13.6171 1.68605 13.8249 1.82491 14.0001 2.00001C14.1752 2.17511 14.314 2.38293 14.4088 2.61173C14.5036 2.84053 14.5523 3.08584 14.5523 3.33334C14.5523 3.58084 14.5036 3.82615 14.4088 4.05495C14.314 4.28375 14.1752 4.49157 14.0001 4.66668L5.00008 13.6667L1.33341 14.6667L2.33341 11L11.3334 2.00001Z"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  Новое фото
-                </button>
-              </div>
-            </div>
-
-            {/* Стоимость */}
-            <div>
-              <label className="block text-foreground text-sm font-medium mb-2">
-                Стоимость
-              </label>
-              <input
-                type="text"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-border text-foreground focus:outline-none focus:border-primary transition-colors"
-              />
-            </div>
-
-            {/* Адрес */}
-            <div>
-              <label className="block text-foreground text-sm font-medium mb-2">
-                Адрес
-              </label>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-border text-foreground focus:outline-none focus:border-primary transition-colors"
-              />
-            </div>
-
-            {/* График работы */}
-            <div>
-              <label className="block text-foreground text-sm font-medium mb-2">
-                График работы
-              </label>
-              <input
-                type="text"
-                value={schedule}
-                onChange={(e) => setSchedule(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-border text-foreground focus:outline-none focus:border-primary transition-colors"
-              />
-            </div>
-
-            {/* Специалисты */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="block text-foreground text-sm font-medium">
-                  Специалисты, выполняющие услугу
-                </label>
-                <button className="text-primary text-sm font-medium hover:text-primary-dark transition-colors flex items-center gap-1">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path
-                      d="M8 3.33334V12.6667M3.33333 8H12.6667"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  Добавить специалиста
-                </button>
-              </div>
-              <div className="space-y-2">
-                {specialists.map((specialist) => (
-                  <div
-                    key={specialist.id}
-                    className="flex items-center justify-between px-4 py-3 rounded-2xl bg-surface"
-                  >
-                    <span className="text-foreground text-base">
-                      {specialist.name}
-                    </span>
-                    <button
-                      onClick={() => removeSpecialist(specialist.id)}
-                      className="text-dim hover:text-primary transition-colors"
-                    >
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                      >
-                        <path
-                          d="M15 5L5 15M5 5L15 15"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* График процедуры */}
-            <div>
-              <label className="block text-foreground text-sm font-medium mb-3">
-                График процедуры
-              </label>
-
-              {/* Онлайн/Оффлайн табы */}
-              <div className="inline-flex gap-0 mb-6 bg-surface rounded-full p-1">
-                <button
-                  onClick={() => setScheduleType("online")}
-                  className={`px-8 py-2.5 rounded-full font-medium text-sm transition-all ${
-                    scheduleType === "online"
-                      ? "bg-white text-foreground shadow-sm"
-                      : "bg-transparent text-secondary"
-                  }`}
-                >
-                  Онлайн
-                </button>
-                <button
-                  onClick={() => setScheduleType("offline")}
-                  className={`px-8 py-2.5 rounded-full font-medium text-sm transition-all ${
-                    scheduleType === "offline"
-                      ? "bg-white text-foreground shadow-sm"
-                      : "bg-transparent text-secondary"
-                  }`}
-                >
-                  Оффлайн
-                </button>
+                {nameError && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Название обязательно
+                  </p>
+                )}
               </div>
 
-              <div className="flex gap-6">
-                {/* Календарь */}
-                <div
-                  className="bg-[#FAFAFA] rounded-3xl border border-border p-5 flex-shrink-0"
-                  style={{ width: "340px" }}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <button className="w-8 h-8 hover:bg-white rounded-lg transition-colors flex items-center justify-center">
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                      >
-                        <path
-                          d="M10 12L6 8L10 4"
-                          stroke="#191A1B"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                    <span className="text-foreground font-semibold text-base">
-                      {currentMonth}
-                    </span>
-                    <button className="w-8 h-8 hover:bg-white rounded-lg transition-colors flex items-center justify-center">
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                      >
-                        <path
-                          d="M6 4L10 8L6 12"
-                          stroke="#191A1B"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+              <div>
+                <label className={lbl}>Категория / специализация</label>
+                <input
+                  value={form.category}
+                  onChange={(e) => set("category", e.target.value)}
+                  placeholder="Например: Гастроэнтерология"
+                  className={inp}
+                />
+              </div>
 
-                  <div className="grid grid-cols-7 gap-1.5 mb-2">
-                    {["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"].map((day) => (
-                      <div
-                        key={day}
-                        className="text-center text-muted text-xs font-medium h-8 flex items-center justify-center"
-                      >
-                        {day}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="grid grid-cols-7 gap-1.5">
-                    {daysInMonth.map((day) => (
-                      <button
-                        key={day}
-                        onClick={() => toggleDay(day)}
-                        className={`h-10 rounded-xl text-sm font-medium transition-all ${
-                          selectedDays.includes(day)
-                            ? "bg-primary text-white shadow-sm"
-                            : "bg-white hover:bg-surface text-foreground"
-                        }`}
-                      >
-                        {day.toString().padStart(2, "0")}
-                      </button>
-                    ))}
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={lbl}>Цена, сом</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.price}
+                    onChange={(e) => set("price", e.target.value)}
+                    placeholder="0"
+                    className={inp}
+                  />
                 </div>
-
-                {/* Временные слоты */}
-                <div className="flex-1 space-y-5">
-                  {/* Morning */}
-                  <div>
-                    <p className="text-muted text-sm font-medium mb-3">
-                      Morning
-                    </p>
-                    <div className="flex gap-2 flex-wrap">
-                      {morningSlots.map((slot, index) => (
-                        <button
-                          key={slot.time}
-                          onClick={() => toggleTimeSlot("morning", index)}
-                          className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                            slot.selected
-                              ? "bg-primary text-white shadow-sm"
-                              : "bg-surface text-secondary hover:bg-border"
-                          }`}
-                        >
-                          {slot.time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Afternoon */}
-                  <div>
-                    <p className="text-muted text-sm font-medium mb-3">
-                      Afternoon
-                    </p>
-                    <div className="flex gap-2 flex-wrap">
-                      {afternoonSlots.map((slot, index) => (
-                        <button
-                          key={slot.time}
-                          onClick={() => toggleTimeSlot("afternoon", index)}
-                          className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                            slot.selected
-                              ? "bg-primary text-white shadow-sm"
-                              : "bg-surface text-secondary hover:bg-border"
-                          }`}
-                        >
-                          {slot.time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Evening */}
-                  <div>
-                    <p className="text-muted text-sm font-medium mb-3">
-                      Evening
-                    </p>
-                    <div className="flex gap-2 flex-wrap">
-                      {eveningSlots.map((slot, index) => (
-                        <button
-                          key={slot.time}
-                          onClick={() => toggleTimeSlot("evening", index)}
-                          className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                            slot.selected
-                              ? "bg-primary text-white shadow-sm"
-                              : "bg-surface text-secondary hover:bg-border"
-                          }`}
-                        >
-                          {slot.time}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                <div>
+                  <label className={lbl}>Длительность, минут</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.duration}
+                    onChange={(e) => set("duration", e.target.value)}
+                    placeholder="30"
+                    className={inp}
+                  />
                 </div>
               </div>
+
+              <p className="text-xs text-muted">
+                Фото процедуры и её расписание — в разработке (ждём поля на
+                бэкенде).
+              </p>
+
+              <div className="border-t border-background pt-4">
+                <button
+                  onClick={() => setConfirmOpen(true)}
+                  disabled={deleteMutation.isPending}
+                  className="text-red-500 text-sm font-medium hover:underline disabled:opacity-50"
+                >
+                  {deleteMutation.isPending
+                    ? "Удаление..."
+                    : "Удалить процедуру"}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
 
@@ -541,13 +246,14 @@ export default function ProcedureDetailsPage() {
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => {
-          console.log("Delete procedure", id);
-          router.push("/clinic-profile/procedures");
+          setConfirmOpen(false);
+          deleteMutation.mutate();
         }}
+        icon={<WarningIcon className="w-7 h-7 [&_path]:stroke-primary" />}
         title="Удалить процедуру?"
-        description="Это действие нельзя отменить"
-        confirmLabel="Удалить"
-        cancelLabel="Отмена"
+        description="Действие нельзя отменить — процедура исчезнет из списка услуг клиники"
+        confirmLabel="Да, удалить"
+        cancelLabel="Назад"
       />
     </div>
   );
