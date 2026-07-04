@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
@@ -46,22 +46,24 @@ export const DoctorProfessionalInfoPage: FC = () => {
     paymentMethods: "",
   });
 
-  useEffect(() => {
-    if (profile) {
-      setD({
-        specialty: profile.specialty,
-        additionalSpecialty: profile.additionalSpecialty,
-        experienceYears: profile.experienceYears,
-        currentPosition: profile.currentPosition,
-        workplace: profile.workplace,
-        qualification: profile.qualification,
-        scientificDegree: profile.scientificDegree,
-        equipment: profile.equipment,
-        patientConditions: profile.patientConditions,
-        paymentMethods: profile.paymentMethods,
-      });
-    }
-  }, [profile]);
+  // Синхронизация формы с профилем прямо в рендере (рекомендованный паттерн
+  // «adjust state during render» вместо setState в эффекте).
+  const [syncedProfile, setSyncedProfile] = useState(profile);
+  if (profile && profile !== syncedProfile) {
+    setSyncedProfile(profile);
+    setD({
+      specialty: profile.specialty,
+      additionalSpecialty: profile.additionalSpecialty,
+      experienceYears: profile.experienceYears,
+      currentPosition: profile.currentPosition,
+      workplace: profile.workplace,
+      qualification: profile.qualification,
+      scientificDegree: profile.scientificDegree,
+      equipment: profile.equipment,
+      patientConditions: profile.patientConditions,
+      paymentMethods: profile.paymentMethods,
+    });
+  }
 
   const set = <K extends keyof D>(k: K, v: D[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));
