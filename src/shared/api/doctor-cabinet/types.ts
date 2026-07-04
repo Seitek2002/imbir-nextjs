@@ -65,6 +65,13 @@ export type DoctorStats = {
   completion_rate: number;
 };
 
+// Итоги приёма (GET/PATCH /api/doctor/appointments/{id}/summary/).
+export type DoctorAppointmentSummary = {
+  diagnosis: string;
+  recommendations: string;
+  doctor_notes: string;
+};
+
 export type DoctorAppointmentFilters = {
   status?: "upcoming" | "completed" | "cancelled" | "all";
   date_from?: string;

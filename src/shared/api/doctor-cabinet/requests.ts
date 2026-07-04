@@ -4,6 +4,7 @@ import { PaginatedResponse } from "../types";
 import {
   DoctorAppointment,
   DoctorAppointmentFilters,
+  DoctorAppointmentSummary,
   DoctorPatient,
   DoctorPatientFilters,
   DoctorPrivateProfile,
@@ -117,6 +118,27 @@ export const getDoctorPatients = async (
   const { data } = await apiClient.get<PaginatedResponse<DoctorPatient>>(
     "/api/doctor/patients/",
     { params: filters },
+  );
+  return data;
+};
+
+// Итоги приёма: диагноз/рекомендации/заметки врача по конкретной записи.
+export const getAppointmentSummary = async (
+  id: number,
+): Promise<DoctorAppointmentSummary> => {
+  const { data } = await apiClient.get<DoctorAppointmentSummary>(
+    `/api/doctor/appointments/${id}/summary/`,
+  );
+  return data;
+};
+
+export const updateAppointmentSummary = async (
+  id: number,
+  body: Partial<DoctorAppointmentSummary>,
+): Promise<DoctorAppointmentSummary> => {
+  const { data } = await apiClient.patch<DoctorAppointmentSummary>(
+    `/api/doctor/appointments/${id}/summary/`,
+    body,
   );
   return data;
 };
