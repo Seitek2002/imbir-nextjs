@@ -15,6 +15,16 @@ export const createAppointment = async (
   return data;
 };
 
+// Одна запись — для проверки статуса/ссылки Meet после оформления.
+export const getAppointmentById = async (
+  id: number,
+): Promise<AppointmentResponse> => {
+  const { data } = await apiClient.get<AppointmentResponse>(
+    `/api/appointments/${id}/`,
+  );
+  return data;
+};
+
 export const cancelAppointment = async (
   id: number,
   body: CancelAppointmentRequest = { status: "cancelled" },

@@ -524,6 +524,7 @@ export const useRecordForm = () => {
     showSuccess,
     setShowSuccess,
     googleMeetLink: appointmentResult?.google_meet_link ?? null,
+    appointmentResult,
     canUseOnline,
     clinicMap,
     selectedClinic,

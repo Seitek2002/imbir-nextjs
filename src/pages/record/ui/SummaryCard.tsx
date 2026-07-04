@@ -1,9 +1,14 @@
 "use client";
 
 import { FC, useState } from "react";
+import toast from "react-hot-toast";
 
 import Image from "next/image";
 
+import { useMutation } from "@tanstack/react-query";
+
+import { getAppointmentById } from "@/shared/api";
+import type { AppointmentStatus } from "@/shared/api";
 import { CalendarIcon } from "@/shared/assets/icons";
 import { Button } from "@/shared/ui";
 
@@ -11,19 +16,44 @@ import { formatDateLabel, formatPrice } from "../model/lib";
 import type { Doctor, Service } from "../model/types";
 import { type ConsultationMode } from "./appointment-datetime-picker";
 
+const STATUS_LABELS: Record<AppointmentStatus, string> = {
+  pending: "Ожидает подтверждения",
+  confirmed: "Подтверждена",
+  upcoming: "Предстоит",
+  completed: "Завершена",
+  cancelled: "Отменена",
+};
+
 export const SummaryCard: FC<{
   doctor: Doctor;
   service: Service;
   mode: ConsultationMode;
   selectedDate: Date | null;
   selectedTime: string | null;
-}> = ({ doctor, service, mode, selectedDate, selectedTime }) => {
-  const [isChecking, setIsChecking] = useState(false);
+  // Появляются после успешного оформления — включают реальную проверку статуса.
+  appointmentId?: number | null;
+  initialStatus?: AppointmentStatus | null;
+}> = ({
+  doctor,
+  service,
+  mode,
+  selectedDate,
+  selectedTime,
+  appointmentId,
+  initialStatus,
+}) => {
+  const [status, setStatus] = useState<AppointmentStatus | null>(null);
 
-  const handleCheckStatus = () => {
-    setIsChecking(true);
-    setTimeout(() => setIsChecking(false), 3000);
-  };
+  const { mutate: checkStatus, isPending: isChecking } = useMutation({
+    mutationFn: () => getAppointmentById(appointmentId as number),
+    onSuccess: (appointment) => setStatus(appointment.status),
+    onError: () => toast.error("Не удалось проверить статус. Попробуйте позже"),
+  });
+
+  const shownStatus = status ?? initialStatus ?? null;
+  const statusLabel = shownStatus
+    ? (STATUS_LABELS[shownStatus] ?? shownStatus)
+    : "Не оформлена";
 
   return (
     <aside className="relative border border-border-soft rounded-3xl bg-white overflow-hidden lg:sticky lg:top-6 flex flex-col lg:w-100 lg:h-128.75">
@@ -96,19 +126,21 @@ export const SummaryCard: FC<{
           <div className="flex items-center justify-between text-sm text-secondary">
             <span>Статус</span>
             <span className="px-2.5 py-1 rounded-full bg-[#FFF3EE] text-primary text-xs font-medium">
-              Ожидает оплаты
+              {statusLabel}
             </span>
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          className="w-full justify-center mt-3 text-foreground"
-          disabled={isChecking}
-          onClick={handleCheckStatus}
-        >
-          Проверить статус
-        </Button>
+        {appointmentId != null && (
+          <Button
+            variant="outline"
+            className="w-full justify-center mt-3 text-foreground"
+            disabled={isChecking}
+            onClick={() => checkStatus()}
+          >
+            {isChecking ? "Проверяем..." : "Проверить статус"}
+          </Button>
+        )}
       </div>
     </aside>
   );

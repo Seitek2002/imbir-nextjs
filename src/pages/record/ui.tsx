@@ -29,6 +29,7 @@ export const RecordPage = () => {
     showSuccess,
     setShowSuccess,
     googleMeetLink,
+    appointmentResult,
   } = form;
 
   return (
@@ -68,6 +69,8 @@ export const RecordPage = () => {
                 mode={mode}
                 selectedDate={selectedDate}
                 selectedTime={selectedTime}
+                appointmentId={appointmentResult?.id ?? null}
+                initialStatus={appointmentResult?.status ?? null}
               />
             )}
           </div>
