@@ -49,10 +49,12 @@ export const getProfileAppointments = async (
 };
 
 export const getFavorites = async (): Promise<FavoriteItem[]> => {
-  const { data } = await apiClient.get<FavoriteItem[]>(
+  // Этот эндпоинт оборачивает список в { data: [...] } (в отличие от прочих
+  // списков, отдающих голый массив). Разворачиваем и подстраховываемся.
+  const { data } = await apiClient.get<{ data: FavoriteItem[] }>(
     "/api/profile/favorites/",
   );
-  return data;
+  return Array.isArray(data?.data) ? data.data : [];
 };
 
 export const addFavorite = async (
