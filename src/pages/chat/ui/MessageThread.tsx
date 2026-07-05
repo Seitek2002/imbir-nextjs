@@ -59,6 +59,51 @@ const MessageBubble: FC<{ message: ChatThreadMessage }> = ({ message }) => (
   </div>
 );
 
+// Первая ссылка в тексте уведомления — обычно приглашение в видеовстречу.
+const URL_RE = /(https?:\/\/\S+)/;
+
+// Системное уведомление (sender === null): плашка по центру ленты.
+// Ссылку на видеовстречу выносим в кнопку «Присоединиться».
+const SystemNotice: FC<{ message: ChatThreadMessage }> = ({ message }) => {
+  const url = message.content.match(URL_RE)?.[0] ?? null;
+  // Текст без ссылки — чтобы она не дублировалась под кнопкой.
+  const text = message.content.replace(URL_RE, "").replace(/\s+$/, "").trim();
+
+  return (
+    <div className="self-center max-w-[85%] my-1 flex flex-col items-center gap-2">
+      <div className="bg-[#EEF3FF] text-foreground text-xs leading-normal text-center px-4 py-2 rounded-xl whitespace-pre-wrap break-words">
+        {text || message.content}
+      </div>
+      {url && (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 bg-primary text-white text-xs font-medium px-4 py-2 rounded-full transition-opacity hover:opacity-90"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M23 7l-7 5 7 5V7z" />
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+          </svg>
+          Присоединиться
+        </a>
+      )}
+      <span className="text-[11px] text-muted">
+        {formatMessageTime(message.createdAt)}
+      </span>
+    </div>
+  );
+};
+
 const TypingBubble = () => (
   <div className="self-start bg-background rounded-2xl rounded-bl-sm px-4 py-3">
     <div className="flex gap-1">
@@ -114,9 +159,13 @@ export const MessageThread: FC<Props> = ({
         <p className="text-center text-sm text-muted mt-8">{emptyHint}</p>
       )}
 
-      {messages.map((message) => (
-        <MessageBubble key={message.id} message={message} />
-      ))}
+      {messages.map((message) =>
+        message.isSystem ? (
+          <SystemNotice key={message.id} message={message} />
+        ) : (
+          <MessageBubble key={message.id} message={message} />
+        ),
+      )}
 
       {pendingReply && <TypingBubble />}
 

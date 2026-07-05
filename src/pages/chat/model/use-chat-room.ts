@@ -68,8 +68,10 @@ export const useChatRoom = (
             id: message.id,
             content: message.content,
             createdAt: message.created_at,
-            isMine: message.sender.id === currentUserId,
+            // sender === null — системное уведомление, ничьё.
+            isMine: message.sender?.id === currentUserId,
             isRead: message.is_read,
+            isSystem: message.sender === null,
           })),
         );
       })
@@ -124,16 +126,20 @@ export const useChatRoom = (
         return;
       }
 
+      const sender = payload.sender;
+
       // The server echoes our own messages — we already render them optimistically.
-      if (payload.sender.id === currentUserId) return;
+      if (sender && sender.id === currentUserId) return;
 
       // Пришло сообщение — собеседник закончил печатать, снимаем его статус.
-      clearTimeout(typingTimersRef.current[payload.sender.id]);
-      setTypingUsers((prev) => {
-        const next = { ...prev };
-        delete next[payload.sender.id];
-        return next;
-      });
+      if (sender) {
+        clearTimeout(typingTimersRef.current[sender.id]);
+        setTypingUsers((prev) => {
+          const next = { ...prev };
+          delete next[sender.id];
+          return next;
+        });
+      }
 
       setMessages((prev) => [
         ...prev,
@@ -142,6 +148,8 @@ export const useChatRoom = (
           content: payload.content,
           createdAt: payload.created_at,
           isMine: false,
+          // sender === null — системное уведомление (напр. онлайн-запись).
+          isSystem: sender === null,
         },
       ]);
     };

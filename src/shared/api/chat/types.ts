@@ -19,7 +19,8 @@ export type ChatRoom = {
 
 export type ChatMessage = {
   id: number;
-  sender: ChatParticipant;
+  // null — системное уведомление (напр. о созданной онлайн-записи).
+  sender: ChatParticipant | null;
   content: string;
   created_at: string;
   is_read: boolean;
@@ -38,7 +39,8 @@ export type OutgoingChatMessage = {
 
 export type IncomingChatMessage = {
   id: number;
-  sender: ChatParticipant;
+  // null — системное уведомление (напр. о созданной онлайн-записи).
+  sender: ChatParticipant | null;
   content: string;
   created_at: string;
   // Обычное сообщение приходит без type (или с "message"); typing — отдельно.

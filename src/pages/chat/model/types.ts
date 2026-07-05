@@ -6,6 +6,8 @@ export type ChatThreadMessage = {
   createdAt: string;
   isMine: boolean;
   isRead?: boolean;
+  // Системное уведомление (sender === null) — рендерится плашкой по центру.
+  isSystem?: boolean;
 };
 
 // A row in the conversation list. The AI assistant is a synthetic "room 0".
