@@ -41,7 +41,25 @@ export type IncomingChatMessage = {
   sender: ChatParticipant;
   content: string;
   created_at: string;
+  // Обычное сообщение приходит без type (или с "message"); typing — отдельно.
+  type?: "message";
 };
+
+// Индикатор «печатает…» — тот же сокет, поле type различает кадр.
+export type TypingOutgoing = {
+  type: "typing";
+  is_typing: boolean;
+};
+
+export type TypingIncoming = {
+  type: "typing";
+  user_id: number;
+  user_name: string;
+  is_typing: boolean;
+};
+
+// Любой кадр из сокета комнаты: сообщение или событие typing.
+export type IncomingSocketFrame = IncomingChatMessage | TypingIncoming;
 
 // ── AI assistant chat (room 0) ──────────────────────────────────────────────
 
