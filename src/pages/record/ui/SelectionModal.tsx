@@ -15,6 +15,7 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
     setModalDraftSelection,
     closeModal,
     applyModalSelection,
+    isDoctorModalLoading,
   } = form;
 
   if (!modalConfig) return null;
@@ -46,7 +47,11 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
         </div>
 
         <div className="mt-3 max-h-95 overflow-y-auto pr-1 space-y-2">
-          {filteredModalItems.length > 0 ? (
+          {isDoctorModalLoading ? (
+            <p className="text-sm text-muted text-center py-6">
+              Загрузка врачей клиники...
+            </p>
+          ) : filteredModalItems.length > 0 ? (
             filteredModalItems.map((item) => (
               <SelectionListItem
                 key={item.id}

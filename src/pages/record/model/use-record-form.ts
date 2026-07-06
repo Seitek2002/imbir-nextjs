@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   api,
   createAppointment,
+  getClinicById,
   getDoctorAvailableSlots,
   getServices,
   profileKeys,
@@ -101,6 +102,14 @@ export const useRecordForm = () => {
     queryFn: () => api.getDoctors({ city: selectedCity, page_size: 200 }),
   });
 
+  // Детали выбранной клиники — источник её списка врачей для шага «Выберите
+  // специалиста». Пока клиника не выбрана, запрос не идёт.
+  const { data: clinicDetail, isLoading: isLoadingClinicDoctors } = useQuery({
+    queryKey: ["record-clinic-detail", selectedClinicId],
+    queryFn: () => getClinicById(selectedClinicId as string),
+    enabled: Boolean(selectedClinicId),
+  });
+
   const { data: servicesRaw } = useQuery({
     queryKey: ["record-services", selectedClinicId, selectedDoctorId],
     queryFn: () =>
@@ -155,6 +164,19 @@ export const useRecordForm = () => {
     image: d.image ?? "",
   }));
 
+  // Врачи выбранной клиники (GET /api/clinics/{id}/). Когда клиника выбрана,
+  // именно этот список показываем в «Выберите специалиста», а не всех по городу.
+  const CLINIC_DOCTORS: Doctor[] = (clinicDetail?.doctors ?? []).map((d) => ({
+    id: String(d.id),
+    clinicId: selectedClinicId ?? "",
+    name: d.full_name,
+    specialty: d.specialty,
+    rating: d.rating,
+    reviews: 0,
+    experience: d.experience_years,
+    image: d.photo ?? "",
+  }));
+
   const SERVICES: Service[] = (servicesRaw?.data ?? []).map((s) => ({
     id: String(s.id),
     clinicId: "",
@@ -192,21 +214,28 @@ export const useRecordForm = () => {
     () => CLINICS.find((clinic) => clinic.id === selectedClinicId) ?? null,
     [CLINICS, selectedClinicId],
   );
+  // Пул для поиска: если клиника выбрана — её врачи, иначе все по городу.
+  // Объединяем, чтобы выбранный врач нашёлся, даже если детали клиники ещё
+  // грузятся или врач был выбран до выбора клиники (deep link).
+  const doctorPool = useMemo(
+    () => [...CLINIC_DOCTORS, ...DOCTORS],
+    [CLINIC_DOCTORS, DOCTORS],
+  );
+
   const selectedDoctor = useMemo(
-    () => DOCTORS.find((doctor) => doctor.id === selectedDoctorId) ?? null,
-    [DOCTORS, selectedDoctorId],
+    () => doctorPool.find((doctor) => doctor.id === selectedDoctorId) ?? null,
+    [doctorPool, selectedDoctorId],
   );
   const selectedService = useMemo(
     () => SERVICES.find((service) => service.id === selectedServiceId) ?? null,
     [SERVICES, selectedServiceId],
   );
 
+  // Клиника выбрана → список врачей из GET /api/clinics/{id}/;
+  // иначе — все врачи города.
   const doctorOptions = useMemo(
-    () =>
-      DOCTORS.filter(
-        (doctor) => !selectedClinicId || doctor.clinicId === selectedClinicId,
-      ),
-    [DOCTORS, selectedClinicId],
+    () => (selectedClinicId ? CLINIC_DOCTORS : DOCTORS),
+    [selectedClinicId, CLINIC_DOCTORS, DOCTORS],
   );
 
   const serviceOptions = SERVICES;
@@ -214,37 +243,24 @@ export const useRecordForm = () => {
   const isStep2Complete = Boolean(selectedDate) && Boolean(selectedTime);
 
   const applyClinicSelection = (clinicId: string) => {
+    if (clinicId === selectedClinicId) return;
+
     setSelectedClinicId(clinicId);
-
-    const matchedDoctor = DOCTORS.find(
-      (doctor) =>
-        doctor.id === selectedDoctorId && doctor.clinicId === clinicId,
-    );
-
-    if (!matchedDoctor) {
-      setSelectedDoctorId(null);
-      setSelectedServiceId(null);
-      return;
-    }
-
-    const matchedService = SERVICES.find(
-      (service) =>
-        service.id === selectedServiceId &&
-        service.clinicId === clinicId &&
-        service.doctorIds.includes(matchedDoctor.id),
-    );
-
-    if (!matchedService) {
-      setSelectedServiceId(null);
-    }
+    // Врачи берутся из выбранной клиники (свой список, грузится отдельно),
+    // поэтому прежний врач и услуга могут к ней не относиться — сбрасываем,
+    // чтобы пользователь выбрал специалиста заново из списка этой клиники.
+    setSelectedDoctorId(null);
+    setSelectedServiceId(null);
   };
 
   const applyDoctorSelection = (doctorId: string) => {
-    const matchedDoctor = DOCTORS.find((doctor) => doctor.id === doctorId);
+    const matchedDoctor = doctorPool.find((doctor) => doctor.id === doctorId);
     if (!matchedDoctor) return;
 
     setSelectedDoctorId(doctorId);
-    if (selectedClinicId !== matchedDoctor.clinicId) {
+    // Врач выбран первым (без клиники) — подтягиваем его клинику из места
+    // работы. Если клиника уже выбрана, врач из её же списка — не трогаем.
+    if (matchedDoctor.clinicId && selectedClinicId !== matchedDoctor.clinicId) {
       setSelectedClinicId(matchedDoctor.clinicId);
     }
 
@@ -535,6 +551,11 @@ export const useRecordForm = () => {
     filteredModalItems,
     mobileStep1Config,
     filteredMobileStep1Items,
+    // Список врачей выбранной клиники грузится отдельным запросом — показываем
+    // загрузку вместо «Ничего не найдено», пока он не пришёл.
+    isDoctorModalLoading: activeModal === "doctor" && isLoadingClinicDoctors,
+    isDoctorStageLoading:
+      mobileSelectionStage === "doctor" && isLoadingClinicDoctors,
     handleMobileStep1Select,
     handleMobileStep1Continue,
     handleRecordBack,

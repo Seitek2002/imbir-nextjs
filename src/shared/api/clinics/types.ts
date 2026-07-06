@@ -13,6 +13,16 @@ export type ClinicBranch = {
   coordinates?: { lat: number; lng: number };
 };
 
+// Врач в составе карточки клиники (GET /api/clinics/{id}/ → doctors[]).
+export type ClinicDoctor = {
+  id: number;
+  full_name: string;
+  photo: string | null;
+  specialty: string;
+  rating: number;
+  experience_years: number;
+};
+
 export type ClinicListItem = {
   id: number;
   name: string;
@@ -39,6 +49,8 @@ export type ClinicDetail = ClinicListItem & {
   payment_methods: string[];
   location: { lat: number; lng: number } | null;
   branches: ClinicBranch[];
+  // Врачи именно этой клиники — источник списка «Выберите специалиста».
+  doctors: ClinicDoctor[];
 };
 
 export type ClinicFilters = {

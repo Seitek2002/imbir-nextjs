@@ -20,6 +20,7 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
     clinicMap,
     handleMobileStep1Select,
     handleMobileStep1Continue,
+    isDoctorStageLoading,
   } = form;
 
   return (
@@ -67,7 +68,11 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
         </div>
 
         <div className="mt-3 max-h-[52vh] overflow-y-auto pr-1 space-y-2">
-          {filteredMobileStep1Items.length > 0 ? (
+          {isDoctorStageLoading ? (
+            <p className="text-sm text-muted text-center py-6">
+              Загрузка врачей клиники...
+            </p>
+          ) : filteredMobileStep1Items.length > 0 ? (
             filteredMobileStep1Items.map((item) => (
               <SelectionListItem
                 key={item.id}
