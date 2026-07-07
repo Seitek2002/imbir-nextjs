@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 
@@ -58,19 +58,22 @@ export const Hero: FC = () => {
           </Link>
 
           <div className="border border-primary rounded-3xl bg-white p-4 w-full md:w-105 flex flex-col gap-4">
-            <div className="flex items-center gap-3">
+            <Link
+              href={ROUTES.CHATS}
+              className="flex items-center gap-3 group cursor-pointer"
+            >
               <div className="w-12 h-12 overflow-hidden rounded-full shrink-0">
                 <Image
                   src={HeroAssiatant}
                   alt=""
                   sizes="48px"
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover object-top group-hover:opacity-90 transition-opacity"
                 />
               </div>
-              <p className="text-sm text-secondary leading-tight">
+              <p className="text-sm text-secondary leading-tight group-hover:text-primary transition-colors">
                 Что вас беспокоит? <br /> Я помогу подобрать вам специалиста
               </p>
-            </div>
+            </Link>
 
             <input
               value={symptom}
@@ -80,7 +83,13 @@ export const Hero: FC = () => {
               className="w-full px-4 py-2.5 rounded-full border border-border text-sm text-foreground outline-none focus:border-primary transition-colors"
             />
 
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center">
+              <Link
+                href={ROUTES.CHATS}
+                className="text-sm text-primary hover:underline font-medium"
+              >
+                Перейти в чат
+              </Link>
               <Button size="sm" onClick={askAssistant}>
                 Описать симптомы
               </Button>
