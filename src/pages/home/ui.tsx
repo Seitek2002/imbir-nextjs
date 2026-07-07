@@ -1,4 +1,4 @@
-﻿import { Suspense } from "react";
+import { Suspense } from "react";
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -54,7 +54,7 @@ export const HomePage = () => {
         <Banners />
       </LazyInView>
 
-      <LazyInView minHeight={380} className="max-w-340 mx-auto">
+      <LazyInView minHeight={380} className="w-full">
         <VideosSwiper
           title="Интервью"
           viewAllHref="/videos"

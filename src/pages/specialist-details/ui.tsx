@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC } from "react";
 import toast from "react-hot-toast";
@@ -384,6 +384,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               viewAllHref={ROUTES.VIDEOS}
               description="Ознакомьтесь с интересными материалами"
               videos={blogVideos}
+              className="px-0 md:px-0"
             />
           )}
         </div>

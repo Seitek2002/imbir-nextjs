@@ -1,8 +1,10 @@
-﻿"use client";
+"use client";
 
 import { FC } from "react";
 
 import Link from "next/link";
+
+import { cn } from "@/shared/lib/utils";
 
 import { VideoCard } from "./video/ui";
 
@@ -20,6 +22,7 @@ type Props = {
   description?: string;
   videos: Video[];
   viewAllHref?: string;
+  className?: string;
 };
 
 export const VideosSwiper: FC<Props> = ({
@@ -27,9 +30,15 @@ export const VideosSwiper: FC<Props> = ({
   description,
   videos,
   viewAllHref,
+  className,
 }) => {
   return (
-    <section className="flex flex-col gap-6 w-full px-4">
+    <section
+      className={cn(
+        "flex flex-col gap-6 w-full max-w-360 mx-auto px-4 md:px-10",
+        className,
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex flex-col gap-1.5">
           <h2 className="font-semibold text-xl md:text-[28px] text-foreground leading-tight">
