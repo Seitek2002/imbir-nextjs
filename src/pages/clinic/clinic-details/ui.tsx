@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 import toast from "react-hot-toast";
@@ -187,13 +187,34 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
 
             <div className="flex flex-col gap-4">
               <div className="relative flex overflow-x-auto md:overflow-hidden snap-x snap-mandatory scrollbar-hide h-85 md:h-100 w-full md:rounded-3xl bg-border-soft">
-                {/* Главное фото */}
-                <Image
-                  src={images[activeImageIdx]}
-                  alt={clinic.name}
-                  fill
-                  className="object-cover"
-                />
+                {/* Mobile scrollable gallery */}
+                <div className="md:hidden flex w-full h-full">
+                  {images.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className="relative w-full h-full shrink-0 snap-start"
+                    >
+                      <Image
+                        src={img}
+                        alt={`${clinic.name}-${idx}`}
+                        fill
+                        className="object-cover"
+                        priority={idx === 0}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop static active image */}
+                <div className="hidden md:block relative w-full h-full">
+                  <Image
+                    src={images[activeImageIdx]}
+                    alt={clinic.name}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </div>
               </div>
 
               <div className="hidden md:flex gap-3 overflow-x-auto scrollbar-hide">

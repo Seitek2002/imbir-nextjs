@@ -18,7 +18,9 @@ import {
 } from "./clinics/requests";
 import type {
   ClinicListItem as ApiClinic,
+  ClinicDetail as ApiClinicDetail,
   ClinicFilters,
+  ClinicSchedule,
 } from "./clinics/types";
 import {
   getDoctorById as _getDoctorById,
@@ -85,6 +87,51 @@ const adaptClinic = (c: ApiClinic): MockClinicListItem => ({
   image: toHttps(c.logo),
 });
 
+const formatClinicSchedule = (
+  schedule?: ClinicSchedule,
+): string | undefined => {
+  if (!schedule) return undefined;
+  const daysMap: Record<string, string> = {
+    monday: "ПН",
+    tuesday: "ВТ",
+    wednesday: "СР",
+    thursday: "ЧТ",
+    friday: "ПТ",
+    saturday: "СБ",
+    sunday: "ВС",
+  };
+  const enabledDays = Object.entries(schedule)
+    .filter(([_, info]) => info?.enabled)
+    .map(([day, info]) => ({
+      name: daysMap[day.toLowerCase()] || day,
+      time: `${info.from}-${info.to}`,
+    }));
+  if (enabledDays.length === 0) return "По записи";
+  const firstTime = enabledDays[0].time;
+  const allSameTime = enabledDays.every((d) => d.time === firstTime);
+  if (
+    allSameTime &&
+    enabledDays.length === 5 &&
+    enabledDays[0].name === "ПН" &&
+    enabledDays[4].name === "ПТ"
+  ) {
+    return `ПН-ПТ • ${firstTime}`;
+  }
+  return enabledDays.map((d) => `${d.name}: ${d.time}`).join(", ");
+};
+
+const adaptClinicDetail = (c: ApiClinicDetail): MockClinicListItem => {
+  const base = adaptClinic(c);
+  return {
+    ...base,
+    about: c.about || undefined,
+    phone: c.phone || undefined,
+    email: c.email || undefined,
+    images: c.photos?.map((p) => toHttps(p)).filter(Boolean) as string[],
+    schedule: formatClinicSchedule(c.schedule),
+  };
+};
+
 const adaptService = (s: ApiService): MockServiceItem => ({
   id: String(s.id),
   clinicId: "",
@@ -135,7 +182,7 @@ export const api = {
     getClinics(filters).then((r) => r.data.map(adaptClinic)),
 
   getClinicById: (id: string) =>
-    _getClinicById(id).then((c) => (c ? adaptClinic(c) : null)),
+    _getClinicById(id).then((c) => (c ? adaptClinicDetail(c) : null)),
 
   getServices: (filters?: ServiceFilters) =>
     getServices(filters).then((r) => r.data.map(adaptService)),
