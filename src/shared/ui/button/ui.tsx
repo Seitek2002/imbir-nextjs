@@ -1,4 +1,4 @@
-﻿import { ButtonHTMLAttributes, ComponentType, FC, SVGProps } from "react";
+import { ButtonHTMLAttributes, ComponentType, FC, SVGProps } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
@@ -26,14 +26,14 @@ export const Button: FC<Props> = ({
   ...props
 }) => {
   const sizes: Record<Sizes, string> = {
-    xs: "text-xs py-1.5",
-    sm: "text-sm py-2.5",
-    md: "text-base py-3.5",
-    lg: "text-base py-4",
+    xs: "h-8 text-xs px-4",
+    sm: "h-10 text-sm px-5",
+    md: "h-12 text-sm md:text-base px-6",
+    lg: "h-[52px] text-base px-8",
   };
 
   const baseStyles =
-    "px-4 font-medium flex items-center gap-2 cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none " +
+    "font-medium flex items-center justify-center gap-2 cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none shrink-0 " +
     sizes[size];
 
   const variants: Record<Variant, string> = {
