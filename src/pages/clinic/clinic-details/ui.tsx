@@ -390,12 +390,18 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                   className="bg-white border border-border-soft rounded-2xl p-4 flex flex-col"
                 >
                   <div className="relative h-32 bg-border-soft rounded-xl mb-4 flex items-center justify-center overflow-hidden">
-                    <Image
-                      src={service.image}
-                      alt={service.name}
-                      fill
-                      className="object-cover"
-                    />
+                    {service.image ? (
+                      <Image
+                        src={service.image}
+                        alt={service.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-[#FFF2F0] text-primary font-bold text-2xl uppercase">
+                        {service.name.slice(0, 2)}
+                      </div>
+                    )}
                   </div>
                   <h4 className="font-semibold text-foreground">
                     {service.name}
