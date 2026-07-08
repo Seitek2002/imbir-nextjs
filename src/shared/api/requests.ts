@@ -67,8 +67,8 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
   reviews: d.reviews_count,
   image: toHttps(d.photo),
   workplaces: d.workplaces.map((w) => ({
-    clinicId: String(w.clinic_id),
-    clinicName: w.clinic_name,
+    clinicId: String(w.id ?? w.clinic_id ?? ""),
+    clinicName: w.name ?? w.clinic_name ?? "",
     price: w.price,
     schedule: emptySchedule,
   })),
@@ -134,16 +134,16 @@ const adaptClinicDetail = (c: ApiClinicDetail): MockClinicListItem => {
 
 const adaptService = (s: ApiService): MockServiceItem => ({
   id: String(s.id),
-  clinicId: "",
-  clinicName: "",
+  clinicId: s.clinic ? String(s.clinic.id) : "",
+  clinicName: s.clinic ? s.clinic.name : "",
   name: s.name,
   category: s.category,
   price: typeof s.price === "string" ? parseFloat(s.price) || 0 : 0,
-  image: "",
+  image: s.photo ? toHttps(s.photo) || "" : "",
   schedule: emptySchedule,
   doctorIds: [],
-  rating: 0,
-  reviews: 0,
+  rating: s.rating ? parseFloat(s.rating) || 0 : 0,
+  reviews: s.reviews_count ? parseInt(s.reviews_count) || 0 : 0,
 });
 
 const resolveAuthor = (author: ApiReview["author"]): string => {

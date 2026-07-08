@@ -53,16 +53,13 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
 
   const { data: services = [] } = useQuery({
     queryKey: ["services", "clinic", id],
-    queryFn: async () => {
-      const allServices = await api.getServices();
-      return allServices.filter((s) => s.clinicId === id);
-    },
+    queryFn: () => api.getServices({ clinic_id: id }),
   });
 
   const { data: doctors = [] } = useQuery({
     queryKey: ["doctors", "clinic", id],
     queryFn: async () => {
-      const allDoctors = await api.getDoctors();
+      const allDoctors = await api.getDoctors({ page_size: 100 });
       return allDoctors.filter((doc) =>
         doc.workplaces.some((w) => w.clinicId === id),
       );

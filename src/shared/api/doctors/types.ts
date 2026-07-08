@@ -5,8 +5,10 @@ export type DoctorWorkplaceSchedule = {
 };
 
 export type DoctorWorkplace = {
-  clinic_id: number;
-  clinic_name: string;
+  id?: number;
+  name?: string;
+  clinic_id?: number;
+  clinic_name?: string;
   clinic_address?: string;
   price: number;
   schedule: DoctorWorkplaceSchedule | string;
