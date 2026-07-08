@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 
@@ -8,6 +8,7 @@ import Link from "next/link";
 import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { Workplace } from "@/shared/dummies";
+import { useAuthStore } from "@/shared/store";
 import { Button, SaveButton } from "@/shared/ui";
 
 import { DoctorPhoto } from "./photo";
@@ -44,6 +45,8 @@ export const DoctorCard: FC<Props> = ({
   variant = "vertical",
 }) => {
   const [loaded, setLoaded] = useState(false);
+  const user = useAuthStore((s) => s.user);
+  const isDoctor = user?.role === "doctor";
 
   const primaryClinic = workplaces[0]?.clinicName || "Не указана";
   const additionalClinicsCount = workplaces.length - 1;
@@ -117,22 +120,24 @@ export const DoctorCard: FC<Props> = ({
           )}
 
           <div className="mt-auto pt-2 flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="xs"
-              className="flex-1 justify-center text-[16px] py-2"
-              onClick={(e) => {
-                stopProp(e);
-                onBook?.();
-              }}
-            >
-              Записаться{" "}
-              {minPrice && (
-                <span className="ml-1 text-sm font-normal opacity-80">
-                  от {minPrice} с
-                </span>
-              )}
-            </Button>
+            {!isDoctor && (
+              <Button
+                variant="outline"
+                size="xs"
+                className="flex-1 justify-center text-[16px] py-2"
+                onClick={(e) => {
+                  stopProp(e);
+                  onBook?.();
+                }}
+              >
+                Записаться{" "}
+                {minPrice && (
+                  <span className="ml-1 text-sm font-normal opacity-80">
+                    от {minPrice} с
+                  </span>
+                )}
+              </Button>
+            )}
             <div onClick={stopProp}>
               <SaveButton
                 initialSaved={initialSaved}
@@ -194,20 +199,22 @@ export const DoctorCard: FC<Props> = ({
         )}
       </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full justify-center mt-3"
-        onClick={(e) => {
-          stopProp(e);
-          onBook?.();
-        }}
-      >
-        Записаться{" "}
-        {minPrice && (
-          <span className="ml-1 opacity-70 font-normal">от {minPrice} с</span>
-        )}
-      </Button>
+      {!isDoctor && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full justify-center mt-3"
+          onClick={(e) => {
+            stopProp(e);
+            onBook?.();
+          }}
+        >
+          Записаться{" "}
+          {minPrice && (
+            <span className="ml-1 opacity-70 font-normal">от {minPrice} с</span>
+          )}
+        </Button>
+      )}
     </Link>
   );
 };

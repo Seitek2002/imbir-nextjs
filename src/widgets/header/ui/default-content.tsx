@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { FC, Suspense, useState } from "react";
 
 import Link from "next/link";
@@ -33,6 +33,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
   const city = useCityStore((state) => state.city);
   const user = useAuthStore((s) => s.user);
+  const isDoctor = user?.role === "doctor";
   const profileHref = user
     ? (ROLE_ROUTE[user.role] ?? ROUTES.PROFILE)
     : ROUTES.LOGIN;
@@ -81,11 +82,13 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
           </div>
 
           <div className="hidden md:flex gap-3">
-            <Link href={ROUTES.RECORD}>
-              <Button size="sm" className="px-5 whitespace-nowrap">
-                Записаться на приём
-              </Button>
-            </Link>
+            {!isDoctor && (
+              <Link href={ROUTES.RECORD}>
+                <Button size="sm" className="px-5 whitespace-nowrap">
+                  Записаться на приём
+                </Button>
+              </Link>
+            )}
             <Suspense
               fallback={<div className="size-10 bg-gray-100 rounded-full" />}
             >

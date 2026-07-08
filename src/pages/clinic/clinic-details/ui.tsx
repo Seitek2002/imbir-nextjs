@@ -38,6 +38,8 @@ type Props = {
 };
 
 export const ClinicDetailsPage: FC<Props> = ({ id }) => {
+  const user = useAuthStore((s) => s.user);
+  const isDoctor = user?.role === "doctor";
   const router = useRouter();
   const [activeImageIdx, setActiveImageIdx] = useState(0);
 
@@ -415,9 +417,11 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                       ⭐ {service.rating} ({service.reviews})
                     </span>
                   </div>
-                  <Button variant="outline" className="w-full justify-center">
-                    Записаться
-                  </Button>
+                  {!isDoctor && (
+                    <Button variant="outline" className="w-full justify-center">
+                      Записаться
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

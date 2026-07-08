@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 
@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
+import { useAuthStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
 type Props = {
@@ -69,6 +70,8 @@ export const ServiceCard: FC<Props> = ({
   variant = "vertical",
 }) => {
   const displayClinic = clinic || clinicId || "Клиника не указана";
+  const user = useAuthStore((s) => s.user);
+  const isDoctor = user?.role === "doctor";
   const href = id ? `${ROUTES.RECORD}?service=${id}` : ROUTES.RECORD;
   const stopProp = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -118,17 +121,19 @@ export const ServiceCard: FC<Props> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 justify-center"
-              onClick={(e) => {
-                stopProp(e);
-                onBook?.();
-              }}
-            >
-              Записаться
-            </Button>
+            {!isDoctor && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 justify-center"
+                onClick={(e) => {
+                  stopProp(e);
+                  onBook?.();
+                }}
+              >
+                Записаться
+              </Button>
+            )}
             <SaveButton initialSaved={initialSaved} onSave={onSave} />
           </div>
         </div>
@@ -182,17 +187,19 @@ export const ServiceCard: FC<Props> = ({
           <span className="text-secondary">({reviews})</span>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full justify-center mt-auto"
-          onClick={(e) => {
-            stopProp(e);
-            onBook?.();
-          }}
-        >
-          Записаться
-        </Button>
+        {!isDoctor && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-center mt-auto"
+            onClick={(e) => {
+              stopProp(e);
+              onBook?.();
+            }}
+          >
+            Записаться
+          </Button>
+        )}
       </div>
     </Link>
   );
