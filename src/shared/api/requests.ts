@@ -28,6 +28,7 @@ import {
 } from "./doctors/requests";
 import type {
   DoctorListItem as ApiDoctor,
+  DoctorDetail as ApiDoctorDetail,
   DoctorFilters,
 } from "./doctors/types";
 import { getReviews } from "./reviews/requests";
@@ -73,6 +74,36 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
     schedule: emptySchedule,
   })),
 });
+
+const adaptDoctorDetail = (d: ApiDoctorDetail): MockDoctorListItem => {
+  const base = adaptDoctor(d);
+  return {
+    ...base,
+    about: d.about || undefined,
+    skills: d.skills || undefined,
+    education:
+      d.education
+        ?.map((e) => `${e.institution} (${e.year}) — ${e.degree}`)
+        .join(", ") || undefined,
+    workExperience:
+      d.work_experience?.map((w) => {
+        const toVal = w.to || new Date().getFullYear();
+        const diff = toVal - w.from;
+        const durationText = diff > 0 ? `${diff} лет` : "менее года";
+        return {
+          years: `${w.from}-${w.to || "Наст. время"}`,
+          duration: `(${durationText})`,
+          place: w.clinic,
+          role: w.position,
+        };
+      }) || undefined,
+    contacts: {
+      schedule: "ПН-ПТ • 09:00-18:00",
+      phone: d.phone || "",
+      email: d.email || "",
+    },
+  };
+};
 
 const adaptClinic = (c: ApiClinic): MockClinicListItem => ({
   id: String(c.id),
@@ -124,7 +155,7 @@ const adaptClinicDetail = (c: ApiClinicDetail): MockClinicListItem => {
   const base = adaptClinic(c);
   return {
     ...base,
-    about: c.about || undefined,
+    about: c.description || undefined,
     phone: c.phone || undefined,
     email: c.email || undefined,
     images: c.photos?.map((p) => toHttps(p)).filter(Boolean) as string[],
@@ -176,7 +207,7 @@ export const api = {
   },
 
   getDoctorById: (id: string) =>
-    _getDoctorById(id).then((d) => (d ? adaptDoctor(d) : null)),
+    _getDoctorById(id).then((d) => (d ? adaptDoctorDetail(d) : null)),
 
   getClinics: (filters?: ClinicFilters) =>
     getClinics(filters).then((r) => r.data.map(adaptClinic)),

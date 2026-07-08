@@ -5,10 +5,10 @@ export type ClinicSchedule = {
 };
 
 export type ClinicBranch = {
-  id: string;
+  id: number | string;
   address: string;
   phone?: string;
-  schedule?: string;
+  schedule?: ClinicSchedule | string;
   city?: string;
   coordinates?: { lat: number; lng: number };
 };
@@ -42,7 +42,7 @@ export type ClinicDetail = ClinicListItem & {
   phone: string | null;
   email: string | null;
   website: string | null;
-  about: string;
+  description: string | null;
   schedule: ClinicSchedule;
   equipment: string[];
   patient_conditions: string[];
