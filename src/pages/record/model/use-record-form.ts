@@ -11,6 +11,7 @@ import {
   createAppointment,
   getClinicById,
   getDoctorAvailableSlots,
+  getProfile,
   getServices,
   profileKeys,
 } from "@/shared/api";
@@ -29,6 +30,7 @@ import {
   groupAvailableSlots,
   isEmailValid,
   isPhoneValid,
+  normalizeLocalPhone,
   toApiDate,
   toApiTime,
 } from "./lib";
@@ -88,6 +90,34 @@ export const useRecordForm = () => {
       });
     },
   });
+
+  const canUseOnline = useAuthStore((state) => Boolean(state.accessToken));
+
+  const { data: profile } = useQuery({
+    queryKey: ["record-profile"],
+    queryFn: () => getProfile(),
+    enabled: canUseOnline,
+  });
+
+  useEffect(() => {
+    if (profile) {
+      if (profile.first_name) setFirstName(profile.first_name);
+      if (profile.last_name) setLastName(profile.last_name);
+      if (profile.phone) {
+        let localPhone = profile.phone;
+        if (localPhone.startsWith("+996")) {
+          localPhone = localPhone.slice(4);
+        } else if (localPhone.startsWith("996")) {
+          localPhone = localPhone.slice(3);
+        } else if (localPhone.startsWith("+")) {
+          localPhone = localPhone.slice(1);
+        }
+        const cleaned = localPhone.replace(/\D/g, "");
+        setPhone(normalizeLocalPhone(cleaned));
+      }
+      if (profile.email) setEmail(profile.email);
+    }
+  }, [profile]);
 
   const { data: clinicsData = [] } = useQuery({
     queryKey: ["record-clinics"],
@@ -200,10 +230,6 @@ export const useRecordForm = () => {
     if (modeParam === "online" || modeParam === "offline") setMode(modeParam);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Online consultations require an authenticated user (the backend rejects
-  // guest bookings with is_online). Reads the real auth token from the store.
-  const canUseOnline = useAuthStore((state) => Boolean(state.accessToken));
 
   const clinicMap = useMemo(
     () => new Map(CLINICS.map((clinic) => [clinic.id, clinic])),
