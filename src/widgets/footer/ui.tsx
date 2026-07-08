@@ -1,4 +1,4 @@
-﻿import { FC, ReactNode } from "react";
+import { FC, ReactNode } from "react";
 
 import Link from "next/link";
 
@@ -21,7 +21,7 @@ const SocialLink: FC<{ href: string; Icon: FC<{ className?: string }> }> = ({
     href={href}
     target="_blank"
     rel="noopener noreferrer"
-    className="size-10 rounded-full bg-primary flex items-center justify-center text-white hover:bg-primary-dark transition-colors"
+    className="size-11 rounded-full bg-primary flex items-center justify-center text-white hover:bg-primary-dark transition-colors shrink-0"
   >
     {/* Добавил fill-white на случай, если svg экспортировались с другим цветом */}
     <Icon className="[&_path]:fill-white" />
@@ -40,7 +40,7 @@ const FooterLink: FC<{ href: string; children: ReactNode }> = ({
 }) => (
   <Link
     href={href}
-    className="text-secondary text-sm md:text-base hover:text-primary transition-colors block mb-3 md:mb-4"
+    className="text-secondary text-sm md:text-base hover:text-primary transition-colors inline-block py-1.5 md:py-2 min-w-11"
   >
     {children}
   </Link>
@@ -75,7 +75,7 @@ export const Footer: FC = () => {
           {/* Ссылки и контакты (Сетка: 1 колонка на моб, 2 на планшете, 3 на ПК) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 lg:gap-10 lg:w-3/4 lg:ml-auto">
             {/* Блок 1 */}
-            <div>
+            <div className="flex flex-col items-start">
               <ColumnHeading>Быстрые ссылки</ColumnHeading>
               <FooterLink href={ROUTES.CLINICS}>Клиники</FooterLink>
               <FooterLink href={ROUTES.SPECIALISTS}>Специалисты</FooterLink>
@@ -83,7 +83,7 @@ export const Footer: FC = () => {
             </div>
 
             {/* Блок 2 */}
-            <div>
+            <div className="flex flex-col items-start">
               <ColumnHeading>Помощь и поддержка</ColumnHeading>
               <FooterLink href={ROUTES.CONTACTS}>Контакты</FooterLink>
               <FooterLink href={ROUTES.TERMS}>Условия и положения</FooterLink>
@@ -93,7 +93,7 @@ export const Footer: FC = () => {
             </div>
 
             {/* Блок 3 */}
-            <div>
+            <div className="flex flex-col items-start">
               <ColumnHeading>Свяжитесь с нами</ColumnHeading>
               <FooterText>info@preste.com</FooterText>
               <FooterText>996 (702) 555-0122</FooterText>
