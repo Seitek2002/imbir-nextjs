@@ -102,7 +102,7 @@ export type ClinicListItem = {
   branches?: Branch[];
 
   // Детальные поля
-  about?: string;
+  description?: string;
   schedule?: string;
   phone?: string;
   email?: string;

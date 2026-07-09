@@ -31,7 +31,8 @@ const csv = (value: string): string[] =>
     .filter(Boolean);
 
 export const DoctorProfessionalInfoPage: FC = () => {
-  const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
+  const { profile, isLoading, isSaving, saveProfile, rawProfile } =
+    useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);
   const [d, setD] = useState<D>({
     specialty: "",
@@ -69,14 +70,33 @@ export const DoctorProfessionalInfoPage: FC = () => {
     setD((prev) => ({ ...prev, [k]: v }));
 
   const handleSave = async () => {
-    // API использует primary/narrow_specializations (не specialty)
+    // Должность/место/категория/степень отдельных полей на бэке НЕ имеют —
+    // храним их в первой записи work_experience (бэк сохраняет произвольные
+    // ключи как JSON, проверено прямыми запросами). Сохраняем существующие
+    // from/to, если они уже были.
+    const existing =
+      (
+        rawProfile as unknown as {
+          work_experience?: Record<string, unknown>[];
+        } | null
+      )?.work_experience?.[0] ?? {};
+
     await saveProfile({
+      // API использует primary/narrow_specializations (не specialty)
       primary_specializations: d.specialty ? [d.specialty] : [],
       narrow_specializations: d.additionalSpecialty
         ? [d.additionalSpecialty]
         : [],
       experience_years: parseInt(d.experienceYears) || 0,
-      additional_services: d.currentPosition || undefined,
+      work_experience: [
+        {
+          ...existing,
+          position: d.currentPosition,
+          clinic: d.workplace,
+          qualification: d.qualification,
+          scientific_degree: d.scientificDegree,
+        },
+      ],
       equipment: csv(d.equipment),
       patient_conditions: csv(d.patientConditions),
       payment_methods: csv(d.paymentMethods),
@@ -190,15 +210,15 @@ export const DoctorProfessionalInfoPage: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <Dropdown
-                label="Место работы (клиника)"
-                placeholder="Выберите"
-                options={["k-MEO", "Городская больница", "Медцентр"].map(
-                  (o) => ({ label: o, value: o }),
-                )}
-                value={d.workplace}
-                onChange={(v) => set("workplace", v)}
-              />
+              <>
+                <label className={lbl}>Место работы (клиника)</label>
+                <input
+                  value={d.workplace}
+                  onChange={(e) => set("workplace", e.target.value)}
+                  placeholder="Введите название клиники"
+                  className={inp}
+                />
+              </>
             ) : (
               <FieldView label="Место работы (клиника)" value={d.workplace} />
             )}

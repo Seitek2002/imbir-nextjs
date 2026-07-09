@@ -35,7 +35,12 @@ export const mapApiToProfile = (
     additional_services?: string;
     experience_years?: number;
     education?: { institution: string; degree?: string; year?: number }[];
-    work_experience?: { position?: string; clinic?: string }[];
+    work_experience?: {
+      position?: string;
+      clinic?: string;
+      qualification?: string;
+      scientific_degree?: string;
+    }[];
     license_number?: string;
     rating?: number | string;
     reviews_count?: number;
@@ -50,10 +55,13 @@ export const mapApiToProfile = (
     specialty: a.primary_specializations?.[0] ?? "",
     additionalSpecialty: a.narrow_specializations?.[0] ?? "",
     experienceYears: String(a.experience_years ?? 0),
+    // Проф. данные держим в первой записи work_experience: бэк сохраняет её как
+    // произвольный JSON и возвращает лишние ключи как есть (проверено), а
+    // отдельных полей должность/место/категория/степень в контракте нет.
     currentPosition: a.work_experience?.[0]?.position ?? "",
     workplace: a.work_experience?.[0]?.clinic ?? "",
-    qualification: "",
-    scientificDegree: "",
+    qualification: a.work_experience?.[0]?.qualification ?? "",
+    scientificDegree: a.work_experience?.[0]?.scientific_degree ?? "",
     equipment: a.equipment?.join(", ") ?? "",
     patientConditions: a.patient_conditions?.join(", ") ?? "",
     paymentMethods: a.payment_methods?.join(", ") ?? "",

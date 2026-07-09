@@ -119,7 +119,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
 
   // --- ФОЛЛБЭКИ ТЕКСТОВ ---
   const aboutText =
-    clinic.about ||
+    clinic.description ||
     "Современная медицинская помощь, опытные врачи и индивидуальный подход к каждому пациенту.";
   const scheduleText = clinic.schedule || "ПН-ПТ • 08:00-17:00";
   const phoneText = clinic.phone || "+996 700 123 456";
