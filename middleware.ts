@@ -14,7 +14,27 @@ const CITY_MAP: Record<string, string> = {
   Batken: "Баткен",
 };
 
+// Разделы кабинетов, защищённые AuthGuard на клиенте — здесь дублируем
+// проверку на границе middleware, чтобы неавторизованный пользователь не
+// увидел даже первый SSR-кадр защищённой страницы.
+const PROTECTED_PREFIXES = ["/profile", "/doctor-profile", "/clinic-profile"];
+
+const isProtectedPath = (pathname: string) =>
+  PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+
 export function middleware(request: NextRequest) {
+  // --- Auth-гейт: независимый от гео-логики ниже механизм. Использует
+  // cookie is_authed (см. src/shared/store/authStore.ts) — НЕ пересекается
+  // с city/imbir-city-set/imbir-detected-city ни по имени, ни по назначению.
+  if (isProtectedPath(request.nextUrl.pathname)) {
+    if (!request.cookies.get("is_authed")) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  }
+
+  // --- Гео-логика (определение города) — как была, без изменений ---
   const response = NextResponse.next();
 
   // Don't overwrite if user already confirmed/selected their city

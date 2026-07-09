@@ -14,10 +14,10 @@ import {
   SearchIcon,
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
-import { useAuthStore } from "@/shared/store";
 import { useCityStore } from "@/shared/store";
 import { Button, IconBtn } from "@/shared/ui";
 
+import { useAuthDisplay } from "../lib/useAuthDisplay";
 import { CitySelectorModal } from "./city-selector";
 import { NotificationsBell } from "./notifications-bell";
 
@@ -32,12 +32,12 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
 }) => {
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
   const city = useCityStore((state) => state.city);
-  const user = useAuthStore((s) => s.user);
-  const isDoctor = user?.role === "doctor";
-  const profileHref = user
-    ? (ROLE_ROUTE[user.role] ?? ROUTES.PROFILE)
+  const { isAuthed, role } = useAuthDisplay();
+  const isDoctor = role === "doctor";
+  const profileHref = isAuthed
+    ? ((role && ROLE_ROUTE[role]) ?? ROUTES.PROFILE)
     : ROUTES.LOGIN;
-  const chatHref = user ? ROUTES.CHATS : ROUTES.LOGIN;
+  const chatHref = isAuthed ? ROUTES.CHATS : ROUTES.LOGIN;
 
   return (
     <>

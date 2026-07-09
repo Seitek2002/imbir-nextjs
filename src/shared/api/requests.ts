@@ -155,7 +155,7 @@ const adaptClinicDetail = (c: ApiClinicDetail): MockClinicListItem => {
   const base = adaptClinic(c);
   return {
     ...base,
-    about: c.description || undefined,
+    description: c.description || undefined,
     phone: c.phone || undefined,
     email: c.email || undefined,
     images: c.photos?.map((p) => toHttps(p)).filter(Boolean) as string[],

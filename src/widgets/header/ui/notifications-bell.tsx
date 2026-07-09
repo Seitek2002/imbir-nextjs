@@ -10,8 +10,9 @@ import {
   markNotificationRead,
   notificationKeys,
 } from "@/shared/api";
-import { useAuthStore } from "@/shared/store";
 import { IconBtn } from "@/shared/ui";
+
+import { useAuthDisplay } from "../lib/useAuthDisplay";
 
 const BellIcon: FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 20 20" fill="none">
@@ -43,7 +44,7 @@ const formatWhen = (iso: string) =>
 // Колокол уведомлений: бейдж непрочитанных + дропдаун со списком.
 // Показывается только авторизованным; список опрашивается раз в минуту.
 export const NotificationsBell: FC = () => {
-  const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
+  const { isAuthed } = useAuthDisplay();
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
