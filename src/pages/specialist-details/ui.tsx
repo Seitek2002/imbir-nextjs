@@ -125,19 +125,21 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
   const about =
     doctor.about ||
     "Опытный специалист с многолетней практикой. Индивидуальный подход к каждому пациенту.";
-  const workExperience = doctor.workExperience || [
-    {
-      years: "2015-Наст. время",
-      duration: `(${doctor.experience} лет)`,
-      place: doctor.workplaces[0]?.clinicName || "Частная клиника",
-      role: doctor.specialty,
-    },
-  ];
-  const skills = doctor.skills || [
-    "Консультация",
-    "Диагностика заболеваний",
-    "Назначение плана лечения",
-  ];
+  const workExperience =
+    doctor.workExperience && doctor.workExperience.length > 0
+      ? doctor.workExperience
+      : [
+          {
+            years: "2015-Наст. время",
+            duration: `(${doctor.experience} лет)`,
+            place: doctor.workplaces[0]?.clinicName || "Частная клиника",
+            role: doctor.specialty,
+          },
+        ];
+  const skills =
+    doctor.skills && doctor.skills.length > 0
+      ? doctor.skills
+      : ["Консультация", "Диагностика заболеваний", "Назначение плана лечения"];
   const scheduleText = doctor.contacts?.schedule || "ПН-ПТ • 08:00-17:00";
   const phoneText = doctor.contacts?.phone || "+996 700 123 456";
   const emailText = doctor.contacts?.email || "doctor@clinic.kg";

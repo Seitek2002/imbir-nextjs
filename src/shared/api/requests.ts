@@ -78,26 +78,44 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
 
 const adaptDoctorDetail = (d: ApiDoctorDetail): MockDoctorListItem => {
   const base = adaptDoctor(d);
+  const formattedWorkExperience =
+    d.work_experience && d.work_experience.length > 0
+      ? d.work_experience.map((w) => {
+          const toVal = w.to || new Date().getFullYear();
+          const diff = toVal - w.from;
+          const durationText = diff > 0 ? `${diff} лет` : "менее года";
+          return {
+            years: `${w.from}-${w.to || "Наст. время"}`,
+            duration: `(${durationText})`,
+            place: w.clinic,
+            role: w.position,
+          };
+        })
+      : undefined;
+
+  const formattedEducation =
+    d.education && d.education.length > 0
+      ? d.education
+          .map((e) => {
+            const parts = [
+              e.institution,
+              e.year ? `(${e.year})` : "",
+              e.degree ? `— ${e.degree}` : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+            return parts.trim();
+          })
+          .filter(Boolean)
+          .join(", ") || undefined
+      : undefined;
+
   return {
     ...base,
     about: d.about || undefined,
-    skills: d.skills || undefined,
-    education:
-      d.education
-        ?.map((e) => `${e.institution} (${e.year}) — ${e.degree}`)
-        .join(", ") || undefined,
-    workExperience:
-      d.work_experience?.map((w) => {
-        const toVal = w.to || new Date().getFullYear();
-        const diff = toVal - w.from;
-        const durationText = diff > 0 ? `${diff} лет` : "менее года";
-        return {
-          years: `${w.from}-${w.to || "Наст. время"}`,
-          duration: `(${durationText})`,
-          place: w.clinic,
-          role: w.position,
-        };
-      }) || undefined,
+    skills: d.skills && d.skills.length > 0 ? d.skills : undefined,
+    education: formattedEducation,
+    workExperience: formattedWorkExperience,
     contacts: {
       schedule: "ПН-ПТ • 09:00-18:00",
       phone: d.phone || "",
