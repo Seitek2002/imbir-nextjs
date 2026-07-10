@@ -12,6 +12,7 @@ import {
   getProfile,
 } from "@/shared/api";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets/icons";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import { Button, Input, Textarea } from "@/shared/ui";
@@ -277,11 +278,11 @@ export const OfflineBookingModal: FC<Props> = ({ isOpen, onClose, doctor }) => {
       setStep(4);
     },
     onError: (err: any) => {
-      const errData = err?.response?.data;
       toast.error(
-        errData?.detail ||
-          errData?.non_field_errors?.[0] ||
+        extractErrorMessage(
+          err?.response?.data,
           "Не удалось создать запись. Попробуйте еще раз.",
+        ),
       );
     },
   });
