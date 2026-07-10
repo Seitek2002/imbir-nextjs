@@ -30,7 +30,7 @@ export const ConversationList: FC<Props> = ({
     <div className={cn("flex flex-col gap-3 h-full", className)}>
       {/* Search & Filter Row */}
       <div className="flex gap-2 shrink-0">
-        <div className="flex-1 bg-white border border-border-soft rounded-full px-4 py-2.5 flex items-center gap-2 shadow-sm">
+        <div className="flex-1 h-11 bg-white border border-border-soft rounded-full px-4 flex items-center gap-2 shadow-sm">
           <SearchIcon className="size-4 text-muted shrink-0" />
           <input
             type="text"
@@ -43,7 +43,7 @@ export const ConversationList: FC<Props> = ({
         <button
           type="button"
           aria-label="Фильтр"
-          className="size-11.5 border border-border-soft bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-50 shrink-0 shadow-sm text-secondary"
+          className="size-11 p-0 border border-border-soft bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-50 shrink-0 shadow-sm text-secondary"
         >
           <FilterSample className="size-5" />
         </button>
