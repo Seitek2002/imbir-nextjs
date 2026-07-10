@@ -56,7 +56,7 @@ export const SummaryCard: FC<{
     : "Не оформлена";
 
   return (
-    <aside className="relative border border-border-soft rounded-3xl bg-white overflow-hidden lg:sticky lg:top-6 flex flex-col lg:w-100 lg:h-128.75">
+    <aside className="relative border border-border-soft rounded-3xl bg-white p-5 lg:sticky lg:top-6 flex flex-col gap-4 shadow-sm w-full lg:w-100">
       {isChecking && (
         <div className="absolute inset-0 z-10 bg-white/70 rounded-3xl flex items-center justify-center">
           <svg
@@ -81,67 +81,83 @@ export const SummaryCard: FC<{
         </div>
       )}
 
-      <div className="relative h-64 lg:flex-1 bg-primary-tint">
-        {doctor.image ? (
-          <Image
-            src={doctor.image}
-            alt={doctor.name}
-            fill
-            className="object-cover object-[center_20%]"
-            sizes="(max-width: 768px) 100vw, 400px"
-          />
-        ) : null}
+      {/* Doctor Info Row */}
+      <div className="flex items-center gap-4 pb-4 border-b border-border-soft">
+        <div className="relative w-16 h-16 rounded-full overflow-hidden bg-primary-tint border border-border-soft shrink-0 flex items-center justify-center">
+          {doctor.image ? (
+            <Image
+              src={doctor.image}
+              alt={doctor.name}
+              fill
+              className="object-cover object-top"
+              sizes="64px"
+            />
+          ) : (
+            <span className="text-primary text-xl font-bold uppercase">
+              {doctor.name.slice(0, 2)}
+            </span>
+          )}
+        </div>
+        <div className="min-w-0">
+          <h4 className="font-semibold text-foreground text-base leading-snug truncate">
+            {doctor.name}
+          </h4>
+          <p className="text-xs text-secondary mt-0.5">{doctor.specialty}</p>
+        </div>
       </div>
 
-      <div className="p-3 shrink-0">
-        <p className="text-base font-semibold text-foreground text-center leading-snug mt-2">
-          {doctor.name}
-        </p>
-        <p className="text-sm text-secondary text-center mt-0.5">
-          {doctor.specialty}
-        </p>
-
-        <div className="mt-3 border border-border-soft rounded-2xl p-3">
-          <p className="text-sm font-medium text-foreground">{service.title}</p>
-          <p className="text-sm text-secondary mt-0.5">
-            {mode === "online" ? "Онлайн-консультация" : "Оффлайн-консультация"}
-          </p>
-          <div className="flex items-center gap-1.5 text-sm text-secondary mt-1">
-            <CalendarIcon className="size-4 shrink-0" />
-            <span>
-              {selectedDate && selectedTime
-                ? `${formatDateLabel(selectedDate)} • ${selectedTime}`
-                : "Дата и время не выбраны"}
-            </span>
-          </div>
+      {/* Appointment Details */}
+      <div className="space-y-3 text-sm">
+        <div className="flex flex-col gap-1">
+          <span className="text-secondary text-xs">Услуга</span>
+          <span className="font-semibold text-foreground leading-snug">
+            {service.title}
+          </span>
         </div>
 
-        <div className="mt-3 space-y-2">
-          <div className="flex items-center justify-between text-sm text-secondary">
-            <span>К оплате</span>
-            <span className="text-foreground font-semibold">
-              {formatPrice(service.price)}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-sm text-secondary">
-            <span>Статус</span>
-            <span className="px-2.5 py-1 rounded-full bg-[#FFF3EE] text-primary text-xs font-medium">
-              {statusLabel}
-            </span>
-          </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-secondary text-xs">Формат приёма</span>
+          <span className="font-medium text-foreground">
+            {mode === "online" ? "Онлайн-консультация" : "Офлайн-консультация"}
+          </span>
         </div>
 
-        {appointmentId != null && (
-          <Button
-            variant="outline"
-            className="w-full justify-center mt-3 text-foreground"
-            disabled={isChecking}
-            onClick={() => checkStatus()}
-          >
-            {isChecking ? "Проверяем..." : "Проверить статус"}
-          </Button>
-        )}
+        <div className="flex flex-col gap-1">
+          <span className="text-secondary text-xs">Дата и время</span>
+          <span className="font-semibold text-primary">
+            {selectedDate && selectedTime
+              ? `${formatDateLabel(selectedDate)} в ${selectedTime}`
+              : "Не выбраны"}
+          </span>
+        </div>
       </div>
+
+      {/* Billing and Status */}
+      <div className="mt-2 pt-4 border-t border-border-soft space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-secondary text-sm">К оплате</span>
+          <span className="text-foreground font-bold text-[20px]">
+            {formatPrice(service.price)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-secondary text-sm">Статус</span>
+          <span className="px-3 py-1 rounded-full bg-[#FFF3EE] text-primary text-xs font-semibold">
+            {statusLabel}
+          </span>
+        </div>
+      </div>
+
+      {appointmentId != null && (
+        <Button
+          variant="outline"
+          className="w-full justify-center mt-2 text-foreground"
+          disabled={isChecking}
+          onClick={() => checkStatus()}
+        >
+          {isChecking ? "Проверяем..." : "Проверить статус"}
+        </Button>
+      )}
     </aside>
   );
 };
