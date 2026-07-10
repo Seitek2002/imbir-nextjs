@@ -271,15 +271,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                         router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
                       }
                     >
-                      Видео-консультация
+                      Онлайн консультация
                     </Button>
                   )}
                 </>
               )}
-              <StartChatButton
-                userId={Number(id)}
-                className="flex-1 justify-center"
-              />
             </div>
 
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
@@ -403,35 +399,28 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
         <Footer />
       </div>
 
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-border-soft z-50 flex gap-2 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
-        {!isDoctor && (
-          <>
+      {!isDoctor && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-border-soft z-50 flex gap-2 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
+          <Button
+            className="flex-1 justify-center bg-[#FFF2F0] text-primary border border-transparent"
+            size="lg"
+            onClick={() => setIsBookingOpen(true)}
+          >
+            Офлайн
+          </Button>
+          {doctor.isOnlineAvailable && (
             <Button
-              className="flex-1 justify-center bg-[#FFF2F0] text-primary border border-transparent"
+              className="flex-1 justify-center"
               size="lg"
-              onClick={() => setIsBookingOpen(true)}
+              onClick={() =>
+                router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
+              }
             >
-              Офлайн
+              Онлайн консультация
             </Button>
-            {doctor.isOnlineAvailable && (
-              <Button
-                className="flex-1 justify-center"
-                size="lg"
-                onClick={() =>
-                  router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
-                }
-              >
-                Онлайн
-              </Button>
-            )}
-          </>
-        )}
-        <StartChatButton
-          userId={Number(id)}
-          size="lg"
-          className="flex-1 justify-center"
-        />
-      </div>
+          )}
+        </div>
+      )}
 
       <OfflineBookingModal
         isOpen={isBookingOpen}
