@@ -76,24 +76,25 @@ export const MessageComposer: FC<Props> = ({
   useEffect(() => stopTyping, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="px-4 py-3 border-t border-border-soft">
-      <div className="flex gap-2 items-center">
+    <div className="px-4 py-3 border-t border-border-soft bg-white">
+      <div className="flex items-center bg-white border border-border-soft rounded-full pl-4 pr-1.5 py-1.5 gap-2 transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
         <input
           type="text"
           value={text}
           onChange={(event) => handleChange(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="flex-1 bg-white border border-border-soft rounded-full px-4 min-h-11.5 text-sm text-foreground outline-none focus:border-primary transition-colors placeholder:text-muted"
+          disabled={disabled}
+          className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted py-1"
         />
         <button
           type="button"
           onClick={submit}
           disabled={!text.trim() || disabled}
           aria-label="Отправить сообщение"
-          className="flex items-center justify-center size-11.5 shrink-0 rounded-full bg-primary text-white disabled:bg-border-soft disabled:text-muted transition-colors"
+          className="flex items-center justify-center size-9 shrink-0 rounded-full bg-primary text-white disabled:bg-border-soft disabled:text-muted transition-colors"
         >
-          <SendIcon className="size-5" />
+          <SendIcon className="size-4.5" />
         </button>
       </div>
     </div>

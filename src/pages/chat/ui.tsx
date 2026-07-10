@@ -3,6 +3,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -92,6 +93,7 @@ const readRoomParam = (): number | null => {
 };
 
 const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
+  const router = useRouter();
   const [pendingAsk, setPendingAsk] = useState<string | undefined>(readAsk);
   const [activeId, setActiveId] = useState<number | null>(() =>
     pendingAsk ? AI_ROOM_ID : readRoomParam(),
@@ -130,20 +132,26 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
 
   return (
     <PageShell>
+      {activeId === null && (
+        <div className="md:hidden">
+          <Header title="Чаты" onBack={() => router.push(ROUTES.HOME)} />
+        </div>
+      )}
+
       <div className="flex-1 w-full max-w-350 mx-auto md:px-10 flex flex-col pt-0 md:pt-8 pb-0 md:pb-10">
         <h1 className="hidden md:block text-[28px] font-semibold text-foreground mb-6">
           Чаты
         </h1>
 
-        <div className="flex flex-1 gap-5 md:h-[calc(100vh-220px)] min-h-150">
+        <div className="flex flex-1 gap-0 md:gap-0 md:bg-white md:border md:border-border-soft md:rounded-3xl md:overflow-hidden md:h-[calc(100vh-220px)] min-h-150">
           <aside
             className={cn(
-              "w-full md:w-85 lg:w-92.5 shrink-0",
+              "w-full md:w-85 lg:w-92.5 shrink-0 md:border-r md:border-border-soft flex flex-col md:bg-[#F9FAFB]",
               activeId !== null && "hidden md:block",
             )}
           >
             <ConversationList
-              className="h-full p-4 md:p-0"
+              className="flex-1"
               conversations={filtered}
               activeId={activeId}
               search={search}
@@ -154,7 +162,7 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
 
           <section
             className={cn(
-              "flex-1 bg-white border border-border-soft rounded-3xl flex-col overflow-hidden",
+              "flex-1 flex flex-col overflow-hidden bg-white md:border-0 md:rounded-none",
               activeConversation ? "flex" : "hidden md:flex",
             )}
           >
