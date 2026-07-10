@@ -14,6 +14,7 @@ import { Header } from "@/widgets/header";
 import { ReviewsSection } from "@/widgets/reviews";
 
 import { DoctorCard } from "@/entities/doctor";
+import { ServiceCard } from "@/entities/service";
 
 // ИМПОРТЫ API
 import { api, createReview } from "@/shared/api";
@@ -387,42 +388,19 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {services.map((service) => (
-                <div
+                <ServiceCard
                   key={service.id}
-                  className="bg-white border border-border-soft rounded-2xl p-4 flex flex-col"
-                >
-                  <div className="relative h-32 bg-border-soft rounded-xl mb-4 flex items-center justify-center overflow-hidden">
-                    {service.image ? (
-                      <Image
-                        src={service.image}
-                        alt={service.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#FFF2F0] text-primary font-bold text-2xl uppercase">
-                        {service.name.slice(0, 2)}
-                      </div>
-                    )}
-                  </div>
-                  <h4 className="font-semibold text-foreground">
-                    {service.name}
-                  </h4>
-                  <p className="text-xs text-muted mb-2">{service.category}</p>
-                  <div className="flex items-center justify-between mt-auto mb-4">
-                    <span className="font-bold text-foreground">
-                      {service.price} с
-                    </span>
-                    <span className="text-xs text-muted">
-                      ⭐ {service.rating} ({service.reviews})
-                    </span>
-                  </div>
-                  {!isDoctor && (
-                    <Button variant="outline" className="w-full justify-center">
-                      Записаться
-                    </Button>
-                  )}
-                </div>
+                  id={service.id}
+                  name={service.name}
+                  category={service.category}
+                  clinic={clinic.name}
+                  clinicId={clinic.id}
+                  rating={service.rating}
+                  reviews={service.reviews}
+                  price={service.price}
+                  image={service.image}
+                  variant="vertical"
+                />
               ))}
             </div>
           </div>

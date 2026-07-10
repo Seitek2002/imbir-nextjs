@@ -84,7 +84,7 @@ export const ServiceCard: FC<Props> = ({
         href={href}
         className="bg-white rounded-3xl p-4 flex items-center gap-4 border border-border cursor-pointer hover:border-primary/40 transition-colors"
       >
-        <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-surface shrink-0">
+        <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-[#FFF2F0] flex items-center justify-center shrink-0">
           {image ? (
             <Image
               src={image}
@@ -94,47 +94,47 @@ export const ServiceCard: FC<Props> = ({
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-dim text-2xl font-semibold">
-              {name.charAt(0)}
-            </div>
+            <span className="text-primary text-2xl font-bold uppercase">
+              {name.slice(0, 2)}
+            </span>
           )}
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <h3 className="text-foreground font-semibold text-base leading-tight">
-              {name}
-            </h3>
-            <span className="text-foreground font-semibold text-base whitespace-nowrap">
-              {price} с
-            </span>
-          </div>
+        <div className="flex-1 min-w-0 flex flex-col self-stretch">
+          <h3 className="text-foreground font-semibold text-base leading-snug line-clamp-2 mb-1">
+            {name}
+          </h3>
 
-          <p className="text-muted text-sm mb-2">
+          <p className="text-muted text-xs mb-1">
             {category} <span className="text-primary">• {displayClinic}</span>
           </p>
 
-          <div className="flex items-center gap-1 mb-3 text-sm">
-            <StarIcon className="w-4 h-4 text-primary" />
+          <div className="flex items-center gap-1 mb-2 text-xs">
+            <StarIcon className="w-3.5 h-3.5 text-primary" />
             <span className="text-primary font-medium">{rating}</span>
             <span className="text-secondary">({reviews})</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {!isDoctor && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 justify-center"
-                onClick={(e) => {
-                  stopProp(e);
-                  onBook?.();
-                }}
-              >
-                Записаться
-              </Button>
-            )}
-            <SaveButton initialSaved={initialSaved} onSave={onSave} />
+          <div className="mt-auto flex items-center justify-between gap-3">
+            <span className="text-foreground font-bold text-base whitespace-nowrap">
+              {price} с
+            </span>
+            <div className="flex items-center gap-2">
+              {!isDoctor && (
+                <Button
+                  variant="outline"
+                  size="xs"
+                  className="px-4 py-1.5 justify-center text-xs"
+                  onClick={(e) => {
+                    stopProp(e);
+                    onBook?.();
+                  }}
+                >
+                  Записаться
+                </Button>
+              )}
+              <SaveButton initialSaved={initialSaved} onSave={onSave} />
+            </div>
           </div>
         </div>
       </Link>
@@ -156,9 +156,9 @@ export const ServiceCard: FC<Props> = ({
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-surface flex items-center justify-center">
-            <span className="text-dim text-4xl font-semibold">
-              {name.charAt(0)}
+          <div className="w-full h-full bg-[#FFF2F0] flex items-center justify-center">
+            <span className="text-primary text-3xl font-bold uppercase">
+              {name.slice(0, 2)}
             </span>
           </div>
         )}
@@ -168,38 +168,40 @@ export const ServiceCard: FC<Props> = ({
       </div>
 
       <div className="flex-1 p-4 flex flex-col">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-foreground font-semibold text-base leading-tight flex-1">
-            {name}
-          </h3>
-          <span className="text-foreground font-semibold text-base whitespace-nowrap">
-            {price} с
-          </span>
-        </div>
-
-        <p className="text-muted text-sm mb-2">
-          {category} <span className="text-primary">• {displayClinic}</span>
+        <p className="text-muted text-xs mb-1 uppercase tracking-wider">
+          {category}
         </p>
 
+        <h3 className="text-foreground font-semibold text-base leading-snug mb-1 line-clamp-2">
+          {name}
+        </h3>
+
+        <p className="text-secondary text-xs mb-3 truncate">{displayClinic}</p>
+
         <div className="flex items-center gap-1 mb-4 text-sm">
-          <StarIcon className="w-4 h-4 text-primary" />
+          <StarIcon className="w-3.5 h-3.5 text-primary" />
           <span className="text-primary font-medium">{rating}</span>
           <span className="text-secondary">({reviews})</span>
         </div>
 
-        {!isDoctor && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-center mt-auto"
-            onClick={(e) => {
-              stopProp(e);
-              onBook?.();
-            }}
-          >
-            Записаться
-          </Button>
-        )}
+        <div className="mt-auto pt-3 flex items-center justify-between gap-3 border-t border-border-soft">
+          <span className="text-foreground font-bold text-lg whitespace-nowrap">
+            {price} с
+          </span>
+          {!isDoctor && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 justify-center"
+              onClick={(e) => {
+                stopProp(e);
+                onBook?.();
+              }}
+            >
+              Записаться
+            </Button>
+          )}
+        </div>
       </div>
     </Link>
   );
