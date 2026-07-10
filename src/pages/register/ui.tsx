@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { JSX, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -14,6 +14,8 @@ import {
   registerClientFn,
   registerClinicFn,
   registerDoctorFn,
+  registerPhoneConfirmFn,
+  registerPhoneRequestFn,
 } from "@/shared/api";
 import {
   EmailIcon,
@@ -26,7 +28,7 @@ import { ROUTES, colors } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { Button, IconBtn, Input } from "@/shared/ui";
+import { Button, IconBtn, Input, PhoneInput } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import {
@@ -216,6 +218,23 @@ export const RegisterPage = () => {
   const [passwordError, setPasswordError] = useState("");
   const [isLoadingClient, setIsLoadingClient] = useState(false);
 
+  const [clientAuthMethod, setClientAuthMethod] = useState<"email" | "phone">(
+    "email",
+  );
+  const [phone, setPhone] = useState("");
+  const [dialCode, setDialCode] = useState("+996");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [timer, setTimer] = useState(0);
+  const [isRequestingCode, setIsRequestingCode] = useState(false);
+
+  useEffect(() => {
+    if (timer <= 0) return;
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timer]);
+
   // Doctor form step (owned here for unified back navigation)
   const [doctorStep, setDoctorStep] = useState<DoctorStep>(1);
 
@@ -238,6 +257,7 @@ export const RegisterPage = () => {
         setActiveForm("role");
       } else {
         setClientStep(1);
+        setVerificationCode("");
       }
     } else if (activeForm === "doctor") {
       if (doctorStep === 1) {
@@ -263,6 +283,51 @@ export const RegisterPage = () => {
     setActiveForm(selectedRole);
   };
 
+  const handleClientContinue = async () => {
+    if (clientAuthMethod === "email") {
+      setClientStep(2);
+      return;
+    }
+
+    setIsRequestingCode(true);
+    try {
+      await registerPhoneRequestFn({
+        phone: `${dialCode}${phone}`,
+      });
+      toast.success("Код подтверждения отправлен на указанный номер");
+      setTimer(60);
+      setClientStep(2);
+    } catch (err: unknown) {
+      const errData = (err as { response?: { data?: unknown } })?.response
+        ?.data;
+      toast.error(
+        extractErrorMessage(errData, "Не удалось отправить код подтверждения"),
+      );
+    } finally {
+      setIsRequestingCode(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (timer > 0 || isRequestingCode) return;
+    setIsRequestingCode(true);
+    try {
+      await registerPhoneRequestFn({
+        phone: `${dialCode}${phone}`,
+      });
+      toast.success("Код подтверждения отправлен повторно");
+      setTimer(60);
+    } catch (err: unknown) {
+      const errData = (err as { response?: { data?: unknown } })?.response
+        ?.data;
+      toast.error(
+        extractErrorMessage(errData, "Не удалось отправить код подтверждения"),
+      );
+    } finally {
+      setIsRequestingCode(false);
+    }
+  };
+
   const handleSubmitClient = async () => {
     if (formData.password !== formData.confirmPassword) {
       setPasswordError("Пароли не совпадают");
@@ -270,13 +335,24 @@ export const RegisterPage = () => {
     }
     setIsLoadingClient(true);
     try {
-      const res = await registerClientFn({
-        first_name: formData.name,
-        last_name: formData.surname,
-        email: formData.email,
-        password: formData.password,
-        phone: "",
-      });
+      let res;
+      if (clientAuthMethod === "email") {
+        res = await registerClientFn({
+          first_name: formData.name,
+          last_name: formData.surname,
+          email: formData.email,
+          password: formData.password,
+          phone: "",
+        });
+      } else {
+        res = await registerPhoneConfirmFn({
+          first_name: formData.name,
+          last_name: formData.surname,
+          phone: `${dialCode}${phone}`,
+          code: verificationCode,
+          password: formData.password,
+        });
+      }
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
@@ -636,19 +712,74 @@ export const RegisterPage = () => {
                       value={formData.surname}
                       onChange={(e) => handleChange("surname", e.target.value)}
                     />
-                    <Input
-                      label="Электронная почта"
-                      type="email"
-                      placeholder="Введите вашу почту"
-                      IconRight={EmailIcon}
-                      value={formData.email}
-                      onChange={(e) => handleChange("email", e.target.value)}
-                    />
+                    <div className="mt-1">
+                      <SegmentedControl
+                        options={[
+                          { label: "Эл. почта", value: "email" },
+                          { label: "Телефон", value: "phone" },
+                        ]}
+                        value={clientAuthMethod}
+                        onChange={(val) =>
+                          setClientAuthMethod(val as "email" | "phone")
+                        }
+                      />
+                    </div>
+                    {clientAuthMethod === "email" ? (
+                      <Input
+                        label="Электронная почта"
+                        type="email"
+                        placeholder="Введите вашу почту"
+                        IconRight={EmailIcon}
+                        value={formData.email}
+                        onChange={(e) => handleChange("email", e.target.value)}
+                      />
+                    ) : (
+                      <PhoneInput
+                        label="Номер телефона"
+                        value={phone}
+                        onChange={(val) => setPhone(val)}
+                        onCountryChange={(country) =>
+                          setDialCode(country.dialCode)
+                        }
+                        defaultCountryCode="KG"
+                      />
+                    )}
                   </div>
                 )}
 
                 {clientStep === 2 && (
                   <div className="flex flex-col gap-4">
+                    {clientAuthMethod === "phone" && (
+                      <div className="flex flex-col gap-1.5">
+                        <Input
+                          label="Код подтверждения"
+                          placeholder="Введите 4-значный код"
+                          value={verificationCode}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, "");
+                            if (val.length <= 4) setVerificationCode(val);
+                          }}
+                          maxLength={4}
+                          inputMode="numeric"
+                        />
+                        <div className="flex justify-end text-sm">
+                          {timer > 0 ? (
+                            <span className="text-muted">
+                              Отправить код повторно через {timer} с
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={handleResendCode}
+                              disabled={isRequestingCode}
+                              className="text-primary hover:text-primary-dark font-medium transition-colors"
+                            >
+                              Отправить код повторно
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     <Input
                       label="Пароль"
                       type={showPassword ? "text" : "password"}
@@ -687,10 +818,18 @@ export const RegisterPage = () => {
                     <Button
                       className="w-full justify-center md:h-14 md:text-lg"
                       size="lg"
-                      onClick={() => setClientStep(2)}
+                      onClick={handleClientContinue}
                       disabled={
-                        !formData.name || !formData.surname || !formData.email
+                        clientAuthMethod === "email"
+                          ? !formData.name ||
+                            !formData.surname ||
+                            !formData.email
+                          : !formData.name ||
+                            !formData.surname ||
+                            !phone ||
+                            isRequestingCode
                       }
+                      loading={isRequestingCode}
                     >
                       Продолжить
                     </Button>
@@ -700,9 +839,15 @@ export const RegisterPage = () => {
                       size="lg"
                       onClick={handleSubmitClient}
                       disabled={
-                        !formData.password ||
-                        !formData.confirmPassword ||
-                        isLoadingClient
+                        clientAuthMethod === "email"
+                          ? !formData.password ||
+                            !formData.confirmPassword ||
+                            isLoadingClient
+                          : !formData.password ||
+                            !formData.confirmPassword ||
+                            !verificationCode ||
+                            verificationCode.length < 4 ||
+                            isLoadingClient
                       }
                       loading={isLoadingClient}
                     >

@@ -39,6 +39,22 @@ export type RegisterClientRequest = {
   phone: string;
 };
 
+export type PhoneRegisterRequestRequest = {
+  phone: string;
+};
+
+export type PhoneRegisterRequestSuccess = {
+  detail: string;
+};
+
+export type PhoneRegisterConfirmRequest = {
+  phone: string;
+  code: string;
+  password?: string;
+  first_name: string;
+  last_name: string;
+};
+
 export type DaySchedule = {
   from: string | null;
   to: string | null;
