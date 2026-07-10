@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { FC } from "react";
 
-import { StarBoldIcon } from "@/shared/assets/icons";
+import { StarBoldIcon, StarOutlineIcon } from "@/shared/assets/icons";
 
 type Props = {
   rating: number;
@@ -21,15 +21,22 @@ export const StarRating: FC<Props> = ({
     <div
       className={`inline-flex items-center gap-0.5 px-3 py-1.5 rounded-full bg-[#FFE5E0] ${className}`}
     >
-      {Array.from({ length: maxRating }).map((_, index) => (
-        <StarBoldIcon
-          key={index}
-          className={
-            index < Math.round(rating) ? "text-primary" : "text-border"
-          }
-          style={{ width: size, height: size }}
-        />
-      ))}
+      {Array.from({ length: maxRating }).map((_, index) => {
+        const isActive = index < Math.round(rating);
+        return isActive ? (
+          <StarBoldIcon
+            key={index}
+            className="text-primary"
+            style={{ width: size, height: size }}
+          />
+        ) : (
+          <StarOutlineIcon
+            key={index}
+            className="text-border"
+            style={{ width: size, height: size }}
+          />
+        );
+      })}
     </div>
   );
 };

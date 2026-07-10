@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 import toast from "react-hot-toast";
@@ -119,6 +119,7 @@ export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
           const data = getEditData(editTarget);
           return (
             <ReviewModal
+              key={editTarget.id}
               isOpen={!!editTarget}
               onClose={() => setEditTarget(null)}
               doctorName={data.name}
