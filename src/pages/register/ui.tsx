@@ -159,7 +159,7 @@ const toApiDate = (ddmmyyyy: string): string => {
 export const RegisterPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
-  const { setTokens, setUser } = useAuthStore();
+  const { setTokens, setUser, setRememberMe } = useAuthStore();
 
   const [authMode, setAuthMode] = useState<string>("register");
   const [activeForm, setActiveForm] = useState<ActiveForm>("role");
@@ -353,6 +353,7 @@ export const RegisterPage = () => {
           password: formData.password,
         });
       }
+      setRememberMe(true);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
@@ -431,6 +432,7 @@ export const RegisterPage = () => {
           agree_publishing: true,
         },
       });
+      setRememberMe(true);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
@@ -515,6 +517,7 @@ export const RegisterPage = () => {
           agree_publishing: data.agreeAccuracy,
         },
       });
+      setRememberMe(true);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${data.clinicName}!`);

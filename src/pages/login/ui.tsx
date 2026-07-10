@@ -25,7 +25,11 @@ const ROLE_REDIRECT: Record<string, string> = {
 
 export const LoginPage = () => {
   const router = useRouter();
-  const { setTokens, setUser } = useAuthStore();
+  const {
+    setTokens,
+    setUser,
+    setRememberMe: setRememberMeStore,
+  } = useAuthStore();
 
   const [authMode, setAuthMode] = useState<string>("login");
   const [email, setEmail] = useState("");
@@ -42,6 +46,7 @@ export const LoginPage = () => {
 
     try {
       const res = await loginFn({ email, password });
+      setRememberMeStore(rememberMe);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
