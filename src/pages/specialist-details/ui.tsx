@@ -25,6 +25,7 @@ import {
   HeartIcon,
   HistoryIcon,
   PhoneIcon,
+  UserCircleIcon,
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
@@ -189,14 +190,16 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               </IconBtn>
             </div>
 
-            <div className="relative w-full h-85 md:h-125 bg-[#FFEFE5] md:rounded-3xl overflow-hidden">
-              {doctor.image && (
+            <div className="relative w-full h-85 md:h-125 bg-[#FFEFE5] md:rounded-3xl overflow-hidden flex items-center justify-center">
+              {doctor.image ? (
                 <Image
                   src={doctor.image}
                   alt={doctor.name}
                   fill
                   className="object-cover object-top"
                 />
+              ) : (
+                <UserCircleIcon className="size-32 text-dim/60" />
               )}
               {doctor.isOnlineAvailable && (
                 <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider hidden md:block">
