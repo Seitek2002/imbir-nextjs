@@ -70,6 +70,7 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
   workplaces: d.workplaces.map((w) => ({
     clinicId: String(w.id ?? w.clinic_id ?? ""),
     clinicName: w.name ?? w.clinic_name ?? "",
+    clinicAddress: (w as any).address ?? w.clinic_address ?? "",
     price: w.price,
     schedule: emptySchedule,
   })),

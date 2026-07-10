@@ -41,6 +41,7 @@ export type Schedule = {
 export type Workplace = {
   clinicId: string;
   clinicName: string;
+  clinicAddress?: string;
   branchId?: string;
   price: number;
   schedule: Schedule;
