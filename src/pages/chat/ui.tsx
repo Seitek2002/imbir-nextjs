@@ -143,10 +143,10 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
           Чаты
         </h1>
 
-        <div className="flex flex-1 gap-0 md:gap-0 md:bg-white md:border md:border-border-soft md:rounded-3xl md:overflow-hidden md:h-[calc(100vh-220px)] min-h-150">
+        <div className="flex flex-1 gap-5 md:h-[calc(100vh-220px)] min-h-150">
           <aside
             className={cn(
-              "w-full md:w-85 lg:w-92.5 shrink-0 md:border-r md:border-border-soft flex flex-col md:bg-[#F9FAFB]",
+              "w-full md:w-85 lg:w-92.5 shrink-0 flex flex-col",
               activeId !== null && "hidden md:block",
             )}
           >
@@ -162,7 +162,7 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
 
           <section
             className={cn(
-              "flex-1 flex flex-col overflow-hidden bg-white md:border-0 md:rounded-none",
+              "flex-1 bg-white flex flex-col overflow-hidden md:border md:border-border-soft md:rounded-[32px] shadow-sm",
               activeConversation ? "flex" : "hidden md:flex",
             )}
           >

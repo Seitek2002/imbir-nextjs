@@ -38,7 +38,7 @@ const MessageBubble: FC<{ message: ChatThreadMessage }> = ({ message }) => (
         "px-4 py-2.5 text-sm leading-normal whitespace-pre-wrap break-words",
         message.isMine
           ? "bg-primary text-white rounded-2xl rounded-br-sm"
-          : "bg-white text-foreground rounded-2xl rounded-bl-sm border border-border-soft",
+          : "bg-[#EEF1F4] text-foreground rounded-2xl rounded-bl-sm",
       )}
     >
       {message.content}
@@ -148,7 +148,7 @@ export const MessageThread: FC<Props> = ({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3 scrollbar-hide bg-[#F9FAFB]">
+    <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3 scrollbar-hide bg-white">
       {error && (
         <div className="self-center bg-[#FFF0EE] text-primary text-xs px-4 py-1.5 rounded-full">
           {error}
