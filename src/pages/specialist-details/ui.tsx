@@ -257,7 +257,8 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 <>
                   <Button
                     variant="outline"
-                    className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-primary"
+                    size="md"
+                    className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-primary hover:bg-[#FFEAE5]"
                     onClick={() => setIsBookingOpen(true)}
                   >
                     Офлайн-запись
@@ -265,6 +266,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                   {doctor.isOnlineAvailable && (
                     <Button
                       className="flex-1 justify-center"
+                      size="md"
                       onClick={() =>
                         router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
                       }
