@@ -95,24 +95,7 @@ export const OfflineBookingModal: FC<Props> = ({ isOpen, onClose, doctor }) => {
   const [comment, setComment] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Reset state when modal is opened/closed
-  useEffect(() => {
-    if (isOpen) {
-      setStep(1);
-      setSelectedClinicId(doctor.workplaces[0]?.clinicId || "");
-      setSelectedServiceId("");
-      setSelectedDate(null);
-      setSelectedTime(null);
-      setFirstName("");
-      setLastName("");
-      setPhone("");
-      setEmail("");
-      setComment("");
-      setErrors({});
-    }
-  }, [isOpen, doctor]);
-
-  // Auth Profile Autofill
+  // Auth Profile Autofill & Modal Reset
   const user = useAuthStore((s) => s.user);
   const canUseOnline = Boolean(user);
 
@@ -123,24 +106,41 @@ export const OfflineBookingModal: FC<Props> = ({ isOpen, onClose, doctor }) => {
   });
 
   useEffect(() => {
-    if (profile) {
-      if (profile.first_name) setFirstName(profile.first_name);
-      if (profile.last_name) setLastName(profile.last_name);
-      if (profile.phone) {
-        let localPhone = profile.phone;
-        if (localPhone.startsWith("+996")) {
-          localPhone = localPhone.slice(4);
-        } else if (localPhone.startsWith("996")) {
-          localPhone = localPhone.slice(3);
-        } else if (localPhone.startsWith("+")) {
-          localPhone = localPhone.slice(1);
+    if (isOpen) {
+      setStep(1);
+      setSelectedClinicId(doctor.workplaces[0]?.clinicId || "");
+      setSelectedServiceId("");
+      setSelectedDate(null);
+      setSelectedTime(null);
+      setComment("");
+      setErrors({});
+
+      if (profile) {
+        setFirstName(profile.first_name || "");
+        setLastName(profile.last_name || "");
+        if (profile.phone) {
+          let localPhone = profile.phone;
+          if (localPhone.startsWith("+996")) {
+            localPhone = localPhone.slice(4);
+          } else if (localPhone.startsWith("996")) {
+            localPhone = localPhone.slice(3);
+          } else if (localPhone.startsWith("+")) {
+            localPhone = localPhone.slice(1);
+          }
+          const cleaned = localPhone.replace(/\D/g, "");
+          setPhone(normalizeLocalPhone(cleaned));
+        } else {
+          setPhone("");
         }
-        const cleaned = localPhone.replace(/\D/g, "");
-        setPhone(normalizeLocalPhone(cleaned));
+        setEmail(profile.email || "");
+      } else {
+        setFirstName("");
+        setLastName("");
+        setPhone("");
+        setEmail("");
       }
-      if (profile.email) setEmail(profile.email);
     }
-  }, [profile]);
+  }, [isOpen, profile, doctor]);
 
   // Fetch services for this doctor
   const { data: servicesRaw } = useQuery({
