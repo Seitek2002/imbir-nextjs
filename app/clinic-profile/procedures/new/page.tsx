@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { ClinicSidebar } from "@/widgets/clinic/sidebar";
+import { ClinicSidebar } from "@/widgets/clinic/layout";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 

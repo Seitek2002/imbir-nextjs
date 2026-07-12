@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { ClinicSidebar } from "@/widgets/clinic/sidebar";
+import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
 import {
   ClinicProfileForm,
@@ -175,11 +175,11 @@ export const ClinicProfilePage: FC = () => {
   }
 
   return (
-    <div className="w-full min-h-screen">
-      {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
-        <h1 className="text-lg font-semibold text-foreground">Моя клиника</h1>
-        {isEditing ? (
+    <ClinicPageLayout
+      title="Моя клиника"
+      desktopTitle="Мой профиль"
+      mobileAction={
+        isEditing ? (
           <Button size="sm" onClick={handleSave}>
             Сохранить
           </Button>
@@ -187,62 +187,35 @@ export const ClinicProfilePage: FC = () => {
           <Button size="sm" variant="outline" onClick={handleEdit}>
             Редактировать
           </Button>
+        )
+      }
+    >
+      <div className="hidden md:flex items-center justify-between mb-6">
+        <h2 className="text-[32px] font-semibold text-foreground">
+          Моя клиника
+        </h2>
+        {isEditing ? (
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={() => setIsEditing(false)}>
+              Отмена
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Сохранение..." : "Сохранить"}
+            </Button>
+          </div>
+        ) : (
+          <Button variant="outline" IconLeft={PencilIcon} onClick={handleEdit}>
+            Редактировать
+          </Button>
         )}
       </div>
 
-      {/* Desktop Content */}
-      <div className="max-w-360 mx-auto px-4 md:px-10 py-4 md:py-8">
-        <h1 className="text-[40px] font-semibold text-foreground mb-8 hidden md:block">
-          Мой профиль
-        </h1>
+      {!isEditing && <ClinicStatsTiles />}
+      {!isEditing && <BranchesCard branches={rawProfile?.branches ?? []} />}
 
-        <div className="flex gap-6">
-          <ClinicSidebar
-            clinicName={profile?.name ?? ""}
-            clinicLogo={profile?.logo}
-            rating={profile?.rating ?? 0}
-          />
-
-          <main className="flex-1 min-w-0">
-            <div className="hidden md:flex items-center justify-between mb-6">
-              <h2 className="text-[32px] font-semibold text-foreground">
-                Моя клиника
-              </h2>
-              {isEditing ? (
-                <div className="flex items-center gap-3">
-                  <Button variant="outline" onClick={() => setIsEditing(false)}>
-                    Отмена
-                  </Button>
-                  <Button onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? "Сохранение..." : "Сохранить"}
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  variant="outline"
-                  IconLeft={PencilIcon}
-                  onClick={handleEdit}
-                >
-                  Редактировать
-                </Button>
-              )}
-            </div>
-
-            {!isEditing && <ClinicStatsTiles />}
-            {!isEditing && (
-              <BranchesCard branches={rawProfile?.branches ?? []} />
-            )}
-
-            {profile && (
-              <ClinicProfileForm
-                ref={formRef}
-                {...profile}
-                isEditing={isEditing}
-              />
-            )}
-          </main>
-        </div>
-      </div>
-    </div>
+      {profile && (
+        <ClinicProfileForm ref={formRef} {...profile} isEditing={isEditing} />
+      )}
+    </ClinicPageLayout>
   );
 };
