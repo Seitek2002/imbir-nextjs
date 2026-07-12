@@ -17,3 +17,4 @@ export { SaveButton } from "./save-button";
 export { FilterPanel } from "./filter-panel";
 export { PageHeader } from "./page-header";
 export { LazyInView } from "./lazy-in-view";
+export { ImageWithFallback } from "./image-with-fallback";

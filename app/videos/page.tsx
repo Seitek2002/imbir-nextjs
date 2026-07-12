@@ -1,9 +1,8 @@
-﻿import Image from "next/image";
-
-import { Footer } from "@/widgets/footer";
+﻿import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 
 import { ROUTES } from "@/shared/config";
+import { ImageWithFallback } from "@/shared/ui";
 
 const VIDEOS = [
   {
@@ -114,11 +113,14 @@ export default function VideosPage() {
             >
               {/* Thumbnail */}
               <div className="relative aspect-video overflow-hidden bg-background">
-                <Image
+                <ImageWithFallback
                   src={v.thumb}
                   alt={v.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  fallback={
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#FEF3F0] to-[#F7C9BC]" />
+                  }
                 />
                 {/* Play overlay */}
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
