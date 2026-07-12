@@ -217,15 +217,15 @@ export const DoctorServicesPage: FC = () => {
         }
       >
         <div className="hidden lg:flex items-center justify-between mb-6">
-          <h2 className="text-[28px] font-semibold text-foreground">Услуги</h2>
+          <h2 className="text-[32px] font-semibold text-foreground">Услуги</h2>
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors"
+            className="flex items-center gap-2 pl-4 pr-5 py-2.5 rounded-full border border-border bg-white text-foreground font-medium hover:border-primary hover:text-primary transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path
                 d="M8 3V13M3 8H13"
-                stroke="white"
+                stroke="currentColor"
                 strokeWidth="1.5"
                 strokeLinecap="round"
               />
@@ -234,55 +234,110 @@ export const DoctorServicesPage: FC = () => {
           </button>
         </div>
 
-        <div className="bg-white rounded-3xl border border-border overflow-hidden">
-          <div className="grid grid-cols-[1fr_1fr_auto] px-5 py-3 border-b border-border">
-            <span className="text-muted text-sm font-medium">
-              Название услуги
-            </span>
-            <span className="text-muted text-sm font-medium">Стоимость</span>
-            <span className="w-8" />
+        {isLoading ? (
+          <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
+            Загрузка...
           </div>
-
-          {isLoading ? (
-            <div className="px-5 py-12 text-center text-muted text-sm">
-              Загрузка...
-            </div>
-          ) : services.length === 0 ? (
-            <div className="px-5 py-12 text-center text-muted text-sm">
-              Услуг пока нет
-            </div>
-          ) : (
-            services.map((s, i) => (
-              <div
-                key={s.id}
-                className={`grid grid-cols-[1fr_1fr_auto] px-5 py-4 items-center ${i !== services.length - 1 ? "border-b border-border" : ""}`}
-              >
-                <span className="text-foreground text-sm font-medium pr-3">
-                  {s.name}
-                </span>
-                <span className="text-muted text-sm pr-3">
-                  {s.price != null ? `${s.price} сом` : "—"}
-                </span>
-                <button
-                  onClick={() => deleteMutation.mutate(s.id)}
-                  disabled={deleteMutation.isPending}
-                  className="w-8 h-8 flex items-center justify-center text-dim hover:text-red-500 transition-colors"
-                  aria-label="Удалить"
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path
-                      d="M2 4h12M5.333 4V2.667a.667.667 0 01.667-.667h4a.667.667 0 01.667.667V4M6.667 7.333v4M9.333 7.333v4M3.333 4l.667 9.333A1.333 1.333 0 005.333 14.667h5.334a1.333 1.333 0 001.333-1.334L12.667 4"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
+        ) : services.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
+            Услуг пока нет
+          </div>
+        ) : (
+          <>
+            {/* ── Desktop: таблица ─────────────────────────────── */}
+            <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+              <div className="grid grid-cols-[1.3fr_2fr_1fr_1fr_auto] gap-4 px-6 py-4 border-b border-border">
+                <span className="text-muted text-sm">Название</span>
+                <span className="text-muted text-sm">Описание</span>
+                <span className="text-muted text-sm">Стоимость</span>
+                <span className="text-muted text-sm">Длительность</span>
+                <span className="w-8" />
               </div>
-            ))
-          )}
-        </div>
+
+              {services.map((s, i) => (
+                <div
+                  key={s.id}
+                  className={`group grid grid-cols-[1.3fr_2fr_1fr_1fr_auto] gap-4 px-6 py-4 items-center ${
+                    i !== services.length - 1 ? "border-b border-border" : ""
+                  }`}
+                >
+                  <span className="text-foreground font-medium">{s.name}</span>
+                  <span className="text-muted">{s.description || "—"}</span>
+                  <span className="text-foreground">
+                    {s.price != null ? `${s.price} сом` : "—"}
+                  </span>
+                  <span className="text-foreground">
+                    {s.duration != null ? `${s.duration} мин` : "—"}
+                  </span>
+                  <button
+                    onClick={() => deleteMutation.mutate(s.id)}
+                    disabled={deleteMutation.isPending}
+                    className="w-8 h-8 flex items-center justify-center text-dim hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="Удалить"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path
+                        d="M2 4h12M5.333 4V2.667a.667.667 0 01.667-.667h4a.667.667 0 01.667.667V4M6.667 7.333v4M9.333 7.333v4M3.333 4l.667 9.333A1.333 1.333 0 005.333 14.667h5.334a1.333 1.333 0 001.333-1.334L12.667 4"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* ── Mobile: карточки ─────────────────────────────── */}
+            <div className="md:hidden flex flex-col gap-3">
+              {services.map((s) => (
+                <div
+                  key={s.id}
+                  className="bg-white rounded-2xl border border-border p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-foreground font-medium">
+                      {s.name}
+                    </span>
+                    <button
+                      onClick={() => deleteMutation.mutate(s.id)}
+                      disabled={deleteMutation.isPending}
+                      className="w-7 h-7 flex items-center justify-center text-dim hover:text-red-500 shrink-0"
+                      aria-label="Удалить"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                      >
+                        <path
+                          d="M2 4h12M5.333 4V2.667a.667.667 0 01.667-.667h4a.667.667 0 01.667.667V4M6.667 7.333v4M9.333 7.333v4M3.333 4l.667 9.333A1.333 1.333 0 005.333 14.667h5.334a1.333 1.333 0 001.333-1.334L12.667 4"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  {s.description && (
+                    <p className="text-muted text-sm mt-1">{s.description}</p>
+                  )}
+                  <div className="flex items-center gap-4 mt-3 text-sm">
+                    <span className="text-foreground font-medium">
+                      {s.price != null ? `${s.price} сом` : "—"}
+                    </span>
+                    <span className="text-muted">
+                      {s.duration != null ? `${s.duration} мин` : "—"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </DoctorPageLayout>
 
       <AddServiceModal

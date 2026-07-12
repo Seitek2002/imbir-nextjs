@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
 
 import {
+  type DoctorAppointment,
   type DoctorAppointmentSummary,
   doctorCabinetKeys,
   getAppointmentSummary,
@@ -16,22 +17,37 @@ import {
 } from "@/shared/api";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { Button, Textarea } from "@/shared/ui";
+import { SegmentedControl } from "@/shared/ui/segmented-control";
 
-type Tab = "all" | "upcoming" | "completed" | "cancelled";
+type Tab = "all" | "upcoming" | "completed";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "all", label: "Все" },
-  { key: "upcoming", label: "Предстоящие" },
-  { key: "completed", label: "Завершённые" },
-  { key: "cancelled", label: "Отменённые" },
+const TABS = [
+  { value: "all" as const, label: "Все" },
+  { value: "upcoming" as const, label: "Предстоящие" },
+  { value: "completed" as const, label: "Завершенные" },
 ];
 
-const STATUS_LABEL: Record<Tab, string> = {
-  all: "",
-  upcoming: "Предстоит",
-  completed: "Завершён",
-  cancelled: "Отменён",
+// Плашка статуса записи (как в макете): предстоящая — оранжевая, завершённая —
+// зелёная, отменённая — серая.
+const STATUS_PILL: Record<
+  DoctorAppointment["status"],
+  { label: string; cls: string }
+> = {
+  upcoming: { label: "Предстоящая", cls: "bg-primary-tint text-primary" },
+  completed: { label: "Завершенная", cls: "bg-[#E3F5EC] text-[#2FA968]" },
+  cancelled: { label: "Отменена", cls: "bg-surface text-muted" },
 };
+
+// "2026-05-06" → "06.05.2026".
+const fmtDate = (iso: string): string => {
+  const parts = iso?.split("-");
+  if (parts?.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+  return iso;
+};
+
+// "10:00:00" → "10:00".
+const fmtTime = (time: string): string =>
+  time?.length >= 5 ? time.slice(0, 5) : time;
 
 const EMPTY_SUMMARY: DoctorAppointmentSummary = {
   diagnosis: "",
@@ -78,7 +94,7 @@ const SummaryEditor: FC<{ appointmentId: number }> = ({ appointmentId }) => {
 
   if (isLoading || !form) {
     return (
-      <div className="px-5 py-4 bg-surface text-muted text-sm">Загрузка...</div>
+      <div className="px-6 py-4 bg-surface text-muted text-sm">Загрузка...</div>
     );
   }
 
@@ -86,7 +102,7 @@ const SummaryEditor: FC<{ appointmentId: number }> = ({ appointmentId }) => {
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
 
   return (
-    <div className="px-5 py-4 bg-surface flex flex-col gap-3">
+    <div className="px-6 py-4 bg-surface flex flex-col gap-3">
       <Textarea
         label="Диагноз"
         value={form.diagnosis}
@@ -117,6 +133,19 @@ const SummaryEditor: FC<{ appointmentId: number }> = ({ appointmentId }) => {
   );
 };
 
+const StatusPill: FC<{ status: DoctorAppointment["status"] }> = ({
+  status,
+}) => {
+  const { label, cls } = STATUS_PILL[status] ?? STATUS_PILL.cancelled;
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${cls}`}
+    >
+      {label}
+    </span>
+  );
+};
+
 export const DoctorAppointmentsPage: FC = () => {
   const [tab, setTab] = useState<Tab>("all");
   const [openSummaryId, setOpenSummaryId] = useState<number | null>(null);
@@ -128,84 +157,107 @@ export const DoctorAppointmentsPage: FC = () => {
 
   const appointments = data?.data ?? [];
 
+  const toggle = (id: number) =>
+    setOpenSummaryId((cur) => (cur === id ? null : id));
+
   return (
     <DoctorPageLayout title="Записи">
-      <h2 className="text-[28px] font-semibold text-foreground mb-6 hidden lg:block">
-        Записи
-      </h2>
-
-      <div className="flex gap-1 bg-white rounded-2xl p-1 mb-4 border border-border">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              tab === t.key
-                ? "bg-primary text-white"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="bg-white rounded-3xl border border-border overflow-hidden">
-        <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 px-5 py-3 border-b border-border">
-          <span className="text-muted text-sm font-medium">Пациент</span>
-          <span className="text-muted text-sm font-medium">Дата / Время</span>
-          <span className="text-muted text-sm font-medium">Статус</span>
-          <span className="text-muted text-sm font-medium">Итоги</span>
+      {/* Desktop: заголовок + сегмент-переключатель в одну строку */}
+      <div className="hidden lg:flex items-center justify-between mb-6">
+        <h2 className="text-[32px] font-semibold text-foreground">Записи</h2>
+        <div className="w-90 shrink-0">
+          <SegmentedControl options={TABS} value={tab} onChange={setTab} />
         </div>
-
-        {isLoading ? (
-          <div className="px-5 py-12 text-center text-muted text-sm">
-            Загрузка...
-          </div>
-        ) : appointments.length === 0 ? (
-          <div className="px-5 py-12 text-center text-muted text-sm">
-            Нет записей
-          </div>
-        ) : (
-          appointments.map((a, i) => (
-            <div
-              key={a.id}
-              className={
-                i !== appointments.length - 1 ? "border-b border-border" : ""
-              }
-            >
-              <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 px-5 py-4 items-center">
-                <span className="text-foreground text-sm font-medium">
-                  {a.patient.full_name}
-                </span>
-                <span className="text-muted text-sm">
-                  {a.date} {a.time}
-                </span>
-                <span
-                  className={`text-sm font-medium ${
-                    a.status === "upcoming"
-                      ? "text-primary"
-                      : a.status === "completed"
-                        ? "text-green-600"
-                        : "text-muted"
-                  }`}
-                >
-                  {STATUS_LABEL[a.status as Tab] ?? a.status}
-                </span>
-                <button
-                  onClick={() =>
-                    setOpenSummaryId(openSummaryId === a.id ? null : a.id)
-                  }
-                  className="text-primary text-sm font-medium hover:underline whitespace-nowrap"
-                >
-                  {openSummaryId === a.id ? "Скрыть" : "Итоги приёма"}
-                </button>
-              </div>
-              {openSummaryId === a.id && <SummaryEditor appointmentId={a.id} />}
-            </div>
-          ))
-        )}
       </div>
+
+      {/* Mobile: сегмент под шапкой страницы */}
+      <div className="lg:hidden mb-4">
+        <SegmentedControl options={TABS} value={tab} onChange={setTab} />
+      </div>
+
+      {isLoading ? (
+        <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
+          Загрузка...
+        </div>
+      ) : appointments.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
+          Нет записей
+        </div>
+      ) : (
+        <>
+          {/* ── Desktop: таблица ───────────────────────────────── */}
+          <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+            <div className="grid grid-cols-[1.6fr_1fr_0.8fr_1.2fr_1fr] gap-4 px-6 py-4 border-b border-border">
+              <span className="text-muted text-sm">Пациент</span>
+              <span className="text-muted text-sm">Дата</span>
+              <span className="text-muted text-sm">Время</span>
+              <span className="text-muted text-sm">Тип</span>
+              <span className="text-muted text-sm">Статус</span>
+            </div>
+
+            {appointments.map((a, i) => (
+              <div
+                key={a.id}
+                className={
+                  i !== appointments.length - 1 ? "border-b border-border" : ""
+                }
+              >
+                <div
+                  onClick={() => toggle(a.id)}
+                  className="grid grid-cols-[1.6fr_1fr_0.8fr_1.2fr_1fr] gap-4 px-6 py-4 items-center cursor-pointer hover:bg-surface transition-colors"
+                >
+                  <span className="text-foreground font-medium">
+                    {a.patient.full_name}
+                  </span>
+                  <span className="text-foreground">{fmtDate(a.date)}</span>
+                  <span className="text-foreground">{fmtTime(a.time)}</span>
+                  <span className="text-foreground">
+                    {a.service?.name ?? "—"}
+                  </span>
+                  <span>
+                    <StatusPill status={a.status} />
+                  </span>
+                </div>
+                {openSummaryId === a.id && (
+                  <SummaryEditor appointmentId={a.id} />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* ── Mobile: карточки ───────────────────────────────── */}
+          <div className="md:hidden flex flex-col gap-3">
+            {appointments.map((a) => (
+              <div
+                key={a.id}
+                className="bg-white rounded-2xl border border-border overflow-hidden"
+              >
+                <div
+                  onClick={() => toggle(a.id)}
+                  className="p-4 cursor-pointer"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-foreground font-medium">
+                      {a.patient.full_name}
+                    </span>
+                    <StatusPill status={a.status} />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted">
+                    <span>{fmtDate(a.date)}</span>
+                    <span>{fmtTime(a.time)}</span>
+                    {a.service?.name && (
+                      <span className="text-foreground">{a.service.name}</span>
+                    )}
+                  </div>
+                </div>
+                {openSummaryId === a.id && (
+                  <SummaryEditor appointmentId={a.id} />
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </DoctorPageLayout>
   );
 };
