@@ -65,7 +65,7 @@ export const Banners: FC = () => {
       <Image
         src={BannerImage1}
         alt=""
-        className="absolute bottom-0 -right-6 md:left-2 md:right-auto w-32.5 md:w-42.5 z-0 object-contain pointer-events-none"
+        className="absolute bottom-0 -right-6 md:left-2 md:right-auto w-32.5 md:w-32 z-0 object-contain pointer-events-none"
       />
     </div>
   );
@@ -121,7 +121,7 @@ export const Banners: FC = () => {
       <Image
         src={BannerImage3}
         alt=""
-        className="absolute bottom-0 -right-6 md:-right-2 w-35 md:w-50 z-0 object-contain pointer-events-none"
+        className="absolute bottom-0 -right-6 md:-right-2 w-35 md:w-36 z-0 object-contain pointer-events-none"
       />
     </div>
   );
