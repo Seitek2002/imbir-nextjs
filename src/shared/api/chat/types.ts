@@ -15,6 +15,9 @@ export type ChatRoom = {
   participants: ChatParticipant[];
   last_message: ChatRoomLastMessage | null;
   created_at: string;
+  // Кол-во непрочитанных сообщений в комнате. Заполняется бэком; пока поля нет —
+  // счётчик в хедере остаётся 0. См. бейдж в HeaderChatButton.
+  unread_count?: number;
 };
 
 export type ChatMessage = {
