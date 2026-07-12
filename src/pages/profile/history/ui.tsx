@@ -42,6 +42,16 @@ const toEntityId = (value: unknown): string => {
   return "";
 };
 
+// Цена берётся из объекта услуги ({id, name, price}); бэк отдаёт число или строку.
+const toServicePrice = (value: unknown): number => {
+  if (value && typeof value === "object") {
+    const price = (value as Record<string, unknown>).price;
+    if (typeof price === "number") return price;
+    if (typeof price === "string") return parseFloat(price) || 0;
+  }
+  return 0;
+};
+
 export const ProfileHistoryPage: FC = () => {
   const [activeTab, setActiveTab] = useState<"upcoming" | "completed">(
     "upcoming",
@@ -62,7 +72,7 @@ export const ProfileHistoryPage: FC = () => {
     date: a.date,
     time: a.time,
     service: toDisplayName(a.service),
-    price: 0,
+    price: toServicePrice(a.service),
     address: "",
     status:
       a.status === "confirmed" || a.status === "pending"
@@ -78,32 +88,27 @@ export const ProfileHistoryPage: FC = () => {
       mobileHeader={<MobilePageHeader title="История записей" />}
       sidebar={<ProfileSidebar />}
     >
-      <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground mb-6 hidden md:block">
-        История записей
-      </h2>
+      {/* Desktop: заголовок + сегмент-переключатель в одну строку */}
+      <div className="hidden md:flex items-center justify-between mb-6">
+        <h2 className="text-[32px] font-semibold text-foreground">
+          История записей
+        </h2>
+        <div className="w-75 shrink-0">
+          <SegmentedControl
+            options={TABS}
+            value={activeTab}
+            onChange={setActiveTab}
+          />
+        </div>
+      </div>
 
+      {/* Mobile: сегмент под шапкой страницы */}
       <div className="md:hidden mb-6">
         <SegmentedControl
           options={TABS}
           value={activeTab}
           onChange={setActiveTab}
         />
-      </div>
-
-      <div className="hidden md:flex gap-2 mb-6">
-        {TABS.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
-            className={`px-6 py-2.5 rounded-full font-medium text-sm whitespace-nowrap transition-all border ${
-              activeTab === tab.value
-                ? "border-foreground text-foreground bg-white"
-                : "border-border text-muted bg-white hover:border-dim"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
       </div>
 
       {isLoading ? (
