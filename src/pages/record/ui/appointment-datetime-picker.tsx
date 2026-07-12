@@ -5,20 +5,11 @@ import { FC, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
 import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets/icons";
+import type { TimeGroup } from "@/shared/lib/booking";
 import { cn } from "@/shared/lib/utils";
 import { IconBtn } from "@/shared/ui";
 
 export type ConsultationMode = "online" | "offline";
-
-export type TimeSlot = {
-  value: string;
-  disabled?: boolean;
-};
-
-export type TimeGroup = {
-  label: string;
-  slots: TimeSlot[];
-};
 
 type Props = {
   mode: ConsultationMode;
