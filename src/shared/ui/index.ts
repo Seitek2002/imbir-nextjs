@@ -19,3 +19,4 @@ export { PageHeader } from "./page-header";
 export { LazyInView } from "./lazy-in-view";
 export { ImageWithFallback } from "./image-with-fallback";
 export { AuthShell } from "./auth-shell";
+export { CabinetShell } from "./cabinet-shell";

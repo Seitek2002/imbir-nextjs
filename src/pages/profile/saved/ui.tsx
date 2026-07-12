@@ -13,7 +13,7 @@ import {
   DoctorPersonIcon,
   ServiceRadialIcon,
 } from "@/shared/assets/icons";
-import { FilterTabBar } from "@/shared/ui";
+import { CabinetShell, FilterTabBar } from "@/shared/ui";
 
 import { ProfileSaved } from "./ProfileSaved/ui";
 import { SavedItem, SavedType } from "./model";
@@ -120,40 +120,29 @@ export const ProfileSavedPage: FC = () => {
   });
 
   return (
-    <>
-      <MobilePageHeader title="Сохранённое" />
-      <div className="w-full max-w-360 mx-auto px-4 md:px-10 py-8">
-        <h1 className="text-[40px] font-semibold text-foreground mb-8 hidden md:block">
-          Мой профиль
-        </h1>
+    <CabinetShell
+      title="Мой профиль"
+      mobileHeader={<MobilePageHeader title="Сохранённое" />}
+      sidebar={<ProfileSidebar />}
+    >
+      <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground mb-6 hidden md:block">
+        Сохранённое
+      </h2>
 
-        <div className="flex gap-6">
-          <aside className="hidden lg:block shrink-0">
-            <ProfileSidebar />
-          </aside>
+      <FilterTabBar
+        tabs={TABS}
+        value={activeTab}
+        onChange={setActiveTab}
+        className="mb-6"
+      />
 
-          <main className="flex-1 min-w-0">
-            <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground mb-6 hidden md:block">
-              Сохранённое
-            </h2>
-
-            <FilterTabBar
-              tabs={TABS}
-              value={activeTab}
-              onChange={setActiveTab}
-              className="mb-6"
-            />
-
-            {isLoading ? (
-              <div className="bg-white rounded-3xl p-10 text-center border border-border text-muted">
-                Загрузка...
-              </div>
-            ) : (
-              <ProfileSaved items={savedItems} activeTab={activeTab} />
-            )}
-          </main>
+      {isLoading ? (
+        <div className="bg-white rounded-3xl p-10 text-center border border-border text-muted">
+          Загрузка...
         </div>
-      </div>
-    </>
+      ) : (
+        <ProfileSaved items={savedItems} activeTab={activeTab} />
+      )}
+    </CabinetShell>
   );
 };
