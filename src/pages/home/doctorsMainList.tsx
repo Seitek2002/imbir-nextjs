@@ -85,6 +85,10 @@ const DoctorsListContent = () => {
     return true;
   });
 
+  // На Главной показываем только первых 8 врачей — это витрина, за полным
+  // списком ведём на /specialists (кнопка «Все»).
+  const visibleDoctors = filteredDoctors.slice(0, 8);
+
   return (
     <>
       <div className="flex flex-col gap-3 lg:mt-10">
@@ -93,7 +97,7 @@ const DoctorsListContent = () => {
           {filteredDoctors.length === 0 && (
             <p className="text-center text-muted py-10">Врачи не найдены</p>
           )}
-          {filteredDoctors.map((doc) => (
+          {visibleDoctors.map((doc) => (
             <DoctorCard
               key={`mobile-doc-${doc.id}`}
               {...doc} // <-- ИСПРАВЛЕНО
@@ -109,7 +113,7 @@ const DoctorsListContent = () => {
               По вашим параметрам врачи не найдены
             </p>
           )}
-          {filteredDoctors.map((doc) => (
+          {visibleDoctors.map((doc) => (
             <DoctorCard
               key={`desktop-doc-${doc.id}`}
               {...doc} // <-- ИСПРАВЛЕНО
