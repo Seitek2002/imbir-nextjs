@@ -11,7 +11,9 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
     mobileStep,
     selectedClinic,
     selectedDoctor,
-    selectedService,
+    selectedServices,
+    selectedServiceIds,
+    mobileSelectionStage,
     openModal,
     mobileStep1Config,
     searchQuery,
@@ -22,6 +24,15 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
     handleMobileStep1Continue,
     isDoctorStageLoading,
   } = form;
+
+  const servicesFieldValue =
+    selectedServices.length === 0
+      ? undefined
+      : selectedServices.length === 1
+        ? selectedServices[0].title
+        : `Выбрано услуг: ${selectedServices.length}`;
+
+  const isServiceStage = mobileSelectionStage === "service";
 
   return (
     <section
@@ -47,7 +58,7 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
 
           <SelectField
             label="Услуга"
-            value={selectedService?.title}
+            value={servicesFieldValue}
             placeholder="Выберите из списка"
             onClick={() => openModal("service")}
           />
@@ -79,7 +90,12 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
                 item={item}
                 clinicMap={clinicMap}
                 compact
-                selected={mobileStep1Config.selectedId === item.id}
+                isMulti={isServiceStage}
+                selected={
+                  isServiceStage
+                    ? selectedServiceIds.includes(item.id)
+                    : mobileStep1Config.selectedId === item.id
+                }
                 onSelect={() => handleMobileStep1Select(item.id)}
               />
             ))
@@ -90,16 +106,20 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
           )}
         </div>
 
-        <div className="mt-4 pt-3 border-t border-[#E9EBEE]">
-          <Button
-            className="w-full justify-center"
-            size="lg"
-            disabled={!mobileStep1Config.selectedId}
-            onClick={handleMobileStep1Continue}
-          >
-            Продолжить
-          </Button>
-        </div>
+        {/* Клиника/врач переводят к следующему этапу сразу по тапу — кнопка
+            нужна только на этапе услуг (множественный выбор). */}
+        {isServiceStage && (
+          <div className="mt-4 pt-3 border-t border-[#E9EBEE]">
+            <Button
+              className="w-full justify-center"
+              size="lg"
+              disabled={selectedServiceIds.length === 0}
+              onClick={handleMobileStep1Continue}
+            >
+              Продолжить
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );

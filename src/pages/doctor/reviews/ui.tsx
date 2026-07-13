@@ -114,7 +114,7 @@ const ReplyModal: FC<ReplyModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
       <div
-        className="modal-overlay absolute inset-0 bg-black/50"
+        className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm"
         data-state={state}
         onClick={handleClose}
       />
@@ -203,7 +203,7 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
       <div
-        className="modal-overlay absolute inset-0 bg-black/50"
+        className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm"
         data-state={state}
         onClick={handleClose}
       />
