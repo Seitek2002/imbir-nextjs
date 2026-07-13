@@ -231,6 +231,14 @@ export const api = {
   getClinics: (filters?: ClinicFilters) =>
     getClinics(filters).then((r) => r.data.map(adaptClinic)),
 
+  // Как getClinics, но сохраняет pagination — нужно для постраничной
+  // подгрузки (кнопка «Показать ещё» на /clinics).
+  getClinicsPaginated: (filters?: ClinicFilters) =>
+    getClinics(filters).then((r) => ({
+      data: r.data.map(adaptClinic),
+      pagination: r.pagination,
+    })),
+
   getClinicById: (id: string) =>
     _getClinicById(id).then((c) => (c ? adaptClinicDetail(c) : null)),
 
