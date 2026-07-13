@@ -45,6 +45,15 @@ import type {
   Service,
 } from "./types";
 
+// Порядок цепочки модалок десктопа: выбор клиники/врача сразу закрывает
+// текущую модалку и открывает следующую. Услуга — конечное звено с
+// множественным выбором, поэтому не участвует в автопереходе.
+const SELECTION_CHAIN: Exclude<SelectionModalType, null>[] = [
+  "clinic",
+  "doctor",
+  "service",
+];
+
 export const useRecordForm = () => {
   const router = useRouter();
   const urlParams = useSearchParams() ?? new URLSearchParams();
@@ -55,9 +64,8 @@ export const useRecordForm = () => {
 
   const [selectedClinicId, setSelectedClinicId] = useState<string | null>(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-    null,
-  );
+  // Услуг можно выбрать несколько — храним массив id, цена суммируется.
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
 
   const [mode, setMode] = useState<ConsultationMode>("offline");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -65,9 +73,6 @@ export const useRecordForm = () => {
 
   const [activeModal, setActiveModal] = useState<SelectionModalType>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [modalDraftSelection, setModalDraftSelection] = useState<string | null>(
-    null,
-  );
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -221,7 +226,7 @@ export const useRecordForm = () => {
 
   useEffect(() => {
     const serviceId = urlParams.get("service");
-    if (serviceId) setSelectedServiceId(serviceId);
+    if (serviceId) setSelectedServiceIds([serviceId]);
     const doctorId = urlParams.get("doctor");
     if (doctorId) setSelectedDoctorId(doctorId);
     const clinicId = urlParams.get("clinic");
@@ -252,9 +257,13 @@ export const useRecordForm = () => {
     () => doctorPool.find((doctor) => doctor.id === selectedDoctorId) ?? null,
     [doctorPool, selectedDoctorId],
   );
-  const selectedService = useMemo(
-    () => SERVICES.find((service) => service.id === selectedServiceId) ?? null,
-    [SERVICES, selectedServiceId],
+  const selectedServices = useMemo(
+    () => SERVICES.filter((service) => selectedServiceIds.includes(service.id)),
+    [SERVICES, selectedServiceIds],
+  );
+  const totalPrice = useMemo(
+    () => selectedServices.reduce((sum, service) => sum + service.price, 0),
+    [selectedServices],
   );
 
   // Клиника выбрана → список врачей из GET /api/clinics/{id}/;
@@ -273,10 +282,10 @@ export const useRecordForm = () => {
 
     setSelectedClinicId(clinicId);
     // Врачи берутся из выбранной клиники (свой список, грузится отдельно),
-    // поэтому прежний врач и услуга могут к ней не относиться — сбрасываем,
+    // поэтому прежний врач и услуги могут к ней не относиться — сбрасываем,
     // чтобы пользователь выбрал специалиста заново из списка этой клиники.
     setSelectedDoctorId(null);
-    setSelectedServiceId(null);
+    setSelectedServiceIds([]);
   };
 
   const applyDoctorSelection = (doctorId: string) => {
@@ -290,19 +299,17 @@ export const useRecordForm = () => {
       setSelectedClinicId(matchedDoctor.clinicId);
     }
 
-    const matchedService = SERVICES.find(
-      (service) =>
-        service.id === selectedServiceId &&
-        service.clinicId === matchedDoctor.clinicId &&
-        service.doctorIds.includes(doctorId),
-    );
-    if (!matchedService) {
-      setSelectedServiceId(null);
-    }
+    // Услуги привязаны к паре клиника/врач — при смене врача сбрасываем выбор.
+    setSelectedServiceIds([]);
   };
 
-  const applyServiceSelection = (serviceId: string) => {
-    setSelectedServiceId(serviceId);
+  // Услуга не выбирается «насмерть», а переключается — можно выбрать несколько.
+  const toggleServiceSelection = (serviceId: string) => {
+    setSelectedServiceIds((prev) =>
+      prev.includes(serviceId)
+        ? prev.filter((id) => id !== serviceId)
+        : [...prev, serviceId],
+    );
   };
 
   const modalConfig = useMemo(() => {
@@ -336,14 +343,13 @@ export const useRecordForm = () => {
         ? selectedClinicId
         : mobileSelectionStage === "doctor"
           ? selectedDoctorId
-          : selectedServiceId;
+          : null;
 
     return { ...SELECTION_LABELS[mobileSelectionStage], items, selectedId };
   }, [
     mobileSelectionStage,
     selectedClinicId,
     selectedDoctorId,
-    selectedServiceId,
     CLINICS,
     doctorOptions,
     serviceOptions,
@@ -354,36 +360,29 @@ export const useRecordForm = () => {
     [mobileStep1Config.items, searchQuery],
   );
 
+  // Клиника/врач выбираются «насмерть» — тап сразу переводит к следующему
+  // этапу. Услуга переключается (множественный выбор) и остаётся на месте,
+  // пользователь сам жмёт «Продолжить».
   const handleMobileStep1Select = (id: string) => {
     if (mobileSelectionStage === "clinic") {
       applyClinicSelection(id);
-      return;
-    }
-
-    if (mobileSelectionStage === "doctor") {
-      applyDoctorSelection(id);
-      return;
-    }
-
-    applyServiceSelection(id);
-  };
-
-  const handleMobileStep1Continue = () => {
-    if (mobileSelectionStage === "clinic") {
-      if (!selectedClinicId) return;
       setMobileSelectionStage("doctor");
       setSearchQuery("");
       return;
     }
 
     if (mobileSelectionStage === "doctor") {
-      if (!selectedDoctorId) return;
+      applyDoctorSelection(id);
       setMobileSelectionStage("service");
       setSearchQuery("");
       return;
     }
 
-    if (!selectedServiceId) return;
+    toggleServiceSelection(id);
+  };
+
+  const handleMobileStep1Continue = () => {
+    if (selectedServiceIds.length === 0) return;
     setSearchQuery("");
     setMobileStep(2);
   };
@@ -397,7 +396,11 @@ export const useRecordForm = () => {
     if (mobileStep === 2) {
       setMobileStep(1);
       setMobileSelectionStage(
-        selectedServiceId ? "service" : selectedDoctorId ? "doctor" : "clinic",
+        selectedServiceIds.length > 0
+          ? "service"
+          : selectedDoctorId
+            ? "doctor"
+            : "clinic",
       );
       setSearchQuery("");
       return;
@@ -421,35 +424,34 @@ export const useRecordForm = () => {
   const openModal = (type: Exclude<SelectionModalType, null>) => {
     setActiveModal(type);
     setSearchQuery("");
-
-    const currentValue =
-      type === "clinic"
-        ? selectedClinicId
-        : type === "doctor"
-          ? selectedDoctorId
-          : selectedServiceId;
-
-    setModalDraftSelection(currentValue ?? null);
   };
 
   const closeModal = () => {
     setActiveModal(null);
     setSearchQuery("");
-    setModalDraftSelection(null);
   };
 
-  const applyModalSelection = () => {
-    if (!activeModal || !modalDraftSelection) return;
+  // Выбор пункта списка в десктопной модалке: клиника/врач — применяются
+  // сразу и открывают следующую модалку в цепочке; услуга — переключается
+  // (можно выбрать несколько), модалка остаётся открытой.
+  const handleModalItemSelect = (id: string) => {
+    if (!activeModal) return;
 
-    if (activeModal === "clinic") {
-      applyClinicSelection(modalDraftSelection);
-    } else if (activeModal === "doctor") {
-      applyDoctorSelection(modalDraftSelection);
-    } else {
-      applyServiceSelection(modalDraftSelection);
+    if (activeModal === "service") {
+      toggleServiceSelection(id);
+      return;
     }
 
-    closeModal();
+    if (activeModal === "clinic") applyClinicSelection(id);
+    else applyDoctorSelection(id);
+
+    const nextType = SELECTION_CHAIN[SELECTION_CHAIN.indexOf(activeModal) + 1];
+    if (nextType) {
+      setActiveModal(nextType);
+      setSearchQuery("");
+    } else {
+      closeModal();
+    }
   };
 
   const buildAppointmentRequest = (): CreateAppointmentRequest | null => {
@@ -463,8 +465,18 @@ export const useRecordForm = () => {
 
     if (selectedDoctorId) request.doctor_id = Number(selectedDoctorId);
     if (selectedClinicId) request.clinic_id = Number(selectedClinicId);
-    if (selectedServiceId) request.service_id = Number(selectedServiceId);
-    if (comment.trim()) request.notes = comment.trim();
+    // Бэк принимает только один service_id — уходит первая выбранная услуга,
+    // остальные добавляем в notes, чтобы врач видел полный список.
+    if (selectedServiceIds[0])
+      request.service_id = Number(selectedServiceIds[0]);
+    const extraServices = selectedServices.slice(1).map((s) => s.title);
+    const notesParts = [
+      ...(extraServices.length
+        ? [`Также выбраны услуги: ${extraServices.join(", ")}`]
+        : []),
+      ...(comment.trim() ? [comment.trim()] : []),
+    ];
+    if (notesParts.length) request.notes = notesParts.join(". ");
 
     // Guests pass their contacts explicitly; authenticated bookings are tied
     // to the logged-in user on the server, so no guest_* fields are sent.
@@ -548,8 +560,6 @@ export const useRecordForm = () => {
     activeModal,
     searchQuery,
     setSearchQuery,
-    modalDraftSelection,
-    setModalDraftSelection,
     firstName,
     setFirstName,
     lastName,
@@ -571,7 +581,10 @@ export const useRecordForm = () => {
     clinicMap,
     selectedClinic,
     selectedDoctor,
-    selectedService,
+    selectedServices,
+    selectedServiceIds,
+    totalPrice,
+    mobileSelectionStage,
     isStep2Complete,
     modalConfig,
     filteredModalItems,
@@ -587,7 +600,7 @@ export const useRecordForm = () => {
     handleRecordBack,
     openModal,
     closeModal,
-    applyModalSelection,
+    handleModalItemSelect,
     validateAndSubmit,
   };
 };

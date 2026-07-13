@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC } from "react";
 
@@ -6,13 +6,24 @@ import { useQuery } from "@tanstack/react-query";
 
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
 
-import { doctorCabinetKeys, getDoctorPatients } from "@/shared/api";
+import { StartChatButton } from "@/features/start-chat";
 
-const PatientAvatar = ({ initial }: { initial: string }) => (
-  <div className="w-9 h-9 rounded-full bg-[#FFF0EE] flex items-center justify-center shrink-0">
-    <span className="text-primary font-semibold text-sm">{initial}</span>
-  </div>
-);
+import {
+  type DoctorPatient,
+  doctorCabinetKeys,
+  getDoctorPatients,
+} from "@/shared/api";
+
+// "2026-04-30" → "30.04.2026".
+const fmtDate = (iso: string): string => {
+  const parts = iso?.split("-");
+  if (parts?.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+  return iso || "—";
+};
+
+// Диагноз в списке пациентов бэк пока не отдаёт — показываем прочерк.
+const diagnosisOf = (p: DoctorPatient): string =>
+  (p as unknown as { diagnosis?: string }).diagnosis || "—";
 
 export const DoctorPatientsPage: FC = () => {
   const { data, isLoading } = useQuery({
@@ -21,46 +32,65 @@ export const DoctorPatientsPage: FC = () => {
   });
 
   const patients = data?.data ?? [];
+  const th = "px-6 py-4 text-muted text-sm font-normal whitespace-nowrap";
+  const td = "px-6 py-4 whitespace-nowrap";
 
   return (
     <DoctorPageLayout title="Пациенты">
-      <h2 className="text-[28px] font-semibold text-foreground mb-6 hidden lg:block">
+      <h2 className="text-[32px] font-semibold text-foreground mb-6 hidden lg:block">
         Пациенты
       </h2>
 
-      <div className="bg-white rounded-3xl border border-border overflow-hidden">
-        <div className="grid grid-cols-2 px-5 py-3 border-b border-border">
-          <span className="text-muted text-sm font-medium">Пациент</span>
-          <span className="text-muted text-sm font-medium">
-            Последний визит
-          </span>
+      {isLoading ? (
+        <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
+          Загрузка...
         </div>
-
-        {isLoading ? (
-          <div className="px-5 py-12 text-center text-muted text-sm">
-            Загрузка...
+      ) : patients.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
+          Нет пациентов
+        </div>
+      ) : (
+        <div className="bg-white rounded-3xl border border-border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-160 text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className={th}>Пациент</th>
+                  <th className={th}>Последний визит</th>
+                  <th className={th}>Диагноз</th>
+                  <th className="px-6 py-4" />
+                </tr>
+              </thead>
+              <tbody>
+                {patients.map((p) => (
+                  <tr
+                    key={p.id}
+                    className="border-b border-border last:border-0"
+                  >
+                    <td className={`${td} text-foreground font-medium`}>
+                      {p.full_name}
+                    </td>
+                    <td className={`${td} text-foreground`}>
+                      {fmtDate(p.last_visit)}
+                    </td>
+                    <td className={`${td} text-foreground`}>
+                      {diagnosisOf(p)}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <StartChatButton
+                        userId={p.id}
+                        size="sm"
+                        variant="outline"
+                        label="Открыть чат"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ) : patients.length === 0 ? (
-          <div className="px-5 py-12 text-center text-muted text-sm">
-            Нет пациентов
-          </div>
-        ) : (
-          patients.map((p, i) => (
-            <div
-              key={p.id}
-              className={`flex items-center gap-3 px-5 py-3.5 ${
-                i !== patients.length - 1 ? "border-b border-border" : ""
-              }`}
-            >
-              <PatientAvatar initial={p.full_name.charAt(0)} />
-              <span className="flex-1 text-foreground text-sm font-medium">
-                {p.full_name}
-              </span>
-              <span className="text-muted text-sm">{p.last_visit}</span>
-            </div>
-          ))
-        )}
-      </div>
+        </div>
+      )}
     </DoctorPageLayout>
   );
 };

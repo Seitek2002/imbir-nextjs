@@ -12,12 +12,6 @@ import {
   getProfile,
 } from "@/shared/api";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets/icons";
-import { extractErrorMessage } from "@/shared/lib/errors";
-import { cn } from "@/shared/lib/utils";
-import { useAuthStore } from "@/shared/store";
-import { Button, Input, Textarea } from "@/shared/ui";
-import { Modal } from "@/shared/ui/modal";
-
 import {
   groupAvailableSlots,
   isEmailValid,
@@ -25,7 +19,12 @@ import {
   normalizeLocalPhone,
   toApiDate,
   toApiTime,
-} from "../record/model/lib";
+} from "@/shared/lib/booking";
+import { extractErrorMessage } from "@/shared/lib/errors";
+import { cn } from "@/shared/lib/utils";
+import { useAuthStore } from "@/shared/store";
+import { Button, Input, Textarea } from "@/shared/ui";
+import { Modal } from "@/shared/ui/modal";
 
 type Workplace = {
   clinicId: string;

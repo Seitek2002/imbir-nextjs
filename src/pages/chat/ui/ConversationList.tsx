@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { FilterSample, SearchIcon } from "@/shared/assets/icons";
+import { SearchIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 import type { Conversation } from "../model/types";
@@ -27,8 +27,8 @@ export const ConversationList: FC<Props> = ({
   const otherConversations = conversations.filter((c) => !c.isAi);
 
   return (
-    <div className={cn("flex flex-col gap-3 h-full", className)}>
-      {/* Search & Filter Row */}
+    <div className={cn("flex flex-col gap-3 h-full min-h-0", className)}>
+      {/* Search Row */}
       <div className="flex gap-2 shrink-0">
         <div className="flex-1 h-11 bg-white border border-border-soft rounded-full px-4 flex items-center gap-2 shadow-sm">
           <SearchIcon className="size-4 text-muted shrink-0" />
@@ -40,13 +40,6 @@ export const ConversationList: FC<Props> = ({
             className="w-full outline-none bg-transparent text-foreground text-sm placeholder:text-muted"
           />
         </div>
-        <button
-          type="button"
-          aria-label="Фильтр"
-          className="size-11 p-0 border border-border-soft bg-white rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-50 shrink-0 shadow-sm text-secondary"
-        >
-          <FilterSample className="size-5" />
-        </button>
       </div>
 
       {/* AI Assistant Card */}

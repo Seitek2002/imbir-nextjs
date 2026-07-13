@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { GeoIcon, StarIcon } from "@/shared/assets/icons";
+import { CheckIcon, GeoIcon, StarIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 import { formatPrice } from "../model/lib";
@@ -11,12 +11,16 @@ export const SelectionListItem = ({
   clinicMap,
   selected,
   compact = false,
+  // Услуги допускают множественный выбор — индикатор рисуется как чекбокс
+  // (квадрат с галочкой), а не радио-кружок.
+  isMulti = false,
   onSelect,
 }: {
   item: SelectionItem;
   clinicMap: Map<string, Clinic>;
   selected: boolean;
   compact?: boolean;
+  isMulti?: boolean;
   onSelect: () => void;
 }) => {
   const isClinic = "address" in item;
@@ -131,9 +135,22 @@ export const SelectionListItem = ({
         )}
       </div>
 
-      <span className="size-6 rounded-full border shrink-0 mt-1 border-[#D4D8DB] flex items-center justify-center">
-        {selected && <span className="size-3.5 rounded-full bg-primary" />}
-      </span>
+      {isMulti ? (
+        <span
+          className={cn(
+            "size-6 rounded-lg border shrink-0 mt-1 flex items-center justify-center transition-colors",
+            selected
+              ? "bg-primary border-primary"
+              : "border-[#D4D8DB] bg-white",
+          )}
+        >
+          {selected && <CheckIcon className="size-4 text-white" />}
+        </span>
+      ) : (
+        <span className="size-6 rounded-full border shrink-0 mt-1 border-[#D4D8DB] flex items-center justify-center">
+          {selected && <span className="size-3.5 rounded-full bg-primary" />}
+        </span>
+      )}
     </button>
   );
 };

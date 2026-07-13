@@ -1,17 +1,12 @@
-﻿"use client";
-
-import { useState } from "react";
+"use client";
 
 import Image from "next/image";
-import Link from "next/link";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
+import { StarIcon } from "@/shared/assets/icons";
+import { CabinetMenuItem, CabinetMobileMenu } from "@/shared/ui";
 
-import { LogoutIcon, StarIcon } from "@/shared/assets/icons";
-import { useLogout } from "@/shared/lib/useLogout";
-import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
-
-const MENU_ITEMS = [
+const MENU_ITEMS: CabinetMenuItem[] = [
   {
     href: "/clinic-profile",
     label: "Моя клиника",
@@ -67,8 +62,6 @@ const MENU_ITEMS = [
 ];
 
 export default function ClinicProfileMenuPage() {
-  const [logoutOpen, setLogoutOpen] = useState(false);
-  const handleLogout = useLogout();
   const { profile, isLoading } = useClinicCabinet();
 
   const clinicName = profile?.name ?? "";
@@ -84,108 +77,32 @@ export default function ClinicProfileMenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
-      <div className="px-4 py-6">
-        <h1 className="text-2xl font-semibold text-foreground mb-6">
-          Мой профиль
-        </h1>
-
-        {/* Profile Card */}
-        <div className="bg-linear-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl p-6 mb-4 flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-            {clinicLogo ? (
-              <Image
-                src={clinicLogo}
-                alt={clinicName}
-                width={96}
-                height={96}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-white text-3xl font-bold">
-                {clinicName.charAt(0)}
-              </span>
-            )}
+    <CabinetMobileMenu
+      avatar={
+        clinicLogo ? (
+          <Image
+            src={clinicLogo}
+            alt={clinicName}
+            width={80}
+            height={80}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="text-white text-2xl font-bold">
+            {clinicName.charAt(0)}
+          </span>
+        )
+      }
+      name={clinicName}
+      subtitle={
+        rating > 0 ? (
+          <div className="flex items-center justify-center gap-1 mt-1">
+            <StarIcon className="w-4 h-4 text-primary" />
+            <span className="text-primary text-sm font-medium">{rating}</span>
           </div>
-          <h2 className="text-foreground font-semibold text-lg">
-            {clinicName}
-          </h2>
-          {rating > 0 && (
-            <div className="flex items-center gap-1 mt-1">
-              <StarIcon className="w-4 h-4 text-primary" />
-              <span className="text-primary text-sm font-medium">
-                {rating}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Menu */}
-        <nav className="bg-white rounded-3xl p-2 flex flex-col gap-1 mb-4">
-          {MENU_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-surface transition-colors"
-            >
-              <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
-                <div className="[&_path]:stroke-primary">{item.icon}</div>
-              </div>
-              <span className="flex-1 font-medium text-base text-secondary">
-                {item.label}
-              </span>
-              <svg
-                className="w-5 h-5 text-dim shrink-0"
-                fill="none"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M7.5 15L12.5 10L7.5 5"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Link>
-          ))}
-        </nav>
-
-        {/* Logout */}
-        <button
-          onClick={() => setLogoutOpen(true)}
-          className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-secondary hover:bg-surface transition-colors w-full"
-        >
-          <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
-            <LogoutIcon className="w-5 h-5 [&_path]:stroke-primary" />
-          </div>
-          <span className="font-medium text-base">Выйти из профиля</span>
-          <svg
-            className="w-5 h-5 text-dim ml-auto shrink-0"
-            fill="none"
-            viewBox="0 0 20 20"
-          >
-            <path
-              d="M7.5 15L12.5 10L7.5 5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
-
-      <ConfirmDialog
-        isOpen={logoutOpen}
-        onClose={() => setLogoutOpen(false)}
-        onConfirm={handleLogout}
-        icon={<LogoutIcon className="w-7 h-7 [&_path]:stroke-primary" />}
-        title="Выйти из профиля?"
-        description="Для продолжения работы потребуется снова войти в аккаунт"
-        confirmLabel="Выйти"
-        cancelLabel="Отмена"
-      />
-    </div>
+        ) : undefined
+      }
+      items={MENU_ITEMS}
+    />
   );
 }

@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
 
 import {
+  type DoctorAppointment,
   type DoctorAppointmentSummary,
   doctorCabinetKeys,
   getAppointmentSummary,
@@ -15,23 +16,38 @@ import {
   updateAppointmentSummary,
 } from "@/shared/api";
 import { extractErrorMessage } from "@/shared/lib/errors";
-import { Button, Textarea } from "@/shared/ui";
+import { Button, Modal, Textarea } from "@/shared/ui";
+import { SegmentedControl } from "@/shared/ui/segmented-control";
 
-type Tab = "all" | "upcoming" | "completed" | "cancelled";
+type Tab = "all" | "upcoming" | "completed";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "all", label: "Все" },
-  { key: "upcoming", label: "Предстоящие" },
-  { key: "completed", label: "Завершённые" },
-  { key: "cancelled", label: "Отменённые" },
+const TABS = [
+  { value: "all" as const, label: "Все" },
+  { value: "upcoming" as const, label: "Предстоящие" },
+  { value: "completed" as const, label: "Завершенные" },
 ];
 
-const STATUS_LABEL: Record<Tab, string> = {
-  all: "",
-  upcoming: "Предстоит",
-  completed: "Завершён",
-  cancelled: "Отменён",
+// Плашка статуса записи (как в макете): предстоящая — оранжевая, завершённая —
+// зелёная, отменённая — серая.
+const STATUS_PILL: Record<
+  DoctorAppointment["status"],
+  { label: string; cls: string }
+> = {
+  upcoming: { label: "Предстоящая", cls: "bg-primary-tint text-primary" },
+  completed: { label: "Завершенная", cls: "bg-[#E3F5EC] text-[#2FA968]" },
+  cancelled: { label: "Отменена", cls: "bg-surface text-muted" },
 };
+
+// "2026-05-06" → "06.05.2026".
+const fmtDate = (iso: string): string => {
+  const parts = iso?.split("-");
+  if (parts?.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+  return iso;
+};
+
+// "10:00:00" → "10:00".
+const fmtTime = (time: string): string =>
+  time?.length >= 5 ? time.slice(0, 5) : time;
 
 const EMPTY_SUMMARY: DoctorAppointmentSummary = {
   diagnosis: "",
@@ -39,7 +55,7 @@ const EMPTY_SUMMARY: DoctorAppointmentSummary = {
   doctor_notes: "",
 };
 
-// Раскрывающийся редактор итогов приёма под строкой записи.
+// Форма итогов приёма — открывается в модалке/боттом-шите по клику на запись.
 const SummaryEditor: FC<{ appointmentId: number }> = ({ appointmentId }) => {
   const queryClient = useQueryClient();
   const queryKey = [
@@ -77,16 +93,14 @@ const SummaryEditor: FC<{ appointmentId: number }> = ({ appointmentId }) => {
   });
 
   if (isLoading || !form) {
-    return (
-      <div className="px-5 py-4 bg-surface text-muted text-sm">Загрузка...</div>
-    );
+    return <div className="py-6 text-muted text-sm">Загрузка...</div>;
   }
 
   const set = (key: keyof DoctorAppointmentSummary, value: string) =>
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
 
   return (
-    <div className="px-5 py-4 bg-surface flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
       <Textarea
         label="Диагноз"
         value={form.diagnosis}
@@ -117,9 +131,22 @@ const SummaryEditor: FC<{ appointmentId: number }> = ({ appointmentId }) => {
   );
 };
 
+const StatusPill: FC<{ status: DoctorAppointment["status"] }> = ({
+  status,
+}) => {
+  const { label, cls } = STATUS_PILL[status] ?? STATUS_PILL.cancelled;
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${cls}`}
+    >
+      {label}
+    </span>
+  );
+};
+
 export const DoctorAppointmentsPage: FC = () => {
   const [tab, setTab] = useState<Tab>("all");
-  const [openSummaryId, setOpenSummaryId] = useState<number | null>(null);
+  const [summaryId, setSummaryId] = useState<number | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: doctorCabinetKeys.appointments({ status: tab }),
@@ -127,85 +154,82 @@ export const DoctorAppointmentsPage: FC = () => {
   });
 
   const appointments = data?.data ?? [];
+  const th = "px-6 py-4 text-muted text-sm font-normal whitespace-nowrap";
+  const td = "px-6 py-4 whitespace-nowrap";
 
   return (
     <DoctorPageLayout title="Записи">
-      <h2 className="text-[28px] font-semibold text-foreground mb-6 hidden lg:block">
-        Записи
-      </h2>
-
-      <div className="flex gap-1 bg-white rounded-2xl p-1 mb-4 border border-border">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              tab === t.key
-                ? "bg-primary text-white"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="bg-white rounded-3xl border border-border overflow-hidden">
-        <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 px-5 py-3 border-b border-border">
-          <span className="text-muted text-sm font-medium">Пациент</span>
-          <span className="text-muted text-sm font-medium">Дата / Время</span>
-          <span className="text-muted text-sm font-medium">Статус</span>
-          <span className="text-muted text-sm font-medium">Итоги</span>
+      {/* Десктоп: заголовок + сегмент-переключатель в одну строку */}
+      <div className="hidden lg:flex items-center justify-between mb-6">
+        <h2 className="text-[32px] font-semibold text-foreground">Записи</h2>
+        <div className="w-90 shrink-0">
+          <SegmentedControl options={TABS} value={tab} onChange={setTab} />
         </div>
-
-        {isLoading ? (
-          <div className="px-5 py-12 text-center text-muted text-sm">
-            Загрузка...
-          </div>
-        ) : appointments.length === 0 ? (
-          <div className="px-5 py-12 text-center text-muted text-sm">
-            Нет записей
-          </div>
-        ) : (
-          appointments.map((a, i) => (
-            <div
-              key={a.id}
-              className={
-                i !== appointments.length - 1 ? "border-b border-border" : ""
-              }
-            >
-              <div className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 px-5 py-4 items-center">
-                <span className="text-foreground text-sm font-medium">
-                  {a.patient.full_name}
-                </span>
-                <span className="text-muted text-sm">
-                  {a.date} {a.time}
-                </span>
-                <span
-                  className={`text-sm font-medium ${
-                    a.status === "upcoming"
-                      ? "text-primary"
-                      : a.status === "completed"
-                        ? "text-green-600"
-                        : "text-muted"
-                  }`}
-                >
-                  {STATUS_LABEL[a.status as Tab] ?? a.status}
-                </span>
-                <button
-                  onClick={() =>
-                    setOpenSummaryId(openSummaryId === a.id ? null : a.id)
-                  }
-                  className="text-primary text-sm font-medium hover:underline whitespace-nowrap"
-                >
-                  {openSummaryId === a.id ? "Скрыть" : "Итоги приёма"}
-                </button>
-              </div>
-              {openSummaryId === a.id && <SummaryEditor appointmentId={a.id} />}
-            </div>
-          ))
-        )}
       </div>
+
+      {/* Мобайл: сегмент под шапкой страницы */}
+      <div className="lg:hidden mb-4">
+        <SegmentedControl options={TABS} value={tab} onChange={setTab} />
+      </div>
+
+      {isLoading ? (
+        <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
+          Загрузка...
+        </div>
+      ) : appointments.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
+          Нет записей
+        </div>
+      ) : (
+        <div className="bg-white rounded-3xl border border-border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-160 text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className={th}>Пациент</th>
+                  <th className={th}>Дата</th>
+                  <th className={th}>Время</th>
+                  <th className={th}>Тип</th>
+                  <th className={th}>Статус</th>
+                </tr>
+              </thead>
+              <tbody>
+                {appointments.map((a) => (
+                  <tr
+                    key={a.id}
+                    onClick={() => setSummaryId(a.id)}
+                    className="border-b border-border last:border-0 cursor-pointer hover:bg-surface transition-colors"
+                  >
+                    <td className={`${td} text-foreground font-medium`}>
+                      {a.patient.full_name}
+                    </td>
+                    <td className={`${td} text-foreground`}>
+                      {fmtDate(a.date)}
+                    </td>
+                    <td className={`${td} text-foreground`}>
+                      {fmtTime(a.time)}
+                    </td>
+                    <td className={`${td} text-foreground`}>
+                      {a.service?.name ?? "—"}
+                    </td>
+                    <td className={td}>
+                      <StatusPill status={a.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <Modal
+        isOpen={summaryId !== null}
+        onClose={() => setSummaryId(null)}
+        title="Итоги приёма"
+      >
+        {summaryId !== null && <SummaryEditor appointmentId={summaryId} />}
+      </Modal>
     </DoctorPageLayout>
   );
 };
