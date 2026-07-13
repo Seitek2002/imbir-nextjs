@@ -11,7 +11,7 @@ import {
 import Image from "next/image";
 
 import type { UpdateClinicProfileBody } from "@/shared/api";
-import { Button, Input, PhoneInput, Textarea } from "@/shared/ui";
+import { Button, Checkbox, Input, PhoneInput, Textarea } from "@/shared/ui";
 
 import type { ClinicProfile } from "./model";
 import {
@@ -457,17 +457,14 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                         onChange={(e) => setDay(key, { close: e.target.value })}
                         className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40"
                       />
-                      <label className="flex items-center gap-2 ml-2 text-sm text-secondary cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={day.enabled}
-                          onChange={(e) =>
-                            setDay(key, { enabled: e.target.checked })
-                          }
-                          className="accent-primary"
-                        />
-                        Рабочий
-                      </label>
+                      <Checkbox
+                        className="ml-2"
+                        label="Рабочий"
+                        checked={day.enabled}
+                        onChange={(e) =>
+                          setDay(key, { enabled: e.target.checked })
+                        }
+                      />
                     </div>
                   );
                 })}
@@ -523,17 +520,12 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
           </div>
 
           {isEditing ? (
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={d.emergency24}
-                onChange={(e) => set("emergency24", e.target.checked)}
-                className="accent-primary w-4 h-4"
-              />
-              <span className="text-sm text-foreground">
-                Экстренный приём 24/7
-              </span>
-            </label>
+            <Checkbox
+              size="large"
+              label="Экстренный приём 24/7"
+              checked={d.emergency24}
+              onChange={(e) => set("emergency24", e.target.checked)}
+            />
           ) : (
             workSchedule.emergency24 && (
               <div className="flex items-center gap-2">

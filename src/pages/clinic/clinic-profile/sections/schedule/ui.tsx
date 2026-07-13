@@ -13,6 +13,8 @@ import {
   useClinicCabinet,
 } from "@/entities/clinic-profile";
 
+import { Checkbox } from "@/shared/ui";
+
 const timeInput =
   "border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40";
 
@@ -117,17 +119,14 @@ export const ClinicSchedulePage: FC = () => {
                       onChange={(e) => setDay(key, { close: e.target.value })}
                       className={timeInput}
                     />
-                    <label className="flex items-center gap-2 ml-2 text-sm text-secondary cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={day.enabled}
-                        onChange={(e) =>
-                          setDay(key, { enabled: e.target.checked })
-                        }
-                        className="accent-primary"
-                      />
-                      Рабочий
-                    </label>
+                    <Checkbox
+                      className="ml-2"
+                      label="Рабочий"
+                      checked={day.enabled}
+                      onChange={(e) =>
+                        setDay(key, { enabled: e.target.checked })
+                      }
+                    />
                   </div>
                 );
               })}
@@ -180,17 +179,12 @@ export const ClinicSchedulePage: FC = () => {
         </div>
 
         {isEditing ? (
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={emergency24}
-              onChange={(e) => setEmergency24(e.target.checked)}
-              className="accent-primary w-4 h-4"
-            />
-            <span className="text-sm text-foreground">
-              Экстренный приём 24/7
-            </span>
-          </label>
+          <Checkbox
+            size="large"
+            label="Экстренный приём 24/7"
+            checked={emergency24}
+            onChange={(e) => setEmergency24(e.target.checked)}
+          />
         ) : (
           profile.workSchedule.emergency24 && (
             <div className="flex items-center gap-2">
