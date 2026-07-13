@@ -1,13 +1,10 @@
-﻿"use client";
+"use client";
 
 import { FC, ReactNode } from "react";
 
 import { useRouter } from "next/navigation";
 
 import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets/icons";
-
-import { useDoctorCabinet } from "./doctor-profile/useDoctorCabinet";
-import { DoctorSidebar } from "./sidebar";
 
 type Props = {
   title: string;
@@ -30,7 +27,6 @@ export const DoctorPageLayout: FC<Props> = ({
   headerRight,
 }) => {
   const router = useRouter();
-  const { profile } = useDoctorCabinet();
 
   const rightSlot =
     headerRight ??
@@ -53,7 +49,7 @@ export const DoctorPageLayout: FC<Props> = ({
     ));
 
   return (
-    <div className="w-full min-h-screen bg-[#FAFAFA]">
+    <>
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
         <button
@@ -71,25 +67,8 @@ export const DoctorPageLayout: FC<Props> = ({
         {rightSlot}
       </div>
 
-      {/* Desktop layout */}
-      <div className="max-w-360 mx-auto px-4 lg:px-10 py-4 lg:py-8">
-        <h1 className="text-[40px] font-semibold text-foreground mb-8 hidden lg:block">
-          Мой профиль
-        </h1>
-
-        <div className="flex gap-6">
-          <div className="hidden lg:block">
-            <DoctorSidebar
-              fullName={profile?.fullName ?? ""}
-              photo={profile?.photo}
-              specialty={profile?.specialty ?? ""}
-              rating={profile?.rating ?? 0}
-            />
-          </div>
-
-          <main className="flex-1 min-w-0">{children}</main>
-        </div>
-      </div>
-    </div>
+      {/* Desktop layout page content */}
+      <div className="hidden lg:block">{children}</div>
+    </>
   );
 };
