@@ -34,6 +34,8 @@ export type UpdateClinicProfileBody = {
   country?: string;
   city?: string;
   address?: string;
+  latitude?: string;
+  longitude?: string;
   legal_name?: string;
   reg_number?: string;
   license_number?: string;

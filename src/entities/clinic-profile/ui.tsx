@@ -32,6 +32,55 @@ const UploadIcon: FC<SVGProps<SVGSVGElement>> = (props) => (
   </svg>
 );
 
+const PinIcon: FC<SVGProps<SVGSVGElement>> = (props) => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...props}>
+    <path
+      d="M13.3333 6.66667C13.3333 10.6667 8 14.6667 8 14.6667C8 14.6667 2.66667 10.6667 2.66667 6.66667C2.66667 5.25218 3.22857 3.89563 4.22876 2.89543C5.22896 1.89524 6.58551 1.33333 8 1.33333C9.41449 1.33333 10.771 1.89524 11.7712 2.89543C12.7714 3.89563 13.3333 5.25218 13.3333 6.66667Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M8 8.66667C9.10457 8.66667 10 7.77124 10 6.66667C10 5.5621 9.10457 4.66667 8 4.66667C6.89543 4.66667 6 5.5621 6 6.66667C6 7.77124 6.89543 8.66667 8 8.66667Z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+// Карта локации — keyless Google Maps embed (без API-ключа): по факту
+// координат показывает пин, без них — просто область по адресу/названию.
+const LocationMap: FC<{
+  latitude?: string;
+  longitude?: string;
+  address?: string;
+}> = ({ latitude, longitude, address }) => {
+  const query =
+    latitude && longitude ? `${latitude},${longitude}` : address || "";
+  if (!query) return null;
+
+  return (
+    <div className="rounded-2xl overflow-hidden border border-border">
+      <iframe
+        title="Геолокация клиники"
+        src={`https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`}
+        className="w-full h-50 border-0"
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+      {address && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-surface">
+          <PinIcon className="text-primary shrink-0" />
+          <span className="text-sm text-foreground">{address}</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const FileIcon: FC<SVGProps<SVGSVGElement>> = (props) => (
   <svg width="32" height="32" viewBox="0 0 32 32" fill="none" {...props}>
     <rect width="32" height="32" rx="8" fill="#F2F4F7" />
@@ -57,22 +106,26 @@ const SectionCard = ({
   title: string;
   children: React.ReactNode;
 }) => (
-  <div className="bg-white rounded-3xl p-8 border border-border mb-6">
-    <h3 className="text-xl font-semibold text-foreground mb-6">{title}</h3>
+  <div className="bg-white rounded-3xl p-5 lg:p-6 border border-border mb-6">
+    <h3 className="text-xl font-semibold text-foreground mb-4">{title}</h3>
     {children}
   </div>
 );
 
-const FieldView = ({
+// Строка вида «label / значение» с тонким разделителем — тот же паттерн, что
+// в унифицированной странице «Мои данные» врача (@/widgets/doctor/layout).
+const FieldRow = ({
   label,
   children,
 }: {
   label: string;
   children: React.ReactNode;
 }) => (
-  <div>
-    <div className="text-xs text-muted mb-1">{label}</div>
-    <div className="text-foreground text-sm">{children}</div>
+  <div className="py-3 border-b border-background last:border-b-0">
+    <div className="text-muted text-sm mb-1">{label}</div>
+    <div className="text-foreground font-medium text-base">
+      {children || "—"}
+    </div>
   </div>
 );
 
@@ -112,6 +165,8 @@ type FormState = {
   fullAddress: string;
   phone: string;
   website: string;
+  latitude: string;
+  longitude: string;
   legalName: string;
   registrationNumber: string;
   licenseNumber: string;
@@ -138,6 +193,8 @@ const buildState = (p: ClinicProfile): FormState => ({
   fullAddress: p.fullAddress ?? "",
   phone: p.phone ?? "",
   website: p.website ?? "",
+  latitude: p.latitude ?? "",
+  longitude: p.longitude ?? "",
   legalName: p.legalName ?? "",
   registrationNumber: p.registrationNumber ?? "",
   licenseNumber: p.licenseNumber ?? "",
@@ -210,6 +267,8 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
       phone,
       email,
       website,
+      latitude,
+      longitude,
       workSchedule,
       legalName,
       registrationNumber,
@@ -250,6 +309,8 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         country: d.country || undefined,
         city: d.city || undefined,
         address: d.fullAddress || undefined,
+        latitude: d.latitude || undefined,
+        longitude: d.longitude || undefined,
         legal_name: d.legalName || undefined,
         reg_number: d.registrationNumber || undefined,
         license_number: d.licenseNumber || undefined,
@@ -395,11 +456,11 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
               </div>
             </>
           ) : (
-            <div className="flex flex-col gap-5">
-              <FieldView label="Название">{name}</FieldView>
+            <div>
+              <FieldRow label="Название">{name}</FieldRow>
 
-              <div>
-                <div className="text-xs text-muted mb-2">Логотип</div>
+              <div className="py-3 border-b border-background">
+                <div className="text-muted text-sm mb-2">Логотип</div>
                 <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
                   {logo ? (
                     <Image
@@ -418,11 +479,11 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 </div>
               </div>
 
-              <FieldView label="Тип">{type}</FieldView>
-              <FieldView label="Описание">{description}</FieldView>
+              <FieldRow label="Тип">{type}</FieldRow>
+              <FieldRow label="Описание">{description}</FieldRow>
 
-              <div>
-                <div className="text-xs text-muted mb-2">Фотографии</div>
+              <div className="pt-3">
+                <div className="text-muted text-sm mb-2">Фотографии</div>
                 <div className="flex items-center gap-4 overflow-x-auto pb-2">
                   {photos.map((photo, i) => (
                     <div
@@ -448,7 +509,7 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         {/* ── 2. Локация и контакты ──────────────────────────────────────── */}
         <SectionCard title="Локация и контакты">
           {isEditing ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-6">
               <Input
                 label="Страна"
                 value={d.country}
@@ -463,7 +524,6 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 label="Полный адрес"
                 value={d.fullAddress}
                 onChange={(e) => set("fullAddress", e.target.value)}
-                className="md:col-span-2"
               />
               <PhoneInput
                 label="Телефон"
@@ -476,17 +536,43 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 type="url"
                 value={d.website}
                 onChange={(e) => set("website", e.target.value)}
-                className="md:col-span-2"
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Широта"
+                  value={d.latitude}
+                  onChange={(e) => set("latitude", e.target.value)}
+                  placeholder="42.8746"
+                />
+                <Input
+                  label="Долгота"
+                  value={d.longitude}
+                  onChange={(e) => set("longitude", e.target.value)}
+                  placeholder="74.5698"
+                />
+              </div>
+              <LocationMap
+                latitude={d.latitude}
+                longitude={d.longitude}
+                address={d.fullAddress}
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <FieldView label="Страна">{country}</FieldView>
-              <FieldView label="Город">{city}</FieldView>
-              <FieldView label="Полный адрес">{fullAddress}</FieldView>
-              <FieldView label="Телефон">{phone}</FieldView>
-              <FieldView label="Почта">{email}</FieldView>
-              <FieldView label="Сайт">{website}</FieldView>
+            <div>
+              <FieldRow label="Страна">{country}</FieldRow>
+              <FieldRow label="Город">{city}</FieldRow>
+              <FieldRow label="Полный адрес">{fullAddress}</FieldRow>
+              <FieldRow label="Телефон">{phone}</FieldRow>
+              <FieldRow label="Почта">{email}</FieldRow>
+              <FieldRow label="Сайт">{website}</FieldRow>
+              <div className="pt-3">
+                <div className="text-muted text-sm mb-2">Геолокация</div>
+                <LocationMap
+                  latitude={latitude}
+                  longitude={longitude}
+                  address={fullAddress}
+                />
+              </div>
             </div>
           )}
         </SectionCard>
@@ -662,22 +748,18 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-5">
-              <FieldView label="Юридическое название">{legalName}</FieldView>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <FieldView label="Регистрационный номер">
-                  {registrationNumber}
-                </FieldView>
-                <FieldView label="Номер лицензии">{licenseNumber}</FieldView>
-                <FieldView label="Дата выдачи лицензии">
-                  {licenseDate}
-                </FieldView>
-                <FieldView label="Орган, выдавший лицензию">
-                  {licenseAuthority}
-                </FieldView>
-              </div>
-              <div>
-                <div className="text-xs text-muted mb-2">
+            <div>
+              <FieldRow label="Юридическое название">{legalName}</FieldRow>
+              <FieldRow label="Регистрационный номер">
+                {registrationNumber}
+              </FieldRow>
+              <FieldRow label="Номер лицензии">{licenseNumber}</FieldRow>
+              <FieldRow label="Дата выдачи лицензии">{licenseDate}</FieldRow>
+              <FieldRow label="Орган, выдавший лицензию">
+                {licenseAuthority}
+              </FieldRow>
+              <div className="pt-3">
+                <div className="text-muted text-sm mb-2">
                   Документы (лицензии, регистрационные документы)
                 </div>
                 <div className="flex flex-wrap gap-4">
@@ -726,16 +808,16 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
               />
             </div>
           ) : (
-            <div className="flex flex-col gap-5">
-              <FieldView label="Основные направления">
+            <div>
+              <FieldRow label="Основные направления">
                 {mainDirections.join(", ")}
-              </FieldView>
-              <FieldView label="Узкие направления">
+              </FieldRow>
+              <FieldRow label="Узкие направления">
                 {narrowDirections.join(", ")}
-              </FieldView>
-              <FieldView label="Дополнительные услуги">
+              </FieldRow>
+              <FieldRow label="Дополнительные услуги">
                 {additionalServices.join(", ")}
-              </FieldView>
+              </FieldRow>
             </div>
           )}
         </SectionCard>
