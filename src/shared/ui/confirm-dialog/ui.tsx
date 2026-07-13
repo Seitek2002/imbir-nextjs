@@ -1,7 +1,9 @@
 ﻿"use client";
 
 import { FC, ReactNode, useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
+import { useMounted } from "@/shared/lib/useMounted";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 type Props = {
@@ -38,6 +40,7 @@ export const ConfirmDialog: FC<Props> = ({
     ? "bg-red-500 hover:bg-red-600"
     : "bg-primary hover:bg-primary-dark";
   const [isClosing, setIsClosing] = useState(false);
+  const mounted = useMounted();
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
@@ -57,11 +60,11 @@ export const ConfirmDialog: FC<Props> = ({
 
   useScrollLock(isOpen);
 
-  if (!isOpen && !isClosing) return null;
+  if (!mounted || (!isOpen && !isClosing)) return null;
 
   const state = isClosing ? "closed" : "open";
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-200 flex items-end sm:items-center justify-center">
       <div
         className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm"
@@ -146,6 +149,7 @@ export const ConfirmDialog: FC<Props> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };

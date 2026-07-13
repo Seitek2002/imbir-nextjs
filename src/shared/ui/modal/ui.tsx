@@ -1,8 +1,10 @@
 ﻿"use client";
 
 import { FC, ReactNode, useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { RemoveIcon } from "@/shared/assets/icons";
+import { useMounted } from "@/shared/lib/useMounted";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 type Props = {
@@ -16,6 +18,7 @@ const DURATION = 200;
 
 export const Modal: FC<Props> = ({ isOpen, onClose, title, children }) => {
   const [isClosing, setIsClosing] = useState(false);
+  const mounted = useMounted();
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
@@ -35,11 +38,11 @@ export const Modal: FC<Props> = ({ isOpen, onClose, title, children }) => {
 
   useScrollLock(isOpen);
 
-  if (!isOpen && !isClosing) return null;
+  if (!mounted || (!isOpen && !isClosing)) return null;
 
   const state = isClosing ? "closed" : "open";
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-100 flex items-end sm:items-center justify-center">
       <div
         className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm"
@@ -80,6 +83,7 @@ export const Modal: FC<Props> = ({ isOpen, onClose, title, children }) => {
         </div>
         <div className="p-5 overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
