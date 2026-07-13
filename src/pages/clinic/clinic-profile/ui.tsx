@@ -21,6 +21,8 @@ import {
 } from "@/shared/api";
 import { Button } from "@/shared/ui";
 
+import { ClinicProfileHub } from "./hub/ui";
+
 // Плитки статистики кабинета (GET /api/clinic/stats/).
 const ClinicStatsTiles: FC = () => {
   const { data: stats } = useQuery({
@@ -175,47 +177,46 @@ export const ClinicProfilePage: FC = () => {
   }
 
   return (
-    <ClinicPageLayout
-      title="Моя клиника"
-      desktopTitle="Мой профиль"
-      mobileAction={
-        isEditing ? (
-          <Button size="sm" onClick={handleSave}>
-            Сохранить
-          </Button>
-        ) : (
-          <Button size="sm" variant="outline" onClick={handleEdit}>
-            Редактировать
-          </Button>
-        )
-      }
-    >
-      <div className="hidden md:flex items-center justify-between mb-6">
-        <h2 className="text-[32px] font-semibold text-foreground">
-          Моя клиника
-        </h2>
-        {isEditing ? (
-          <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
-              Отмена
+    <ClinicPageLayout title="Моя клиника" desktopTitle="Мой профиль">
+      {/* Десктоп: единая страница со всеми секциями и одним общим
+          «Редактировать» (без изменений). Мобайл: хаб-список секций ниже —
+          редактирование происходит на отдельном экране каждой секции. */}
+      <div className="hidden md:block">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[32px] font-semibold text-foreground">
+            Моя клиника
+          </h2>
+          {isEditing ? (
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={() => setIsEditing(false)}>
+                Отмена
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Сохранение..." : "Сохранить"}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              IconLeft={PencilIcon}
+              onClick={handleEdit}
+            >
+              Редактировать
             </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Сохранение..." : "Сохранить"}
-            </Button>
-          </div>
-        ) : (
-          <Button variant="outline" IconLeft={PencilIcon} onClick={handleEdit}>
-            Редактировать
-          </Button>
+          )}
+        </div>
+
+        {!isEditing && <ClinicStatsTiles />}
+        {!isEditing && <BranchesCard branches={rawProfile?.branches ?? []} />}
+
+        {profile && (
+          <ClinicProfileForm ref={formRef} {...profile} isEditing={isEditing} />
         )}
       </div>
 
-      {!isEditing && <ClinicStatsTiles />}
-      {!isEditing && <BranchesCard branches={rawProfile?.branches ?? []} />}
-
-      {profile && (
-        <ClinicProfileForm ref={formRef} {...profile} isEditing={isEditing} />
-      )}
+      <div className="md:hidden">
+        <ClinicProfileHub />
+      </div>
     </ClinicPageLayout>
   );
 };
