@@ -13,6 +13,7 @@ import {
   VideoCallIcon,
 } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { Button, IconBtn } from "@/shared/ui";
 
 import {
   formatDateHuman,
@@ -186,22 +187,24 @@ export const AppointmentCard: FC<Props> = ({
               <GoogleMeetButton href={appointment.googleMeetLink!} />
             )}
             {showCancel && (
-              <button
+              <Button
                 onClick={() => onCancel(appointment.id)}
-                className="px-5 py-2.5 rounded-full bg-primary-tint text-primary font-medium text-sm hover:bg-[#FFE0DA] transition-colors flex items-center gap-2 whitespace-nowrap"
+                variant="outline"
+                size="sm"
+                IconLeft={CloseIcon}
               >
-                <CloseIcon className="w-4 h-4 shrink-0" />
                 Отменить
-              </button>
+              </Button>
             )}
             {showReview && (
-              <button
+              <Button
                 onClick={() => onReview(appointment.id)}
-                className="px-5 py-2.5 rounded-full bg-primary-tint text-primary font-medium text-sm hover:bg-[#FFE0DA] transition-colors flex items-center gap-2 whitespace-nowrap"
+                variant="outline"
+                size="sm"
+                IconLeft={ReviewsIcon}
               >
-                <ReviewsIcon className="w-4 h-4 shrink-0 [&_path]:stroke-primary" />
                 Оставить отзыв
-              </button>
+              </Button>
             )}
           </div>
 
@@ -259,23 +262,25 @@ export const AppointmentCard: FC<Props> = ({
             <GoogleMeetButton href={appointment.googleMeetLink!} compact />
           )}
           {showCancel && (
-            <button
+            <IconBtn
               onClick={() => onCancel(appointment.id)}
-              className="w-11 h-11 rounded-full border border-border flex items-center justify-center shrink-0 hover:bg-primary-tint transition-colors"
+              variant="outline"
+              size="sm"
               aria-label="Отменить"
               style={{ color: colors.primary }}
             >
               <CloseIcon className="w-4.5 h-4.5" />
-            </button>
+            </IconBtn>
           )}
           {showReview && (
-            <button
+            <IconBtn
               onClick={() => onReview(appointment.id)}
-              className="w-11 h-11 rounded-full border border-border flex items-center justify-center shrink-0 hover:bg-primary-tint transition-colors"
+              variant="outline"
+              size="sm"
               aria-label="Оставить отзыв"
             >
               <ReviewsIcon className="w-5 h-5 [&_path]:stroke-primary" />
-            </button>
+            </IconBtn>
           )}
         </div>
       </div>

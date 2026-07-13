@@ -5,6 +5,7 @@ import { FC, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import { colors } from "@/shared/config";
+import { IconBtn } from "@/shared/ui";
 
 type Props = {
   title: string;
@@ -23,9 +24,10 @@ export const MobilePageHeader: FC<Props> = ({
     <div
       className={`md:hidden flex items-center justify-between px-4 py-4 bg-white${hasBorder ? " border-b border-border" : ""}`}
     >
-      <button
+      <IconBtn
         onClick={() => router.back()}
-        className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
+        variant="text"
+        size="sm"
         aria-label="Назад"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -37,7 +39,7 @@ export const MobilePageHeader: FC<Props> = ({
             strokeLinejoin="round"
           />
         </svg>
-      </button>
+      </IconBtn>
 
       <h1 className="text-lg font-semibold text-foreground">{title}</h1>
 

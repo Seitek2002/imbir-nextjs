@@ -100,12 +100,13 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
         <p className="text-xl font-semibold text-foreground">
           Клиника не найдена
         </p>
-        <button
-          className="text-primary underline text-sm"
+        <Button
+          variant="text"
+          className="text-primary underline"
           onClick={() => router.push(ROUTES.CLINICS)}
         >
           Вернуться к списку клиник
-        </button>
+        </Button>
       </div>
     );
   }

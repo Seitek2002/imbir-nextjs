@@ -18,7 +18,7 @@ import {
   getClinicDoctors,
 } from "@/shared/api";
 import { EditIcon } from "@/shared/assets/icons";
-import { Button, Dropdown } from "@/shared/ui";
+import { Button, Dropdown, IconBtn, Input } from "@/shared/ui";
 
 import {
   CATEGORY_OPTIONS,
@@ -27,8 +27,6 @@ import {
   RecordsPreview,
   ScheduleEditor,
   SpecialistsPicker,
-  inp,
-  lbl,
 } from "../procedure-form";
 
 export const ClinicNewProcedurePage: FC = () => {
@@ -107,10 +105,12 @@ export const ClinicNewProcedurePage: FC = () => {
       title="Добавить процедуру"
       desktopTitle="Мой профиль"
       mobileAction={
-        <button
+        <IconBtn
           onClick={handleSave}
           disabled={addMutation.isPending}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-surface transition-colors disabled:opacity-50"
+          variant="text"
+          size="sm"
+          className="text-primary"
           aria-label="Сохранить"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -122,13 +122,15 @@ export const ClinicNewProcedurePage: FC = () => {
               strokeLinejoin="round"
             />
           </svg>
-        </button>
+        </IconBtn>
       }
     >
       <div className="hidden md:flex items-center gap-4 mb-6">
-        <button
+        <IconBtn
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors shrink-0"
+          variant="text"
+          size="sm"
+          className="shrink-0"
           aria-label="Назад"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -140,7 +142,7 @@ export const ClinicNewProcedurePage: FC = () => {
               strokeLinejoin="round"
             />
           </svg>
-        </button>
+        </IconBtn>
         <h2 className="text-[28px] font-semibold text-foreground flex-1">
           Добавить процедуру
         </h2>
@@ -159,7 +161,9 @@ export const ClinicNewProcedurePage: FC = () => {
 
       <div className="bg-white rounded-3xl border border-border p-5 mb-4 flex flex-col gap-4">
         <div>
-          <label className={lbl}>Фото процедуры</label>
+          <label className="block text-foreground text-sm font-medium mb-1.5">
+            Фото процедуры
+          </label>
           <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-surface">
             {photoPreview ? (
               <Image
@@ -176,31 +180,28 @@ export const ClinicNewProcedurePage: FC = () => {
                 </svg>
               </div>
             )}
-            <button
+            <IconBtn
               onClick={() => photoInputRef.current?.click()}
-              className="absolute top-1.5 right-1.5 w-8 h-8 rounded-full bg-white border border-border flex items-center justify-center hover:bg-surface transition-colors"
+              variant="outline"
+              size="xs"
+              className="absolute top-1.5 right-1.5 bg-white"
               aria-label="Добавить фото"
             >
               <EditIcon className="w-4 h-4" />
-            </button>
+            </IconBtn>
           </div>
         </div>
 
-        <div>
-          <label className={lbl}>Название</label>
-          <input
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              if (e.target.value.trim()) setNameError(false);
-            }}
-            placeholder="Введите название"
-            className={`${inp} ${nameError ? "border-primary" : ""}`}
-          />
-          {nameError && (
-            <p className="text-primary text-xs mt-1">Обязательное поле</p>
-          )}
-        </div>
+        <Input
+          label="Название"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (e.target.value.trim()) setNameError(false);
+          }}
+          placeholder="Введите название"
+          error={nameError ? "Обязательное поле" : undefined}
+        />
 
         <Dropdown
           label="Специализация"
@@ -211,16 +212,13 @@ export const ClinicNewProcedurePage: FC = () => {
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={lbl}>Стоимость</label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="0"
-              className={inp}
-            />
-          </div>
+          <Input
+            label="Стоимость"
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            placeholder="0"
+          />
           <Dropdown
             label=" "
             options={CURRENCY_OPTIONS}
@@ -229,36 +227,27 @@ export const ClinicNewProcedurePage: FC = () => {
           />
         </div>
 
-        <div>
-          <label className={lbl}>Длительность, мин</label>
-          <input
-            type="number"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="0"
-            className={inp}
-          />
-        </div>
+        <Input
+          label="Длительность, мин"
+          type="number"
+          value={duration}
+          onChange={(e) => setDuration(e.target.value)}
+          placeholder="0"
+        />
 
-        <div>
-          <label className={lbl}>Клиника, проводящая процедуру</label>
-          <input
-            value={clinicName}
-            onChange={(e) => setClinicName(e.target.value)}
-            placeholder="Введите название клиники"
-            className={inp}
-          />
-        </div>
+        <Input
+          label="Клиника, проводящая процедуру"
+          value={clinicName}
+          onChange={(e) => setClinicName(e.target.value)}
+          placeholder="Введите название клиники"
+        />
 
-        <div>
-          <label className={lbl}>Адрес клиники, проводящей процедуру</label>
-          <input
-            value={clinicAddress}
-            onChange={(e) => setClinicAddress(e.target.value)}
-            placeholder="Введите адрес клиники"
-            className={inp}
-          />
-        </div>
+        <Input
+          label="Адрес клиники, проводящей процедуру"
+          value={clinicAddress}
+          onChange={(e) => setClinicAddress(e.target.value)}
+          placeholder="Введите адрес клиники"
+        />
       </div>
 
       <div className="bg-white rounded-3xl border border-border p-5 mb-4">

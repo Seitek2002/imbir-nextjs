@@ -20,7 +20,7 @@ import {
   updateClinicService,
 } from "@/shared/api";
 import { EditIcon, TrashIcon } from "@/shared/assets/icons";
-import { Button, ConfirmDialog, Dropdown } from "@/shared/ui";
+import { Button, ConfirmDialog, Dropdown, IconBtn, Input } from "@/shared/ui";
 
 import {
   CATEGORY_OPTIONS,
@@ -30,8 +30,6 @@ import {
   RecordsPreview,
   ScheduleEditor,
   SpecialistsPicker,
-  inp,
-  lbl,
 } from "../procedure-form";
 
 export const ClinicProcedureDetailPage: FC = () => {
@@ -167,13 +165,15 @@ export const ClinicProcedureDetailPage: FC = () => {
         </div>
       )}
       {isEditing && (
-        <button
+        <IconBtn
           onClick={() => photoInputRef.current?.click()}
-          className="absolute bottom-1.5 right-1.5 w-7 h-7 rounded-full bg-white border border-border flex items-center justify-center hover:bg-surface transition-colors"
+          variant="outline"
+          size="xs"
+          className="absolute bottom-1.5 right-1.5 bg-white"
           aria-label="Изменить фото"
         >
           <EditIcon className="w-3.5 h-3.5" />
-        </button>
+        </IconBtn>
       )}
     </div>
   );
@@ -185,10 +185,12 @@ export const ClinicProcedureDetailPage: FC = () => {
         desktopTitle="Мой профиль"
         mobileAction={
           isEditing ? (
-            <button
+            <IconBtn
               onClick={() => saveMutation.mutate()}
               disabled={saveMutation.isPending}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-surface transition-colors disabled:opacity-50"
+              variant="text"
+              size="sm"
+              className="text-primary"
               aria-label="Сохранить"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -200,31 +202,37 @@ export const ClinicProcedureDetailPage: FC = () => {
                   strokeLinejoin="round"
                 />
               </svg>
-            </button>
+            </IconBtn>
           ) : (
             <div className="flex items-center gap-1">
-              <button
+              <IconBtn
                 onClick={() => setIsEditing(true)}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-muted hover:bg-surface transition-colors"
+                variant="text"
+                size="sm"
+                className="text-muted"
                 aria-label="Редактировать"
               >
                 <EditIcon className="w-5 h-5" />
-              </button>
-              <button
+              </IconBtn>
+              <IconBtn
                 onClick={() => setDeleteOpen(true)}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-primary-tint transition-colors"
+                variant="text"
+                size="sm"
+                className="text-primary hover:bg-primary-tint"
                 aria-label="Удалить"
               >
                 <TrashIcon className="w-5 h-5" />
-              </button>
+              </IconBtn>
             </div>
           )
         }
       >
         <div className="hidden md:flex items-center gap-4 mb-6">
-          <button
+          <IconBtn
             onClick={() => router.back()}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors shrink-0"
+            variant="text"
+            size="sm"
+            className="shrink-0"
             aria-label="Назад"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -236,7 +244,7 @@ export const ClinicProcedureDetailPage: FC = () => {
                 strokeLinejoin="round"
               />
             </svg>
-          </button>
+          </IconBtn>
           <h2 className="text-[28px] font-semibold text-foreground flex-1">
             {isEditing ? "Редактировать" : "Назад"}
           </h2>
@@ -291,18 +299,17 @@ export const ClinicProcedureDetailPage: FC = () => {
           {isEditing ? (
             <div className="flex flex-col gap-4">
               <div>
-                <label className={lbl}>Фото процедуры</label>
+                <label className="block text-foreground text-sm font-medium mb-1.5">
+                  Фото процедуры
+                </label>
                 {photo}
               </div>
-              <div>
-                <label className={lbl}>Название</label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Введите название"
-                  className={inp}
-                />
-              </div>
+              <Input
+                label="Название"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Введите название"
+              />
               <Dropdown
                 label="Специализация"
                 placeholder="Выберите из списка"
@@ -311,16 +318,13 @@ export const ClinicProcedureDetailPage: FC = () => {
                 onChange={setCategory}
               />
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className={lbl}>Стоимость</label>
-                  <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="0"
-                    className={inp}
-                  />
-                </div>
+                <Input
+                  label="Стоимость"
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0"
+                />
                 <Dropdown
                   label=" "
                   options={CURRENCY_OPTIONS}
@@ -328,26 +332,18 @@ export const ClinicProcedureDetailPage: FC = () => {
                   onChange={setCurrency}
                 />
               </div>
-              <div>
-                <label className={lbl}>Клиника, проводящая процедуру</label>
-                <input
-                  value={clinicName}
-                  onChange={(e) => setClinicName(e.target.value)}
-                  placeholder="Введите название клиники"
-                  className={inp}
-                />
-              </div>
-              <div>
-                <label className={lbl}>
-                  Адрес клиники, проводящей процедуру
-                </label>
-                <input
-                  value={clinicAddress}
-                  onChange={(e) => setClinicAddress(e.target.value)}
-                  placeholder="Введите адрес клиники"
-                  className={inp}
-                />
-              </div>
+              <Input
+                label="Клиника, проводящая процедуру"
+                value={clinicName}
+                onChange={(e) => setClinicName(e.target.value)}
+                placeholder="Введите название клиники"
+              />
+              <Input
+                label="Адрес клиники, проводящей процедуру"
+                value={clinicAddress}
+                onChange={(e) => setClinicAddress(e.target.value)}
+                placeholder="Введите адрес клиники"
+              />
             </div>
           ) : (
             <>

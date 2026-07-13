@@ -12,11 +12,7 @@ import {
 
 import type { ClinicDoctorItem } from "@/shared/api";
 import type { TimeGroup } from "@/shared/lib/booking";
-import { Button, Dropdown, Modal } from "@/shared/ui";
-
-export const inp =
-  "w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors bg-white";
-export const lbl = "block text-foreground text-sm font-medium mb-1.5";
+import { Button, Dropdown, IconBtn, Modal } from "@/shared/ui";
 
 export const FieldRow: FC<{ label: string; children: React.ReactNode }> = ({
   label,
@@ -222,10 +218,12 @@ export const SpecialistsPicker: FC<SpecialistsPickerProps> = ({
             >
               <span className="text-foreground text-sm">{doc.full_name}</span>
               {isEditing && (
-                <button
+                <IconBtn
                   type="button"
                   onClick={() => onRemove(String(doc.id))}
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-dim hover:text-red-500 transition-colors shrink-0"
+                  variant="text"
+                  size="xs"
+                  className="text-dim hover:text-red-500 shrink-0"
                   aria-label="Убрать"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -236,7 +234,7 @@ export const SpecialistsPicker: FC<SpecialistsPickerProps> = ({
                       strokeLinecap="round"
                     />
                   </svg>
-                </button>
+                </IconBtn>
               )}
             </div>
           ))}
@@ -260,13 +258,14 @@ export const SpecialistsPicker: FC<SpecialistsPickerProps> = ({
         ) : (
           // Список уже не пуст — дальнейшие добавления через модалку (как в
           // макете «Редактировать»), чтобы не перестраивать уже видимые строки.
-          <button
+          <Button
             type="button"
+            variant="text"
             onClick={() => setModalOpen(true)}
-            className="text-primary text-sm font-medium hover:underline"
+            className="text-primary"
           >
             + Добавить специалиста
-          </button>
+          </Button>
         ))}
 
       {selected.length === 0 && !isEditing && (

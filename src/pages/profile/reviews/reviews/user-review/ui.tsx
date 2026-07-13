@@ -5,6 +5,7 @@ import { FC } from "react";
 import Image from "next/image";
 
 import { EditIcon, GeoIcon, RemoveIcon } from "@/shared/assets/icons";
+import { IconBtn } from "@/shared/ui";
 import { StarRating } from "@/shared/ui/star-rating";
 
 import type { UserReview } from "./model";
@@ -86,22 +87,25 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
 
         <div className="flex items-center gap-2 shrink-0">
           {onEdit && (
-            <button
+            <IconBtn
               onClick={() => onEdit(review.id)}
-              className="w-10 h-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-surface transition-colors"
+              variant="outline"
+              size="sm"
               aria-label="Редактировать"
             >
               <EditIcon className="w-5 h-5 text-secondary" />
-            </button>
+            </IconBtn>
           )}
           {onDelete && (
-            <button
+            <IconBtn
               onClick={() => onDelete(review.id)}
-              className="w-10 h-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-[#FFE5E0] hover:border-[#FFE5E0] transition-colors"
+              variant="outline"
+              size="sm"
               aria-label="Удалить"
+              className="hover:bg-[#FFE5E0] hover:border-[#FFE5E0]"
             >
               <RemoveIcon className="w-5 h-5 [&_path]:stroke-primary" />
-            </button>
+            </IconBtn>
           )}
         </div>
       </div>

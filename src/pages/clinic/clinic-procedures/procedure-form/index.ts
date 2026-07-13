@@ -10,6 +10,4 @@ export {
   RecordsPreview,
   ScheduleEditor,
   SpecialistsPicker,
-  inp,
-  lbl,
 } from "./shared-ui";

@@ -16,6 +16,7 @@ import {
 } from "@/shared/api";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui";
 
 const DAYS: { key: keyof WeekSchedule; label: string }[] = [
   { key: "monday", label: "Понедельник" },
@@ -149,13 +150,13 @@ export const DoctorSchedulePage: FC = () => {
         <h2 className="text-[28px] font-semibold text-foreground">
           Расписание приёма
         </h2>
-        <button
+        <Button
+          size="sm"
           onClick={() => save(toApiBody(form))}
           disabled={isSaving}
-          className="px-5 py-2.5 rounded-full font-medium bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-60"
         >
           {isSaving ? "Сохранение..." : "Сохранить"}
-        </button>
+        </Button>
       </div>
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8 flex flex-col gap-1">
@@ -242,13 +243,14 @@ export const DoctorSchedulePage: FC = () => {
       </div>
 
       <div className="lg:hidden mt-4">
-        <button
+        <Button
+          size="lg"
+          className="w-full"
           onClick={() => save(toApiBody(form))}
           disabled={isSaving}
-          className="w-full px-5 py-3 rounded-full font-medium bg-primary text-white transition-colors disabled:opacity-60"
         >
           {isSaving ? "Сохранение..." : "Сохранить"}
-        </button>
+        </Button>
       </div>
 
       <p className="text-xs text-muted mt-3">

@@ -19,7 +19,7 @@ import {
   getClinicStats,
   updateClinicBranch,
 } from "@/shared/api";
-import { Button } from "@/shared/ui";
+import { Button, Input } from "@/shared/ui";
 
 import { ClinicProfileHub } from "./hub/ui";
 
@@ -90,10 +90,10 @@ const BranchesCard: FC<{ branches: ClinicProfileBranch[] }> = ({
           >
             {editingId === branch.id ? (
               <>
-                <input
+                <Input
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-xl border border-border text-sm text-foreground focus:outline-none focus:border-primary"
+                  className="flex-1"
                   placeholder="Адрес филиала"
                 />
                 <Button
@@ -118,15 +118,16 @@ const BranchesCard: FC<{ branches: ClinicProfileBranch[] }> = ({
                 <span className="flex-1 text-sm text-foreground truncate">
                   {branch.address || "Адрес не указан"}
                 </span>
-                <button
+                <Button
+                  variant="text"
+                  className="text-primary"
                   onClick={() => {
                     setEditingId(branch.id);
                     setAddress(branch.address ?? "");
                   }}
-                  className="text-primary text-sm font-medium hover:underline"
                 >
                   Изменить
-                </button>
+                </Button>
               </>
             )}
           </div>

@@ -8,6 +8,7 @@ import { useClinicCabinet } from "@/entities/clinic-profile";
 
 import { HeaderBackIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
+import { IconBtn } from "@/shared/ui";
 
 import { ClinicSidebar } from "./sidebar";
 
@@ -40,13 +41,14 @@ export const ClinicPageLayout: FC<Props> = ({
     <div className="w-full min-h-screen">
       {/* Mobile header */}
       <div className="md:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
-        <button
+        <IconBtn
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
+          variant="text"
+          size="sm"
           aria-label="Назад"
         >
           <HeaderBackIcon className="w-5 h-5" />
-        </button>
+        </IconBtn>
         <h1 className="text-base font-semibold text-foreground truncate mx-2">
           {title}
         </h1>

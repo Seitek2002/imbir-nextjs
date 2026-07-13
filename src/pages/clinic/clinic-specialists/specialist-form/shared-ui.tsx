@@ -5,7 +5,7 @@ import { FC, useRef } from "react";
 import Image from "next/image";
 
 import { UserCircleIcon } from "@/shared/assets/icons";
-import { Button, PhoneInput } from "@/shared/ui";
+import { Button, Input, PhoneInput, Textarea } from "@/shared/ui";
 
 import type { SpecialistFormState } from "./model";
 
@@ -13,10 +13,6 @@ export const GENDER_OPTIONS = [
   { label: "Мужской", value: "male" },
   { label: "Женский", value: "female" },
 ];
-
-export const inp =
-  "w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors bg-white";
-export const lbl = "block text-foreground text-sm font-medium mb-1.5";
 
 // Строка «label / значение» с разделителем — тот же паттерн, что в остальных
 // unified-профилях (доктор «Мои данные», клиника «Моя клиника»).
@@ -97,18 +93,17 @@ export const BasicInfoSection: FC<SectionProps> = ({ d, set, isEditing }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <label className={lbl}>ФИО</label>
-        <input
-          value={d.fullName}
-          onChange={(e) => set("fullName", e.target.value)}
-          placeholder="Введите полное ФИО"
-          className={inp}
-        />
-      </div>
+      <Input
+        label="ФИО"
+        value={d.fullName}
+        onChange={(e) => set("fullName", e.target.value)}
+        placeholder="Введите полное ФИО"
+      />
 
       <div>
-        <label className={lbl}>Пол</label>
+        <label className="block text-foreground text-sm font-medium mb-1.5">
+          Пол
+        </label>
         <div className="flex gap-3">
           {GENDER_OPTIONS.map(({ label, value }) => (
             <button
@@ -136,35 +131,26 @@ export const BasicInfoSection: FC<SectionProps> = ({ d, set, isEditing }) => {
         </div>
       </div>
 
-      <div>
-        <label className={lbl}>Дата рождения</label>
-        <input
-          value={d.birthDate}
-          onChange={(e) => set("birthDate", e.target.value)}
-          placeholder="ДД.ММ.ГГГГ"
-          className={inp}
-        />
-      </div>
+      <Input
+        label="Дата рождения"
+        value={d.birthDate}
+        onChange={(e) => set("birthDate", e.target.value)}
+        placeholder="ДД.ММ.ГГГГ"
+      />
 
-      <div>
-        <label className={lbl}>Город</label>
-        <input
-          value={d.city}
-          onChange={(e) => set("city", e.target.value)}
-          placeholder="Выберите из списка"
-          className={inp}
-        />
-      </div>
+      <Input
+        label="Город"
+        value={d.city}
+        onChange={(e) => set("city", e.target.value)}
+        placeholder="Выберите из списка"
+      />
 
-      <div>
-        <label className={lbl}>Языки общения</label>
-        <input
-          value={d.languages}
-          onChange={(e) => set("languages", e.target.value)}
-          placeholder="Выберите из списка"
-          className={inp}
-        />
-      </div>
+      <Input
+        label="Языки общения"
+        value={d.languages}
+        onChange={(e) => set("languages", e.target.value)}
+        placeholder="Выберите из списка"
+      />
 
       <PhoneInput
         label="Телефон"
@@ -172,19 +158,18 @@ export const BasicInfoSection: FC<SectionProps> = ({ d, set, isEditing }) => {
         onChange={(v) => set("phone", v)}
       />
 
-      <div>
-        <label className={lbl}>Почта</label>
-        <input
-          type="email"
-          value={d.email}
-          onChange={(e) => set("email", e.target.value)}
-          placeholder="Введите вашу почту"
-          className={inp}
-        />
-      </div>
+      <Input
+        label="Почта"
+        type="email"
+        value={d.email}
+        onChange={(e) => set("email", e.target.value)}
+        placeholder="Введите вашу почту"
+      />
 
       <div>
-        <label className={lbl}>Фото</label>
+        <label className="block text-foreground text-sm font-medium mb-1.5">
+          Фото
+        </label>
         <input
           ref={photoInputRef}
           type="file"
@@ -243,70 +228,49 @@ export const ProfessionalSection: FC<SectionProps> = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <label className={lbl}>Специализация</label>
-        <input
-          value={d.specialization}
-          onChange={(e) => set("specialization", e.target.value)}
-          placeholder="Выберите из списка"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Дополнительная специализация</label>
-        <input
-          value={d.additionalSpecialization}
-          onChange={(e) => set("additionalSpecialization", e.target.value)}
-          placeholder="Выберите из списка"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Стаж работы (лет)</label>
-        <input
-          type="number"
-          value={d.experienceYears}
-          onChange={(e) => set("experienceYears", e.target.value)}
-          placeholder="0"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Текущая должность</label>
-        <input
-          value={d.position}
-          onChange={(e) => set("position", e.target.value)}
-          placeholder="Введите должность"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Место работы (клиника)</label>
-        <input
-          value={d.workplace}
-          onChange={(e) => set("workplace", e.target.value)}
-          placeholder="Введите название клиники"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Категория/Квалификация</label>
-        <input
-          value={d.qualification}
-          onChange={(e) => set("qualification", e.target.value)}
-          placeholder="Введите категорию/квалификацию"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Научная степень</label>
-        <input
-          value={d.degree}
-          onChange={(e) => set("degree", e.target.value)}
-          placeholder="Введите научную степень"
-          className={inp}
-        />
-      </div>
+      <Input
+        label="Специализация"
+        value={d.specialization}
+        onChange={(e) => set("specialization", e.target.value)}
+        placeholder="Выберите из списка"
+      />
+      <Input
+        label="Дополнительная специализация"
+        value={d.additionalSpecialization}
+        onChange={(e) => set("additionalSpecialization", e.target.value)}
+        placeholder="Выберите из списка"
+      />
+      <Input
+        label="Стаж работы (лет)"
+        type="number"
+        value={d.experienceYears}
+        onChange={(e) => set("experienceYears", e.target.value)}
+        placeholder="0"
+      />
+      <Input
+        label="Текущая должность"
+        value={d.position}
+        onChange={(e) => set("position", e.target.value)}
+        placeholder="Введите должность"
+      />
+      <Input
+        label="Место работы (клиника)"
+        value={d.workplace}
+        onChange={(e) => set("workplace", e.target.value)}
+        placeholder="Введите название клиники"
+      />
+      <Input
+        label="Категория/Квалификация"
+        value={d.qualification}
+        onChange={(e) => set("qualification", e.target.value)}
+        placeholder="Введите категорию/квалификацию"
+      />
+      <Input
+        label="Научная степень"
+        value={d.degree}
+        onChange={(e) => set("degree", e.target.value)}
+        placeholder="Введите научную степень"
+      />
     </div>
   );
 };
@@ -331,61 +295,43 @@ export const EducationSection: FC<SectionProps> = ({ d, set, isEditing }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <label className={lbl}>ВУЗ</label>
-        <input
-          value={d.university}
-          onChange={(e) => set("university", e.target.value)}
-          placeholder="Введите название"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Год окончания</label>
-        <input
-          value={d.graduationYear}
-          onChange={(e) => set("graduationYear", e.target.value)}
-          placeholder="ГГГГ"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Интернатура</label>
-        <input
-          value={d.internship}
-          onChange={(e) => set("internship", e.target.value)}
-          placeholder="Введите интернатуру"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Ординатура</label>
-        <input
-          value={d.residency}
-          onChange={(e) => set("residency", e.target.value)}
-          placeholder="Введите ординатуру"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Специализация по диплому</label>
-        <input
-          value={d.diplomaSpecialty}
-          onChange={(e) => set("diplomaSpecialty", e.target.value)}
-          placeholder="Введите специализацию по диплому"
-          className={inp}
-        />
-      </div>
-      <div>
-        <label className={lbl}>Дополнительное образование</label>
-        <textarea
-          value={d.additionalEducation}
-          onChange={(e) => set("additionalEducation", e.target.value)}
-          placeholder="Курсы повышения квалификации, сертификаты..."
-          rows={3}
-          className={`${inp} resize-none`}
-        />
-      </div>
+      <Input
+        label="ВУЗ"
+        value={d.university}
+        onChange={(e) => set("university", e.target.value)}
+        placeholder="Введите название"
+      />
+      <Input
+        label="Год окончания"
+        value={d.graduationYear}
+        onChange={(e) => set("graduationYear", e.target.value)}
+        placeholder="ГГГГ"
+      />
+      <Input
+        label="Интернатура"
+        value={d.internship}
+        onChange={(e) => set("internship", e.target.value)}
+        placeholder="Введите интернатуру"
+      />
+      <Input
+        label="Ординатура"
+        value={d.residency}
+        onChange={(e) => set("residency", e.target.value)}
+        placeholder="Введите ординатуру"
+      />
+      <Input
+        label="Специализация по диплому"
+        value={d.diplomaSpecialty}
+        onChange={(e) => set("diplomaSpecialty", e.target.value)}
+        placeholder="Введите специализацию по диплому"
+      />
+      <Textarea
+        label="Дополнительное образование"
+        value={d.additionalEducation}
+        onChange={(e) => set("additionalEducation", e.target.value)}
+        placeholder="Курсы повышения квалификации, сертификаты..."
+        rows={3}
+      />
     </div>
   );
 };
@@ -407,7 +353,9 @@ export const CertificatesSection: FC<SectionProps> = ({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <label className={lbl}>Сертификаты</label>
+        <label className="block text-foreground text-sm font-medium mb-1.5">
+          Сертификаты
+        </label>
         <button
           type="button"
           className="w-full py-6 rounded-2xl border border-dashed border-border flex items-center justify-center gap-2 text-foreground font-medium hover:border-primary hover:text-primary transition-colors"
@@ -415,15 +363,12 @@ export const CertificatesSection: FC<SectionProps> = ({
           + Загрузить документы
         </button>
       </div>
-      <div>
-        <label className={lbl}>Лицензия</label>
-        <input
-          value={d.licenseNumber}
-          onChange={(e) => set("licenseNumber", e.target.value)}
-          placeholder="Введите номер лицензии"
-          className={inp}
-        />
-      </div>
+      <Input
+        label="Лицензия"
+        value={d.licenseNumber}
+        onChange={(e) => set("licenseNumber", e.target.value)}
+        placeholder="Введите номер лицензии"
+      />
     </div>
   );
 };

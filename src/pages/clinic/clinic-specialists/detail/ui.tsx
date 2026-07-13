@@ -14,7 +14,7 @@ import {
   TrashIcon,
   UserCircleIcon,
 } from "@/shared/assets/icons";
-import { Button, ConfirmDialog } from "@/shared/ui";
+import { Button, ConfirmDialog, IconBtn } from "@/shared/ui";
 
 import {
   BasicInfoSection,
@@ -86,13 +86,15 @@ export const ClinicSpecialistDetailPage: FC = () => {
             >
               <EditIcon className="w-5 h-5" />
             </Link>
-            <button
+            <IconBtn
               onClick={() => setDeleteOpen(true)}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-primary-tint transition-colors"
+              variant="text"
+              size="sm"
+              className="text-primary hover:bg-primary-tint"
               aria-label="Удалить"
             >
               <TrashIcon className="w-5 h-5" />
-            </button>
+            </IconBtn>
           </div>
         }
       >

@@ -6,9 +6,26 @@ import Image from "next/image";
 
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
-import { FieldView, formStyles } from "@/widgets/doctor/layout";
+import { FieldView } from "@/widgets/doctor/layout";
 
-const { inp } = formStyles;
+import { Button, Input } from "@/shared/ui";
+
+const AddIcon: FC<{ className?: string }> = ({ className }) => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 14 14"
+    fill="none"
+    className={className}
+  >
+    <path
+      d="M7 2V12M2 7H12"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
 
 export const DoctorDocumentsPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
@@ -63,17 +80,18 @@ export const DoctorDocumentsPage: FC = () => {
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
-        <button
+        <Button
+          variant={isEditing ? "default" : "outline"}
+          size="sm"
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-primary text-white hover:bg-primary-dark" : "border border-border text-secondary hover:bg-surface"}`}
         >
           {isSaving
             ? "Сохранение..."
             : isEditing
               ? "Сохранить"
               : "Редактировать"}
-        </button>
+        </Button>
       </div>
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8 space-y-6">
@@ -89,20 +107,15 @@ export const DoctorDocumentsPage: FC = () => {
                   onChange={handleCertUpload}
                   className="hidden"
                 />
-                <button
+                <Button
+                  variant="text"
+                  size="xs"
+                  className="text-primary"
+                  IconLeft={AddIcon}
                   onClick={() => certRef.current?.click()}
-                  className="text-primary text-sm font-medium flex items-center gap-1"
                 >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path
-                      d="M7 2V12M2 7H12"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
                   Добавить документ
-                </button>
+                </Button>
               </>
             )}
           </div>
@@ -164,15 +177,12 @@ export const DoctorDocumentsPage: FC = () => {
 
         <div>
           {isEditing ? (
-            <>
-              <label className={formStyles.lbl}>Номер лицензии</label>
-              <input
-                value={licenseNumber}
-                onChange={(e) => setLicenseNumber(e.target.value)}
-                placeholder="ЛИЦ-XXXXXX"
-                className={inp}
-              />
-            </>
+            <Input
+              label="Номер лицензии"
+              value={licenseNumber}
+              onChange={(e) => setLicenseNumber(e.target.value)}
+              placeholder="ЛИЦ-XXXXXX"
+            />
           ) : (
             <FieldView label="Номер лицензии" value={licenseNumber} />
           )}

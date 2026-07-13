@@ -5,6 +5,7 @@ import { FC, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets/icons";
+import { IconBtn } from "@/shared/ui";
 
 import { useDoctorCabinet } from "./doctor-profile/useDoctorCabinet";
 import { DoctorSidebar } from "./sidebar";
@@ -35,11 +36,11 @@ export const DoctorPageLayout: FC<Props> = ({
   const rightSlot =
     headerRight ??
     (editAction ? (
-      <button
+      <IconBtn
         onClick={onEditToggle}
-        className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-          editAction === "save" ? "text-primary" : "text-muted hover:bg-surface"
-        }`}
+        variant="text"
+        size="sm"
+        className={editAction === "save" ? "text-primary" : "text-muted"}
         aria-label={editAction === "save" ? "Сохранить" : "Редактировать"}
       >
         {editAction === "save" ? (
@@ -47,7 +48,7 @@ export const DoctorPageLayout: FC<Props> = ({
         ) : (
           <EditIcon className="w-5 h-5" />
         )}
-      </button>
+      </IconBtn>
     ) : (
       <div className="w-10" />
     ));
@@ -56,13 +57,14 @@ export const DoctorPageLayout: FC<Props> = ({
     <div className="w-full min-h-screen bg-[#FAFAFA]">
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
-        <button
+        <IconBtn
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
+          variant="text"
+          size="sm"
           aria-label="Назад"
         >
           <HeaderBackIcon className="w-5 h-5" />
-        </button>
+        </IconBtn>
 
         <h1 className="text-base font-semibold text-foreground truncate mx-2">
           {title}
