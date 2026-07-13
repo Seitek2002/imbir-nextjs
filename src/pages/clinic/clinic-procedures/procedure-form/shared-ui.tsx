@@ -245,6 +245,8 @@ export const SpecialistsPicker: FC<SpecialistsPickerProps> = ({
 
       {isEditing &&
         (selected.length === 0 ? (
+          // Пустой список — первый специалист выбирается прямо тут (как в
+          // макете «Добавить процедуру»), без модалки.
           <Dropdown
             placeholder="Выберите из списка"
             options={available.map((d) => ({
@@ -256,6 +258,8 @@ export const SpecialistsPicker: FC<SpecialistsPickerProps> = ({
             className="w-full"
           />
         ) : (
+          // Список уже не пуст — дальнейшие добавления через модалку (как в
+          // макете «Редактировать»), чтобы не перестраивать уже видимые строки.
           <button
             type="button"
             onClick={() => setModalOpen(true)}
