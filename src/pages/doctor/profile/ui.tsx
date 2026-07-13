@@ -13,7 +13,7 @@ import { DoctorSidebar } from "@/widgets/doctor/layout";
 import { doctorCabinetKeys, getDoctorStats } from "@/shared/api";
 import { ChevronRightIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
-import { CabinetMobileMenu } from "@/shared/ui";
+import { CabinetMobileMenu, StatTiles } from "@/shared/ui";
 
 // Плитки статистики кабинета (GET /api/doctor/stats/).
 const DoctorStatsTiles: FC = () => {
@@ -34,19 +34,7 @@ const DoctorStatsTiles: FC = () => {
     { label: "Пациентов", value: stats.patients_count },
   ];
 
-  return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-      {tiles.map((tile) => (
-        <div
-          key={tile.label}
-          className="bg-white rounded-2xl border border-border p-4"
-        >
-          <p className="text-2xl font-semibold text-foreground">{tile.value}</p>
-          <p className="text-muted text-xs mt-1">{tile.label}</p>
-        </div>
-      ))}
-    </div>
-  );
+  return <StatTiles tiles={tiles} className="lg:grid-cols-4 mb-4" />;
 };
 
 const MENU_ITEMS = [

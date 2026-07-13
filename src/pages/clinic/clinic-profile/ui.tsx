@@ -19,7 +19,7 @@ import {
   getClinicStats,
   updateClinicBranch,
 } from "@/shared/api";
-import { Button, Input } from "@/shared/ui";
+import { Button, Input, StatTiles } from "@/shared/ui";
 
 import { ClinicProfileHub } from "./hub/ui";
 
@@ -41,19 +41,7 @@ const ClinicStatsTiles: FC = () => {
     { label: "Отзывов", value: stats.reviews_count },
   ];
 
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-      {tiles.map((tile) => (
-        <div
-          key={tile.label}
-          className="bg-white rounded-2xl border border-border p-4"
-        >
-          <p className="text-2xl font-semibold text-foreground">{tile.value}</p>
-          <p className="text-muted text-xs mt-1">{tile.label}</p>
-        </div>
-      ))}
-    </div>
-  );
+  return <StatTiles tiles={tiles} className="md:grid-cols-3 mb-6" />;
 };
 
 // Филиалы клиники: список с inline-правкой адреса (PUT /api/clinic/branches/{id}/).
