@@ -126,6 +126,7 @@ export const ProceduresList: FC<Props> = ({ procedures, onDelete }) => {
           if (pendingDeleteId) onDelete?.(pendingDeleteId);
           setPendingDeleteId(null);
         }}
+        variant="danger"
         title="Удалить процедуру?"
         description="Это действие нельзя отменить"
         confirmLabel="Удалить"

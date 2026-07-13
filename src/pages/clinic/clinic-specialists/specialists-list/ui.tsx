@@ -133,7 +133,8 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
           if (pendingDeleteId) onDelete(pendingDeleteId);
           setPendingDeleteId(null);
         }}
-        icon={<TrashIcon className="w-7 h-7 text-primary" />}
+        icon={<TrashIcon className="w-7 h-7" />}
+        variant="danger"
         title="Удалить специалиста?"
         description={
           pendingName

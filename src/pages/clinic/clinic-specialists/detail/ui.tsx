@@ -198,7 +198,8 @@ export const ClinicSpecialistDetailPage: FC = () => {
           setDeleteOpen(false);
           deleteMutation.mutate();
         }}
-        icon={<TrashIcon className="w-7 h-7 text-primary" />}
+        icon={<TrashIcon className="w-7 h-7" />}
+        variant="danger"
         title="Открепить специалиста?"
         description={`«${specialist.full_name}» будет удалён из списка специалистов клиники без возможности восстановления`}
         confirmLabel="Открепить"

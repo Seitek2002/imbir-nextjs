@@ -292,7 +292,8 @@ export const DoctorServicesPage: FC = () => {
         onConfirm={() => {
           if (deleteTarget) deleteMutation.mutate(deleteTarget.id);
         }}
-        icon={<TrashIcon className="text-primary w-6 h-6" />}
+        icon={<TrashIcon className="w-6 h-6" />}
+        variant="danger"
         title="Удалить услугу?"
         description={
           deleteTarget

@@ -13,6 +13,8 @@ type Props = {
   description?: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  // "danger" — для необратимых удалений (красный акцент вместо оранжевого).
+  variant?: "default" | "danger";
 };
 
 const DURATION = 200;
@@ -26,7 +28,15 @@ export const ConfirmDialog: FC<Props> = ({
   description,
   confirmLabel = "Удалить",
   cancelLabel = "Отмена",
+  variant = "default",
 }) => {
+  const isDanger = variant === "danger";
+  const iconWrapClass = isDanger
+    ? "bg-red-50 text-red-500"
+    : "bg-[#FFF0EE] text-primary";
+  const confirmBtnClass = isDanger
+    ? "bg-red-500 hover:bg-red-600"
+    : "bg-primary hover:bg-primary-dark";
   const [isClosing, setIsClosing] = useState(false);
 
   const handleClose = useCallback(() => {
@@ -65,7 +75,9 @@ export const ConfirmDialog: FC<Props> = ({
         data-state={state}
       >
         {icon && (
-          <div className="w-14 h-14 rounded-full bg-[#FFF0EE] flex items-center justify-center">
+          <div
+            className={`w-14 h-14 rounded-full flex items-center justify-center ${iconWrapClass}`}
+          >
             {icon}
           </div>
         )}
@@ -89,7 +101,7 @@ export const ConfirmDialog: FC<Props> = ({
               onConfirm();
               handleClose();
             }}
-            className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium text-base hover:bg-primary-dark transition-colors active:scale-95"
+            className={`flex-1 py-3.5 rounded-full text-white font-medium text-base transition-colors active:scale-95 ${confirmBtnClass}`}
           >
             {confirmLabel}
           </button>
@@ -102,7 +114,9 @@ export const ConfirmDialog: FC<Props> = ({
         data-state={state}
       >
         {icon && (
-          <div className="w-16 h-16 rounded-full bg-[#FFF0EE] flex items-center justify-center">
+          <div
+            className={`w-16 h-16 rounded-full flex items-center justify-center ${iconWrapClass}`}
+          >
             {icon}
           </div>
         )}
@@ -126,7 +140,7 @@ export const ConfirmDialog: FC<Props> = ({
               onConfirm();
               handleClose();
             }}
-            className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium text-base hover:bg-primary-dark transition-colors active:scale-95"
+            className={`flex-1 py-3.5 rounded-full text-white font-medium text-base transition-colors active:scale-95 ${confirmBtnClass}`}
           >
             {confirmLabel}
           </button>

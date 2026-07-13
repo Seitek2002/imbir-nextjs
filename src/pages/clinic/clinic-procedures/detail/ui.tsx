@@ -405,7 +405,8 @@ export const ClinicProcedureDetailPage: FC = () => {
           setDeleteOpen(false);
           deleteMutation.mutate();
         }}
-        icon={<TrashIcon className="w-7 h-7 text-primary" />}
+        icon={<TrashIcon className="w-7 h-7" />}
+        variant="danger"
         title="Удалить процедуру?"
         description="Действие нельзя отменить — процедура исчезнет из списка услуг клиники"
         confirmLabel="Удалить"
