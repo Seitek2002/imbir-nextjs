@@ -143,11 +143,12 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
                 По вашим параметрам клиники не найдены
               </p>
             ) : (
-              filteredClinics.map((clinic) => (
+              filteredClinics.map((clinic, index) => (
                 <ClinicCard
                   key={`mob-${clinic.id}`}
                   {...clinic}
                   variant="horizontal"
+                  priority={index < 2}
                   initialSaved={isSaved(Number(clinic.id))}
                   onSave={() => toggle(Number(clinic.id))}
                 />
@@ -209,10 +210,11 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
               </p>
             ) : (
               <div className="grid grid-cols-4 gap-5 items-stretch">
-                {filteredClinics.map((clinic) => (
+                {filteredClinics.map((clinic, index) => (
                   <ClinicCard
                     key={`desk-${clinic.id}`}
                     {...clinic}
+                    priority={index < 4}
                     initialSaved={isSaved(Number(clinic.id))}
                     onSave={() => toggle(Number(clinic.id))}
                   />
