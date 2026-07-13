@@ -2,6 +2,8 @@
 
 import { FC, useState } from "react";
 
+import { ClinicSectionPage } from "@/widgets/clinic/section-page";
+
 import {
   DAY_API,
   DAY_LABELS,
@@ -10,8 +12,6 @@ import {
   toDay,
   useClinicCabinet,
 } from "@/entities/clinic-profile";
-
-import { ClinicSectionPage } from "../../section-page";
 
 const timeInput =
   "border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40";

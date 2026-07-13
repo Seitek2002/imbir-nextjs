@@ -2,6 +2,8 @@
 
 import { FC, useState } from "react";
 
+import { ClinicSectionPage } from "@/widgets/clinic/section-page";
+
 import {
   FieldRow,
   FileIcon,
@@ -10,8 +12,6 @@ import {
 } from "@/entities/clinic-profile";
 
 import { Input } from "@/shared/ui";
-
-import { ClinicSectionPage } from "../../section-page";
 
 export const ClinicLegalPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();

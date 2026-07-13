@@ -3,6 +3,7 @@
 import { FC, useState } from "react";
 
 import Image from "next/image";
+import Link from "next/link";
 
 import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
@@ -22,10 +23,10 @@ type Props = Specialist & {
   onDelete?: (id: string) => void;
 };
 
-const DeleteButton: FC<{ onClick: () => void; className?: string }> = ({
-  onClick,
-  className,
-}) => (
+const DeleteButton: FC<{
+  onClick: (e: React.MouseEvent) => void;
+  className?: string;
+}> = ({ onClick, className }) => (
   <button
     onClick={onClick}
     className={`z-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-primary-tint hover:border-primary transition-colors shrink-0 ${className ?? ""}`}
@@ -64,43 +65,45 @@ export const SpecialistCard: FC<Props> = ({
         />
       )}
 
-      {/* Photo */}
-      <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-primary-tint mb-3">
-        {image ? (
-          <>
-            {!loaded && <div className="absolute inset-0 skeleton" />}
-            <Image
-              src={image}
-              alt={name}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
-              className="object-cover object-top scale-110"
-              onLoad={() => setLoaded(true)}
-            />
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <UserCircleIcon className="size-20 text-dim" />
-          </div>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="px-1">
-        <h3 className="font-semibold text-base text-foreground leading-tight truncate mb-1">
-          {name}
-        </h3>
-        <p className="text-sm text-muted truncate mb-2">
-          {specialty} <span className="text-primary">• {clinic}</span>
-        </p>
-
-        <div className="flex items-center gap-1 text-sm flex-wrap">
-          <StarIcon className="w-4 h-4 text-primary" />
-          <span className="font-medium text-primary">{rating}</span>
-          <span className="text-muted">({reviews})</span>
-          <span className="text-muted">• {experience} лет опыта</span>
+      <Link href={`/clinic-profile/specialists/${id}`}>
+        {/* Photo */}
+        <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-primary-tint mb-3">
+          {image ? (
+            <>
+              {!loaded && <div className="absolute inset-0 skeleton" />}
+              <Image
+                src={image}
+                alt={name}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+                className="object-cover object-top scale-110"
+                onLoad={() => setLoaded(true)}
+              />
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <UserCircleIcon className="size-20 text-dim" />
+            </div>
+          )}
         </div>
-      </div>
+
+        {/* Info */}
+        <div className="px-1">
+          <h3 className="font-semibold text-base text-foreground leading-tight truncate mb-1">
+            {name}
+          </h3>
+          <p className="text-sm text-muted truncate mb-2">
+            {specialty} <span className="text-primary">• {clinic}</span>
+          </p>
+
+          <div className="flex items-center gap-1 text-sm flex-wrap">
+            <StarIcon className="w-4 h-4 text-primary" />
+            <span className="font-medium text-primary">{rating}</span>
+            <span className="text-muted">({reviews})</span>
+            <span className="text-muted">• {experience} лет опыта</span>
+          </div>
+        </div>
+      </Link>
     </div>
   );
 };
@@ -118,7 +121,10 @@ export const SpecialistRow: FC<Props> = ({
   image,
   onDelete,
 }) => (
-  <div className="flex items-center gap-3 bg-white rounded-2xl border border-border-soft p-3">
+  <Link
+    href={`/clinic-profile/specialists/${id}`}
+    className="flex items-center gap-3 bg-white rounded-2xl border border-border-soft p-3"
+  >
     <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-primary-tint shrink-0">
       {image ? (
         <Image
@@ -147,7 +153,13 @@ export const SpecialistRow: FC<Props> = ({
       </div>
     </div>
     {onDelete && (
-      <DeleteButton onClick={() => onDelete(id)} className="w-8 h-8" />
+      <DeleteButton
+        onClick={(e) => {
+          e.preventDefault();
+          onDelete(id);
+        }}
+        className="w-8 h-8"
+      />
     )}
-  </div>
+  </Link>
 );

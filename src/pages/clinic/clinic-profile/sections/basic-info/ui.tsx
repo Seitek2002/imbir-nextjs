@@ -4,12 +4,12 @@ import { FC, useRef, useState } from "react";
 
 import Image from "next/image";
 
+import { ClinicSectionPage } from "@/widgets/clinic/section-page";
+
 import { useClinicCabinet } from "@/entities/clinic-profile";
 import { FieldRow, UploadIcon } from "@/entities/clinic-profile";
 
 import { Button, Input, Textarea } from "@/shared/ui";
-
-import { ClinicSectionPage } from "../../section-page";
 
 export const ClinicBasicInfoPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();

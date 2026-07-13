@@ -2,11 +2,11 @@
 
 import { FC, useState } from "react";
 
+import { ClinicSectionPage } from "@/widgets/clinic/section-page";
+
 import { csv, useClinicCabinet } from "@/entities/clinic-profile";
 
 import { Textarea } from "@/shared/ui";
-
-import { ClinicSectionPage } from "../../section-page";
 
 const BulletList: FC<{ label: string; items: string[] }> = ({
   label,

@@ -1,0 +1,1 @@
+export { ClinicSpecialistProfessionalPage } from "./ui";
