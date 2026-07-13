@@ -164,9 +164,9 @@ export const DoctorSchedulePage: FC = () => {
           return (
             <div
               key={key}
-              className="flex items-center justify-between gap-3 py-3 border-b border-background last:border-0"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 py-3 border-b border-background last:border-0"
             >
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-3 shrink-0">
                 <Toggle
                   on={day.enabled}
                   onClick={() => setDay(key, { enabled: !day.enabled })}
@@ -181,7 +181,7 @@ export const DoctorSchedulePage: FC = () => {
                   {label}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 pl-14.5 sm:pl-0">
                 <input
                   type="time"
                   value={day.from}
