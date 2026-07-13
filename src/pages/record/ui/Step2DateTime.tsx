@@ -1,9 +1,10 @@
+import { AppointmentDateTimePicker } from "@/widgets/appointment-datetime-picker";
+
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
 import { StepTitle } from "./StepTitle";
-import { AppointmentDateTimePicker } from "./appointment-datetime-picker";
 
 export const Step2DateTime = ({ form }: { form: RecordForm }) => {
   const {

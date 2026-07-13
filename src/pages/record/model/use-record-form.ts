@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { ConsultationMode } from "@/widgets/appointment-datetime-picker";
+
 import {
   api,
   createAppointment,
@@ -23,7 +25,6 @@ import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { useAuthStore, useCityStore } from "@/shared/store";
 
-import { ConsultationMode } from "../ui/appointment-datetime-picker";
 import { SELECTION_LABELS } from "./constants";
 import {
   filterSelectionItems,
