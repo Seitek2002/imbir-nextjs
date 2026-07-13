@@ -2,7 +2,9 @@
 
 import { FC, useState } from "react";
 
-import Image, { StaticImageData } from "next/image";
+import { StaticImageData } from "next/image";
+
+import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
   title: string;
@@ -30,13 +32,15 @@ export const VideoCard: FC<Props> = ({
     >
       <div className="relative w-full aspect-video md:aspect-auto md:h-55 shrink-0 overflow-hidden rounded-2xl bg-background">
         {!loaded && <div className="absolute inset-0 skeleton" />}
-        <Image
+        <ImageWithFallback
           src={thumbnail}
           alt={title}
           fill
           sizes="(max-width: 768px) 100vw, 440px"
           className="object-cover"
           onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
+          fallback={<div className="absolute inset-0 bg-surface" />}
         />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="size-12 rounded-full bg-white/90 flex items-center justify-center shadow-md pl-0.5">

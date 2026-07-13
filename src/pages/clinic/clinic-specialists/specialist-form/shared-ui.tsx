@@ -2,10 +2,14 @@
 
 import { FC, useRef } from "react";
 
-import Image from "next/image";
-
 import { UserCircleIcon } from "@/shared/assets/icons";
-import { Button, Input, PhoneInput, Textarea } from "@/shared/ui";
+import {
+  Button,
+  ImageWithFallback,
+  Input,
+  PhoneInput,
+  Textarea,
+} from "@/shared/ui";
 
 import type { SpecialistFormState } from "./model";
 
@@ -74,13 +78,14 @@ export const BasicInfoSection: FC<SectionProps> = ({ d, set, isEditing }) => {
           <div className="text-muted text-sm mb-2">Фото</div>
           <div className="w-20 h-20 rounded-full overflow-hidden bg-surface flex items-center justify-center">
             {d.photoPreview ? (
-              <Image
+              <ImageWithFallback
                 src={d.photoPreview}
                 alt={d.fullName}
                 width={80}
                 height={80}
                 unoptimized={d.photoPreview.startsWith("data:")}
                 className="w-full h-full object-cover"
+                fallback={<UserCircleIcon className="size-10 text-dim" />}
               />
             ) : (
               <UserCircleIcon className="size-10 text-dim" />
@@ -180,13 +185,14 @@ export const BasicInfoSection: FC<SectionProps> = ({ d, set, isEditing }) => {
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-full overflow-hidden bg-surface flex items-center justify-center shrink-0">
             {d.photoPreview ? (
-              <Image
+              <ImageWithFallback
                 src={d.photoPreview}
                 alt={d.fullName}
                 width={80}
                 height={80}
                 unoptimized={d.photoPreview.startsWith("data:")}
                 className="w-full h-full object-cover"
+                fallback={<UserCircleIcon className="size-10 text-dim" />}
               />
             ) : (
               <UserCircleIcon className="size-10 text-dim" />

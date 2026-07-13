@@ -2,13 +2,11 @@
 
 import { FC, useRef, useState } from "react";
 
-import Image from "next/image";
-
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView } from "@/widgets/doctor/layout";
 
-import { Button, Input } from "@/shared/ui";
+import { Button, ImageWithFallback, Input } from "@/shared/ui";
 
 const AddIcon: FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -131,12 +129,35 @@ export const DoctorDocumentsPage: FC = () => {
                 key={i}
                 className="relative w-16 h-16 rounded-xl overflow-hidden border border-border bg-surface"
               >
-                <Image
+                <ImageWithFallback
                   src={cert}
                   alt={`cert-${i}`}
                   width={64}
                   height={64}
                   className="w-full h-full object-cover"
+                  fallback={
+                    <div className="w-full h-full flex items-center justify-center text-dim">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                      >
+                        <path
+                          d="M4 3h9l3 3v11a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M13 3v3h3"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  }
                 />
                 {isEditing && (
                   <button

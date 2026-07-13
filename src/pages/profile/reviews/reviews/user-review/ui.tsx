@@ -2,10 +2,8 @@
 
 import { FC } from "react";
 
-import Image from "next/image";
-
 import { EditIcon, GeoIcon, RemoveIcon } from "@/shared/assets/icons";
-import { IconBtn } from "@/shared/ui";
+import { IconBtn, ImageWithFallback } from "@/shared/ui";
 import { StarRating } from "@/shared/ui/star-rating";
 
 import type { UserReview } from "./model";
@@ -62,21 +60,20 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
     <div className="bg-white rounded-3xl p-6 border border-border flex flex-col gap-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          {review.image ? (
-            <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
-              <Image
-                src={review.image}
-                alt={getTitle() || ""}
-                width={48}
-                height={48}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center text-muted text-lg font-semibold shrink-0">
-              {getTitle()?.charAt(0) || "?"}
-            </div>
-          )}
+          <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+            <ImageWithFallback
+              src={review.image}
+              alt={getTitle() || ""}
+              width={48}
+              height={48}
+              className="w-full h-full object-cover"
+              fallback={
+                <div className="w-full h-full bg-surface flex items-center justify-center text-muted text-lg font-semibold">
+                  {getTitle()?.charAt(0) || "?"}
+                </div>
+              }
+            />
+          </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-foreground font-semibold text-base leading-tight">
               {getTitle()}

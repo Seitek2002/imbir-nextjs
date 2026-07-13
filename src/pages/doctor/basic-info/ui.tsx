@@ -2,13 +2,17 @@
 
 import { FC, useRef, useState } from "react";
 
-import Image from "next/image";
-
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
-import { Button, IconBtn, Input, PhoneInput } from "@/shared/ui";
+import {
+  Button,
+  IconBtn,
+  ImageWithFallback,
+  Input,
+  PhoneInput,
+} from "@/shared/ui";
 
 const { lbl } = formStyles;
 
@@ -128,19 +132,18 @@ export const DoctorBasicInfoPage: FC = () => {
         <div className="flex justify-center mb-6">
           <div className="relative">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-              {d.photo ? (
-                <Image
-                  src={d.photo}
-                  alt={d.fullName}
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-white text-2xl font-bold">
-                  {d.fullName.charAt(0)}
-                </span>
-              )}
+              <ImageWithFallback
+                src={d.photo}
+                alt={d.fullName}
+                width={80}
+                height={80}
+                className="w-full h-full object-cover"
+                fallback={
+                  <span className="text-white text-2xl font-bold">
+                    {d.fullName.charAt(0)}
+                  </span>
+                }
+              />
             </div>
             {isEditing && (
               <>

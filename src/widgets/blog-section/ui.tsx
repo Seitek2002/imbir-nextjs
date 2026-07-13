@@ -2,13 +2,13 @@
 
 import { FC, useState } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { BlogCard, BlogCategory, BlogPost } from "@/entities/blog";
 
 import { ThunderIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
   posts: BlogPost[];
@@ -47,13 +47,15 @@ export const BlogSection: FC<Props> = ({
             className="relative w-167.5 shrink-0 h-105 rounded-3xl overflow-hidden border border-border-soft group block"
           >
             {!featuredLoaded && <div className="absolute inset-0 skeleton" />}
-            <Image
+            <ImageWithFallback
               src={featured.image}
               alt={featured.title}
               fill
               sizes="50vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               onLoad={() => setFeaturedLoaded(true)}
+              onError={() => setFeaturedLoaded(true)}
+              fallback={<div className="absolute inset-0 bg-surface" />}
             />
           </Link>
 
@@ -119,13 +121,15 @@ export const BlogSection: FC<Props> = ({
             className="relative w-full h-52 rounded-3xl overflow-hidden border border-border-soft block"
           >
             {!featuredLoaded && <div className="absolute inset-0 skeleton" />}
-            <Image
+            <ImageWithFallback
               src={featured.image}
               alt={featured.title}
               fill
               sizes="100vw"
               className="object-cover object-top"
               onLoad={() => setFeaturedLoaded(true)}
+              onError={() => setFeaturedLoaded(true)}
+              fallback={<div className="absolute inset-0 bg-surface" />}
             />
           </Link>
         </div>

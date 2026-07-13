@@ -2,8 +2,6 @@
 
 import { FC } from "react";
 
-import Image from "next/image";
-
 import {
   CalendarIcon,
   GeoIcon,
@@ -13,7 +11,7 @@ import {
   VideoCallIcon,
 } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
-import { Button, IconBtn } from "@/shared/ui";
+import { Button, IconBtn, ImageWithFallback } from "@/shared/ui";
 
 import {
   formatDateHuman,
@@ -131,22 +129,22 @@ export const AppointmentCard: FC<Props> = ({
     </div>
   );
 
-  const photo = (sizes: string, initialCls: string) =>
-    appointment.doctorImage ? (
-      <Image
-        src={appointment.doctorImage}
-        alt={appointment.doctorName}
-        fill
-        sizes={sizes}
-        className="object-cover object-top"
-      />
-    ) : (
-      <div
-        className={`w-full h-full flex items-center justify-center text-dim font-semibold ${initialCls}`}
-      >
-        {appointment.doctorName.charAt(0)}
-      </div>
-    );
+  const photo = (sizes: string, initialCls: string) => (
+    <ImageWithFallback
+      src={appointment.doctorImage}
+      alt={appointment.doctorName}
+      fill
+      sizes={sizes}
+      className="object-cover object-top"
+      fallback={
+        <div
+          className={`w-full h-full flex items-center justify-center text-dim font-semibold ${initialCls}`}
+        >
+          {appointment.doctorName.charAt(0)}
+        </div>
+      }
+    />
+  );
 
   return (
     <>

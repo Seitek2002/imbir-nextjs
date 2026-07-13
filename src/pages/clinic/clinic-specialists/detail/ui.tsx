@@ -2,7 +2,6 @@
 
 import { FC, useState } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -14,7 +13,7 @@ import {
   TrashIcon,
   UserCircleIcon,
 } from "@/shared/assets/icons";
-import { Button, ConfirmDialog, IconBtn } from "@/shared/ui";
+import { Button, ConfirmDialog, IconBtn, ImageWithFallback } from "@/shared/ui";
 
 import {
   BasicInfoSection,
@@ -152,11 +151,16 @@ export const ClinicSpecialistDetailPage: FC = () => {
           <div className="bg-white rounded-3xl border border-border overflow-hidden mb-4">
             <div className="relative w-full aspect-square bg-primary-tint">
               {specialist.photo ? (
-                <Image
+                <ImageWithFallback
                   src={specialist.photo}
                   alt={specialist.full_name}
                   fill
                   className="object-cover object-top"
+                  fallback={
+                    <div className="w-full h-full flex items-center justify-center">
+                      <UserCircleIcon className="size-20 text-dim" />
+                    </div>
+                  }
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

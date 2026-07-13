@@ -2,11 +2,11 @@
 
 import { FC, useState } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
   id: string;
@@ -82,13 +82,19 @@ export const ProcedureCard: FC<Props> = ({
           {image ? (
             <>
               {!loaded && <div className="absolute inset-0 skeleton" />}
-              <Image
+              <ImageWithFallback
                 src={image}
                 alt={name}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
                 className="object-cover"
                 onLoad={() => setLoaded(true)}
+                onError={() => setLoaded(true)}
+                fallback={
+                  <div className="w-full h-full flex items-center justify-center">
+                    <PlaceholderPhoto />
+                  </div>
+                }
               />
             </>
           ) : (
@@ -142,7 +148,17 @@ export const ProcedureRow: FC<Props> = ({
   >
     <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-primary-tint shrink-0">
       {image ? (
-        <Image src={image} alt={name} fill className="object-cover" />
+        <ImageWithFallback
+          src={image}
+          alt={name}
+          fill
+          className="object-cover"
+          fallback={
+            <div className="w-full h-full flex items-center justify-center">
+              <PlaceholderPhoto className="w-8 h-8" />
+            </div>
+          }
+        />
       ) : (
         <div className="w-full h-full flex items-center justify-center">
           <PlaceholderPhoto className="w-8 h-8" />

@@ -2,11 +2,11 @@
 
 import { FC, useState } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { ImageWithFallback } from "@/shared/ui";
 
 export type Specialist = {
   id: string;
@@ -71,13 +71,19 @@ export const SpecialistCard: FC<Props> = ({
           {image ? (
             <>
               {!loaded && <div className="absolute inset-0 skeleton" />}
-              <Image
+              <ImageWithFallback
                 src={image}
                 alt={name}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
                 className="object-cover object-top scale-110"
                 onLoad={() => setLoaded(true)}
+                onError={() => setLoaded(true)}
+                fallback={
+                  <div className="w-full h-full flex items-center justify-center">
+                    <UserCircleIcon className="size-20 text-dim" />
+                  </div>
+                }
               />
             </>
           ) : (
@@ -127,11 +133,16 @@ export const SpecialistRow: FC<Props> = ({
   >
     <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-primary-tint shrink-0">
       {image ? (
-        <Image
+        <ImageWithFallback
           src={image}
           alt={name}
           fill
           className="object-cover object-top"
+          fallback={
+            <div className="w-full h-full flex items-center justify-center">
+              <UserCircleIcon className="size-8 text-dim" />
+            </div>
+          }
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center">

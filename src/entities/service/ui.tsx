@@ -2,13 +2,13 @@
 
 import { FC, useState } from "react";
 
-import Image, { StaticImageData } from "next/image";
+import { StaticImageData } from "next/image";
 import Link from "next/link";
 
 import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
-import { Button } from "@/shared/ui";
+import { Button, ImageWithFallback } from "@/shared/ui";
 
 type Props = {
   id?: string;
@@ -85,19 +85,18 @@ export const ServiceCard: FC<Props> = ({
         className="bg-white rounded-3xl p-4 flex items-center gap-4 border border-border cursor-pointer hover:border-primary/40 transition-colors"
       >
         <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-[#FFF2F0] flex items-center justify-center shrink-0">
-          {image ? (
-            <Image
-              src={image}
-              alt={name}
-              fill
-              sizes="112px"
-              className="object-cover"
-            />
-          ) : (
-            <span className="text-primary text-2xl font-bold uppercase">
-              {name.slice(0, 2)}
-            </span>
-          )}
+          <ImageWithFallback
+            src={image}
+            alt={name}
+            fill
+            sizes="112px"
+            className="object-cover"
+            fallback={
+              <span className="text-primary text-2xl font-bold uppercase">
+                {name.slice(0, 2)}
+              </span>
+            }
+          />
         </div>
 
         <div className="flex-1 min-w-0 flex flex-col self-stretch">
@@ -147,21 +146,20 @@ export const ServiceCard: FC<Props> = ({
       className="bg-white rounded-3xl border border-border overflow-hidden flex flex-col h-full cursor-pointer hover:border-primary/40 transition-colors"
     >
       <div className="relative aspect-4/3 w-full">
-        {image ? (
-          <Image
-            src={image}
-            alt={name}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-[#FFF2F0] flex items-center justify-center">
-            <span className="text-primary text-3xl font-bold uppercase">
-              {name.slice(0, 2)}
-            </span>
-          </div>
-        )}
+        <ImageWithFallback
+          src={image}
+          alt={name}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-cover"
+          fallback={
+            <div className="w-full h-full bg-[#FFF2F0] flex items-center justify-center">
+              <span className="text-primary text-3xl font-bold uppercase">
+                {name.slice(0, 2)}
+              </span>
+            </div>
+          }
+        />
         <div className="absolute top-4 right-4 z-10">
           <SaveButton initialSaved={initialSaved} onSave={onSave} />
         </div>

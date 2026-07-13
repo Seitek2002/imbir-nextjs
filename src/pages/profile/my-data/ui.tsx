@@ -3,15 +3,20 @@
 import { FC, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-import Image from "next/image";
-
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
 import { ProfileSidebar } from "@/widgets/profile/sidebar";
 
 import { getProfile, updateProfile } from "@/shared/api";
 import { CheckIcon, EditIcon } from "@/shared/assets/icons";
 import { useAuthStore } from "@/shared/store";
-import { Button, CabinetShell, IconBtn, Input, PhoneInput } from "@/shared/ui";
+import {
+  Button,
+  CabinetShell,
+  IconBtn,
+  ImageWithFallback,
+  Input,
+  PhoneInput,
+} from "@/shared/ui";
 
 type D = {
   firstName: string;
@@ -183,20 +188,19 @@ export const ProfileMyDataPage: FC = () => {
           <p className="block text-muted text-xs mb-1">Фото</p>
           <div className="relative w-20 h-20 mt-2">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-surface">
-              {d.photo ? (
-                <Image
-                  src={d.photo}
-                  alt="Фото"
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-cover"
-                  unoptimized={d.photo.startsWith("data:")}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted text-2xl font-semibold">
-                  {d.firstName.charAt(0) || "?"}
-                </div>
-              )}
+              <ImageWithFallback
+                src={d.photo}
+                alt="Фото"
+                width={80}
+                height={80}
+                className="w-full h-full object-cover"
+                unoptimized={d.photo?.startsWith("data:")}
+                fallback={
+                  <div className="w-full h-full flex items-center justify-center text-muted text-2xl font-semibold">
+                    {d.firstName.charAt(0) || "?"}
+                  </div>
+                }
+              />
             </div>
             {isEditing && (
               <>

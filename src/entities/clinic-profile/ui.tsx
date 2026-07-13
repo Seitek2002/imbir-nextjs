@@ -8,10 +8,15 @@ import {
   useState,
 } from "react";
 
-import Image from "next/image";
-
 import type { UpdateClinicProfileBody } from "@/shared/api";
-import { Button, Checkbox, Input, PhoneInput, Textarea } from "@/shared/ui";
+import {
+  Button,
+  Checkbox,
+  ImageWithFallback,
+  Input,
+  PhoneInput,
+  Textarea,
+} from "@/shared/ui";
 
 import type { ClinicProfile } from "./model";
 import {
@@ -234,21 +239,20 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 />
                 <div className="flex items-center gap-4">
                   <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-                    {logoPreview ? (
-                      <Image
-                        src={logoPreview}
-                        alt="Logo"
-                        width={96}
-                        height={96}
-                        sizes="96px"
-                        unoptimized={logoPreview.startsWith("data:")}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-white text-4xl font-bold">
-                        {d.name.charAt(0)}
-                      </span>
-                    )}
+                    <ImageWithFallback
+                      src={logoPreview}
+                      alt="Logo"
+                      width={96}
+                      height={96}
+                      sizes="96px"
+                      unoptimized={logoPreview?.startsWith("data:")}
+                      className="w-full h-full object-cover"
+                      fallback={
+                        <span className="text-white text-4xl font-bold">
+                          {d.name.charAt(0)}
+                        </span>
+                      }
+                    />
                   </div>
                   <Button
                     variant="outline"
@@ -288,13 +292,14 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                       key={i}
                       className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
                     >
-                      <Image
+                      <ImageWithFallback
                         src={photo}
                         alt={`Photo ${i + 1}`}
                         width={96}
                         height={96}
                         sizes="96px"
                         className="w-full h-full object-cover"
+                        fallback={null}
                       />
                     </div>
                   ))}
@@ -311,20 +316,19 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
               <div className="py-3 border-b border-background">
                 <div className="text-muted text-sm mb-2">Логотип</div>
                 <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-                  {logo ? (
-                    <Image
-                      src={logo}
-                      alt="Logo"
-                      width={96}
-                      height={96}
-                      sizes="96px"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-4xl font-bold">
-                      {name.charAt(0)}
-                    </span>
-                  )}
+                  <ImageWithFallback
+                    src={logo}
+                    alt="Logo"
+                    width={96}
+                    height={96}
+                    sizes="96px"
+                    className="w-full h-full object-cover"
+                    fallback={
+                      <span className="text-white text-4xl font-bold">
+                        {name.charAt(0)}
+                      </span>
+                    }
+                  />
                 </div>
               </div>
 
@@ -339,13 +343,14 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                       key={i}
                       className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
                     >
-                      <Image
+                      <ImageWithFallback
                         src={photo}
                         alt={`Photo ${i + 1}`}
                         width={96}
                         height={96}
                         sizes="96px"
                         className="w-full h-full object-cover"
+                        fallback={null}
                       />
                     </div>
                   ))}

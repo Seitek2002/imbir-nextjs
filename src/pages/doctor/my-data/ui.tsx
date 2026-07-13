@@ -2,8 +2,6 @@
 
 import { FC, ReactNode, useRef, useState } from "react";
 
-import Image from "next/image";
-
 import {
   DoctorPageLayout,
   FieldView,
@@ -11,7 +9,7 @@ import {
   useDoctorCabinet,
 } from "@/widgets/doctor/layout";
 
-import { Button, Input, PhoneInput } from "@/shared/ui";
+import { Button, ImageWithFallback, Input, PhoneInput } from "@/shared/ui";
 
 const { lbl } = formStyles;
 
@@ -361,19 +359,18 @@ export const DoctorMyDataPage: FC = () => {
               <label className={lbl}>Фото</label>
               <div className="flex items-center gap-4">
                 <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
-                  {d.photo ? (
-                    <Image
-                      src={d.photo}
-                      alt={d.fullName}
-                      width={80}
-                      height={80}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-2xl font-bold">
-                      {d.fullName.charAt(0)}
-                    </span>
-                  )}
+                  <ImageWithFallback
+                    src={d.photo}
+                    alt={d.fullName}
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-cover"
+                    fallback={
+                      <span className="text-white text-2xl font-bold">
+                        {d.fullName.charAt(0)}
+                      </span>
+                    }
+                  />
                 </div>
                 <input
                   ref={photoRef}
@@ -410,19 +407,18 @@ export const DoctorMyDataPage: FC = () => {
             <div className="py-3">
               <p className="text-muted text-sm mb-2">Фото</p>
               <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-                {d.photo ? (
-                  <Image
-                    src={d.photo}
-                    alt={d.fullName}
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-white text-2xl font-bold">
-                    {d.fullName.charAt(0)}
-                  </span>
-                )}
+                <ImageWithFallback
+                  src={d.photo}
+                  alt={d.fullName}
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                  fallback={
+                    <span className="text-white text-2xl font-bold">
+                      {d.fullName.charAt(0)}
+                    </span>
+                  }
+                />
               </div>
             </div>
           </div>

@@ -2,12 +2,10 @@
 
 import { FC, useCallback, useState } from "react";
 
-import Image from "next/image";
-
 import { StarBoldIcon, StarOutlineIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
-import { Button } from "@/shared/ui";
+import { Button, ImageWithFallback } from "@/shared/ui";
 
 type Props = {
   isOpen: boolean;
@@ -67,19 +65,18 @@ export const ReviewModal: FC<Props> = ({
       {/* Doctor Info */}
       <div className="flex items-center gap-3 p-4 bg-surface rounded-2xl">
         <div className="w-14 h-14 rounded-full overflow-hidden bg-white shrink-0">
-          {doctorImage ? (
-            <Image
-              src={doctorImage}
-              alt={doctorName}
-              width={56}
-              height={56}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-dim text-lg font-semibold">
-              {doctorName.charAt(0)}
-            </div>
-          )}
+          <ImageWithFallback
+            src={doctorImage}
+            alt={doctorName}
+            width={56}
+            height={56}
+            className="w-full h-full object-cover"
+            fallback={
+              <div className="w-full h-full flex items-center justify-center text-dim text-lg font-semibold">
+                {doctorName.charAt(0)}
+              </div>
+            }
+          />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-foreground font-semibold text-base leading-tight">

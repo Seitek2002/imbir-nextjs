@@ -2,14 +2,12 @@
 
 import { FC, useRef, useState } from "react";
 
-import Image from "next/image";
-
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 import { FieldRow, UploadIcon } from "@/entities/clinic-profile";
 
-import { Button, Input, Textarea } from "@/shared/ui";
+import { Button, ImageWithFallback, Input, Textarea } from "@/shared/ui";
 
 export const ClinicBasicInfoPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
@@ -95,7 +93,7 @@ export const ClinicBasicInfoPage: FC = () => {
               <div className="flex items-center gap-4">
                 <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
                   {logoPreview ? (
-                    <Image
+                    <ImageWithFallback
                       src={logoPreview}
                       alt="Logo"
                       width={96}
@@ -103,6 +101,11 @@ export const ClinicBasicInfoPage: FC = () => {
                       sizes="96px"
                       unoptimized={logoPreview.startsWith("data:")}
                       className="w-full h-full object-cover"
+                      fallback={
+                        <span className="text-white text-4xl font-bold">
+                          {name.charAt(0)}
+                        </span>
+                      }
                     />
                   ) : (
                     <span className="text-white text-4xl font-bold">
@@ -142,13 +145,18 @@ export const ClinicBasicInfoPage: FC = () => {
               <div className="text-muted text-sm mb-2">Логотип</div>
               <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
                 {profile.logo ? (
-                  <Image
+                  <ImageWithFallback
                     src={profile.logo}
                     alt="Logo"
                     width={96}
                     height={96}
                     sizes="96px"
                     className="w-full h-full object-cover"
+                    fallback={
+                      <span className="text-white text-4xl font-bold">
+                        {profile.name.charAt(0)}
+                      </span>
+                    }
                   />
                 ) : (
                   <span className="text-white text-4xl font-bold">
@@ -170,13 +178,14 @@ export const ClinicBasicInfoPage: FC = () => {
                       key={i}
                       className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
                     >
-                      <Image
+                      <ImageWithFallback
                         src={photo}
                         alt={`Photo ${i + 1}`}
                         width={96}
                         height={96}
                         sizes="96px"
                         className="w-full h-full object-cover"
+                        fallback={<div className="w-full h-full bg-surface" />}
                       />
                     </div>
                   ))}

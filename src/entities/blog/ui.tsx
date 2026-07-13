@@ -2,10 +2,11 @@
 
 import { FC, useState } from "react";
 
-import Image, { StaticImageData } from "next/image";
+import { StaticImageData } from "next/image";
 import Link from "next/link";
 
 import { colors } from "@/shared/config";
+import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
   title: string;
@@ -37,7 +38,7 @@ export const BlogCard: FC<Props> = ({
     >
       <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
         {!loaded && <div className="absolute inset-0 rounded-2xl skeleton" />}
-        <Image
+        <ImageWithFallback
           src={image}
           alt={title}
           fill
@@ -45,6 +46,8 @@ export const BlogCard: FC<Props> = ({
           sizes="(max-width: 768px) 100vw, 440px"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
+          fallback={<div className="absolute inset-0 bg-surface" />}
         />
       </div>
 
