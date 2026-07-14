@@ -9,7 +9,6 @@ import { ProfileSidebar } from "@/widgets/profile/sidebar";
 
 import { getProfileAppointments, profileKeys } from "@/shared/api";
 import { CabinetShell } from "@/shared/ui";
-import { SearchInput } from "@/shared/ui/input/search-input";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import { Appointment } from "./history/AppointmentCard/model";
@@ -57,7 +56,6 @@ export const ProfileHistoryPage: FC = () => {
   const [activeTab, setActiveTab] = useState<"upcoming" | "completed">(
     "upcoming",
   );
-  const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: profileKeys.appointments({ status: activeTab }),
@@ -90,31 +88,27 @@ export const ProfileHistoryPage: FC = () => {
       mobileHeader={<MobilePageHeader title="История записей" />}
       sidebar={<ProfileSidebar />}
     >
-      {/* Desktop: как в макете — заголовок + поиск в одну строку, табы ниже */}
-      <div className="hidden md:flex items-center justify-between gap-6 mb-5">
+      {/* Desktop: заголовок + сегмент-переключатель в одну строку */}
+      <div className="hidden md:flex items-center justify-between mb-6">
         <h2 className="text-[32px] font-semibold text-foreground">
           История записей
         </h2>
-        <div className="w-80 shrink-0">
-          <SearchInput value={searchQuery} onChange={setSearchQuery} />
+        <div className="w-75 shrink-0">
+          <SegmentedControl
+            options={TABS}
+            value={activeTab}
+            onChange={setActiveTab}
+          />
         </div>
       </div>
-      <div className="hidden md:block w-75 mb-6">
-        <SegmentedControl
-          options={TABS}
-          value={activeTab}
-          onChange={setActiveTab}
-        />
-      </div>
 
-      {/* Mobile: сегмент и поиск под шапкой страницы */}
-      <div className="md:hidden mb-6 flex flex-col gap-3">
+      {/* Mobile: сегмент под шапкой страницы */}
+      <div className="md:hidden mb-6">
         <SegmentedControl
           options={TABS}
           value={activeTab}
           onChange={setActiveTab}
         />
-        <SearchInput value={searchQuery} onChange={setSearchQuery} />
       </div>
 
       {isLoading ? (
@@ -122,11 +116,7 @@ export const ProfileHistoryPage: FC = () => {
           Загрузка...
         </div>
       ) : (
-        <ProfileHistory
-          appointments={appointments}
-          activeTab={activeTab}
-          searchQuery={searchQuery}
-        />
+        <ProfileHistory appointments={appointments} activeTab={activeTab} />
       )}
     </CabinetShell>
   );

@@ -7,9 +7,9 @@ import Link from "next/link";
 import {
   HistoryIcon,
   LogoutIcon,
+  PersonIcon,
   ReviewsIcon,
   SavedIcon,
-  SettingsIcon,
 } from "@/shared/assets/icons";
 import { useLogout } from "@/shared/lib/useLogout";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
@@ -18,11 +18,7 @@ import { ImageWithFallback } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 const MENU_ITEMS = [
-  {
-    href: "/profile/my-data",
-    label: "Настройки профиля",
-    icon: SettingsIcon,
-  },
+  { href: "/profile/my-data", label: "Мои данные", icon: PersonIcon },
   { href: "/profile/history", label: "История записей", icon: HistoryIcon },
   { href: "/profile/saved", label: "Сохранённое", icon: SavedIcon },
   { href: "/profile/reviews", label: "Отзывы", icon: ReviewsIcon },
@@ -59,28 +55,26 @@ export const ProfileSidebar: FC = () => {
   return (
     <>
       <div className="w-full max-w-88 flex flex-col gap-4">
-        {/* Profile Card — как в макете: белая горизонтальная карточка-ссылка */}
-        <Link
-          href="/profile/my-data"
-          className="bg-white rounded-3xl px-4 py-3.5 flex items-center gap-3 hover:bg-surface transition-colors"
-        >
-          <div className="w-12 h-12 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
+        {/* Profile Card — градиентная карточка с аватаром по центру, как в макете */}
+        <div className="bg-linear-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl px-6 py-5 flex flex-col items-center gap-3">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
             <ImageWithFallback
               src={user?.avatar}
               alt={displayName}
-              width={48}
-              height={48}
+              width={80}
+              height={80}
               className="w-full h-full object-cover"
               fallback={
-                <span className="text-white text-lg font-bold">{initials}</span>
+                <span className="text-white text-2xl font-bold">
+                  {initials}
+                </span>
               }
             />
           </div>
-          <h3 className="text-foreground font-semibold text-base truncate">
+          <h3 className="text-foreground font-semibold text-base">
             {displayName}
           </h3>
-          {CHEVRON}
-        </Link>
+        </div>
 
         {/* Menu */}
         <nav

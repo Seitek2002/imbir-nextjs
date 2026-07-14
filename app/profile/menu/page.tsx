@@ -2,9 +2,9 @@
 
 import {
   HistoryIcon,
+  PersonIcon,
   ReviewsIcon,
   SavedIcon,
-  SettingsIcon,
 } from "@/shared/assets/icons";
 import { useAuthStore } from "@/shared/store";
 import { CabinetMenuItem, CabinetMobileMenu } from "@/shared/ui";
@@ -12,8 +12,8 @@ import { CabinetMenuItem, CabinetMobileMenu } from "@/shared/ui";
 const MENU_ITEMS: CabinetMenuItem[] = [
   {
     href: "/profile/my-data",
-    label: "Настройки профиля",
-    icon: <SettingsIcon className="w-5 h-5" />,
+    label: "Мои данные",
+    icon: <PersonIcon className="w-5 h-5" />,
   },
   {
     href: "/profile/history",
