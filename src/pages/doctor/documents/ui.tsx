@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { FC, useRef, useState } from "react";
 
-import { DoctorPageLayout } from "@/widgets/doctor/layout";
+import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView } from "@/widgets/doctor/layout";
 
@@ -91,6 +91,8 @@ export const DoctorDocumentsPage: FC = () => {
               : "Редактировать"}
         </Button>
       </div>
+
+      <DoctorMyDataTabs />
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8 space-y-6">
         <div>

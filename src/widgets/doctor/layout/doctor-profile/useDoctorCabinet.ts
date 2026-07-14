@@ -14,6 +14,24 @@ import {
 
 import type { DoctorProfileData } from "./model";
 
+const SPECIALIZATION_MAP: Record<string, string> = {
+  therapist: "Терапевт",
+  surgeon: "Хирург",
+  cardiologist: "Кардиолог",
+  neurologist: "Невролог",
+  dentist: "Стоматолог",
+  pediatrician: "Педиатр",
+  gynecologist: "Гинеколог",
+  ophthalmologist: "Офтальмолог",
+  ent: "Лор",
+  dermatologist: "Дерматолог",
+};
+
+const translateSpecialty = (spec: string): string => {
+  if (!spec) return "";
+  return SPECIALIZATION_MAP[spec.toLowerCase()] ?? spec;
+};
+
 export const mapApiToProfile = (
   api: DoctorPrivateProfile,
 ): DoctorProfileData => {
@@ -52,8 +70,10 @@ export const mapApiToProfile = (
   return {
     fullName:
       a.full_name ?? `${a.first_name ?? ""} ${a.last_name ?? ""}`.trim(),
-    specialty: a.primary_specializations?.[0] ?? "",
-    additionalSpecialty: a.narrow_specializations?.[0] ?? "",
+    specialty: translateSpecialty(a.primary_specializations?.[0] ?? ""),
+    additionalSpecialty: translateSpecialty(
+      a.narrow_specializations?.[0] ?? "",
+    ),
     experienceYears: String(a.experience_years ?? 0),
     // Проф. данные держим в первой записи work_experience: бэк сохраняет её как
     // произвольный JSON и возвращает лишние ключи как есть (проверено), а

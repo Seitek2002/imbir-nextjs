@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { FC, ReactNode, useState } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
 
 import Link from "next/link";
 
@@ -26,9 +26,9 @@ type MenuItem = {
 
 const MENU_ITEMS: MenuItem[] = [
   {
-    href: "/doctor-profile",
+    href: "/doctor-profile/my-data",
     label: "Мои данные",
-    exact: true,
+    exact: false,
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
         <path
@@ -55,21 +55,6 @@ const MENU_ITEMS: MenuItem[] = [
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
         <path
           d="M13.3333 0.833336V4.16667M6.66667 0.833336V4.16667M2.5 7.5H17.5M4.16667 2.5H15.8333C16.7538 2.5 17.5 3.24619 17.5 4.16667V15.8333C17.5 16.7538 16.7538 17.5 15.8333 17.5H4.16667C3.24619 17.5 2.5 16.7538 2.5 15.8333V4.16667C2.5 3.24619 3.24619 2.5 4.16667 2.5Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: "/doctor-profile/schedule",
-    label: "Расписание",
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M10 5V10L13.3333 11.6667M17.5 10C17.5 14.1421 14.1421 17.5 10 17.5C5.85786 17.5 2.5 14.1421 2.5 10C2.5 5.85786 5.85786 2.5 10 2.5C14.1421 2.5 17.5 5.85786 17.5 10Z"
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"
@@ -142,34 +127,43 @@ export const DoctorSidebar: FC<Props> = ({
   const [logoutOpen, setLogoutOpen] = useState(false);
   const handleLogout = useLogout();
 
+  useEffect(() => {
+    console.log("DoctorSidebar mounted!");
+  }, []);
+
   return (
-    <aside className="w-72 shrink-0 hidden lg:block">
+    <aside className="w-88 shrink-0 hidden lg:block">
       <Link
         href="/doctor-profile"
-        className="bg-white rounded-3xl p-5 flex items-center gap-4 mb-4 border border-border hover:border-primary transition-colors"
+        className="relative bg-white rounded-3xl pt-8 pb-6 px-5 flex flex-col items-center border border-border hover:border-primary transition-colors overflow-hidden mb-4"
       >
-        <div className="w-14 h-14 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
+        {/* Top Gradient Background */}
+        <div className="absolute top-0 inset-x-0 h-28 bg-linear-to-b from-[#FFF0EE] to-transparent pointer-events-none" />
+
+        {/* Centered Avatar */}
+        <div className="relative z-10 w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center mb-3 border-2 border-white shadow-sm">
           <ImageWithFallback
             src={photo}
             alt={fullName}
-            width={56}
-            height={56}
+            width={80}
+            height={80}
             className="w-full h-full object-cover"
             fallback={
-              <span className="text-white text-xl font-bold">
+              <span className="text-white text-2xl font-bold">
                 {fullName.charAt(0)}
               </span>
             }
           />
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-foreground font-semibold text-base truncate">
+
+        {/* Centered Doctor Details */}
+        <div className="relative z-10 text-center w-full">
+          <p className="text-foreground font-semibold text-lg leading-tight truncate">
             {fullName}
           </p>
-          <div className="flex items-center gap-1 mt-0.5">
+          <div className="flex items-center justify-center gap-1 mt-2">
             <StarIcon className="w-4 h-4 text-primary" />
-            <span className="text-primary text-sm font-medium">{rating}</span>
-            <span className="text-muted text-sm ml-1">{specialty}</span>
+            <span className="text-primary text-sm font-semibold">{rating}</span>
           </div>
         </div>
       </Link>

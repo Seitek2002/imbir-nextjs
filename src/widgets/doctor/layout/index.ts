@@ -4,3 +4,6 @@ export type { DoctorReview } from "./doctor-profile/model";
 export { formStyles } from "./doctor-profile/ui";
 export { FieldView } from "./doctor-profile/ui";
 export { DoctorSidebar } from "./sidebar";
+export { DoctorMyDataTabs } from "./tabs";
+export { DoctorProfilePreviewCard } from "./profile-card";
+export { DoctorPageLayoutSkeleton } from "./skeleton";

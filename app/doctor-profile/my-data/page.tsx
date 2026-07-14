@@ -1,5 +1,5 @@
-import { DoctorMyDataPage } from "@/pages/doctor/my-data";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <DoctorMyDataPage />;
+  redirect("/doctor-profile/my-data/basic");
 }
