@@ -14,7 +14,7 @@ import {
   doctorCabinetKeys,
   getDoctorServices,
 } from "@/shared/api";
-import { ConfirmDialog, Modal } from "@/shared/ui";
+import { Button, ConfirmDialog, IconBtn, Input, Modal } from "@/shared/ui";
 
 const TrashIcon: FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -50,10 +50,6 @@ const AddIcon: FC<{ className?: string }> = ({ className }) => (
     />
   </svg>
 );
-
-const inp =
-  "w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors";
-const lbl = "block text-foreground text-sm font-medium mb-1.5";
 
 type AddServiceModalProps = {
   isOpen: boolean;
@@ -99,64 +95,51 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Добавить услугу">
       <div className="space-y-4">
-        <div>
-          <label className={lbl}>Название услуги</label>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Введите название"
-            className={inp}
-          />
-        </div>
-        <div>
-          <label className={lbl}>Описание услуги</label>
-          <input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Введите описание"
-            className={inp}
-          />
-        </div>
+        <Input
+          label="Название услуги"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Введите название"
+        />
+        <Input
+          label="Описание услуги"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Введите описание"
+        />
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className={lbl}>Стоимость, сом</label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="0"
-              className={inp}
-            />
-          </div>
-          <div>
-            <label className={lbl}>Длительность, мин</label>
-            <input
-              type="number"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              placeholder="0"
-              className={inp}
-            />
-          </div>
+          <Input
+            label="Стоимость, сом"
+            type="number"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            placeholder="0"
+          />
+          <Input
+            label="Длительность, мин"
+            type="number"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            placeholder="0"
+          />
         </div>
         <div className="flex gap-3 pt-1">
-          <button
+          <Button
+            variant="outline"
+            size="lg"
+            className="flex-1"
             onClick={onClose}
-            className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium hover:bg-background transition-colors active:scale-95"
           >
             Отмена
-          </button>
-          <button
+          </Button>
+          <Button
+            size="lg"
+            className="flex-1"
             onClick={handleSubmit}
             disabled={!name.trim() || isLoading}
-            className={`flex-1 py-3.5 rounded-full font-medium transition-colors ${
-              name.trim() && !isLoading
-                ? "bg-primary text-white hover:bg-primary-dark active:scale-95"
-                : "bg-border text-dim cursor-not-allowed"
-            }`}
           >
             {isLoading ? "Сохранение..." : "Добавить"}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>
@@ -200,13 +183,14 @@ export const DoctorServicesPage: FC = () => {
         {/* Десктоп: заголовок + кнопка добавления */}
         <div className="hidden lg:flex items-center justify-between mb-6">
           <h2 className="text-[32px] font-semibold text-foreground">Услуги</h2>
-          <button
+          <Button
+            variant="outline"
+            size="sm"
+            IconLeft={AddIcon}
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 pl-4 pr-5 py-2.5 rounded-full border border-border bg-white text-foreground font-medium hover:border-primary hover:text-primary transition-colors"
           >
-            <AddIcon />
             Добавить услугу
-          </button>
+          </Button>
         </div>
 
         <div className="pb-24 lg:pb-0">
@@ -250,13 +234,15 @@ export const DoctorServicesPage: FC = () => {
                           {s.duration != null ? `${s.duration} мин` : "—"}
                         </td>
                         <td className="px-6 py-4">
-                          <button
+                          <IconBtn
                             onClick={() => setDeleteTarget(s)}
-                            className="w-8 h-8 flex items-center justify-center text-dim hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                            variant="text"
+                            size="xs"
+                            className="text-dim hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100"
                             aria-label="Удалить"
                           >
                             <TrashIcon />
-                          </button>
+                          </IconBtn>
                         </td>
                       </tr>
                     ))}
@@ -270,13 +256,14 @@ export const DoctorServicesPage: FC = () => {
 
       {/* Мобайл: кнопка добавления закреплена снизу */}
       <div className="lg:hidden fixed inset-x-0 bottom-0 p-4 bg-[#FAFAFA] z-30">
-        <button
+        <Button
+          size="lg"
+          className="w-full"
+          IconLeft={AddIcon}
           onClick={() => setModalOpen(true)}
-          className="w-full py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors active:scale-95 flex items-center justify-center gap-2"
         >
-          <AddIcon className="text-white" />
           Добавить услугу
-        </button>
+        </Button>
       </div>
 
       <AddServiceModal
@@ -292,7 +279,8 @@ export const DoctorServicesPage: FC = () => {
         onConfirm={() => {
           if (deleteTarget) deleteMutation.mutate(deleteTarget.id);
         }}
-        icon={<TrashIcon className="text-primary w-6 h-6" />}
+        icon={<TrashIcon className="w-6 h-6" />}
+        variant="danger"
         title="Удалить услугу?"
         description={
           deleteTarget

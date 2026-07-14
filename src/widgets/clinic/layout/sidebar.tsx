@@ -2,12 +2,12 @@
 
 import { FC, ReactNode, useState } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { LogoutIcon, StarIcon } from "@/shared/assets/icons";
 import { useLogout } from "@/shared/lib/useLogout";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
+import { ImageWithFallback } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 type Props = {
@@ -153,34 +153,31 @@ export const ClinicSidebar: FC<Props> = ({
     <aside className="w-72 shrink-0 hidden lg:block">
       <Link
         href="/clinic-profile"
-        className="bg-white rounded-3xl p-5 flex items-center gap-4 mb-4 border border-border hover:border-primary transition-colors"
+        className="bg-white rounded-3xl p-6 flex flex-col items-center text-center mb-4 border border-border hover:border-primary transition-colors"
       >
-        <div className="w-14 h-14 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
-          {clinicLogo ? (
-            <Image
-              src={clinicLogo}
-              alt={clinicName}
-              width={56}
-              height={56}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-white text-xl font-bold">
-              {clinicName.charAt(0)}
-            </span>
-          )}
+        <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0 mb-3">
+          <ImageWithFallback
+            src={clinicLogo}
+            alt={clinicName}
+            width={80}
+            height={80}
+            className="w-full h-full object-cover"
+            fallback={
+              <span className="text-white text-2xl font-bold">
+                {clinicName.charAt(0)}
+              </span>
+            }
+          />
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-foreground font-semibold text-base truncate">
-            {clinicName}
-          </p>
-          {!!rating && rating > 0 && (
-            <div className="flex items-center gap-1 mt-0.5">
-              <StarIcon className="w-4 h-4 text-primary" />
-              <span className="text-primary text-sm font-medium">{rating}</span>
-            </div>
-          )}
-        </div>
+        <p className="text-foreground font-semibold text-base truncate max-w-full">
+          {clinicName}
+        </p>
+        {!!rating && rating > 0 && (
+          <div className="flex items-center gap-1 mt-1">
+            <StarIcon className="w-4 h-4 text-primary" />
+            <span className="text-primary text-sm font-medium">{rating}</span>
+          </div>
+        )}
       </Link>
 
       <nav

@@ -7,14 +7,15 @@ import { useQuery } from "@tanstack/react-query";
 import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
 import { clinicCabinetKeys, getClinicAppointments } from "@/shared/api";
+import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 type Tab = "all" | "upcoming" | "completed" | "cancelled";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "all", label: "Все" },
-  { key: "upcoming", label: "Предстоящие" },
-  { key: "completed", label: "Завершённые" },
-  { key: "cancelled", label: "Отменённые" },
+const TABS = [
+  { value: "all" as const, label: "Все" },
+  { value: "upcoming" as const, label: "Предстоящие" },
+  { value: "completed" as const, label: "Завершённые" },
+  { value: "cancelled" as const, label: "Отменённые" },
 ];
 
 const STATUS_LABEL: Record<string, string> = {
@@ -37,20 +38,8 @@ export const ClinicAppointmentsPage: FC = () => {
 
   return (
     <ClinicPageLayout title="Записи">
-      <div className="flex gap-1 bg-white rounded-2xl p-1 mb-4 border border-border">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              tab === t.key
-                ? "bg-primary text-white"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="mb-4">
+        <SegmentedControl options={TABS} value={tab} onChange={setTab} />
       </div>
 
       <div className="bg-white rounded-3xl border border-border overflow-hidden">

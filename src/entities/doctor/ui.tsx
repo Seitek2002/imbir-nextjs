@@ -2,14 +2,14 @@
 
 import { FC, useState } from "react";
 
-import Image, { StaticImageData } from "next/image";
+import { StaticImageData } from "next/image";
 import Link from "next/link";
 
 import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { Workplace } from "@/shared/dummies";
 import { useAuthStore } from "@/shared/store";
-import { Button, SaveButton } from "@/shared/ui";
+import { Button, ImageWithFallback, SaveButton } from "@/shared/ui";
 
 import { DoctorPhoto } from "./photo";
 
@@ -69,13 +69,19 @@ export const DoctorCard: FC<Props> = ({
           {image ? (
             <>
               {!loaded && <div className="absolute inset-0 skeleton" />}
-              <Image
+              <ImageWithFallback
                 src={image}
                 alt={name}
                 fill
                 sizes="120px"
                 className="object-cover object-top scale-110"
                 onLoad={() => setLoaded(true)}
+                onError={() => setLoaded(true)}
+                fallback={
+                  <div className="w-full h-full flex items-center justify-center">
+                    <UserCircleIcon className="size-10 text-dim" />
+                  </div>
+                }
               />
             </>
           ) : (

@@ -6,6 +6,7 @@ export { SegmentedControl } from "./segmented-control";
 export { Textarea } from "./textarea";
 export { InfoCard } from "./info-card";
 export { StatsPanel } from "./stats-panel";
+export { StatTiles } from "./stat-tiles";
 export { Modal } from "./modal";
 export { ConfirmDialog } from "./confirm-dialog";
 

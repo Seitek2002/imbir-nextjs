@@ -2,8 +2,6 @@
 
 import { FC, ReactNode, useRef, useState } from "react";
 
-import Image from "next/image";
-
 import {
   DoctorPageLayout,
   FieldView,
@@ -11,9 +9,9 @@ import {
   useDoctorCabinet,
 } from "@/widgets/doctor/layout";
 
-import { PhoneInput } from "@/shared/ui";
+import { Button, ImageWithFallback, Input, PhoneInput } from "@/shared/ui";
 
-const { inp, lbl } = formStyles;
+const { lbl } = formStyles;
 
 const GENDER_OPTIONS = [
   { label: "Мужской", value: "male" },
@@ -103,6 +101,23 @@ const Section: FC<{ title: string; children: ReactNode }> = ({
       {children}
     </div>
   </div>
+);
+
+const CameraIcon: FC<{ className?: string }> = ({ className }) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    className={className}
+  >
+    <path
+      d="M11.5 2a1.7 1.7 0 012.4 2.4L5.6 12.7 2.4 13.6l.9-3.2L11.5 2z"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinejoin="round"
+    />
+  </svg>
 );
 
 const FileIcon = () => (
@@ -258,36 +273,30 @@ export const DoctorMyDataPage: FC = () => {
       {/* Desktop: заголовок + кнопка редактирования */}
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
-        <button
+        <Button
+          variant={isEditing ? "default" : "outline"}
+          size="sm"
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${
-            isEditing
-              ? "bg-primary text-white hover:bg-primary-dark"
-              : "border border-border text-secondary hover:bg-surface"
-          }`}
         >
           {isSaving
             ? "Сохранение..."
             : isEditing
               ? "Сохранить"
               : "Редактировать"}
-        </button>
+        </Button>
       </div>
 
       {/* ── Основная информация ─────────────────────────────── */}
       <Section title="Основная информация">
         {isEditing ? (
           <div className="flex flex-col gap-5">
-            {field(
-              "ФИО",
-              <input
-                value={d.fullName}
-                onChange={(e) => set("fullName", e.target.value)}
-                placeholder="Введите ФИО"
-                className={inp}
-              />,
-            )}
+            <Input
+              label="ФИО"
+              value={d.fullName}
+              onChange={(e) => set("fullName", e.target.value)}
+              placeholder="Введите ФИО"
+            />
             {field(
               "Пол",
               <div className="grid grid-cols-2 gap-3">
@@ -316,65 +325,52 @@ export const DoctorMyDataPage: FC = () => {
                 ))}
               </div>,
             )}
-            {field(
-              "Дата рождения",
-              <input
-                value={d.birthDate}
-                onChange={(e) => set("birthDate", e.target.value)}
-                placeholder="ДД.ММ.ГГГГ"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Город",
-              <input
-                value={d.city}
-                onChange={(e) => set("city", e.target.value)}
-                placeholder="Введите город"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Языки общения",
-              <input
-                value={d.languages}
-                onChange={(e) => set("languages", e.target.value)}
-                placeholder="Русский, Английский"
-                className={inp}
-              />,
-            )}
+            <Input
+              label="Дата рождения"
+              value={d.birthDate}
+              onChange={(e) => set("birthDate", e.target.value)}
+              placeholder="ДД.ММ.ГГГГ"
+            />
+            <Input
+              label="Город"
+              value={d.city}
+              onChange={(e) => set("city", e.target.value)}
+              placeholder="Введите город"
+            />
+            <Input
+              label="Языки общения"
+              value={d.languages}
+              onChange={(e) => set("languages", e.target.value)}
+              placeholder="Русский, Английский"
+            />
             <PhoneInput
               label="Телефон"
               value={d.phone.replace(/^\+?996/, "")}
               onChange={(v) => set("phone", v ? `+996${v}` : "")}
             />
-            {field(
-              "Почта",
-              <input
-                type="email"
-                value={d.email}
-                onChange={(e) => set("email", e.target.value)}
-                placeholder="example@mail.com"
-                className={inp}
-              />,
-            )}
+            <Input
+              label="Почта"
+              type="email"
+              value={d.email}
+              onChange={(e) => set("email", e.target.value)}
+              placeholder="example@mail.com"
+            />
             <div>
               <label className={lbl}>Фото</label>
               <div className="flex items-center gap-4">
                 <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
-                  {d.photo ? (
-                    <Image
-                      src={d.photo}
-                      alt={d.fullName}
-                      width={80}
-                      height={80}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-2xl font-bold">
-                      {d.fullName.charAt(0)}
-                    </span>
-                  )}
+                  <ImageWithFallback
+                    src={d.photo}
+                    alt={d.fullName}
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-cover"
+                    fallback={
+                      <span className="text-white text-2xl font-bold">
+                        {d.fullName.charAt(0)}
+                      </span>
+                    }
+                  />
                 </div>
                 <input
                   ref={photoRef}
@@ -383,21 +379,15 @@ export const DoctorMyDataPage: FC = () => {
                   onChange={handlePhoto}
                   className="hidden"
                 />
-                <button
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
+                  IconLeft={CameraIcon}
                   onClick={() => photoRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-border text-secondary text-sm font-medium hover:bg-surface transition-colors"
                 >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path
-                      d="M11.5 2a1.7 1.7 0 012.4 2.4L5.6 12.7 2.4 13.6l.9-3.2L11.5 2z"
-                      stroke="currentColor"
-                      strokeWidth="1.3"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
                   Новое фото
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -417,19 +407,18 @@ export const DoctorMyDataPage: FC = () => {
             <div className="py-3">
               <p className="text-muted text-sm mb-2">Фото</p>
               <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-                {d.photo ? (
-                  <Image
-                    src={d.photo}
-                    alt={d.fullName}
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-white text-2xl font-bold">
-                    {d.fullName.charAt(0)}
-                  </span>
-                )}
+                <ImageWithFallback
+                  src={d.photo}
+                  alt={d.fullName}
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                  fallback={
+                    <span className="text-white text-2xl font-bold">
+                      {d.fullName.charAt(0)}
+                    </span>
+                  }
+                />
               </div>
             </div>
           </div>
@@ -440,69 +429,48 @@ export const DoctorMyDataPage: FC = () => {
       <Section title="Профессиональные данные">
         {isEditing ? (
           <div className="flex flex-col gap-5">
-            {field(
-              "Специализация",
-              <input
-                value={d.specialty}
-                onChange={(e) => set("specialty", e.target.value)}
-                placeholder="Терапевт"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Дополнительная специализация",
-              <input
-                value={d.additionalSpecialty}
-                onChange={(e) => set("additionalSpecialty", e.target.value)}
-                placeholder="Кардиолог"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Стаж работы, лет",
-              <input
-                value={d.experienceYears}
-                onChange={(e) => set("experienceYears", e.target.value)}
-                placeholder="15"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Текущая должность",
-              <input
-                value={d.currentPosition}
-                onChange={(e) => set("currentPosition", e.target.value)}
-                placeholder="Главный врач"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Место работы (клиника)",
-              <input
-                value={d.workplace}
-                onChange={(e) => set("workplace", e.target.value)}
-                placeholder="K-MED"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Категория/Квалификация",
-              <input
-                value={d.qualification}
-                onChange={(e) => set("qualification", e.target.value)}
-                placeholder="Высшая"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Научная степень",
-              <input
-                value={d.scientificDegree}
-                onChange={(e) => set("scientificDegree", e.target.value)}
-                placeholder="Кандидат медицинских наук"
-                className={inp}
-              />,
-            )}
+            <Input
+              label="Специализация"
+              value={d.specialty}
+              onChange={(e) => set("specialty", e.target.value)}
+              placeholder="Терапевт"
+            />
+            <Input
+              label="Дополнительная специализация"
+              value={d.additionalSpecialty}
+              onChange={(e) => set("additionalSpecialty", e.target.value)}
+              placeholder="Кардиолог"
+            />
+            <Input
+              label="Стаж работы, лет"
+              value={d.experienceYears}
+              onChange={(e) => set("experienceYears", e.target.value)}
+              placeholder="15"
+            />
+            <Input
+              label="Текущая должность"
+              value={d.currentPosition}
+              onChange={(e) => set("currentPosition", e.target.value)}
+              placeholder="Главный врач"
+            />
+            <Input
+              label="Место работы (клиника)"
+              value={d.workplace}
+              onChange={(e) => set("workplace", e.target.value)}
+              placeholder="K-MED"
+            />
+            <Input
+              label="Категория/Квалификация"
+              value={d.qualification}
+              onChange={(e) => set("qualification", e.target.value)}
+              placeholder="Высшая"
+            />
+            <Input
+              label="Научная степень"
+              value={d.scientificDegree}
+              onChange={(e) => set("scientificDegree", e.target.value)}
+              placeholder="Кандидат медицинских наук"
+            />
           </div>
         ) : (
           <div>
@@ -521,62 +489,42 @@ export const DoctorMyDataPage: FC = () => {
       <Section title="Образование">
         {isEditing ? (
           <div className="flex flex-col gap-5">
-            {field(
-              "ВУЗ",
-              <input
-                value={d.university}
-                onChange={(e) => set("university", e.target.value)}
-                placeholder="Название ВУЗа"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Год окончания",
-              <input
-                value={d.graduationYear}
-                onChange={(e) => set("graduationYear", e.target.value)}
-                placeholder="2010"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Интернатура",
-              <input
-                value={d.internship}
-                onChange={(e) => set("internship", e.target.value)}
-                placeholder="Терапия"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Ординатура",
-              <input
-                value={d.residency}
-                onChange={(e) => set("residency", e.target.value)}
-                placeholder="Кардиология"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Специализация по диплому",
-              <input
-                value={d.diplomaSpecialty}
-                onChange={(e) => set("diplomaSpecialty", e.target.value)}
-                placeholder="Лечебное дело"
-                className={inp}
-              />,
-            )}
-            {field(
-              "Дополнительное образование",
-              <input
-                value={d.additionalEducation.join(", ")}
-                onChange={(e) =>
-                  set("additionalEducation", csv(e.target.value))
-                }
-                placeholder="Курсы повышения квалификации"
-                className={inp}
-              />,
-            )}
+            <Input
+              label="ВУЗ"
+              value={d.university}
+              onChange={(e) => set("university", e.target.value)}
+              placeholder="Название ВУЗа"
+            />
+            <Input
+              label="Год окончания"
+              value={d.graduationYear}
+              onChange={(e) => set("graduationYear", e.target.value)}
+              placeholder="2010"
+            />
+            <Input
+              label="Интернатура"
+              value={d.internship}
+              onChange={(e) => set("internship", e.target.value)}
+              placeholder="Терапия"
+            />
+            <Input
+              label="Ординатура"
+              value={d.residency}
+              onChange={(e) => set("residency", e.target.value)}
+              placeholder="Кардиология"
+            />
+            <Input
+              label="Специализация по диплому"
+              value={d.diplomaSpecialty}
+              onChange={(e) => set("diplomaSpecialty", e.target.value)}
+              placeholder="Лечебное дело"
+            />
+            <Input
+              label="Дополнительное образование"
+              value={d.additionalEducation.join(", ")}
+              onChange={(e) => set("additionalEducation", csv(e.target.value))}
+              placeholder="Курсы повышения квалификации"
+            />
           </div>
         ) : (
           <div>
@@ -646,17 +594,16 @@ export const DoctorMyDataPage: FC = () => {
             </div>
           </div>
 
-          {isEditing
-            ? field(
-                "Номер лицензии",
-                <input
-                  value={d.licenseNumber}
-                  onChange={(e) => set("licenseNumber", e.target.value)}
-                  placeholder="ЛИЦ-123456"
-                  className={inp}
-                />,
-              )
-            : view("Номер лицензии", d.licenseNumber)}
+          {isEditing ? (
+            <Input
+              label="Номер лицензии"
+              value={d.licenseNumber}
+              onChange={(e) => set("licenseNumber", e.target.value)}
+              placeholder="ЛИЦ-123456"
+            />
+          ) : (
+            view("Номер лицензии", d.licenseNumber)
+          )}
         </div>
       </Section>
     </DoctorPageLayout>

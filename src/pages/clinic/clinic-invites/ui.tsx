@@ -17,7 +17,7 @@ import {
 import { GeoIcon, HistoryIcon, WarningIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { Button } from "@/shared/ui";
+import { Button, IconBtn } from "@/shared/ui";
 
 const LinkIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -314,14 +314,16 @@ export const ClinicInvitesPage: FC = () => {
                     </>
                   )}
                 </Button>
-                <button
+                <IconBtn
                   type="button"
                   onClick={() => deleteMutation.mutate(link.id)}
                   disabled={deleteMutation.isPending}
-                  className="size-9 rounded-xl border border-border flex items-center justify-center text-muted hover:border-red-300 hover:text-red-500 transition-colors"
+                  variant="outline"
+                  size="sm"
+                  className="text-muted hover:border-red-300 hover:text-red-500"
                 >
                   <TrashIcon />
-                </button>
+                </IconBtn>
               </div>
             </div>
           ))}

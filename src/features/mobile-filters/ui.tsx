@@ -4,6 +4,9 @@ import { FC, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { useQuery } from "@tanstack/react-query";
+
+import { getSpecializations, referenceKeys } from "@/shared/api";
 import { StarIcon } from "@/shared/assets/icons";
 import { Button, Dropdown, PageHeader, Radio, RangeSlider } from "@/shared/ui";
 
@@ -25,12 +28,6 @@ type Props = {
   clinicOptions?: DropdownOption[];
 };
 
-const SPECIALTY_OPTIONS = [
-  { value: "Кардиолог", label: "Кардиолог" },
-  { value: "Врач-терапевт", label: "Терапевт" },
-  { value: "Хирург", label: "Хирург" },
-  { value: "Педиатр", label: "Педиатр" },
-];
 const RATINGS = ["5.0", "4.0", "3.0", "2.0", "1.0"];
 const MAX_PRICE = 5000;
 const MAX_EXP = 50;
@@ -44,6 +41,19 @@ export const MobileFiltersModal: FC<Props> = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
+
+  // Реальный список специализаций с бэка вместо захардкоженных 4 штук —
+  // тот же справочник, что и в десктопном FilterBar.
+  const { data: specializations = [] } = useQuery({
+    queryKey: referenceKeys.specializations(),
+    queryFn: getSpecializations,
+    enabled: !!fields?.specialty,
+    staleTime: 60 * 60 * 1000,
+  });
+  const specialtyOptions = specializations.map((name) => ({
+    value: name,
+    label: name,
+  }));
 
   const initialExp = searchParams.get(`${prefix}_exp`)?.split("-").map(Number);
   const [experience, setExperience] = useState<[number, number]>([
@@ -204,13 +214,14 @@ export const MobileFiltersModal: FC<Props> = ({
               Специализация
             </span>
             <Dropdown
-              options={SPECIALTY_OPTIONS}
+              options={specialtyOptions}
               value={specialty}
               onChange={(val) => setSpecialty(val as string[])}
               placeholder="Выберите специализацию"
               className="w-full"
               isMulti={true}
               type="checkbox"
+              searchable
             />
           </div>
         )}

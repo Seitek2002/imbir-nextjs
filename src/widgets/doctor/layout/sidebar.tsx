@@ -2,12 +2,12 @@
 
 import { FC, ReactNode, useEffect, useState } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { LogoutIcon, StarIcon } from "@/shared/assets/icons";
 import { useLogout } from "@/shared/lib/useLogout";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
+import { ImageWithFallback } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 type Props = {
@@ -142,19 +142,18 @@ export const DoctorSidebar: FC<Props> = ({
 
         {/* Centered Avatar */}
         <div className="relative z-10 w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center mb-3 border-2 border-white shadow-sm">
-          {photo ? (
-            <Image
-              src={photo}
-              alt={fullName}
-              width={80}
-              height={80}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-white text-2xl font-bold">
-              {fullName.charAt(0)}
-            </span>
-          )}
+          <ImageWithFallback
+            src={photo}
+            alt={fullName}
+            width={80}
+            height={80}
+            className="w-full h-full object-cover"
+            fallback={
+              <span className="text-white text-2xl font-bold">
+                {fullName.charAt(0)}
+              </span>
+            }
+          />
         </div>
 
         {/* Centered Doctor Details */}

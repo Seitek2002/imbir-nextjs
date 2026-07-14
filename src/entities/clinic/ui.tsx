@@ -8,6 +8,7 @@ import Link from "next/link";
 
 import { GeoIcon, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
+import { useInView } from "@/shared/lib/useInView";
 import { SaveButton } from "@/shared/ui";
 
 const getInitials = (name: string) =>
@@ -43,6 +44,9 @@ type Props = {
   onSave?: () => void;
   initialSaved?: boolean;
   variant?: "vertical" | "horizontal";
+  // Для карточек над сгибом (первые в списке) — грузим фото сразу,
+  // без ленивой подгрузки, чтобы не задерживать LCP.
+  priority?: boolean;
 };
 
 export const ClinicCard: FC<Props> = ({
@@ -56,9 +60,16 @@ export const ClinicCard: FC<Props> = ({
   onSave,
   initialSaved = false,
   variant = "vertical",
+  priority = false,
 }) => {
   const [loaded, setLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  // Не грузим фото клиники, пока карточка не окажется рядом с вьюпортом —
+  // важно на страницах с длинными списками (без этого браузер/WebView
+  // может начать тянуть фото карточек, до которых пользователь ещё не
+  // доскроллил). Карточки с priority (см. выше) эту задержку пропускают.
+  const { ref: imgRef, inView } = useInView<HTMLDivElement>();
+  const shouldMount = priority || inView;
 
   const href = id ? ROUTES.CLINIC_DETAILS(id) : "/";
   const stopProp = (e: React.MouseEvent) => {
@@ -72,8 +83,12 @@ export const ClinicCard: FC<Props> = ({
         href={href}
         className="bg-white rounded-2xl border border-border-soft overflow-hidden flex items-stretch w-full cursor-pointer hover:border-primary/40 transition-colors"
       >
-        <div className="relative w-35">
-          {image && !imageError ? (
+        <div ref={imgRef} className="relative w-35">
+          {!image || imageError ? (
+            <ClinicImageFallback name={name} />
+          ) : !shouldMount ? (
+            <div className="absolute inset-0 skeleton" />
+          ) : (
             <>
               {!loaded && <div className="absolute inset-0 skeleton" />}
               <Image
@@ -82,12 +97,11 @@ export const ClinicCard: FC<Props> = ({
                 fill
                 sizes="140px"
                 className="object-cover"
+                priority={priority}
                 onLoad={() => setLoaded(true)}
                 onError={() => setImageError(true)}
               />
             </>
-          ) : (
-            <ClinicImageFallback name={name} />
           )}
         </div>
         <div className="p-3 flex-1 min-w-0">
@@ -129,8 +143,15 @@ export const ClinicCard: FC<Props> = ({
       href={href}
       className="bg-white rounded-3xl border border-border-soft w-full h-full flex flex-col p-2 cursor-pointer hover:border-primary/40 transition-colors"
     >
-      <div className="relative w-full h-55 rounded-2xl overflow-hidden">
-        {image && !imageError ? (
+      <div
+        ref={imgRef}
+        className="relative w-full h-55 rounded-2xl overflow-hidden"
+      >
+        {!image || imageError ? (
+          <ClinicImageFallback name={name} />
+        ) : !shouldMount ? (
+          <div className="absolute inset-0 skeleton" />
+        ) : (
           <>
             {!loaded && <div className="absolute inset-0 skeleton" />}
             <Image
@@ -139,12 +160,11 @@ export const ClinicCard: FC<Props> = ({
               fill
               sizes="280px"
               className="object-cover"
+              priority={priority}
               onLoad={() => setLoaded(true)}
               onError={() => setImageError(true)}
             />
           </>
-        ) : (
-          <ClinicImageFallback name={name} />
         )}
         <div className="absolute top-2 right-2" onClick={stopProp}>
           <SaveButton

@@ -2,7 +2,6 @@
 
 import { FC } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +12,7 @@ import { DoctorSidebar } from "@/widgets/doctor/layout";
 import { doctorCabinetKeys, getDoctorStats } from "@/shared/api";
 import { ChevronRightIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
-import { CabinetMobileMenu } from "@/shared/ui";
+import { CabinetMobileMenu, ImageWithFallback, StatTiles } from "@/shared/ui";
 
 // Плитки статистики кабинета (GET /api/doctor/stats/).
 const DoctorStatsTiles: FC = () => {
@@ -34,19 +33,7 @@ const DoctorStatsTiles: FC = () => {
     { label: "Пациентов", value: stats.patients_count },
   ];
 
-  return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-      {tiles.map((tile) => (
-        <div
-          key={tile.label}
-          className="bg-white rounded-2xl border border-border p-4"
-        >
-          <p className="text-2xl font-semibold text-foreground">{tile.value}</p>
-          <p className="text-muted text-xs mt-1">{tile.label}</p>
-        </div>
-      ))}
-    </div>
-  );
+  return <StatTiles tiles={tiles} className="lg:grid-cols-4 mb-4" />;
 };
 
 const MENU_ITEMS = [
@@ -151,19 +138,18 @@ export const DoctorProfilePage: FC = () => {
       <div className="lg:hidden">
         <CabinetMobileMenu
           avatar={
-            d.photo ? (
-              <Image
-                src={d.photo}
-                alt={d.fullName}
-                width={80}
-                height={80}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-white text-2xl font-bold">
-                {d.fullName.charAt(0)}
-              </span>
-            )
+            <ImageWithFallback
+              src={d.photo}
+              alt={d.fullName}
+              width={80}
+              height={80}
+              className="w-full h-full object-cover"
+              fallback={
+                <span className="text-white text-2xl font-bold">
+                  {d.fullName.charAt(0)}
+                </span>
+              }
+            />
           }
           name={d.fullName}
           subtitle={
@@ -197,19 +183,18 @@ export const DoctorProfilePage: FC = () => {
             <div className="bg-white rounded-3xl border border-border p-8">
               <div className="flex items-center gap-6 mb-8">
                 <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
-                  {d.photo ? (
-                    <Image
-                      src={d.photo}
-                      alt={d.fullName}
-                      width={96}
-                      height={96}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-3xl font-bold">
-                      {d.fullName.charAt(0)}
-                    </span>
-                  )}
+                  <ImageWithFallback
+                    src={d.photo}
+                    alt={d.fullName}
+                    width={96}
+                    height={96}
+                    className="w-full h-full object-cover"
+                    fallback={
+                      <span className="text-white text-3xl font-bold">
+                        {d.fullName.charAt(0)}
+                      </span>
+                    }
+                  />
                 </div>
                 <div>
                   <h2 className="text-2xl font-semibold text-foreground">

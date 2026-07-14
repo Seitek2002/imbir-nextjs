@@ -1,0 +1,1 @@
+export { ClinicNewProcedurePage } from "./ui";

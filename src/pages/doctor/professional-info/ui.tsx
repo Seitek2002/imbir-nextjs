@@ -4,11 +4,9 @@ import { FC, useState } from "react";
 
 import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
-import { FieldView, formStyles } from "@/widgets/doctor/layout";
+import { FieldView } from "@/widgets/doctor/layout";
 
-import { Dropdown } from "@/shared/ui";
-
-const { inp, lbl } = formStyles;
+import { Button, Dropdown, Input } from "@/shared/ui";
 
 type D = {
   specialty: string;
@@ -124,17 +122,18 @@ export const DoctorProfessionalInfoPage: FC = () => {
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
-        <button
+        <Button
+          variant={isEditing ? "default" : "outline"}
+          size="sm"
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-primary text-white hover:bg-primary-dark" : "border border-border text-secondary hover:bg-surface"}`}
         >
           {isSaving
             ? "Сохранение..."
             : isEditing
               ? "Сохранить"
               : "Редактировать"}
-        </button>
+        </Button>
       </div>
 
       <DoctorMyDataTabs />
@@ -180,47 +179,38 @@ export const DoctorProfessionalInfoPage: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Стаж работы, лет</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={d.experienceYears}
-                  onChange={(e) => set("experienceYears", e.target.value)}
-                  placeholder="0"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Стаж работы, лет"
+                type="number"
+                min="0"
+                value={d.experienceYears}
+                onChange={(e) => set("experienceYears", e.target.value)}
+                placeholder="0"
+              />
             ) : (
               <FieldView label="Стаж работы, лет" value={d.experienceYears} />
             )}
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Текущая должность</label>
-                <input
-                  value={d.currentPosition}
-                  onChange={(e) => set("currentPosition", e.target.value)}
-                  placeholder="Введите должность"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Текущая должность"
+                value={d.currentPosition}
+                onChange={(e) => set("currentPosition", e.target.value)}
+                placeholder="Введите должность"
+              />
             ) : (
               <FieldView label="Текущая должность" value={d.currentPosition} />
             )}
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Место работы (клиника)</label>
-                <input
-                  value={d.workplace}
-                  onChange={(e) => set("workplace", e.target.value)}
-                  placeholder="Введите название клиники"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Место работы (клиника)"
+                value={d.workplace}
+                onChange={(e) => set("workplace", e.target.value)}
+                placeholder="Введите название клиники"
+              />
             ) : (
               <FieldView label="Место работы (клиника)" value={d.workplace} />
             )}
@@ -245,60 +235,48 @@ export const DoctorProfessionalInfoPage: FC = () => {
           </div>
           <div className="lg:col-span-2">
             {isEditing ? (
-              <>
-                <label className={lbl}>Научная степень</label>
-                <input
-                  value={d.scientificDegree}
-                  onChange={(e) => set("scientificDegree", e.target.value)}
-                  placeholder="Введите степень"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Научная степень"
+                value={d.scientificDegree}
+                onChange={(e) => set("scientificDegree", e.target.value)}
+                placeholder="Введите степень"
+              />
             ) : (
               <FieldView label="Научная степень" value={d.scientificDegree} />
             )}
           </div>
           <div className="lg:col-span-2">
             {isEditing ? (
-              <>
-                <label className={lbl}>Оборудование (через запятую)</label>
-                <input
-                  value={d.equipment}
-                  onChange={(e) => set("equipment", e.target.value)}
-                  placeholder="УЗИ, ЭКГ, Рентген"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Оборудование (через запятую)"
+                value={d.equipment}
+                onChange={(e) => set("equipment", e.target.value)}
+                placeholder="УЗИ, ЭКГ, Рентген"
+              />
             ) : (
               <FieldView label="Оборудование" value={d.equipment} />
             )}
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Условия приёма (через запятую)</label>
-                <input
-                  value={d.patientConditions}
-                  onChange={(e) => set("patientConditions", e.target.value)}
-                  placeholder="Приём детей, Приём на дому"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Условия приёма (через запятую)"
+                value={d.patientConditions}
+                onChange={(e) => set("patientConditions", e.target.value)}
+                placeholder="Приём детей, Приём на дому"
+              />
             ) : (
               <FieldView label="Условия приёма" value={d.patientConditions} />
             )}
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Способы оплаты (через запятую)</label>
-                <input
-                  value={d.paymentMethods}
-                  onChange={(e) => set("paymentMethods", e.target.value)}
-                  placeholder="Наличные, Карта, Перевод"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Способы оплаты (через запятую)"
+                value={d.paymentMethods}
+                onChange={(e) => set("paymentMethods", e.target.value)}
+                placeholder="Наличные, Карта, Перевод"
+              />
             ) : (
               <FieldView label="Способы оплаты" value={d.paymentMethods} />
             )}

@@ -1,0 +1,1 @@
+export { ClinicEquipmentPage } from "./ui";

@@ -7,6 +7,8 @@ import Image from "next/image";
 
 import { useMutation } from "@tanstack/react-query";
 
+import { type ConsultationMode } from "@/widgets/appointment-datetime-picker";
+
 import { getAppointmentById } from "@/shared/api";
 import type { AppointmentStatus } from "@/shared/api";
 import { CalendarIcon } from "@/shared/assets/icons";
@@ -14,7 +16,6 @@ import { Button } from "@/shared/ui";
 
 import { formatDateLabel, formatPrice } from "../model/lib";
 import type { Doctor, Service } from "../model/types";
-import { type ConsultationMode } from "./appointment-datetime-picker";
 
 const formatServiceTitles = (services: Service[]): string =>
   services.map((s) => s.title).join(", ");

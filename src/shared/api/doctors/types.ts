@@ -64,6 +64,8 @@ export type DoctorFilters = {
   min_rating?: number;
   is_online?: boolean;
   payment_method?: string;
+  min_experience?: number;
+  max_experience?: number;
   page?: number;
   page_size?: number;
 };

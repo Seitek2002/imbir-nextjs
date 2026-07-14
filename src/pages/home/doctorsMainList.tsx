@@ -11,9 +11,20 @@ import { FilterBar } from "@/features/filter-bar";
 
 import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 
-import { api, doctorKeys } from "@/shared/api";
+import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
+
+// Карусель на Главной раньше грузила только дефолтную (небольшую) страницу
+// врачей и фильтровала её целиком на клиенте — из-за этого фильтры FilterBar
+// могли молча не находить реальные совпадения, если они были за пределами
+// первой страницы. Теперь город/онлайн/оценка/цена/стаж и (при одной
+// выбранной специальности) сама специализация уходят в API реальными
+// параметрами — как на /specialists. page_size увеличен, т.к. при 2+
+// выбранных специальностях бэк не может отфильтровать по всем сразу
+// (specialization принимает только одно значение) — в этом случае остаётся
+// клиентская страховка ниже.
+const FULL_LIST_PAGE_SIZE = 200;
 
 const DoctorsListContent = () => {
   const searchParams = useSearchParams() ?? new URLSearchParams();
@@ -28,7 +39,31 @@ const DoctorsListContent = () => {
   // /specialists, где город уже учитывался) — теперь оба списка врачей
   // ведут себя одинаково.
   const selectedCity = useCityStore((s) => s.city);
-  const filters = { city: selectedCity || undefined };
+
+  const [priceMin, priceMax] = currentPrice
+    ? currentPrice.split("-").map(Number)
+    : [undefined, undefined];
+  const [expMin, expMax] = currentExp
+    ? currentExp.split("-").map(Number)
+    : [undefined, undefined];
+  const selectedSpecs = currentSpec
+    ? currentSpec.split(",").filter(Boolean)
+    : [];
+
+  const filters: DoctorFilters = {
+    city: selectedCity || undefined,
+    is_online: isOnlineOnly || undefined,
+    min_rating:
+      currentRating && currentRating !== "all"
+        ? parseFloat(currentRating)
+        : undefined,
+    min_price: priceMin,
+    max_price: priceMax,
+    min_experience: expMin,
+    max_experience: expMax,
+    specialization: selectedSpecs.length === 1 ? selectedSpecs[0] : undefined,
+    page_size: FULL_LIST_PAGE_SIZE,
+  };
 
   const { data: doctors = [], isLoading } = useQuery({
     queryKey: doctorKeys.list(filters),
@@ -49,37 +84,11 @@ const DoctorsListContent = () => {
     );
   }
 
+  // Страховка на клиенте только для случая 2+ выбранных специальностей —
+  // единственное, что бэк не может отфильтровать сам за один запрос.
   const filteredDoctors = doctors.filter((doc) => {
-    // <-- НОВОЕ: Фильтр онлайна
-    if (isOnlineOnly && !doc.isOnlineAvailable) return false;
-
-    // 1. Специальность
-    if (currentSpec) {
-      const selectedSpecs = currentSpec.split(",");
-      if (!selectedSpecs.includes(doc.specialty)) return false;
-    }
-
-    // 2. Рейтинг
-    if (currentRating && currentRating !== "all") {
-      const minRating = parseFloat(currentRating);
-      if (doc.rating < minRating) return false;
-    }
-
-    // 3. Опыт (стаж)
-    if (currentExp) {
-      const [minExp, maxExp] = currentExp.split("-").map(Number);
-      if (doc.experience < minExp || doc.experience > maxExp) return false;
-    }
-
-    // 4. Цена (Ищем минимальную по всем клиникам)
-    if (currentPrice) {
-      const [minPrice, maxPrice] = currentPrice.split("-").map(Number);
-      const docMinPrice =
-        doc.workplaces.length > 0
-          ? Math.min(...doc.workplaces.map((w) => w.price))
-          : 0;
-
-      if (docMinPrice < minPrice || docMinPrice > maxPrice) return false;
+    if (selectedSpecs.length > 1 && !selectedSpecs.includes(doc.specialty)) {
+      return false;
     }
 
     return true;

@@ -225,17 +225,41 @@ export const api = {
     return getDoctors(resolved).then((r) => r.data.map(adaptDoctor));
   },
 
+  // Как getDoctors, но сохраняет pagination — нужно для постраничной
+  // подгрузки (кнопка «Показать ещё» на /specialists).
+  getDoctorsPaginated: (filters?: DoctorFilters) =>
+    getDoctors(filters).then((r) => ({
+      data: r.data.map(adaptDoctor),
+      pagination: r.pagination,
+    })),
+
   getDoctorById: (id: string) =>
     _getDoctorById(id).then((d) => (d ? adaptDoctorDetail(d) : null)),
 
   getClinics: (filters?: ClinicFilters) =>
     getClinics(filters).then((r) => r.data.map(adaptClinic)),
 
+  // Как getClinics, но сохраняет pagination — нужно для постраничной
+  // подгрузки (кнопка «Показать ещё» на /clinics).
+  getClinicsPaginated: (filters?: ClinicFilters) =>
+    getClinics(filters).then((r) => ({
+      data: r.data.map(adaptClinic),
+      pagination: r.pagination,
+    })),
+
   getClinicById: (id: string) =>
     _getClinicById(id).then((c) => (c ? adaptClinicDetail(c) : null)),
 
   getServices: (filters?: ServiceFilters) =>
     getServices(filters).then((r) => r.data.map(adaptService)),
+
+  // Как getServices, но сохраняет pagination — нужно для постраничной
+  // подгрузки (кнопка «Показать ещё» на /services).
+  getServicesPaginated: (filters?: ServiceFilters) =>
+    getServices(filters).then((r) => ({
+      data: r.data.map(adaptService),
+      pagination: r.pagination,
+    })),
 
   getReviews: () =>
     getReviews("doctor", 0).then((r) => r.data.map(adaptReview)),

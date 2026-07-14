@@ -2,7 +2,6 @@
 
 import { FC, useState } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import {
@@ -15,6 +14,7 @@ import {
 import { useLogout } from "@/shared/lib/useLogout";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
 import { useAuthStore } from "@/shared/store";
+import { ImageWithFallback } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 const MENU_ITEMS = [
@@ -58,17 +58,18 @@ export const ProfileSidebar: FC = () => {
         {/* Profile Card */}
         <div className="bg-linear-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl px-6 py-5 flex flex-col items-center gap-3">
           <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
-            {user?.avatar ? (
-              <Image
-                src={user.avatar}
-                alt={displayName}
-                width={80}
-                height={80}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-white text-2xl font-bold">{initials}</span>
-            )}
+            <ImageWithFallback
+              src={user?.avatar}
+              alt={displayName}
+              width={80}
+              height={80}
+              className="w-full h-full object-cover"
+              fallback={
+                <span className="text-white text-2xl font-bold">
+                  {initials}
+                </span>
+              }
+            />
           </div>
           <h3 className="text-foreground font-semibold text-base">
             {displayName}

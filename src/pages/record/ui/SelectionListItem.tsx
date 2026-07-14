@@ -1,7 +1,6 @@
-import Image from "next/image";
-
 import { CheckIcon, GeoIcon, StarIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
+import { ImageWithFallback } from "@/shared/ui";
 
 import { formatPrice } from "../model/lib";
 import type { Clinic, SelectionItem } from "../model/types";
@@ -46,14 +45,13 @@ export const SelectionListItem = ({
           compact ? "size-16" : "size-20",
         )}
       >
-        {item.image ? (
-          <Image
-            src={item.image}
-            alt={itemTitle}
-            fill
-            className="object-cover"
-          />
-        ) : null}
+        <ImageWithFallback
+          src={item.image}
+          alt={itemTitle}
+          fill
+          className="object-cover"
+          fallback={null}
+        />
       </div>
 
       <div className="min-w-0 flex-1 text-left">

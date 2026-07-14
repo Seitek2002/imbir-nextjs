@@ -4,7 +4,7 @@ import { FC } from "react";
 
 import Link from "next/link";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -20,13 +20,17 @@ import { ClinicCard, ClinicSkeleton } from "@/entities/clinic";
 import { ClinicFilters, api, clinicKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { useCityStore } from "@/shared/store";
+import { Button } from "@/shared/ui";
 
-// Специализация остаётся клиентским фильтром: ClinicFilters.specialization —
-// такое же одно-строковое поле, как у /api/doctors/, где этот же параметр на
-// практике не находит совпадений (проверено). Пока бэк не подтвердит, что
-// для клиник он работает иначе, безопаснее не полагаться на него.
-// page_size увеличен для той же клиентской фильтрации (макет без пагинации).
-const FULL_LIST_PAGE_SIZE = 200;
+// Постраничная подгрузка: 8 клиник за раз, дальше — по кнопке «Показать ещё».
+const PAGE_SIZE = 8;
+
+// TODO: специализация и текстовый поиск остаются клиентскими и фильтруют
+// только уже подгруженные страницы (бэк пока не поддерживает эти параметры
+// в /api/clinics/ — specialization на практике не находит совпадений,
+// проверено на /api/doctors/). Как только бэк добавит нормальную серверную
+// фильтрацию, оба фильтра нужно перенести в filters ниже и убрать
+// клиентский filter.
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -49,19 +53,31 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
   const selectedCity = useCityStore((s) => s.city);
 
   // 2. Город и оценка уходят в реальные query-параметры API.
-  const filters: ClinicFilters = {
+  const filters: Omit<ClinicFilters, "page" | "page_size"> = {
     city: selectedCity || undefined,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)
         : undefined,
-    page_size: FULL_LIST_PAGE_SIZE,
   };
 
-  const { data: clinics = [], isLoading } = useQuery({
-    queryKey: clinicKeys.list(filters),
-    queryFn: () => api.getClinics(filters),
-  });
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: clinicKeys.list(filters),
+      queryFn: ({ pageParam }) =>
+        api.getClinicsPaginated({
+          ...filters,
+          page: pageParam,
+          page_size: PAGE_SIZE,
+        }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) =>
+        lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
+          ? lastPage.pagination.page + 1
+          : undefined,
+    });
+
+  const clinics = data?.pages.flatMap((page) => page.data) ?? [];
 
   // 3. Специализация и текстовый поиск — клиентские.
   const filteredClinics = clinics.filter((clinic) => {
@@ -127,17 +143,30 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
                 По вашим параметрам клиники не найдены
               </p>
             ) : (
-              filteredClinics.map((clinic) => (
+              filteredClinics.map((clinic, index) => (
                 <ClinicCard
                   key={`mob-${clinic.id}`}
                   {...clinic}
                   variant="horizontal"
+                  priority={index < 2}
                   initialSaved={isSaved(Number(clinic.id))}
                   onSave={() => toggle(Number(clinic.id))}
                 />
               ))
             )}
           </div>
+
+          {hasNextPage && (
+            <div className="flex justify-center mt-4">
+              <Button
+                variant="outline"
+                onClick={() => fetchNextPage()}
+                loading={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? "Загрузка…" : "Показать ещё"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* --- ДЕСКТОПНАЯ ВЕРСИЯ --- */}
@@ -181,14 +210,28 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
               </p>
             ) : (
               <div className="grid grid-cols-4 gap-5 items-stretch">
-                {filteredClinics.map((clinic) => (
+                {filteredClinics.map((clinic, index) => (
                   <ClinicCard
                     key={`desk-${clinic.id}`}
                     {...clinic}
+                    priority={index < 4}
                     initialSaved={isSaved(Number(clinic.id))}
                     onSave={() => toggle(Number(clinic.id))}
                   />
                 ))}
+              </div>
+            )}
+
+            {hasNextPage && (
+              <div className="flex justify-center mt-8">
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={() => fetchNextPage()}
+                  loading={isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? "Загрузка…" : "Показать ещё"}
+                </Button>
               </div>
             )}
           </div>

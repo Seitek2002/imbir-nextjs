@@ -70,6 +70,8 @@ export const mapApiToClinicProfile = (
   phone: api.phone ?? "",
   email: api.email ?? "",
   website: api.website ?? "",
+  latitude: api.latitude ?? "",
+  longitude: api.longitude ?? "",
   workSchedule: mapWorkSchedule(api),
   legalName: api.legal_name ?? "",
   registrationNumber: api.reg_number ?? "",

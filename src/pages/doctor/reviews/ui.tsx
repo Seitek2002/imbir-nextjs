@@ -21,6 +21,7 @@ import { ChatIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
+import { Button, IconBtn, Textarea } from "@/shared/ui";
 
 const resolveAuthorName = (author?: ReviewAuthor): string => {
   if (!author) return "Аноним";
@@ -126,10 +127,7 @@ const ReplyModal: FC<ReplyModalProps> = ({
           <h2 className="text-lg font-semibold text-foreground">
             Ответ на отзыв
           </h2>
-          <button
-            onClick={handleClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
-          >
+          <IconBtn onClick={handleClose} variant="text" size="sm">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M13.5 4.5L4.5 13.5M4.5 4.5L13.5 13.5"
@@ -138,30 +136,28 @@ const ReplyModal: FC<ReplyModalProps> = ({
                 strokeLinecap="round"
               />
             </svg>
-          </button>
+          </IconBtn>
         </div>
         <div className="p-5 space-y-4">
           <p className="text-muted text-sm">В ответ {reviewAuthor}</p>
-          <textarea
+          <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Введите текст"
             rows={4}
-            className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary resize-none transition-colors"
           />
           <div className="flex gap-3">
-            <button
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1"
               onClick={handleClose}
-              className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium hover:bg-background transition-colors"
             >
               Отмена
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors"
-            >
+            </Button>
+            <Button size="lg" className="flex-1" onClick={handleSubmit}>
               Отправить
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -215,10 +211,7 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
           <h2 className="text-lg font-semibold text-foreground">
             Пожаловаться
           </h2>
-          <button
-            onClick={handleClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
-          >
+          <IconBtn onClick={handleClose} variant="text" size="sm">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M13.5 4.5L4.5 13.5M4.5 4.5L13.5 13.5"
@@ -227,7 +220,7 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
                 strokeLinecap="round"
               />
             </svg>
-          </button>
+          </IconBtn>
         </div>
         <div className="p-5 space-y-3">
           <p className="text-muted text-sm mb-1">Выберите причину жалобы</p>
@@ -252,34 +245,34 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
             </label>
           ))}
           <div className="pt-2">
-            <label className="block text-muted text-sm mb-1.5">
-              Опишите причину
-            </label>
-            <textarea
+            <Textarea
+              label="Опишите причину"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Введите текст"
               rows={3}
-              className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary resize-none transition-colors"
             />
           </div>
           <div className="flex gap-3 pt-1">
-            <button
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1"
               onClick={handleClose}
-              className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium hover:bg-background transition-colors"
             >
               Отмена
-            </button>
-            <button
+            </Button>
+            <Button
+              size="lg"
+              className="flex-1"
               onClick={() => {
                 setReason("");
                 setComment("");
                 handleClose();
               }}
-              className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors"
             >
               Отправить
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -319,19 +312,23 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
 
     {/* Действия врача */}
     <div className="flex items-center gap-5 mt-4">
-      <button
+      <Button
+        variant="text"
+        size="xs"
+        className="text-primary"
+        IconLeft={ChatIcon}
         onClick={() => onReply(review)}
-        className="flex items-center gap-1.5 text-sm text-primary font-medium hover:opacity-80 transition-opacity"
       >
-        <ChatIcon className="size-4" />
         {review.reply ? "Изменить ответ" : "Ответить"}
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="text"
+        size="xs"
+        className="text-muted"
         onClick={() => onComplain(review)}
-        className="text-muted text-sm hover:text-primary transition-colors"
       >
         Пожаловаться
-      </button>
+      </Button>
     </div>
 
     {/* Ответ врача */}

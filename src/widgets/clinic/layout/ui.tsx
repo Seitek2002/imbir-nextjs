@@ -2,9 +2,13 @@
 
 import { FC, ReactNode } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
+import { HeaderBackIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
+import { IconBtn } from "@/shared/ui";
 
 import { ClinicSidebar } from "./sidebar";
 
@@ -31,13 +35,24 @@ export const ClinicPageLayout: FC<Props> = ({
   children,
 }) => {
   const { profile } = useClinicCabinet();
+  const router = useRouter();
 
   return (
     <div className="w-full min-h-screen">
       {/* Mobile header */}
       <div className="md:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
-        <h1 className="text-lg font-semibold text-foreground">{title}</h1>
-        {mobileAction}
+        <IconBtn
+          onClick={() => router.back()}
+          variant="text"
+          size="sm"
+          aria-label="Назад"
+        >
+          <HeaderBackIcon className="w-5 h-5" />
+        </IconBtn>
+        <h1 className="text-base font-semibold text-foreground truncate mx-2">
+          {title}
+        </h1>
+        {mobileAction ?? <div className="w-10" />}
       </div>
 
       {/* Desktop content */}
