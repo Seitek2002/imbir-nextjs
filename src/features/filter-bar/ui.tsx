@@ -4,6 +4,9 @@ import { FC, ReactNode } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { useQuery } from "@tanstack/react-query";
+
+import { getSpecializations, referenceKeys } from "@/shared/api";
 import { RemoveIcon } from "@/shared/assets/icons";
 import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 
@@ -19,13 +22,6 @@ type Props = {
   };
   children?: ReactNode;
 };
-
-const SPECIALTY_OPTIONS = [
-  { value: "Кардиолог", label: "Кардиолог" },
-  { value: "Врач-терапевт", label: "Терапевт" },
-  { value: "Хирург", label: "Хирург" },
-  { value: "Педиатр", label: "Педиатр" },
-];
 
 const RATING_OPTIONS = [
   { value: "all", label: "Все" },
@@ -51,6 +47,19 @@ export const FilterBar: FC<Props> = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
+
+  // Реальный список специализаций с бэка вместо захардкоженных 4 штук.
+  // Справочник почти не меняется — держим его в кеше подольше.
+  const { data: specializations = [] } = useQuery({
+    queryKey: referenceKeys.specializations(),
+    queryFn: getSpecializations,
+    enabled: !!fields.specialty,
+    staleTime: 60 * 60 * 1000,
+  });
+  const specialtyOptions = specializations.map((name) => ({
+    value: name,
+    label: name,
+  }));
 
   // Все значения — единственный источник правды: URL.
   // router.replace обновляет useSearchParams синхронно через React,
@@ -168,11 +177,12 @@ export const FilterBar: FC<Props> = ({
             <Dropdown
               label="Специализация"
               placeholder="Все"
-              options={SPECIALTY_OPTIONS}
+              options={specialtyOptions}
               value={specialty}
               onChange={(val) => handleSpecialtyChange(val as string[])}
               isMulti={true}
               type="checkbox"
+              searchable
             />
           )}
           {fields.experience && (
