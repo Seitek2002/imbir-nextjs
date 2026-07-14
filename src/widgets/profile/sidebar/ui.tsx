@@ -56,7 +56,7 @@ export const ProfileSidebar: FC = () => {
     <>
       <div className="w-full max-w-88 flex flex-col gap-4">
         {/* Profile Card — градиентная карточка с аватаром по центру, как в макете */}
-        <div className="bg-linear-to-b from-[#FFE2DA] to-white rounded-3xl px-6 py-5 flex flex-col items-center gap-3">
+        <div className="bg-linear-to-b from-[#FFE2DA] to-white border border-border-soft rounded-3xl px-6 py-5 flex flex-col items-center gap-3">
           <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
             <ImageWithFallback
               src={user?.avatar}
