@@ -21,11 +21,13 @@ import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { useCityStore } from "@/shared/store";
 
-// Бэк не поддерживает фильтр по стажу (нет такого query-параметра в
-// /api/doctors/), а фильтр specialization есть в контракте, но на практике
-// всегда возвращает пустой список даже для точных совпадений (проверено
-// прямыми запросами) — это баг бэкенда. Оставляем оба фильтра клиентскими.
-// page_size увеличен, чтобы клиентская фильтрация не резала выборку до
+// Бэк добавил min_experience/max_experience и рабочий specialization
+// (проверено напрямую) — оба теперь реальные query-параметры. Но
+// specialization принимает только одно значение (точное вхождение), а наш
+// фильтр — мультиселект: при 2+ выбранных специальностях сервер не сможет
+// отфильтровать по всем сразу, поэтому в этом случае оставляем клиентскую
+// фильтрацию как страховку (см. filteredDoctors ниже).
+// page_size увеличен, чтобы эта клиентская страховка не резала выборку до
 // дефолтных 20 записей (макет не предполагает пагинацию — карточки не
 // ограничены страницами).
 const FULL_LIST_PAGE_SIZE = 200;
@@ -65,13 +67,18 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
   }, []);
   const selectedCity = isHydrated ? storeCity : initialCity;
 
-  // 2. Собираем реальные фильтры и отдаём их API — специализация/стаж
-  // остаются клиентскими (см. комментарий у FULL_LIST_PAGE_SIZE), город/
-  // онлайн/оценка/цена уходят в query-параметры и реально сужают выборку
-  // на бэке.
+  // 2. Собираем реальные фильтры и отдаём их API — город/онлайн/оценка/
+  // цена/стаж/текстовый поиск реально сужают выборку на бэке. Специализация
+  // уходит на бэк только если выбрана ровно одна (см. комментарий выше).
   const [priceMin, priceMax] = currentPrice
     ? currentPrice.split("-").map(Number)
     : [undefined, undefined];
+  const [expMin, expMax] = currentExp
+    ? currentExp.split("-").map(Number)
+    : [undefined, undefined];
+  const selectedSpecs = currentSpec
+    ? currentSpec.split(",").filter(Boolean)
+    : [];
 
   const filters: DoctorFilters = {
     city: selectedCity || undefined,
@@ -82,6 +89,10 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
         : undefined,
     min_price: priceMin,
     max_price: priceMax,
+    min_experience: expMin,
+    max_experience: expMax,
+    specialization: selectedSpecs.length === 1 ? selectedSpecs[0] : undefined,
+    search: activeQuery || undefined,
     page_size: FULL_LIST_PAGE_SIZE,
   };
 
@@ -90,27 +101,11 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
     queryFn: () => api.getDoctors(filters),
   });
 
-  // 3. Специализация и стаж — фильтруем на клиенте (бэк их не поддерживает
-  // рабочим образом), плюс текстовый поиск.
+  // 3. Страховка на клиенте только для случая 2+ выбранных специальностей —
+  // единственное, что бэк не может отфильтровать сам за один запрос.
   const filteredDoctors = doctors.filter((doc) => {
-    if (activeQuery) {
-      const q = activeQuery.toLowerCase();
-      if (
-        !doc.name.toLowerCase().includes(q) &&
-        !doc.specialty.toLowerCase().includes(q)
-      ) {
-        return false;
-      }
-    }
-
-    if (currentSpec) {
-      const selectedSpecs = currentSpec.split(",");
-      if (!selectedSpecs.includes(doc.specialty)) return false;
-    }
-
-    if (currentExp) {
-      const [minExp, maxExp] = currentExp.split("-").map(Number);
-      if (doc.experience < minExp || doc.experience > maxExp) return false;
+    if (selectedSpecs.length > 1 && !selectedSpecs.includes(doc.specialty)) {
+      return false;
     }
 
     return true;
