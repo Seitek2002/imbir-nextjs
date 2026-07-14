@@ -147,7 +147,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
     filteredServices.length > 0;
 
   return (
-    <main className="min-h-screen bg-background md:bg-white flex flex-col">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col pb-16 lg:pb-0">
       <Header title="Поиск" backTo={ROUTES.HOME}>
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">

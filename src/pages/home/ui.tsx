@@ -35,7 +35,7 @@ const SpecializationsSection = dynamic(() =>
 
 export const HomePage = () => {
   return (
-    <main>
+    <main className="pb-16 lg:pb-0">
       <Header searchable />
       <Hero />
 

@@ -1,19 +1,25 @@
 "use client";
 
+import { FC } from "react";
+
 import {
   HistoryIcon,
-  PersonIcon,
   ReviewsIcon,
   SavedIcon,
+  SettingsIcon,
 } from "@/shared/assets/icons";
 import { useAuthStore } from "@/shared/store";
-import { CabinetMenuItem, CabinetMobileMenu } from "@/shared/ui";
+import {
+  CabinetMenuItem,
+  CabinetMobileMenu,
+  ImageWithFallback,
+} from "@/shared/ui";
 
 const MENU_ITEMS: CabinetMenuItem[] = [
   {
     href: "/profile/my-data",
-    label: "Мои данные",
-    icon: <PersonIcon className="w-5 h-5" />,
+    label: "Настройки профиля",
+    icon: <SettingsIcon className="w-5 h-5" />,
   },
   {
     href: "/profile/history",
@@ -73,7 +79,10 @@ const StatusCard = () => (
   </div>
 );
 
-export default function ProfileMenuPage() {
+// Мобильный хаб профиля пациента — карточка, пункты меню и статус. Это НЕ
+// отдельный маршрут: рендерится внутри /profile на узких экранах, а на
+// десктопе тот же /profile разворачивается в двухколоночный кабинет.
+export const ProfileMobileHub: FC = () => {
   const { user } = useAuthStore();
   const userName = user
     ? `${user.first_name} ${user.last_name?.charAt(0) ?? ""}`.trim()
@@ -82,13 +91,27 @@ export default function ProfileMenuPage() {
   return (
     <CabinetMobileMenu
       avatar={
-        <span className="text-white text-2xl font-bold">
-          {userName.charAt(0)}
-        </span>
+        <ImageWithFallback
+          src={user?.avatar}
+          alt={userName}
+          width={80}
+          height={80}
+          className="w-full h-full object-cover"
+          fallback={
+            <span className="text-white text-2xl font-bold">
+              {userName.charAt(0)}
+            </span>
+          }
+        />
       }
       name={userName}
+      subtitle={
+        user?.email ? (
+          <p className="text-muted text-sm mt-0.5">{user.email}</p>
+        ) : undefined
+      }
       items={MENU_ITEMS}
       footer={<StatusCard />}
     />
   );
-}
+};

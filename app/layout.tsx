@@ -4,6 +4,7 @@ import { Onest } from "next/font/google";
 
 import { Providers } from "@/app/providers";
 
+import { MobileBottomNav } from "@/widgets/mobile-bottom-nav";
 import type { UserRole } from "@/shared/store";
 import {
   type InitialAuth,
@@ -75,7 +76,10 @@ export default async function RootLayout({
         className="min-h-full flex flex-col bg-background lg:bg-white"
       >
         <InitialAuthProvider value={initialAuth}>
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+            <MobileBottomNav />
+          </Providers>
         </InitialAuthProvider>
       </body>
     </html>

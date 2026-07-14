@@ -64,7 +64,8 @@ export const CabinetMobileMenu: FC<Props> = ({
   return (
     <>
       <div className="min-h-screen bg-[#FAFAFA]">
-        <div className="px-4 py-6">
+        {/* pb под фиксированную нижнюю таб-панель (на мобильном) */}
+        <div className="px-4 py-6 pb-24 lg:pb-6">
           <h1 className="text-2xl font-semibold text-foreground mb-6">
             {title}
           </h1>

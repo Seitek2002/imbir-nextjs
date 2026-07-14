@@ -7,9 +7,9 @@ import Link from "next/link";
 import {
   HistoryIcon,
   LogoutIcon,
-  PersonIcon,
   ReviewsIcon,
   SavedIcon,
+  SettingsIcon,
 } from "@/shared/assets/icons";
 import { useLogout } from "@/shared/lib/useLogout";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
@@ -18,7 +18,7 @@ import { ImageWithFallback } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 const MENU_ITEMS = [
-  { href: "/profile/my-data", label: "Мои данные", icon: PersonIcon },
+  { href: "/profile/my-data", label: "Настройки профиля", icon: SettingsIcon },
   { href: "/profile/history", label: "История записей", icon: HistoryIcon },
   { href: "/profile/saved", label: "Сохранённое", icon: SavedIcon },
   { href: "/profile/reviews", label: "Отзывы", icon: ReviewsIcon },
