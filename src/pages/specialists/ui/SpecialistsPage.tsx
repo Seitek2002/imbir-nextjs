@@ -4,7 +4,7 @@ import { FC, useEffect, useState } from "react";
 
 import Link from "next/link";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -20,19 +20,16 @@ import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { useCityStore } from "@/shared/store";
+import { Button } from "@/shared/ui";
 
-// Бэк добавил min_experience/max_experience и рабочий specialization
-// (проверено напрямую) — оба теперь реальные query-параметры. Но
-// specialization принимает только одно значение (точное вхождение), а наш
-// фильтр — мультиселект: при 2+ выбранных специальностях сервер не сможет
-// отфильтровать по всем сразу, поэтому в этом случае оставляем клиентскую
-// фильтрацию как страховку (см. filteredDoctors ниже).
-// page_size увеличен, чтобы эта клиентская страховка не резала выборку до
-// дефолтных 20 записей (макет не предполагает пагинацию — карточки не
-// ограничены страницами).
-const FULL_LIST_PAGE_SIZE = 200;
-
-// <-- ИМПОРТ НАШЕГО API
+// Постраничная подгрузка: 8 врачей за раз, дальше — по кнопке «Показать ещё»
+// (как на /clinics). Бэк поддерживает specialization только с одним
+// значением (точное вхождение) — при 2+ выбранных специальностях (наш
+// фильтр — мультиселект) сервер не отфильтрует по всем сразу, поэтому в
+// этом случае specialization на бэк не уходит, а фильтрация по
+// специальности остаётся клиентской и работает только по уже подгруженным
+// страницам (тот же компромисс, что и с фильтрами на /clinics).
+const PAGE_SIZE = 8;
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -80,7 +77,7 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
     ? currentSpec.split(",").filter(Boolean)
     : [];
 
-  const filters: DoctorFilters = {
+  const filters: Omit<DoctorFilters, "page" | "page_size"> = {
     city: selectedCity || undefined,
     is_online: isOnlineOnly || undefined,
     min_rating:
@@ -93,16 +90,29 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
     max_experience: expMax,
     specialization: selectedSpecs.length === 1 ? selectedSpecs[0] : undefined,
     search: activeQuery || undefined,
-    page_size: FULL_LIST_PAGE_SIZE,
   };
 
-  const { data: doctors = [], isLoading } = useQuery({
-    queryKey: doctorKeys.list(filters),
-    queryFn: () => api.getDoctors(filters),
-  });
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: doctorKeys.list(filters),
+      queryFn: ({ pageParam }) =>
+        api.getDoctorsPaginated({
+          ...filters,
+          page: pageParam,
+          page_size: PAGE_SIZE,
+        }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) =>
+        lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
+          ? lastPage.pagination.page + 1
+          : undefined,
+    });
 
-  // 3. Страховка на клиенте только для случая 2+ выбранных специальностей —
-  // единственное, что бэк не может отфильтровать сам за один запрос.
+  const doctors = data?.pages.flatMap((page) => page.data) ?? [];
+
+  // Страховка на клиенте только для случая 2+ выбранных специальностей —
+  // единственное, что бэк не может отфильтровать сам за один запрос
+  // (фильтрует только уже подгруженные страницы, см. комментарий у PAGE_SIZE).
   const filteredDoctors = doctors.filter((doc) => {
     if (selectedSpecs.length > 1 && !selectedSpecs.includes(doc.specialty)) {
       return false;
@@ -167,6 +177,18 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
               ))
             )}
           </div>
+
+          {hasNextPage && (
+            <div className="flex justify-center mt-4">
+              <Button
+                variant="outline"
+                onClick={() => fetchNextPage()}
+                loading={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? "Загрузка…" : "Показать ещё"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* --- ДЕСКТОПНАЯ ВЕРСИЯ --- */}
@@ -228,6 +250,19 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
                     onSave={() => toggle(Number(doc.id))}
                   />
                 ))}
+              </div>
+            )}
+
+            {hasNextPage && (
+              <div className="flex justify-center mt-8">
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={() => fetchNextPage()}
+                  loading={isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? "Загрузка…" : "Показать ещё"}
+                </Button>
               </div>
             )}
           </div>

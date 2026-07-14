@@ -72,7 +72,7 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
         }),
       initialPageParam: 1,
       getNextPageParam: (lastPage) =>
-        lastPage.pagination.page < lastPage.pagination.total_pages
+        lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
           ? lastPage.pagination.page + 1
           : undefined,
     });

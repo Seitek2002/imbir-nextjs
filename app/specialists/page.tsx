@@ -11,9 +11,9 @@ import { SpecialistsPage } from "@/pages/specialists";
 import { api, doctorKeys } from "@/shared/api";
 import { CITY_COOKIE, DEFAULT_CITY } from "@/shared/store";
 
-// Должно совпадать с FULL_LIST_PAGE_SIZE в SpecialistsPage.tsx, иначе
-// ключ запроса тут разойдётся с клиентским и SSR-префетч не подхватится.
-const FULL_LIST_PAGE_SIZE = 200;
+// Должно совпадать с PAGE_SIZE в SpecialistsPage.tsx, иначе ключ запроса тут
+// разойдётся с клиентским и SSR-префетч не подхватится.
+const PAGE_SIZE = 8;
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -29,11 +29,19 @@ const Specialists = async ({ searchParams }: Props) => {
   const raw = cookieStore.get(CITY_COOKIE)?.value;
   const city = raw ? decodeURIComponent(raw) : DEFAULT_CITY;
 
-  const filters = { city, page_size: FULL_LIST_PAGE_SIZE };
+  // Клиент использует useInfiniteQuery — префетч обязан быть именно
+  // prefetchInfiniteQuery (форма { pages, pageParams }), а не обычный
+  // prefetchQuery. Раньше здесь был prefetchQuery с page_size=200 (плоский
+  // массив) — ключ не совпадал с клиентским useInfiniteQuery (там
+  // page_size=8 приходит через pageParam, а не через filters), так что
+  // префетч просто ничего не ускорял.
+  const filters = { city };
   const queryClient = new QueryClient();
-  await queryClient.prefetchQuery({
+  await queryClient.prefetchInfiniteQuery({
     queryKey: doctorKeys.list(filters),
-    queryFn: () => api.getDoctors(filters),
+    queryFn: () =>
+      api.getDoctorsPaginated({ ...filters, page: 1, page_size: PAGE_SIZE }),
+    initialPageParam: 1,
   });
 
   return (
