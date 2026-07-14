@@ -5,7 +5,6 @@ import { FC, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
-import { ProfileSidebar } from "@/widgets/profile/sidebar";
 
 import { getMyReviews, profileKeys } from "@/shared/api";
 import {
@@ -13,7 +12,7 @@ import {
   DoctorPersonIcon,
   ServiceRadialIcon,
 } from "@/shared/assets/icons";
-import { CabinetShell, FilterTabBar } from "@/shared/ui";
+import { FilterTabBar } from "@/shared/ui";
 
 import { ProfileReviews } from "./reviews/ui";
 import { ReviewType, UserReview } from "./reviews/user-review/model";
@@ -67,29 +66,28 @@ export const ProfileReviewsPage: FC = () => {
   });
 
   return (
-    <CabinetShell
-      title="Мой профиль"
-      mobileHeader={<MobilePageHeader title="Отзывы" />}
-      sidebar={<ProfileSidebar />}
-    >
-      <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground mb-6 hidden md:block">
-        Отзывы
-      </h2>
+    <>
+      <MobilePageHeader title="Отзывы" />
+      <div className="px-4 py-8 md:p-0">
+        <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground mb-6 hidden md:block">
+          Отзывы
+        </h2>
 
-      <FilterTabBar
-        tabs={TABS}
-        value={activeTab}
-        onChange={setActiveTab}
-        className="mb-6"
-      />
+        <FilterTabBar
+          tabs={TABS}
+          value={activeTab}
+          onChange={setActiveTab}
+          className="mb-6"
+        />
 
-      {isLoading ? (
-        <div className="bg-white rounded-3xl p-10 text-center border border-border text-muted">
-          Загрузка...
-        </div>
-      ) : (
-        <ProfileReviews reviews={reviews} activeTab={activeTab} />
-      )}
-    </CabinetShell>
+        {isLoading ? (
+          <div className="bg-white rounded-3xl p-10 text-center border border-border text-muted">
+            Загрузка...
+          </div>
+        ) : (
+          <ProfileReviews reviews={reviews} activeTab={activeTab} />
+        )}
+      </div>
+    </>
   );
 };

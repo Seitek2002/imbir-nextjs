@@ -14,11 +14,13 @@ export default function Loading() {
         <div className="flex gap-6">
           {/* Sidebar skeleton */}
           <aside className="hidden lg:block shrink-0 w-88">
-            <div className="bg-linear-to-b from-[#FFE2DA] to-white border border-border-soft rounded-3xl px-6 py-5 flex flex-col items-center gap-3 mb-4">
-              <div className="w-20 h-20 rounded-full skeleton" />
-              <div className="h-5 w-24 skeleton rounded" />
+            <div className="bg-white border border-border-soft rounded-3xl p-1 mb-4">
+              <div className="bg-linear-to-b from-[#FFE2DA] to-white rounded-[20px] px-6 py-5 flex flex-col items-center gap-3">
+                <div className="w-20 h-20 rounded-full skeleton" />
+                <div className="h-5 w-24 skeleton rounded" />
+              </div>
             </div>
-            <div className="bg-white rounded-3xl py-2 px-2 flex flex-col gap-1 mb-4">
+            <div className="bg-white border border-border-soft rounded-3xl py-2 px-2 flex flex-col gap-1 mb-4">
               {[0, 1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center gap-3 px-4 py-3.5">
                   <div className="w-9 h-9 rounded-xl skeleton shrink-0" />
@@ -26,9 +28,11 @@ export default function Loading() {
                 </div>
               ))}
             </div>
-            <div className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-xl skeleton shrink-0" />
-              <div className="h-5 w-28 skeleton rounded" />
+            <div className="bg-white border border-border-soft rounded-3xl p-1 mb-4">
+              <div className="flex items-center gap-3 px-4 py-3.5">
+                <div className="w-9 h-9 rounded-xl skeleton shrink-0" />
+                <div className="h-5 w-28 skeleton rounded" />
+              </div>
             </div>
             <div className="bg-white rounded-3xl p-6">
               <div className="h-4 w-32 skeleton rounded mb-2" />

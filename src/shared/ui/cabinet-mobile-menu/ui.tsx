@@ -69,14 +69,18 @@ export const CabinetMobileMenu: FC<Props> = ({
             {title}
           </h1>
 
-          {/* Профиль */}
-          <div className="bg-linear-to-b from-[#FFE2DA] to-white border border-border-soft rounded-3xl p-6 mb-4 flex flex-col items-center gap-3">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-              {avatar}
-            </div>
-            <div className="text-center">
-              <h2 className="text-foreground font-semibold text-lg">{name}</h2>
-              {subtitle}
+          {/* Профиль — белая рамка с отступом 4px, внутри градиентная подложка */}
+          <div className="bg-white border border-border-soft rounded-3xl p-1 mb-4">
+            <div className="bg-linear-to-b from-[#FFE2DA] to-white rounded-[20px] p-6 flex flex-col items-center gap-3">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
+                {avatar}
+              </div>
+              <div className="text-center">
+                <h2 className="text-foreground font-semibold text-lg">
+                  {name}
+                </h2>
+                {subtitle}
+              </div>
             </div>
           </div>
 

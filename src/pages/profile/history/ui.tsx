@@ -5,10 +5,8 @@ import { FC, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
-import { ProfileSidebar } from "@/widgets/profile/sidebar";
 
 import { getProfileAppointments, profileKeys } from "@/shared/api";
-import { CabinetShell } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import { Appointment } from "./history/AppointmentCard/model";
@@ -83,41 +81,40 @@ export const ProfileHistoryPage: FC = () => {
   }));
 
   return (
-    <CabinetShell
-      title="Мой профиль"
-      mobileHeader={<MobilePageHeader title="История записей" />}
-      sidebar={<ProfileSidebar />}
-    >
-      {/* Desktop: заголовок + сегмент-переключатель в одну строку */}
-      <div className="hidden md:flex items-center justify-between mb-6">
-        <h2 className="text-[32px] font-semibold text-foreground">
-          История записей
-        </h2>
-        <div className="w-75 shrink-0">
+    <>
+      <MobilePageHeader title="История записей" />
+      <div className="px-4 py-8 md:p-0">
+        {/* Desktop: заголовок + сегмент-переключатель в одну строку */}
+        <div className="hidden md:flex items-center justify-between mb-6">
+          <h2 className="text-[32px] font-semibold text-foreground">
+            История записей
+          </h2>
+          <div className="w-75 shrink-0">
+            <SegmentedControl
+              options={TABS}
+              value={activeTab}
+              onChange={setActiveTab}
+            />
+          </div>
+        </div>
+
+        {/* Mobile: сегмент под шапкой страницы */}
+        <div className="md:hidden mb-6">
           <SegmentedControl
             options={TABS}
             value={activeTab}
             onChange={setActiveTab}
           />
         </div>
-      </div>
 
-      {/* Mobile: сегмент под шапкой страницы */}
-      <div className="md:hidden mb-6">
-        <SegmentedControl
-          options={TABS}
-          value={activeTab}
-          onChange={setActiveTab}
-        />
+        {isLoading ? (
+          <div className="bg-white rounded-3xl p-10 text-center border border-border text-muted">
+            Загрузка...
+          </div>
+        ) : (
+          <ProfileHistory appointments={appointments} activeTab={activeTab} />
+        )}
       </div>
-
-      {isLoading ? (
-        <div className="bg-white rounded-3xl p-10 text-center border border-border text-muted">
-          Загрузка...
-        </div>
-      ) : (
-        <ProfileHistory appointments={appointments} activeTab={activeTab} />
-      )}
-    </CabinetShell>
+    </>
   );
 };

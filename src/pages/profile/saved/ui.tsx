@@ -5,7 +5,6 @@ import { FC, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
-import { ProfileSidebar } from "@/widgets/profile/sidebar";
 
 import { api, getFavorites, getServiceById, profileKeys } from "@/shared/api";
 import {
@@ -13,7 +12,7 @@ import {
   DoctorPersonIcon,
   ServiceRadialIcon,
 } from "@/shared/assets/icons";
-import { CabinetShell, FilterTabBar } from "@/shared/ui";
+import { FilterTabBar } from "@/shared/ui";
 
 import { ProfileSaved } from "./ProfileSaved/ui";
 import { SavedItem, SavedType } from "./model";
@@ -120,29 +119,28 @@ export const ProfileSavedPage: FC = () => {
   });
 
   return (
-    <CabinetShell
-      title="Мой профиль"
-      mobileHeader={<MobilePageHeader title="Сохранённое" />}
-      sidebar={<ProfileSidebar />}
-    >
-      <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground mb-6 hidden md:block">
-        Сохранённое
-      </h2>
+    <>
+      <MobilePageHeader title="Сохранённое" />
+      <div className="px-4 py-8 md:p-0">
+        <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground mb-6 hidden md:block">
+          Сохранённое
+        </h2>
 
-      <FilterTabBar
-        tabs={TABS}
-        value={activeTab}
-        onChange={setActiveTab}
-        className="mb-6"
-      />
+        <FilterTabBar
+          tabs={TABS}
+          value={activeTab}
+          onChange={setActiveTab}
+          className="mb-6"
+        />
 
-      {isLoading ? (
-        <div className="bg-white rounded-3xl p-10 text-center border border-border text-muted">
-          Загрузка...
-        </div>
-      ) : (
-        <ProfileSaved items={savedItems} activeTab={activeTab} />
-      )}
-    </CabinetShell>
+        {isLoading ? (
+          <div className="bg-white rounded-3xl p-10 text-center border border-border text-muted">
+            Загрузка...
+          </div>
+        ) : (
+          <ProfileSaved items={savedItems} activeTab={activeTab} />
+        )}
+      </div>
+    </>
   );
 };
