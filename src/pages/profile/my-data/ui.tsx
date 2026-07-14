@@ -135,7 +135,7 @@ export const ProfileMyDataPage: FC = () => {
     }
   };
 
-  const title = isEditing ? "Редактировать" : "Мои данные";
+  const title = isEditing ? "Редактировать" : "Настройки профиля";
 
   const mobileRight = (
     <IconBtn
@@ -162,7 +162,7 @@ export const ProfileMyDataPage: FC = () => {
     >
       <div className="hidden md:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">
-          Мои данные
+          Настройки профиля
         </h2>
         <Button
           onClick={isEditing ? handleSave : () => setIsEditing(true)}

@@ -120,9 +120,11 @@ export const AppointmentCard: FC<Props> = ({
           : "absolute top-2 left-2 flex items-center gap-0.5 bg-white rounded-md px-1.5 py-0.5 shadow-sm"
       }
     >
-      <StarIcon className={size === "lg" ? "w-4 h-4" : "w-3 h-3"} />
+      <StarIcon
+        className={`text-primary ${size === "lg" ? "w-4 h-4" : "w-3 h-3"}`}
+      />
       <span
-        className={`text-primary font-semibold ${size === "lg" ? "text-sm" : "text-xs"}`}
+        className={`text-foreground font-semibold ${size === "lg" ? "text-sm" : "text-xs"}`}
       >
         {appointment.doctorRating.toFixed(2)}
       </span>
@@ -163,19 +165,21 @@ export const AppointmentCard: FC<Props> = ({
           </h3>
           <div className="text-base mb-5">{meta}</div>
 
-          <div className="flex flex-col gap-3 text-base text-secondary">
+          <div className="flex flex-col gap-3 text-base text-foreground">
             <div className="flex items-center gap-2.5">
-              <CalendarIcon className="w-5 h-5 shrink-0 [&_path]:stroke-secondary" />
+              <CalendarIcon className="w-5 h-5 shrink-0 [&_path]:stroke-primary" />
               <span>{formatDateNumeric(appointment.date)}</span>
             </div>
             <div className="flex items-center gap-2.5">
-              <ClockIcon className="w-5 h-5 shrink-0 text-secondary" />
+              <ClockIcon className="w-5 h-5 shrink-0 text-primary" />
               <span>{formatTime(appointment.time)}</span>
             </div>
-            <div className="flex items-start gap-2.5">
-              <GeoIcon className="w-5 h-5 mt-0.5 shrink-0 [&_path]:stroke-secondary" />
-              <span className="flex-1">{appointment.address}</span>
-            </div>
+            {appointment.address && (
+              <div className="flex items-start gap-2.5">
+                <GeoIcon className="w-5 h-5 mt-0.5 shrink-0 [&_path]:stroke-primary" />
+                <span className="flex-1">{appointment.address}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -187,9 +191,10 @@ export const AppointmentCard: FC<Props> = ({
             {showCancel && (
               <Button
                 onClick={() => onCancel(appointment.id)}
-                variant="outline"
+                variant="text"
                 size="sm"
                 IconLeft={CloseIcon}
+                className="bg-red-50 text-red-500 hover:bg-red-100 active:bg-red-100"
               >
                 Отменить
               </Button>
@@ -197,9 +202,10 @@ export const AppointmentCard: FC<Props> = ({
             {showReview && (
               <Button
                 onClick={() => onReview(appointment.id)}
-                variant="outline"
+                variant="text"
                 size="sm"
                 IconLeft={ReviewsIcon}
+                className="bg-[#FFF0EE] text-primary hover:bg-[#FFE4DE] active:bg-[#FFE4DE]"
               >
                 Оставить отзыв
               </Button>
@@ -207,10 +213,10 @@ export const AppointmentCard: FC<Props> = ({
           </div>
 
           <div className="text-right">
-            <p className="text-muted text-base mb-1">{appointment.service}</p>
+            <p className="text-secondary text-lg mb-1">{appointment.service}</p>
             <Price
               value={appointment.price}
-              className="text-foreground font-semibold text-2xl"
+              className="text-foreground font-semibold text-[28px]"
             />
           </div>
         </div>
@@ -250,11 +256,13 @@ export const AppointmentCard: FC<Props> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-sm text-secondary flex-1 min-w-0 bg-background px-3 py-2.5 rounded-2xl">
-            <GeoIcon className="w-4 h-4 shrink-0 [&_path]:stroke-secondary" />
-            <span className="flex-1 truncate">{appointment.address}</span>
-          </div>
+        <div className="flex items-center justify-end gap-2">
+          {appointment.address && (
+            <div className="flex items-center gap-1.5 text-sm text-secondary flex-1 min-w-0 bg-background px-3 py-2.5 rounded-2xl">
+              <GeoIcon className="w-4 h-4 shrink-0 [&_path]:stroke-secondary" />
+              <span className="flex-1 truncate">{appointment.address}</span>
+            </div>
+          )}
 
           {showMeet && (
             <GoogleMeetButton href={appointment.googleMeetLink!} compact />

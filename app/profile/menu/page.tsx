@@ -2,9 +2,9 @@
 
 import {
   HistoryIcon,
-  PersonIcon,
   ReviewsIcon,
   SavedIcon,
+  SettingsIcon,
 } from "@/shared/assets/icons";
 import { useAuthStore } from "@/shared/store";
 import { CabinetMenuItem, CabinetMobileMenu } from "@/shared/ui";
@@ -12,8 +12,8 @@ import { CabinetMenuItem, CabinetMobileMenu } from "@/shared/ui";
 const MENU_ITEMS: CabinetMenuItem[] = [
   {
     href: "/profile/my-data",
-    label: "Мои данные",
-    icon: <PersonIcon className="w-5 h-5" />,
+    label: "Настройки профиля",
+    icon: <SettingsIcon className="w-5 h-5" />,
   },
   {
     href: "/profile/history",
@@ -56,24 +56,18 @@ const StatusCard = () => (
           отзывов
         </span>
       </div>
+      {/* Единый трек: оранжевый сегмент + синий хвост, как в макете */}
       <div className="flex items-center gap-2">
-        <div className="flex-1 flex items-center gap-2">
-          <span className="text-primary text-sm font-semibold border border-primary rounded-lg px-2 py-0.5">
-            90%
-          </span>
-          <div className="flex-1 bg-border rounded-full h-2 overflow-hidden">
-            <div
-              className="bg-primary h-full rounded-full"
-              style={{ width: "90%" }}
-            />
-          </div>
+        <span className="text-primary text-sm font-semibold border border-primary rounded-lg px-2 py-0.5">
+          90%
+        </span>
+        <div className="flex-1 h-2 rounded-full overflow-hidden flex">
+          <div className="bg-primary h-full" style={{ width: "90%" }} />
+          <div className="bg-[#8B9FFF] h-full flex-1" />
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-12 bg-[#8B9FFF] rounded-full h-2" />
-          <span className="text-[#8B9FFF] text-sm font-semibold border border-[#8B9FFF] rounded-lg px-2 py-0.5">
-            10%
-          </span>
-        </div>
+        <span className="text-[#8B9FFF] text-sm font-semibold border border-[#8B9FFF] rounded-lg px-2 py-0.5">
+          10%
+        </span>
       </div>
     </div>
   </div>

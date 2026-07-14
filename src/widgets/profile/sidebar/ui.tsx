@@ -7,9 +7,9 @@ import Link from "next/link";
 import {
   HistoryIcon,
   LogoutIcon,
-  PersonIcon,
   ReviewsIcon,
   SavedIcon,
+  SettingsIcon,
 } from "@/shared/assets/icons";
 import { useLogout } from "@/shared/lib/useLogout";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
@@ -18,7 +18,11 @@ import { ImageWithFallback } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 const MENU_ITEMS = [
-  { href: "/profile/my-data", label: "Мои данные", icon: PersonIcon },
+  {
+    href: "/profile/my-data",
+    label: "Настройки профиля",
+    icon: SettingsIcon,
+  },
   { href: "/profile/history", label: "История записей", icon: HistoryIcon },
   { href: "/profile/saved", label: "Сохранённое", icon: SavedIcon },
   { href: "/profile/reviews", label: "Отзывы", icon: ReviewsIcon },
@@ -55,26 +59,28 @@ export const ProfileSidebar: FC = () => {
   return (
     <>
       <div className="w-full max-w-88 flex flex-col gap-4">
-        {/* Profile Card */}
-        <div className="bg-linear-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl px-6 py-5 flex flex-col items-center gap-3">
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
+        {/* Profile Card — как в макете: белая горизонтальная карточка-ссылка */}
+        <Link
+          href="/profile/my-data"
+          className="bg-white rounded-3xl px-4 py-3.5 flex items-center gap-3 hover:bg-surface transition-colors"
+        >
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
             <ImageWithFallback
               src={user?.avatar}
               alt={displayName}
-              width={80}
-              height={80}
+              width={48}
+              height={48}
               className="w-full h-full object-cover"
               fallback={
-                <span className="text-white text-2xl font-bold">
-                  {initials}
-                </span>
+                <span className="text-white text-lg font-bold">{initials}</span>
               }
             />
           </div>
-          <h3 className="text-foreground font-semibold text-base">
+          <h3 className="text-foreground font-semibold text-base truncate">
             {displayName}
           </h3>
-        </div>
+          {CHEVRON}
+        </Link>
 
         {/* Menu */}
         <nav
@@ -134,40 +140,30 @@ export const ProfileSidebar: FC = () => {
             замечаете светлые стороны, дарите надежду другим пациентам и
             помогаете клинике расцветать. Спасибо за ваш позитивный заряд!
           </p>
-          <div className="flex items-end gap-3">
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-muted text-xs">
-                  Положительных
-                  <br />
-                  отзывов
-                </span>
-                <span className="text-muted text-xs">
-                  Отрицательных
-                  <br />
-                  отзывов
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 flex items-center gap-2">
-                  <span className="text-primary text-sm font-semibold border border-primary rounded-lg px-2 py-0.5">
-                    90%
-                  </span>
-                  <div className="flex-1 bg-border rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-primary h-full rounded-full"
-                      style={{ width: "90%" }}
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-12 bg-[#8B9FFF] rounded-full h-2" />
-                  <span className="text-[#8B9FFF] text-sm font-semibold border border-[#8B9FFF] rounded-lg px-2 py-0.5">
-                    10%
-                  </span>
-                </div>
-              </div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-muted text-xs">
+              Положительных
+              <br />
+              отзывов
+            </span>
+            <span className="text-muted text-xs text-right">
+              Отрицательных
+              <br />
+              отзывов
+            </span>
+          </div>
+          {/* Единый трек: оранжевый сегмент + синий хвост, как в макете */}
+          <div className="flex items-center gap-2">
+            <span className="text-primary text-sm font-semibold border border-primary rounded-lg px-2 py-0.5">
+              90%
+            </span>
+            <div className="flex-1 h-2 rounded-full overflow-hidden flex">
+              <div className="bg-primary h-full" style={{ width: "90%" }} />
+              <div className="bg-[#8B9FFF] h-full flex-1" />
             </div>
+            <span className="text-[#8B9FFF] text-sm font-semibold border border-[#8B9FFF] rounded-lg px-2 py-0.5">
+              10%
+            </span>
           </div>
         </div>
       </div>

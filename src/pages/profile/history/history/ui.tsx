@@ -23,20 +23,33 @@ import { AppointmentCard } from "./AppointmentCard/ui";
 type Props = {
   appointments: Appointment[];
   activeTab: "upcoming" | "completed";
+  // Строка из поиска в шапке — фильтруем на клиенте по врачу/клинике/услуге.
+  searchQuery?: string;
 };
 
-export const ProfileHistory: FC<Props> = ({ appointments, activeTab }) => {
+export const ProfileHistory: FC<Props> = ({
+  appointments,
+  activeTab,
+  searchQuery = "",
+}) => {
   const [appointmentsList, setAppointmentsList] = useState(appointments);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [cancelTarget, setCancelTarget] = useState<string | null>(null);
 
-  const filteredAppointments = appointmentsList.filter((apt) =>
-    activeTab === "upcoming"
-      ? apt.status === "upcoming"
-      : apt.status === "completed",
-  );
+  const query = searchQuery.trim().toLowerCase();
+  const filteredAppointments = appointmentsList.filter((apt) => {
+    const byTab =
+      activeTab === "upcoming"
+        ? apt.status === "upcoming"
+        : apt.status === "completed";
+    if (!byTab) return false;
+    if (!query) return true;
+    return [apt.doctorName, apt.doctorClinic, apt.service].some((field) =>
+      field.toLowerCase().includes(query),
+    );
+  });
 
   const queryClient = useQueryClient();
   const { mutate: cancel } = useMutation({
@@ -107,9 +120,11 @@ export const ProfileHistory: FC<Props> = ({ appointments, activeTab }) => {
     return (
       <div className="bg-white rounded-3xl p-10 text-center border border-border">
         <p className="text-muted text-lg">
-          {activeTab === "upcoming"
-            ? "У вас нет предстоящих записей"
-            : "У вас нет прошедших записей"}
+          {query
+            ? "По вашему запросу ничего не найдено"
+            : activeTab === "upcoming"
+              ? "У вас нет предстоящих записей"
+              : "У вас нет прошедших записей"}
         </p>
       </div>
     );
