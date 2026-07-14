@@ -151,38 +151,41 @@ export const ClinicSidebar: FC<Props> = ({
 
   return (
     <aside className="w-72 shrink-0 hidden lg:block">
+      {/* Profile Card — белая рамка с отступом 4px, внутри градиентная подложка */}
       <Link
         href="/clinic-profile"
-        className="bg-white rounded-3xl p-6 flex flex-col items-center text-center mb-4 border border-border hover:border-primary transition-colors"
+        className="block bg-white border border-border-soft rounded-3xl p-1 mb-4 hover:border-primary transition-colors"
       >
-        <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0 mb-3">
-          <ImageWithFallback
-            src={clinicLogo}
-            alt={clinicName}
-            width={80}
-            height={80}
-            className="w-full h-full object-cover"
-            fallback={
-              <span className="text-white text-2xl font-bold">
-                {clinicName.charAt(0)}
-              </span>
-            }
-          />
-        </div>
-        <p className="text-foreground font-semibold text-base truncate max-w-full">
-          {clinicName}
-        </p>
-        {!!rating && rating > 0 && (
-          <div className="flex items-center gap-1 mt-1">
-            <StarIcon className="w-4 h-4 text-primary" />
-            <span className="text-primary text-sm font-medium">{rating}</span>
+        <div className="bg-linear-to-b from-[#FFE2DA] to-white rounded-[20px] p-6 flex flex-col items-center text-center">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0 mb-3 border-2 border-white shadow-sm">
+            <ImageWithFallback
+              src={clinicLogo}
+              alt={clinicName}
+              width={80}
+              height={80}
+              className="w-full h-full object-cover"
+              fallback={
+                <span className="text-white text-2xl font-bold">
+                  {clinicName.charAt(0)}
+                </span>
+              }
+            />
           </div>
-        )}
+          <p className="text-foreground font-semibold text-base truncate max-w-full">
+            {clinicName}
+          </p>
+          {!!rating && rating > 0 && (
+            <div className="flex items-center gap-1 mt-1">
+              <StarIcon className="w-4 h-4 text-primary" />
+              <span className="text-primary text-sm font-medium">{rating}</span>
+            </div>
+          )}
+        </div>
       </Link>
 
       <nav
         ref={navRef}
-        className="bg-white rounded-3xl p-2 flex flex-col gap-1 mb-4 relative"
+        className="bg-white border border-border-soft rounded-3xl p-2 flex flex-col gap-1 mb-4 relative"
       >
         <div
           className="absolute inset-x-2 rounded-2xl bg-primary-tint transition-all duration-200 ease-out pointer-events-none"
@@ -216,14 +219,17 @@ export const ClinicSidebar: FC<Props> = ({
         })}
       </nav>
 
+      {/* Logout — своя рамка + небольшой отступ со всех сторон */}
       <button
         onClick={() => setLogoutOpen(true)}
-        className="bg-white rounded-3xl px-6 py-4 flex items-center gap-3 text-secondary hover:bg-surface transition-colors w-full"
+        className="bg-white border border-border-soft rounded-3xl p-1 w-full group"
       >
-        <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center shrink-0 text-primary">
-          <LogoutIcon className="w-5 h-5" />
+        <div className="flex items-center gap-3 px-4 py-3.5 rounded-[20px] text-secondary group-hover:bg-surface transition-colors">
+          <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center shrink-0 text-primary">
+            <LogoutIcon className="w-5 h-5" />
+          </div>
+          <span className="font-medium text-base">Выйти из профиля</span>
         </div>
-        <span className="font-medium text-base">Выйти из профиля</span>
       </button>
 
       <ConfirmDialog
