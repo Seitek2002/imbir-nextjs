@@ -70,7 +70,7 @@ export const CabinetMobileMenu: FC<Props> = ({
           </h1>
 
           {/* Профиль */}
-          <div className="bg-linear-to-br from-[#FFE5DC] to-[#FFD4C8] rounded-3xl p-6 mb-4 flex flex-col items-center gap-3">
+          <div className="bg-linear-to-b from-[#FFE2DA] to-white rounded-3xl p-6 mb-4 flex flex-col items-center gap-3">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
               {avatar}
             </div>
