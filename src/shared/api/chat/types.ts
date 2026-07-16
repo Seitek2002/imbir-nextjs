@@ -33,6 +33,12 @@ export type CreateChatRoomRequest = {
   user_id: number;
 };
 
+// GET /api/chat/rooms/unread-count/ — общее число непрочитанных входящих
+// сообщений по всем комнатам. Отдельный лёгкий эндпоинт для бейджа в хедере.
+export type ChatUnreadCountResponse = {
+  unread_count: number;
+};
+
 // WebSocket payloads. The client sends only the text; the server broadcasts a
 // full message object to every participant (including the sender — see echo
 // handling in the chat-room hook).

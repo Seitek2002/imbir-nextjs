@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { useQuery } from "@tanstack/react-query";
 
-import { chatKeys, getChatRooms } from "@/shared/api";
+import { chatKeys, getChatUnreadCount } from "@/shared/api";
 import { ChatIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { IconBtn } from "@/shared/ui";
@@ -15,23 +15,19 @@ import { useAuthDisplay } from "../lib/useAuthDisplay";
 
 // Иконка чата в хедере с бейджем непрочитанных. Заменяет отдельный колокольчик
 // уведомлений: число приходящих сообщений теперь показывается прямо на чате.
-// Источник числа — unread_count по комнатам (getChatRooms); опрашиваем раз в
-// минуту, как раньше делал колокол. Пока бэк не отдаёт unread_count — сумма 0
-// и бейдж не рисуется.
+// Источник — отдельный лёгкий эндпоинт GET /api/chat/rooms/unread-count/;
+// опрашиваем раз в минуту. retry: false — пока бэк не задеплоил эндпоинт, 404
+// не должен спамить ретраями; при ошибке data=undefined → бейдж скрыт (0).
 export const HeaderChatButton: FC = () => {
   const { isAuthed } = useAuthDisplay();
 
-  const { data: rooms } = useQuery({
-    queryKey: chatKeys.rooms(),
-    queryFn: getChatRooms,
+  const { data: unread = 0 } = useQuery({
+    queryKey: chatKeys.unreadCount(),
+    queryFn: getChatUnreadCount,
     enabled: isAuthed,
     refetchInterval: 60_000,
+    retry: false,
   });
-
-  const unread = (rooms ?? []).reduce(
-    (sum, room) => sum + (room.unread_count ?? 0),
-    0,
-  );
 
   const href = isAuthed ? ROUTES.CHATS : ROUTES.LOGIN;
 

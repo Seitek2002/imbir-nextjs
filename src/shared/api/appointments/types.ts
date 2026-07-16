@@ -44,3 +44,12 @@ export type AppointmentResponse = {
 export type CancelAppointmentRequest = {
   status: "cancelled";
 };
+
+// POST /api/appointments/{id}/reschedule/ — перенос записи на новую дату/время.
+// Онлайн-консультации перегенерируют google_meet_link; при наличии пациента и
+// врача бэк шлёт системное сообщение в их чат. Нельзя переносить cancelled/
+// completed (бэк вернёт 400).
+export type RescheduleAppointmentRequest = {
+  date: string; // YYYY-MM-DD
+  time: string; // HH:MM
+};

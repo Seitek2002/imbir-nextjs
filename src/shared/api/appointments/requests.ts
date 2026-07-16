@@ -3,6 +3,7 @@ import {
   AppointmentResponse,
   CancelAppointmentRequest,
   CreateAppointmentRequest,
+  RescheduleAppointmentRequest,
 } from "./types";
 
 export const createAppointment = async (
@@ -30,4 +31,17 @@ export const cancelAppointment = async (
   body: CancelAppointmentRequest = { status: "cancelled" },
 ): Promise<void> => {
   await apiClient.patch(`/api/appointments/${id}/`, body);
+};
+
+// Перенос записи. Возвращает обновлённую запись (в т.ч. новый google_meet_link
+// для онлайн-консультаций).
+export const rescheduleAppointment = async (
+  id: number,
+  body: RescheduleAppointmentRequest,
+): Promise<AppointmentResponse> => {
+  const { data } = await apiClient.post<AppointmentResponse>(
+    `/api/appointments/${id}/reschedule/`,
+    body,
+  );
+  return data;
 };

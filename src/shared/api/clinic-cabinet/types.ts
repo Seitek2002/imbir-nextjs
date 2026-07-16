@@ -53,9 +53,10 @@ export type ClinicDoctorItem = {
   is_active: boolean;
 };
 
-// Соответствует реальной схеме ClinicServiceWriteRequest
-// (POST/PUT /api/clinic/services/). doctor_ids/image/schedule в схеме нет —
-// были придуманы по ошибке, бэк их не принимает и не хранит.
+// POST/PUT /api/clinic/services/. doctor_ids — список User ID врачей ЭТОЙ
+// клиники, которым назначается услуга (при PUT старые связи заменяются на
+// новые). Допускаются только врачи, привязанные к клинике через
+// DoctorClinicLink — иначе бэк вернёт 400.
 export type ClinicServiceBody = {
   name: string;
   category: string;
@@ -63,6 +64,34 @@ export type ClinicServiceBody = {
   price?: string | null;
   duration?: number | null;
   is_active?: boolean;
+  doctor_ids?: number[];
+};
+
+// Врач в ответе услуги (POST/PUT возвращают services с doctors[]).
+export type ClinicServiceDoctor = {
+  id: number;
+  full_name: string;
+};
+
+// Ответ создания/обновления услуги клиники (с назначенными врачами).
+export type ClinicServiceResponse = {
+  id: number;
+  name: string;
+  category: string;
+  price: string | null;
+  doctors: ClinicServiceDoctor[];
+  created_at: string;
+};
+
+// POST /api/clinic/doctors/ — регистрация врача клиникой из кабинета.
+// password необязателен (по умолчанию бэк ставит "Doctor123!"). Почта и
+// телефон должны быть уникальны — иначе 400.
+export type CreateClinicDoctorRequest = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  password?: string;
 };
 
 export type ClinicAppointmentFilters = {

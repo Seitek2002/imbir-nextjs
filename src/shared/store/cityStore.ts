@@ -16,20 +16,42 @@ const writeCityCookie = (city: string) => {
 
 type CityStore = {
   city: string;
+  // Баннер подтверждения города показан/скрыт (dismiss или подтверждение).
   isSet: boolean;
+  // Город выбран пользователем ВРУЧНУЮ (через селектор или «Верно» в баннере).
+  // Отличается от isSet: закрытие баннера («Изменить») не считается выбором и
+  // не блокирует автоподстановку задетекченного города.
+  manuallySelected: boolean;
   setCity: (city: string) => void;
+  applyDetectedCity: (city: string) => void;
   dismiss: () => void;
 };
 
 export const useCityStore = create<CityStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       city: DEFAULT_CITY,
       isSet: false,
+      manuallySelected: false,
+
+      // Ручной выбор города: и хедер, и каталог начинают слать именно его,
+      // автоподстановка детекта больше не перезаписывает.
       setCity: (city) => {
         writeCityCookie(city);
-        set({ city, isSet: true });
+        set({ city, isSet: true, manuallySelected: true });
       },
+
+      // Подставляем город, определённый бэком/middleware по IP (cookie
+      // imbir-detected-city), пока пользователь не выбрал город вручную. Так
+      // хедер и выдача каталога показывают реальный город пользователя, а не
+      // хардкод «Бишкек». No-op, если выбор уже сделан вручную или город тот же.
+      applyDetectedCity: (city) => {
+        if (get().manuallySelected) return;
+        if (!city || city === get().city) return;
+        writeCityCookie(city);
+        set({ city });
+      },
+
       dismiss: () => set({ isSet: true }),
     }),
     {

@@ -92,6 +92,7 @@ export const referenceKeys = {
   equipment: () => [...referenceKeys.all, "equipment"] as const,
   conditions: () => [...referenceKeys.all, "conditions"] as const,
   paymentMethods: () => [...referenceKeys.all, "paymentMethods"] as const,
+  countryCodes: () => [...referenceKeys.all, "countryCodes"] as const,
 };
 
 export const notificationKeys = {
@@ -102,6 +103,7 @@ export const notificationKeys = {
 export const chatKeys = {
   all: ["chat"] as const,
   rooms: () => [...chatKeys.all, "rooms"] as const,
+  unreadCount: () => [...chatKeys.all, "unread-count"] as const,
   messages: (roomId: number) => [...chatKeys.all, "messages", roomId] as const,
   ai: () => [...chatKeys.all, "ai"] as const,
 };

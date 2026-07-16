@@ -58,6 +58,13 @@ export type ClinicFilters = {
   city?: string;
   specialization?: string;
   min_rating?: number;
+  // Стаж клиники (лет с момента основания).
+  min_experience?: number;
+  max_experience?: number;
+  // Фильтр по стоимости услуг: клиника попадает в выдачу, если предлагает
+  // хотя бы одну услугу в указанном диапазоне цен.
+  min_price?: number;
+  max_price?: number;
   payment_method?: string;
   page?: number;
   page_size?: number;

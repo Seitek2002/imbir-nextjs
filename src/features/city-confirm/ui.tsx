@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { GeoIcon } from "@/shared/assets/icons";
 import { useCityStore } from "@/shared/store";
@@ -33,11 +33,33 @@ function useDetectedCity(): string | null {
 }
 
 export const CityConfirmBanner = () => {
-  const { isSet, setCity, dismiss } = useCityStore();
+  const { isSet, manuallySelected, setCity, dismiss, applyDetectedCity } =
+    useCityStore();
   const detectedCity = useDetectedCity();
   const [closed, setClosed] = useState(false);
 
-  if (closed || !detectedCity || isSet) return null;
+  // Пока город не выбран вручную — синхронизируем стор с задетекченным по IP
+  // (cookie imbir-detected-city, ставит middleware), чтобы и хедер, и выдача
+  // каталога сразу показывали реальный город, а не хардкод «Бишкек».
+  //
+  // ВАЖНО: применяем ТОЛЬКО после регидрации persist-стора. Гидратация
+  // zustand/persist асинхронна — если выставить город до её окончания, она
+  // перезапишет его обратно на дефолт (гонка, теряется наш set). Поэтому либо
+  // применяем сразу (если уже гидратирован), либо по onFinishHydration.
+  useEffect(() => {
+    if (!detectedCity) return;
+    if (useCityStore.persist.hasHydrated()) {
+      applyDetectedCity(detectedCity);
+      return;
+    }
+    return useCityStore.persist.onFinishHydration(() => {
+      applyDetectedCity(detectedCity);
+    });
+  }, [detectedCity, applyDetectedCity]);
+
+  // Баннер не нужен, если города нет, он уже подтверждён/скрыт, или выбран
+  // вручную (напр. восстановлен из localStorage у вернувшегося пользователя).
+  if (closed || !detectedCity || isSet || manuallySelected) return null;
 
   const handleConfirm = () => {
     setCity(detectedCity);

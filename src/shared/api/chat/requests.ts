@@ -3,6 +3,7 @@ import {
   AiChatMessage,
   ChatMessage,
   ChatRoom,
+  ChatUnreadCountResponse,
   CreateChatRoomRequest,
   SendAiMessageRequest,
 } from "./types";
@@ -12,6 +13,14 @@ import {
 export const getChatRooms = async (): Promise<ChatRoom[]> => {
   const { data } = await apiClient.get<ChatRoom[]>("/api/chat/rooms/");
   return data;
+};
+
+// Общее число непрочитанных входящих сообщений — для бейджа в хедере.
+export const getChatUnreadCount = async (): Promise<number> => {
+  const { data } = await apiClient.get<ChatUnreadCountResponse>(
+    "/api/chat/rooms/unread-count/",
+  );
+  return data.unread_count;
 };
 
 // Creates a room with another user, or returns the existing one (no duplicates).

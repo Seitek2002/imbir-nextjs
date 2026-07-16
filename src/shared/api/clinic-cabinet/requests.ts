@@ -9,6 +9,7 @@ import {
   ClinicPrivateProfile,
   ClinicServiceBody,
   ClinicStats,
+  CreateClinicDoctorRequest,
   CreateInviteRequest,
   InviteLink,
   UpdateBranchRequest,
@@ -93,6 +94,19 @@ export const getClinicDoctors = async (): Promise<{
 }> => {
   const { data } = await apiClient.get<{ data: ClinicDoctorItem[] }>(
     "/api/clinic/doctors/",
+  );
+  return data;
+};
+
+// Регистрация врача клиникой из кабинета. Создаёт User(role=doctor) +
+// DoctorProfile (город/страна клиники) + DoctorClinicLink. Почта и телефон
+// должны быть уникальны (иначе 400).
+export const createClinicDoctor = async (
+  body: CreateClinicDoctorRequest,
+): Promise<ClinicDoctorItem> => {
+  const { data } = await apiClient.post<ClinicDoctorItem>(
+    "/api/clinic/doctors/",
+    body,
   );
   return data;
 };
