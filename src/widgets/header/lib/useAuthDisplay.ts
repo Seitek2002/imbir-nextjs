@@ -23,7 +23,7 @@ const useHydrated = () =>
     () => false,
   );
 
-// Даёт хедеру (default-content.tsx, notifications-bell.tsx) значение,
+// Даёт хедеру (default-content.tsx, chat-button.tsx) значение,
 // безопасное для самого первого рендера — до и после гидратации.
 //
 // В отличие от AuthGuard (где token нужен только внутри эффекта-редиректа

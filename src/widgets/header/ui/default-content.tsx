@@ -6,7 +6,6 @@ import Link from "next/link";
 import { GlobalSearch } from "@/features/global-search";
 
 import {
-  ChatIcon,
   GeoBtnArrowIcon,
   GeoIcon,
   Logo,
@@ -18,8 +17,8 @@ import { useCityStore } from "@/shared/store";
 import { Button, IconBtn } from "@/shared/ui";
 
 import { useAuthDisplay } from "../lib/useAuthDisplay";
+import { HeaderChatButton } from "./chat-button";
 import { CitySelectorModal } from "./city-selector";
-import { NotificationsBell } from "./notifications-bell";
 
 const ROLE_ROUTE: Record<string, string> = {
   patient: "/profile",
@@ -37,7 +36,6 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
   const profileHref = isAuthed
     ? ((role && ROLE_ROUTE[role]) ?? ROUTES.PROFILE)
     : ROUTES.LOGIN;
-  const chatHref = isAuthed ? ROUTES.CHATS : ROUTES.LOGIN;
 
   return (
     <>
@@ -68,12 +66,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
 
           {/* Mobile right icons */}
           <div className="flex md:hidden gap-2">
-            <NotificationsBell />
-            <Link href={chatHref}>
-              <IconBtn variant="outline" size="sm">
-                <ChatIcon className="size-5" />
-              </IconBtn>
-            </Link>
+            <HeaderChatButton />
             <Link href={profileHref}>
               <IconBtn variant="outline" size="sm">
                 <ProfileIcon className="size-5" />
@@ -94,12 +87,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             >
               <GlobalSearch />
             </Suspense>
-            <NotificationsBell />
-            <Link href={chatHref}>
-              <IconBtn variant="outline" size="sm">
-                <ChatIcon className="size-5" />
-              </IconBtn>
-            </Link>
+            <HeaderChatButton />
             <Link href={profileHref}>
               <IconBtn variant="outline" size="sm">
                 <ProfileIcon className="size-5" />

@@ -1,13 +1,11 @@
-﻿"use client";
+"use client";
 
 import { FC, ReactNode } from "react";
 
 import { useRouter } from "next/navigation";
 
 import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets/icons";
-
-import { useDoctorCabinet } from "./doctor-profile/useDoctorCabinet";
-import { DoctorSidebar } from "./sidebar";
+import { IconBtn } from "@/shared/ui";
 
 type Props = {
   title: string;
@@ -30,16 +28,15 @@ export const DoctorPageLayout: FC<Props> = ({
   headerRight,
 }) => {
   const router = useRouter();
-  const { profile } = useDoctorCabinet();
 
   const rightSlot =
     headerRight ??
     (editAction ? (
-      <button
+      <IconBtn
         onClick={onEditToggle}
-        className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-          editAction === "save" ? "text-primary" : "text-muted hover:bg-surface"
-        }`}
+        variant="text"
+        size="sm"
+        className={editAction === "save" ? "text-primary" : "text-muted"}
         aria-label={editAction === "save" ? "Сохранить" : "Редактировать"}
       >
         {editAction === "save" ? (
@@ -47,22 +44,23 @@ export const DoctorPageLayout: FC<Props> = ({
         ) : (
           <EditIcon className="w-5 h-5" />
         )}
-      </button>
+      </IconBtn>
     ) : (
       <div className="w-10" />
     ));
 
   return (
-    <div className="w-full min-h-screen bg-[#FAFAFA]">
+    <>
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
-        <button
+        <IconBtn
           onClick={() => router.back()}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
+          variant="text"
+          size="sm"
           aria-label="Назад"
         >
           <HeaderBackIcon className="w-5 h-5" />
-        </button>
+        </IconBtn>
 
         <h1 className="text-base font-semibold text-foreground truncate mx-2">
           {title}
@@ -71,25 +69,8 @@ export const DoctorPageLayout: FC<Props> = ({
         {rightSlot}
       </div>
 
-      {/* Desktop layout */}
-      <div className="max-w-360 mx-auto px-4 lg:px-10 py-4 lg:py-8">
-        <h1 className="text-[40px] font-semibold text-foreground mb-8 hidden lg:block">
-          Мой профиль
-        </h1>
-
-        <div className="flex gap-6">
-          <div className="hidden lg:block">
-            <DoctorSidebar
-              fullName={profile?.fullName ?? ""}
-              photo={profile?.photo}
-              specialty={profile?.specialty ?? ""}
-              rating={profile?.rating ?? 0}
-            />
-          </div>
-
-          <main className="flex-1 min-w-0">{children}</main>
-        </div>
-      </div>
-    </div>
+      {/* Desktop layout page content */}
+      <div className="hidden lg:block">{children}</div>
+    </>
   );
 };

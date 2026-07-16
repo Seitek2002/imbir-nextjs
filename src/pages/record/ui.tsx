@@ -22,7 +22,7 @@ export const RecordPage = () => {
     mobileStep,
     handleRecordBack,
     selectedDoctor,
-    selectedService,
+    selectedServices,
     mode,
     selectedDate,
     selectedTime,
@@ -62,10 +62,10 @@ export const RecordPage = () => {
           </div>
 
           <div className="hidden lg:block">
-            {selectedDoctor && selectedService && (
+            {selectedDoctor && selectedServices.length > 0 && (
               <SummaryCard
                 doctor={selectedDoctor}
-                service={selectedService}
+                services={selectedServices}
                 mode={mode}
                 selectedDate={selectedDate}
                 selectedTime={selectedTime}
@@ -79,12 +79,11 @@ export const RecordPage = () => {
 
       <SelectionModal form={form} />
 
-      {showSuccess && (
-        <SuccessModal
-          onClose={() => setShowSuccess(false)}
-          googleMeetLink={googleMeetLink}
-        />
-      )}
+      <SuccessModal
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+        googleMeetLink={googleMeetLink}
+      />
     </main>
   );
 };

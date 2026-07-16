@@ -1,6 +1,8 @@
 "use client";
 
-import { FC, ReactNode, useEffect, useRef, useState } from "react";
+import { FC, ReactNode } from "react";
+
+import { useInView } from "@/shared/lib/useInView";
 
 type Props = {
   children: ReactNode;
@@ -21,36 +23,11 @@ export const LazyInView: FC<Props> = ({
   rootMargin = "300px 0px",
   className,
 }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(false);
-
-  useEffect(() => {
-    if (shown) return;
-    const node = ref.current;
-    if (!node) return;
-
-    // No IntersectionObserver (very old WebView) → just render eagerly.
-    if (typeof IntersectionObserver === "undefined") {
-      queueMicrotask(() => setShown(true));
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          setShown(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [shown, rootMargin]);
+  const { ref, inView } = useInView<HTMLDivElement>(rootMargin);
 
   return (
     <div ref={ref} className={className} style={{ minHeight }}>
-      {shown ? children : null}
+      {inView ? children : null}
     </div>
   );
 };

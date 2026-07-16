@@ -1,12 +1,46 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 
-import { DoctorPageLayout } from "@/widgets/doctor/layout";
+import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
-import { FieldView, formStyles } from "@/widgets/doctor/layout";
+import { FieldView } from "@/widgets/doctor/layout";
 
-const { inp, lbl } = formStyles;
+import { Button, IconBtn, Input } from "@/shared/ui";
+
+const PlusIcon: FC<{ className?: string }> = ({ className }) => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 14 14"
+    fill="none"
+    className={className}
+  >
+    <path
+      d="M7 2V12M2 7H12"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const CloseIcon: FC<{ className?: string }> = ({ className }) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    className={className}
+  >
+    <path
+      d="M12 4L4 12M4 4L12 12"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
 
 type D = {
   university: string;
@@ -89,92 +123,80 @@ export const DoctorEducationPage: FC = () => {
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
-        <button
+        <Button
+          variant={isEditing ? "default" : "outline"}
+          size="sm"
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-primary text-white hover:bg-primary-dark" : "border border-border text-secondary hover:bg-surface"}`}
         >
           {isSaving
             ? "Сохранение..."
             : isEditing
               ? "Сохранить"
               : "Редактировать"}
-        </button>
+        </Button>
       </div>
+
+      <DoctorMyDataTabs />
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>ВУЗ</label>
-                <input
-                  value={d.university}
-                  onChange={(e) => set("university", e.target.value)}
-                  placeholder="Название учебного заведения"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="ВУЗ"
+                value={d.university}
+                onChange={(e) => set("university", e.target.value)}
+                placeholder="Название учебного заведения"
+              />
             ) : (
               <FieldView label="ВУЗ" value={d.university} />
             )}
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Год окончания</label>
-                <input
-                  value={d.graduationYear}
-                  onChange={(e) => set("graduationYear", e.target.value)}
-                  placeholder="ГГГГ"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Год окончания"
+                value={d.graduationYear}
+                onChange={(e) => set("graduationYear", e.target.value)}
+                placeholder="ГГГГ"
+              />
             ) : (
               <FieldView label="Год окончания" value={d.graduationYear} />
             )}
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Интернатура</label>
-                <input
-                  value={d.internship}
-                  onChange={(e) => set("internship", e.target.value)}
-                  placeholder="Специальность"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Интернатура"
+                value={d.internship}
+                onChange={(e) => set("internship", e.target.value)}
+                placeholder="Специальность"
+              />
             ) : (
               <FieldView label="Интернатура" value={d.internship} />
             )}
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Ординатура</label>
-                <input
-                  value={d.residency}
-                  onChange={(e) => set("residency", e.target.value)}
-                  placeholder="Специальность"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Ординатура"
+                value={d.residency}
+                onChange={(e) => set("residency", e.target.value)}
+                placeholder="Специальность"
+              />
             ) : (
               <FieldView label="Ординатура" value={d.residency} />
             )}
           </div>
           <div className="lg:col-span-2">
             {isEditing ? (
-              <>
-                <label className={lbl}>Специализация по диплому</label>
-                <input
-                  value={d.diplomaSpecialty}
-                  onChange={(e) => set("diplomaSpecialty", e.target.value)}
-                  placeholder="Введите специализацию"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Специализация по диплому"
+                value={d.diplomaSpecialty}
+                onChange={(e) => set("diplomaSpecialty", e.target.value)}
+                placeholder="Введите специализацию"
+              />
             ) : (
               <FieldView
                 label="Специализация по диплому"
@@ -186,22 +208,17 @@ export const DoctorEducationPage: FC = () => {
             <div className="flex items-center justify-between mb-2">
               <p className="text-muted text-sm">Дополнительное образование</p>
               {isEditing && (
-                <button
+                <Button
+                  variant="text"
+                  size="xs"
+                  className="text-primary"
+                  IconLeft={PlusIcon}
                   onClick={() =>
                     set("additionalEducation", [...d.additionalEducation, ""])
                   }
-                  className="text-primary text-sm font-medium flex items-center gap-1"
                 >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path
-                      d="M7 2V12M2 7H12"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
                   Добавить
-                </button>
+                </Button>
               )}
             </div>
             {isEditing ? (
@@ -213,7 +230,7 @@ export const DoctorEducationPage: FC = () => {
                 )}
                 {d.additionalEducation.map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <input
+                    <Input
                       value={item}
                       onChange={(e) =>
                         set(
@@ -224,31 +241,21 @@ export const DoctorEducationPage: FC = () => {
                         )
                       }
                       placeholder="Курс, год"
-                      className={`${inp} flex-1`}
+                      className="flex-1"
                     />
-                    <button
+                    <IconBtn
                       onClick={() =>
                         set(
                           "additionalEducation",
                           d.additionalEducation.filter((_, j) => j !== i),
                         )
                       }
-                      className="w-9 h-9 flex items-center justify-center text-dim hover:text-primary transition-colors"
+                      variant="text"
+                      size="xs"
+                      className="text-dim hover:text-primary"
                     >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                      >
-                        <path
-                          d="M12 4L4 12M4 4L12 12"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </button>
+                      <CloseIcon />
+                    </IconBtn>
                   </div>
                 ))}
               </div>

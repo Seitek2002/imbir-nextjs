@@ -7,6 +7,9 @@ import {
   PasswordResetConfirmRequest,
   PasswordResetRequest,
   PasswordResetVerifyRequest,
+  PhoneRegisterConfirmRequest,
+  PhoneRegisterRequestRequest,
+  PhoneRegisterRequestSuccess,
   RefreshResponse,
   RegisterClientRequest,
   RegisterClinicRequest,
@@ -45,6 +48,26 @@ export const registerClientFn = async (
 ): Promise<AuthResponse> => {
   const { data } = await apiClient.post<AuthResponse>(
     "/api/auth/register/client/",
+    body,
+  );
+  return data;
+};
+
+export const registerPhoneRequestFn = async (
+  body: PhoneRegisterRequestRequest,
+): Promise<PhoneRegisterRequestSuccess> => {
+  const { data } = await apiClient.post<PhoneRegisterRequestSuccess>(
+    "/api/auth/register/phone/request/",
+    body,
+  );
+  return data;
+};
+
+export const registerPhoneConfirmFn = async (
+  body: PhoneRegisterConfirmRequest,
+): Promise<AuthResponse> => {
+  const { data } = await apiClient.post<AuthResponse>(
+    "/api/auth/register/phone/confirm/",
     body,
   );
   return data;

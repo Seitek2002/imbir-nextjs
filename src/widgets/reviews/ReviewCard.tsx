@@ -1,8 +1,7 @@
 ﻿import { FC } from "react";
 
-import Image from "next/image";
-
 import { StarIcon } from "@/shared/assets/icons";
+import { ImageWithFallback } from "@/shared/ui";
 
 export type ReviewProps = {
   id?: string | number;
@@ -45,14 +44,13 @@ export const ReviewCard: FC<ReviewProps> = ({
         <div className="flex items-center gap-3">
           {/* Аватарка */}
           <div className="size-10.5 rounded-full bg-border-soft shrink-0 overflow-hidden relative">
-            {avatarUrl && (
-              <Image
-                src={avatarUrl}
-                alt={author}
-                fill
-                className="object-cover"
-              />
-            )}
+            <ImageWithFallback
+              src={avatarUrl}
+              alt={author}
+              fill
+              className="object-cover"
+              fallback={null}
+            />
           </div>
 
           <div className="flex flex-col">

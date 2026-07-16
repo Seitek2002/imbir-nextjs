@@ -17,9 +17,11 @@ import {
   getDoctorReviews,
   replyToReview,
 } from "@/shared/api";
+import { ChatIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
+import { Button, IconBtn, Textarea } from "@/shared/ui";
 
 const resolveAuthorName = (author?: ReviewAuthor): string => {
   if (!author) return "Аноним";
@@ -29,17 +31,39 @@ const resolveAuthorName = (author?: ReviewAuthor): string => {
 
 const DURATION = 200;
 
-const StarFilled = ({ filled = true }: { filled?: boolean }) => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 14 14"
-    fill={filled ? colors.primary : "none"}
-    stroke={filled ? colors.primary : colors.border}
-    strokeWidth="1"
-  >
-    <path d="M7 1L8.85 4.83L13 5.43L10 8.36L10.71 12.5L7 10.54L3.29 12.5L4 8.36L1 5.43L5.15 4.83L7 1Z" />
-  </svg>
+const MONTHS = [
+  "Января",
+  "Февраля",
+  "Марта",
+  "Апреля",
+  "Мая",
+  "Июня",
+  "Июля",
+  "Августа",
+  "Сентября",
+  "Октября",
+  "Ноября",
+  "Декабря",
+];
+
+// "2025-11-20..." → "20 Ноября, 2025" (как в макете).
+const fmtReviewDate = (iso: string): string => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso.slice(0, 10);
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}, ${d.getFullYear()}`;
+};
+
+// Плашка со звёздами — тот же стиль, что в виджете отзывов на страницах
+// деталей врача/клиники/услуги (@/widgets/reviews).
+const StarPill: FC<{ rating: number }> = ({ rating }) => (
+  <div className="flex items-center bg-[#FFA18D] py-1.5 px-2.5 rounded-full gap-0.5 shrink-0">
+    {Array.from({ length: 5 }).map((_, i) => (
+      <StarIcon
+        key={i}
+        className={`size-3.5 ${i < rating ? "text-white" : "text-white/50"}`}
+      />
+    ))}
+  </div>
 );
 
 type ReplyModalProps = {
@@ -91,7 +115,7 @@ const ReplyModal: FC<ReplyModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
       <div
-        className="modal-overlay absolute inset-0 bg-black/50"
+        className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm"
         data-state={state}
         onClick={handleClose}
       />
@@ -103,10 +127,7 @@ const ReplyModal: FC<ReplyModalProps> = ({
           <h2 className="text-lg font-semibold text-foreground">
             Ответ на отзыв
           </h2>
-          <button
-            onClick={handleClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
-          >
+          <IconBtn onClick={handleClose} variant="text" size="sm">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M13.5 4.5L4.5 13.5M4.5 4.5L13.5 13.5"
@@ -115,30 +136,28 @@ const ReplyModal: FC<ReplyModalProps> = ({
                 strokeLinecap="round"
               />
             </svg>
-          </button>
+          </IconBtn>
         </div>
         <div className="p-5 space-y-4">
           <p className="text-muted text-sm">В ответ {reviewAuthor}</p>
-          <textarea
+          <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Введите текст"
             rows={4}
-            className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary resize-none transition-colors"
           />
           <div className="flex gap-3">
-            <button
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1"
               onClick={handleClose}
-              className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium hover:bg-background transition-colors"
             >
               Отмена
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors"
-            >
+            </Button>
+            <Button size="lg" className="flex-1" onClick={handleSubmit}>
               Отправить
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -180,7 +199,7 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
       <div
-        className="modal-overlay absolute inset-0 bg-black/50"
+        className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm"
         data-state={state}
         onClick={handleClose}
       />
@@ -192,10 +211,7 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
           <h2 className="text-lg font-semibold text-foreground">
             Пожаловаться
           </h2>
-          <button
-            onClick={handleClose}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface transition-colors"
-          >
+          <IconBtn onClick={handleClose} variant="text" size="sm">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
                 d="M13.5 4.5L4.5 13.5M4.5 4.5L13.5 13.5"
@@ -204,7 +220,7 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
                 strokeLinecap="round"
               />
             </svg>
-          </button>
+          </IconBtn>
         </div>
         <div className="p-5 space-y-3">
           <p className="text-muted text-sm mb-1">Выберите причину жалобы</p>
@@ -229,34 +245,34 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
             </label>
           ))}
           <div className="pt-2">
-            <label className="block text-muted text-sm mb-1.5">
-              Опишите причину
-            </label>
-            <textarea
+            <Textarea
+              label="Опишите причину"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Введите текст"
               rows={3}
-              className="w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary resize-none transition-colors"
             />
           </div>
           <div className="flex gap-3 pt-1">
-            <button
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1"
               onClick={handleClose}
-              className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium hover:bg-background transition-colors"
             >
               Отмена
-            </button>
-            <button
+            </Button>
+            <Button
+              size="lg"
+              className="flex-1"
               onClick={() => {
                 setReason("");
                 setComment("");
                 handleClose();
               }}
-              className="flex-1 py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors"
             >
               Отправить
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -271,77 +287,64 @@ type ReviewCardProps = {
 };
 
 const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
-  <div className="p-5 border-b border-border last:border-0">
+  <div className="bg-white border border-border-soft rounded-[20px] p-5">
+    {/* Шапка: автор + дата, справа — плашка со звёздами */}
     <div className="flex items-start justify-between gap-3">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-[#FFF0EE] flex items-center justify-center shrink-0">
-          <span className="text-primary font-semibold text-sm">
+        <div className="size-10.5 rounded-full bg-[#FFF0EE] flex items-center justify-center shrink-0">
+          <span className="text-primary font-semibold">
             {review.authorInitial}
           </span>
         </div>
         <div>
-          <p className="text-foreground font-medium text-sm">
+          <p className="text-foreground font-medium text-base">
             {review.authorName}
           </p>
-          <div className="flex items-center gap-0.5 mt-0.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <StarFilled key={i} filled={i < review.rating} />
-            ))}
-          </div>
+          <p className="text-muted text-sm mt-0.5">{review.date}</p>
         </div>
       </div>
-      <span className="text-muted text-xs shrink-0">{review.date}</span>
+      <StarPill rating={review.rating} />
     </div>
-    <p className="text-foreground text-sm mt-3 leading-relaxed">
-      {review.text}
-    </p>
+
+    <div className="h-px bg-border-soft my-4" />
+
+    <p className="text-secondary text-[15px] leading-relaxed">{review.text}</p>
+
+    {/* Действия врача */}
+    <div className="flex items-center gap-5 mt-4">
+      <Button
+        variant="text"
+        size="xs"
+        className="text-primary"
+        IconLeft={ChatIcon}
+        onClick={() => onReply(review)}
+      >
+        {review.reply ? "Изменить ответ" : "Ответить"}
+      </Button>
+      <Button
+        variant="text"
+        size="xs"
+        className="text-muted"
+        onClick={() => onComplain(review)}
+      >
+        Пожаловаться
+      </Button>
+    </div>
+
+    {/* Ответ врача */}
     {review.reply && (
-      <div className="mt-3 rounded-2xl bg-surface border border-border-soft p-3">
-        <p className="text-foreground font-medium text-xs mb-1">Ваш ответ</p>
-        <p className="text-secondary text-sm leading-relaxed">{review.reply}</p>
-        {review.replyTime && (
-          <p className="text-muted text-xs mt-1">{review.replyTime}</p>
-        )}
+      <div className="mt-4">
+        <p className="text-foreground font-medium text-sm mb-2">Ответ врача</p>
+        <div className="rounded-2xl bg-surface p-4">
+          <p className="text-secondary text-sm leading-relaxed">
+            {review.reply}
+          </p>
+          {review.replyTime && (
+            <p className="text-muted text-xs mt-2">{review.replyTime}</p>
+          )}
+        </div>
       </div>
     )}
-    <div className="flex items-center gap-4 mt-3">
-      <button
-        onClick={() => onReply(review)}
-        className="text-muted text-xs flex items-center gap-1 hover:text-primary transition-colors"
-      >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path
-            d="M1.5 2.5H12.5V9.5H8L5 12V9.5H1.5V2.5Z"
-            stroke="currentColor"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        {review.reply ? "Изменить ответ" : "Ответить"}
-      </button>
-      <button
-        onClick={() => onComplain(review)}
-        className="text-muted text-xs flex items-center gap-1 hover:text-primary transition-colors"
-      >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path
-            d="M7 1L13 13H1L7 1Z"
-            stroke="currentColor"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M7 5.5V7.5M7 9.5V10"
-            stroke="currentColor"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-          />
-        </svg>
-        Пожаловаться
-      </button>
-    </div>
   </div>
 );
 
@@ -367,10 +370,10 @@ export const DoctorReviewsPage: FC = () => {
       authorName: name,
       authorInitial: name.charAt(0).toUpperCase(),
       rating: r.rating,
-      date: r.created_at.slice(0, 10),
+      date: fmtReviewDate(r.created_at),
       text: r.text,
       reply: r.reply?.text,
-      replyTime: r.reply ? r.reply.created_at.slice(0, 10) : undefined,
+      replyTime: r.reply ? fmtReviewDate(r.reply.created_at) : undefined,
     };
   });
 
@@ -390,53 +393,57 @@ export const DoctorReviewsPage: FC = () => {
   return (
     <>
       <DoctorPageLayout title="Отзывы">
-        <h2 className="text-[28px] font-semibold text-foreground mb-6 hidden lg:block">
+        <h2 className="text-[32px] font-semibold text-foreground mb-6 hidden lg:block">
           Отзывы
         </h2>
 
-        <div className="bg-white rounded-3xl border border-border p-5 mb-4 flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <span className="text-3xl font-bold text-foreground">
-              {profile?.rating ?? "—"}
-            </span>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-0.5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <StarFilled key={i} />
-                ))}
+        {/* Статистика — те же плитки, что в виджете отзывов на деталях */}
+        <div className="grid grid-cols-2 gap-4 mb-4 max-w-xl">
+          <div className="bg-white border border-border-soft rounded-2xl p-5 sm:p-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-[#FFA18D] rounded-xl size-11 flex items-center justify-center shrink-0">
+                <StarIcon className="size-5 text-white" />
               </div>
-              <span className="text-muted text-xs mt-0.5">Средняя оценка</span>
+              <span className="text-[28px] font-semibold text-foreground">
+                {profile?.rating ?? "—"}
+              </span>
             </div>
+            <span className="text-muted block mt-3">Средняя оценка</span>
           </div>
-          <div className="w-px h-10 bg-border" />
-          <div>
-            <span className="text-3xl font-bold text-foreground">
-              {profile?.totalReviews ?? "—"}
-            </span>
-            <p className="text-muted text-xs mt-0.5">Всего отзывов</p>
+
+          <div className="bg-white border border-border-soft rounded-2xl p-5 sm:p-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-[#FFA18D] rounded-xl size-11 flex items-center justify-center shrink-0">
+                <ChatIcon className="size-5 text-white" />
+              </div>
+              <span className="text-[28px] font-semibold text-foreground">
+                {profile?.totalReviews ?? "—"}
+              </span>
+            </div>
+            <span className="text-muted block mt-3">Всего отзывов</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl border border-border overflow-hidden">
-          {isLoading ? (
-            <div className="p-10 text-center text-muted text-sm">
-              Загрузка...
-            </div>
-          ) : reviews.length === 0 ? (
-            <div className="p-10 text-center text-muted text-sm">
-              Отзывов пока нет
-            </div>
-          ) : (
-            reviews.map((r) => (
+        {isLoading ? (
+          <div className="bg-white rounded-[20px] border border-border-soft p-10 text-center text-muted text-sm">
+            Загрузка...
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="bg-white rounded-[20px] border border-border-soft p-10 text-center text-muted text-sm">
+            Отзывов пока нет
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {reviews.map((r) => (
               <ReviewCard
                 key={r.id}
                 review={r}
                 onReply={setReplyTarget}
                 onComplain={setComplaintTarget}
               />
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </DoctorPageLayout>
 
       <ReplyModal

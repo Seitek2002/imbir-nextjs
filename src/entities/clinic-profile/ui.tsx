@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  type FC,
-  type SVGProps,
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -10,98 +8,31 @@ import {
   useState,
 } from "react";
 
-import Image from "next/image";
-
 import type { UpdateClinicProfileBody } from "@/shared/api";
-import { colors } from "@/shared/config";
-import { Button, Input, PhoneInput, Textarea } from "@/shared/ui";
+import {
+  Button,
+  Checkbox,
+  ImageWithFallback,
+  Input,
+  PhoneInput,
+  Textarea,
+} from "@/shared/ui";
 
 import type { ClinicProfile } from "./model";
-
-// ─── Icons ─────────────────────────────────────────────────────────────────
-
-const UploadIcon: FC<SVGProps<SVGSVGElement>> = (props) => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...props}>
-    <path
-      d="M2 11L2 14L5 14M14 5L14 2L11 2M5 2L2 2L2 5M11 14L14 14L14 11"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const FileIcon: FC<SVGProps<SVGSVGElement>> = (props) => (
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" {...props}>
-    <rect width="32" height="32" rx="8" fill="#F2F4F7" />
-    <path
-      d="M11 10C11 9.44772 11.4477 9 12 9H19.5858C19.851 9 20.1054 9.10536 20.2929 9.29289L22.7071 11.7071C22.8946 11.8946 23 12.149 23 12.4142V22C23 22.5523 22.5523 23 22 23H12C11.4477 23 11 22.5523 11 22V10Z"
-      stroke={colors.secondary}
-      strokeWidth="1.5"
-    />
-    <path
-      d="M19 9V12C19 12.5523 19.4477 13 20 13H23"
-      stroke={colors.secondary}
-      strokeWidth="1.5"
-    />
-  </svg>
-);
-
-// ─── Sub-components ─────────────────────────────────────────────────────────
-
-const SectionCard = ({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) => (
-  <div className="bg-white rounded-3xl p-8 border border-border mb-6">
-    <h3 className="text-xl font-semibold text-foreground mb-6">{title}</h3>
-    {children}
-  </div>
-);
-
-const FieldView = ({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) => (
-  <div>
-    <div className="text-xs text-muted mb-1">{label}</div>
-    <div className="text-foreground text-sm">{children}</div>
-  </div>
-);
-
-// ─── Schedule helpers ────────────────────────────────────────────────────────
-
-type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
-
-const DAY_LABELS: { key: DayKey; ru: string }[] = [
-  { key: "mon", ru: "ПН" },
-  { key: "tue", ru: "ВТ" },
-  { key: "wed", ru: "СР" },
-  { key: "thu", ru: "ЧТ" },
-  { key: "fri", ru: "ПТ" },
-  { key: "sat", ru: "СБ" },
-  { key: "sun", ru: "ВС" },
-];
-
-// Ключ формы → английское название дня (формат бэка)
-const DAY_API: Record<DayKey, string> = {
-  mon: "monday",
-  tue: "tuesday",
-  wed: "wednesday",
-  thu: "thursday",
-  fri: "friday",
-  sat: "saturday",
-  sun: "sunday",
-};
-
-type DayState = { open: string; close: string; enabled: boolean };
+import {
+  DAY_API,
+  DAY_LABELS,
+  type DayKey,
+  type DayState,
+  FieldRow,
+  FileIcon,
+  LocationMap,
+  SectionCard,
+  UploadIcon,
+  csv,
+  toApiDate,
+  toDay,
+} from "./shared-ui";
 
 type FormState = {
   name: string;
@@ -112,6 +43,8 @@ type FormState = {
   fullAddress: string;
   phone: string;
   website: string;
+  latitude: string;
+  longitude: string;
   legalName: string;
   registrationNumber: string;
   licenseNumber: string;
@@ -138,6 +71,8 @@ const buildState = (p: ClinicProfile): FormState => ({
   fullAddress: p.fullAddress ?? "",
   phone: p.phone ?? "",
   website: p.website ?? "",
+  latitude: p.latitude ?? "",
+  longitude: p.longitude ?? "",
   legalName: p.legalName ?? "",
   registrationNumber: p.registrationNumber ?? "",
   licenseNumber: p.licenseNumber ?? "",
@@ -163,30 +98,6 @@ const buildState = (p: ClinicProfile): FormState => ({
   emergency24: p.workSchedule.emergency24 ?? false,
 });
 
-const toDay = (d: {
-  open?: string;
-  close?: string;
-  enabled?: boolean;
-}): DayState => ({
-  open: d?.open ?? "",
-  close: d?.close ?? "",
-  enabled: d?.enabled ?? false,
-});
-
-const csv = (s: string): string[] =>
-  s
-    .split(",")
-    .map((x) => x.trim())
-    .filter(Boolean);
-
-// "ДД.ММ.ГГГГ" → "ГГГГ-ММ-ДД"; уже-ISO/пусто отдаём как есть
-const toApiDate = (v: string): string | null => {
-  const t = v.trim();
-  if (!t) return null;
-  const m = t.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-  return m ? `${m[3]}-${m[2]}-${m[1]}` : t;
-};
-
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export type ClinicProfileFormHandle = {
@@ -210,6 +121,8 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
       phone,
       email,
       website,
+      latitude,
+      longitude,
       workSchedule,
       legalName,
       registrationNumber,
@@ -250,6 +163,8 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         country: d.country || undefined,
         city: d.city || undefined,
         address: d.fullAddress || undefined,
+        latitude: d.latitude || undefined,
+        longitude: d.longitude || undefined,
         legal_name: d.legalName || undefined,
         reg_number: d.registrationNumber || undefined,
         license_number: d.licenseNumber || undefined,
@@ -324,21 +239,20 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 />
                 <div className="flex items-center gap-4">
                   <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-                    {logoPreview ? (
-                      <Image
-                        src={logoPreview}
-                        alt="Logo"
-                        width={96}
-                        height={96}
-                        sizes="96px"
-                        unoptimized={logoPreview.startsWith("data:")}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-white text-4xl font-bold">
-                        {d.name.charAt(0)}
-                      </span>
-                    )}
+                    <ImageWithFallback
+                      src={logoPreview}
+                      alt="Logo"
+                      width={96}
+                      height={96}
+                      sizes="96px"
+                      unoptimized={logoPreview?.startsWith("data:")}
+                      className="w-full h-full object-cover"
+                      fallback={
+                        <span className="text-white text-4xl font-bold">
+                          {d.name.charAt(0)}
+                        </span>
+                      }
+                    />
                   </div>
                   <Button
                     variant="outline"
@@ -378,13 +292,14 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                       key={i}
                       className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
                     >
-                      <Image
+                      <ImageWithFallback
                         src={photo}
                         alt={`Photo ${i + 1}`}
                         width={96}
                         height={96}
                         sizes="96px"
                         className="w-full h-full object-cover"
+                        fallback={null}
                       />
                     </div>
                   ))}
@@ -395,47 +310,47 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
               </div>
             </>
           ) : (
-            <div className="flex flex-col gap-5">
-              <FieldView label="Название">{name}</FieldView>
+            <div>
+              <FieldRow label="Название">{name}</FieldRow>
 
-              <div>
-                <div className="text-xs text-muted mb-2">Логотип</div>
+              <div className="py-3 border-b border-background">
+                <div className="text-muted text-sm mb-2">Логотип</div>
                 <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-                  {logo ? (
-                    <Image
-                      src={logo}
-                      alt="Logo"
-                      width={96}
-                      height={96}
-                      sizes="96px"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-4xl font-bold">
-                      {name.charAt(0)}
-                    </span>
-                  )}
+                  <ImageWithFallback
+                    src={logo}
+                    alt="Logo"
+                    width={96}
+                    height={96}
+                    sizes="96px"
+                    className="w-full h-full object-cover"
+                    fallback={
+                      <span className="text-white text-4xl font-bold">
+                        {name.charAt(0)}
+                      </span>
+                    }
+                  />
                 </div>
               </div>
 
-              <FieldView label="Тип">{type}</FieldView>
-              <FieldView label="Описание">{description}</FieldView>
+              <FieldRow label="Тип">{type}</FieldRow>
+              <FieldRow label="Описание">{description}</FieldRow>
 
-              <div>
-                <div className="text-xs text-muted mb-2">Фотографии</div>
+              <div className="pt-3">
+                <div className="text-muted text-sm mb-2">Фотографии</div>
                 <div className="flex items-center gap-4 overflow-x-auto pb-2">
                   {photos.map((photo, i) => (
                     <div
                       key={i}
                       className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
                     >
-                      <Image
+                      <ImageWithFallback
                         src={photo}
                         alt={`Photo ${i + 1}`}
                         width={96}
                         height={96}
                         sizes="96px"
                         className="w-full h-full object-cover"
+                        fallback={null}
                       />
                     </div>
                   ))}
@@ -448,7 +363,7 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         {/* ── 2. Локация и контакты ──────────────────────────────────────── */}
         <SectionCard title="Локация и контакты">
           {isEditing ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-6">
               <Input
                 label="Страна"
                 value={d.country}
@@ -463,7 +378,6 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 label="Полный адрес"
                 value={d.fullAddress}
                 onChange={(e) => set("fullAddress", e.target.value)}
-                className="md:col-span-2"
               />
               <PhoneInput
                 label="Телефон"
@@ -476,17 +390,43 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 type="url"
                 value={d.website}
                 onChange={(e) => set("website", e.target.value)}
-                className="md:col-span-2"
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Широта"
+                  value={d.latitude}
+                  onChange={(e) => set("latitude", e.target.value)}
+                  placeholder="42.8746"
+                />
+                <Input
+                  label="Долгота"
+                  value={d.longitude}
+                  onChange={(e) => set("longitude", e.target.value)}
+                  placeholder="74.5698"
+                />
+              </div>
+              <LocationMap
+                latitude={d.latitude}
+                longitude={d.longitude}
+                address={d.fullAddress}
               />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <FieldView label="Страна">{country}</FieldView>
-              <FieldView label="Город">{city}</FieldView>
-              <FieldView label="Полный адрес">{fullAddress}</FieldView>
-              <FieldView label="Телефон">{phone}</FieldView>
-              <FieldView label="Почта">{email}</FieldView>
-              <FieldView label="Сайт">{website}</FieldView>
+            <div>
+              <FieldRow label="Страна">{country}</FieldRow>
+              <FieldRow label="Город">{city}</FieldRow>
+              <FieldRow label="Полный адрес">{fullAddress}</FieldRow>
+              <FieldRow label="Телефон">{phone}</FieldRow>
+              <FieldRow label="Почта">{email}</FieldRow>
+              <FieldRow label="Сайт">{website}</FieldRow>
+              <div className="pt-3">
+                <div className="text-muted text-sm mb-2">Геолокация</div>
+                <LocationMap
+                  latitude={latitude}
+                  longitude={longitude}
+                  address={fullAddress}
+                />
+              </div>
             </div>
           )}
         </SectionCard>
@@ -522,17 +462,14 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                         onChange={(e) => setDay(key, { close: e.target.value })}
                         className="border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40"
                       />
-                      <label className="flex items-center gap-2 ml-2 text-sm text-secondary cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={day.enabled}
-                          onChange={(e) =>
-                            setDay(key, { enabled: e.target.checked })
-                          }
-                          className="accent-primary"
-                        />
-                        Рабочий
-                      </label>
+                      <Checkbox
+                        className="ml-2"
+                        label="Рабочий"
+                        checked={day.enabled}
+                        onChange={(e) =>
+                          setDay(key, { enabled: e.target.checked })
+                        }
+                      />
                     </div>
                   );
                 })}
@@ -588,17 +525,12 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
           </div>
 
           {isEditing ? (
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={d.emergency24}
-                onChange={(e) => set("emergency24", e.target.checked)}
-                className="accent-primary w-4 h-4"
-              />
-              <span className="text-sm text-foreground">
-                Экстренный приём 24/7
-              </span>
-            </label>
+            <Checkbox
+              size="large"
+              label="Экстренный приём 24/7"
+              checked={d.emergency24}
+              onChange={(e) => set("emergency24", e.target.checked)}
+            />
           ) : (
             workSchedule.emergency24 && (
               <div className="flex items-center gap-2">
@@ -662,22 +594,18 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-5">
-              <FieldView label="Юридическое название">{legalName}</FieldView>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <FieldView label="Регистрационный номер">
-                  {registrationNumber}
-                </FieldView>
-                <FieldView label="Номер лицензии">{licenseNumber}</FieldView>
-                <FieldView label="Дата выдачи лицензии">
-                  {licenseDate}
-                </FieldView>
-                <FieldView label="Орган, выдавший лицензию">
-                  {licenseAuthority}
-                </FieldView>
-              </div>
-              <div>
-                <div className="text-xs text-muted mb-2">
+            <div>
+              <FieldRow label="Юридическое название">{legalName}</FieldRow>
+              <FieldRow label="Регистрационный номер">
+                {registrationNumber}
+              </FieldRow>
+              <FieldRow label="Номер лицензии">{licenseNumber}</FieldRow>
+              <FieldRow label="Дата выдачи лицензии">{licenseDate}</FieldRow>
+              <FieldRow label="Орган, выдавший лицензию">
+                {licenseAuthority}
+              </FieldRow>
+              <div className="pt-3">
+                <div className="text-muted text-sm mb-2">
                   Документы (лицензии, регистрационные документы)
                 </div>
                 <div className="flex flex-wrap gap-4">
@@ -726,16 +654,16 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
               />
             </div>
           ) : (
-            <div className="flex flex-col gap-5">
-              <FieldView label="Основные направления">
+            <div>
+              <FieldRow label="Основные направления">
                 {mainDirections.join(", ")}
-              </FieldView>
-              <FieldView label="Узкие направления">
+              </FieldRow>
+              <FieldRow label="Узкие направления">
                 {narrowDirections.join(", ")}
-              </FieldView>
-              <FieldView label="Дополнительные услуги">
+              </FieldRow>
+              <FieldRow label="Дополнительные услуги">
                 {additionalServices.join(", ")}
-              </FieldView>
+              </FieldRow>
             </div>
           )}
         </SectionCard>

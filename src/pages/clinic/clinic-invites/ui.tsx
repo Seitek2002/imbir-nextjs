@@ -4,7 +4,7 @@ import { FC, useState } from "react";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { ClinicSidebar } from "@/widgets/clinic/sidebar";
+import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
@@ -17,7 +17,7 @@ import {
 import { GeoIcon, HistoryIcon, WarningIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { Button } from "@/shared/ui";
+import { Button, IconBtn } from "@/shared/ui";
 
 const LinkIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -152,201 +152,183 @@ export const ClinicInvitesPage: FC = () => {
     new Date(dateStr).toLocaleDateString("ru-RU");
 
   return (
-    <div className="w-full min-h-screen">
-      <div className="md:hidden flex items-center px-4 py-4 bg-white border-b border-border">
-        <h1 className="text-lg font-semibold text-foreground">
-          Пригласить врача
-        </h1>
-      </div>
-
-      <div className="max-w-360 mx-auto px-4 md:px-10 py-4 md:py-8">
-        <h1 className="text-[40px] font-semibold text-foreground mb-2 hidden md:block">
-          Пригласить врача
-        </h1>
-
-        <div className="flex gap-6">
-          <ClinicSidebar
-            clinicName={profile?.name ?? ""}
-            rating={profile?.rating}
-          />
-
-          <main className="flex-1 min-w-0 flex flex-col gap-6">
-            {/* Info banner */}
-            <div className="bg-primary-tint border border-[#FDDDD5] rounded-2xl p-4 flex gap-3">
-              <div className="size-9 rounded-xl bg-primary flex items-center justify-center shrink-0 mt-0.5">
-                <LinkIcon />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground text-sm mb-1">
-                  Как это работает
-                </p>
-                <p className="text-sm text-secondary">
-                  Создайте ссылку-приглашение для врача. Перейдя по ней, врач
-                  попадёт на регистрацию с уже предзаполненными данными вашей
-                  клиники и филиала. Ссылка действует 7 дней.
-                </p>
-              </div>
-            </div>
-
-            {!hasClinicId && (
-              <div className="bg-[#FFF8E6] border border-[#F5D889] rounded-2xl p-4 flex gap-3">
-                <div className="size-9 rounded-xl bg-[#F5D889] flex items-center justify-center shrink-0 mt-0.5">
-                  <WarningIcon className="text-foreground" />
-                </div>
-                <p className="text-sm text-secondary">
-                  Не удалось определить ID вашей клиники — ссылка-приглашение
-                  будет недоступна для копирования. Попробуйте обновить страницу
-                  или обратитесь в поддержку.
-                </p>
-              </div>
-            )}
-
-            {/* Generator */}
-            <div className="bg-white border border-border rounded-2xl p-5 flex flex-col gap-4">
-              <h2 className="font-semibold text-foreground text-lg">
-                Создать ссылку
-              </h2>
-
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-overlay">Филиал</span>
-                <div className="flex flex-col gap-2">
-                  {branchOptions.map((opt) => (
-                    <button
-                      key={opt.id ?? "main"}
-                      type="button"
-                      onClick={() => setSelectedBranchId(opt.id + "")}
-                      className={cn(
-                        "w-full rounded-xl border-2 p-3 text-left flex items-start gap-3 transition-colors",
-                        selectedBranchId === opt.id
-                          ? "border-primary bg-primary-tint"
-                          : "border-border hover:border-primary/40",
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "mt-0.5 size-4 rounded-full border-2 shrink-0 flex items-center justify-center",
-                          selectedBranchId === opt.id
-                            ? "border-primary"
-                            : "border-dim",
-                        )}
-                      >
-                        {selectedBranchId === opt.id && (
-                          <div className="size-2 rounded-full bg-primary" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">
-                          {opt.id === null
-                            ? (profile?.name ?? "Главный офис")
-                            : `Филиал`}
-                        </p>
-                        <p className="text-xs text-secondary flex items-center gap-1 mt-0.5">
-                          <GeoIcon className="size-3 text-primary shrink-0" />
-                          {opt.address}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <Button
-                className="w-full justify-center"
-                onClick={() => createMutation.mutate()}
-                disabled={createMutation.isPending}
-              >
-                {createMutation.isPending ? "Создание..." : "Создать ссылку"}
-              </Button>
-            </div>
-
-            {/* Links list */}
-            {links.length > 0 && (
-              <div className="flex flex-col gap-3">
-                <h2 className="font-semibold text-foreground text-lg">
-                  Созданные ссылки
-                </h2>
-                {links.map((link) => (
-                  <div
-                    key={link.id}
-                    className={cn(
-                      "bg-white border rounded-2xl p-4 flex flex-col gap-3",
-                      link.is_active
-                        ? "border-border"
-                        : "border-border opacity-50",
-                    )}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
-                          {getBranchLabel(link.branch)}
-                        </p>
-                        <p className="text-xs text-muted mt-0.5 font-mono truncate">
-                          {hasClinicId
-                            ? `/register?clinicId=${clinicId}${link.branch != null ? `&branchId=${link.branch}` : ""}`
-                            : "ID клиники недоступен"}
-                        </p>
-                      </div>
-                      <span
-                        className={cn(
-                          "shrink-0 text-xs px-2 py-0.5 rounded-full font-medium",
-                          link.is_valid
-                            ? "bg-green-100 text-green-700"
-                            : "bg-background text-muted",
-                        )}
-                      >
-                        {link.is_valid ? "Активна" : "Истекла"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-xs text-muted">
-                      <span className="flex items-center gap-1">
-                        <HistoryIcon className="size-3.5 text-primary" />
-                        Создана: {formatDate(link.created_at)}
-                      </span>
-                      {link.expires_at && (
-                        <span className="flex items-center gap-1">
-                          <HistoryIcon className="size-3.5 text-muted" />
-                          До: {formatDate(link.expires_at)}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 justify-center gap-2"
-                        onClick={() => handleCopy(link.id, link.branch)}
-                        disabled={!hasClinicId}
-                      >
-                        {copiedId === link.id ? (
-                          <>
-                            <CheckIcon />
-                            Скопировано
-                          </>
-                        ) : (
-                          <>
-                            <CopyIcon />
-                            Копировать ссылку
-                          </>
-                        )}
-                      </Button>
-                      <button
-                        type="button"
-                        onClick={() => deleteMutation.mutate(link.id)}
-                        disabled={deleteMutation.isPending}
-                        className="size-9 rounded-xl border border-border flex items-center justify-center text-muted hover:border-red-300 hover:text-red-500 transition-colors"
-                      >
-                        <TrashIcon />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </main>
+    <ClinicPageLayout
+      title="Пригласить врача"
+      mainClassName="flex flex-col gap-6"
+    >
+      {/* Info banner */}
+      <div className="bg-primary-tint border border-[#FDDDD5] rounded-2xl p-4 flex gap-3">
+        <div className="size-9 rounded-xl bg-primary flex items-center justify-center shrink-0 mt-0.5">
+          <LinkIcon />
+        </div>
+        <div>
+          <p className="font-semibold text-foreground text-sm mb-1">
+            Как это работает
+          </p>
+          <p className="text-sm text-secondary">
+            Создайте ссылку-приглашение для врача. Перейдя по ней, врач попадёт
+            на регистрацию с уже предзаполненными данными вашей клиники и
+            филиала. Ссылка действует 7 дней.
+          </p>
         </div>
       </div>
-    </div>
+
+      {!hasClinicId && (
+        <div className="bg-[#FFF8E6] border border-[#F5D889] rounded-2xl p-4 flex gap-3">
+          <div className="size-9 rounded-xl bg-[#F5D889] flex items-center justify-center shrink-0 mt-0.5">
+            <WarningIcon className="text-foreground" />
+          </div>
+          <p className="text-sm text-secondary">
+            Не удалось определить ID вашей клиники — ссылка-приглашение будет
+            недоступна для копирования. Попробуйте обновить страницу или
+            обратитесь в поддержку.
+          </p>
+        </div>
+      )}
+
+      {/* Generator */}
+      <div className="bg-white border border-border rounded-2xl p-5 flex flex-col gap-4">
+        <h2 className="font-semibold text-foreground text-lg">
+          Создать ссылку
+        </h2>
+
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-overlay">Филиал</span>
+          <div className="flex flex-col gap-2">
+            {branchOptions.map((opt) => (
+              <button
+                key={opt.id ?? "main"}
+                type="button"
+                onClick={() => setSelectedBranchId(opt.id + "")}
+                className={cn(
+                  "w-full rounded-xl border-2 p-3 text-left flex items-start gap-3 transition-colors",
+                  selectedBranchId === opt.id
+                    ? "border-primary bg-primary-tint"
+                    : "border-border hover:border-primary/40",
+                )}
+              >
+                <div
+                  className={cn(
+                    "mt-0.5 size-4 rounded-full border-2 shrink-0 flex items-center justify-center",
+                    selectedBranchId === opt.id
+                      ? "border-primary"
+                      : "border-dim",
+                  )}
+                >
+                  {selectedBranchId === opt.id && (
+                    <div className="size-2 rounded-full bg-primary" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {opt.id === null
+                      ? (profile?.name ?? "Главный офис")
+                      : `Филиал`}
+                  </p>
+                  <p className="text-xs text-secondary flex items-center gap-1 mt-0.5">
+                    <GeoIcon className="size-3 text-primary shrink-0" />
+                    {opt.address}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Button
+          className="w-full justify-center"
+          onClick={() => createMutation.mutate()}
+          disabled={createMutation.isPending}
+        >
+          {createMutation.isPending ? "Создание..." : "Создать ссылку"}
+        </Button>
+      </div>
+
+      {/* Links list */}
+      {links.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="font-semibold text-foreground text-lg">
+            Созданные ссылки
+          </h2>
+          {links.map((link) => (
+            <div
+              key={link.id}
+              className={cn(
+                "bg-white border rounded-2xl p-4 flex flex-col gap-3",
+                link.is_active ? "border-border" : "border-border opacity-50",
+              )}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {getBranchLabel(link.branch)}
+                  </p>
+                  <p className="text-xs text-muted mt-0.5 font-mono truncate">
+                    {hasClinicId
+                      ? `/register?clinicId=${clinicId}${link.branch != null ? `&branchId=${link.branch}` : ""}`
+                      : "ID клиники недоступен"}
+                  </p>
+                </div>
+                <span
+                  className={cn(
+                    "shrink-0 text-xs px-2 py-0.5 rounded-full font-medium",
+                    link.is_valid
+                      ? "bg-green-100 text-green-700"
+                      : "bg-background text-muted",
+                  )}
+                >
+                  {link.is_valid ? "Активна" : "Истекла"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4 text-xs text-muted">
+                <span className="flex items-center gap-1">
+                  <HistoryIcon className="size-3.5 text-primary" />
+                  Создана: {formatDate(link.created_at)}
+                </span>
+                {link.expires_at && (
+                  <span className="flex items-center gap-1">
+                    <HistoryIcon className="size-3.5 text-muted" />
+                    До: {formatDate(link.expires_at)}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 justify-center gap-2"
+                  onClick={() => handleCopy(link.id, link.branch)}
+                  disabled={!hasClinicId}
+                >
+                  {copiedId === link.id ? (
+                    <>
+                      <CheckIcon />
+                      Скопировано
+                    </>
+                  ) : (
+                    <>
+                      <CopyIcon />
+                      Копировать ссылку
+                    </>
+                  )}
+                </Button>
+                <IconBtn
+                  type="button"
+                  onClick={() => deleteMutation.mutate(link.id)}
+                  disabled={deleteMutation.isPending}
+                  variant="outline"
+                  size="sm"
+                  className="text-muted hover:border-red-300 hover:text-red-500"
+                >
+                  <TrashIcon />
+                </IconBtn>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </ClinicPageLayout>
   );
 };

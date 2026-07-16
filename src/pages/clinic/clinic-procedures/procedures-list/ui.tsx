@@ -6,7 +6,7 @@ import { colors } from "@/shared/config";
 import { ConfirmDialog, FilterPanel, IconBtn, SearchInput } from "@/shared/ui";
 
 import type { Procedure } from "./clinic-procedure/model";
-import { ProcedureCard } from "./clinic-procedure/ui";
+import { ProcedureCard, ProcedureRow } from "./clinic-procedure/ui";
 
 type Props = {
   procedures: Procedure[];
@@ -94,15 +94,29 @@ export const ProceduresList: FC<Props> = ({ procedures, onDelete }) => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredItems.map((procedure) => (
-            <ProcedureCard
-              key={procedure.id}
-              {...procedure}
-              onDelete={setPendingDeleteId}
-            />
-          ))}
-        </div>
+        <>
+          {/* Десктоп: сетка карточек */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredItems.map((procedure) => (
+              <ProcedureCard
+                key={procedure.id}
+                {...procedure}
+                onDelete={setPendingDeleteId}
+              />
+            ))}
+          </div>
+
+          {/* Мобайл: компактный список строк */}
+          <div className="md:hidden flex flex-col gap-3">
+            {filteredItems.map((procedure) => (
+              <ProcedureRow
+                key={procedure.id}
+                {...procedure}
+                onDelete={setPendingDeleteId}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       <ConfirmDialog
@@ -112,6 +126,7 @@ export const ProceduresList: FC<Props> = ({ procedures, onDelete }) => {
           if (pendingDeleteId) onDelete?.(pendingDeleteId);
           setPendingDeleteId(null);
         }}
+        variant="danger"
         title="Удалить процедуру?"
         description="Это действие нельзя отменить"
         confirmLabel="Удалить"

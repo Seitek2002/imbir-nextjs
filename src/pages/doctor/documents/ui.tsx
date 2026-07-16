@@ -1,14 +1,29 @@
-﻿"use client";
+"use client";
 
 import { FC, useRef, useState } from "react";
 
-import Image from "next/image";
-
-import { DoctorPageLayout } from "@/widgets/doctor/layout";
+import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
-import { FieldView, formStyles } from "@/widgets/doctor/layout";
+import { FieldView } from "@/widgets/doctor/layout";
 
-const { inp } = formStyles;
+import { Button, ImageWithFallback, Input } from "@/shared/ui";
+
+const AddIcon: FC<{ className?: string }> = ({ className }) => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 14 14"
+    fill="none"
+    className={className}
+  >
+    <path
+      d="M7 2V12M2 7H12"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
 
 export const DoctorDocumentsPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
@@ -63,18 +78,21 @@ export const DoctorDocumentsPage: FC = () => {
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
-        <button
+        <Button
+          variant={isEditing ? "default" : "outline"}
+          size="sm"
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-primary text-white hover:bg-primary-dark" : "border border-border text-secondary hover:bg-surface"}`}
         >
           {isSaving
             ? "Сохранение..."
             : isEditing
               ? "Сохранить"
               : "Редактировать"}
-        </button>
+        </Button>
       </div>
+
+      <DoctorMyDataTabs />
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8 space-y-6">
         <div>
@@ -89,20 +107,15 @@ export const DoctorDocumentsPage: FC = () => {
                   onChange={handleCertUpload}
                   className="hidden"
                 />
-                <button
+                <Button
+                  variant="text"
+                  size="xs"
+                  className="text-primary"
+                  IconLeft={AddIcon}
                   onClick={() => certRef.current?.click()}
-                  className="text-primary text-sm font-medium flex items-center gap-1"
                 >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path
-                      d="M7 2V12M2 7H12"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
                   Добавить документ
-                </button>
+                </Button>
               </>
             )}
           </div>
@@ -118,12 +131,35 @@ export const DoctorDocumentsPage: FC = () => {
                 key={i}
                 className="relative w-16 h-16 rounded-xl overflow-hidden border border-border bg-surface"
               >
-                <Image
+                <ImageWithFallback
                   src={cert}
                   alt={`cert-${i}`}
                   width={64}
                   height={64}
                   className="w-full h-full object-cover"
+                  fallback={
+                    <div className="w-full h-full flex items-center justify-center text-dim">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                      >
+                        <path
+                          d="M4 3h9l3 3v11a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M13 3v3h3"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  }
                 />
                 {isEditing && (
                   <button
@@ -164,15 +200,12 @@ export const DoctorDocumentsPage: FC = () => {
 
         <div>
           {isEditing ? (
-            <>
-              <label className={formStyles.lbl}>Номер лицензии</label>
-              <input
-                value={licenseNumber}
-                onChange={(e) => setLicenseNumber(e.target.value)}
-                placeholder="ЛИЦ-XXXXXX"
-                className={inp}
-              />
-            </>
+            <Input
+              label="Номер лицензии"
+              value={licenseNumber}
+              onChange={(e) => setLicenseNumber(e.target.value)}
+              placeholder="ЛИЦ-XXXXXX"
+            />
           ) : (
             <FieldView label="Номер лицензии" value={licenseNumber} />
           )}

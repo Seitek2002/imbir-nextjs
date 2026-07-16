@@ -13,7 +13,7 @@ import { ActiveFiltersChips } from "@/features/active-filters-chips";
 import { FiltersTrigger } from "@/features/mobile-filters";
 import { UrlSearchInput } from "@/features/search-by-query";
 
-import { api } from "@/shared/api";
+import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { Button } from "@/shared/ui";
 
@@ -61,10 +61,40 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
     typeof searchParams?.doc_price === "string" ? searchParams.doc_price : null;
   const isOnlineOnly = searchParams?.doc_online === "true";
 
+  // Врачи: город/онлайн/оценка/цена/стаж/текст и (при одной выбранной
+  // специальности) сама специализация — реальные query-параметры API (как
+  // на /specialists). page_size увеличен для клиентской страховки на случай
+  // 2+ выбранных специальностей — бэк принимает только одно значение
+  // specialization за запрос.
+  const [priceMin, priceMax] = currentPrice
+    ? currentPrice.split("-").map(Number)
+    : [undefined, undefined];
+  const [expMin, expMax] = currentExp
+    ? currentExp.split("-").map(Number)
+    : [undefined, undefined];
+  const selectedSpecs = currentSpec
+    ? currentSpec.split(",").filter(Boolean)
+    : [];
+
+  const doctorFilters: DoctorFilters = {
+    is_online: isOnlineOnly || undefined,
+    min_rating:
+      currentRating && currentRating !== "all"
+        ? parseFloat(currentRating)
+        : undefined,
+    min_price: priceMin,
+    max_price: priceMax,
+    min_experience: expMin,
+    max_experience: expMax,
+    specialization: selectedSpecs.length === 1 ? selectedSpecs[0] : undefined,
+    search: activeQuery || undefined,
+    page_size: 200,
+  };
+
   // 2. ПОЛУЧАЕМ ВСЕ ДАННЫЕ С СЕРВЕРА
   const { data: doctors = [], isLoading: isDocsLoading } = useQuery({
-    queryKey: ["doctors"],
-    queryFn: () => api.getDoctors(),
+    queryKey: doctorKeys.list(doctorFilters),
+    queryFn: () => api.getDoctors(doctorFilters),
   });
 
   const { data: clinics = [], isLoading: isClinicsLoading } = useQuery({
@@ -81,39 +111,11 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
 
   // 3. ФИЛЬТРУЕМ ДАННЫЕ НА ЛЕТУ ПО ЗАПРОСУ И ФИЛЬТРАМ
 
-  // --- ФИЛЬТР ВРАЧЕЙ ---
+  // --- ФИЛЬТР ВРАЧЕЙ --- страховка на клиенте только для случая 2+
+  // выбранных специальностей, всё остальное уже отфильтровано на бэке.
   const filteredDoctors = doctors.filter((doc) => {
-    if (activeQuery) {
-      const q = activeQuery.toLowerCase();
-      const matchesName = doc.name.toLowerCase().includes(q);
-      const matchesSpec = doc.specialty.toLowerCase().includes(q);
-      if (!matchesName && !matchesSpec) return false;
-    }
-
-    if (isOnlineOnly && !doc.isOnlineAvailable) return false;
-
-    if (currentSpec) {
-      const selectedSpecs = currentSpec.split(",");
-      if (!selectedSpecs.includes(doc.specialty)) return false;
-    }
-
-    if (currentRating && currentRating !== "all") {
-      const minRating = parseFloat(currentRating);
-      if (doc.rating < minRating) return false;
-    }
-
-    if (currentExp) {
-      const [minExp, maxExp] = currentExp.split("-").map(Number);
-      if (doc.experience < minExp || doc.experience > maxExp) return false;
-    }
-
-    if (currentPrice) {
-      const [minPrice, maxPrice] = currentPrice.split("-").map(Number);
-      const docMinPrice =
-        doc.workplaces.length > 0
-          ? Math.min(...doc.workplaces.map((w) => w.price))
-          : 0;
-      if (docMinPrice < minPrice || docMinPrice > maxPrice) return false;
+    if (selectedSpecs.length > 1 && !selectedSpecs.includes(doc.specialty)) {
+      return false;
     }
 
     return true;
@@ -145,7 +147,7 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
     filteredServices.length > 0;
 
   return (
-    <main className="min-h-screen bg-background md:bg-white flex flex-col">
+    <main className="min-h-screen bg-background md:bg-white flex flex-col pb-16 lg:pb-0">
       <Header title="Поиск" backTo={ROUTES.HOME}>
         <div className="flex gap-3 items-center mt-3 md:mt-0 md:block">
           <div className="flex-1">

@@ -6,7 +6,11 @@ import { TrashIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { ConfirmDialog, FilterPanel, IconBtn, SearchInput } from "@/shared/ui";
 
-import { type Specialist, SpecialistCard } from "./SpecialistCard";
+import {
+  type Specialist,
+  SpecialistCard,
+  SpecialistRow,
+} from "./SpecialistCard";
 
 type Props = {
   specialists: Specialist[];
@@ -97,15 +101,29 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredItems.map((specialist) => (
-            <SpecialistCard
-              key={specialist.id}
-              {...specialist}
-              onDelete={(id) => setPendingDeleteId(id)}
-            />
-          ))}
-        </div>
+        <>
+          {/* Десктоп: сетка карточек */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredItems.map((specialist) => (
+              <SpecialistCard
+                key={specialist.id}
+                {...specialist}
+                onDelete={(id) => setPendingDeleteId(id)}
+              />
+            ))}
+          </div>
+
+          {/* Мобайл: компактный список строк */}
+          <div className="md:hidden flex flex-col gap-3">
+            {filteredItems.map((specialist) => (
+              <SpecialistRow
+                key={specialist.id}
+                {...specialist}
+                onDelete={(id) => setPendingDeleteId(id)}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       <ConfirmDialog
@@ -115,7 +133,8 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
           if (pendingDeleteId) onDelete(pendingDeleteId);
           setPendingDeleteId(null);
         }}
-        icon={<TrashIcon className="w-7 h-7 text-primary" />}
+        icon={<TrashIcon className="w-7 h-7" />}
+        variant="danger"
         title="Удалить специалиста?"
         description={
           pendingName

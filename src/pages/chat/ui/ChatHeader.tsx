@@ -25,7 +25,7 @@ export const ChatHeader: FC<Props> = ({
         type="button"
         onClick={onBack}
         aria-label="Назад к списку чатов"
-        className="md:hidden flex items-center justify-center size-9 rounded-full hover:bg-gray-50 text-foreground"
+        className="md:hidden flex items-center justify-center size-9 p-0 rounded-full hover:bg-gray-50 text-foreground"
       >
         <HeaderBackIcon className="size-5" />
       </button>
@@ -45,7 +45,7 @@ export const ChatHeader: FC<Props> = ({
         type="button"
         onClick={onClear}
         aria-label="Очистить историю"
-        className="flex items-center justify-center size-9 rounded-full hover:bg-background transition-colors text-muted hover:text-foreground"
+        className="flex items-center justify-center size-9 p-0 rounded-full hover:bg-background transition-colors text-muted hover:text-foreground"
       >
         <TrashIcon className="size-5" />
       </button>

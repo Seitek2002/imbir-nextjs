@@ -5,7 +5,7 @@ import { FC } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -23,6 +23,11 @@ import { ROUTES } from "@/shared/config";
 import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 
 const MAX_PRICE = 10000;
+// Постраничная подгрузка: 8 услуг за раз, дальше — по кнопке «Показать ещё»
+// (как на /clinics и /specialists). Текстовый поиск бэк не поддерживает
+// (проверено напрямую — search ни на что не влияет), поэтому activeQuery
+// остаётся клиентским и фильтрует только уже подгруженные страницы.
+const PAGE_SIZE = 8;
 // Реальный ServiceListItem с бэка не содержит ни rating, ни clinic вообще —
 // эти поля сейчас всегда фабрикуются на фронте (0 / пустая строка), поэтому
 // фильтры "Оценка" и "Клиника" гарантированно возвращали бы пустой список.
@@ -79,17 +84,32 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
 
   // Категория и цена — реальные query-параметры /api/services/ (проверено
   // напрямую). "Оценка"/"Клиника" не отправляем — см. DISABLED_FILTERS_NOTE.
-  const filters: ServiceFilters = {
+  const filters: Omit<ServiceFilters, "page" | "page_size"> = {
     category: currentCategory ?? undefined,
     min_price: priceParts ? priceRange[0] : undefined,
     max_price: priceParts ? priceRange[1] : undefined,
   };
 
-  const { data: services = [], isLoading } = useQuery({
-    queryKey: serviceKeys.list(filters),
-    queryFn: () => api.getServices(filters),
-  });
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: serviceKeys.list(filters),
+      queryFn: ({ pageParam }) =>
+        api.getServicesPaginated({
+          ...filters,
+          page: pageParam,
+          page_size: PAGE_SIZE,
+        }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) =>
+        lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
+          ? lastPage.pagination.page + 1
+          : undefined,
+    });
 
+  const services = data?.pages.flatMap((page) => page.data) ?? [];
+
+  // Текстовый поиск — клиентский, фильтрует только уже подгруженные страницы
+  // (см. комментарий у PAGE_SIZE).
   const filteredServices = services.filter((s) => {
     if (activeQuery) {
       const q = activeQuery.toLowerCase();
@@ -166,6 +186,18 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
               ))
             )}
           </div>
+
+          {hasNextPage && (
+            <div className="flex justify-center mt-4">
+              <Button
+                variant="outline"
+                onClick={() => fetchNextPage()}
+                loading={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? "Загрузка…" : "Показать ещё"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Desktop */}
@@ -279,6 +311,19 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                     onSave={() => toggle(Number(s.id))}
                   />
                 ))}
+              </div>
+            )}
+
+            {hasNextPage && (
+              <div className="flex justify-center mt-8">
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={() => fetchNextPage()}
+                  loading={isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? "Загрузка…" : "Показать ещё"}
+                </Button>
               </div>
             )}
           </div>

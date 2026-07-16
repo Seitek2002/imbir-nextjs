@@ -70,6 +70,7 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
   workplaces: d.workplaces.map((w) => ({
     clinicId: String(w.id ?? w.clinic_id ?? ""),
     clinicName: w.name ?? w.clinic_name ?? "",
+    clinicAddress: (w as any).address ?? w.clinic_address ?? "",
     price: w.price,
     schedule: emptySchedule,
   })),
@@ -77,26 +78,44 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
 
 const adaptDoctorDetail = (d: ApiDoctorDetail): MockDoctorListItem => {
   const base = adaptDoctor(d);
+  const formattedWorkExperience =
+    d.work_experience && d.work_experience.length > 0
+      ? d.work_experience.map((w) => {
+          const toVal = w.to || new Date().getFullYear();
+          const diff = toVal - w.from;
+          const durationText = diff > 0 ? `${diff} лет` : "менее года";
+          return {
+            years: `${w.from}-${w.to || "Наст. время"}`,
+            duration: `(${durationText})`,
+            place: w.clinic,
+            role: w.position,
+          };
+        })
+      : undefined;
+
+  const formattedEducation =
+    d.education && d.education.length > 0
+      ? d.education
+          .map((e) => {
+            const parts = [
+              e.institution,
+              e.year ? `(${e.year})` : "",
+              e.degree ? `— ${e.degree}` : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+            return parts.trim();
+          })
+          .filter(Boolean)
+          .join(", ") || undefined
+      : undefined;
+
   return {
     ...base,
     about: d.about || undefined,
-    skills: d.skills || undefined,
-    education:
-      d.education
-        ?.map((e) => `${e.institution} (${e.year}) — ${e.degree}`)
-        .join(", ") || undefined,
-    workExperience:
-      d.work_experience?.map((w) => {
-        const toVal = w.to || new Date().getFullYear();
-        const diff = toVal - w.from;
-        const durationText = diff > 0 ? `${diff} лет` : "менее года";
-        return {
-          years: `${w.from}-${w.to || "Наст. время"}`,
-          duration: `(${durationText})`,
-          place: w.clinic,
-          role: w.position,
-        };
-      }) || undefined,
+    skills: d.skills && d.skills.length > 0 ? d.skills : undefined,
+    education: formattedEducation,
+    workExperience: formattedWorkExperience,
     contacts: {
       schedule: "ПН-ПТ • 09:00-18:00",
       phone: d.phone || "",
@@ -206,17 +225,41 @@ export const api = {
     return getDoctors(resolved).then((r) => r.data.map(adaptDoctor));
   },
 
+  // Как getDoctors, но сохраняет pagination — нужно для постраничной
+  // подгрузки (кнопка «Показать ещё» на /specialists).
+  getDoctorsPaginated: (filters?: DoctorFilters) =>
+    getDoctors(filters).then((r) => ({
+      data: r.data.map(adaptDoctor),
+      pagination: r.pagination,
+    })),
+
   getDoctorById: (id: string) =>
     _getDoctorById(id).then((d) => (d ? adaptDoctorDetail(d) : null)),
 
   getClinics: (filters?: ClinicFilters) =>
     getClinics(filters).then((r) => r.data.map(adaptClinic)),
 
+  // Как getClinics, но сохраняет pagination — нужно для постраничной
+  // подгрузки (кнопка «Показать ещё» на /clinics).
+  getClinicsPaginated: (filters?: ClinicFilters) =>
+    getClinics(filters).then((r) => ({
+      data: r.data.map(adaptClinic),
+      pagination: r.pagination,
+    })),
+
   getClinicById: (id: string) =>
     _getClinicById(id).then((c) => (c ? adaptClinicDetail(c) : null)),
 
   getServices: (filters?: ServiceFilters) =>
     getServices(filters).then((r) => r.data.map(adaptService)),
+
+  // Как getServices, но сохраняет pagination — нужно для постраничной
+  // подгрузки (кнопка «Показать ещё» на /services).
+  getServicesPaginated: (filters?: ServiceFilters) =>
+    getServices(filters).then((r) => ({
+      data: r.data.map(adaptService),
+      pagination: r.pagination,
+    })),
 
   getReviews: () =>
     getReviews("doctor", 0).then((r) => r.data.map(adaptReview)),

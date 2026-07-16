@@ -1,16 +1,20 @@
-﻿"use client";
+"use client";
 
 import { FC, useRef, useState } from "react";
 
-import Image from "next/image";
-
-import { DoctorPageLayout } from "@/widgets/doctor/layout";
+import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
-import { PhoneInput } from "@/shared/ui";
+import {
+  Button,
+  IconBtn,
+  ImageWithFallback,
+  Input,
+  PhoneInput,
+} from "@/shared/ui";
 
-const { inp, lbl } = formStyles;
+const { lbl } = formStyles;
 
 const GENDER_OPTIONS = [
   { label: "Мужской", value: "male" },
@@ -110,36 +114,38 @@ export const DoctorBasicInfoPage: FC = () => {
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
-        <button
+        <Button
+          variant={isEditing ? "default" : "outline"}
+          size="sm"
           onClick={isEditing ? handleSave : () => setIsEditing(true)}
           disabled={isSaving}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-colors disabled:opacity-60 ${isEditing ? "bg-primary text-white hover:bg-primary-dark" : "border border-border text-secondary hover:bg-surface"}`}
         >
           {isSaving
             ? "Сохранение..."
             : isEditing
               ? "Сохранить"
               : "Редактировать"}
-        </button>
+        </Button>
       </div>
+
+      <DoctorMyDataTabs />
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8">
         <div className="flex justify-center mb-6">
           <div className="relative">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-              {d.photo ? (
-                <Image
-                  src={d.photo}
-                  alt={d.fullName}
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-white text-2xl font-bold">
-                  {d.fullName.charAt(0)}
-                </span>
-              )}
+              <ImageWithFallback
+                src={d.photo}
+                alt={d.fullName}
+                width={80}
+                height={80}
+                className="w-full h-full object-cover"
+                fallback={
+                  <span className="text-white text-2xl font-bold">
+                    {d.fullName.charAt(0)}
+                  </span>
+                }
+              />
             </div>
             {isEditing && (
               <>
@@ -150,9 +156,9 @@ export const DoctorBasicInfoPage: FC = () => {
                   onChange={handlePhoto}
                   className="hidden"
                 />
-                <button
+                <IconBtn
                   onClick={() => photoRef.current?.click()}
-                  className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary flex items-center justify-center"
+                  className="absolute bottom-0 right-0"
                 >
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                     <path
@@ -163,7 +169,7 @@ export const DoctorBasicInfoPage: FC = () => {
                       strokeLinejoin="round"
                     />
                   </svg>
-                </button>
+                </IconBtn>
               </>
             )}
           </div>
@@ -172,15 +178,12 @@ export const DoctorBasicInfoPage: FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div className="lg:col-span-2">
             {isEditing ? (
-              <>
-                <label className={lbl}>ФИО</label>
-                <input
-                  value={d.fullName}
-                  onChange={(e) => set("fullName", e.target.value)}
-                  placeholder="Введите ФИО"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="ФИО"
+                value={d.fullName}
+                onChange={(e) => set("fullName", e.target.value)}
+                placeholder="Введите ФИО"
+              />
             ) : (
               <FieldView label="ФИО" value={d.fullName} />
             )}
@@ -220,45 +223,36 @@ export const DoctorBasicInfoPage: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Дата рождения</label>
-                <input
-                  value={d.birthDate}
-                  onChange={(e) => set("birthDate", e.target.value)}
-                  placeholder="ДД.ММ.ГГГГ"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Дата рождения"
+                value={d.birthDate}
+                onChange={(e) => set("birthDate", e.target.value)}
+                placeholder="ДД.ММ.ГГГГ"
+              />
             ) : (
               <FieldView label="Дата рождения" value={d.birthDate} />
             )}
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Город</label>
-                <input
-                  value={d.city}
-                  onChange={(e) => set("city", e.target.value)}
-                  placeholder="Введите город"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Город"
+                value={d.city}
+                onChange={(e) => set("city", e.target.value)}
+                placeholder="Введите город"
+              />
             ) : (
               <FieldView label="Город" value={d.city} />
             )}
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Языки общения</label>
-                <input
-                  value={d.languages}
-                  onChange={(e) => set("languages", e.target.value)}
-                  placeholder="Русский, Английский"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Языки общения"
+                value={d.languages}
+                onChange={(e) => set("languages", e.target.value)}
+                placeholder="Русский, Английский"
+              />
             ) : (
               <FieldView label="Языки общения" value={d.languages} />
             )}
@@ -277,16 +271,13 @@ export const DoctorBasicInfoPage: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <>
-                <label className={lbl}>Почта</label>
-                <input
-                  type="email"
-                  value={d.email}
-                  onChange={(e) => set("email", e.target.value)}
-                  placeholder="example@mail.com"
-                  className={inp}
-                />
-              </>
+              <Input
+                label="Почта"
+                type="email"
+                value={d.email}
+                onChange={(e) => set("email", e.target.value)}
+                placeholder="example@mail.com"
+              />
             ) : (
               <FieldView label="Почта" value={d.email} />
             )}

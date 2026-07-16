@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 import toast from "react-hot-toast";
@@ -107,7 +107,8 @@ export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
-        icon={<RemoveIcon className="w-7 h-7 [&_path]:stroke-primary" />}
+        icon={<RemoveIcon className="w-7 h-7 [&_path]:stroke-red-500" />}
+        variant="danger"
         title="Удалить отзыв?"
         description="Отзыв будет удалён без возможности восстановления"
         confirmLabel="Удалить"
@@ -119,6 +120,7 @@ export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
           const data = getEditData(editTarget);
           return (
             <ReviewModal
+              key={editTarget.id}
               isOpen={!!editTarget}
               onClose={() => setEditTarget(null)}
               doctorName={data.name}

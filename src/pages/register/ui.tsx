@@ -1,9 +1,8 @@
-﻿"use client";
+"use client";
 
 import { JSX, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Footer } from "@/widgets/footer";
@@ -14,6 +13,8 @@ import {
   registerClientFn,
   registerClinicFn,
   registerDoctorFn,
+  registerPhoneConfirmFn,
+  registerPhoneRequestFn,
 } from "@/shared/api";
 import {
   EmailIcon,
@@ -26,7 +27,7 @@ import { ROUTES, colors } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { Button, IconBtn, Input } from "@/shared/ui";
+import { AuthShell, Button, IconBtn, Input, PhoneInput } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import {
@@ -157,7 +158,7 @@ const toApiDate = (ddmmyyyy: string): string => {
 export const RegisterPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
-  const { setTokens, setUser } = useAuthStore();
+  const { setTokens, setUser, setRememberMe } = useAuthStore();
 
   const [authMode, setAuthMode] = useState<string>("register");
   const [activeForm, setActiveForm] = useState<ActiveForm>("role");
@@ -216,6 +217,23 @@ export const RegisterPage = () => {
   const [passwordError, setPasswordError] = useState("");
   const [isLoadingClient, setIsLoadingClient] = useState(false);
 
+  const [clientAuthMethod, setClientAuthMethod] = useState<"email" | "phone">(
+    "email",
+  );
+  const [phone, setPhone] = useState("");
+  const [dialCode, setDialCode] = useState("+996");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [timer, setTimer] = useState(0);
+  const [isRequestingCode, setIsRequestingCode] = useState(false);
+
+  useEffect(() => {
+    if (timer <= 0) return;
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timer]);
+
   // Doctor form step (owned here for unified back navigation)
   const [doctorStep, setDoctorStep] = useState<DoctorStep>(1);
 
@@ -238,6 +256,7 @@ export const RegisterPage = () => {
         setActiveForm("role");
       } else {
         setClientStep(1);
+        setVerificationCode("");
       }
     } else if (activeForm === "doctor") {
       if (doctorStep === 1) {
@@ -263,6 +282,51 @@ export const RegisterPage = () => {
     setActiveForm(selectedRole);
   };
 
+  const handleClientContinue = async () => {
+    if (clientAuthMethod === "email") {
+      setClientStep(2);
+      return;
+    }
+
+    setIsRequestingCode(true);
+    try {
+      await registerPhoneRequestFn({
+        phone: `${dialCode}${phone}`,
+      });
+      toast.success("Код подтверждения отправлен на указанный номер");
+      setTimer(60);
+      setClientStep(2);
+    } catch (err: unknown) {
+      const errData = (err as { response?: { data?: unknown } })?.response
+        ?.data;
+      toast.error(
+        extractErrorMessage(errData, "Не удалось отправить код подтверждения"),
+      );
+    } finally {
+      setIsRequestingCode(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (timer > 0 || isRequestingCode) return;
+    setIsRequestingCode(true);
+    try {
+      await registerPhoneRequestFn({
+        phone: `${dialCode}${phone}`,
+      });
+      toast.success("Код подтверждения отправлен повторно");
+      setTimer(60);
+    } catch (err: unknown) {
+      const errData = (err as { response?: { data?: unknown } })?.response
+        ?.data;
+      toast.error(
+        extractErrorMessage(errData, "Не удалось отправить код подтверждения"),
+      );
+    } finally {
+      setIsRequestingCode(false);
+    }
+  };
+
   const handleSubmitClient = async () => {
     if (formData.password !== formData.confirmPassword) {
       setPasswordError("Пароли не совпадают");
@@ -270,13 +334,25 @@ export const RegisterPage = () => {
     }
     setIsLoadingClient(true);
     try {
-      const res = await registerClientFn({
-        first_name: formData.name,
-        last_name: formData.surname,
-        email: formData.email,
-        password: formData.password,
-        phone: "",
-      });
+      let res;
+      if (clientAuthMethod === "email") {
+        res = await registerClientFn({
+          first_name: formData.name,
+          last_name: formData.surname,
+          email: formData.email,
+          password: formData.password,
+          phone: "",
+        });
+      } else {
+        res = await registerPhoneConfirmFn({
+          first_name: formData.name,
+          last_name: formData.surname,
+          phone: `${dialCode}${phone}`,
+          code: verificationCode,
+          password: formData.password,
+        });
+      }
+      setRememberMe(true);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
@@ -355,6 +431,7 @@ export const RegisterPage = () => {
           agree_publishing: true,
         },
       });
+      setRememberMe(true);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
@@ -439,6 +516,7 @@ export const RegisterPage = () => {
           agree_publishing: data.agreeAccuracy,
         },
       });
+      setRememberMe(true);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${data.clinicName}!`);
@@ -469,253 +547,297 @@ export const RegisterPage = () => {
   );
 
   return (
-    <main className="min-h-screen bg-background flex flex-col">
-      <Header onBack={handleBack}>{AuthTabs}</Header>
+    <AuthShell
+      header={<Header onBack={handleBack}>{AuthTabs}</Header>}
+      footer={<Footer />}
+    >
+      {/* Desktop: back button + auth tabs */}
+      <div className="hidden md:flex items-center gap-4">
+        <IconBtn variant="outline" size="sm" onClick={handleBack}>
+          <HeaderBackIcon className="size-4" />
+        </IconBtn>
+        <div className="flex-1 flex justify-center">{AuthTabs}</div>
+        <div className="size-9" />
+      </div>
 
-      <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
-        {/* Left decorative panel — desktop only */}
-        <div className="hidden md:block md:w-1/2 shrink-0 self-start sticky top-8">
-          <div className="rounded-2xl bg-[#FEF3F0] overflow-hidden flex items-center justify-center">
-            <div className="relative w-full aspect-square">
-              <Image
-                src="/assets/auth-bg.png"
-                fill
-                alt="Imbir"
-                className="object-contain"
-              />
-            </div>
+      {/* Step: role selection */}
+      {activeForm === "role" && (
+        <>
+          <div className="mt-8 mb-6 md:mt-12 text-center">
+            <h2 className="text-2xl font-semibold text-foreground mb-2">
+              Выберите свою роль
+            </h2>
+            <p className="text-muted text-sm md:text-base">
+              Это поможет настроить для вас нужный функционал
+            </p>
           </div>
-        </div>
 
-        {/* Right form card */}
-        <div className="flex-1 md:bg-white md:rounded-2xl md:p-10 md:pb-16 flex flex-col max-w-120 md:max-w-none mx-auto w-full">
-          <div className="md:contents bg-white rounded-2xl m-2 p-4 md:p-0 flex-1 flex flex-col">
-            {/* Desktop: back button + auth tabs */}
-            <div className="hidden md:flex items-center gap-4">
-              <IconBtn variant="outline" size="sm" onClick={handleBack}>
-                <HeaderBackIcon className="size-4" />
-              </IconBtn>
-              <div className="flex-1 flex justify-center">{AuthTabs}</div>
-              <div className="size-9" />
-            </div>
-
-            {/* Step: role selection */}
-            {activeForm === "role" && (
-              <>
-                <div className="mt-8 mb-6 md:mt-12 text-center">
-                  <h2 className="text-2xl font-semibold text-foreground mb-2">
-                    Выберите свою роль
-                  </h2>
-                  <p className="text-muted text-sm md:text-base">
-                    Это поможет настроить для вас нужный функционал
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  {ROLES.map(({ value, label, description, Icon }) => (
-                    <label
-                      key={value}
-                      className={cn(
-                        "flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer",
-                        selectedRole === value
-                          ? "border-primary bg-[#FFF8F6]"
-                          : "border-border bg-white hover:border-primary/40",
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="role"
-                        value={value}
-                        checked={selectedRole === value}
-                        onChange={() => setSelectedRole(value)}
-                        className="sr-only"
-                      />
-                      <div className="shrink-0 size-12 rounded-full bg-[#FEF3F0] flex items-center justify-center">
-                        <Icon />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-foreground">{label}</p>
-                        <p className="text-sm text-muted">{description}</p>
-                      </div>
-                      <div
-                        className={cn(
-                          "shrink-0 size-5 rounded-full border-4 transition-all flex items-center justify-center",
-                          selectedRole === value
-                            ? "border-primary"
-                            : "border-border-soft",
-                        )}
-                      >
-                        {selectedRole === value && (
-                          <div className="size-2.5 rounded-full bg-primary" />
-                        )}
-                      </div>
-                    </label>
-                  ))}
-                </div>
-
-                <div className="mt-auto pt-10 md:mt-10">
-                  <Button
-                    className="w-full justify-center md:h-14 md:text-lg"
-                    size="lg"
-                    onClick={handleContinueRole}
-                    disabled={!selectedRole}
-                  >
-                    Продолжить
-                  </Button>
-                </div>
-              </>
-            )}
-
-            {/* Doctor registration */}
-            {activeForm === "doctor" && (
-              <div className="mt-8 md:mt-12 flex-1 flex flex-col">
-                {inviteClinic && (
-                  <div className="mb-4 px-4 py-3 rounded-xl bg-primary-tint border border-[#FDDDD5] text-sm text-secondary">
-                    Вы приглашены клиникой{" "}
-                    <span className="font-semibold text-foreground">
-                      {inviteClinic.clinicName}
-                    </span>
-                    {inviteClinic.branchId && inviteClinic.branchAddress && (
-                      <> — {inviteClinic.branchAddress}</>
-                    )}
-                  </div>
+          <div className="flex flex-col gap-3">
+            {ROLES.map(({ value, label, description, Icon }) => (
+              <label
+                key={value}
+                className={cn(
+                  "flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer",
+                  selectedRole === value
+                    ? "border-primary bg-[#FFF8F6]"
+                    : "border-border bg-white hover:border-primary/40",
                 )}
-                <DoctorRegistrationForm
-                  step={doctorStep}
-                  onContinue={() =>
-                    setDoctorStep((s) => Math.min(s + 1, 4) as DoctorStep)
-                  }
-                  onSubmit={handleSubmitDoctor}
-                  isLoading={isLoadingDoctor}
-                  inviteClinic={inviteClinic}
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value={value}
+                  checked={selectedRole === value}
+                  onChange={() => setSelectedRole(value)}
+                  className="sr-only"
                 />
-              </div>
-            )}
-
-            {/* Clinic registration */}
-            {activeForm === "clinic" && (
-              <div className="mt-8 md:mt-12 flex-1 flex flex-col">
-                <ClinicRegistrationForm
-                  step={clinicStep}
-                  onContinue={() =>
-                    setClinicStep((s) => Math.min(s + 1, 7) as ClinicStep)
-                  }
-                  onSubmit={handleSubmitClinic}
-                  isLoading={isLoadingClinic}
-                />
-              </div>
-            )}
-
-            {/* Client registration */}
-            {activeForm === "client" && (
-              <>
-                <div className="mt-8 mb-6 md:mt-12">
-                  <h2 className="text-2xl font-semibold text-foreground mb-2">
-                    Добро пожаловать в Imbir
-                  </h2>
-                  <p className="text-muted text-sm md:text-base">
-                    {clientStep === 1
-                      ? "Заполните данные, чтобы создать аккаунт"
-                      : "Придумайте и подтвердите пароль вашего аккаунта"}
-                  </p>
+                <div className="shrink-0 size-12 rounded-full bg-[#FEF3F0] flex items-center justify-center">
+                  <Icon />
                 </div>
-
-                {clientStep === 1 && (
-                  <div className="flex flex-col gap-4">
-                    <Input
-                      label="Имя"
-                      placeholder="Введите ваше имя"
-                      IconRight={ProfileIcon}
-                      value={formData.name}
-                      onChange={(e) => handleChange("name", e.target.value)}
-                    />
-                    <Input
-                      label="Фамилия"
-                      placeholder="Введите вашу фамилию"
-                      IconRight={ProfileIcon}
-                      value={formData.surname}
-                      onChange={(e) => handleChange("surname", e.target.value)}
-                    />
-                    <Input
-                      label="Электронная почта"
-                      type="email"
-                      placeholder="Введите вашу почту"
-                      IconRight={EmailIcon}
-                      value={formData.email}
-                      onChange={(e) => handleChange("email", e.target.value)}
-                    />
-                  </div>
-                )}
-
-                {clientStep === 2 && (
-                  <div className="flex flex-col gap-4">
-                    <Input
-                      label="Пароль"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Введите пароль"
-                      IconRight={showPassword ? EyeIcon : EyeOffIcon}
-                      onIconRightClick={() => setShowPassword(!showPassword)}
-                      value={formData.password}
-                      onChange={(e) => handleChange("password", e.target.value)}
-                    />
-                    <Input
-                      label="Подтвердите пароль"
-                      type={showConfirm ? "text" : "password"}
-                      placeholder="Введите пароль повторно"
-                      IconRight={showConfirm ? EyeIcon : EyeOffIcon}
-                      onIconRightClick={() => setShowConfirm(!showConfirm)}
-                      value={formData.confirmPassword}
-                      onChange={(e) =>
-                        handleChange("confirmPassword", e.target.value)
-                      }
-                      error={passwordError}
-                    />
-                  </div>
-                )}
-
-                <div className="mt-auto pt-10 md:mt-10 flex flex-col gap-3">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-center md:h-14 md:text-lg"
-                    size="lg"
-                    onClick={handleBack}
-                  >
-                    Назад
-                  </Button>
-
-                  {clientStep === 1 ? (
-                    <Button
-                      className="w-full justify-center md:h-14 md:text-lg"
-                      size="lg"
-                      onClick={() => setClientStep(2)}
-                      disabled={
-                        !formData.name || !formData.surname || !formData.email
-                      }
-                    >
-                      Продолжить
-                    </Button>
-                  ) : (
-                    <Button
-                      className="w-full justify-center md:h-14 md:text-lg"
-                      size="lg"
-                      onClick={handleSubmitClient}
-                      disabled={
-                        !formData.password ||
-                        !formData.confirmPassword ||
-                        isLoadingClient
-                      }
-                      loading={isLoadingClient}
-                    >
-                      Создать аккаунт
-                    </Button>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-foreground">{label}</p>
+                  <p className="text-sm text-muted">{description}</p>
+                </div>
+                <div
+                  className={cn(
+                    "shrink-0 size-5 rounded-full border-4 transition-all flex items-center justify-center",
+                    selectedRole === value
+                      ? "border-primary"
+                      : "border-border-soft",
+                  )}
+                >
+                  {selectedRole === value && (
+                    <div className="size-2.5 rounded-full bg-primary" />
                   )}
                 </div>
-              </>
+              </label>
+            ))}
+          </div>
+
+          <div className="mt-auto pt-10 md:mt-10">
+            <Button
+              className="w-full justify-center md:h-14 md:text-lg"
+              size="lg"
+              onClick={handleContinueRole}
+              disabled={!selectedRole}
+            >
+              Продолжить
+            </Button>
+          </div>
+        </>
+      )}
+
+      {/* Doctor registration */}
+      {activeForm === "doctor" && (
+        <div className="mt-8 md:mt-12 flex-1 flex flex-col">
+          {inviteClinic && (
+            <div className="mb-4 px-4 py-3 rounded-xl bg-primary-tint border border-[#FDDDD5] text-sm text-secondary">
+              Вы приглашены клиникой{" "}
+              <span className="font-semibold text-foreground">
+                {inviteClinic.clinicName}
+              </span>
+              {inviteClinic.branchId && inviteClinic.branchAddress && (
+                <> — {inviteClinic.branchAddress}</>
+              )}
+            </div>
+          )}
+          <DoctorRegistrationForm
+            step={doctorStep}
+            onContinue={() =>
+              setDoctorStep((s) => Math.min(s + 1, 4) as DoctorStep)
+            }
+            onSubmit={handleSubmitDoctor}
+            isLoading={isLoadingDoctor}
+            inviteClinic={inviteClinic}
+          />
+        </div>
+      )}
+
+      {/* Clinic registration */}
+      {activeForm === "clinic" && (
+        <div className="mt-8 md:mt-12 flex-1 flex flex-col">
+          <ClinicRegistrationForm
+            step={clinicStep}
+            onContinue={() =>
+              setClinicStep((s) => Math.min(s + 1, 7) as ClinicStep)
+            }
+            onSubmit={handleSubmitClinic}
+            isLoading={isLoadingClinic}
+          />
+        </div>
+      )}
+
+      {/* Client registration */}
+      {activeForm === "client" && (
+        <>
+          <div className="mt-8 mb-6 md:mt-12">
+            <h2 className="text-2xl font-semibold text-foreground mb-2">
+              Добро пожаловать в Imbir
+            </h2>
+            <p className="text-muted text-sm md:text-base">
+              {clientStep === 1
+                ? "Заполните данные, чтобы создать аккаунт"
+                : "Придумайте и подтвердите пароль вашего аккаунта"}
+            </p>
+          </div>
+
+          {clientStep === 1 && (
+            <div className="flex flex-col gap-4">
+              <Input
+                label="Имя"
+                placeholder="Введите ваше имя"
+                IconRight={ProfileIcon}
+                value={formData.name}
+                onChange={(e) => handleChange("name", e.target.value)}
+              />
+              <Input
+                label="Фамилия"
+                placeholder="Введите вашу фамилию"
+                IconRight={ProfileIcon}
+                value={formData.surname}
+                onChange={(e) => handleChange("surname", e.target.value)}
+              />
+              <div className="mt-1">
+                <SegmentedControl
+                  options={[
+                    { label: "Эл. почта", value: "email" },
+                    { label: "Телефон", value: "phone" },
+                  ]}
+                  value={clientAuthMethod}
+                  onChange={(val) =>
+                    setClientAuthMethod(val as "email" | "phone")
+                  }
+                />
+              </div>
+              {clientAuthMethod === "email" ? (
+                <Input
+                  label="Электронная почта"
+                  type="email"
+                  placeholder="Введите вашу почту"
+                  IconRight={EmailIcon}
+                  value={formData.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                />
+              ) : (
+                <PhoneInput
+                  label="Номер телефона"
+                  value={phone}
+                  onChange={(val) => setPhone(val)}
+                  onCountryChange={(country) => setDialCode(country.dialCode)}
+                  defaultCountryCode="KG"
+                />
+              )}
+            </div>
+          )}
+
+          {clientStep === 2 && (
+            <div className="flex flex-col gap-4">
+              {clientAuthMethod === "phone" && (
+                <div className="flex flex-col gap-1.5">
+                  <Input
+                    label="Код подтверждения"
+                    placeholder="Введите 4-значный код"
+                    value={verificationCode}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      if (val.length <= 4) setVerificationCode(val);
+                    }}
+                    maxLength={4}
+                    inputMode="numeric"
+                  />
+                  <div className="flex justify-end text-sm">
+                    {timer > 0 ? (
+                      <span className="text-muted">
+                        Отправить код повторно через {timer} с
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleResendCode}
+                        disabled={isRequestingCode}
+                        className="text-primary hover:text-primary-dark font-medium transition-colors"
+                      >
+                        Отправить код повторно
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              <Input
+                label="Пароль"
+                type={showPassword ? "text" : "password"}
+                placeholder="Введите пароль"
+                IconRight={showPassword ? EyeIcon : EyeOffIcon}
+                onIconRightClick={() => setShowPassword(!showPassword)}
+                value={formData.password}
+                onChange={(e) => handleChange("password", e.target.value)}
+              />
+              <Input
+                label="Подтвердите пароль"
+                type={showConfirm ? "text" : "password"}
+                placeholder="Введите пароль повторно"
+                IconRight={showConfirm ? EyeIcon : EyeOffIcon}
+                onIconRightClick={() => setShowConfirm(!showConfirm)}
+                value={formData.confirmPassword}
+                onChange={(e) =>
+                  handleChange("confirmPassword", e.target.value)
+                }
+                error={passwordError}
+              />
+            </div>
+          )}
+
+          <div className="mt-auto pt-10 md:mt-10 flex flex-col gap-3">
+            <Button
+              variant="outline"
+              className="w-full justify-center md:h-14 md:text-lg"
+              size="lg"
+              onClick={handleBack}
+            >
+              Назад
+            </Button>
+
+            {clientStep === 1 ? (
+              <Button
+                className="w-full justify-center md:h-14 md:text-lg"
+                size="lg"
+                onClick={handleClientContinue}
+                disabled={
+                  clientAuthMethod === "email"
+                    ? !formData.name || !formData.surname || !formData.email
+                    : !formData.name ||
+                      !formData.surname ||
+                      !phone ||
+                      isRequestingCode
+                }
+                loading={isRequestingCode}
+              >
+                Продолжить
+              </Button>
+            ) : (
+              <Button
+                className="w-full justify-center md:h-14 md:text-lg"
+                size="lg"
+                onClick={handleSubmitClient}
+                disabled={
+                  clientAuthMethod === "email"
+                    ? !formData.password ||
+                      !formData.confirmPassword ||
+                      isLoadingClient
+                    : !formData.password ||
+                      !formData.confirmPassword ||
+                      !verificationCode ||
+                      verificationCode.length < 4 ||
+                      isLoadingClient
+                }
+                loading={isLoadingClient}
+              >
+                Создать аккаунт
+              </Button>
             )}
           </div>
-        </div>
-      </div>
-      <Footer />
-    </main>
+        </>
+      )}
+    </AuthShell>
   );
 };

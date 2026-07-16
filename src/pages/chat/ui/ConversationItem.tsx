@@ -27,7 +27,7 @@ export const ConversationItem: FC<Props> = ({
       onClick={onSelect}
       className={cn(
         "flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-colors text-left w-full",
-        isActive ? "bg-[#FEF3F0]" : "bg-white hover:bg-gray-50",
+        isActive ? "bg-[#FEF3F0]" : "bg-transparent hover:bg-gray-50",
       )}
     >
       <ChatAvatar name={conversation.name} isAi={conversation.isAi} size={48} />

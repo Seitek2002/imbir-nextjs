@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { ClinicSidebar } from "@/widgets/clinic/sidebar";
+import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
 import {
   ClinicProfileForm,
@@ -19,7 +19,9 @@ import {
   getClinicStats,
   updateClinicBranch,
 } from "@/shared/api";
-import { Button } from "@/shared/ui";
+import { Button, Input, StatTiles } from "@/shared/ui";
+
+import { ClinicProfileHub } from "./hub/ui";
 
 // Плитки статистики кабинета (GET /api/clinic/stats/).
 const ClinicStatsTiles: FC = () => {
@@ -39,19 +41,7 @@ const ClinicStatsTiles: FC = () => {
     { label: "Отзывов", value: stats.reviews_count },
   ];
 
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-      {tiles.map((tile) => (
-        <div
-          key={tile.label}
-          className="bg-white rounded-2xl border border-border p-4"
-        >
-          <p className="text-2xl font-semibold text-foreground">{tile.value}</p>
-          <p className="text-muted text-xs mt-1">{tile.label}</p>
-        </div>
-      ))}
-    </div>
-  );
+  return <StatTiles tiles={tiles} className="md:grid-cols-3 mb-6" />;
 };
 
 // Филиалы клиники: список с inline-правкой адреса (PUT /api/clinic/branches/{id}/).
@@ -88,10 +78,10 @@ const BranchesCard: FC<{ branches: ClinicProfileBranch[] }> = ({
           >
             {editingId === branch.id ? (
               <>
-                <input
+                <Input
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-xl border border-border text-sm text-foreground focus:outline-none focus:border-primary"
+                  className="flex-1"
                   placeholder="Адрес филиала"
                 />
                 <Button
@@ -116,15 +106,16 @@ const BranchesCard: FC<{ branches: ClinicProfileBranch[] }> = ({
                 <span className="flex-1 text-sm text-foreground truncate">
                   {branch.address || "Адрес не указан"}
                 </span>
-                <button
+                <Button
+                  variant="text"
+                  className="text-primary"
                   onClick={() => {
                     setEditingId(branch.id);
                     setAddress(branch.address ?? "");
                   }}
-                  className="text-primary text-sm font-medium hover:underline"
                 >
                   Изменить
-                </button>
+                </Button>
               </>
             )}
           </div>
@@ -175,74 +166,46 @@ export const ClinicProfilePage: FC = () => {
   }
 
   return (
-    <div className="w-full min-h-screen">
-      {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
-        <h1 className="text-lg font-semibold text-foreground">Моя клиника</h1>
-        {isEditing ? (
-          <Button size="sm" onClick={handleSave}>
-            Сохранить
-          </Button>
-        ) : (
-          <Button size="sm" variant="outline" onClick={handleEdit}>
-            Редактировать
-          </Button>
+    <ClinicPageLayout title="Моя клиника" desktopTitle="Мой профиль">
+      {/* Десктоп: единая страница со всеми секциями и одним общим
+          «Редактировать» (без изменений). Мобайл: хаб-список секций ниже —
+          редактирование происходит на отдельном экране каждой секции. */}
+      <div className="hidden md:block">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[32px] font-semibold text-foreground">
+            Моя клиника
+          </h2>
+          {isEditing ? (
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={() => setIsEditing(false)}>
+                Отмена
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Сохранение..." : "Сохранить"}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              IconLeft={PencilIcon}
+              onClick={handleEdit}
+            >
+              Редактировать
+            </Button>
+          )}
+        </div>
+
+        {!isEditing && <ClinicStatsTiles />}
+        {!isEditing && <BranchesCard branches={rawProfile?.branches ?? []} />}
+
+        {profile && (
+          <ClinicProfileForm ref={formRef} {...profile} isEditing={isEditing} />
         )}
       </div>
 
-      {/* Desktop Content */}
-      <div className="max-w-360 mx-auto px-4 md:px-10 py-4 md:py-8">
-        <h1 className="text-[40px] font-semibold text-foreground mb-8 hidden md:block">
-          Мой профиль
-        </h1>
-
-        <div className="flex gap-6">
-          <ClinicSidebar
-            clinicName={profile?.name ?? ""}
-            clinicLogo={profile?.logo}
-            rating={profile?.rating ?? 0}
-          />
-
-          <main className="flex-1 min-w-0">
-            <div className="hidden md:flex items-center justify-between mb-6">
-              <h2 className="text-[32px] font-semibold text-foreground">
-                Моя клиника
-              </h2>
-              {isEditing ? (
-                <div className="flex items-center gap-3">
-                  <Button variant="outline" onClick={() => setIsEditing(false)}>
-                    Отмена
-                  </Button>
-                  <Button onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? "Сохранение..." : "Сохранить"}
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  variant="outline"
-                  IconLeft={PencilIcon}
-                  onClick={handleEdit}
-                >
-                  Редактировать
-                </Button>
-              )}
-            </div>
-
-            {!isEditing && <ClinicStatsTiles />}
-            {!isEditing && (
-              <BranchesCard branches={rawProfile?.branches ?? []} />
-            )}
-
-            {profile && (
-              <ClinicProfileForm
-                ref={formRef}
-                {...profile}
-                isEditing={isEditing}
-              />
-            )}
-          </main>
-        </div>
+      <div className="md:hidden">
+        <ClinicProfileHub />
       </div>
-    </div>
+    </ClinicPageLayout>
   );
 };

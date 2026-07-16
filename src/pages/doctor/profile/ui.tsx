@@ -2,7 +2,6 @@
 
 import { FC } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { useQuery } from "@tanstack/react-query";
@@ -11,9 +10,9 @@ import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { DoctorSidebar } from "@/widgets/doctor/layout";
 
 import { doctorCabinetKeys, getDoctorStats } from "@/shared/api";
-import { ChevronRightIcon, LogoutIcon, StarIcon } from "@/shared/assets/icons";
+import { ChevronRightIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
-import { useLogout } from "@/shared/lib/useLogout";
+import { CabinetMobileMenu, ImageWithFallback, StatTiles } from "@/shared/ui";
 
 // Плитки статистики кабинета (GET /api/doctor/stats/).
 const DoctorStatsTiles: FC = () => {
@@ -34,19 +33,7 @@ const DoctorStatsTiles: FC = () => {
     { label: "Пациентов", value: stats.patients_count },
   ];
 
-  return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-      {tiles.map((tile) => (
-        <div
-          key={tile.label}
-          className="bg-white rounded-2xl border border-border p-4"
-        >
-          <p className="text-2xl font-semibold text-foreground">{tile.value}</p>
-          <p className="text-muted text-xs mt-1">{tile.label}</p>
-        </div>
-      ))}
-    </div>
-  );
+  return <StatTiles tiles={tiles} className="lg:grid-cols-4 mb-4" />;
 };
 
 const MENU_ITEMS = [
@@ -143,33 +130,29 @@ const MENU_ITEMS = [
 
 export const DoctorProfilePage: FC = () => {
   const { profile: d } = useDoctorCabinet();
-  const handleLogout = useLogout();
   if (!d) return null;
 
   return (
     <div className="w-full min-h-screen bg-[#FAFAFA]">
       {/* Mobile layout */}
       <div className="lg:hidden">
-        <div className="px-4 pt-8 pb-6 flex flex-col items-center gap-3">
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-            {d.photo ? (
-              <Image
-                src={d.photo}
-                alt={d.fullName}
-                width={80}
-                height={80}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-white text-2xl font-bold">
-                {d.fullName.charAt(0)}
-              </span>
-            )}
-          </div>
-          <div className="text-center">
-            <p className="text-foreground font-semibold text-lg">
-              {d.fullName}
-            </p>
+        <CabinetMobileMenu
+          avatar={
+            <ImageWithFallback
+              src={d.photo}
+              alt={d.fullName}
+              width={80}
+              height={80}
+              className="w-full h-full object-cover"
+              fallback={
+                <span className="text-white text-2xl font-bold">
+                  {d.fullName.charAt(0)}
+                </span>
+              }
+            />
+          }
+          name={d.fullName}
+          subtitle={
             <div className="flex items-center justify-center gap-1.5 mt-1">
               <StarIcon className="w-4 h-4 text-primary" />
               <span className="text-primary text-sm font-medium">
@@ -177,41 +160,10 @@ export const DoctorProfilePage: FC = () => {
               </span>
               <span className="text-muted text-sm">· {d.specialty}</span>
             </div>
-          </div>
-        </div>
-
-        <div className="px-4 pb-6">
-          <DoctorStatsTiles />
-          <nav className="bg-white rounded-3xl p-2 flex flex-col gap-1">
-            {MENU_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-surface transition-colors"
-              >
-                <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
-                  {item.icon}
-                </div>
-                <span className="flex-1 font-medium text-base text-foreground">
-                  {item.label}
-                </span>
-                <ChevronRightIcon className="w-5 h-5 text-dim" />
-              </Link>
-            ))}
-          </nav>
-
-          <button
-            onClick={handleLogout}
-            className="mt-3 w-full bg-white rounded-3xl px-6 py-4 flex items-center gap-3 hover:bg-surface transition-colors"
-          >
-            <div className="w-9 h-9 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
-              <LogoutIcon className="w-5 h-5 [&_path]:stroke-primary" />
-            </div>
-            <span className="font-medium text-base text-secondary">
-              Выйти из профиля
-            </span>
-          </button>
-        </div>
+          }
+          beforeMenu={<DoctorStatsTiles />}
+          items={MENU_ITEMS}
+        />
       </div>
 
       {/* Desktop layout */}
@@ -231,19 +183,18 @@ export const DoctorProfilePage: FC = () => {
             <div className="bg-white rounded-3xl border border-border p-8">
               <div className="flex items-center gap-6 mb-8">
                 <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
-                  {d.photo ? (
-                    <Image
-                      src={d.photo}
-                      alt={d.fullName}
-                      width={96}
-                      height={96}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-3xl font-bold">
-                      {d.fullName.charAt(0)}
-                    </span>
-                  )}
+                  <ImageWithFallback
+                    src={d.photo}
+                    alt={d.fullName}
+                    width={96}
+                    height={96}
+                    className="w-full h-full object-cover"
+                    fallback={
+                      <span className="text-white text-3xl font-bold">
+                        {d.fullName.charAt(0)}
+                      </span>
+                    }
+                  />
                 </div>
                 <div>
                   <h2 className="text-2xl font-semibold text-foreground">

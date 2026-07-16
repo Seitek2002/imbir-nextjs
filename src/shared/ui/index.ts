@@ -6,6 +6,7 @@ export { SegmentedControl } from "./segmented-control";
 export { Textarea } from "./textarea";
 export { InfoCard } from "./info-card";
 export { StatsPanel } from "./stats-panel";
+export { StatTiles } from "./stat-tiles";
 export { Modal } from "./modal";
 export { ConfirmDialog } from "./confirm-dialog";
 
@@ -17,3 +18,8 @@ export { SaveButton } from "./save-button";
 export { FilterPanel } from "./filter-panel";
 export { PageHeader } from "./page-header";
 export { LazyInView } from "./lazy-in-view";
+export { ImageWithFallback } from "./image-with-fallback";
+export { AuthShell } from "./auth-shell";
+export { CabinetShell } from "./cabinet-shell";
+export { CabinetMobileMenu } from "./cabinet-mobile-menu";
+export type { CabinetMenuItem } from "./cabinet-mobile-menu";

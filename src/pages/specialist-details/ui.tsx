@@ -1,6 +1,6 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 import toast from "react-hot-toast";
 
 import Image from "next/image";
@@ -25,6 +25,7 @@ import {
   HeartIcon,
   HistoryIcon,
   PhoneIcon,
+  UserCircleIcon,
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
@@ -33,12 +34,15 @@ import { Button, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
 
+import { OfflineBookingModal } from "./OfflineBookingModal";
+
 type Props = {
   id: string;
 };
 
 export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
   const router = useRouter();
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
 
   // 1. ПОЛУЧАЕМ ДАННЫЕ ВРАЧА
   const {
@@ -122,19 +126,21 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
   const about =
     doctor.about ||
     "Опытный специалист с многолетней практикой. Индивидуальный подход к каждому пациенту.";
-  const workExperience = doctor.workExperience || [
-    {
-      years: "2015-Наст. время",
-      duration: `(${doctor.experience} лет)`,
-      place: doctor.workplaces[0]?.clinicName || "Частная клиника",
-      role: doctor.specialty,
-    },
-  ];
-  const skills = doctor.skills || [
-    "Консультация",
-    "Диагностика заболеваний",
-    "Назначение плана лечения",
-  ];
+  const workExperience =
+    doctor.workExperience && doctor.workExperience.length > 0
+      ? doctor.workExperience
+      : [
+          {
+            years: "2015-Наст. время",
+            duration: `(${doctor.experience} лет)`,
+            place: doctor.workplaces[0]?.clinicName || "Частная клиника",
+            role: doctor.specialty,
+          },
+        ];
+  const skills =
+    doctor.skills && doctor.skills.length > 0
+      ? doctor.skills
+      : ["Консультация", "Диагностика заболеваний", "Назначение плана лечения"];
   const scheduleText = doctor.contacts?.schedule || "ПН-ПТ • 08:00-17:00";
   const phoneText = doctor.contacts?.phone || "+996 700 123 456";
   const emailText = doctor.contacts?.email || "doctor@clinic.kg";
@@ -184,14 +190,16 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
               </IconBtn>
             </div>
 
-            <div className="relative w-full h-85 md:h-125 bg-[#FFEFE5] md:rounded-3xl overflow-hidden">
-              {doctor.image && (
+            <div className="relative w-full h-85 md:h-125 bg-[#FFEFE5] md:rounded-3xl overflow-hidden flex items-center justify-center">
+              {doctor.image ? (
                 <Image
                   src={doctor.image}
                   alt={doctor.name}
                   fill
                   className="object-cover object-top"
                 />
+              ) : (
+                <UserCircleIcon className="size-32 text-dim/60" />
               )}
               {doctor.isOnlineAvailable && (
                 <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider hidden md:block">
@@ -254,29 +262,25 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                 <>
                   <Button
                     variant="outline"
-                    className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-primary"
-                    onClick={() =>
-                      router.push(`${ROUTES.RECORD}?doctor=${id}&mode=offline`)
-                    }
+                    size="md"
+                    className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-primary hover:bg-[#FFEAE5]"
+                    onClick={() => setIsBookingOpen(true)}
                   >
                     Офлайн-запись
                   </Button>
                   {doctor.isOnlineAvailable && (
                     <Button
                       className="flex-1 justify-center"
+                      size="md"
                       onClick={() =>
                         router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
                       }
                     >
-                      Видео-консультация
+                      Онлайн консультация
                     </Button>
                   )}
                 </>
               )}
-              <StartChatButton
-                userId={Number(id)}
-                className="flex-1 justify-center"
-              />
             </div>
 
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
@@ -400,37 +404,40 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
         <Footer />
       </div>
 
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-border-soft z-50 flex gap-2 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
-        {!isDoctor && (
-          <>
+      {!isDoctor && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-border-soft z-50 flex gap-2 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
+          <Button
+            className="flex-1 justify-center bg-[#FFF2F0] text-primary border border-transparent"
+            size="lg"
+            onClick={() => setIsBookingOpen(true)}
+          >
+            Офлайн
+          </Button>
+          {doctor.isOnlineAvailable && (
             <Button
-              className="flex-1 justify-center bg-[#FFF2F0] text-primary border border-transparent"
+              className="flex-1 justify-center"
               size="lg"
               onClick={() =>
-                router.push(`${ROUTES.RECORD}?doctor=${id}&mode=offline`)
+                router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
               }
             >
-              Офлайн
+              Онлайн консультация
             </Button>
-            {doctor.isOnlineAvailable && (
-              <Button
-                className="flex-1 justify-center"
-                size="lg"
-                onClick={() =>
-                  router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
-                }
-              >
-                Онлайн
-              </Button>
-            )}
-          </>
-        )}
-        <StartChatButton
-          userId={Number(id)}
-          size="lg"
-          className="flex-1 justify-center"
-        />
-      </div>
+          )}
+        </div>
+      )}
+
+      <OfflineBookingModal
+        isOpen={isBookingOpen}
+        onClose={() => setIsBookingOpen(false)}
+        doctor={{
+          id: doctor.id,
+          name: doctor.name,
+          specialty: doctor.specialty,
+          image: doctor.image,
+          workplaces: doctor.workplaces,
+        }}
+      />
     </main>
   );
 };
