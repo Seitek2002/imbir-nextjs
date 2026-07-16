@@ -43,6 +43,9 @@ const nextConfig: NextConfig = {
   },
 
   turbopack: {
+    // Без явного root Next ищет lockfile вверх по дереву и находит
+    // ~/package-lock.json — за корень воркспейса берётся домашняя папка.
+    root: __dirname,
     rules: {
       "*.svg": {
         loaders: ["@svgr/webpack"],

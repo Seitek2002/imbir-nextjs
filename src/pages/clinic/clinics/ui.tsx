@@ -25,11 +25,15 @@ import { Button } from "@/shared/ui";
 // Постраничная подгрузка: 8 клиник за раз, дальше — по кнопке «Показать ещё».
 const PAGE_SIZE = 8;
 
-// TODO: специализация и текстовый поиск остаются клиентскими и фильтруют
-// только уже подгруженные страницы (бэк пока не поддерживает эти параметры
-// в /api/clinics/ — specialization на практике не находит совпадений,
-// проверено на /api/doctors/). Как только бэк добавит нормальную серверную
-// фильтрацию, оба фильтра нужно перенести в filters ниже и убрать
+// Город, текстовый поиск, оценка, цена и стаж уходят на бэк реальными
+// query-параметрами (проверено живыми запросами: min_price=999999 → 0,
+// search=Мед → только «Клиника Мед-Сити»).
+//
+// TODO: специализация остаётся КЛИЕНТСКОЙ и фильтрует только уже подгруженные
+// страницы — бэк на /api/clinics/?specialization= возвращает 0 для любого
+// значения (проверено: у всех клиник в primary_specializations есть
+// «Кардиология», но фильтр отдаёт пусто; те же значения у /api/doctors/
+// работают). Как починят — перенести specialization в filters ниже и убрать
 // клиентский filter.
 
 type Props = {
@@ -49,16 +53,36 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
     typeof searchParams?.clinic_rating === "string"
       ? searchParams.clinic_rating
       : null;
+  const currentExp =
+    typeof searchParams?.clinic_exp === "string"
+      ? searchParams.clinic_exp
+      : null;
+  const currentPrice =
+    typeof searchParams?.clinic_price === "string"
+      ? searchParams.clinic_price
+      : null;
 
   const selectedCity = useCityStore((s) => s.city);
 
-  // 2. Город и оценка уходят в реальные query-параметры API.
+  const [priceMin, priceMax] = currentPrice
+    ? currentPrice.split("-").map(Number)
+    : [undefined, undefined];
+  const [expMin, expMax] = currentExp
+    ? currentExp.split("-").map(Number)
+    : [undefined, undefined];
+
+  // 2. Город, поиск, оценка, цена и стаж уходят в реальные query-параметры API.
   const filters: Omit<ClinicFilters, "page" | "page_size"> = {
     city: selectedCity || undefined,
+    search: activeQuery || undefined,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)
         : undefined,
+    min_price: priceMin,
+    max_price: priceMax,
+    min_experience: expMin,
+    max_experience: expMax,
   };
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -79,13 +103,9 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
 
   const clinics = data?.pages.flatMap((page) => page.data) ?? [];
 
-  // 3. Специализация и текстовый поиск — клиентские.
+  // 3. Клиентской осталась только специализация (см. TODO вверху файла) —
+  // поиск теперь фильтрует бэк, поэтому дублировать его тут не нужно.
   const filteredClinics = clinics.filter((clinic) => {
-    if (activeQuery) {
-      const q = activeQuery.toLowerCase();
-      if (!clinic.name.toLowerCase().includes(q)) return false;
-    }
-
     if (currentSpec) {
       const selectedSpecs = currentSpec.split(",");
       const hasMatch = clinic.specialties?.some((spec) =>
@@ -99,11 +119,13 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
 
   const { isSaved, toggle } = useFavoriteToggle("clinic");
 
+  // Цена и стаж включены: бэк научился по ним фильтровать (min_price/max_price,
+  // min_experience/max_experience — проверено живыми запросами).
   const clinicFilters = {
     specialty: true,
-    experience: false,
+    experience: true,
     rating: true,
-    price: false,
+    price: true,
   };
 
   return (

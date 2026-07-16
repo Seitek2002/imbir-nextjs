@@ -91,12 +91,23 @@ export const ClinicNewProcedurePage: FC = () => {
       return;
     }
     setNameError(false);
+    // Бэк требует category (пустая → 400 «Это поле не может быть пустым»).
+    // Ловим до запроса и явно называем поле — иначе пользователь видит
+    // непонятную ошибку без привязки к полю.
+    if (!category) {
+      toast.error("Выберите специализацию");
+      return;
+    }
     addMutation.mutate({
       name: name.trim(),
       category,
       price: price.trim() || undefined,
       duration: duration ? Number(duration) : undefined,
       is_active: true,
+      // Врачи клиники, которым назначается услуга. Бэк принимает только id
+      // врачей, привязанных к этой клинике (иначе 400), и сам проставляет
+      // услугу им в список.
+      doctor_ids: specialistIds.map(Number),
     });
   };
 

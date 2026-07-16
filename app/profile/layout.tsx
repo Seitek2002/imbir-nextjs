@@ -3,10 +3,18 @@ import { ReactNode } from "react";
 import { AuthGuard } from "@/shared/lib/AuthGuard";
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
+import { InitialAuthProvider } from "@/shared/lib/initialAuthContext";
+import { readInitialAuth } from "@/shared/lib/readInitialAuth";
 
-export default function ProfileLayout({ children }: { children: ReactNode }) {
+export default async function ProfileLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const initialAuth = await readInitialAuth();
+
   return (
-    <>
+    <InitialAuthProvider value={initialAuth}>
       <div className="hidden md:block">
         <Header />
       </div>
@@ -14,6 +22,6 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
       <div className="hidden md:block">
         <Footer />
       </div>
-    </>
+    </InitialAuthProvider>
   );
 }

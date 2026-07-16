@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import {
+  type CreateAppointmentRequest,
   api,
   createAppointment,
   getDoctorAvailableSlots,
@@ -40,7 +41,8 @@ type Props = {
     id: string | number;
     name: string;
     specialty: string;
-    image?: any;
+    // Либо готовый url, либо импортированная статика (next/image отдаёт { src }).
+    image?: string | { src: string };
     workplaces: Workplace[];
   };
 };
@@ -74,6 +76,9 @@ const addDays = (date: Date, days: number) => {
 };
 
 const pad = (n: number) => String(n).padStart(2, "0");
+
+const startOfMonth = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), 1);
 
 export const OfflineBookingModal: FC<Props> = ({ isOpen, onClose, doctor }) => {
   const [step, setStep] = useState(1);
@@ -153,11 +158,20 @@ export const OfflineBookingModal: FC<Props> = ({ isOpen, onClose, doctor }) => {
   }, [servicesRaw]);
 
   // Date picker helpers
-  const [monthCursor, setMonthCursor] = useState(() => new Date());
-  useEffect(() => {
-    const d = selectedDate ?? new Date();
-    setMonthCursor(new Date(d.getFullYear(), d.getMonth(), 1));
-  }, [selectedDate]);
+  //
+  // monthCursor ведёт себя двояко: его свободно двигают стрелки «пред./след.
+  // месяц», но при смене выбранной даты он обязан прыгнуть на её месяц. Это
+  // ровно случай «поправить state при изменении входа» — правим прямо в
+  // рендере, сравнивая с предыдущим значением, а не эффектом: эффект здесь
+  // давал лишний каскадный ре-рендер (и ругался eslint).
+  const [monthCursor, setMonthCursor] = useState(() =>
+    startOfMonth(new Date()),
+  );
+  const [prevSelectedDate, setPrevSelectedDate] = useState(selectedDate);
+  if (selectedDate !== prevSelectedDate) {
+    setPrevSelectedDate(selectedDate);
+    setMonthCursor(startOfMonth(selectedDate ?? new Date()));
+  }
 
   const monthLabel = `${MONTHS[monthCursor.getMonth()]} ${monthCursor.getFullYear()}`;
 
@@ -276,10 +290,10 @@ export const OfflineBookingModal: FC<Props> = ({ isOpen, onClose, doctor }) => {
     onSuccess: () => {
       setStep(4);
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
       toast.error(
         extractErrorMessage(
-          err?.response?.data,
+          (err as { response?: { data?: unknown } })?.response?.data,
           "Не удалось создать запись. Попробуйте еще раз.",
         ),
       );
@@ -312,7 +326,7 @@ export const OfflineBookingModal: FC<Props> = ({ isOpen, onClose, doctor }) => {
       return;
     }
 
-    const requestBody: any = {
+    const requestBody: CreateAppointmentRequest = {
       date: toApiDate(selectedDate),
       time: toApiTime(selectedTime),
       is_online: false,

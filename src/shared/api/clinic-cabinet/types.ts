@@ -1,3 +1,5 @@
+import type { ServiceListItem } from "../services/types";
+
 export type ClinicProfileBranch = {
   id: number;
   address: string;
@@ -67,10 +69,18 @@ export type ClinicServiceBody = {
   doctor_ids?: number[];
 };
 
-// Врач в ответе услуги (POST/PUT возвращают services с doctors[]).
+// Врач в ответе услуги (POST/PUT/GET возвращают услугу с doctors[]).
 export type ClinicServiceDoctor = {
   id: number;
   full_name: string;
+};
+
+// Услуга в кабинете клиники = публичная услуга + назначенные врачи.
+// doctors приходит и в списке, и в ответе создания/обновления.
+export type ClinicServiceListItem = ServiceListItem & {
+  doctors?: ClinicServiceDoctor[];
+  description?: string;
+  is_active?: boolean;
 };
 
 // Ответ создания/обновления услуги клиники (с назначенными врачами).

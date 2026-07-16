@@ -5,6 +5,8 @@
 // This file adapts the new snake_case API types back to the camelCase
 // mock-type shape that existing entity components and views expect.
 // It acts as a backward-compatibility layer during migration.
+import { toHttps } from "@/shared/lib/media";
+
 import type {
   ClinicListItem as MockClinicListItem,
   DoctorListItem as MockDoctorListItem,
@@ -39,14 +41,6 @@ import type {
   ServiceFilters,
 } from "./services/types";
 
-const toHttps = (url: string | null | undefined): string | undefined => {
-  if (!url) return undefined;
-  return url.replace(
-    /^http:\/\/imbir\.sino0on\.ru/,
-    "https://imbir.sino0on.ru",
-  );
-};
-
 const emptySchedule = {
   mon: null,
   tue: null,
@@ -70,7 +64,8 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
   workplaces: d.workplaces.map((w) => ({
     clinicId: String(w.id ?? w.clinic_id ?? ""),
     clinicName: w.name ?? w.clinic_name ?? "",
-    clinicAddress: (w as any).address ?? w.clinic_address ?? "",
+    clinicAddress:
+      (w as { address?: string }).address ?? w.clinic_address ?? "",
     price: w.price,
     schedule: emptySchedule,
   })),

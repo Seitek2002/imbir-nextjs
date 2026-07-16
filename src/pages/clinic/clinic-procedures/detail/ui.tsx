@@ -78,6 +78,8 @@ export const ClinicProcedureDetailPage: FC = () => {
     setPrice(service.price ?? "");
     setDuration(service.duration != null ? String(service.duration) : "");
     setClinicName(service.clinic?.name ?? "");
+    // Врачи, которым услуга уже назначена (бэк отдаёт их в doctors[]).
+    setSpecialistIds((service.doctors ?? []).map((d) => String(d.id)));
   }
 
   const setDay = (key: DayKey, patch: Partial<DayState>) =>
@@ -99,6 +101,8 @@ export const ClinicProcedureDetailPage: FC = () => {
         price: price.trim() || undefined,
         duration: duration ? Number(duration) : undefined,
         is_active: true,
+        // При PUT бэк заменяет старые связи врач↔услуга на переданные.
+        doctor_ids: specialistIds.map(Number),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.services() });
@@ -116,6 +120,20 @@ export const ClinicProcedureDetailPage: FC = () => {
       );
     },
   });
+
+  // Бэк требует name и category (пустые → 400 «Это поле не может быть
+  // пустым» без указания поля). Проверяем до запроса и называем поле явно.
+  const handleSave = () => {
+    if (!name.trim()) {
+      toast.error("Введите название");
+      return;
+    }
+    if (!category) {
+      toast.error("Выберите специализацию");
+      return;
+    }
+    saveMutation.mutate();
+  };
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteClinicService(serviceId),
@@ -186,7 +204,7 @@ export const ClinicProcedureDetailPage: FC = () => {
         mobileAction={
           isEditing ? (
             <IconBtn
-              onClick={() => saveMutation.mutate()}
+              onClick={handleSave}
               disabled={saveMutation.isPending}
               variant="text"
               size="sm"
@@ -249,10 +267,7 @@ export const ClinicProcedureDetailPage: FC = () => {
             {isEditing ? "Редактировать" : "Назад"}
           </h2>
           {isEditing ? (
-            <Button
-              onClick={() => saveMutation.mutate()}
-              disabled={saveMutation.isPending}
-            >
+            <Button onClick={handleSave} disabled={saveMutation.isPending}>
               {saveMutation.isPending ? "Сохранение..." : "Сохранить"}
             </Button>
           ) : (

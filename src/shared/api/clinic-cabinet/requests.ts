@@ -1,13 +1,15 @@
+import { toHttps } from "@/shared/lib/media";
+
 import { apiClient } from "../client";
 import type { DoctorAppointment } from "../doctor-cabinet/types";
 import type { PaginatedReviewsResponse } from "../reviews/types";
-import type { ServiceListItem } from "../services/types";
 import { PaginatedResponse } from "../types";
 import {
   ClinicAppointmentFilters,
   ClinicDoctorItem,
   ClinicPrivateProfile,
   ClinicServiceBody,
+  ClinicServiceListItem,
   ClinicStats,
   CreateClinicDoctorRequest,
   CreateInviteRequest,
@@ -19,7 +21,7 @@ export const getClinicProfile = async (): Promise<ClinicPrivateProfile> => {
   const { data } = await apiClient.get<ClinicPrivateProfile>(
     "/api/clinic/profile/",
   );
-  return data;
+  return { ...data, logo: toHttps(data.logo) ?? null };
 };
 
 // Писчие поля PUT /api/clinic/profile/ (схема ClinicOwnProfileRequest).
@@ -89,13 +91,23 @@ export const updateClinicBranch = async (
   await apiClient.put(`/api/clinic/branches/${branchId}/`, body);
 };
 
-export const getClinicDoctors = async (): Promise<{
-  data: ClinicDoctorItem[];
-}> => {
-  const { data } = await apiClient.get<{ data: ClinicDoctorItem[] }>(
+// Списки кабинета пагинированы (по умолчанию бэк отдаёт page_size=20), а UI
+// показывает их одним списком без пагинации. Без явного page_size клиника с
+// 21+ врачом молча теряла бы хвост. 100 — потолок бэка: page_size=500 он
+// приводит к 100.
+const CABINET_PAGE_SIZE = 100;
+
+export const getClinicDoctors = async (): Promise<
+  PaginatedResponse<ClinicDoctorItem>
+> => {
+  const { data } = await apiClient.get<PaginatedResponse<ClinicDoctorItem>>(
     "/api/clinic/doctors/",
+    { params: { page_size: CABINET_PAGE_SIZE } },
   );
-  return data;
+  return {
+    ...data,
+    data: data.data.map((d) => ({ ...d, photo: toHttps(d.photo) ?? null })),
+  };
 };
 
 // Регистрация врача клиникой из кабинета. Создаёт User(role=doctor) +
@@ -115,19 +127,19 @@ export const detachClinicDoctor = async (doctorId: number): Promise<void> => {
   await apiClient.delete(`/api/clinic/doctors/${doctorId}/`);
 };
 
-export const getClinicServices = async (): Promise<{
-  data: ServiceListItem[];
-}> => {
-  const { data } = await apiClient.get<{ data: ServiceListItem[] }>(
-    "/api/clinic/services/",
-  );
+export const getClinicServices = async (): Promise<
+  PaginatedResponse<ClinicServiceListItem>
+> => {
+  const { data } = await apiClient.get<
+    PaginatedResponse<ClinicServiceListItem>
+  >("/api/clinic/services/", { params: { page_size: CABINET_PAGE_SIZE } });
   return data;
 };
 
 export const addClinicService = async (
   body: ClinicServiceBody,
-): Promise<ServiceListItem> => {
-  const { data } = await apiClient.post<ServiceListItem>(
+): Promise<ClinicServiceListItem> => {
+  const { data } = await apiClient.post<ClinicServiceListItem>(
     "/api/clinic/services/",
     body,
   );
@@ -137,8 +149,8 @@ export const addClinicService = async (
 export const updateClinicService = async (
   id: number,
   body: ClinicServiceBody,
-): Promise<ServiceListItem> => {
-  const { data } = await apiClient.put<ServiceListItem>(
+): Promise<ClinicServiceListItem> => {
+  const { data } = await apiClient.put<ClinicServiceListItem>(
     `/api/clinic/services/${id}/`,
     body,
   );

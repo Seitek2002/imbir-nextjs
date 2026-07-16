@@ -25,7 +25,26 @@ type Props = {
   appointment: Appointment;
   onCancel?: (id: string) => void;
   onReview?: (id: string) => void;
+  onReschedule?: (id: string) => void;
 };
+
+const CalendarEditIcon: FC<{ className?: string }> = ({ className }) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    className={className}
+  >
+    <path
+      d="M10.5 1.5v2.5M5.5 1.5v2.5M2 6.5h12M3.5 3h9A1.5 1.5 0 0 1 14 4.5v4M2 4.5A1.5 1.5 0 0 1 3.5 3M2 4.5v8A1.5 1.5 0 0 0 3.5 14h4.5M11 14.5l3.5-3.5-1.5-1.5L9.5 13v1.5H11z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 const ClockIcon: FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 20 20" fill="none">
@@ -98,11 +117,15 @@ export const AppointmentCard: FC<Props> = ({
   appointment,
   onCancel,
   onReview,
+  onReschedule,
 }) => {
   const isUpcoming = appointment.status === "upcoming";
   const isCompleted = appointment.status === "completed";
   const showCancel = isUpcoming && !!onCancel;
   const showReview = isCompleted && !!onReview;
+  // Переносить можно только предстоящие записи и только если знаем врача —
+  // свободные слоты запрашиваются именно по нему.
+  const showReschedule = isUpcoming && !!onReschedule && !!appointment.doctorId;
   const showMeet = appointment.isOnline && !!appointment.googleMeetLink;
 
   const meta = (
@@ -187,6 +210,17 @@ export const AppointmentCard: FC<Props> = ({
           <div className="flex flex-col items-end gap-2">
             {showMeet && (
               <GoogleMeetButton href={appointment.googleMeetLink!} />
+            )}
+            {showReschedule && (
+              <Button
+                onClick={() => onReschedule(appointment.id)}
+                variant="text"
+                size="sm"
+                IconLeft={CalendarEditIcon}
+                className="bg-[#FFF0EE] text-primary hover:bg-[#FFE4DE] active:bg-[#FFE4DE]"
+              >
+                Перенести
+              </Button>
             )}
             {showCancel && (
               <Button
@@ -277,13 +311,24 @@ export const AppointmentCard: FC<Props> = ({
         </div>
 
         {/* Buttons */}
-        {(showMeet || showCancel || showReview) && (
+        {(showMeet || showCancel || showReview || showReschedule) && (
           <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border w-full">
             {showMeet && (
               <GoogleMeetButton
                 href={appointment.googleMeetLink!}
                 compact={false}
               />
+            )}
+            {showReschedule && (
+              <Button
+                onClick={() => onReschedule(appointment.id)}
+                variant="text"
+                size="sm"
+                IconLeft={CalendarEditIcon}
+                className="bg-[#FFF0EE] text-primary hover:bg-[#FFE4DE] active:bg-[#FFE4DE] flex-1 justify-center py-2.5 rounded-2xl"
+              >
+                Перенести
+              </Button>
             )}
             {showCancel && (
               <Button

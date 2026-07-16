@@ -15,6 +15,9 @@ type Props = {
   mode: ConsultationMode;
   onModeChange: (mode: ConsultationMode) => void;
   canUseOnline?: boolean;
+  // Скрыть переключатель Онлайн/Оффлайн — нужен при переносе записи, где
+  // формат консультации уже зафиксирован и меняется только дата/время.
+  hideModeToggle?: boolean;
   selectedDate: Date | null;
   onDateChange: (date: Date) => void;
   selectedTime: string | null;
@@ -61,6 +64,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
   mode,
   onModeChange,
   canUseOnline = true,
+  hideModeToggle = false,
   selectedDate,
   onDateChange,
   selectedTime,
@@ -86,8 +90,9 @@ export const AppointmentDateTimePicker: FC<Props> = ({
   });
 
   useEffect(() => {
+    if (hideModeToggle) return;
     if (!canUseOnline && mode === "online") onModeChange("offline");
-  }, [canUseOnline, mode, onModeChange]);
+  }, [canUseOnline, mode, onModeChange, hideModeToggle]);
 
   // Auto-scroll selected date into view on mobile
   useEffect(() => {
@@ -201,7 +206,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
   return (
     <div className={cn("space-y-3", className)}>
       {/* Mode toggle */}
-      <div className="space-y-2">
+      <div className={cn("space-y-2", hideModeToggle && "hidden")}>
         <div className="relative grid grid-cols-2 items-center bg-background p-1 rounded-full">
           <div
             className="absolute top-1 bottom-1 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-transform duration-300"

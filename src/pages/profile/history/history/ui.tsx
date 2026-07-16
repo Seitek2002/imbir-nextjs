@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { RescheduleModal } from "@/features/reschedule-appointment";
 import { ReviewModal } from "@/features/review-modal";
 
 import {
@@ -41,6 +42,9 @@ export const ProfileHistory: FC<Props> = ({
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [cancelTarget, setCancelTarget] = useState<string | null>(null);
+  const [rescheduleTarget, setRescheduleTarget] = useState<Appointment | null>(
+    null,
+  );
 
   const query = searchQuery.trim().toLowerCase();
   const filteredAppointments = appointmentsList.filter((apt) => {
@@ -147,9 +151,27 @@ export const ProfileHistory: FC<Props> = ({
             onReview={
               activeTab === "completed" ? handleOpenReviewModal : undefined
             }
+            onReschedule={
+              activeTab === "upcoming"
+                ? (id) =>
+                    setRescheduleTarget(
+                      appointmentsList.find((a) => a.id === id) ?? null,
+                    )
+                : undefined
+            }
           />
         ))}
       </div>
+
+      {rescheduleTarget && (
+        <RescheduleModal
+          isOpen={!!rescheduleTarget}
+          onClose={() => setRescheduleTarget(null)}
+          appointmentId={rescheduleTarget.id}
+          doctorId={rescheduleTarget.doctorId}
+          isOnline={!!rescheduleTarget.isOnline}
+        />
+      )}
 
       <ConfirmDialog
         isOpen={!!cancelTarget}
