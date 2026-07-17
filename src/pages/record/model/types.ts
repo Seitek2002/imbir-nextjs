@@ -1,8 +1,8 @@
 import { StaticImageData } from "next/image";
 
-type SelectionModalType = "clinic" | "doctor" | "service" | null;
+type SelectionModalType = "clinic" | "doctor" | "workplace" | "service" | null;
 type MobileStep = 1 | 2 | 3;
-type MobileSelectionStage = "clinic" | "doctor" | "service";
+type MobileSelectionStage = "clinic" | "doctor" | "workplace" | "service";
 
 type Clinic = {
   id: string;
@@ -14,9 +14,16 @@ type Clinic = {
   image: StaticImageData | string;
 };
 
+type Workplace = {
+  clinicId: string;
+  clinicName: string;
+  clinicAddress?: string;
+};
+
 type Doctor = {
   id: string;
   clinicId: string;
+  workplaces: Workplace[];
   name: string;
   specialty: string;
   rating: number;
@@ -55,4 +62,5 @@ export type {
   Clinic,
   Doctor,
   Service,
+  Workplace,
 };

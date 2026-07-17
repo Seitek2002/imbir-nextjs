@@ -46,15 +46,6 @@ import type {
   Service,
 } from "./types";
 
-// Порядок цепочки модалок десктопа: выбор пункта сразу закрывает текущую
-// модалку и открывает следующую; на последнем звене (услуга) модалка просто
-// закрывается.
-const SELECTION_CHAIN: Exclude<SelectionModalType, null>[] = [
-  "clinic",
-  "doctor",
-  "service",
-];
-
 export const useRecordForm = () => {
   const router = useRouter();
   const urlParams = useSearchParams() ?? new URLSearchParams();
@@ -68,6 +59,11 @@ export const useRecordForm = () => {
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
     null,
   );
+  // Врач пришёл по ссылке без явной клиники (см. эффект ниже) — пока список
+  // врачей не загрузился, не знаем, сколько у него мест работы.
+  const [pendingWorkplaceDoctorId, setPendingWorkplaceDoctorId] = useState<
+    string | null
+  >(null);
 
   const [mode, setMode] = useState<ConsultationMode>("offline");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -201,6 +197,11 @@ export const useRecordForm = () => {
   const DOCTORS: Doctor[] = doctorsData.map((d) => ({
     id: String(d.id),
     clinicId: d.workplaces[0]?.clinicId ?? "",
+    workplaces: d.workplaces.map((w) => ({
+      clinicId: w.clinicId,
+      clinicName: w.clinicName,
+      clinicAddress: w.clinicAddress,
+    })),
     name: d.name,
     specialty: d.specialty,
     rating: d.rating,
@@ -211,9 +212,19 @@ export const useRecordForm = () => {
 
   // Врачи выбранной клиники (GET /api/clinics/{id}/). Когда клиника выбрана,
   // именно этот список показываем в «Выберите специалиста», а не всех по городу.
+  // Место работы тут всегда одно и уже известно — сама клиника, из списка
+  // которой этот врач получен.
   const CLINIC_DOCTORS: Doctor[] = (clinicDetail?.doctors ?? []).map((d) => ({
     id: String(d.id),
     clinicId: selectedClinicId ?? "",
+    workplaces: selectedClinicId
+      ? [
+          {
+            clinicId: selectedClinicId,
+            clinicName: clinicDetail?.name ?? "",
+          },
+        ]
+      : [],
     name: d.full_name,
     specialty: d.specialty,
     rating: d.rating,
@@ -248,7 +259,11 @@ export const useRecordForm = () => {
     // мобильный степпер на следующий актуальный этап цепочки клиника→врач→
     // услуга, иначе он всегда стартует с «clinic» и заставляет повторно
     // выбирать то, что уже пришло в URL.
-    if (doctorId) {
+    if (doctorId && !clinicId) {
+      // Клиника не указана явно — решим по числу мест работы врача, как
+      // только прогрузится список врачей (см. эффект ниже).
+      setPendingWorkplaceDoctorId(doctorId);
+    } else if (doctorId) {
       setMobileSelectionStage("service");
     } else if (clinicId) {
       setMobileSelectionStage("doctor");
@@ -273,6 +288,31 @@ export const useRecordForm = () => {
     [CLINIC_DOCTORS, DOCTORS],
   );
 
+  // Разрешаем неоднозначность места работы для врача, пришедшего по ссылке
+  // без явной клиники: одно место работы — подставляем его молча; несколько
+  // — сразу открываем выбор места работы (как и при обычном интерактивном
+  // выборе врача, см. applyDoctorSelection).
+  useEffect(() => {
+    if (!pendingWorkplaceDoctorId) return;
+
+    const matchedDoctor = doctorPool.find(
+      (doctor) => doctor.id === pendingWorkplaceDoctorId,
+    );
+    if (!matchedDoctor) return;
+
+    setPendingWorkplaceDoctorId(null);
+
+    if (matchedDoctor.workplaces.length > 1) {
+      setMobileSelectionStage("workplace");
+      setActiveModal("workplace");
+    } else {
+      if (matchedDoctor.workplaces[0]) {
+        setSelectedClinicId(matchedDoctor.workplaces[0].clinicId);
+      }
+      setMobileSelectionStage("service");
+    }
+  }, [pendingWorkplaceDoctorId, doctorPool]);
+
   const selectedDoctor = useMemo(
     () => doctorPool.find((doctor) => doctor.id === selectedDoctorId) ?? null,
     [doctorPool, selectedDoctorId],
@@ -291,6 +331,24 @@ export const useRecordForm = () => {
 
   const serviceOptions = SERVICES;
 
+  // Места работы текущего выбранного врача — показываются как обычные
+  // «клиники» (та же карточка), когда у врача их несколько и нужно уточнить,
+  // в каком из них оформляется приём.
+  const workplaceOptions: Clinic[] = useMemo(() => {
+    const doctor = doctorPool.find((d) => d.id === selectedDoctorId);
+    if (!doctor) return [];
+
+    return doctor.workplaces.map((w) => ({
+      id: w.clinicId,
+      name: w.clinicName,
+      rating: 0,
+      reviews: 0,
+      experience: 0,
+      address: w.clinicAddress ?? "",
+      image: "",
+    }));
+  }, [doctorPool, selectedDoctorId]);
+
   const isStep2Complete = Boolean(selectedDate) && Boolean(selectedTime);
 
   const applyClinicSelection = (clinicId: string) => {
@@ -304,19 +362,34 @@ export const useRecordForm = () => {
     setSelectedServiceId(null);
   };
 
-  const applyDoctorSelection = (doctorId: string) => {
+  // Возвращает true, если после выбора врача нужно ещё уточнить у
+  // пользователя, в каком из его мест работы оформляется приём.
+  const applyDoctorSelection = (doctorId: string): boolean => {
     const matchedDoctor = doctorPool.find((doctor) => doctor.id === doctorId);
-    if (!matchedDoctor) return;
+    if (!matchedDoctor) return false;
 
     setSelectedDoctorId(doctorId);
-    // Врач выбран первым (без клиники) — подтягиваем его клинику из места
-    // работы. Если клиника уже выбрана, врач из её же списка — не трогаем.
-    if (matchedDoctor.clinicId && selectedClinicId !== matchedDoctor.clinicId) {
-      setSelectedClinicId(matchedDoctor.clinicId);
-    }
-
-    // Услуги привязаны к паре клиника/врач — при смене врача сбрасываем выбор.
+    // Услуга привязана к паре клиника/врач — при смене врача сбрасываем выбор.
     setSelectedServiceId(null);
+
+    // Врач выбран из списка уже выбранной клиники — место работы однозначно
+    // (эта же клиника), трогать его не нужно.
+    if (selectedClinicId) return false;
+
+    // Врач выбран «с нуля», без привязки к клинике. Одно место работы —
+    // подставляем его молча; несколько — неоднозначно, пусть решает
+    // пользователь (см. вызовы applyDoctorSelection).
+    if (matchedDoctor.workplaces.length > 1) return true;
+
+    setSelectedClinicId(matchedDoctor.workplaces[0]?.clinicId ?? null);
+    return false;
+  };
+
+  // Клиника выбирается из мест работы уже выбранного врача — в отличие от
+  // applyClinicSelection, врача и услугу трогать не нужно: они относятся к
+  // тому же врачу, просто уточняется, в каком из его мест работы.
+  const applyWorkplaceSelection = (clinicId: string) => {
+    setSelectedClinicId(clinicId);
   };
 
   const selectService = (serviceId: string) => {
@@ -331,10 +404,12 @@ export const useRecordForm = () => {
         ? (CLINICS as SelectionItem[])
         : activeModal === "doctor"
           ? (doctorOptions as SelectionItem[])
-          : (serviceOptions as SelectionItem[]);
+          : activeModal === "workplace"
+            ? (workplaceOptions as SelectionItem[])
+            : (serviceOptions as SelectionItem[]);
 
     return { ...SELECTION_LABELS[activeModal], items };
-  }, [activeModal, CLINICS, doctorOptions, serviceOptions]);
+  }, [activeModal, CLINICS, doctorOptions, workplaceOptions, serviceOptions]);
 
   const filteredModalItems = useMemo(() => {
     if (!modalConfig) return [];
@@ -347,14 +422,18 @@ export const useRecordForm = () => {
         ? (CLINICS as SelectionItem[])
         : mobileSelectionStage === "doctor"
           ? (doctorOptions as SelectionItem[])
-          : (serviceOptions as SelectionItem[]);
+          : mobileSelectionStage === "workplace"
+            ? (workplaceOptions as SelectionItem[])
+            : (serviceOptions as SelectionItem[]);
 
     const selectedId =
       mobileSelectionStage === "clinic"
         ? selectedClinicId
         : mobileSelectionStage === "doctor"
           ? selectedDoctorId
-          : selectedServiceId;
+          : mobileSelectionStage === "workplace"
+            ? selectedClinicId
+            : selectedServiceId;
 
     return { ...SELECTION_LABELS[mobileSelectionStage], items, selectedId };
   }, [
@@ -364,6 +443,7 @@ export const useRecordForm = () => {
     selectedServiceId,
     CLINICS,
     doctorOptions,
+    workplaceOptions,
     serviceOptions,
   ]);
 
@@ -373,7 +453,9 @@ export const useRecordForm = () => {
   );
 
   // Каждый этап выбирается «насмерть» — тап сразу переводит к следующему
-  // этапу цепочки, а с последнего (услуга) — сразу к шагу 2.
+  // этапу цепочки, а с последнего (услуга) — сразу к шагу 2. У врача с
+  // несколькими местами работы между «доктором» и «услугой» вклинивается
+  // этап «место приёма».
   const handleMobileStep1Select = (id: string) => {
     if (mobileSelectionStage === "clinic") {
       applyClinicSelection(id);
@@ -383,7 +465,14 @@ export const useRecordForm = () => {
     }
 
     if (mobileSelectionStage === "doctor") {
-      applyDoctorSelection(id);
+      const needsWorkplace = applyDoctorSelection(id);
+      setSearchQuery("");
+      setMobileSelectionStage(needsWorkplace ? "workplace" : "service");
+      return;
+    }
+
+    if (mobileSelectionStage === "workplace") {
+      applyWorkplaceSelection(id);
       setMobileSelectionStage("service");
       setSearchQuery("");
       return;
@@ -400,6 +489,13 @@ export const useRecordForm = () => {
       return;
     }
 
+    // Врач с несколькими местами работы прошёл через отдельный этап «место
+    // приёма» — назад с шага 2 или с «услуги» нужно вернуть именно туда, а
+    // не сразу к «доктору».
+    const doctorHasMultipleWorkplaces =
+      (doctorPool.find((doctor) => doctor.id === selectedDoctorId)?.workplaces
+        .length ?? 0) > 1;
+
     if (mobileStep === 2) {
       setMobileStep(1);
       setMobileSelectionStage(
@@ -410,6 +506,14 @@ export const useRecordForm = () => {
     }
 
     if (mobileSelectionStage === "service") {
+      setMobileSelectionStage(
+        doctorHasMultipleWorkplaces ? "workplace" : "doctor",
+      );
+      setSearchQuery("");
+      return;
+    }
+
+    if (mobileSelectionStage === "workplace") {
       setMobileSelectionStage("doctor");
       setSearchQuery("");
       return;
@@ -435,21 +539,35 @@ export const useRecordForm = () => {
   };
 
   // Выбор пункта списка в десктопной модалке применяется сразу и открывает
-  // следующую модалку в цепочке; на последнем звене (услуга) модалка закрывается.
+  // следующую модалку в цепочке; на последнем звене (услуга) модалка
+  // закрывается. У врача с несколькими местами работы после «доктора»
+  // открывается «место приёма» вместо «услуги».
   const handleModalItemSelect = (id: string) => {
     if (!activeModal) return;
 
-    if (activeModal === "clinic") applyClinicSelection(id);
-    else if (activeModal === "doctor") applyDoctorSelection(id);
-    else selectService(id);
-
-    const nextType = SELECTION_CHAIN[SELECTION_CHAIN.indexOf(activeModal) + 1];
-    if (nextType) {
-      setActiveModal(nextType);
+    if (activeModal === "clinic") {
+      applyClinicSelection(id);
+      setActiveModal("doctor");
       setSearchQuery("");
-    } else {
-      closeModal();
+      return;
     }
+
+    if (activeModal === "doctor") {
+      const needsWorkplace = applyDoctorSelection(id);
+      setSearchQuery("");
+      setActiveModal(needsWorkplace ? "workplace" : "service");
+      return;
+    }
+
+    if (activeModal === "workplace") {
+      applyWorkplaceSelection(id);
+      setActiveModal("service");
+      setSearchQuery("");
+      return;
+    }
+
+    selectService(id);
+    closeModal();
   };
 
   const buildAppointmentRequest = (): CreateAppointmentRequest | null => {
@@ -567,6 +685,7 @@ export const useRecordForm = () => {
     appointmentResult,
     canUseOnline,
     clinicMap,
+    selectedClinicId,
     selectedClinic,
     selectedDoctor,
     selectedService,

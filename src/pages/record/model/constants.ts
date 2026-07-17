@@ -24,6 +24,10 @@ const SELECTION_LABELS: Record<
     title: "Выберите специалиста",
     searchPlaceholder: "Поиск специалиста",
   },
+  workplace: {
+    title: "Выберите место приёма",
+    searchPlaceholder: "Поиск клиники",
+  },
   service: { title: "Выберите услугу", searchPlaceholder: "Поиск услуги" },
 };
 

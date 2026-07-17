@@ -19,6 +19,7 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
     setSearchQuery,
     filteredModalItems,
     clinicMap,
+    selectedClinicId,
     selectedClinic,
     selectedDoctor,
     selectedServiceId,
@@ -46,6 +47,7 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
   const isSelected = (id: string): boolean => {
     if (activeModal === "clinic") return selectedClinic?.id === id;
     if (activeModal === "doctor") return selectedDoctor?.id === id;
+    if (activeModal === "workplace") return selectedClinicId === id;
     return selectedServiceId === id;
   };
 

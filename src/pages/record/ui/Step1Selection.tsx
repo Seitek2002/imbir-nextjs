@@ -34,7 +34,14 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
             label="Клиника"
             value={selectedClinic?.name}
             placeholder="Выберите из списка"
-            onClick={() => openModal("clinic")}
+            onClick={() =>
+              // Врач уже выбран, а клиника — ещё нет: значит, выбор места
+              // работы для него не завершён (несколько мест работы), и
+              // открывать нужно именно его список, а не все клиники подряд.
+              openModal(
+                !selectedClinic && selectedDoctor ? "workplace" : "clinic",
+              )
+            }
           />
 
           <SelectField
