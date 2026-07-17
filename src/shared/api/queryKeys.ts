@@ -31,6 +31,11 @@ export const serviceKeys = {
   detail: (id: string | number) => [...serviceKeys.details(), id] as const,
 };
 
+export const searchKeys = {
+  all: ["search"] as const,
+  suggest: (query: string) => [...searchKeys.all, "suggest", query] as const,
+};
+
 export const reviewKeys = {
   all: ["reviews"] as const,
   byTarget: (type: string, id: string | number) =>

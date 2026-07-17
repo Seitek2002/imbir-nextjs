@@ -13,13 +13,19 @@ import { SearchInput } from "@/shared/ui";
 
 import { CategoriesGrid } from "./categories-grid";
 import { RecentSearches } from "./recent-searches";
+import { SearchSuggestions } from "./suggestions";
 
 const DURATION = 200;
+const DEBOUNCE_MS = 300;
+// Меньше двух символов — подсказки почти всегда бесполезны, а бэку смысла
+// дёргать эндпоинт нет.
+const MIN_QUERY_LENGTH = 2;
 
 export const GlobalSearch: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const addSearch = useSearchHistoryStore((state) => state.addSearch);
@@ -44,6 +50,13 @@ export const GlobalSearch: FC = () => {
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  // Подсказки дёргаем не на каждое нажатие клавиши, а после паузы в вводе —
+  // иначе при быстром наборе улетает запрос на каждый символ.
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedQuery(query), DEBOUNCE_MS);
+    return () => clearTimeout(timeout);
+  }, [query]);
 
   const handleSearchSubmit = () => {
     if (!query.trim()) return;
@@ -81,17 +94,20 @@ export const GlobalSearch: FC = () => {
             </div>
 
             <div className="max-h-[60vh] overflow-y-auto scrollbar-hide bg-white rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
-              {query ? (
-                <div className="p-4">
-                  <p className="text-foreground text-sm mb-4">
-                    Ищем: <span className="font-medium">{query}</span>...
-                  </p>
+              {query.trim() ? (
+                <div className="py-2">
+                  {debouncedQuery.trim().length >= MIN_QUERY_LENGTH && (
+                    <SearchSuggestions
+                      query={debouncedQuery.trim()}
+                      onNavigate={handleClose}
+                    />
+                  )}
 
                   <button
                     onClick={handleSearchSubmit}
-                    className="text-primary text-sm font-medium hover:underline"
+                    className="w-full text-left px-4 py-3 text-primary text-sm font-medium hover:underline"
                   >
-                    Все результаты по запросу «{query}»
+                    Все результаты по запросу «{query.trim()}»
                   </button>
                 </div>
               ) : (

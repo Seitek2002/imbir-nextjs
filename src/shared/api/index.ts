@@ -17,6 +17,10 @@ export * from "./clinics/requests";
 export * from "./services/types";
 export * from "./services/requests";
 
+// Global search
+export * from "./search/types";
+export * from "./search/requests";
+
 // Reviews & Appointments
 export * from "./reviews/types";
 export * from "./reviews/requests";
