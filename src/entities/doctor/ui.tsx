@@ -136,12 +136,7 @@ export const DoctorCard: FC<Props> = ({
                   onBook?.();
                 }}
               >
-                Записаться{" "}
-                {minPrice && (
-                  <span className="ml-1 text-sm font-normal opacity-80">
-                    от {minPrice} с
-                  </span>
-                )}
+                Записаться
               </Button>
             )}
             <div onClick={stopProp}>
@@ -215,10 +210,7 @@ export const DoctorCard: FC<Props> = ({
             onBook?.();
           }}
         >
-          Записаться{" "}
-          {minPrice && (
-            <span className="ml-1 opacity-70 font-normal">от {minPrice} с</span>
-          )}
+          Записаться
         </Button>
       )}
     </Link>
