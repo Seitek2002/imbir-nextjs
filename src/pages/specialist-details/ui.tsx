@@ -273,7 +273,12 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                       className="flex-1 justify-center"
                       size="md"
                       onClick={() =>
-                        router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
+                        router.push(
+                          ROUTES.RECORD_FOR_DOCTOR(id, {
+                            workplaces: doctor.workplaces,
+                            mode: "online",
+                          }),
+                        )
                       }
                     >
                       Онлайн консультация

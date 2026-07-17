@@ -4,6 +4,7 @@ import { FC, Suspense } from "react";
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -45,6 +46,7 @@ type Props = {
 };
 
 export const SearchPage: FC<Props> = ({ searchParams }) => {
+  const router = useRouter();
   // 1. Читаем параметры
   const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
   const isFiltersModalOpen = searchParams?.modal === "filters";
@@ -210,6 +212,13 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                           key={`mob-doc-${doc.id}`}
                           {...doc}
                           variant="horizontal"
+                          onBook={() =>
+                            router.push(
+                              ROUTES.RECORD_FOR_DOCTOR(doc.id, {
+                                workplaces: doc.workplaces,
+                              }),
+                            )
+                          }
                         />
                       ))}
                     </div>
@@ -318,6 +327,13 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                               key={`desk-doc-${doc.id}`}
                               {...doc}
                               variant="vertical"
+                              onBook={() =>
+                                router.push(
+                                  ROUTES.RECORD_FOR_DOCTOR(doc.id, {
+                                    workplaces: doc.workplaces,
+                                  }),
+                                )
+                              }
                             />
                           ))}
                         </div>

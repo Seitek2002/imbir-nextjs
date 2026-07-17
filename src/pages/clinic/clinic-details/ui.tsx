@@ -417,7 +417,16 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {doctors.map((doc) => (
-                <DoctorCard key={doc.id} {...doc} variant="vertical" />
+                <DoctorCard
+                  key={doc.id}
+                  {...doc}
+                  variant="vertical"
+                  onBook={() =>
+                    router.push(
+                      ROUTES.RECORD_FOR_DOCTOR(doc.id, { clinicId: id }),
+                    )
+                  }
+                />
               ))}
             </div>
           </div>

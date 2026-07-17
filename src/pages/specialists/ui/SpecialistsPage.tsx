@@ -3,6 +3,7 @@
 import { FC, useEffect, useState } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 
@@ -38,6 +39,7 @@ type Props = {
 };
 
 export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
+  const router = useRouter();
   // 1. Читаем параметры из пропсов
   const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
   const isFiltersModalOpen = searchParams?.modal === "filters";
@@ -173,6 +175,13 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
                   variant="horizontal"
                   initialSaved={isSaved(Number(doc.id))}
                   onSave={() => toggle(Number(doc.id))}
+                  onBook={() =>
+                    router.push(
+                      ROUTES.RECORD_FOR_DOCTOR(doc.id, {
+                        workplaces: doc.workplaces,
+                      }),
+                    )
+                  }
                 />
               ))
             )}
@@ -248,6 +257,13 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
                     {...doc}
                     initialSaved={isSaved(Number(doc.id))}
                     onSave={() => toggle(Number(doc.id))}
+                    onBook={() =>
+                      router.push(
+                        ROUTES.RECORD_FOR_DOCTOR(doc.id, {
+                          workplaces: doc.workplaces,
+                        }),
+                      )
+                    }
                   />
                 ))}
               </div>

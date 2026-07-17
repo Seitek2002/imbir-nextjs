@@ -2,6 +2,8 @@
 
 import { FC, useEffect, useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicCard } from "@/entities/clinic";
@@ -9,6 +11,7 @@ import { DoctorCard } from "@/entities/doctor";
 import { ServiceCard } from "@/entities/service";
 
 import { profileKeys, removeFavorite } from "@/shared/api";
+import { ROUTES } from "@/shared/config";
 
 import { SavedItem, SavedType } from "../model";
 
@@ -18,6 +21,7 @@ type Props = {
 };
 
 export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
+  const router = useRouter();
   const [savedItems, setSavedItems] = useState(items);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -62,6 +66,13 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
                 initialSaved={true}
                 onSave={() => handleUnsave(item.id)}
                 variant="horizontal"
+                onBook={() =>
+                  router.push(
+                    ROUTES.RECORD_FOR_DOCTOR(item.data.id, {
+                      workplaces: item.data.workplaces,
+                    }),
+                  )
+                }
               />
             );
           }
@@ -107,6 +118,13 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
               initialSaved={true}
               onSave={() => handleUnsave(item.id)}
               variant="vertical"
+              onBook={() =>
+                router.push(
+                  ROUTES.RECORD_FOR_DOCTOR(item.data.id, {
+                    workplaces: item.data.workplaces,
+                  }),
+                )
+              }
             />
           );
         }

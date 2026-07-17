@@ -3,7 +3,7 @@
 import { FC, Suspense } from "react";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -12,6 +12,7 @@ import { FilterBar } from "@/features/filter-bar";
 import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 
 import { DoctorFilters, api, doctorKeys } from "@/shared/api";
+import { ROUTES } from "@/shared/config";
 import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
@@ -27,6 +28,7 @@ import { Button } from "@/shared/ui";
 const FULL_LIST_PAGE_SIZE = 200;
 
 const DoctorsListContent = () => {
+  const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
 
   const currentSpec = searchParams.get("doc_spec");
@@ -111,6 +113,13 @@ const DoctorsListContent = () => {
               key={`mobile-doc-${doc.id}`}
               {...doc} // <-- ИСПРАВЛЕНО
               variant="horizontal"
+              onBook={() =>
+                router.push(
+                  ROUTES.RECORD_FOR_DOCTOR(doc.id, {
+                    workplaces: doc.workplaces,
+                  }),
+                )
+              }
             />
           ))}
         </div>
@@ -127,6 +136,13 @@ const DoctorsListContent = () => {
               key={`desktop-doc-${doc.id}`}
               {...doc} // <-- ИСПРАВЛЕНО
               variant="vertical"
+              onBook={() =>
+                router.push(
+                  ROUTES.RECORD_FOR_DOCTOR(doc.id, {
+                    workplaces: doc.workplaces,
+                  }),
+                )
+              }
             />
           ))}
         </div>

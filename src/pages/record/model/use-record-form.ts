@@ -234,6 +234,16 @@ export const useRecordForm = () => {
     if (clinicId) setSelectedClinicId(clinicId);
     const modeParam = urlParams.get("mode");
     if (modeParam === "online" || modeParam === "offline") setMode(modeParam);
+
+    // Deep-link с карточки/страницы врача (или услуги) — сразу переводим
+    // мобильный степпер на следующий актуальный этап цепочки клиника→врач→
+    // услуга, иначе он всегда стартует с «clinic» и заставляет повторно
+    // выбирать то, что уже пришло в URL.
+    if (doctorId) {
+      setMobileSelectionStage("service");
+    } else if (clinicId) {
+      setMobileSelectionStage("doctor");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -35,4 +35,28 @@ export const ROUTES = {
 
     return `/search?${searchParams.toString()}`;
   },
+
+  // /record с предзаполненным врачом. Клиника: если известна явно (например,
+  // мы уже на странице этой клиники) — передайте clinicId напрямую; иначе
+  // передайте workplaces и она подставится сама, только если это
+  // единственное место работы врача (иначе неоднозначно, пусть выберет сам
+  // на странице записи).
+  RECORD_FOR_DOCTOR: (
+    doctorId: string | number,
+    options?: {
+      clinicId?: string;
+      workplaces?: { clinicId: string }[];
+      mode?: "online" | "offline";
+    },
+  ) => {
+    const params = new URLSearchParams({ doctor: String(doctorId) });
+    const clinicId =
+      options?.clinicId ??
+      (options?.workplaces?.length === 1
+        ? options.workplaces[0].clinicId
+        : undefined);
+    if (clinicId) params.set("clinic", clinicId);
+    if (options?.mode) params.set("mode", options.mode);
+    return `/record?${params.toString()}`;
+  },
 } as const;
