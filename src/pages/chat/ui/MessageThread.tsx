@@ -1,11 +1,12 @@
 "use client";
 
-import { FC, useEffect, useRef } from "react";
+import { FC, Fragment, useEffect, useRef } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
 import { formatMessageTime } from "../model/lib";
 import type { ChatThreadMessage } from "../model/types";
+import { RecommendationCards } from "./RecommendationCards";
 
 const ReadReceipt: FC<{ isRead?: boolean }> = ({ isRead }) => (
   <span
@@ -163,7 +164,12 @@ export const MessageThread: FC<Props> = ({
         message.isSystem ? (
           <SystemNotice key={message.id} message={message} />
         ) : (
-          <MessageBubble key={message.id} message={message} />
+          <Fragment key={message.id}>
+            <MessageBubble message={message} />
+            {!message.isMine && message.recommendations && (
+              <RecommendationCards recommendations={message.recommendations} />
+            )}
+          </Fragment>
         ),
       )}
 

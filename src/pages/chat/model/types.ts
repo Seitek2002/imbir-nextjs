@@ -1,3 +1,5 @@
+import type { AiRecommendations } from "@/shared/api";
+
 // View-model shared by both the user-to-user chat and the AI assistant.
 // `isMine` decides bubble alignment; the data layer maps each source onto it.
 export type ChatThreadMessage = {
@@ -8,6 +10,9 @@ export type ChatThreadMessage = {
   isRead?: boolean;
   // Системное уведомление (sender === null) — рендерится плашкой по центру.
   isSystem?: boolean;
+  // Есть только у ответов ИИ-ассистента — карточки врачей/клиник/услуг под
+  // текстом сообщения (см. RecommendationCards). Обычный чат этого не шлёт.
+  recommendations?: AiRecommendations;
 };
 
 // A row in the conversation list. The AI assistant is a synthetic "room 0".

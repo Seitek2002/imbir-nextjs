@@ -12,6 +12,7 @@ const toThreadMessage = (message: AiChatMessage): ChatThreadMessage => ({
   content: message.content,
   createdAt: message.created_at,
   isMine: message.role === "user",
+  recommendations: message.recommendations,
 });
 
 type UseAiChatResult = {

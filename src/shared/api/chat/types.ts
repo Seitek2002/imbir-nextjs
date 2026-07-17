@@ -76,10 +76,46 @@ export type IncomingSocketFrame = IncomingChatMessage | TypingIncoming;
 
 export type AiChatRole = "user" | "assistant";
 
+export type AiRecommendedDoctor = {
+  id: number;
+  full_name: string;
+  specialty: string;
+  photo: string | null;
+  rating: string;
+  is_online_available: boolean;
+};
+
+export type AiRecommendedClinic = {
+  id: number;
+  name: string;
+  logo: string | null;
+  city: string;
+  rating: string;
+};
+
+export type AiRecommendedService = {
+  id: number;
+  name: string;
+  category: string;
+  price: string;
+  clinic: { id: number; name: string } | null;
+};
+
+// Ассистент может порекомендовать врачей/клиники/услуги в подходящий момент
+// разговора — фронт рисует их карточками под текстом сообщения. Поле
+// присутствует всегда (не на каждый ответ ассистента есть рекомендации —
+// тогда все три массива просто пустые), максимум по 3 записи в каждом.
+export type AiRecommendations = {
+  doctors: AiRecommendedDoctor[];
+  clinics: AiRecommendedClinic[];
+  services: AiRecommendedService[];
+};
+
 export type AiChatMessage = {
   id: number;
   role: AiChatRole;
   content: string;
+  recommendations: AiRecommendations;
   created_at: string;
 };
 
