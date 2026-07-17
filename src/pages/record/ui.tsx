@@ -22,7 +22,7 @@ export const RecordPage = () => {
     mobileStep,
     handleRecordBack,
     selectedDoctor,
-    selectedServices,
+    selectedService,
     mode,
     selectedDate,
     selectedTime,
@@ -62,10 +62,10 @@ export const RecordPage = () => {
           </div>
 
           <div className="hidden lg:block">
-            {selectedDoctor && selectedServices.length > 0 && (
+            {selectedDoctor && selectedService && (
               <SummaryCard
                 doctor={selectedDoctor}
-                services={selectedServices}
+                service={selectedService}
                 mode={mode}
                 selectedDate={selectedDate}
                 selectedTime={selectedTime}

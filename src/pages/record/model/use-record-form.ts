@@ -46,9 +46,9 @@ import type {
   Service,
 } from "./types";
 
-// Порядок цепочки модалок десктопа: выбор клиники/врача сразу закрывает
-// текущую модалку и открывает следующую. Услуга — конечное звено с
-// множественным выбором, поэтому не участвует в автопереходе.
+// Порядок цепочки модалок десктопа: выбор пункта сразу закрывает текущую
+// модалку и открывает следующую; на последнем звене (услуга) модалка просто
+// закрывается.
 const SELECTION_CHAIN: Exclude<SelectionModalType, null>[] = [
   "clinic",
   "doctor",
@@ -65,8 +65,9 @@ export const useRecordForm = () => {
 
   const [selectedClinicId, setSelectedClinicId] = useState<string | null>(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
-  // Услуг можно выбрать несколько — храним массив id, цена суммируется.
-  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    null,
+  );
 
   const [mode, setMode] = useState<ConsultationMode>("offline");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -235,7 +236,7 @@ export const useRecordForm = () => {
 
   useEffect(() => {
     const serviceId = urlParams.get("service");
-    if (serviceId) setSelectedServiceIds([serviceId]);
+    if (serviceId) setSelectedServiceId(serviceId);
     const doctorId = urlParams.get("doctor");
     if (doctorId) setSelectedDoctorId(doctorId);
     const clinicId = urlParams.get("clinic");
@@ -276,13 +277,9 @@ export const useRecordForm = () => {
     () => doctorPool.find((doctor) => doctor.id === selectedDoctorId) ?? null,
     [doctorPool, selectedDoctorId],
   );
-  const selectedServices = useMemo(
-    () => SERVICES.filter((service) => selectedServiceIds.includes(service.id)),
-    [SERVICES, selectedServiceIds],
-  );
-  const totalPrice = useMemo(
-    () => selectedServices.reduce((sum, service) => sum + service.price, 0),
-    [selectedServices],
+  const selectedService = useMemo(
+    () => SERVICES.find((service) => service.id === selectedServiceId) ?? null,
+    [SERVICES, selectedServiceId],
   );
 
   // Клиника выбрана → список врачей из GET /api/clinics/{id}/;
@@ -304,7 +301,7 @@ export const useRecordForm = () => {
     // поэтому прежний врач и услуги могут к ней не относиться — сбрасываем,
     // чтобы пользователь выбрал специалиста заново из списка этой клиники.
     setSelectedDoctorId(null);
-    setSelectedServiceIds([]);
+    setSelectedServiceId(null);
   };
 
   const applyDoctorSelection = (doctorId: string) => {
@@ -319,16 +316,11 @@ export const useRecordForm = () => {
     }
 
     // Услуги привязаны к паре клиника/врач — при смене врача сбрасываем выбор.
-    setSelectedServiceIds([]);
+    setSelectedServiceId(null);
   };
 
-  // Услуга не выбирается «насмерть», а переключается — можно выбрать несколько.
-  const toggleServiceSelection = (serviceId: string) => {
-    setSelectedServiceIds((prev) =>
-      prev.includes(serviceId)
-        ? prev.filter((id) => id !== serviceId)
-        : [...prev, serviceId],
-    );
+  const selectService = (serviceId: string) => {
+    setSelectedServiceId(serviceId);
   };
 
   const modalConfig = useMemo(() => {
@@ -362,13 +354,14 @@ export const useRecordForm = () => {
         ? selectedClinicId
         : mobileSelectionStage === "doctor"
           ? selectedDoctorId
-          : null;
+          : selectedServiceId;
 
     return { ...SELECTION_LABELS[mobileSelectionStage], items, selectedId };
   }, [
     mobileSelectionStage,
     selectedClinicId,
     selectedDoctorId,
+    selectedServiceId,
     CLINICS,
     doctorOptions,
     serviceOptions,
@@ -379,9 +372,8 @@ export const useRecordForm = () => {
     [mobileStep1Config.items, searchQuery],
   );
 
-  // Клиника/врач выбираются «насмерть» — тап сразу переводит к следующему
-  // этапу. Услуга переключается (множественный выбор) и остаётся на месте,
-  // пользователь сам жмёт «Продолжить».
+  // Каждый этап выбирается «насмерть» — тап сразу переводит к следующему
+  // этапу цепочки, а с последнего (услуга) — сразу к шагу 2.
   const handleMobileStep1Select = (id: string) => {
     if (mobileSelectionStage === "clinic") {
       applyClinicSelection(id);
@@ -397,11 +389,7 @@ export const useRecordForm = () => {
       return;
     }
 
-    toggleServiceSelection(id);
-  };
-
-  const handleMobileStep1Continue = () => {
-    if (selectedServiceIds.length === 0) return;
+    selectService(id);
     setSearchQuery("");
     setMobileStep(2);
   };
@@ -415,11 +403,7 @@ export const useRecordForm = () => {
     if (mobileStep === 2) {
       setMobileStep(1);
       setMobileSelectionStage(
-        selectedServiceIds.length > 0
-          ? "service"
-          : selectedDoctorId
-            ? "doctor"
-            : "clinic",
+        selectedServiceId ? "service" : selectedDoctorId ? "doctor" : "clinic",
       );
       setSearchQuery("");
       return;
@@ -450,19 +434,14 @@ export const useRecordForm = () => {
     setSearchQuery("");
   };
 
-  // Выбор пункта списка в десктопной модалке: клиника/врач — применяются
-  // сразу и открывают следующую модалку в цепочке; услуга — переключается
-  // (можно выбрать несколько), модалка остаётся открытой.
+  // Выбор пункта списка в десктопной модалке применяется сразу и открывает
+  // следующую модалку в цепочке; на последнем звене (услуга) модалка закрывается.
   const handleModalItemSelect = (id: string) => {
     if (!activeModal) return;
 
-    if (activeModal === "service") {
-      toggleServiceSelection(id);
-      return;
-    }
-
     if (activeModal === "clinic") applyClinicSelection(id);
-    else applyDoctorSelection(id);
+    else if (activeModal === "doctor") applyDoctorSelection(id);
+    else selectService(id);
 
     const nextType = SELECTION_CHAIN[SELECTION_CHAIN.indexOf(activeModal) + 1];
     if (nextType) {
@@ -484,18 +463,8 @@ export const useRecordForm = () => {
 
     if (selectedDoctorId) request.doctor_id = Number(selectedDoctorId);
     if (selectedClinicId) request.clinic_id = Number(selectedClinicId);
-    // Бэк принимает только один service_id — уходит первая выбранная услуга,
-    // остальные добавляем в notes, чтобы врач видел полный список.
-    if (selectedServiceIds[0])
-      request.service_id = Number(selectedServiceIds[0]);
-    const extraServices = selectedServices.slice(1).map((s) => s.title);
-    const notesParts = [
-      ...(extraServices.length
-        ? [`Также выбраны услуги: ${extraServices.join(", ")}`]
-        : []),
-      ...(comment.trim() ? [comment.trim()] : []),
-    ];
-    if (notesParts.length) request.notes = notesParts.join(". ");
+    if (selectedServiceId) request.service_id = Number(selectedServiceId);
+    if (comment.trim()) request.notes = comment.trim();
 
     // Guests pass their contacts explicitly; authenticated bookings are tied
     // to the logged-in user on the server, so no guest_* fields are sent.
@@ -600,9 +569,8 @@ export const useRecordForm = () => {
     clinicMap,
     selectedClinic,
     selectedDoctor,
-    selectedServices,
-    selectedServiceIds,
-    totalPrice,
+    selectedService,
+    selectedServiceId,
     mobileSelectionStage,
     isStep2Complete,
     modalConfig,
@@ -615,7 +583,6 @@ export const useRecordForm = () => {
     isDoctorStageLoading:
       mobileSelectionStage === "doctor" && isLoadingClinicDoctors,
     handleMobileStep1Select,
-    handleMobileStep1Continue,
     handleRecordBack,
     openModal,
     closeModal,

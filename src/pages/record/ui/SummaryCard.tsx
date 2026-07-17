@@ -17,9 +17,6 @@ import { Button } from "@/shared/ui";
 import { formatDateLabel, formatPrice } from "../model/lib";
 import type { Doctor, Service } from "../model/types";
 
-const formatServiceTitles = (services: Service[]): string =>
-  services.map((s) => s.title).join(", ");
-
 const STATUS_LABELS: Record<AppointmentStatus, string> = {
   pending: "Ожидает подтверждения",
   confirmed: "Подтверждена",
@@ -30,7 +27,7 @@ const STATUS_LABELS: Record<AppointmentStatus, string> = {
 
 export const SummaryCard: FC<{
   doctor: Doctor;
-  services: Service[];
+  service: Service;
   mode: ConsultationMode;
   selectedDate: Date | null;
   selectedTime: string | null;
@@ -39,14 +36,13 @@ export const SummaryCard: FC<{
   initialStatus?: AppointmentStatus | null;
 }> = ({
   doctor,
-  services,
+  service,
   mode,
   selectedDate,
   selectedTime,
   appointmentId,
   initialStatus,
 }) => {
-  const totalPrice = services.reduce((sum, s) => sum + s.price, 0);
   const [status, setStatus] = useState<AppointmentStatus | null>(null);
 
   const { mutate: checkStatus, isPending: isChecking } = useMutation({
@@ -114,11 +110,9 @@ export const SummaryCard: FC<{
       {/* Appointment Details */}
       <div className="space-y-3 text-sm">
         <div className="flex flex-col gap-1">
-          <span className="text-secondary text-xs">
-            {services.length > 1 ? "Услуги" : "Услуга"}
-          </span>
+          <span className="text-secondary text-xs">Услуга</span>
           <span className="font-semibold text-foreground leading-snug">
-            {formatServiceTitles(services)}
+            {service.title}
           </span>
         </div>
 
@@ -144,7 +138,7 @@ export const SummaryCard: FC<{
         <div className="flex items-center justify-between">
           <span className="text-secondary text-sm">К оплате</span>
           <span className="text-foreground font-bold text-[20px]">
-            {formatPrice(totalPrice)}
+            {formatPrice(service.price)}
           </span>
         </div>
         <div className="flex items-center justify-between">

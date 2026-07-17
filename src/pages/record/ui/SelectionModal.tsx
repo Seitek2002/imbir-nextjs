@@ -4,9 +4,8 @@ import { useCallback, useState } from "react";
 
 import { RemoveIcon } from "@/shared/assets/icons";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
-import { Button, IconBtn, SearchInput } from "@/shared/ui";
+import { IconBtn, SearchInput } from "@/shared/ui";
 
-import { formatPrice } from "../model/lib";
 import type { RecordForm } from "../model/use-record-form";
 import { SelectionListItem } from "./SelectionListItem";
 
@@ -22,8 +21,7 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
     clinicMap,
     selectedClinic,
     selectedDoctor,
-    selectedServiceIds,
-    totalPrice,
+    selectedServiceId,
     closeModal,
     handleModalItemSelect,
     isDoctorModalLoading,
@@ -31,7 +29,6 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
 
   const [isClosing, setIsClosing] = useState(false);
   const isOpen = Boolean(activeModal);
-  const isMulti = activeModal === "service";
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
@@ -49,7 +46,7 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
   const isSelected = (id: string): boolean => {
     if (activeModal === "clinic") return selectedClinic?.id === id;
     if (activeModal === "doctor") return selectedDoctor?.id === id;
-    return selectedServiceIds.includes(id);
+    return selectedServiceId === id;
   };
 
   return (
@@ -99,7 +96,6 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
                 item={item}
                 clinicMap={clinicMap}
                 selected={isSelected(item.id)}
-                isMulti={isMulti}
                 onSelect={() => handleModalItemSelect(item.id)}
               />
             ))
@@ -109,24 +105,6 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
             </p>
           )}
         </div>
-
-        {/* Услуги можно выбрать несколько — показываем бегущий итог и явную
-            кнопку завершения (модалка не закрывается по клику на пункт). */}
-        {isMulti && (
-          <div className="mt-4 pt-4 border-t border-border-soft flex items-center justify-between gap-3">
-            <div>
-              <p className="text-secondary text-sm">
-                Выбрано: {selectedServiceIds.length}
-              </p>
-              <p className="text-foreground font-semibold text-lg">
-                {formatPrice(totalPrice)}
-              </p>
-            </div>
-            <Button size="lg" onClick={handleClose}>
-              Готово
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
