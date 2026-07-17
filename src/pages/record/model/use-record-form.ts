@@ -146,13 +146,21 @@ export const useRecordForm = () => {
     enabled: Boolean(selectedClinicId),
   });
 
+  // Бэк моделирует услуги клиники и услуги конкретного врача как
+  // непересекающиеся наборы (у "докторских" услуг clinic всегда null) —
+  // передача clinic_id и doctor_id вместе даёт пересечение, которое всегда
+  // пусто. Поэтому фильтруем по врачу, если он выбран, и только иначе — по
+  // клинике целиком.
   const { data: servicesRaw } = useQuery({
     queryKey: ["record-services", selectedClinicId, selectedDoctorId],
     queryFn: () =>
-      getServices({
-        ...(selectedClinicId ? { clinic_id: selectedClinicId } : {}),
-        ...(selectedDoctorId ? { doctor_id: selectedDoctorId } : {}),
-      }),
+      getServices(
+        selectedDoctorId
+          ? { doctor_id: selectedDoctorId }
+          : selectedClinicId
+            ? { clinic_id: selectedClinicId }
+            : {},
+      ),
   });
 
   const selectedDateStr = selectedDate ? toApiDate(selectedDate) : null;
