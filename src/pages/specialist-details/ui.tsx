@@ -196,6 +196,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                   src={doctor.image}
                   alt={doctor.name}
                   fill
+                  sizes="(min-width: 768px) 400px, 100vw"
                   className="object-cover object-top"
                 />
               ) : (

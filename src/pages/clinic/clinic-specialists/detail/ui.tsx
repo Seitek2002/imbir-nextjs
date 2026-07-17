@@ -155,6 +155,7 @@ export const ClinicSpecialistDetailPage: FC = () => {
                   src={specialist.photo}
                   alt={specialist.full_name}
                   fill
+                  sizes="100vw"
                   className="object-cover object-top"
                   fallback={
                     <div className="w-full h-full flex items-center justify-center">

@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
 
   images: {
     formats: ["image/avif", "image/webp"],
+    // Next.js 16 whitelists quality values; 55 — hero background (see
+    // src/pages/home/hero.tsx), 75 — the default used everywhere else.
+    qualities: [55, 75],
     remotePatterns: [
       {
         protocol: "https",

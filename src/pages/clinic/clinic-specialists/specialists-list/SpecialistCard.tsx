@@ -137,6 +137,7 @@ export const SpecialistRow: FC<Props> = ({
           src={image}
           alt={name}
           fill
+          sizes="56px"
           className="object-cover object-top"
           fallback={
             <div className="w-full h-full flex items-center justify-center">

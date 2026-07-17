@@ -48,6 +48,7 @@ export const ReviewCard: FC<ReviewProps> = ({
               src={avatarUrl}
               alt={author}
               fill
+              sizes="42px"
               className="object-cover"
               fallback={null}
             />

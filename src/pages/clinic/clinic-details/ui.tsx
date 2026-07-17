@@ -198,6 +198,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                       src={img}
                       alt={`${clinic.name}-${idx}`}
                       fill
+                      sizes="calc(100vw - 32px)"
                       className="object-cover"
                       priority={idx === 0}
                     />
@@ -210,6 +211,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                     src={images[activeImageIdx]}
                     alt={clinic.name}
                     fill
+                    sizes="(min-width: 768px) 1320px, 100vw"
                     className="object-cover"
                     priority
                   />
@@ -233,6 +235,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
                       src={img}
                       alt={`thumb-${idx}`}
                       fill
+                      sizes="(min-width: 1024px) 96px, 80px"
                       className="object-cover"
                     />
                   </div>

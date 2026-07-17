@@ -172,6 +172,7 @@ export const ClinicProcedureDetailPage: FC = () => {
           src={photoPreview}
           alt={name}
           fill
+          sizes="112px"
           unoptimized={photoPreview.startsWith("data:")}
           className="object-cover"
         />

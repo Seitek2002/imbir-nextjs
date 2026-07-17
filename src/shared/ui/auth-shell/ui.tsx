@@ -26,6 +26,7 @@ export const AuthShell = ({ header, footer, children }: Props) => (
             <Image
               src="/assets/auth-bg.png"
               fill
+              sizes="640px"
               alt="Imbir"
               className="object-contain"
             />

@@ -45,6 +45,7 @@ export const SelectionListItem = ({
           src={item.image}
           alt={itemTitle}
           fill
+          sizes="80px"
           className="object-cover"
           fallback={null}
         />

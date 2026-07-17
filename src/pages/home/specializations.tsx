@@ -36,6 +36,7 @@ export const SpecializationsSection = () => {
                 src={image}
                 alt={name}
                 fill
+                sizes="(min-width: 768px) 112px, 80px"
                 className="object-contain group-hover:scale-105 transition-transform duration-200"
               />
             </div>
