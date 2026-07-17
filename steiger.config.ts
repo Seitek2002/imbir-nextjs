@@ -13,4 +13,16 @@ export default defineConfig([
       "fsd/no-public-api-sidestep": "off",
     },
   },
+  {
+    // Сайдбар кабинета пациента рендерится напрямую из корневого Next-роутинга
+    // (app/profile/(cabinet)/layout.tsx) — так каркас с сайдбаром живёт в
+    // layout и НЕ перемонтируется при переключении вкладок (плавный индикатор
+    // меню). steiger сканирует только src и не видит этого потребителя из
+    // app/, поэтому ошибочно считает слайс «без ссылок». Это не мёртвый код —
+    // точечно отключаем insignificant-slice, не ломая архитектуру ради линтера.
+    files: ["./src/widgets/profile/sidebar/**"],
+    rules: {
+      "fsd/insignificant-slice": "off",
+    },
+  },
 ]);

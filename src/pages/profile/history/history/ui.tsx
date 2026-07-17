@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { RescheduleModal } from "@/features/reschedule-appointment";
 import { ReviewModal } from "@/features/review-modal";
 
 import {
@@ -20,6 +19,7 @@ import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 import type { Appointment, AppointmentStatus } from "./AppointmentCard/model";
 import { AppointmentCard } from "./AppointmentCard/ui";
+import { RescheduleModal } from "./RescheduleModal";
 
 type Props = {
   appointments: Appointment[];

@@ -12,7 +12,7 @@ import {
   profileKeys,
 } from "@/shared/api";
 import { FilterSample } from "@/shared/assets/icons";
-import { SearchInput } from "@/shared/ui/input/search-input";
+import { SearchInput } from "@/shared/ui/input";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import { Appointment } from "./history/AppointmentCard/model";

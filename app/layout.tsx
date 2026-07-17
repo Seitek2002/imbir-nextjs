@@ -3,8 +3,6 @@ import { Onest } from "next/font/google";
 
 import { Providers } from "@/app/providers";
 
-import { MobileBottomNav } from "@/widgets/mobile-bottom-nav";
-
 import "@/app/globals.css";
 
 const onest = Onest({
@@ -47,10 +45,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col bg-background lg:bg-white"
       >
-        <Providers>
-          {children}
-          <MobileBottomNav />
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
