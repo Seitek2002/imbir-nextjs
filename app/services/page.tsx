@@ -6,12 +6,16 @@ import {
 
 import { ServicesPage } from "@/pages/services";
 
-import { api, serviceKeys } from "@/shared/api";
+import { ServiceFilters, api, serviceKeys } from "@/shared/api";
 
 // Должно совпадать с PAGE_SIZE в ServicesPage.tsx, иначе ключ запроса тут
 // разойдётся с клиентским и SSR-префетч не подхватится (либо, что хуже,
 // подхватится некорректно — см. комментарий ниже про форму infinite-query).
 const PAGE_SIZE = 8;
+// Должно совпадать с ServicesPage.tsx (там см. константу MAX_PRICE).
+const MAX_PRICE = 10000;
+// Должно совпадать с PREFIX в ServicesPage.tsx.
+const PREFIX = "svc";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -20,20 +24,35 @@ type Props = {
 const Services = async ({ searchParams }: Props) => {
   const resolvedSearchParams = await searchParams;
 
-  // Prefetch on the server so the list ships in the initial HTML; the
-  // client's default (no-filter) query hydrates this instead of refetching.
-  // Важно: клиент использует useInfiniteQuery — префетч обязан быть именно
-  // prefetchInfiniteQuery (форма { pages, pageParams }), а не обычный
-  // prefetchQuery. Раньше здесь был prefetchQuery с плоским массивом; его
-  // ключ (serviceKeys.list({})) хеш-совпадал с клиентским (все фильтры по
-  // умолчанию undefined хешируются так же, как {}), поэтому гидратация
-  // подставляла клиенту данные не той формы, и useInfiniteQuery падал при
-  // попытке прочитать .pages на плоском массиве.
+  // Должно ЗНАЧЕНИЕ В ЗНАЧЕНИЕ совпадать с тем, как ServicesPage строит свой
+  // `filters` из useSearchParams() — иначе ключ запроса тут не совпадёт с
+  // клиентским и HydrationBoundary ничего не подхватит. Раньше здесь
+  // префетчилось {} без категории/цены — для любой ссылки с ?svc_spec=...
+  // или ?svc_price=... префетч был бесполезен, клиент всё равно бил по API
+  // заново с реальными фильтрами.
+  const rawCategory = resolvedSearchParams?.[`${PREFIX}_spec`];
+  const currentCategory =
+    typeof rawCategory === "string" ? rawCategory : null;
+
+  const rawPrice = resolvedSearchParams?.[`${PREFIX}_price`];
+  const priceParts =
+    typeof rawPrice === "string" ? rawPrice.split("-").map(Number) : undefined;
+  const priceRange: [number, number] = [
+    priceParts?.[0] ?? 0,
+    priceParts?.[1] ?? MAX_PRICE,
+  ];
+
+  const filters: Omit<ServiceFilters, "page" | "page_size"> = {
+    category: currentCategory ?? undefined,
+    min_price: priceParts ? priceRange[0] : undefined,
+    max_price: priceParts ? priceRange[1] : undefined,
+  };
+
   const queryClient = new QueryClient();
   await queryClient.prefetchInfiniteQuery({
-    queryKey: serviceKeys.list({}),
+    queryKey: serviceKeys.list(filters),
     queryFn: () =>
-      api.getServicesPaginated({ page: 1, page_size: PAGE_SIZE }),
+      api.getServicesPaginated({ ...filters, page: 1, page_size: PAGE_SIZE }),
     initialPageParam: 1,
   });
 

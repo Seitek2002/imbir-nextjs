@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 
 import Link from "next/link";
 
@@ -38,9 +38,12 @@ const PAGE_SIZE = 8;
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
+  // City the server prefetched clinics for (from the city cookie, see
+  // app/clinics/page.tsx).
+  initialCity: string;
 };
 
-export const ClinicsPage: FC<Props> = ({ searchParams }) => {
+export const ClinicsPage: FC<Props> = ({ searchParams, initialCity }) => {
   const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
   const isFiltersModalOpen = searchParams?.modal === "filters";
 
@@ -62,7 +65,28 @@ export const ClinicsPage: FC<Props> = ({ searchParams }) => {
       ? searchParams.clinic_price
       : null;
 
-  const selectedCity = useCityStore((s) => s.city);
+  const storeCity = useCityStore((s) => s.city);
+  // Стор персистится из localStorage асинхронно, уже после маунта. Пока
+  // гидратация не завершилась, используем город, который сервер реально
+  // передал в префетч (initialCity, из cookie) — иначе ключ первого
+  // клиентского запроса разойдётся с ключом дегидратированных данных, и
+  // HydrationBoundary ничего не подхватит (см. app/clinics/page.tsx).
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    if (useCityStore.persist.hasHydrated()) {
+      // Гидратация могла завершиться ещё до маунта этого компонента (напр.
+      // переход с другой страницы SPA, стор общий) — onFinishHydration ниже
+      // в этом случае никогда не выстрелит, других способов узнать об этом
+      // нет. queueMicrotask здесь не спасает: эмпирически проверено (см.
+      // use-record-form.ts), что он не гарантированно выигрывает гонку с
+      // внутренним микротаском самого Zustand.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsHydrated(true);
+      return;
+    }
+    return useCityStore.persist.onFinishHydration(() => setIsHydrated(true));
+  }, []);
+  const selectedCity = isHydrated ? storeCity : initialCity;
 
   const [priceMin, priceMax] = currentPrice
     ? currentPrice.split("-").map(Number)
