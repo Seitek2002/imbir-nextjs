@@ -10,6 +10,7 @@ import { CheckIcon, EditIcon } from "@/shared/assets/icons";
 import { useAuthStore } from "@/shared/store";
 import {
   Button,
+  ConfirmDialog,
   IconBtn,
   ImageWithFallback,
   Input,
@@ -43,6 +44,7 @@ export const ProfileMyDataPage: FC = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
   const [d, setD] = useState<D>({
     firstName: user?.first_name ?? "",
@@ -137,7 +139,9 @@ export const ProfileMyDataPage: FC = () => {
 
   const mobileRight = (
     <IconBtn
-      onClick={isEditing ? handleSave : () => setIsEditing(true)}
+      onClick={
+        isEditing ? () => setShowSaveConfirm(true) : () => setIsEditing(true)
+      }
       disabled={isSaving}
       variant="text"
       size="sm"
@@ -159,7 +163,11 @@ export const ProfileMyDataPage: FC = () => {
             Настройки профиля
           </h2>
           <Button
-            onClick={isEditing ? handleSave : () => setIsEditing(true)}
+            onClick={
+              isEditing
+                ? () => setShowSaveConfirm(true)
+                : () => setIsEditing(true)
+            }
             disabled={isSaving}
             variant={isEditing ? "default" : "outline"}
             size="sm"
@@ -288,6 +296,17 @@ export const ProfileMyDataPage: FC = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showSaveConfirm}
+        onClose={() => setShowSaveConfirm(false)}
+        onConfirm={handleSave}
+        icon={<CheckIcon className="w-7 h-7 text-primary" />}
+        title="Сохранить изменения?"
+        description="Обновлённые данные профиля будут сохранены"
+        confirmLabel="Сохранить"
+        cancelLabel="Отмена"
+      />
     </>
   );
 };

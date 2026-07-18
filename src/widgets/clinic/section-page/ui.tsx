@@ -1,11 +1,11 @@
 "use client";
 
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
 import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets/icons";
-import { IconBtn } from "@/shared/ui";
+import { ConfirmDialog, IconBtn } from "@/shared/ui";
 
 type Props = {
   title: string;
@@ -27,6 +27,18 @@ export const ClinicSectionPage: FC<Props> = ({
   isSaving,
 }) => {
   const router = useRouter();
+  // onEditToggle — это handleSave, когда isEditing уже true (единая точка,
+  // общая для всех 6 секций профиля клиники), поэтому подтверждение
+  // достаточно перехватить здесь один раз, а не в каждой странице-секции.
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+
+  const handleHeaderAction = () => {
+    if (isEditing) {
+      setShowSaveConfirm(true);
+      return;
+    }
+    onEditToggle();
+  };
 
   return (
     <div className="w-full min-h-screen bg-[#FAFAFA]">
@@ -45,7 +57,7 @@ export const ClinicSectionPage: FC<Props> = ({
         </h1>
 
         <IconBtn
-          onClick={onEditToggle}
+          onClick={handleHeaderAction}
           disabled={isSaving}
           variant="text"
           size="sm"
@@ -61,6 +73,17 @@ export const ClinicSectionPage: FC<Props> = ({
       </div>
 
       <div className="max-w-360 mx-auto px-4 py-4">{children}</div>
+
+      <ConfirmDialog
+        isOpen={showSaveConfirm}
+        onClose={() => setShowSaveConfirm(false)}
+        onConfirm={onEditToggle}
+        icon={<CheckIcon className="w-7 h-7 text-primary" />}
+        title="Сохранить изменения?"
+        description="Обновлённые данные будут сохранены в профиле клиники"
+        confirmLabel="Сохранить"
+        cancelLabel="Отмена"
+      />
     </div>
   );
 };

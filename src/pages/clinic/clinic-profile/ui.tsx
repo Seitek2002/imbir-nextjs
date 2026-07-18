@@ -19,7 +19,8 @@ import {
   getClinicStats,
   updateClinicBranch,
 } from "@/shared/api";
-import { Button, Input, StatTiles } from "@/shared/ui";
+import { CheckIcon } from "@/shared/assets/icons";
+import { Button, ConfirmDialog, Input, StatTiles } from "@/shared/ui";
 
 import { ClinicProfileHub } from "./hub/ui";
 
@@ -147,6 +148,7 @@ export const ClinicProfilePage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile, rawProfile } =
     useClinicCabinet();
   const [isEditing, setIsEditing] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const formRef = useRef<ClinicProfileFormHandle>(null);
 
   const handleSave = async () => {
@@ -180,7 +182,10 @@ export const ClinicProfilePage: FC = () => {
               <Button variant="outline" onClick={() => setIsEditing(false)}>
                 Отмена
               </Button>
-              <Button onClick={handleSave} disabled={isSaving}>
+              <Button
+                onClick={() => setShowSaveConfirm(true)}
+                disabled={isSaving}
+              >
                 {isSaving ? "Сохранение..." : "Сохранить"}
               </Button>
             </div>
@@ -206,6 +211,17 @@ export const ClinicProfilePage: FC = () => {
       <div className="md:hidden">
         <ClinicProfileHub />
       </div>
+
+      <ConfirmDialog
+        isOpen={showSaveConfirm}
+        onClose={() => setShowSaveConfirm(false)}
+        onConfirm={handleSave}
+        icon={<CheckIcon className="w-7 h-7 text-primary" />}
+        title="Сохранить изменения?"
+        description="Обновлённые данные профиля клиники будут сохранены"
+        confirmLabel="Сохранить"
+        cancelLabel="Отмена"
+      />
     </ClinicPageLayout>
   );
 };

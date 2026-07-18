@@ -6,7 +6,8 @@ import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView } from "@/widgets/doctor/layout";
 
-import { Button, ImageWithFallback, Input } from "@/shared/ui";
+import { CheckIcon } from "@/shared/assets/icons";
+import { Button, ConfirmDialog, ImageWithFallback, Input } from "@/shared/ui";
 
 const AddIcon: FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -28,6 +29,7 @@ const AddIcon: FC<{ className?: string }> = ({ className }) => (
 export const DoctorDocumentsPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [licenseNumber, setLicenseNumber] = useState("");
   const [certs, setCerts] = useState<string[]>([]);
   const certRef = useRef<HTMLInputElement>(null);
@@ -74,14 +76,20 @@ export const DoctorDocumentsPage: FC = () => {
     <DoctorPageLayout
       title={title}
       editAction={isEditing ? "save" : "edit"}
-      onEditToggle={isEditing ? handleSave : () => setIsEditing(true)}
+      onEditToggle={
+        isEditing ? () => setShowSaveConfirm(true) : () => setIsEditing(true)
+      }
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
         <Button
           variant={isEditing ? "default" : "outline"}
           size="sm"
-          onClick={isEditing ? handleSave : () => setIsEditing(true)}
+          onClick={
+            isEditing
+              ? () => setShowSaveConfirm(true)
+              : () => setIsEditing(true)
+          }
           disabled={isSaving}
         >
           {isSaving
@@ -211,6 +219,17 @@ export const DoctorDocumentsPage: FC = () => {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showSaveConfirm}
+        onClose={() => setShowSaveConfirm(false)}
+        onConfirm={handleSave}
+        icon={<CheckIcon className="w-7 h-7 text-primary" />}
+        title="Сохранить изменения?"
+        description="Обновлённые данные профиля будут сохранены"
+        confirmLabel="Сохранить"
+        cancelLabel="Отмена"
+      />
     </DoctorPageLayout>
   );
 };

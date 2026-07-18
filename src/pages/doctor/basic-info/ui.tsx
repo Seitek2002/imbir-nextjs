@@ -6,8 +6,10 @@ import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
+import { CheckIcon } from "@/shared/assets/icons";
 import {
   Button,
+  ConfirmDialog,
   IconBtn,
   ImageWithFallback,
   Input,
@@ -24,6 +26,7 @@ const GENDER_OPTIONS = [
 export const DoctorBasicInfoPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [d, setD] = useState({
     fullName: "",
     gender: "",
@@ -110,14 +113,20 @@ export const DoctorBasicInfoPage: FC = () => {
     <DoctorPageLayout
       title={title}
       editAction={isEditing ? "save" : "edit"}
-      onEditToggle={isEditing ? handleSave : () => setIsEditing(true)}
+      onEditToggle={
+        isEditing ? () => setShowSaveConfirm(true) : () => setIsEditing(true)
+      }
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
         <Button
           variant={isEditing ? "default" : "outline"}
           size="sm"
-          onClick={isEditing ? handleSave : () => setIsEditing(true)}
+          onClick={
+            isEditing
+              ? () => setShowSaveConfirm(true)
+              : () => setIsEditing(true)
+          }
           disabled={isSaving}
         >
           {isSaving
@@ -284,6 +293,17 @@ export const DoctorBasicInfoPage: FC = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showSaveConfirm}
+        onClose={() => setShowSaveConfirm(false)}
+        onConfirm={handleSave}
+        icon={<CheckIcon className="w-7 h-7 text-primary" />}
+        title="Сохранить изменения?"
+        description="Обновлённые данные профиля будут сохранены"
+        confirmLabel="Сохранить"
+        cancelLabel="Отмена"
+      />
     </DoctorPageLayout>
   );
 };
