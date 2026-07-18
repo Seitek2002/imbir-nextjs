@@ -194,7 +194,12 @@ export const ClinicsPage: FC<Props> = ({ searchParams, initialCity }) => {
                   key={`mob-${clinic.id}`}
                   {...clinic}
                   variant="horizontal"
-                  priority={index < 2}
+                  // Компактные горизонтальные карточки — на реальном мобильном
+                  // вьюпорте (проверено на Moto G Power через Lighthouse) в
+                  // зоне видимости уже 3-я карточка, а не только первые 2.
+                  // Подтверждено: LCP-элементом на проде оказалось фото именно
+                  // 3-й клиники в дефолтном порядке — она грузилась лениво.
+                  priority={index < 4}
                   initialSaved={isSaved(Number(clinic.id))}
                   onSave={() => toggle(Number(clinic.id))}
                 />
