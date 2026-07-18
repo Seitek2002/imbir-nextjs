@@ -165,9 +165,11 @@ export const useRecordForm = () => {
   // завершения гидратации стора — если она уже случилась (переход с другой
   // страницы SPA, стор общий на всё приложение), запрос уйдёт сразу.
   const selectedCity = useCityStore((s) => s.city);
-  const [isCityHydrated, setIsCityHydrated] = useState(() =>
-    useCityStore.persist.hasHydrated(),
-  );
+  // Инициализируем false безусловно — на сервере (SSR) persist-объект стора
+  // недоступен (localStorage там нет), а useState-инициализатор выполняется
+  // и на сервере тоже. Любое обращение к useCityStore.persist делаем только
+  // внутри эффекта, который на сервере не выполняется в принципе.
+  const [isCityHydrated, setIsCityHydrated] = useState(false);
   useEffect(() => {
     if (useCityStore.persist.hasHydrated()) {
       setIsCityHydrated(true);
