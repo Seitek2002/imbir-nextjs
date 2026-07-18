@@ -36,9 +36,14 @@ import { StatsPanel } from "@/shared/ui/stats-panel";
 
 type Props = {
   id: string;
+  // Получено на сервере (app/clinics/[id]/page.tsx) и передано как initialData
+  // в useQuery — иначе клиент всегда стартует с isLoading=true и на секунду
+  // показывает текст "Загрузка клиники..." поверх уже отрисованного skeleton
+  // из loading.tsx, даже если данные пришли почти мгновенно.
+  initialClinic?: Awaited<ReturnType<typeof api.getClinicById>>;
 };
 
-export const ClinicDetailsPage: FC<Props> = ({ id }) => {
+export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "doctor";
   const router = useRouter();
@@ -53,6 +58,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
   } = useQuery({
     queryKey: ["clinic", id],
     queryFn: () => api.getClinicById(id),
+    initialData: initialClinic,
   });
 
   const { data: services = [] } = useQuery({

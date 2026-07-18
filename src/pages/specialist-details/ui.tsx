@@ -36,9 +36,15 @@ import { StatsPanel } from "@/shared/ui/stats-panel";
 
 type Props = {
   id: string;
+  // Получено на сервере (app/specialists/[id]/page.tsx) и передано как
+  // initialData в useQuery — иначе клиент всегда стартует с isLoading=true и
+  // на секунду показывает текст "Загрузка специалиста..." поверх уже
+  // отрисованного skeleton'а из loading.tsx, даже если данные пришли почти
+  // мгновенно.
+  initialDoctor?: Awaited<ReturnType<typeof api.getDoctorById>>;
 };
 
-export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
+export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
   const router = useRouter();
   const [isOfflineInfoOpen, setIsOfflineInfoOpen] = useState(false);
 
@@ -50,6 +56,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
   } = useQuery({
     queryKey: ["doctor", id],
     queryFn: () => api.getDoctorById(id),
+    initialData: initialDoctor,
   });
 
   // 2. ПОЛУЧАЕМ ОТЗЫВЫ ЭТОГО ВРАЧА
