@@ -1,1 +1,0 @@
-export { DoctorMyDataPage } from "./ui";
