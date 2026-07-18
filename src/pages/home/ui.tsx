@@ -14,11 +14,16 @@ import {
 import { ROUTES } from "@/shared/config";
 import { LazyInView } from "@/shared/ui";
 
+// Эти два блока рендерятся сразу (не за LazyInView, см. ниже), поэтому им не
+// нужен свой отдельный async-чанк — dynamic() тут только добавлял лишний
+// round-trip и дублировал общие зависимости (напр. tailwind-merge) в чанк
+// каждого компонента вместо одного общего бандла страницы. Компоненты ниже,
+// что реально отложены через LazyInView, оставлены динамическими — там
+// code-splitting настоящий, не косметический.
+import { DoctorsMainList } from "./doctorsMainList";
 import { Hero } from "./hero";
+import { SpecializationsSection } from "./specializations";
 
-const DoctorsMainList = dynamic(() =>
-  import("./doctorsMainList").then((mod) => mod.DoctorsMainList),
-);
 const ClinicsList = dynamic(() =>
   import("./clinicsList").then((mod) => mod.ClinicsMainList),
 );
@@ -28,9 +33,6 @@ const VideosSwiper = dynamic(() =>
 );
 const Footer = dynamic(() =>
   import("@/widgets/footer").then((mod) => mod.Footer),
-);
-const SpecializationsSection = dynamic(() =>
-  import("./specializations").then((mod) => mod.SpecializationsSection),
 );
 
 export const HomePage = () => {
