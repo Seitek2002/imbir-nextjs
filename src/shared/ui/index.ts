@@ -9,6 +9,7 @@ export { StatsPanel } from "./stats-panel";
 export { StatTiles } from "./stat-tiles";
 export { Modal } from "./modal";
 export { ConfirmDialog } from "./confirm-dialog";
+export { ContactInfoModal } from "./contact-info-modal";
 
 export { Input, Radio, Checkbox, SearchInput } from "./input";
 export { FilterTabBar } from "./filter-tabs";

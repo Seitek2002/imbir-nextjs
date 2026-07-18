@@ -30,7 +30,7 @@ import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { Button, IconBtn } from "@/shared/ui";
+import { Button, ContactInfoModal, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
 
@@ -43,6 +43,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
   const isDoctor = user?.role === "doctor";
   const router = useRouter();
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const [isOfflineInfoOpen, setIsOfflineInfoOpen] = useState(false);
 
   // 1. ЗАПРАШИВАЕМ ДАННЫЕ ПАРАЛЛЕЛЬНО
   const {
@@ -287,9 +288,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
               <Button
                 variant="outline"
                 className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-primary"
-                onClick={() =>
-                  router.push(`${ROUTES.RECORD}?clinic=${id}&mode=offline`)
-                }
+                onClick={() => setIsOfflineInfoOpen(true)}
               >
                 Офлайн-консультация
               </Button>
@@ -454,6 +453,14 @@ export const ClinicDetailsPage: FC<Props> = ({ id }) => {
       <div className="hidden md:block">
         <Footer />
       </div>
+
+      <ContactInfoModal
+        isOpen={isOfflineInfoOpen}
+        onClose={() => setIsOfflineInfoOpen(false)}
+        title="Офлайн-консультация"
+        phone={clinic.phone}
+        email={clinic.email}
+      />
     </main>
   );
 };

@@ -30,11 +30,9 @@ import {
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { useAuthStore } from "@/shared/store";
-import { Button, IconBtn } from "@/shared/ui";
+import { Button, ContactInfoModal, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
-
-import { OfflineBookingModal } from "./OfflineBookingModal";
 
 type Props = {
   id: string;
@@ -42,7 +40,7 @@ type Props = {
 
 export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
   const router = useRouter();
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isOfflineInfoOpen, setIsOfflineInfoOpen] = useState(false);
 
   // 1. ПОЛУЧАЕМ ДАННЫЕ ВРАЧА
   const {
@@ -265,7 +263,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
                     variant="outline"
                     size="md"
                     className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-primary hover:bg-[#FFEAE5]"
-                    onClick={() => setIsBookingOpen(true)}
+                    onClick={() => setIsOfflineInfoOpen(true)}
                   >
                     Офлайн-запись
                   </Button>
@@ -415,7 +413,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
           <Button
             className="flex-1 justify-center bg-[#FFF2F0] text-primary border border-transparent"
             size="lg"
-            onClick={() => setIsBookingOpen(true)}
+            onClick={() => setIsOfflineInfoOpen(true)}
           >
             Офлайн
           </Button>
@@ -433,16 +431,12 @@ export const SpecialistDetailsPage: FC<Props> = ({ id }) => {
         </div>
       )}
 
-      <OfflineBookingModal
-        isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
-        doctor={{
-          id: doctor.id,
-          name: doctor.name,
-          specialty: doctor.specialty,
-          image: doctor.image,
-          workplaces: doctor.workplaces,
-        }}
+      <ContactInfoModal
+        isOpen={isOfflineInfoOpen}
+        onClose={() => setIsOfflineInfoOpen(false)}
+        title="Офлайн-запись"
+        phone={doctor.contacts?.phone}
+        email={doctor.contacts?.email}
       />
     </main>
   );
