@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { ConsultationMode } from "@/widgets/appointment-datetime-picker";
 
@@ -45,6 +50,11 @@ import type {
   SelectionModalType,
   Service,
 } from "./types";
+
+// Список клиник в модалке «Клиника»: как и на /clinics, /specialists,
+// /services — постраничная подгрузка с кнопкой «Показать ещё», иначе бэк
+// отдаёт только первую страницу и часть клиник в форме записи не найти.
+const CLINICS_PAGE_SIZE = 20;
 
 export const useRecordForm = () => {
   const router = useRouter();
@@ -122,17 +132,58 @@ export const useRecordForm = () => {
     }
   }, [profile]);
 
-  const { data: clinicsData = [] } = useQuery({
+  const {
+    data: clinicsPages,
+    fetchNextPage: fetchMoreClinics,
+    hasNextPage: hasMoreClinics,
+    isFetchingNextPage: isFetchingMoreClinics,
+  } = useInfiniteQuery({
     queryKey: ["record-clinics"],
-    queryFn: () => api.getClinics(),
+    queryFn: ({ pageParam }) =>
+      api.getClinicsPaginated({
+        page: pageParam,
+        page_size: CLINICS_PAGE_SIZE,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
+        ? lastPage.pagination.page + 1
+        : undefined,
   });
+
+  const clinicsData = useMemo(
+    () => clinicsPages?.pages.flatMap((page) => page.data) ?? [],
+    [clinicsPages],
+  );
+
+  // Стор города персистится из localStorage асинхронно, уже ПОСЛЕ маунта. У
+  // /specialists есть безопасный дефолт на время гидратации — сервер читает
+  // тот же город из cookie и передаёт его пропом, так что оба значения
+  // заведомо совпадают. У /record такого cookie-чтения на сервере нет,
+  // поэтому вместо подстраховки фейковым дефолтом (он может не совпасть с
+  // реальным городом и уйдёт лишний повторный запрос) просто ждём реального
+  // завершения гидратации стора — если она уже случилась (переход с другой
+  // страницы SPA, стор общий на всё приложение), запрос уйдёт сразу.
+  const selectedCity = useCityStore((s) => s.city);
+  const [isCityHydrated, setIsCityHydrated] = useState(() =>
+    useCityStore.persist.hasHydrated(),
+  );
+  useEffect(() => {
+    if (useCityStore.persist.hasHydrated()) {
+      setIsCityHydrated(true);
+      return;
+    }
+    return useCityStore.persist.onFinishHydration(() =>
+      setIsCityHydrated(true),
+    );
+  }, []);
 
   // Врачи выбранного города; page_size поднят, иначе бэк отдаст только
   // первую страницу (20 записей) и в форме будут видны не все врачи.
-  const selectedCity = useCityStore((s) => s.city);
   const { data: doctorsData = [] } = useQuery({
     queryKey: ["record-doctors", selectedCity],
     queryFn: () => api.getDoctors({ city: selectedCity, page_size: 200 }),
+    enabled: isCityHydrated,
   });
 
   // Детали выбранной клиники — источник её списка врачей для шага «Выберите
@@ -235,7 +286,8 @@ export const useRecordForm = () => {
 
   const SERVICES: Service[] = (servicesRaw?.data ?? []).map((s) => ({
     id: String(s.id),
-    clinicId: "",
+    clinicId: s.clinic ? String(s.clinic.id) : "",
+    clinicName: s.clinic?.name,
     doctorIds: [],
     title: s.name,
     category: s.category,
@@ -685,6 +737,9 @@ export const useRecordForm = () => {
     appointmentResult,
     canUseOnline,
     clinicMap,
+    hasMoreClinics: Boolean(hasMoreClinics),
+    isFetchingMoreClinics,
+    fetchMoreClinics,
     selectedClinicId,
     selectedClinic,
     selectedDoctor,
