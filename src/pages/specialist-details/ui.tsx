@@ -201,6 +201,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                   src={doctor.image}
                   alt={doctor.name}
                   fill
+                  // Это LCP-элемент страницы (виден сразу, без скролла) —
+                  // без priority next/image ставит loading="lazy" и браузер
+                  // не начинает грузить фото, пока JS до него не дойдёт.
+                  // Подтверждено Lighthouse: ~1.3с чистой задержки на LCP.
+                  priority
                   sizes="(min-width: 768px) 400px, 100vw"
                   className="object-cover object-top"
                 />
