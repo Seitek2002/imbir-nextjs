@@ -35,6 +35,12 @@ type Doctor = {
 type Service = {
   id: string;
   clinicId: string;
+  // Название клиники берём напрямую из ответа API (см. use-record-form.ts),
+  // а не через clinicMap.get(clinicId) — тот строится из отдельного,
+  // постранично догружаемого списка клиник, где нужной клиники может ещё не
+  // быть. Без этого поля две одноимённые услуги из разных клиник выглядели
+  // неотличимо друг от друга.
+  clinicName?: string;
   doctorIds: string[];
   title: string;
   category: string;

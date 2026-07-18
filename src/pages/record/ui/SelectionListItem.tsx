@@ -96,10 +96,9 @@ export const SelectionListItem = ({
             )}
           >
             {item.category}
-            <span className="text-primary">
-              {" "}
-              • {clinicMap.get(item.clinicId)?.name}
-            </span>
+            {item.clinicName && (
+              <span className="text-primary"> • {item.clinicName}</span>
+            )}
           </p>
         )}
 
