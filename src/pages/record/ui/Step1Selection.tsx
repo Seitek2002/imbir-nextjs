@@ -1,5 +1,5 @@
 import { cn } from "@/shared/lib/utils";
-import { SearchInput } from "@/shared/ui";
+import { Button, SearchInput } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
 import { SelectField } from "./SelectField";
@@ -14,10 +14,14 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
     selectedService,
     openModal,
     mobileStep1Config,
+    mobileSelectionStage,
     searchQuery,
     setSearchQuery,
     filteredMobileStep1Items,
     clinicMap,
+    hasMoreClinics,
+    isFetchingMoreClinics,
+    fetchMoreClinics,
     handleMobileStep1Select,
     isDoctorStageLoading,
   } = form;
@@ -95,6 +99,19 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
             </p>
           )}
         </div>
+
+        {mobileSelectionStage === "clinic" && hasMoreClinics && (
+          <div className="flex justify-center mt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchMoreClinics()}
+              loading={isFetchingMoreClinics}
+            >
+              {isFetchingMoreClinics ? "Загрузка…" : "Показать ещё"}
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );

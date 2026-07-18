@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 
 import { RemoveIcon } from "@/shared/assets/icons";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
-import { IconBtn, SearchInput } from "@/shared/ui";
+import { Button, IconBtn, SearchInput } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
 import { SelectionListItem } from "./SelectionListItem";
@@ -19,6 +19,9 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
     setSearchQuery,
     filteredModalItems,
     clinicMap,
+    hasMoreClinics,
+    isFetchingMoreClinics,
+    fetchMoreClinics,
     selectedClinicId,
     selectedClinic,
     selectedDoctor,
@@ -107,6 +110,19 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
             </p>
           )}
         </div>
+
+        {activeModal === "clinic" && hasMoreClinics && (
+          <div className="flex justify-center mt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchMoreClinics()}
+              loading={isFetchingMoreClinics}
+            >
+              {isFetchingMoreClinics ? "Загрузка…" : "Показать ещё"}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
