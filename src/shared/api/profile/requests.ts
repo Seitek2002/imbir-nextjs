@@ -28,7 +28,9 @@ export const updateProfile = async (
         form.append(key, String(value));
     });
     form.append("avatar_upload", avatar_upload);
-    const { data } = await apiClient.put<ClientProfile>("/api/profile/", form);
+    const { data } = await apiClient.put<ClientProfile>("/api/profile/", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return data;
   }
 

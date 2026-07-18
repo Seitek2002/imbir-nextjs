@@ -73,6 +73,7 @@ export const updateClinicProfile = async (
     const { data } = await apiClient.put<ClinicPrivateProfile>(
       "/api/clinic/profile/",
       form,
+      { headers: { "Content-Type": "multipart/form-data" } },
     );
     return data;
   }
