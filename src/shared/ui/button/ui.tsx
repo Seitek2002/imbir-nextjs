@@ -25,9 +25,16 @@ export const Button: FC<Props> = ({
   size = "xs",
   ...props
 }) => {
+  // xs/sm — 32-40px высотой, меньше рекомендованного минимума в 44px для
+  // тач-таргета (iOS HIG / Material). Расширяем кликабельную область только
+  // по вертикали невидимым ::after — ширина (и весь остальной вид кнопки)
+  // не меняется, так что соседние элементы в ряду не затрагиваются.
   const sizes: Record<Sizes, string> = {
-    xs: "h-8 text-xs px-4",
-    sm: "h-10 text-sm px-5",
+    // Инсеты чуть больше, чем строго нужно по высоте: у outline-варианта есть
+    // рамка (border), а её ширина вычитается из containing block для ::after
+    // (это padding-box, не border-box) — с запасом это не играет роли.
+    xs: "h-8 text-xs px-4 relative after:absolute after:inset-x-0 after:-inset-y-2 after:content-['']",
+    sm: "h-10 text-sm px-5 relative after:absolute after:inset-x-0 after:-inset-y-1 after:content-['']",
     md: "h-12 text-sm md:text-base px-6",
     lg: "h-[52px] text-base px-8",
   };

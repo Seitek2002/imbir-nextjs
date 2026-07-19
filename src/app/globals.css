@@ -24,6 +24,27 @@
   --color-overlay: #0d0d12;
 }
 
+/* ── Тач-устройства: убираем то, что выдаёт "это сайт в браузере" ────────── */
+
+html,
+body {
+  /* Не даём "резиновой" прокрутке всей страницы всплывать поверх контента —
+     в вебвью это выглядит как графический глюк, а не нативный скролл. */
+  overscroll-behavior-y: none;
+}
+
+button,
+a,
+[role="button"] {
+  /* Стандартная серо-синяя вспышка при тапе (у кнопок уже есть свои
+     active:-состояния) и системное long-press меню
+     "Сохранить картинку"/выделение текста на кнопках-ссылках. */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 @utility scrollbar-hide {
   -ms-overflow-style: none; /* IE и Edge */
   scrollbar-width: none; /* Firefox */

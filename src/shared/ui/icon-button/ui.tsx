@@ -25,15 +25,21 @@ export const IconBtn = forwardRef<HTMLButtonElement, Props>(
     },
     ref,
   ) => {
+    // xs/sm — иконка + паддинг дают всего ~28-40px видимого размера, меньше
+    // рекомендованного минимума в 44px для тач-таргета (iOS HIG / Material).
+    // Визуально кнопку не увеличиваем — вместо этого невидимый ::after
+    // расширяет именно кликабельную область до 44×44, отцентрованно.
+    const hitArea =
+      "after:absolute after:inset-1/2 after:size-11 after:-translate-x-1/2 after:-translate-y-1/2 after:content-['']";
     const sizes: Record<Sizes, string> = {
-      xs: "p-1.5",
-      sm: "p-2.5",
+      xs: `p-1.5 ${hitArea}`,
+      sm: `p-2.5 ${hitArea}`,
       md: "p-3.5",
       lg: "p-4",
     };
 
     const baseStyles =
-      "inline-flex items-center justify-center cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none " +
+      "relative inline-flex items-center justify-center cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none " +
       sizes[size];
 
     const variants: Record<Variant, string> = {

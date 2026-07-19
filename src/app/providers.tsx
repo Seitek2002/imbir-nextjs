@@ -10,7 +10,11 @@ import { MobileBottomNav } from "@/widgets/mobile-bottom-nav";
 
 import { CityConfirmBanner } from "@/features/city-confirm";
 
+import { useTapHaptics } from "@/shared/lib/useTapHaptics";
+
 export function Providers({ children }: { children: React.ReactNode }) {
+  useTapHaptics();
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
