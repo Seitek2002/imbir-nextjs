@@ -46,15 +46,17 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
               <Logo className="w-26.5 h-6.5" />
             </Link>
 
-            <Button
-              IconLeft={GeoIcon}
-              IconRight={GeoBtnArrowIcon}
-              variant="outline"
-              size="sm"
-              onClick={() => setIsCityModalOpen(true)}
-            >
-              {city}
-            </Button>
+            <div className="hidden md:block">
+              <Button
+                IconLeft={GeoIcon}
+                IconRight={GeoBtnArrowIcon}
+                variant="outline"
+                size="sm"
+                onClick={() => setIsCityModalOpen(true)}
+              >
+                {city}
+              </Button>
+            </div>
           </div>
 
           <nav className="hidden md:flex text-foreground text-xs lg:text-base gap-6 items-center">
@@ -64,14 +66,17 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             <Link href={ROUTES.BLOG}>Блог</Link>
           </nav>
 
-          {/* Mobile right icons */}
-          <div className="flex md:hidden gap-2">
-            <HeaderChatButton />
-            <Link href={profileHref}>
-              <IconBtn variant="outline" size="sm">
-                <ProfileIcon className="size-5" />
-              </IconBtn>
-            </Link>
+          {/* Mobile City Selector */}
+          <div className="md:hidden">
+            <Button
+              IconLeft={GeoIcon}
+              IconRight={GeoBtnArrowIcon}
+              variant="outline"
+              size="sm"
+              onClick={() => setIsCityModalOpen(true)}
+            >
+              {city}
+            </Button>
           </div>
 
           <div className="hidden md:flex gap-3">

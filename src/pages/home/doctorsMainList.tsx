@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, Suspense } from "react";
 
@@ -153,7 +153,7 @@ const DoctorsListContent = () => {
 
 export const DoctorsMainList: FC = () => {
   return (
-    <div className="max-w-340 mx-auto py-30 px-4">
+    <div className="max-w-340 mx-auto pt-8 pb-0 md:py-30 px-4">
       <div className="hidden lg:block">
         <Suspense
           fallback={
