@@ -63,7 +63,7 @@ export const VideosSwiper: FC<Props> = ({
 
       {/* Mobile: native horizontal scroll-snap (no JS carousel lib). Slides are
           ~87% wide so the next one peeks, matching the old slidesPerView 1.15. */}
-      <div className="md:hidden flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2">
+      <div className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto md:hidden">
         {videos.map((video) => (
           <div key={video.id} className="snap-start shrink-0 w-[87%]">
             <VideoCard

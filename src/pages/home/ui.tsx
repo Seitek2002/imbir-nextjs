@@ -52,11 +52,11 @@ export const HomePage = () => {
         <ClinicsList />
       </LazyInView>
 
-      <LazyInView minHeight={440}>
+      <LazyInView minHeight={228}>
         <Banners />
       </LazyInView>
 
-      <LazyInView minHeight={380} className="w-full">
+      <LazyInView minHeight={320} className="w-full">
         <VideosSwiper
           title="Интервью"
           viewAllHref="/videos"
@@ -90,7 +90,7 @@ export const HomePage = () => {
         />
       </LazyInView>
 
-      <section className="w-full max-w-360 mx-auto px-4 md:px-10 pt-8 pb-0 md:py-12">
+      <section className="mx-auto w-full max-w-360 px-4 pt-8 pb-0 md:px-10 md:pt-8 md:pb-12">
         <div className="flex items-start justify-between mb-6 md:mb-8">
           <div>
             <h2 className="text-2xl md:text-[32px] font-bold text-foreground leading-tight">

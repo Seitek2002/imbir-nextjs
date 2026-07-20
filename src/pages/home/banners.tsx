@@ -9,6 +9,9 @@ import {
   BannerImage1,
   BannerImage2,
   BannerImage3,
+  GridBlue,
+  GridPinkSlanted,
+  GridPinkStraight,
 } from "@/shared/assets/images";
 import { Button } from "@/shared/ui";
 
@@ -17,145 +20,176 @@ export const Banners: FC = () => {
   const trackRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Track the centred slide to drive the dots (replaces Swiper's pagination).
   useEffect(() => {
-    const root = trackRef.current;
-    if (!root || typeof IntersectionObserver === "undefined") return;
+    const track = trackRef.current;
+    if (!track || typeof IntersectionObserver === "undefined") return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
-          const idx = slideRefs.current.indexOf(entry.target as HTMLDivElement);
-          if (idx >= 0) setActive(idx);
+
+          const index = slideRefs.current.indexOf(
+            entry.target as HTMLDivElement,
+          );
+          if (index >= 0) setActive(index);
         });
       },
-      { root, threshold: 0.6 },
+      { root: track, threshold: 0.6 },
     );
-    slideRefs.current.forEach((slide) => slide && observer.observe(slide));
+
+    slideRefs.current.forEach((slide) => {
+      if (slide) observer.observe(slide);
+    });
+
     return () => observer.disconnect();
   }, []);
 
-  const goTo = (index: number) =>
+  const goTo = (index: number) => {
     slideRefs.current[index]?.scrollIntoView({
       behavior: "smooth",
-      inline: "start",
       block: "nearest",
+      inline: "start",
     });
+  };
 
   const card1 = (
-    <div className="relative bg-[#F49A82] rounded-4xl p-6 md:p-8 h-60 md:h-80 overflow-hidden flex flex-col justify-between w-full">
+    <div className="relative flex h-[196px] w-full flex-col justify-between overflow-hidden rounded-[20px] bg-[#FFA18D] p-6 pb-4 md:h-[424px] md:rounded-3xl md:pb-6">
       <div className="relative z-10">
-        <h3 className="text-white text-[28px] md:text-[32px] font-bold leading-tight mb-2">
+        <h3 className="mb-2 text-[28px] leading-tight font-bold text-white md:text-[32px]">
           100+ процедур
         </h3>
-        <p className="text-white/90 text-sm md:text-base max-w-50">
-          Все необходимые услуги — быстро и удобно
+        <p className="text-base leading-tight text-white">
+          Все необходимые услуги
+          <br />— быстро и удобно
         </p>
       </div>
-      <div className="relative z-10 flex justify-start md:justify-end mt-4">
+      <div className="relative z-10 flex justify-start md:justify-end">
         <Link href="/services">
           <Button
-            size="sm"
-            className="bg-white text-foreground border-none hover:bg-gray-50"
+            size="lg"
+            className="w-44 border-none bg-white text-foreground hover:bg-gray-50 md:w-[156px]"
           >
             Смотреть
           </Button>
         </Link>
       </div>
       <Image
+        src={GridPinkStraight}
+        alt=""
+        className="pointer-events-none absolute top-[100px] right-0 z-0 hidden h-[193px] w-[197px] md:block"
+      />
+      <Image
         src={BannerImage1}
         alt=""
-        className="absolute bottom-0 -right-6 md:left-2 md:right-auto w-32.5 md:w-32 z-0 object-contain pointer-events-none"
+        className="pointer-events-none absolute bottom-6 left-0 z-0 hidden w-48 object-contain md:block"
       />
     </div>
   );
 
   const card2 = (
-    <div className="relative bg-surface rounded-4xl p-6 md:p-8 h-60 md:h-80 overflow-hidden flex flex-col justify-center w-full">
-      <div className="relative z-10 max-w-[60%] md:max-w-[50%] flex flex-col gap-4 md:gap-5">
-        <h3 className="text-foreground text-[28px] md:text-[36px] font-bold leading-tight">
+    <div className="relative flex h-[196px] w-full flex-col overflow-hidden rounded-[20px] bg-primary-tint p-6 pb-4 md:h-[424px] md:rounded-3xl md:bg-[#F6F8F5] md:p-8">
+      <div className="relative z-10 flex h-full max-w-[360px] flex-col">
+        <h3 className="text-[28px] leading-tight font-bold text-foreground md:text-[36px]">
           Онлайн-
-          <br />
+          <br className="hidden md:block" />
           консультация
         </h3>
-        <p className="text-secondary text-sm md:text-base leading-snug">
-          Свяжитесь с врачом из любой точки — быстро, удобно и без ожидания
+        <p className="mt-1 text-base leading-tight text-secondary md:mt-4 md:max-w-[340px]">
+          Свяжитесь с врачом из любой точки
+          <br className="md:hidden" /> — быстро, удобно и без ожидания
         </p>
-        <div>
+        <div className="mt-auto md:mt-5">
           <Link href="/record">
-            <Button size="md">Записаться</Button>
+            <Button size="lg" className="w-48 md:w-44">
+              Записаться
+            </Button>
           </Link>
         </div>
       </div>
       <Image
+        src={GridPinkSlanted}
+        alt=""
+        className="pointer-events-none absolute bottom-0 left-0 z-0 hidden h-[192px] w-[499px] md:block"
+      />
+      <Image
+        src={GridPinkStraight}
+        alt=""
+        className="pointer-events-none absolute top-0 right-0 z-0 hidden h-[193px] w-[197px] md:block"
+      />
+      <Image
         src={BannerImage2}
         alt=""
-        className="absolute bottom-0 -right-8 md:right-8 w-40 md:w-65 z-0 object-contain pointer-events-none"
+        className="pointer-events-none absolute right-8 bottom-0 z-0 hidden w-[306px] object-contain md:block"
       />
     </div>
   );
 
   const card3 = (
-    <div className="relative bg-[#F2F4F7] rounded-4xl p-6 md:p-8 h-60 md:h-80 overflow-hidden flex flex-col justify-between w-full">
+    <div className="relative flex h-[196px] w-full flex-col justify-between overflow-hidden rounded-[20px] bg-white p-6 pb-4 md:h-[424px] md:rounded-3xl md:bg-[#F2F3F5] md:pb-6">
       <div className="relative z-10">
-        <h3 className="text-foreground text-[28px] md:text-[32px] font-bold leading-tight mb-2">
+        <h3 className="mb-2 text-[28px] leading-tight font-bold text-foreground md:text-[32px]">
           100+
-          <br />
-          специалистов
+          <br className="hidden md:block" /> специалистов
         </h3>
-        <p className="text-secondary text-sm md:text-base max-w-45">
+        <p className="max-w-[280px] text-base leading-tight text-secondary">
           Опытные эксперты для решения ваших задач
         </p>
       </div>
-      <div className="relative z-10 flex justify-start mt-4">
+      <div className="relative z-10 flex justify-start">
         <Link href="/specialists">
           <Button
-            size="sm"
+            size="lg"
             variant="outline"
-            className="bg-white hover:bg-gray-50"
+            className="w-44 border-[#FFA18D] bg-white hover:bg-gray-50 md:w-[156px]"
           >
             Смотреть
           </Button>
         </Link>
       </div>
       <Image
+        src={GridBlue}
+        alt=""
+        className="pointer-events-none absolute bottom-0 left-0 z-0 hidden h-[276px] w-[151px] md:block"
+      />
+      <Image
         src={BannerImage3}
         alt=""
-        className="absolute bottom-0 -right-6 md:-right-2 w-35 md:w-36 z-0 object-contain pointer-events-none"
+        className="pointer-events-none absolute right-10 bottom-2 z-0 hidden w-50 object-contain md:block"
       />
     </div>
   );
 
   return (
-    <section className="w-full max-w-360 mx-auto px-4 md:px-10 pt-8 pb-0 md:py-6">
-      {/* Mobile: native scroll-snap carousel with custom dots (no Swiper). */}
+    <section className="mx-auto w-full max-w-360 px-4 pt-8 pb-0 md:px-10 md:pt-8 md:pb-8">
       <div className="md:hidden">
         <div
           ref={trackRef}
-          className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+          className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto"
         >
           {[card1, card2, card3].map((card, i) => (
             <div
               key={i}
-              ref={(el) => {
-                slideRefs.current[i] = el;
+              ref={(element) => {
+                slideRefs.current[i] = element;
               }}
-              className="snap-start shrink-0 w-full"
+              className="w-full shrink-0 snap-start"
             >
               {card}
             </div>
           ))}
         </div>
 
-        <div className="flex justify-center gap-2 mt-4">
-          {[0, 1, 2].map((i) => (
+        <div className="mt-4 flex justify-center gap-2">
+          {[0, 1, 2].map((index) => (
             <button
-              key={i}
+              key={index}
               type="button"
-              onClick={() => goTo(i)}
-              aria-label={`Перейти к слайду ${i + 1}`}
-              className={`h-2 rounded-full transition-all ${
-                i === active ? "w-6 bg-muted" : "w-2 bg-border-soft"
+              onClick={() => goTo(index)}
+              aria-label={`Перейти к баннеру ${index + 1}`}
+              aria-current={active === index ? "true" : undefined}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                active === index ? "w-6 bg-muted" : "w-2 bg-border-soft"
               }`}
             />
           ))}

@@ -1,6 +1,9 @@
 import BannerImage1 from "./banners/banner-1.png";
 import BannerImage2 from "./banners/banner-2.png";
 import BannerImage3 from "./banners/banner-3.png";
+import GridBlue from "./banners/grid-blue.png";
+import GridPinkSlanted from "./banners/grid-pink-slanted.png";
+import GridPinkStraight from "./banners/grid-pink-straight.png";
 import BlogImage1 from "./blog/blog-1.png";
 import BlogImage2 from "./blog/blog-2.png";
 import BlogImage3 from "./blog/blog-3.png";
@@ -58,6 +61,9 @@ export {
   BannerImage1,
   BannerImage2,
   BannerImage3,
+  GridBlue,
+  GridPinkStraight,
+  GridPinkSlanted,
   VideoThumbnail1,
   VideoThumbnail2,
   VideoThumbnail3,
