@@ -54,7 +54,7 @@ const FooterText: FC<{ children: ReactNode }> = ({ children }) => (
 
 export const Footer: FC = () => {
   return (
-    <footer className="w-full max-w-360 mx-auto px-4 md:px-10 pb-6 pt-10">
+    <footer className="w-full max-w-360 mx-auto px-4 md:px-10 pb-6 pt-8 md:pt-10">
       {/* Контейнер со светло-бежевым фоном */}
       <div className="bg-[#FCF9F7] rounded-4xl p-6 sm:p-10 md:p-12 flex flex-col gap-10">
         {/* Верхняя часть: Сетка с контентом */}

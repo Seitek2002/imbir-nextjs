@@ -35,7 +35,7 @@ export const VideosSwiper: FC<Props> = ({
   return (
     <section
       className={cn(
-        "flex flex-col gap-6 w-full max-w-360 mx-auto px-4 md:px-10",
+        "flex flex-col gap-6 w-full max-w-360 mx-auto px-4 md:px-10 pt-8 pb-0 md:pt-0 md:pb-0",
         className,
       )}
     >

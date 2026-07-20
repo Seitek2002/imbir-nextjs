@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useEffect, useRef, useState } from "react";
 
@@ -127,7 +127,7 @@ export const Banners: FC = () => {
   );
 
   return (
-    <section className="w-full max-w-360 mx-auto px-4 md:px-10 py-6">
+    <section className="w-full max-w-360 mx-auto px-4 md:px-10 pt-8 pb-0 md:py-6">
       {/* Mobile: native scroll-snap carousel with custom dots (no Swiper). */}
       <div className="md:hidden">
         <div

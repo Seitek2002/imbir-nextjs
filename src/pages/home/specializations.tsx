@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 
 import { SPECIALIZATIONS } from "@/shared/config";
@@ -6,7 +6,7 @@ import { ROUTES } from "@/shared/config";
 
 export const SpecializationsSection = () => {
   return (
-    <section className="w-full max-w-360 mx-auto px-4 md:px-10 py-8 md:py-12">
+    <section className="w-full max-w-360 mx-auto px-4 md:px-10 pt-8 pb-0 md:py-12">
       <div className="flex items-start justify-between mb-6 md:mb-8">
         <div>
           <h2 className="text-2xl md:text-[32px] font-bold text-foreground leading-tight">
