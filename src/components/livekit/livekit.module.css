@@ -1,0 +1,512 @@
+.setupScreen,
+.stateScreen,
+.roomScreen {
+  min-height: 100dvh;
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(245, 101, 62, 0.18),
+      transparent 34%
+    ),
+    #0d0d12;
+  color: #fff;
+}
+
+.setupScreen {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.setupCard {
+  width: min(100%, 720px);
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  background: rgba(27, 28, 33, 0.94);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+}
+
+.setupHeading {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.setupHeading h1 {
+  margin: 8px 0 6px;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 650;
+}
+
+.setupHeading p,
+.privacyNote,
+.stateScreen p {
+  color: #a9adb5;
+}
+
+.eyebrow {
+  color: #ff8a68;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.preview {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 20px;
+  background: #050506;
+}
+
+.previewVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: rotateY(180deg);
+}
+
+.cameraDisabled,
+.previewLoading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  color: #a9adb5;
+  background: #111216;
+}
+
+.cameraDisabled svg {
+  width: 48px;
+}
+
+.deviceControls {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.deviceRow {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.8fr) minmax(220px, 1.2fr);
+  gap: 12px;
+}
+
+.deviceRow select,
+.deviceToggle,
+.deviceToggleOn {
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 14px;
+  color: #fff;
+  background: #24252b;
+}
+
+.deviceRow select {
+  width: 100%;
+  padding: 0 14px;
+  outline: none;
+}
+
+.deviceRow select:disabled {
+  color: #747780;
+  opacity: 0.65;
+}
+
+.deviceToggle,
+.deviceToggleOn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+.deviceToggleOn {
+  border-color: rgba(245, 101, 62, 0.6);
+  background: rgba(245, 101, 62, 0.12);
+}
+
+.deviceToggle svg,
+.deviceToggleOn svg {
+  width: 22px;
+  flex: none;
+}
+
+.meterBlock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 2px;
+  color: #c8cad0;
+  font-size: 13px;
+}
+
+.meter {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.meter i {
+  width: 6px;
+  height: 18px;
+  border-radius: 4px;
+  background: #3b3d45;
+  transition: background 80ms ease;
+}
+
+.meter .meterActive {
+  background: #f5653e;
+}
+
+.deviceError,
+.controlError {
+  margin-top: 14px;
+  color: #ff9a86;
+  text-align: center;
+}
+
+.joinButton {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 22px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  background: #f5653e;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.joinButton:hover {
+  background: #e5542d;
+}
+
+.joinButton:active {
+  transform: scale(0.99);
+}
+
+.privacyNote {
+  margin-top: 12px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.stateScreen {
+  display: grid;
+  min-height: 100dvh;
+  place-content: center;
+  justify-items: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.stateScreen h1 {
+  max-width: 620px;
+  margin: 18px 0 8px;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 650;
+}
+
+.spinner {
+  width: 46px;
+  height: 46px;
+  border: 4px solid rgba(255, 255, 255, 0.18);
+  border-top-color: #f5653e;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.stateIcon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 1px solid rgba(255, 138, 104, 0.55);
+  border-radius: 50%;
+  color: #ff8a68;
+  font-size: 28px;
+}
+
+.stateActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.stateActions button {
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: #24252b;
+  cursor: pointer;
+}
+
+.stateActions button:first-child {
+  border-color: #f5653e;
+  background: #f5653e;
+}
+
+.roomScreen,
+.liveKitRoom,
+.conference {
+  height: 100dvh;
+  min-height: 0;
+}
+
+.roomScreen {
+  position: relative;
+  overflow: hidden;
+}
+
+.liveKitRoom {
+  --lk-bg: #0d0d12;
+  --lk-control-bg: #25262c;
+  --lk-accent-bg: #f5653e;
+  display: block;
+}
+
+.conference {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: max(18px, env(safe-area-inset-top)) 18px
+    max(18px, env(safe-area-inset-bottom));
+  background: #0d0d12;
+}
+
+.conferenceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 16px;
+  color: #a9adb5;
+  font-size: 13px;
+}
+
+.conferenceHeader div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f5653e;
+  box-shadow: 0 0 0 5px rgba(245, 101, 62, 0.15);
+}
+
+.videoStage {
+  position: relative;
+  min-height: 0;
+}
+
+.videoGrid {
+  height: 100%;
+  gap: 12px;
+}
+
+.videoGrid :global(.lk-participant-tile) {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 20px;
+  background: #191a1f;
+}
+
+.videoGrid :global(.lk-participant-tile::after) {
+  border-radius: 20px;
+}
+
+.waitingParticipant {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  z-index: 3;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #d3d5da;
+  font-size: 13px;
+  background: rgba(13, 13, 18, 0.76);
+  backdrop-filter: blur(12px);
+  transform: translateX(-50%);
+}
+
+.controlsWrap {
+  position: relative;
+  z-index: 5;
+  padding-top: 16px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.controlButton,
+.controlOff,
+.leaveButton {
+  display: flex;
+  min-width: 92px;
+  min-height: 58px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border-radius: 18px;
+  color: #fff;
+  font-size: 13px;
+  background: #25262c;
+  cursor: pointer;
+}
+
+.controlButton svg,
+.controlOff svg,
+.leaveButton svg {
+  width: 23px;
+}
+
+.controlOff {
+  color: #191a1b;
+  background: #fff;
+}
+
+.leaveButton {
+  background: #e54747;
+}
+
+.controlButton:disabled,
+.controlOff:disabled,
+.leaveButton:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.controlError {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.connectionNotice,
+.connectionWarning,
+.roomError {
+  position: fixed;
+  top: max(70px, calc(env(safe-area-inset-top) + 54px));
+  left: 50%;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 13px;
+  background: rgba(29, 30, 35, 0.92);
+  backdrop-filter: blur(12px);
+  transform: translateX(-50%);
+}
+
+.connectionWarning {
+  flex-direction: column;
+}
+
+.connectionWarning span {
+  color: #c3c5ca;
+}
+
+.connectionWarning button {
+  color: #ff9a7e;
+  cursor: pointer;
+}
+
+.roomError {
+  border-color: rgba(229, 71, 71, 0.5);
+}
+
+.startAudio {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  z-index: 10;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  color: #fff;
+  background: #f5653e;
+  transform: translateX(-50%);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .setupScreen {
+    padding: 0;
+    place-items: stretch;
+  }
+
+  .setupCard {
+    min-height: 100dvh;
+    padding: max(24px, env(safe-area-inset-top)) 16px
+      max(24px, env(safe-area-inset-bottom));
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .deviceRow {
+    grid-template-columns: 1fr;
+  }
+
+  .conference {
+    padding-inline: 10px;
+  }
+
+  .videoGrid {
+    gap: 8px;
+  }
+
+  .controlButton,
+  .controlOff,
+  .leaveButton {
+    min-width: 76px;
+    min-height: 58px;
+    flex-direction: column;
+    gap: 3px;
+    padding: 7px 12px;
+    border-radius: 17px;
+    font-size: 11px;
+  }
+
+  .conferenceHeader span:last-child {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 1.6s;
+  }
+}

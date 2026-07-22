@@ -17,7 +17,12 @@ const CITY_MAP: Record<string, string> = {
 // Разделы кабинетов, защищённые AuthGuard на клиенте — здесь дублируем
 // проверку на границе middleware, чтобы неавторизованный пользователь не
 // увидел даже первый SSR-кадр защищённой страницы.
-const PROTECTED_PREFIXES = ["/profile", "/doctor-profile", "/clinic-profile"];
+const PROTECTED_PREFIXES = [
+  "/profile",
+  "/doctor-profile",
+  "/clinic-profile",
+  "/consultation",
+];
 
 const isProtectedPath = (pathname: string) =>
   PROTECTED_PREFIXES.some(
