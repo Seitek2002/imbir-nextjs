@@ -125,30 +125,17 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
     );
   }
 
-  // --- ФОЛЛБЭКИ ДЛЯ ДЕТАЛЬНЫХ ПОЛЕЙ (Пока их нет в MockAPI) ---
-  const education =
-    doctor.education || "Медицинская Академия, факультет лечебного дела";
-  const about =
-    doctor.about ||
-    "Опытный специалист с многолетней практикой. Индивидуальный подход к каждому пациенту.";
-  const workExperience =
-    doctor.workExperience && doctor.workExperience.length > 0
-      ? doctor.workExperience
-      : [
-          {
-            years: "2015-Наст. время",
-            duration: `(${doctor.experience} лет)`,
-            place: doctor.workplaces[0]?.clinicName || "Частная клиника",
-            role: doctor.specialty,
-          },
-        ];
-  const skills =
-    doctor.skills && doctor.skills.length > 0
-      ? doctor.skills
-      : ["Консультация", "Диагностика заболеваний", "Назначение плана лечения"];
-  const scheduleText = doctor.contacts?.schedule || "ПН-ПТ • 08:00-17:00";
-  const phoneText = doctor.contacts?.phone || "+996 700 123 456";
-  const emailText = doctor.contacts?.email || "doctor@clinic.kg";
+  // Детальные поля бэк заполняет не для каждого врача. Ничего не выдумываем:
+  // чего нет — того не показываем (раньше здесь стояли правдоподобные тексты,
+  // включая чужой телефон и почту, и пациент видел их как данные врача).
+  const education = doctor.education;
+  const about = doctor.about;
+  const workExperience = doctor.workExperience ?? [];
+  const skills = doctor.skills ?? [];
+  const scheduleText = doctor.contacts?.schedule;
+  const phoneText = doctor.contacts?.phone;
+  const emailText = doctor.contacts?.email;
+  const hasContacts = !!(scheduleText || phoneText || emailText);
 
   return (
     <main className="min-h-screen bg-background md:bg-white flex flex-col relative pb-20 md:pb-0">
@@ -290,80 +277,96 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             </div>
 
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
-              <InfoCard title="Образование" expandable lines={3}>
-                {education}
-              </InfoCard>
-              <InfoCard title="О враче" expandable lines={3}>
-                {about}
-              </InfoCard>
+              {education && (
+                <InfoCard title="Образование" expandable lines={3}>
+                  {education}
+                </InfoCard>
+              )}
+              {about && (
+                <InfoCard title="О враче" expandable lines={3}>
+                  {about}
+                </InfoCard>
+              )}
 
-              <InfoCard title="Опыт работы" expandable={false}>
-                <div className="flex flex-col gap-5">
-                  {workExperience.map((exp, idx) => (
-                    <div key={idx} className="relative pl-5">
-                      <span className="absolute left-0 top-2.5 w-2.5 h-0.5 bg-primary" />
-                      <div className="mb-1">
-                        <span className="text-foreground font-medium text-sm md:text-base">
-                          {exp.years}{" "}
+              {workExperience.length > 0 && (
+                <InfoCard title="Опыт работы" expandable={false}>
+                  <div className="flex flex-col gap-5">
+                    {workExperience.map((exp, idx) => (
+                      <div key={idx} className="relative pl-5">
+                        <span className="absolute left-0 top-2.5 w-2.5 h-0.5 bg-primary" />
+                        <div className="mb-1">
+                          <span className="text-foreground font-medium text-sm md:text-base">
+                            {exp.years}{" "}
+                          </span>
+                          <span className="text-primary text-sm md:text-base">
+                            {exp.duration}
+                          </span>
+                        </div>
+                        <p className="text-foreground text-sm md:text-base">
+                          {exp.place}
+                        </p>
+                        <p className="text-muted text-sm md:text-base">
+                          {exp.role}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </InfoCard>
+              )}
+
+              {skills.length > 0 && (
+                <InfoCard title="Профессиональные навыки" expandable={false}>
+                  <ul className="flex flex-col gap-3">
+                    {skills.map((skill, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <span className="text-primary font-medium text-lg leading-none mt-0.5">
+                          —
                         </span>
-                        <span className="text-primary text-sm md:text-base">
-                          {exp.duration}
+                        <span className="text-muted text-sm md:text-base leading-relaxed">
+                          {skill}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </InfoCard>
+              )}
+
+              {hasContacts && (
+                <InfoCard title="Контакты" expandable={false}>
+                  <div className="flex flex-col gap-4">
+                    {scheduleText && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-primary">
+                          <HistoryIcon className="size-5" />
+                        </span>
+                        <span className="text-muted text-sm md:text-base">
+                          {scheduleText}
                         </span>
                       </div>
-                      <p className="text-foreground text-sm md:text-base">
-                        {exp.place}
-                      </p>
-                      <p className="text-muted text-sm md:text-base">
-                        {exp.role}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </InfoCard>
-
-              <InfoCard title="Профессиональные навыки" expandable={false}>
-                <ul className="flex flex-col gap-3">
-                  {skills.map((skill, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <span className="text-primary font-medium text-lg leading-none mt-0.5">
-                        —
-                      </span>
-                      <span className="text-muted text-sm md:text-base leading-relaxed">
-                        {skill}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </InfoCard>
-
-              <InfoCard title="Контакты" expandable={false}>
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-primary">
-                      <HistoryIcon className="size-5" />
-                    </span>
-                    <span className="text-muted text-sm md:text-base">
-                      {scheduleText}
-                    </span>
+                    )}
+                    {phoneText && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-primary">
+                          <PhoneIcon className="size-5" />
+                        </span>
+                        <span className="text-muted text-sm md:text-base">
+                          {phoneText}
+                        </span>
+                      </div>
+                    )}
+                    {emailText && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-primary">
+                          <EmailIcon className="size-5" />
+                        </span>
+                        <span className="text-muted text-sm md:text-base">
+                          {emailText}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-primary">
-                      <PhoneIcon className="size-5" />
-                    </span>
-                    <span className="text-muted text-sm md:text-base">
-                      {phoneText}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-primary">
-                      <EmailIcon className="size-5" />
-                    </span>
-                    <span className="text-muted text-sm md:text-base">
-                      {emailText}
-                    </span>
-                  </div>
-                </div>
-              </InfoCard>
+                </InfoCard>
+              )}
             </div>
           </div>
         </div>
