@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 
-import { StaticImageData } from "next/image";
-
 import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
-  src: StaticImageData | string;
+  // У статьи с бэка картинки может не быть
+  src?: string;
   alt: string;
 };
 

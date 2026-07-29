@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 
@@ -6,7 +6,6 @@ import Link from "next/link";
 
 import { BlogCard, BlogCategory, BlogPost } from "@/entities/blog";
 
-import { ThunderIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { ImageWithFallback } from "@/shared/ui";
 
@@ -61,10 +60,9 @@ export const BlogSection: FC<Props> = ({
 
           <div className="flex flex-col justify-center gap-4 bg-white rounded-3xl border border-border-soft p-8 flex-1">
             <div className="flex items-center gap-3">
-              {featured.badge && (
-                <span className="flex items-center gap-1.5 bg-[#FFF3F0] text-primary text-xs font-semibold px-3 py-1.5 rounded-full">
-                  <ThunderIcon />
-                  {featured.badge}
+              {featured.category && (
+                <span className="text-sm text-primary bg-[#FFF3F0] px-3 py-1.5 rounded-full font-medium">
+                  {featured.category}
                 </span>
               )}
               <span className="text-sm text-muted border border-border-soft px-3 py-1.5 rounded-full">
@@ -94,10 +92,9 @@ export const BlogSection: FC<Props> = ({
         <div className="md:hidden flex flex-col gap-2">
           <div className="bg-white rounded-3xl border border-border-soft p-5 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              {featured.badge && (
-                <span className="flex items-center gap-1.5 bg-[#FFF3F0] text-primary text-xs font-semibold px-3 py-1.5 rounded-full">
-                  <ThunderIcon />
-                  {featured.badge}
+              {featured.category && (
+                <span className="text-sm text-primary bg-[#FFF3F0] px-3 py-1.5 rounded-full font-medium">
+                  {featured.category}
                 </span>
               )}
               <span className="text-sm text-muted border border-border-soft px-3 py-1.5 rounded-full">
@@ -172,7 +169,6 @@ export const BlogSection: FC<Props> = ({
               key={post.id}
               title={post.title}
               category={post.category}
-              categoryColor={post.categoryColor}
               date={post.date}
               image={post.image}
               href={post.href}

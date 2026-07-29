@@ -1,4 +1,4 @@
-﻿import { FC } from "react";
+import { FC } from "react";
 
 import Link from "next/link";
 
@@ -7,7 +7,6 @@ import { Header } from "@/widgets/header";
 
 import { BlogArticle, BlogCard, BlogPost } from "@/entities/blog";
 
-import { ThunderIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 
 import { ArticleImage } from "./article-image";
@@ -17,7 +16,19 @@ type Props = {
   relatedPosts: BlogPost[];
 };
 
+// Бэк отдаёт текст статьи одним полем content. Формат не типизирован, поэтому
+// разметку не интерпретируем (это был бы XSS через админку), а режем текст на
+// абзацы по пустым строкам и переводам строки.
+const toParagraphs = (content: string): string[] =>
+  content
+    .replace(/<[^>]+>/g, "")
+    .split(/\r?\n/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
 export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
+  const paragraphs = toParagraphs(article.content);
+
   return (
     <main className="min-h-screen bg-background flex flex-col">
       <Header title="Статья" backTo={ROUTES.BLOG} />
@@ -42,10 +53,9 @@ export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
         </nav>
 
         <div className="flex items-center gap-3 mb-4 md:mb-6">
-          {article.badge && (
-            <span className="flex items-center gap-1.5 rounded-full bg-[#FFF3F0] text-primary text-[12px] md:text-sm font-medium px-4 py-2">
-              <ThunderIcon />
-              {article.badge}
+          {article.category && (
+            <span className="rounded-full bg-[#FFF3F0] text-primary text-[12px] md:text-sm font-medium px-4 py-2">
+              {article.category}
             </span>
           )}
           <span className="rounded-full border border-[#D6D9DC] text-secondary text-[12px] md:text-sm font-medium px-4 py-2">
@@ -62,36 +72,25 @@ export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
             <ArticleImage src={article.image} alt={article.title} />
 
             <div className="mt-5 md:mt-6 space-y-4 md:space-y-5">
-              <p className="text-base text-secondary leading-[145%]">
-                {article.intro}
-              </p>
-
-              {article.points.map((point) => (
-                <div key={point.title}>
-                  <h2 className="flex items-start gap-2 text-[18px] font-semibold leading-[130%] text-foreground">
-                    <span className="text-[#D11313] text-[12px] leading-none mt-1.5">
-                      ►
-                    </span>
-                    <span>{point.title}</span>
-                  </h2>
-                  <p className="mt-2 text-base text-secondary leading-[145%]">
-                    {point.text}
-                  </p>
-                </div>
-              ))}
-
-              <div>
-                <h2 className="text-[18px] font-semibold leading-[130%] text-foreground">
-                  {article.summaryTitle}
-                </h2>
-                <p className="mt-2 text-base text-secondary leading-[145%]">
-                  {article.summary}
+              {article.description && (
+                <p className="text-base text-secondary leading-[145%] font-medium">
+                  {article.description}
                 </p>
-              </div>
+              )}
+
+              {paragraphs.map((paragraph, index) => (
+                <p
+                  key={index}
+                  className="text-base text-secondary leading-[145%]"
+                >
+                  {paragraph}
+                </p>
+              ))}
             </div>
           </article>
 
-          <aside className="w-full">
+          {/* Пока в блоге одна статья, показывать пустой блок «Читать далее» не за чем */}
+          <aside className={relatedPosts.length ? "w-full" : "hidden"}>
             <h2 className="text-[32px] font-semibold leading-[120%] text-foreground mb-3">
               Читать далее
             </h2>
@@ -101,7 +100,6 @@ export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
                   key={post.id}
                   title={post.title}
                   category={post.category}
-                  categoryColor={post.categoryColor}
                   date={post.date}
                   image={post.image}
                   href={post.href}

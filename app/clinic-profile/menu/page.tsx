@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
+
 import { StarIcon } from "@/shared/assets/icons";
 import { CabinetMenuItem, CabinetMobileMenu } from "@/shared/ui";
 

@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
 
-import { AuthGuard } from "@/shared/lib/AuthGuard";
 import { ClinicPageLayoutSkeleton } from "@/widgets/clinic/layout";
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
+
+import { AuthGuard } from "@/shared/lib/AuthGuard";
 import { InitialAuthProvider } from "@/shared/lib/initialAuthContext";
 import { readInitialAuth } from "@/shared/lib/readInitialAuth";
 

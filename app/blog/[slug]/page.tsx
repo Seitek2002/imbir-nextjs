@@ -2,34 +2,26 @@ import { notFound } from "next/navigation";
 
 import { BlogArticlePage } from "@/pages/blog-article";
 
-import {
-  BLOG_POSTS,
-  getBlogArticleBySlug,
-  getRelatedBlogPosts,
-} from "@/entities/blog";
+import { fetchBlogArticle, fetchRelatedBlogPosts } from "@/entities/blog";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return BLOG_POSTS.map((post) => ({
-    slug: post.slug,
-  }));
-}
+// Статьи приходят с бэка и появляются без деплоя — вместо статики по списку
+// слагов держим страницу на ISR.
+export const revalidate = 300;
 
 export default async function Page({ params }: Props) {
   const { slug } = await params;
-  const article = getBlogArticleBySlug(slug);
+  const [article, relatedPosts] = await Promise.all([
+    fetchBlogArticle(slug),
+    fetchRelatedBlogPosts(slug),
+  ]);
 
   if (!article) {
     notFound();
   }
 
-  return (
-    <BlogArticlePage
-      article={article}
-      relatedPosts={getRelatedBlogPosts(slug)}
-    />
-  );
+  return <BlogArticlePage article={article} relatedPosts={relatedPosts} />;
 }

@@ -4,10 +4,13 @@ import { BlogSectionServer } from "@/widgets/blog-section";
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 
-import { BLOG_CATEGORIES, BLOG_POSTS, BlogSkeleton } from "@/entities/blog";
+import { BlogSkeleton } from "@/entities/blog";
 
-const BLOG_SKELETON_COUNT = BLOG_POSTS.filter((post) => !post.featured).length;
-const HAS_FEATURED_POST = BLOG_POSTS.some((post) => post.featured);
+// Скелетон рисуем «в среднем по разделу»: сколько постов и категорий придёт с
+// бэка, на этапе фолбэка ещё неизвестно.
+const BLOG_SKELETON_COUNT = 3;
+const CATEGORY_SKELETON_COUNT = 4;
+const HAS_FEATURED_POST = true;
 
 function BlogFallback() {
   return (
@@ -50,11 +53,8 @@ function BlogFallback() {
 
       <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="shrink-0 h-10 w-16 skeleton rounded-full" />
-        {BLOG_CATEGORIES.map((category) => (
-          <div
-            key={category.id}
-            className="shrink-0 h-10 w-28 skeleton rounded-full"
-          />
+        {Array.from({ length: CATEGORY_SKELETON_COUNT }, (_, i) => (
+          <div key={i} className="shrink-0 h-10 w-28 skeleton rounded-full" />
         ))}
       </div>
 

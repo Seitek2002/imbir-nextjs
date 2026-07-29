@@ -57,7 +57,10 @@ export default function Loading() {
                 <div className="w-20 h-20 rounded-full skeleton" />
               </div>
               {[0, 1, 2, 3, 4].map((i) => (
-                <div key={i} className="py-3 border-b border-background last:border-0">
+                <div
+                  key={i}
+                  className="py-3 border-b border-background last:border-0"
+                >
                   <div className="h-3 w-24 skeleton rounded mb-2" />
                   <div className="h-4 w-40 skeleton rounded" />
                 </div>

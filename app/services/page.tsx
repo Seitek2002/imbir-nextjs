@@ -31,8 +31,7 @@ const Services = async ({ searchParams }: Props) => {
   // или ?svc_price=... префетч был бесполезен, клиент всё равно бил по API
   // заново с реальными фильтрами.
   const rawCategory = resolvedSearchParams?.[`${PREFIX}_spec`];
-  const currentCategory =
-    typeof rawCategory === "string" ? rawCategory : null;
+  const currentCategory = typeof rawCategory === "string" ? rawCategory : null;
 
   const rawPrice = resolvedSearchParams?.[`${PREFIX}_price`];
   const priceParts =

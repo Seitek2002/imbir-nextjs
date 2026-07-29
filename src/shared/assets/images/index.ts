@@ -4,10 +4,6 @@ import BannerImage3 from "./banners/banner-3.png";
 import GridBlue from "./banners/grid-blue.png";
 import GridPinkSlanted from "./banners/grid-pink-slanted.png";
 import GridPinkStraight from "./banners/grid-pink-straight.png";
-import BlogImage1 from "./blog/blog-1.png";
-import BlogImage2 from "./blog/blog-2.png";
-import BlogImage3 from "./blog/blog-3.png";
-import BlogBanner from "./blog/blog-banner.png";
 import ClinicImage1 from "./clinics/clinic-1.png";
 import ClinicImage2 from "./clinics/clinic-2.png";
 import ClinicImage3 from "./clinics/clinic-3.png";
@@ -67,9 +63,5 @@ export {
   VideoThumbnail1,
   VideoThumbnail2,
   VideoThumbnail3,
-  BlogBanner,
-  BlogImage1,
-  BlogImage2,
-  BlogImage3,
   HeroAssiatant,
 };

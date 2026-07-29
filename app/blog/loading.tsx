@@ -1,7 +1,10 @@
-﻿import { BLOG_CATEGORIES, BLOG_POSTS, BlogSkeleton } from "@/entities/blog";
+﻿import { BlogSkeleton } from "@/entities/blog";
 
-const BLOG_SKELETON_COUNT = BLOG_POSTS.filter((post) => !post.featured).length;
-const HAS_FEATURED_POST = BLOG_POSTS.some((post) => post.featured);
+// Сколько постов и категорий придёт с бэка, на этапе загрузки неизвестно —
+// рисуем средний по разделу каркас.
+const BLOG_SKELETON_COUNT = 3;
+const CATEGORY_SKELETON_COUNT = 4;
+const HAS_FEATURED_POST = true;
 
 export default function Loading() {
   return (
@@ -54,9 +57,9 @@ export default function Loading() {
 
           <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="shrink-0 h-10 w-16 skeleton rounded-full" />
-            {BLOG_CATEGORIES.map((category) => (
+            {Array.from({ length: CATEGORY_SKELETON_COUNT }, (_, i) => (
               <div
-                key={category.id}
+                key={i}
                 className="shrink-0 h-10 w-28 skeleton rounded-full"
               />
             ))}

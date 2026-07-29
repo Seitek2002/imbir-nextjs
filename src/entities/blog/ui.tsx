@@ -2,7 +2,6 @@
 
 import { FC, useState } from "react";
 
-import { StaticImageData } from "next/image";
 import Link from "next/link";
 
 import { colors } from "@/shared/config";
@@ -13,7 +12,8 @@ type Props = {
   category: string;
   categoryColor?: string;
   date: string;
-  image: StaticImageData | string;
+  // У поста с бэка может не быть картинки — тогда ImageWithFallback рисует фон
+  image?: string;
   href?: string;
   // Eager-load this card's image (use for the first card above the fold so it
   // isn't lazy and can become the LCP element sooner).
