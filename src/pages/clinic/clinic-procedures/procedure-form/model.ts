@@ -45,13 +45,6 @@ export const EMPTY_PROCEDURE_FORM: ProcedureFormState = {
   lunchTo: "",
 };
 
-export const CATEGORY_OPTIONS = [
-  { label: "Кардиология", value: "Кардиология" },
-  { label: "Терапия", value: "Терапия" },
-  { label: "Хирургия", value: "Хирургия" },
-  { label: "Косметология", value: "Косметология" },
-];
-
 export const CURRENCY_OPTIONS = [
   { label: "KGS", value: "KGS" },
   { label: "USD", value: "USD" },

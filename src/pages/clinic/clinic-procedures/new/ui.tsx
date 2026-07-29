@@ -11,6 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
 import { type DayKey, type DayState } from "@/entities/clinic-profile";
+import { useServiceCategories } from "@/entities/service";
 
 import {
   addClinicService,
@@ -21,7 +22,6 @@ import { EditIcon } from "@/shared/assets/icons";
 import { Button, Dropdown, IconBtn, Input } from "@/shared/ui";
 
 import {
-  CATEGORY_OPTIONS,
   CURRENCY_OPTIONS,
   EMPTY_SCHEDULE,
   RecordsPreview,
@@ -44,6 +44,8 @@ export const ClinicNewProcedurePage: FC = () => {
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState(false);
   const [category, setCategory] = useState("");
+  // Категории собираем из существующих услуг — справочника у бэка нет
+  const { options: categoryOptions } = useServiceCategories();
   const [price, setPrice] = useState("");
   const [currency, setCurrency] = useState("KGS");
   const [duration, setDuration] = useState("");
@@ -218,7 +220,7 @@ export const ClinicNewProcedurePage: FC = () => {
         <Dropdown
           label="Специализация"
           placeholder="Выберите из списка"
-          options={CATEGORY_OPTIONS}
+          options={categoryOptions}
           value={category}
           onChange={setCategory}
         />

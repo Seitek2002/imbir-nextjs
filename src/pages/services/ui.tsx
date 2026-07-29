@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC } from "react";
 
@@ -15,7 +15,7 @@ import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { FiltersTrigger, MobileFiltersModal } from "@/features/mobile-filters";
 import { UrlSearchInput } from "@/features/search-by-query";
 
-import { ServiceCard } from "@/entities/service";
+import { ServiceCard, useServiceCategories } from "@/entities/service";
 
 import { ServiceFilters, api, serviceKeys } from "@/shared/api";
 import { RemoveIcon } from "@/shared/assets/icons";
@@ -33,14 +33,6 @@ const PAGE_SIZE = 8;
 // фильтры "Оценка" и "Клиника" гарантированно возвращали бы пустой список.
 // Отключены до тех пор, пока бэк не добавит эти поля в /api/services/.
 const DISABLED_FILTERS_NOTE = "скоро";
-
-const CATEGORY_OPTIONS = [
-  { value: "Кардиология", label: "Кардиология" },
-  { value: "Педиатрия", label: "Педиатрия" },
-  { value: "Неврология", label: "Неврология" },
-  { value: "Хирургия", label: "Хирургия" },
-  { value: "Диагностика", label: "Диагностика" },
-];
 
 const PREFIX = "svc";
 
@@ -129,6 +121,9 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
 
   const { isSaved, toggle } = useFavoriteToggle("service");
 
+  // Категории — из реальных услуг, справочника у бэка нет
+  const { options: categoryOptions } = useServiceCategories();
+
   return (
     <main className="min-h-screen bg-background md:bg-white flex flex-col">
       <Header title="Услуги" backTo={ROUTES.HOME}>
@@ -147,7 +142,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
         isOpen={isFiltersModalOpen}
         prefix={PREFIX}
         fields={mobileFilters}
-        categoryOptions={CATEGORY_OPTIONS}
+        categoryOptions={categoryOptions}
       />
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
@@ -242,7 +237,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
             <Dropdown
               label="Услуга"
               placeholder="Все"
-              options={CATEGORY_OPTIONS}
+              options={categoryOptions}
               value={currentCategory ?? ""}
               onChange={(val) => updateURL("spec", val || null)}
             />
