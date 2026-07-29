@@ -212,11 +212,6 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
               ) : (
                 <UserCircleIcon className="size-32 text-dim/60" />
               )}
-              {doctor.isOnlineAvailable && (
-                <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider hidden md:block">
-                  Онлайн
-                </div>
-              )}
             </div>
           </div>
 
@@ -224,16 +219,9 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             <div className="bg-white rounded-[20px] p-4 border border-border-soft">
               <div className="flex justify-center md:justify-between items-start mb-6">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
-                      {doctor.name}
-                    </h1>
-                    {doctor.isOnlineAvailable && (
-                      <span className="md:hidden bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0 mt-1">
-                        Онлайн
-                      </span>
-                    )}
-                  </div>
+                  <h1 className="text-2xl md:text-3xl font-semibold text-foreground mb-1">
+                    {doctor.name}
+                  </h1>
                   <p className="text-muted text-center lg:text-left text-base">
                     {doctor.specialty}
                   </p>

@@ -42,7 +42,6 @@ export const RecommendationCards: FC<{
                 specialty={doctor.specialty}
                 photo={doctor.photo}
                 rating={doctor.rating}
-                isOnlineAvailable={doctor.is_online_available}
                 onBook={() => router.push(ROUTES.RECORD_FOR_DOCTOR(doctor.id))}
               />
             ))}

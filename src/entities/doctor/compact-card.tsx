@@ -15,7 +15,6 @@ type Props = {
   specialty: string;
   photo?: string | null;
   rating?: string | number;
-  isOnlineAvailable?: boolean;
   onBook?: () => void;
 };
 
@@ -27,7 +26,6 @@ export const DoctorCompactCard: FC<Props> = ({
   specialty,
   photo,
   rating,
-  isOnlineAvailable,
   onBook,
 }) => {
   const user = useAuthStore((s) => s.user);
@@ -56,11 +54,6 @@ export const DoctorCompactCard: FC<Props> = ({
             </div>
           }
         />
-        {isOnlineAvailable && (
-          <div className="absolute top-1.5 left-1.5 bg-green-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
-            Онлайн
-          </div>
-        )}
       </div>
 
       <div className="mt-2 px-0.5">

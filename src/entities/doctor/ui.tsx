@@ -18,7 +18,6 @@ type Props = {
   name: string;
   specialty: string;
   workplaces: Workplace[];
-  isOnlineAvailable?: boolean;
   rating?: number;
   reviews?: number;
   experience: number;
@@ -34,7 +33,6 @@ export const DoctorCard: FC<Props> = ({
   name,
   specialty,
   workplaces,
-  isOnlineAvailable,
   rating,
   reviews,
   experience,
@@ -92,16 +90,9 @@ export const DoctorCard: FC<Props> = ({
         </div>
 
         <div className="flex-1 min-w-0 py-0.5 flex flex-col">
-          <div className="flex items-start justify-between gap-2">
-            <p className="font-semibold text-[18px] text-foreground leading-tight truncate">
-              {name}
-            </p>
-            {isOnlineAvailable && (
-              <span className="shrink-0 bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
-                Онлайн
-              </span>
-            )}
-          </div>
+          <p className="font-semibold text-[18px] text-foreground leading-tight truncate">
+            {name}
+          </p>
 
           <p className="text-[14px] text-secondary truncate mt-1">
             {specialty}
@@ -157,12 +148,6 @@ export const DoctorCard: FC<Props> = ({
       href={href}
       className="bg-white rounded-3xl border border-border-soft p-2 w-full h-full flex flex-col relative cursor-pointer hover:border-primary/40 transition-colors"
     >
-      {isOnlineAvailable && (
-        <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider">
-          Онлайн
-        </div>
-      )}
-
       <div className="relative aspect-square w-full">
         <DoctorPhoto image={image} name={name} />
         <div className="absolute top-2 right-2 z-10" onClick={stopProp}>
