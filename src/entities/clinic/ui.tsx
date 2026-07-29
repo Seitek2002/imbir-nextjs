@@ -39,7 +39,7 @@ type Props = {
   rating?: number;
   reviews?: number;
   experience: number;
-  address: string;
+  address?: string;
   image?: StaticImageData | string;
   onSave?: () => void;
   initialSaved?: boolean;
@@ -122,10 +122,12 @@ export const ClinicCard: FC<Props> = ({
               )}
             </div>
           )}
-          <div className="flex items-center gap-1 mt-1 text-xs text-secondary">
-            <GeoIcon className="size-3.5 text-primary" />
-            <span className="truncate">{address}</span>
-          </div>
+          {address && (
+            <div className="flex items-center gap-1 mt-1 text-xs text-secondary">
+              <GeoIcon className="size-3.5 text-primary" />
+              <span className="truncate">{address}</span>
+            </div>
+          )}
           <div className="flex justify-end mt-2" onClick={stopProp}>
             <SaveButton
               initialSaved={initialSaved}
@@ -191,10 +193,12 @@ export const ClinicCard: FC<Props> = ({
             )}
           </div>
         )}
-        <div className="flex items-center gap-1 mt-1 text-xs text-secondary">
-          <GeoIcon className="size-3.5 text-primary" />
-          <span className="truncate">{address}</span>
-        </div>
+        {address && (
+          <div className="flex items-center gap-1 mt-1 text-xs text-secondary">
+            <GeoIcon className="size-3.5 text-primary" />
+            <span className="truncate">{address}</span>
+          </div>
+        )}
       </div>
     </Link>
   );
