@@ -1,11 +1,15 @@
-﻿import { FC } from "react";
+import { FC } from "react";
 
-import Image, { StaticImageData } from "next/image";
+import { StaticImageData } from "next/image";
 import Link from "next/link";
+
+import { SpecializationIllustration } from "@/entities/specialization";
 
 type Props = {
   title: string;
-  image: StaticImageData | string;
+  // Иллюстрация есть не у каждой специализации из справочника — для остальных
+  // SpecializationIllustration рисует нейтральный значок.
+  image?: StaticImageData;
   href?: string;
   onClick?: () => void;
 };
@@ -16,14 +20,9 @@ export const CategoryCard: FC<Props> = ({ title, image, href, onClick }) => {
 
   const inner = (
     <>
-      <Image
-        src={image}
-        alt={title}
-        width={36}
-        height={36}
-        style={{ width: 36, height: "auto" }}
-        className="shrink-0 object-contain"
-      />
+      <span className="relative w-9 h-9 shrink-0">
+        <SpecializationIllustration image={image} name={title} sizes="36px" />
+      </span>
       <span className="truncate text-sm md:text-base">{title}</span>
     </>
   );
