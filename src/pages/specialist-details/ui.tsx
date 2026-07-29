@@ -236,9 +236,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                           <GeoIcon className="size-4" />
                         </span>
                         <span>{workplace.clinicName}</span>
-                        <span className="text-muted ml-auto font-medium">
-                          {workplace.price} с
-                        </span>
+                        {workplace.price !== undefined && (
+                          <span className="text-muted ml-auto font-medium">
+                            {workplace.price} с
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
