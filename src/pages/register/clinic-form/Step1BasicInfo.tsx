@@ -2,10 +2,12 @@
 
 import { useRef } from "react";
 
+import { getClinicTypes, referenceKeys } from "@/shared/api";
 import { colors } from "@/shared/config";
+import { useReferenceOptions } from "@/shared/lib/useReference";
 import { Dropdown, Input } from "@/shared/ui";
 
-import { CLINIC_TYPES } from "../model/constants";
+import { DEFAULT_CLINIC_TYPES } from "../model/constants";
 import type { ClinicFormData } from "../model/types";
 import { PhotoThumb } from "./PhotoThumb";
 
@@ -38,6 +40,12 @@ type Props = {
 export const Step1BasicInfo = ({ data, onChange }: Props) => {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const photosInputRef = useRef<HTMLInputElement>(null);
+
+  const { options: clinicTypeOptions } = useReferenceOptions(
+    referenceKeys.clinicTypes(),
+    getClinicTypes,
+    DEFAULT_CLINIC_TYPES,
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -101,7 +109,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
       <Dropdown
         label="Тип клиники"
         placeholder="Выберите из списка"
-        options={CLINIC_TYPES}
+        options={clinicTypeOptions}
         value={data.clinicType}
         onChange={(v) => onChange("clinicType", v)}
       />

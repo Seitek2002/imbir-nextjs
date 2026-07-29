@@ -4,24 +4,9 @@ import { FC, useState } from "react";
 import toast from "react-hot-toast";
 
 import { GeoIcon } from "@/shared/assets/icons";
+import { CITIES_BY_COUNTRY as COUNTRIES_DATA } from "@/shared/config";
 import { useCityStore } from "@/shared/store";
 import { Button, Dropdown, Modal } from "@/shared/ui";
-
-const COUNTRIES_DATA: Record<string, string[]> = {
-  Кыргызстан: [
-    "Бишкек",
-    "Ош",
-    "Джалал-Абад",
-    "Каракол",
-    "Токмок",
-    "Кант",
-    "Нарын",
-    "Талас",
-    "Баткен",
-  ],
-  Россия: ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург"],
-  Казахстан: ["Алматы", "Астана", "Шымкент", "Караганда"],
-};
 
 const COUNTRY_OPTIONS = Object.keys(COUNTRIES_DATA).map((c) => ({
   value: c,

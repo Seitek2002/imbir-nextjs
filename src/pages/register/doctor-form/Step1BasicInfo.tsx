@@ -2,11 +2,13 @@
 
 import { useRef } from "react";
 
-import { colors } from "@/shared/config";
+import { getCities, getLanguages, referenceKeys } from "@/shared/api";
+import { CITIES, colors } from "@/shared/config";
+import { useReferenceOptions } from "@/shared/lib/useReference";
 import { cn } from "@/shared/lib/utils";
 import { Dropdown, Input, PhoneInput } from "@/shared/ui";
 
-import { CITIES, LANGUAGES } from "../model/constants";
+import { DEFAULT_LANGUAGES } from "../model/constants";
 import type { DoctorFormData } from "../model/types";
 
 const UploadIcon = () => (
@@ -37,6 +39,19 @@ type Props = {
 
 export const Step1BasicInfo = ({ data, onChange }: Props) => {
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // Город и языки — из справочников бэка, поверх локальных наборов по
+  // умолчанию: на бэк уходит выбранная строка, а не код.
+  const { options: cityOptions } = useReferenceOptions(
+    referenceKeys.cities(),
+    getCities,
+    CITIES,
+  );
+  const { options: languageOptions } = useReferenceOptions(
+    referenceKeys.languages(),
+    getLanguages,
+    DEFAULT_LANGUAGES,
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -99,7 +114,8 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
       <Dropdown
         label="Город"
         placeholder="Выберите из списка"
-        options={CITIES}
+        options={cityOptions}
+        searchable
         value={data.city}
         onChange={(v) => onChange("city", v)}
       />
@@ -107,7 +123,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
       <Dropdown
         label="Языки общения"
         placeholder="Выберите из списка"
-        options={LANGUAGES}
+        options={languageOptions}
         isMulti
         value={data.languages}
         onChange={(v) => onChange("languages", v)}

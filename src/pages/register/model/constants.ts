@@ -1,19 +1,10 @@
 import { ClinicFormData, ClinicStep, DoctorStep } from "./types";
 
-export const CITIES = [
-  { label: "Бишкек", value: "bishkek" },
-  { label: "Ош", value: "osh" },
-  { label: "Джалал-Абад", value: "jalal-abad" },
-  { label: "Каракол", value: "karakol" },
-  { label: "Токмок", value: "tokmok" },
-  { label: "Нарын", value: "naryn" },
-];
-
-export const LANGUAGES = [
-  { label: "Кыргызский", value: "kyrgyz" },
-  { label: "Русский", value: "russian" },
-  { label: "Английский", value: "english" },
-];
+// Наборы по умолчанию для справочников бэка: показываются, пока справочник
+// грузится, и дополняют его, если он неполный (см. useReference). На бэк
+// уходит выбранная строка как есть — никаких служебных кодов вроде "russian",
+// иначе значение не совпадёт ни с одним фильтром и засорит сам справочник.
+export const DEFAULT_LANGUAGES = ["Кыргызский", "Русский", "Английский"];
 
 export const STEP_TITLES: Record<DoctorStep, string> = {
   1: "Основная информация",
@@ -24,18 +15,16 @@ export const STEP_TITLES: Record<DoctorStep, string> = {
 
 export const TOTAL_STEPS = 4;
 
-export const CLINIC_TYPES = [
-  { label: "Частная", value: "private" },
-  { label: "Государственная", value: "public" },
-  { label: "Многопрофильная", value: "multi" },
-  { label: "Специализированная", value: "specialized" },
+export const DEFAULT_CLINIC_TYPES = [
+  "Частная",
+  "Государственная",
+  "Многопрофильная",
+  "Специализированная",
 ];
 
-export const COUNTRIES = [
-  { label: "Кыргызстан", value: "kg" },
-  { label: "Казахстан", value: "kz" },
-  { label: "Россия", value: "ru" },
-];
+// Страны берём из справочника телефонных кодов (там же человеческие названия);
+// этот список — только на случай, если справочник не ответил.
+export const DEFAULT_COUNTRIES = ["Кыргызстан", "Казахстан", "Россия"];
 
 export const DAYS: { key: keyof ClinicFormData["schedule"]; label: string }[] =
   [
@@ -48,7 +37,7 @@ export const DAYS: { key: keyof ClinicFormData["schedule"]; label: string }[] =
     { key: "sun", label: "ВС" },
   ];
 
-export const EQUIPMENT_OPTIONS = [
+export const DEFAULT_EQUIPMENT = [
   "УЗИ",
   "КТ/МРТ",
   "Операционная",
@@ -57,7 +46,7 @@ export const EQUIPMENT_OPTIONS = [
   "Реанимация",
 ];
 
-export const PATIENT_CONDITIONS = [
+export const DEFAULT_PATIENT_CONDITIONS = [
   "Парковка",
   "Детская зона",
   "Онлайн-консультация",
@@ -65,7 +54,7 @@ export const PATIENT_CONDITIONS = [
   "Аптека",
 ];
 
-export const PAYMENT_OPTIONS = ["Наличные", "Карта", "Онлайн"];
+export const DEFAULT_PAYMENT_METHODS = ["Наличные", "Карта", "Онлайн"];
 
 export const CLINIC_STEP_TITLES: Record<ClinicStep, string> = {
   1: "Основная информация",

@@ -2,9 +2,12 @@
 
 import { FC, useRef } from "react";
 
+import { useSpecializationOptions } from "@/entities/specialization";
+
 import { UserCircleIcon } from "@/shared/assets/icons";
 import {
   Button,
+  Dropdown,
   ImageWithFallback,
   Input,
   PhoneInput,
@@ -216,6 +219,14 @@ export const ProfessionalSection: FC<SectionProps> = ({
   set,
   isEditing,
 }) => {
+  // Специализация — из справочника бэка, а не свободный текст: по этому же
+  // значению врача потом ищут фильтры, опечатка выкидывала бы его из выдачи.
+  const { options: specializationOptions, isLoading: isSpecsLoading } =
+    useSpecializationOptions();
+  const specializationPlaceholder = isSpecsLoading
+    ? "Загружаем список..."
+    : "Выберите из списка";
+
   if (!isEditing) {
     return (
       <div>
@@ -234,17 +245,21 @@ export const ProfessionalSection: FC<SectionProps> = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <Input
+      <Dropdown
         label="Специализация"
+        placeholder={specializationPlaceholder}
+        options={specializationOptions}
+        searchable
         value={d.specialization}
-        onChange={(e) => set("specialization", e.target.value)}
-        placeholder="Выберите из списка"
+        onChange={(v) => set("specialization", v)}
       />
-      <Input
+      <Dropdown
         label="Дополнительная специализация"
+        placeholder={specializationPlaceholder}
+        options={specializationOptions}
+        searchable
         value={d.additionalSpecialization}
-        onChange={(e) => set("additionalSpecialization", e.target.value)}
-        placeholder="Выберите из списка"
+        onChange={(v) => set("additionalSpecialization", v)}
       />
       <Input
         label="Стаж работы (лет)"
