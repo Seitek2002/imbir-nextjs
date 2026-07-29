@@ -50,12 +50,28 @@ export type SpecializationTile = {
 // Справочник почти не меняется — держим его в кеше подольше. Ключ тот же, что
 // у фильтров (FilterBar/MobileFiltersModal), так что на всё приложение уходит
 // один запрос.
-export const useSpecializationTiles = (limit = SPECIALIZATION_TILES_LIMIT) => {
-  const { data = [], isLoading } = useQuery({
+export const useSpecializations = () =>
+  useQuery({
     queryKey: referenceKeys.specializations(),
     queryFn: getSpecializations,
     staleTime: 60 * 60 * 1000,
   });
+
+// Готовые options для Dropdown. Значение = само название: именно оно уходит на
+// бэк в primary_specializations/narrow_specializations и по нему же работают
+// фильтры врачей, поэтому никаких собственных кодов ("cardiologist") тут быть
+// не должно.
+export const useSpecializationOptions = () => {
+  const { data = [], isLoading } = useSpecializations();
+
+  return {
+    options: data.map((name) => ({ label: name, value: name })),
+    isLoading,
+  };
+};
+
+export const useSpecializationTiles = (limit = SPECIALIZATION_TILES_LIMIT) => {
+  const { data = [], isLoading } = useSpecializations();
 
   const tiles: SpecializationTile[] = data.slice(0, limit).map((name) => ({
     name,

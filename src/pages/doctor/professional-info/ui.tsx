@@ -6,6 +6,8 @@ import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView } from "@/widgets/doctor/layout";
 
+import { useSpecializationOptions } from "@/entities/specialization";
+
 import { CheckIcon } from "@/shared/assets/icons";
 import { Button, ConfirmDialog, Dropdown, Input } from "@/shared/ui";
 
@@ -68,6 +70,14 @@ export const DoctorProfessionalInfoPage: FC = () => {
 
   const set = <K extends keyof D>(k: K, v: D[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));
+
+  // Специализации — из справочника бэка: значение уходит в
+  // primary_specializations как есть, и по нему же врача находят фильтры.
+  const { options: specializationOptions, isLoading: isSpecsLoading } =
+    useSpecializationOptions();
+  const specializationPlaceholder = isSpecsLoading
+    ? "Загружаем список..."
+    : "Выберите";
 
   const handleSave = async () => {
     // Должность/место/категория/степень отдельных полей на бэке НЕ имеют —
@@ -152,14 +162,9 @@ export const DoctorProfessionalInfoPage: FC = () => {
             {isEditing ? (
               <Dropdown
                 label="Специализация"
-                placeholder="Выберите"
-                options={[
-                  "Терапевт",
-                  "Кардиолог",
-                  "Хирург",
-                  "Педиатр",
-                  "Невролог",
-                ].map((o) => ({ label: o, value: o }))}
+                placeholder={specializationPlaceholder}
+                options={specializationOptions}
+                searchable
                 value={d.specialty}
                 onChange={(v) => set("specialty", v)}
               />
@@ -171,10 +176,9 @@ export const DoctorProfessionalInfoPage: FC = () => {
             {isEditing ? (
               <Dropdown
                 label="Дополнительная специализация"
-                placeholder="Выберите"
-                options={["Кардиолог", "Терапевт", "Хирург", "Педиатр"].map(
-                  (o) => ({ label: o, value: o }),
-                )}
+                placeholder={specializationPlaceholder}
+                options={specializationOptions}
+                searchable
                 value={d.additionalSpecialty}
                 onChange={(v) => set("additionalSpecialty", v)}
               />

@@ -15,19 +15,6 @@ export const LANGUAGES = [
   { label: "Английский", value: "english" },
 ];
 
-export const SPECIALIZATIONS = [
-  { label: "Терапевт", value: "therapist" },
-  { label: "Хирург", value: "surgeon" },
-  { label: "Кардиолог", value: "cardiologist" },
-  { label: "Невролог", value: "neurologist" },
-  { label: "Стоматолог", value: "dentist" },
-  { label: "Педиатр", value: "pediatrician" },
-  { label: "Гинеколог", value: "gynecologist" },
-  { label: "Офтальмолог", value: "ophthalmologist" },
-  { label: "Лор", value: "ent" },
-  { label: "Дерматолог", value: "dermatologist" },
-];
-
 export const STEP_TITLES: Record<DoctorStep, string> = {
   1: "Основная информация",
   2: "Профессиональные данные",
