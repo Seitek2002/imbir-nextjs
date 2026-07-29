@@ -15,6 +15,7 @@ import {
   deleteClinicService,
   getClinicServices,
 } from "@/shared/api";
+import { parsePrice } from "@/shared/lib/price";
 
 import { ProceduresList } from "./procedures-list";
 import type { Procedure } from "./procedures-list/clinic-procedure/model";
@@ -57,8 +58,7 @@ export const ClinicProceduresPage: FC = () => {
     name: s.name,
     category: s.category,
     clinic: profile?.name ?? "",
-    price:
-      typeof s.price === "string" ? parseFloat(s.price) || 0 : (s.price ?? 0),
+    price: parsePrice(s.price),
   }));
 
   return (

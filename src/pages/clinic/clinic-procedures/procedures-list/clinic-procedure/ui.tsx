@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { hasPrice } from "@/shared/lib/price";
 import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
@@ -13,7 +14,7 @@ type Props = {
   name: string;
   category: string;
   clinic: string;
-  price: number;
+  price?: number;
   image?: string;
   reviews?: number;
   onDelete?: (id: string) => void;
@@ -114,9 +115,12 @@ export const ProcedureCard: FC<Props> = ({
           </p>
 
           <div className="flex items-center justify-between">
-            <span className="text-foreground font-semibold text-base">
-              {price} с
-            </span>
+            {/* Цены может не быть — «0 с» читалось бы как «бесплатно» */}
+            {hasPrice(price) && (
+              <span className="text-foreground font-semibold text-base">
+                {price} с
+              </span>
+            )}
             {reviews && (
               <div className="flex items-center gap-1 text-sm">
                 <StarIcon className="w-4 h-4 text-primary" />
@@ -171,9 +175,11 @@ export const ProcedureRow: FC<Props> = ({
         <h3 className="font-semibold text-sm text-foreground truncate">
           {name}
         </h3>
-        <span className="text-foreground font-semibold text-sm shrink-0">
-          {price} с
-        </span>
+        {hasPrice(price) && (
+          <span className="text-foreground font-semibold text-sm shrink-0">
+            {price} с
+          </span>
+        )}
       </div>
       <p className="text-xs text-muted truncate mt-0.5">
         {category} <span className="text-primary">• {clinic}</span>

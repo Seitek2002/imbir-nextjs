@@ -48,8 +48,6 @@ export const DoctorCard: FC<Props> = ({
 
   const primaryClinic = workplaces[0]?.clinicName || "Не указана";
   const additionalClinicsCount = workplaces.length - 1;
-  const minPrice =
-    workplaces.length > 0 ? Math.min(...workplaces.map((w) => w.price)) : null;
 
   const href = id ? ROUTES.SPECIALIST_DETAILS(id) : "/";
   const stopProp = (e: React.MouseEvent) => {

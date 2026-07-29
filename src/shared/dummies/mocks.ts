@@ -43,7 +43,8 @@ export type Workplace = {
   clinicName: string;
   clinicAddress?: string;
   branchId?: string;
-  price: number;
+  // Бэк может не отдать цену за приём — тогда блок цены прячется
+  price?: number;
   schedule: Schedule;
 };
 
@@ -116,7 +117,8 @@ export type ServiceItem = {
   clinicName: string;
   name: string;
   category: string;
-  price: number;
+  // Может отсутствовать — см. parsePrice в @/shared/lib/price
+  price?: number;
   image: string;
   schedule: Schedule;
   doctorIds: string[];

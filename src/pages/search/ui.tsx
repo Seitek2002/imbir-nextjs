@@ -16,6 +16,7 @@ import { UrlSearchInput } from "@/features/search-by-query";
 
 import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { hasPrice } from "@/shared/lib/price";
 import { Button } from "@/shared/ui";
 
 const MobileFiltersModal = dynamic(() =>
@@ -263,9 +264,11 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                               {service.category}
                             </p>
                           </div>
-                          <div className="font-bold text-foreground text-sm">
-                            {service.price} с
-                          </div>
+                          {hasPrice(service.price) && (
+                            <div className="font-bold text-foreground text-sm">
+                              {service.price} с
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -387,10 +390,16 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                                 {service.category}
                               </p>
                               <div className="flex items-center justify-between mt-auto">
-                                <span className="font-bold text-foreground text-lg">
-                                  {service.price} с
-                                </span>
-                                <Button variant="outline" size="sm">
+                                {hasPrice(service.price) && (
+                                  <span className="font-bold text-foreground text-lg">
+                                    {service.price} с
+                                  </span>
+                                )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="ml-auto"
+                                >
                                   Подробнее
                                 </Button>
                               </div>

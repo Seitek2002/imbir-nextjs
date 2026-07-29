@@ -12,6 +12,7 @@ import {
   profileKeys,
 } from "@/shared/api";
 import { FilterSample } from "@/shared/assets/icons";
+import { parsePrice } from "@/shared/lib/price";
 import { SearchInput } from "@/shared/ui/input";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
@@ -68,14 +69,13 @@ type DoctorDetails = {
   workplaces?: Array<{ address?: string }>;
 };
 
-// Цена берётся из объекта услуги ({id, name, price}); бэк отдаёт число или строку.
-const toServicePrice = (value: unknown): number => {
+// Цена берётся из объекта услуги ({id, name, price}); бэк отдаёт число или
+// строку. Если цены нет — undefined, карточка прячет блок стоимости.
+const toServicePrice = (value: unknown): number | undefined => {
   if (value && typeof value === "object") {
-    const price = (value as Record<string, unknown>).price;
-    if (typeof price === "number") return price;
-    if (typeof price === "string") return parseFloat(price) || 0;
+    return parsePrice((value as Record<string, unknown>).price);
   }
-  return 0;
+  return undefined;
 };
 
 export const ProfileHistoryPage: FC = () => {

@@ -10,7 +10,7 @@ export type DoctorWorkplace = {
   clinic_id?: number;
   clinic_name?: string;
   clinic_address?: string;
-  price: number;
+  price?: number;
   schedule: DoctorWorkplaceSchedule | string;
   lunch_break?: LunchBreak;
 };

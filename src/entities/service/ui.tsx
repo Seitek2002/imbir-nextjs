@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
+import { hasPrice } from "@/shared/lib/price";
 import { useAuthStore } from "@/shared/store";
 import { Button, ImageWithFallback } from "@/shared/ui";
 
@@ -18,7 +19,7 @@ type Props = {
   clinicId?: string;
   rating: number;
   reviews: number;
-  price: number | string;
+  price?: number | string | null;
   image?: string | StaticImageData;
   onBook?: () => void;
   onSave?: () => void;
@@ -70,6 +71,8 @@ export const ServiceCard: FC<Props> = ({
   variant = "vertical",
 }) => {
   const displayClinic = clinic || clinicId || "Клиника не указана";
+  // Цену прячем целиком, если бэк её не отдал — «0 с» читалось бы как «бесплатно»
+  const showPrice = hasPrice(price);
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "doctor";
   const href = id ? `${ROUTES.RECORD}?service=${id}` : ROUTES.RECORD;
@@ -115,10 +118,12 @@ export const ServiceCard: FC<Props> = ({
           </div>
 
           <div className="mt-auto flex items-center justify-between gap-3">
-            <span className="text-foreground font-bold text-base whitespace-nowrap">
-              {price} с
-            </span>
-            <div className="flex items-center gap-2">
+            {showPrice && (
+              <span className="text-foreground font-bold text-base whitespace-nowrap">
+                {price} с
+              </span>
+            )}
+            <div className="flex items-center gap-2 ml-auto">
               {!isDoctor && (
                 <Button
                   variant="outline"
@@ -183,9 +188,11 @@ export const ServiceCard: FC<Props> = ({
         </div>
 
         <div className="mt-auto pt-3 flex items-center justify-between gap-3 border-t border-border-soft">
-          <span className="text-foreground font-bold text-lg whitespace-nowrap">
-            {price} с
-          </span>
+          {showPrice && (
+            <span className="text-foreground font-bold text-lg whitespace-nowrap">
+              {price} с
+            </span>
+          )}
           {!isDoctor && (
             <Button
               variant="outline"

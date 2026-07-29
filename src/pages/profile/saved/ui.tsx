@@ -12,6 +12,7 @@ import {
   DoctorPersonIcon,
   ServiceRadialIcon,
 } from "@/shared/assets/icons";
+import { parsePrice } from "@/shared/lib/price";
 import { FilterTabBar } from "@/shared/ui";
 
 import { ProfileSaved } from "./ProfileSaved/ui";
@@ -92,8 +93,7 @@ export const ProfileSavedPage: FC = () => {
                 clinicName: "",
                 name: s.name,
                 category: s.category,
-                price:
-                  typeof s.price === "string" ? parseFloat(s.price) || 0 : 0,
+                price: parsePrice(s.price),
                 image: "",
                 schedule: emptySchedule,
                 doctorIds: [],

@@ -11,7 +11,8 @@ export type Appointment = {
   date: string;
   time: string;
   service: string;
-  price: number;
+  // Цена фиксируется при записи, но бэк может её не отдать — тогда прячем
+  price?: number;
   address: string;
   status: AppointmentStatus;
   isOnline: boolean;

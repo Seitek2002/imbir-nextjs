@@ -65,14 +65,15 @@ const CloseIcon: FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-const Price: FC<{ value: number; className?: string }> = ({
+const Price: FC<{ value?: number; className?: string }> = ({
   value,
   className,
-}) => (
-  <span className={className}>
-    {formatPrice(value)} <span className="underline">с</span>
-  </span>
-);
+}) =>
+  value === undefined ? null : (
+    <span className={className}>
+      {formatPrice(value)} <span className="underline">с</span>
+    </span>
+  );
 
 // Внутренняя LiveKit-комната — ID записи используется как consultation_id.
 const ConsultationButton: FC<{ appointmentId: string; compact?: boolean }> = ({

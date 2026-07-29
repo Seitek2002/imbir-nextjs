@@ -4,13 +4,14 @@ import { FC } from "react";
 
 import Link from "next/link";
 
+import { hasPrice } from "@/shared/lib/price";
 import { useAuthStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
 type Props = {
   name: string;
   category: string;
-  price: string | number;
+  price?: string | number | null;
   clinicName?: string;
   href: string;
   onBook?: () => void;
@@ -50,7 +51,10 @@ export const ServiceCompactCard: FC<Props> = ({
       {clinicName && (
         <p className="text-[11px] text-secondary truncate mt-1">{clinicName}</p>
       )}
-      <p className="font-bold text-sm text-foreground mt-2">{price} с</p>
+      {/* Без цены строку не рисуем — «0 с» читалось бы как «бесплатно» */}
+      {hasPrice(price) && (
+        <p className="font-bold text-sm text-foreground mt-2">{price} с</p>
+      )}
 
       {!isDoctor && (
         <Button

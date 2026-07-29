@@ -3,7 +3,8 @@ export type Procedure = {
   name: string;
   category: string;
   clinic: string;
-  price: number;
+  // Бэк может не отдать цену — карточка тогда прячет строку с ценой
+  price?: number;
   image?: string;
   reviews?: number;
 };

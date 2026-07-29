@@ -6,6 +6,7 @@
 // mock-type shape that existing entity components and views expect.
 // It acts as a backward-compatibility layer during migration.
 import { toHttps } from "@/shared/lib/media";
+import { parsePrice } from "@/shared/lib/price";
 
 import type {
   ClinicListItem as MockClinicListItem,
@@ -183,7 +184,7 @@ const adaptService = (s: ApiService): MockServiceItem => ({
   clinicName: s.clinic ? s.clinic.name : "",
   name: s.name,
   category: s.category,
-  price: typeof s.price === "string" ? parseFloat(s.price) || 0 : 0,
+  price: parsePrice(s.price),
   image: s.photo ? toHttps(s.photo) || "" : "",
   schedule: emptySchedule,
   doctorIds: [],
