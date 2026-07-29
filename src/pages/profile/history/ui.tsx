@@ -147,7 +147,6 @@ export const ProfileHistoryPage: FC = () => {
           ? "upcoming"
           : a.status,
       isOnline: a.is_online,
-      googleMeetLink: a.google_meet_link,
     };
   });
 

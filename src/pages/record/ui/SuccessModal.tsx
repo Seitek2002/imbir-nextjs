@@ -2,6 +2,8 @@
 
 import { FC, useCallback, useState } from "react";
 
+import Link from "next/link";
+
 import { SuccessCheckIcon, VideoCallIcon } from "@/shared/assets/icons";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 import { Button } from "@/shared/ui";
@@ -9,7 +11,8 @@ import { Button } from "@/shared/ui";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  googleMeetLink?: string | null;
+  appointmentId?: number | null;
+  isOnline: boolean;
 };
 
 const DURATION = 200;
@@ -17,7 +20,8 @@ const DURATION = 200;
 export const SuccessModal: FC<Props> = ({
   isOpen,
   onClose,
-  googleMeetLink,
+  appointmentId,
+  isOnline,
 }) => {
   const [isClosing, setIsClosing] = useState(false);
 
@@ -54,31 +58,26 @@ export const SuccessModal: FC<Props> = ({
             успешно забронирована!
           </p>
           <p className="text-sm text-secondary mt-2">
-            {googleMeetLink
+            {isOnline
               ? "Подключитесь к онлайн-приёму в назначенное время"
               : "Ожидайте сообщение от вашего специалиста"}
           </p>
         </div>
 
-        {googleMeetLink && (
-          <a
-            href={googleMeetLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full"
-          >
+        {isOnline && appointmentId != null && (
+          <Link href={`/consultation/${appointmentId}`} className="w-full">
             <Button
               className="w-full justify-center"
               size="lg"
               IconLeft={VideoCallIcon}
             >
-              Открыть Google Meet
+              Открыть консультацию
             </Button>
-          </a>
+          </Link>
         )}
 
         <Button
-          variant={googleMeetLink ? "outline" : "default"}
+          variant={isOnline && appointmentId != null ? "outline" : "default"}
           className="w-full justify-center"
           onClick={handleClose}
         >

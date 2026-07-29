@@ -1,12 +1,15 @@
 import { apiClient } from "../client";
 import {
   AiChatMessage,
+  ChatConsultation,
   ChatMessage,
   ChatRoom,
   ChatUnreadCountResponse,
   CreateChatRoomRequest,
   SendAiMessageRequest,
 } from "./types";
+
+type ConsultationRole = "patient" | "doctor" | "clinic";
 
 // ── User-to-user chat ───────────────────────────────────────────────────────
 
@@ -39,6 +42,30 @@ export const getRoomMessages = async (
     `/api/chat/rooms/${roomId}/messages/`,
   );
   return data;
+};
+
+// В текущем ответе системного сообщения нет appointment_id. До расширения
+// backend-контракта берём доступные пользователю записи и сопоставляем их с
+// уведомлением по дате/времени. Для клиники LiveKit-комнаты недоступны.
+export const getChatConsultations = async (
+  role: ConsultationRole,
+): Promise<ChatConsultation[]> => {
+  if (role === "clinic") return [];
+
+  const endpoint =
+    role === "doctor"
+      ? "/api/doctor/appointments/"
+      : "/api/profile/appointments/";
+  const { data } = await apiClient.get<{ data: ChatConsultation[] }>(endpoint, {
+    params: { page_size: 100 },
+  });
+
+  return Array.isArray(data?.data)
+    ? data.data.filter(
+        (appointment) =>
+          appointment.is_online && appointment.status !== "cancelled",
+      )
+    : [];
 };
 
 // ── AI assistant chat (room 0) ──────────────────────────────────────────────

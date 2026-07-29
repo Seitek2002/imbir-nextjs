@@ -27,6 +27,9 @@ export type ChatMessage = {
   content: string;
   created_at: string;
   is_read: boolean;
+  // Backend пока не отдаёт поле, поэтому для старого контракта оно опционально.
+  // Когда появится, frontend перестанет сопоставлять запись по дате/времени.
+  appointment_id?: number | null;
 };
 
 export type CreateChatRoomRequest = {
@@ -52,8 +55,17 @@ export type IncomingChatMessage = {
   sender: ChatParticipant | null;
   content: string;
   created_at: string;
+  appointment_id?: number | null;
   // Обычное сообщение приходит без type (или с "message"); typing — отдельно.
   type?: "message";
+};
+
+export type ChatConsultation = {
+  id: number;
+  date: string;
+  time: string;
+  is_online: boolean;
+  status: string;
 };
 
 // Индикатор «печатает…» — тот же сокет, поле type различает кадр.

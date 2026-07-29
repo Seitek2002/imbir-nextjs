@@ -2,23 +2,18 @@
 
 import { FC } from "react";
 
+import Link from "next/link";
+
 import {
   CalendarIcon,
   GeoIcon,
-  MedicalServiceIcon,
   ReviewsIcon,
   StarIcon,
   VideoCallIcon,
 } from "@/shared/assets/icons";
-import { colors } from "@/shared/config";
-import { Button, IconBtn, ImageWithFallback } from "@/shared/ui";
+import { Button, ImageWithFallback } from "@/shared/ui";
 
-import {
-  formatDateHuman,
-  formatDateNumeric,
-  formatPrice,
-  formatTime,
-} from "./lib";
+import { formatDateNumeric, formatPrice, formatTime } from "./lib";
 import type { Appointment } from "./model";
 
 type Props = {
@@ -79,37 +74,33 @@ const Price: FC<{ value: number; className?: string }> = ({
   </span>
 );
 
-// Онлайн-встреча (Google Meet) — доп. действие, только для онлайн-записей.
-const GoogleMeetButton: FC<{ href: string; compact?: boolean }> = ({
-  href,
+// Внутренняя LiveKit-комната — ID записи используется как consultation_id.
+const ConsultationButton: FC<{ appointmentId: string; compact?: boolean }> = ({
+  appointmentId,
   compact,
 }) => {
-  const shared = {
-    href,
-    target: "_blank",
-    rel: "noopener noreferrer",
-  } as const;
+  const href = `/consultation/${appointmentId}`;
 
   if (compact) {
     return (
-      <a
-        {...shared}
-        aria-label="Подключиться к Google Meet"
+      <Link
+        href={href}
+        aria-label="Подключиться к онлайн-консультации"
         className="w-11 h-11 rounded-full bg-primary flex items-center justify-center shrink-0 hover:bg-primary-dark transition-colors"
       >
         <VideoCallIcon className="w-4.5 h-4.5 text-white" />
-      </a>
+      </Link>
     );
   }
 
   return (
-    <a
-      {...shared}
+    <Link
+      href={href}
       className="px-5 py-2.5 rounded-full bg-primary text-white font-medium text-sm hover:bg-primary-dark transition-colors flex items-center gap-2 whitespace-nowrap"
     >
       <VideoCallIcon className="w-4 h-4" />
       Подключиться
-    </a>
+    </Link>
   );
 };
 
@@ -126,7 +117,7 @@ export const AppointmentCard: FC<Props> = ({
   // Переносить можно только предстоящие записи и только если знаем врача —
   // свободные слоты запрашиваются именно по нему.
   const showReschedule = isUpcoming && !!onReschedule && !!appointment.doctorId;
-  const showMeet = appointment.isOnline && !!appointment.googleMeetLink;
+  const showConsultation = isUpcoming && appointment.isOnline;
 
   const meta = (
     <p className="text-muted">
@@ -208,8 +199,8 @@ export const AppointmentCard: FC<Props> = ({
 
         <div className="flex flex-col items-end justify-between shrink-0 pt-1">
           <div className="flex flex-col items-end gap-2">
-            {showMeet && (
-              <GoogleMeetButton href={appointment.googleMeetLink!} />
+            {showConsultation && (
+              <ConsultationButton appointmentId={appointment.id} />
             )}
             {showReschedule && (
               <Button
@@ -311,11 +302,11 @@ export const AppointmentCard: FC<Props> = ({
         </div>
 
         {/* Buttons */}
-        {(showMeet || showCancel || showReview || showReschedule) && (
+        {(showConsultation || showCancel || showReview || showReschedule) && (
           <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border w-full">
-            {showMeet && (
-              <GoogleMeetButton
-                href={appointment.googleMeetLink!}
+            {showConsultation && (
+              <ConsultationButton
+                appointmentId={appointment.id}
                 compact={false}
               />
             )}

@@ -735,7 +735,6 @@ export const useRecordForm = () => {
     isSubmitting,
     showSuccess,
     setShowSuccess,
-    googleMeetLink: appointmentResult?.google_meet_link ?? null,
     appointmentResult,
     canUseOnline,
     clinicMap,

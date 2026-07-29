@@ -15,5 +15,4 @@ export type Appointment = {
   address: string;
   status: AppointmentStatus;
   isOnline: boolean;
-  googleMeetLink: string | null;
 };

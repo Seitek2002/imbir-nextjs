@@ -10,6 +10,8 @@ export type ChatThreadMessage = {
   isRead?: boolean;
   // Системное уведомление (sender === null) — рендерится плашкой по центру.
   isSystem?: boolean;
+  // ID записи нужен для внутреннего маршрута LiveKit.
+  consultationId?: number;
   // Есть только у ответов ИИ-ассистента — карточки врачей/клиник/услуг под
   // текстом сообщения (см. RecommendationCards). Обычный чат этого не шлёт.
   recommendations?: AiRecommendations;

@@ -2,6 +2,8 @@
 
 import { FC, Fragment, useEffect, useRef } from "react";
 
+import Link from "next/link";
+
 import { cn } from "@/shared/lib/utils";
 
 import { formatMessageTime } from "../model/lib";
@@ -75,7 +77,27 @@ const SystemNotice: FC<{ message: ChatThreadMessage }> = ({ message }) => {
       <div className="bg-[#EEF3FF] text-foreground text-xs leading-normal text-center px-4 py-2 rounded-xl whitespace-pre-wrap break-words">
         {text || message.content}
       </div>
-      {url && (
+      {message.consultationId ? (
+        <Link
+          href={`/consultation/${message.consultationId}`}
+          className="inline-flex items-center gap-1.5 bg-primary text-white text-xs font-medium px-4 py-2 rounded-full transition-opacity hover:opacity-90"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M23 7l-7 5 7 5V7z" />
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+          </svg>
+          Присоединиться
+        </Link>
+      ) : url ? (
         <a
           href={url}
           target="_blank"
@@ -97,7 +119,7 @@ const SystemNotice: FC<{ message: ChatThreadMessage }> = ({ message }) => {
           </svg>
           Присоединиться
         </a>
-      )}
+      ) : null}
       <span className="text-[11px] text-muted">
         {formatMessageTime(message.createdAt)}
       </span>

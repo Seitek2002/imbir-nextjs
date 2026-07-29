@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { getRoomMessages } from "@/shared/api";
-import type { IncomingSocketFrame } from "@/shared/api";
+import { getChatConsultations, getRoomMessages } from "@/shared/api";
+import type { ChatConsultation, IncomingSocketFrame } from "@/shared/api";
 import { useAuthStore } from "@/shared/store";
 
 import { CHAT_WS_BASE } from "./constants";
@@ -16,6 +16,37 @@ const WS_CODE_NOT_A_PARTICIPANT = 4003;
 // Страховка: если "перестал печатать" потеряется, снимаем статус сами.
 // Больше окна дебаунса отправителя (2с) с запасом.
 const TYPING_EXPIRE_MS = 6000;
+
+const SYSTEM_APPOINTMENT_RE = /(\d{2})\.(\d{2})\.(\d{4})\s+в\s+(\d{2}):(\d{2})/;
+
+const getConsultationKey = (date: string, time: string) =>
+  `${date}|${time.slice(0, 5)}`;
+
+const findConsultationId = (
+  content: string,
+  consultations: ChatConsultation[],
+) => {
+  const match = content.match(SYSTEM_APPOINTMENT_RE);
+  if (!match) return undefined;
+
+  const [, day, month, year, hour, minute] = match;
+  const key = getConsultationKey(
+    `${year}-${month}-${day}`,
+    `${hour}:${minute}`,
+  );
+  const matches = consultations.filter(
+    (consultation) =>
+      getConsultationKey(consultation.date, consultation.time) === key,
+  );
+
+  return matches.reduce<number | undefined>(
+    (latestId, consultation) =>
+      latestId === undefined || consultation.id > latestId
+        ? consultation.id
+        : latestId,
+    undefined,
+  );
+};
 
 type UseChatRoomResult = {
   messages: ChatThreadMessage[];
@@ -45,6 +76,7 @@ export const useChatRoom = (
   // user_id → имя печатающего участника.
   const [typingUsers, setTypingUsers] = useState<Record<number, string>>({});
   const socketRef = useRef<WebSocket | null>(null);
+  const consultationsRef = useRef<ChatConsultation[]>([]);
   // Таймеры авто-снятия статуса по каждому user_id (на случай потери "false").
   const typingTimersRef = useRef<Record<number, ReturnType<typeof setTimeout>>>(
     {},
@@ -52,17 +84,22 @@ export const useChatRoom = (
 
   // Reactive token: a refresh swaps it and transparently reconnects the socket.
   const token = useAuthStore((state) => state.accessToken);
+  const role = useAuthStore((state) => state.user?.role);
   const authError = token ? null : "Требуется авторизация";
 
   useEffect(() => {
-    if (roomId === null || currentUserId === null || !token) return;
+    if (roomId === null || currentUserId === null || !token || !role) return;
 
     let isActive = true;
 
     // 1. Load history (incoming unread messages are marked read server-side).
-    getRoomMessages(roomId)
-      .then((history) => {
+    Promise.all([
+      getRoomMessages(roomId),
+      getChatConsultations(role).catch(() => []),
+    ])
+      .then(([history, consultations]) => {
         if (!isActive) return;
+        consultationsRef.current = consultations;
         setMessages(
           history.map((message) => ({
             id: message.id,
@@ -72,6 +109,9 @@ export const useChatRoom = (
             isMine: message.sender?.id === currentUserId,
             isRead: message.is_read,
             isSystem: message.sender === null,
+            consultationId:
+              message.appointment_id ??
+              findConsultationId(message.content, consultations),
           })),
         );
       })
@@ -150,8 +190,34 @@ export const useChatRoom = (
           isMine: false,
           // sender === null — системное уведомление (напр. онлайн-запись).
           isSystem: sender === null,
+          consultationId:
+            payload.appointment_id ??
+            findConsultationId(payload.content, consultationsRef.current),
         },
       ]);
+
+      // Новая запись могла появиться уже после загрузки истории комнаты.
+      // Обновляем список и добавляем ссылку в только что пришедшее уведомление.
+      if (sender === null && !payload.appointment_id) {
+        void getChatConsultations(role)
+          .then((consultations) => {
+            if (!isActive) return;
+            consultationsRef.current = consultations;
+            const consultationId = findConsultationId(
+              payload.content,
+              consultations,
+            );
+            if (!consultationId) return;
+            setMessages((prev) =>
+              prev.map((message) =>
+                message.id === payload.id
+                  ? { ...message, consultationId }
+                  : message,
+              ),
+            );
+          })
+          .catch(() => undefined);
+      }
     };
 
     socket.onerror = () => {
@@ -172,12 +238,13 @@ export const useChatRoom = (
       isActive = false;
       socket.close();
       socketRef.current = null;
+      consultationsRef.current = [];
       // Гасим все таймеры авто-снятия и статусы при смене комнаты/токена.
       Object.values(typingTimersRef.current).forEach(clearTimeout);
       typingTimersRef.current = {};
       setTypingUsers({});
     };
-  }, [roomId, currentUserId, token]);
+  }, [roomId, currentUserId, token, role]);
 
   const sendTyping = useCallback((isTyping: boolean) => {
     const socket = socketRef.current;

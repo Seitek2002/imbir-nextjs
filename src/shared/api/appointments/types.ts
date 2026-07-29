@@ -31,7 +31,7 @@ export type AppointmentResponse = {
   date: string;
   time: string;
   is_online: boolean;
-  // Filled by the backend only when is_online is true.
+  // Legacy Google Meet field; for new LiveKit records it is expected to be null.
   google_meet_link: string | null;
   status: AppointmentStatus;
   doctor?: AppointmentDoctor;
@@ -46,9 +46,9 @@ export type CancelAppointmentRequest = {
 };
 
 // POST /api/appointments/{id}/reschedule/ — перенос записи на новую дату/время.
-// Онлайн-консультации перегенерируют google_meet_link; при наличии пациента и
-// врача бэк шлёт системное сообщение в их чат. Нельзя переносить cancelled/
-// completed (бэк вернёт 400).
+// Для онлайн-консультации сохраняется тот же id LiveKit-комнаты; при наличии
+// пациента и врача бэк шлёт системное сообщение в их чат. Нельзя переносить
+// cancelled/completed (бэк вернёт 400).
 export type RescheduleAppointmentRequest = {
   date: string; // YYYY-MM-DD
   time: string; // HH:MM

@@ -34,7 +34,7 @@ export const cancelAppointment = async (
 };
 
 // Перенос записи. Возвращает обновлённую запись (в т.ч. новый google_meet_link
-// для онлайн-консультаций).
+// для онлайн-консультаций; LiveKit-комната остаётся привязана к id записи).
 export const rescheduleAppointment = async (
   id: number,
   body: RescheduleAppointmentRequest,

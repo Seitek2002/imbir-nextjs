@@ -28,7 +28,6 @@ export const RecordPage = () => {
     selectedTime,
     showSuccess,
     setShowSuccess,
-    googleMeetLink,
     appointmentResult,
   } = form;
 
@@ -82,7 +81,8 @@ export const RecordPage = () => {
       <SuccessModal
         isOpen={showSuccess}
         onClose={() => setShowSuccess(false)}
-        googleMeetLink={googleMeetLink}
+        appointmentId={appointmentResult?.id ?? null}
+        isOnline={mode === "online"}
       />
     </main>
   );
