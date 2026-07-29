@@ -1,5 +1,9 @@
 import { AuthUser } from "@/shared/store/authStore";
 
+// Вход по почте ИЛИ по номеру телефона. Бэк принимает и то, и другое, но
+// identifier ВСЕГДА идёт в поле `email` (проверено: отдельного поля `phone`
+// нет — запрос без `email` возвращает "email: Обязательное поле", а телефон в
+// формате E.164, напр. +996700000000, в поле `email` бэк принимает).
 export type LoginRequest = {
   email: string;
   password: string;

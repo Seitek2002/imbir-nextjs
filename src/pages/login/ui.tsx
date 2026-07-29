@@ -13,8 +13,17 @@ import { loginFn } from "@/shared/api";
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
-import { AuthShell, Button, Checkbox, Input } from "@/shared/ui";
+import {
+  AuthShell,
+  Button,
+  Checkbox,
+  type Country,
+  Input,
+  PhoneInput,
+} from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
+
+type LoginBy = "email" | "phone";
 
 const ROLE_REDIRECT: Record<string, string> = {
   patient: "/profile",
@@ -31,20 +40,31 @@ export const LoginPage = () => {
   } = useAuthStore();
 
   const [authMode, setAuthMode] = useState<string>("login");
+  const [loginBy, setLoginBy] = useState<LoginBy>("email");
   const [email, setEmail] = useState("");
+  // Телефон храним раздельно: национальную часть (phoneLocal) и код страны из
+  // PhoneInput — полный E.164-номер собираем только при отправке.
+  const [phoneLocal, setPhoneLocal] = useState("");
+  const [dialCode, setDialCode] = useState("+996");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const identifierFilled = loginBy === "email" ? !!email : !!phoneLocal;
+
   const handleSubmit = async () => {
-    if (!email || !password) return;
+    if (!identifierFilled || !password) return;
     setError("");
     setIsLoading(true);
 
     try {
-      const res = await loginFn({ email, password });
+      // Бэк принимает identifier ТОЛЬКО в поле `email` — и почту, и телефон
+      // (в формате E.164). Отдельного поля `phone` у логина нет.
+      const identifier =
+        loginBy === "email" ? email : `${dialCode}${phoneLocal}`;
+      const res = await loginFn({ email: identifier, password });
       setRememberMeStore(rememberMe);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
@@ -56,7 +76,9 @@ export const LoginPage = () => {
           ?.response?.data?.detail ??
         (err as { response?: { data?: { error?: string } } })?.response?.data
           ?.error ??
-        "Неверный email или пароль";
+        (loginBy === "email"
+          ? "Неверный email или пароль"
+          : "Неверный номер телефона или пароль");
       setError(msg);
     } finally {
       setIsLoading(false);
@@ -94,14 +116,35 @@ export const LoginPage = () => {
       </div>
 
       <div className="flex flex-col gap-4">
-        <Input
-          label="Электронная почта"
-          type="email"
-          placeholder="Введите вашу почту"
-          IconRight={EmailIcon}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+        <SegmentedControl
+          options={[
+            { label: "Эл. почта", value: "email" },
+            { label: "Телефон", value: "phone" },
+          ]}
+          value={loginBy}
+          onChange={(val) => {
+            setLoginBy(val);
+            setError("");
+          }}
         />
+
+        {loginBy === "email" ? (
+          <Input
+            label="Электронная почта"
+            type="email"
+            placeholder="Введите вашу почту"
+            IconRight={EmailIcon}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        ) : (
+          <PhoneInput
+            label="Номер телефона"
+            value={phoneLocal}
+            onChange={setPhoneLocal}
+            onCountryChange={(c: Country) => setDialCode(c.dialCode)}
+          />
+        )}
 
         <div>
           <Input
@@ -139,7 +182,7 @@ export const LoginPage = () => {
           className="w-full justify-center md:h-14 md:text-lg"
           size="lg"
           onClick={handleSubmit}
-          disabled={!email || !password || isLoading}
+          disabled={!identifierFilled || !password || isLoading}
           loading={isLoading}
         >
           Продолжить
