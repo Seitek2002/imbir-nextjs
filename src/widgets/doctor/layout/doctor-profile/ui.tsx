@@ -29,4 +29,11 @@ export const FieldView: FC<FieldViewProps> = ({ label, value }) => {
 export const formStyles = {
   inp: "w-full px-4 py-3 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary transition-colors bg-white",
   lbl: "block text-muted text-sm mb-1.5",
+  // Раскладка полей раздела «Мои данные». По макету на мобильном это список
+  // с тонкими разделителями, на десктопе — сетка в две колонки.
+  fieldList:
+    "divide-y divide-background lg:divide-y-0 lg:grid lg:grid-cols-2 lg:gap-5 [&>div]:py-3 [&>div:first-child]:pt-0 [&>div:last-child]:pb-0 lg:[&>div]:py-0",
+  // Та же сетка в режиме редактирования: поля-инпуты идут с отступами,
+  // без разделителей.
+  formGrid: "flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-5",
 } as const;

@@ -18,6 +18,13 @@ type Props = {
   editAction?: "edit" | "save";
   onEditToggle?: () => void;
   headerRight?: ReactNode;
+  /**
+   * onBack — что делает стрелка «назад» в мобильной шапке. По умолчанию
+   * router.back(); экраны-разделы кабинета передают свой обработчик, чтобы
+   * вернуться на предыдущий шаг внутри страницы (например, из раздела
+   * «Моих данных» — к списку разделов), а не уйти из кабинета.
+   */
+  onBack?: () => void;
 };
 
 export const DoctorPageLayout: FC<Props> = ({
@@ -26,6 +33,7 @@ export const DoctorPageLayout: FC<Props> = ({
   editAction,
   onEditToggle,
   headerRight,
+  onBack,
 }) => {
   const router = useRouter();
 
@@ -54,7 +62,7 @@ export const DoctorPageLayout: FC<Props> = ({
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
         <IconBtn
-          onClick={() => router.back()}
+          onClick={onBack ?? (() => router.back())}
           variant="text"
           size="sm"
           aria-label="Назад"
@@ -69,8 +77,11 @@ export const DoctorPageLayout: FC<Props> = ({
         {rightSlot}
       </div>
 
-      {/* Desktop layout page content */}
-      <div className="hidden lg:block">{children}</div>
+      {/* Контент страницы — на всех ширинах. Мобильные отступы даёт эта
+          обёртка (как в ClinicPageLayout): каркас кабинета
+          DoctorPageLayoutSkeleton держит края чистыми, чтобы шапка выше шла
+          во всю ширину экрана. */}
+      <div className="px-4 py-4 lg:p-0">{children}</div>
     </>
   );
 };

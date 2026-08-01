@@ -15,7 +15,9 @@ export const DoctorPageLayoutSkeleton: FC<Props> = ({ children }) => {
   return (
     <div className="w-full min-h-screen bg-[#FAFAFA]">
       {/* Desktop layout */}
-      <div className="max-w-360 mx-auto px-4 lg:px-10 py-4 lg:py-8">
+      {/* Без отступов на мобильном: их добавляет контентная обёртка страницы
+          (DoctorPageLayout), иначе мобильная шапка не была бы во всю ширину. */}
+      <div className="max-w-360 mx-auto lg:px-10 lg:py-8">
         <h1 className="text-[40px] font-semibold text-foreground mb-8 hidden lg:block">
           Мой профиль
         </h1>
