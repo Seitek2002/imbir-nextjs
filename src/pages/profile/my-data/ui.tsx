@@ -10,6 +10,7 @@ import { CheckIcon, EditIcon } from "@/shared/assets/icons";
 import { useAuthStore } from "@/shared/store";
 import {
   Button,
+  CancelEditButton,
   ConfirmDialog,
   IconBtn,
   ImageWithFallback,
@@ -46,14 +47,16 @@ export const ProfileMyDataPage: FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
-  const [d, setD] = useState<D>({
+  const initialData: D = {
     firstName: user?.first_name ?? "",
     lastName: user?.last_name ?? "",
     patronymic: savedPatronymic,
     phone: user?.phone ?? "",
     email: user?.email ?? "",
     photo: user?.avatar ?? undefined,
-  });
+  };
+  const [d, setD] = useState<D>(initialData);
+  const savedDataRef = useRef<D>(initialData);
   const photoRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof D>(k: K, v: D[K]) =>
@@ -66,14 +69,18 @@ export const ProfileMyDataPage: FC = () => {
     getProfile()
       .then((profile) => {
         if (cancelled) return;
-        setD((prev) => ({
-          ...prev,
-          firstName: profile.first_name ?? prev.firstName,
-          lastName: profile.last_name ?? prev.lastName,
-          phone: profile.phone ?? prev.phone,
-          email: profile.email ?? prev.email,
-          photo: profile.avatar ?? prev.photo,
-        }));
+        setD((prev) => {
+          const next = {
+            ...prev,
+            firstName: profile.first_name ?? prev.firstName,
+            lastName: profile.last_name ?? prev.lastName,
+            phone: profile.phone ?? prev.phone,
+            email: profile.email ?? prev.email,
+            photo: profile.avatar ?? prev.photo,
+          };
+          savedDataRef.current = next;
+          return next;
+        });
         const current = useAuthStore.getState().user;
         if (current && profile.avatar) {
           useAuthStore
@@ -112,7 +119,15 @@ export const ProfileMyDataPage: FC = () => {
       localStorage.setItem("profile_patronymic", d.patronymic);
 
       const newAvatar = updated.avatar ?? d.photo;
-      if (newAvatar) set("photo", newAvatar);
+      const savedData: D = {
+        ...d,
+        firstName: updated.first_name,
+        lastName: updated.last_name,
+        phone: updated.phone ?? d.phone,
+        photo: newAvatar,
+      };
+      savedDataRef.current = savedData;
+      setD(savedData);
       setPendingPhoto(null);
 
       // Keep authStore in sync so name and avatar update everywhere
@@ -133,6 +148,12 @@ export const ProfileMyDataPage: FC = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleCancel = () => {
+    setD(savedDataRef.current);
+    setPendingPhoto(null);
+    setIsEditing(false);
   };
 
   const title = isEditing ? "Редактировать" : "Настройки профиля";
@@ -156,29 +177,38 @@ export const ProfileMyDataPage: FC = () => {
 
   return (
     <>
-      <MobilePageHeader title={title} rightElement={mobileRight} />
+      <MobilePageHeader
+        title={title}
+        rightElement={mobileRight}
+        onBack={isEditing ? handleCancel : undefined}
+      />
       <div className="px-4 py-8 md:p-0">
         <div className="hidden md:flex items-center justify-between mb-6">
           <h2 className="text-[28px] font-semibold text-foreground">
             Настройки профиля
           </h2>
-          <Button
-            onClick={
-              isEditing
-                ? () => setShowSaveConfirm(true)
-                : () => setIsEditing(true)
-            }
-            disabled={isSaving}
-            variant={isEditing ? "default" : "outline"}
-            size="sm"
-            IconLeft={isEditing ? undefined : EditIcon}
-          >
-            {isSaving
-              ? "Сохранение..."
-              : isEditing
-                ? "Сохранить"
-                : "Редактировать"}
-          </Button>
+          <div className="flex items-center gap-3">
+            {isEditing && (
+              <CancelEditButton onClick={handleCancel} disabled={isSaving} />
+            )}
+            <Button
+              onClick={
+                isEditing
+                  ? () => setShowSaveConfirm(true)
+                  : () => setIsEditing(true)
+              }
+              disabled={isSaving}
+              variant={isEditing ? "default" : "outline"}
+              size="sm"
+              IconLeft={isEditing ? undefined : EditIcon}
+            >
+              {isSaving
+                ? "Сохранение..."
+                : isEditing
+                  ? "Сохранить"
+                  : "Редактировать"}
+            </Button>
+          </div>
         </div>
 
         {/* Как в макете: заголовок внутри внешней карточки, поля — в узкой внутренней */}

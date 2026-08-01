@@ -7,13 +7,19 @@ import Link from "next/link";
 import {
   CalendarIcon,
   GeoIcon,
+  MedicalServiceIcon,
   ReviewsIcon,
   StarIcon,
   VideoCallIcon,
 } from "@/shared/assets/icons";
 import { Button, ImageWithFallback } from "@/shared/ui";
 
-import { formatDateNumeric, formatPrice, formatTime } from "./lib";
+import {
+  formatDateHuman,
+  formatDateNumeric,
+  formatPrice,
+  formatTime,
+} from "./lib";
 import type { Appointment } from "./model";
 
 type Props = {
@@ -249,8 +255,8 @@ export const AppointmentCard: FC<Props> = ({
       </div>
 
       {/* ── Mobile ──────────────────────────────────────────────── */}
-      <div className="md:hidden bg-white rounded-3xl p-4 border border-border">
-        <div className="flex items-start gap-4 mb-4">
+      <div className="md:hidden bg-white rounded-3xl p-3 border border-border">
+        <div className="flex items-start gap-3 mb-3">
           <div className="relative shrink-0">
             <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-primary-tint">
               {photo("112px", "text-3xl")}
@@ -264,88 +270,67 @@ export const AppointmentCard: FC<Props> = ({
             </h3>
             <div className="text-sm mb-2.5">{meta}</div>
 
-            <div className="flex flex-col gap-2 text-sm text-foreground">
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4 shrink-0 text-primary" />
-                <span>{formatDateNumeric(appointment.date)}</span>
+            <div className="flex flex-col gap-1.5 text-sm text-secondary">
+              <div className="flex items-center gap-1.5">
+                <CalendarIcon className="w-4 h-4 shrink-0 [&_path]:stroke-secondary" />
+                <span>
+                  {formatDateHuman(appointment.date)} •{" "}
+                  {formatTime(appointment.time)}
+                </span>
               </div>
-              <div className="flex items-center gap-2">
-                <ClockIcon className="w-4 h-4 shrink-0 text-primary" />
-                <span>{formatTime(appointment.time)}</span>
+              <div className="flex items-center gap-1.5 min-w-0">
+                <MedicalServiceIcon className="w-4 h-4 shrink-0 [&_path]:stroke-secondary" />
+                <span className="truncate">
+                  {appointment.service}
+                  {appointment.price !== undefined && (
+                    <>
+                      {" • "}
+                      <Price value={appointment.price} />
+                    </>
+                  )}
+                </span>
               </div>
-              {appointment.address && (
-                <div className="flex items-start gap-2">
-                  <GeoIcon className="w-4 h-4 mt-0.5 shrink-0 [&_path]:stroke-primary" />
-                  <span className="flex-1 leading-snug">
-                    {appointment.address}
-                  </span>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
-        {/* Separator and service info */}
-        <div className="border-t border-dashed border-border mt-3 pt-3 flex items-center justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <p className="text-secondary text-xs mb-0.5">Услуга</p>
-            <p className="text-foreground font-medium text-sm truncate">
-              {appointment.service}
-            </p>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 text-sm text-secondary flex-1 min-w-0 bg-background px-3 py-2.5 rounded-2xl">
+            <GeoIcon className="w-4 h-4 shrink-0 [&_path]:stroke-secondary" />
+            <span className="flex-1 truncate">{appointment.address}</span>
           </div>
-          <div className="text-right shrink-0">
-            <p className="text-secondary text-xs mb-0.5">Стоимость</p>
-            <Price
-              value={appointment.price}
-              className="text-foreground font-semibold text-base"
-            />
-          </div>
-        </div>
 
-        {/* Buttons */}
-        {(showConsultation || showCancel || showReview || showReschedule) && (
-          <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border w-full">
-            {showConsultation && (
-              <ConsultationButton
-                appointmentId={appointment.id}
-                compact={false}
-              />
-            )}
-            {showReschedule && (
-              <Button
-                onClick={() => onReschedule(appointment.id)}
-                variant="text"
-                size="sm"
-                IconLeft={CalendarEditIcon}
-                className="bg-[#FFF0EE] text-primary hover:bg-[#FFE4DE] active:bg-[#FFE4DE] flex-1 justify-center py-2.5 rounded-2xl"
-              >
-                Перенести
-              </Button>
-            )}
-            {showCancel && (
-              <Button
-                onClick={() => onCancel(appointment.id)}
-                variant="text"
-                size="sm"
-                IconLeft={CloseIcon}
-                className="bg-red-50 text-red-500 hover:bg-red-100 active:bg-red-100 flex-1 justify-center py-2.5 rounded-2xl"
-              >
-                Отменить
-              </Button>
-            )}
-            {showReview && (
-              <Button
-                onClick={() => onReview(appointment.id)}
-                variant="text"
-                size="sm"
-                IconLeft={ReviewsIcon}
-                className="bg-[#FFF0EE] text-primary hover:bg-[#FFE4DE] active:bg-[#FFE4DE] flex-1 justify-center py-2.5 rounded-2xl"
-              >
-                Оставить отзыв
-              </Button>
-            )}
-          </div>
-        )}
+          {showConsultation && (
+            <ConsultationButton appointmentId={appointment.id} compact />
+          )}
+          {showReschedule && (
+            <button
+              onClick={() => onReschedule(appointment.id)}
+              aria-label="Перенести запись"
+              className="w-11 h-11 rounded-full border border-border flex items-center justify-center shrink-0 text-primary hover:bg-primary-tint transition-colors"
+            >
+              <CalendarEditIcon className="w-4.5 h-4.5" />
+            </button>
+          )}
+          {showCancel && (
+            <button
+              onClick={() => onCancel(appointment.id)}
+              className="w-11 h-11 rounded-full border border-border flex items-center justify-center shrink-0 text-primary hover:bg-primary-tint transition-colors"
+              aria-label="Отменить"
+            >
+              <CloseIcon className="w-4.5 h-4.5" />
+            </button>
+          )}
+          {showReview && (
+            <button
+              onClick={() => onReview(appointment.id)}
+              className="w-11 h-11 rounded-full border border-border flex items-center justify-center shrink-0 hover:bg-primary-tint transition-colors"
+              aria-label="Оставить отзыв"
+            >
+              <ReviewsIcon className="w-5 h-5 [&_path]:stroke-primary" />
+            </button>
+          )}
+        </div>
       </div>
     </>
   );

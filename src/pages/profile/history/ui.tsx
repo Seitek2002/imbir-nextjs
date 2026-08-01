@@ -11,8 +11,9 @@ import {
   getProfileAppointments,
   profileKeys,
 } from "@/shared/api";
-import { FilterSample } from "@/shared/assets/icons";
+import { FilterSample, RemoveIcon, SearchIcon } from "@/shared/assets/icons";
 import { parsePrice } from "@/shared/lib/price";
+import { IconBtn } from "@/shared/ui";
 import { SearchInput } from "@/shared/ui/input";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
@@ -83,6 +84,7 @@ export const ProfileHistoryPage: FC = () => {
     "upcoming",
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const { data, isLoading: isAppointmentsLoading } = useQuery({
     queryKey: profileKeys.appointments({ status: activeTab }),
@@ -152,8 +154,41 @@ export const ProfileHistoryPage: FC = () => {
 
   return (
     <>
-      <MobilePageHeader title="История записей" />
-      <div className="px-4 py-8 md:p-0">
+      <MobilePageHeader
+        title="История записей"
+        rightElement={
+          <IconBtn
+            onClick={() => setMobileSearchOpen((open) => !open)}
+            variant="outline"
+            size="sm"
+            aria-label={mobileSearchOpen ? "Закрыть поиск" : "Открыть поиск"}
+          >
+            {mobileSearchOpen ? (
+              <RemoveIcon className="size-4" />
+            ) : (
+              <SearchIcon className="size-5" />
+            )}
+          </IconBtn>
+        }
+        bottomElement={
+          <div className="flex flex-col gap-3">
+            {mobileSearchOpen && (
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <SearchInput value={searchQuery} onChange={setSearchQuery} />
+                </div>
+                <FilterButton />
+              </div>
+            )}
+            <SegmentedControl
+              options={TABS}
+              value={activeTab}
+              onChange={setActiveTab}
+            />
+          </div>
+        }
+      />
+      <div className="px-4 pt-6 pb-8 md:p-0">
         {/* Desktop: заголовок + поиск с фильтром в одну строку, табы ниже */}
         <div className="hidden md:flex items-center justify-between gap-6 mb-5">
           <h2 className="text-[32px] font-semibold text-foreground">
@@ -167,21 +202,6 @@ export const ProfileHistoryPage: FC = () => {
           </div>
         </div>
         <div className="hidden md:block w-75 mb-6">
-          <SegmentedControl
-            options={TABS}
-            value={activeTab}
-            onChange={setActiveTab}
-          />
-        </div>
-
-        {/* Mobile: поиск с фильтром, затем сегмент-переключатель */}
-        <div className="md:hidden mb-6 flex flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
-              <SearchInput value={searchQuery} onChange={setSearchQuery} />
-            </div>
-            <FilterButton />
-          </div>
           <SegmentedControl
             options={TABS}
             value={activeTab}
