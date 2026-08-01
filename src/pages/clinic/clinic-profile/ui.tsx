@@ -20,7 +20,13 @@ import {
   updateClinicBranch,
 } from "@/shared/api";
 import { CheckIcon } from "@/shared/assets/icons";
-import { Button, ConfirmDialog, Input, StatTiles } from "@/shared/ui";
+import {
+  Button,
+  CancelEditButton,
+  ConfirmDialog,
+  Input,
+  StatTiles,
+} from "@/shared/ui";
 
 import { ClinicProfileHub } from "./hub/ui";
 
@@ -94,13 +100,7 @@ const BranchesCard: FC<{ branches: ClinicProfileBranch[] }> = ({
                 >
                   {isPending ? "..." : "Сохранить"}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setEditingId(null)}
-                >
-                  Отмена
-                </Button>
+                <CancelEditButton onClick={() => setEditingId(null)} />
               </>
             ) : (
               <>
@@ -179,9 +179,7 @@ export const ClinicProfilePage: FC = () => {
           </h2>
           {isEditing ? (
             <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={() => setIsEditing(false)}>
-                Отмена
-              </Button>
+              <CancelEditButton onClick={() => setIsEditing(false)} />
               <Button
                 onClick={() => setShowSaveConfirm(true)}
                 disabled={isSaving}
