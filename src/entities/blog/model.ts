@@ -21,6 +21,7 @@ export type BlogPost = {
   categoryId: string;
   category: string;
   date: string;
+  dateShort: string;
   image?: string;
   href: string;
   featured: boolean;
@@ -48,11 +49,32 @@ const MONTHS = [
   "декабря",
 ];
 
+const SHORT_MONTHS = [
+  "янв.",
+  "февр.",
+  "март",
+  "апр.",
+  "май",
+  "июнь",
+  "июль",
+  "авг.",
+  "сент.",
+  "окт.",
+  "нояб.",
+  "дек.",
+];
+
 // "2026-07-17" → "17 июля 2026"
 export const formatBlogDate = (iso: string): string => {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+};
+
+export const formatBlogDateShort = (iso: string): string => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return `${date.getDate()} ${SHORT_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 };
 
 const adaptPost = (post: ApiBlogPost): BlogPost => ({
@@ -63,6 +85,7 @@ const adaptPost = (post: ApiBlogPost): BlogPost => ({
   categoryId: post.category?.slug ?? "",
   category: post.category?.name ?? "",
   date: formatBlogDate(post.date),
+  dateShort: formatBlogDateShort(post.date),
   image: post.image ?? undefined,
   href: ROUTES.BLOG_ARTICLE(post.slug),
   featured: post.is_featured,

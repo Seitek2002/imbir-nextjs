@@ -12,6 +12,7 @@ import { ImageWithFallback } from "@/shared/ui";
 type Props = {
   posts: BlogPost[];
   categories: BlogCategory[];
+  variant?: "default" | "home";
   // On the dedicated /blog page the grid is near the top, so eager-load the
   // first card (its image is the mobile LCP). Off by default (e.g. on home,
   // where the section sits far below the fold).
@@ -21,6 +22,7 @@ type Props = {
 export const BlogSection: FC<Props> = ({
   posts,
   categories,
+  variant = "default",
   prioritizeFirstCard = false,
 }) => {
   const [activeCategory, setActiveCategory] = useState("all");
@@ -36,6 +38,41 @@ export const BlogSection: FC<Props> = ({
       : posts.filter(
           (post) => !post.featured && post.categoryId === activeCategory,
         );
+
+  if (variant === "home") {
+    const homeFeatured = featured ?? posts[0];
+    const homeSecondary = posts
+      .filter((post) => post.id !== homeFeatured?.id)
+      .slice(0, 3);
+    const homeMobilePosts = [
+      ...(homeFeatured ? [homeFeatured] : []),
+      ...homeSecondary,
+    ].slice(0, 3);
+
+    if (!homeFeatured) return null;
+
+    return (
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-7">
+        <HomeFeaturedCard post={homeFeatured} />
+
+        <div className="hidden flex-col gap-3 md:flex">
+          {homeSecondary.map((post) => (
+            <HomeHorizontalCard key={post.id} post={post} />
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-2 md:hidden">
+          {homeMobilePosts.map((post, index) => (
+            <HomeHorizontalCard
+              key={post.id}
+              post={post}
+              priority={prioritizeFirstCard && index === 0}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -184,3 +221,85 @@ export const BlogSection: FC<Props> = ({
     </div>
   );
 };
+
+const HomePostMeta: FC<{ post: BlogPost }> = ({ post }) => (
+  <div className="flex items-center gap-2 whitespace-nowrap text-xs leading-none">
+    <span className="font-medium text-primary">{post.category}</span>
+    <span className="text-muted">•</span>
+    <span className="hidden text-muted md:inline">{post.date}</span>
+    <span className="text-muted md:hidden">{post.dateShort}</span>
+  </div>
+);
+
+const HomePostImage: FC<{
+  post: BlogPost;
+  className: string;
+  sizes: string;
+  priority?: boolean;
+}> = ({ post, className, sizes, priority = false }) => {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      {!loaded && <div className="absolute inset-0 skeleton" />}
+      <ImageWithFallback
+        src={post.image}
+        alt={post.title}
+        fill
+        priority={priority}
+        sizes={sizes}
+        className="object-cover"
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+        fallback={<div className="absolute inset-0 bg-surface" />}
+      />
+    </div>
+  );
+};
+
+const HomeFeaturedCard: FC<{ post: BlogPost }> = ({ post }) => (
+  <Link
+    href={post.href}
+    className="hidden min-w-0 overflow-hidden rounded-2xl border border-border-soft bg-white md:flex md:flex-col"
+  >
+    <HomePostImage
+      post={post}
+      className="mx-1 mt-1 aspect-[5/3] rounded-2xl"
+      sizes="(max-width: 1360px) 50vw, 620px"
+    />
+    <div className="flex flex-col gap-2 p-3.5 pt-2.5">
+      <HomePostMeta post={post} />
+      <h3 className="line-clamp-2 text-base font-semibold leading-snug text-foreground">
+        {post.title}
+      </h3>
+      {post.description && (
+        <p className="line-clamp-2 text-sm leading-snug text-secondary">
+          {post.description}
+        </p>
+      )}
+    </div>
+  </Link>
+);
+
+const HomeHorizontalCard: FC<{
+  post: BlogPost;
+  priority?: boolean;
+}> = ({ post, priority = false }) => (
+  <Link
+    href={post.href}
+    className="flex h-[108px] min-w-0 gap-2 overflow-hidden rounded-2xl border border-border-soft bg-white p-1 md:h-[120px] md:gap-3"
+  >
+    <HomePostImage
+      post={post}
+      className="h-full w-[102px] shrink-0 rounded-xl md:w-[110px] md:rounded-2xl"
+      sizes="110px"
+      priority={priority}
+    />
+    <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 px-1.5 py-2 md:gap-3 md:px-2.5">
+      <HomePostMeta post={post} />
+      <h3 className="line-clamp-3 text-base font-semibold leading-[1.2] text-foreground md:line-clamp-2">
+        {post.title}
+      </h3>
+    </div>
+  </Link>
+);

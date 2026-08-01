@@ -90,26 +90,28 @@ export const HomePage = () => {
         />
       </LazyInView>
 
-      <section className="mx-auto w-full max-w-360 px-4 pt-8 pb-0 md:px-10 md:pt-8 md:pb-12">
-        <div className="flex items-start justify-between mb-6 md:mb-8">
-          <div>
-            <h2 className="text-2xl md:text-[32px] font-bold text-foreground leading-tight">
-              Блог
-            </h2>
-            <p className="hidden md:block text-muted text-base mt-1">
-              Статьи о здоровье, советы специалистов и новости медицины
-            </p>
+      <section className="mx-auto w-full max-w-360 px-3 pt-3 pb-0 md:px-8 md:pt-8 md:pb-12">
+        <div className="rounded-2xl bg-white px-4 py-4 md:rounded-none md:bg-transparent md:px-0 md:py-0">
+          <div className="mb-4 flex items-start justify-between md:mb-6">
+            <div>
+              <h2 className="text-[18px] font-semibold leading-tight text-foreground md:text-[28px]">
+                Блог
+              </h2>
+              <p className="hidden md:block text-muted text-base mt-1">
+                Статьи о здоровье, советы специалистов и новости медицины
+              </p>
+            </div>
+            <Link
+              href={ROUTES.BLOG}
+              className="md:hidden text-primary text-sm font-medium mt-1"
+            >
+              Все
+            </Link>
           </div>
-          <Link
-            href={ROUTES.BLOG}
-            className="md:hidden text-primary text-sm font-medium mt-1"
-          >
-            Все
-          </Link>
+          <Suspense fallback={null}>
+            <BlogSectionServer variant="home" prioritizeFirstCard />
+          </Suspense>
         </div>
-        <Suspense fallback={null}>
-          <BlogSectionServer />
-        </Suspense>
       </section>
 
       <LazyInView minHeight={300}>
