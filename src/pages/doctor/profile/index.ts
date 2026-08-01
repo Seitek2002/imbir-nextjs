@@ -1,1 +1,1 @@
-export { DoctorProfilePage } from "./ui";
+export { DoctorProfileMobileHub } from "./ui";

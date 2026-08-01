@@ -2,13 +2,18 @@
 
 import { FC, useRef, useState } from "react";
 
-import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
+import {
+  DoctorMyDataTabs,
+  DoctorPageLayout,
+  useMyDataTabs,
+} from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
 import { CheckIcon } from "@/shared/assets/icons";
 import {
   Button,
+  CancelEditButton,
   ConfirmDialog,
   IconBtn,
   ImageWithFallback,
@@ -16,7 +21,7 @@ import {
   PhoneInput,
 } from "@/shared/ui";
 
-const { lbl } = formStyles;
+const { lbl, fieldList, formGrid } = formStyles;
 
 const GENDER_OPTIONS = [
   { label: "Мужской", value: "male" },
@@ -25,6 +30,7 @@ const GENDER_OPTIONS = [
 
 export const DoctorBasicInfoSection: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
+  const { setActive } = useMyDataTabs();
   const [isEditing, setIsEditing] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [d, setD] = useState({
@@ -102,11 +108,31 @@ export const DoctorBasicInfoSection: FC = () => {
     setIsEditing(false);
   };
 
+  const handleCancel = () => {
+    if (profile) {
+      setD({
+        fullName: profile.fullName,
+        gender: profile.gender,
+        birthDate: profile.birthDate,
+        city: profile.city,
+        languages: profile.languages,
+        phone: profile.phone,
+        email: profile.email,
+        photo: profile.photo,
+      });
+    }
+    setPendingPhoto(null);
+    setIsEditing(false);
+  };
+
   const title = isEditing ? "Редактировать" : "Основная информация";
 
   if (isLoading) {
     return (
-      <DoctorPageLayout title="Основная информация">
+      <DoctorPageLayout
+        title="Основная информация"
+        onBack={() => setActive(null)}
+      >
         <div className="flex items-center justify-center py-20 text-muted">
           Загрузка...
         </div>
@@ -121,38 +147,50 @@ export const DoctorBasicInfoSection: FC = () => {
       onEditToggle={
         isEditing ? () => setShowSaveConfirm(true) : () => setIsEditing(true)
       }
+      // Из формы редактирования «назад» возвращает к просмотру раздела,
+      // из просмотра — к списку разделов «Моих данных» (мобильный сценарий
+      // макета). На десктопе мобильной шапки нет.
+      onBack={isEditing ? handleCancel : () => setActive(null)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
-        <Button
-          variant={isEditing ? "default" : "outline"}
-          size="sm"
-          onClick={
-            isEditing
-              ? () => setShowSaveConfirm(true)
-              : () => setIsEditing(true)
-          }
-          disabled={isSaving}
-        >
-          {isSaving
-            ? "Сохранение..."
-            : isEditing
-              ? "Сохранить"
-              : "Редактировать"}
-        </Button>
+        <div className="flex items-center gap-3">
+          {isEditing && (
+            <CancelEditButton onClick={handleCancel} disabled={isSaving} />
+          )}
+          <Button
+            variant={isEditing ? "default" : "outline"}
+            size="sm"
+            onClick={
+              isEditing
+                ? () => setShowSaveConfirm(true)
+                : () => setIsEditing(true)
+            }
+            disabled={isSaving}
+          >
+            {isSaving
+              ? "Сохранение..."
+              : isEditing
+                ? "Сохранить"
+                : "Редактировать"}
+          </Button>
+        </div>
       </div>
 
       <DoctorMyDataTabs />
 
-      <div className="bg-white rounded-3xl border border-border p-5 lg:p-8">
-        <div className="flex justify-center mb-6">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
+      <div className="bg-white rounded-3xl border border-border p-5 lg:p-8 flex flex-col lg:block">
+        {/* По макету на мобильном «Фото» — последнее поле карточки, поэтому
+            order-last; на десктопе аватар остаётся сверху по центру. */}
+        <div className="order-last pt-3 border-t border-background lg:order-none lg:pt-0 lg:mb-6 lg:border-0 lg:flex lg:justify-center">
+          <p className="text-muted text-xs mb-2 lg:hidden">Фото</p>
+          <div className="relative w-28 h-28 lg:w-20 lg:h-20">
+            <div className="w-full h-full rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
               <ImageWithFallback
                 src={d.photo}
                 alt={d.fullName}
-                width={80}
-                height={80}
+                width={112}
+                height={112}
                 className="w-full h-full object-cover"
                 fallback={
                   <span className="text-white text-2xl font-bold">
@@ -189,7 +227,7 @@ export const DoctorBasicInfoSection: FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className={isEditing ? formGrid : fieldList}>
           <div className="lg:col-span-2">
             {isEditing ? (
               <Input

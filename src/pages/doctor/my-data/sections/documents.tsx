@@ -2,12 +2,22 @@
 
 import { FC, useRef, useState } from "react";
 
-import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
+import {
+  DoctorMyDataTabs,
+  DoctorPageLayout,
+  useMyDataTabs,
+} from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView } from "@/widgets/doctor/layout";
 
 import { CheckIcon } from "@/shared/assets/icons";
-import { Button, ConfirmDialog, ImageWithFallback, Input } from "@/shared/ui";
+import {
+  Button,
+  CancelEditButton,
+  ConfirmDialog,
+  ImageWithFallback,
+  Input,
+} from "@/shared/ui";
 
 const AddIcon: FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -28,6 +38,7 @@ const AddIcon: FC<{ className?: string }> = ({ className }) => (
 
 export const DoctorDocumentsSection: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
+  const { setActive } = useMyDataTabs();
   const [isEditing, setIsEditing] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [licenseNumber, setLicenseNumber] = useState("");
@@ -65,11 +76,22 @@ export const DoctorDocumentsSection: FC = () => {
     setIsEditing(false);
   };
 
+  const handleCancel = () => {
+    if (profile) {
+      setLicenseNumber(profile.licenseNumber);
+      setCerts([...profile.certificates]);
+    }
+    setIsEditing(false);
+  };
+
   const title = isEditing ? "Редактировать" : "Сертификаты и документы";
 
   if (isLoading) {
     return (
-      <DoctorPageLayout title="Сертификаты и документы">
+      <DoctorPageLayout
+        title="Сертификаты и документы"
+        onBack={() => setActive(null)}
+      >
         <div className="flex items-center justify-center py-20 text-muted">
           Загрузка...
         </div>
@@ -84,25 +106,31 @@ export const DoctorDocumentsSection: FC = () => {
       onEditToggle={
         isEditing ? () => setShowSaveConfirm(true) : () => setIsEditing(true)
       }
+      onBack={isEditing ? handleCancel : () => setActive(null)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
-        <Button
-          variant={isEditing ? "default" : "outline"}
-          size="sm"
-          onClick={
-            isEditing
-              ? () => setShowSaveConfirm(true)
-              : () => setIsEditing(true)
-          }
-          disabled={isSaving}
-        >
-          {isSaving
-            ? "Сохранение..."
-            : isEditing
-              ? "Сохранить"
-              : "Редактировать"}
-        </Button>
+        <div className="flex items-center gap-3">
+          {isEditing && (
+            <CancelEditButton onClick={handleCancel} disabled={isSaving} />
+          )}
+          <Button
+            variant={isEditing ? "default" : "outline"}
+            size="sm"
+            onClick={
+              isEditing
+                ? () => setShowSaveConfirm(true)
+                : () => setIsEditing(true)
+            }
+            disabled={isSaving}
+          >
+            {isSaving
+              ? "Сохранение..."
+              : isEditing
+                ? "Сохранить"
+                : "Редактировать"}
+          </Button>
+        </div>
       </div>
 
       <DoctorMyDataTabs />

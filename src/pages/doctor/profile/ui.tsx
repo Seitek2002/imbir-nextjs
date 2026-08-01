@@ -2,39 +2,11 @@
 
 import { FC } from "react";
 
-import Link from "next/link";
-
-import { useQuery } from "@tanstack/react-query";
-
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
-import { DoctorSidebar } from "@/widgets/doctor/layout";
 
-import { doctorCabinetKeys, getDoctorStats } from "@/shared/api";
-import { ChevronRightIcon, StarIcon } from "@/shared/assets/icons";
+import { StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
-import { CabinetMobileMenu, ImageWithFallback, StatTiles } from "@/shared/ui";
-
-// Плитки статистики кабинета (GET /api/doctor/stats/).
-const DoctorStatsTiles: FC = () => {
-  const { data: stats } = useQuery({
-    queryKey: doctorCabinetKeys.stats(),
-    queryFn: getDoctorStats,
-  });
-
-  if (!stats) return null;
-
-  const tiles = [
-    { label: "Просмотры профиля", value: stats.profile_views },
-    { label: "Записей всего", value: stats.appointments.total },
-    {
-      label: "Предстоящие записи",
-      value: stats.appointments.pending + stats.appointments.confirmed,
-    },
-    { label: "Пациентов", value: stats.patients_count },
-  ];
-
-  return <StatTiles tiles={tiles} className="lg:grid-cols-4 mb-4" />;
-};
+import { CabinetMobileMenu, ImageWithFallback } from "@/shared/ui";
 
 const MENU_ITEMS = [
   {
@@ -128,111 +100,44 @@ const MENU_ITEMS = [
   },
 ];
 
-export const DoctorProfilePage: FC = () => {
+// Мобильный хаб кабинета врача — карточка профиля, меню разделов и выход,
+// как в макете. Это НЕ отдельный маршрут: рендерится внутри /doctor-profile
+// на узких экранах (как ProfileMobileHub у пациента), а на десктопе тот же
+// адрес разворачивается в двухколоночный кабинет с сайдбаром.
+export const DoctorProfileMobileHub: FC = () => {
   const { profile: d } = useDoctorCabinet();
-  if (!d) return null;
+
+  // Пока профиль грузится, показываем меню с пустой карточкой: пункты и
+  // выход доступны сразу, а не после ответа сервера.
+  const fullName = d?.fullName ?? "";
 
   return (
-    <div className="w-full min-h-screen bg-[#FAFAFA]">
-      {/* Mobile layout */}
-      <div className="lg:hidden">
-        <CabinetMobileMenu
-          avatar={
-            <ImageWithFallback
-              src={d.photo}
-              alt={d.fullName}
-              width={80}
-              height={80}
-              className="w-full h-full object-cover"
-              fallback={
-                <span className="text-white text-2xl font-bold">
-                  {d.fullName.charAt(0)}
-                </span>
-              }
-            />
+    <CabinetMobileMenu
+      avatar={
+        <ImageWithFallback
+          src={d?.photo}
+          alt={fullName}
+          width={80}
+          height={80}
+          className="w-full h-full object-cover"
+          fallback={
+            <span className="text-white text-2xl font-bold">
+              {fullName.charAt(0)}
+            </span>
           }
-          name={d.fullName}
-          subtitle={
-            <div className="flex items-center justify-center gap-1.5 mt-1">
-              <StarIcon className="w-4 h-4 text-primary" />
-              <span className="text-primary text-sm font-medium">
-                {d.rating}
-              </span>
-              <span className="text-muted text-sm">· {d.specialty}</span>
-            </div>
-          }
-          beforeMenu={<DoctorStatsTiles />}
-          items={MENU_ITEMS}
         />
-      </div>
-
-      {/* Desktop layout */}
-      <div className="hidden lg:block max-w-360 mx-auto px-10 py-8">
-        <h1 className="text-[40px] font-semibold text-foreground mb-8">
-          Мой профиль
-        </h1>
-        <div className="flex gap-6">
-          <DoctorSidebar
-            fullName={d.fullName}
-            photo={d.photo}
-            specialty={d.specialty}
-            rating={d.rating}
-          />
-          <main className="flex-1 min-w-0">
-            <DoctorStatsTiles />
-            <div className="bg-white rounded-3xl border border-border p-8">
-              <div className="flex items-center gap-6 mb-8">
-                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0">
-                  <ImageWithFallback
-                    src={d.photo}
-                    alt={d.fullName}
-                    width={96}
-                    height={96}
-                    className="w-full h-full object-cover"
-                    fallback={
-                      <span className="text-white text-3xl font-bold">
-                        {d.fullName.charAt(0)}
-                      </span>
-                    }
-                  />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-semibold text-foreground">
-                    {d.fullName}
-                  </h2>
-                  <p className="text-muted mt-1">
-                    {d.specialty} · {d.additionalSpecialty}
-                  </p>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <StarIcon className="w-4 h-4 text-primary" />
-                    <span className="text-primary font-medium">{d.rating}</span>
-                    <span className="text-muted text-sm">
-                      ({d.totalReviews} отзывов)
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {MENU_ITEMS.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex items-center gap-3 p-4 rounded-2xl border border-border hover:border-primary hover:bg-primary-tint transition-colors"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-primary-tint flex items-center justify-center shrink-0">
-                      {item.icon}
-                    </div>
-                    <span className="font-medium text-foreground flex-1">
-                      {item.label}
-                    </span>
-                    <ChevronRightIcon className="w-5 h-5 text-dim" />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-    </div>
+      }
+      name={fullName}
+      // В макете под именем только рейтинг — без специальности.
+      subtitle={
+        d ? (
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <StarIcon className="w-4 h-4 text-primary" />
+            <span className="text-primary text-sm font-medium">{d.rating}</span>
+          </div>
+        ) : undefined
+      }
+      items={MENU_ITEMS}
+    />
   );
 };

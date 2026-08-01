@@ -2,7 +2,7 @@
 // (сайдбар и заголовок живут в layout.tsx и не перерисовываются).
 export default function Loading() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="px-4 py-4 lg:p-0 flex flex-col gap-4">
       <div className="h-8 w-56 skeleton rounded-xl hidden lg:block" />
       {[0, 1, 2].map((i) => (
         <div key={i} className="bg-white rounded-3xl border border-border p-5">

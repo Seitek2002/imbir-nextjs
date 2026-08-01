@@ -2,12 +2,24 @@
 
 import { FC, useState } from "react";
 
-import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
+import {
+  DoctorMyDataTabs,
+  DoctorPageLayout,
+  useMyDataTabs,
+} from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
-import { FieldView } from "@/widgets/doctor/layout";
+import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
 import { CheckIcon } from "@/shared/assets/icons";
-import { Button, ConfirmDialog, IconBtn, Input } from "@/shared/ui";
+import {
+  Button,
+  CancelEditButton,
+  ConfirmDialog,
+  IconBtn,
+  Input,
+} from "@/shared/ui";
+
+const { fieldList, formGrid } = formStyles;
 
 const PlusIcon: FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -55,6 +67,7 @@ type D = {
 export const DoctorEducationSection: FC = () => {
   const { profile, isLoading, isSaving, saveProfile, rawProfile } =
     useDoctorCabinet();
+  const { setActive } = useMyDataTabs();
   const [isEditing, setIsEditing] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [d, setD] = useState<D>({
@@ -107,11 +120,25 @@ export const DoctorEducationSection: FC = () => {
     setIsEditing(false);
   };
 
+  const handleCancel = () => {
+    if (profile) {
+      setD({
+        university: profile.university,
+        graduationYear: profile.graduationYear,
+        internship: profile.internship,
+        residency: profile.residency,
+        diplomaSpecialty: profile.diplomaSpecialty,
+        additionalEducation: [...profile.additionalEducation],
+      });
+    }
+    setIsEditing(false);
+  };
+
   const title = isEditing ? "Редактировать" : "Образование";
 
   if (isLoading) {
     return (
-      <DoctorPageLayout title="Образование">
+      <DoctorPageLayout title="Образование" onBack={() => setActive(null)}>
         <div className="flex items-center justify-center py-20 text-muted">
           Загрузка...
         </div>
@@ -129,31 +156,37 @@ export const DoctorEducationSection: FC = () => {
       onEditToggle={
         isEditing ? () => setShowSaveConfirm(true) : () => setIsEditing(true)
       }
+      onBack={isEditing ? handleCancel : () => setActive(null)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
-        <Button
-          variant={isEditing ? "default" : "outline"}
-          size="sm"
-          onClick={
-            isEditing
-              ? () => setShowSaveConfirm(true)
-              : () => setIsEditing(true)
-          }
-          disabled={isSaving}
-        >
-          {isSaving
-            ? "Сохранение..."
-            : isEditing
-              ? "Сохранить"
-              : "Редактировать"}
-        </Button>
+        <div className="flex items-center gap-3">
+          {isEditing && (
+            <CancelEditButton onClick={handleCancel} disabled={isSaving} />
+          )}
+          <Button
+            variant={isEditing ? "default" : "outline"}
+            size="sm"
+            onClick={
+              isEditing
+                ? () => setShowSaveConfirm(true)
+                : () => setIsEditing(true)
+            }
+            disabled={isSaving}
+          >
+            {isSaving
+              ? "Сохранение..."
+              : isEditing
+                ? "Сохранить"
+                : "Редактировать"}
+          </Button>
+        </div>
       </div>
 
       <DoctorMyDataTabs />
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className={isEditing ? formGrid : fieldList}>
           <div>
             {isEditing ? (
               <Input

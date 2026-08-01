@@ -23,8 +23,10 @@ export const isMyDataTab = (value: string | null): value is MyDataTab =>
   MY_DATA_TABS.some((tab) => tab.id === value);
 
 type ContextValue = {
-  active: MyDataTab;
-  setActive: (tab: MyDataTab) => void;
+  // null — раздел не выбран: на мобильном это экран-список «Моих данных»
+  // (как в макете), на десктопе списка нет и показывается первая вкладка.
+  active: MyDataTab | null;
+  setActive: (tab: MyDataTab | null) => void;
 };
 
 const MyDataTabsContext = createContext<ContextValue | null>(null);
@@ -43,16 +45,17 @@ export const useMyDataTabs = () => {
 // состоянием, а в адресной строке остаётся ?tab=… через history.replaceState:
 // ссылку по-прежнему можно скинуть или обновить, но без навигации Next.
 export const MyDataTabsProvider: FC<{
-  initialTab: MyDataTab;
+  initialTab: MyDataTab | null;
   children: ReactNode;
 }> = ({ initialTab, children }) => {
-  const [active, setActiveState] = useState<MyDataTab>(initialTab);
+  const [active, setActiveState] = useState<MyDataTab | null>(initialTab);
 
-  const setActive = useCallback((tab: MyDataTab) => {
+  const setActive = useCallback((tab: MyDataTab | null) => {
     setActiveState(tab);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
-      url.searchParams.set("tab", tab);
+      if (tab) url.searchParams.set("tab", tab);
+      else url.searchParams.delete("tab");
       window.history.replaceState(null, "", url);
     }
   }, []);
@@ -64,8 +67,13 @@ export const MyDataTabsProvider: FC<{
   );
 };
 
+// Вкладки — только десктопные: на мобильном по макету разделы открываются
+// с экрана-списка «Мои данные» (DoctorMyDataList), а не переключаются табами.
 export const DoctorMyDataTabs: FC = () => {
   const { active, setActive } = useMyDataTabs();
+  // Раздел не выбран — на десктопе показывается первая вкладка, её и
+  // подсвечиваем.
+  const current = active ?? MY_DATA_TABS[0].id;
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Стрелками ходим по вкладкам, как ожидается от роли tablist.
@@ -83,10 +91,10 @@ export const DoctorMyDataTabs: FC = () => {
     <div
       role="tablist"
       aria-label="Мои данные"
-      className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none -mx-4 px-4 lg:mx-0 lg:px-0"
+      className="hidden lg:flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none"
     >
       {MY_DATA_TABS.map((tab, index) => {
-        const isActive = active === tab.id;
+        const isActive = current === tab.id;
         return (
           <button
             key={tab.id}

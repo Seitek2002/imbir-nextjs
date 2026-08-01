@@ -2,14 +2,24 @@
 
 import { FC, useState } from "react";
 
-import { DoctorMyDataTabs, DoctorPageLayout } from "@/widgets/doctor/layout";
+import {
+  DoctorMyDataTabs,
+  DoctorPageLayout,
+  useMyDataTabs,
+} from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
-import { FieldView } from "@/widgets/doctor/layout";
+import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
 import { useSpecializationOptions } from "@/entities/specialization";
 
 import { CheckIcon } from "@/shared/assets/icons";
-import { Button, ConfirmDialog, Dropdown, Input } from "@/shared/ui";
+import {
+  Button,
+  CancelEditButton,
+  ConfirmDialog,
+  Dropdown,
+  Input,
+} from "@/shared/ui";
 
 type D = {
   specialty: string;
@@ -24,6 +34,8 @@ type D = {
   paymentMethods: string;
 };
 
+const { fieldList, formGrid } = formStyles;
+
 // "УЗИ, ЭКГ" → ["УЗИ", "ЭКГ"]
 const csv = (value: string): string[] =>
   value
@@ -34,6 +46,7 @@ const csv = (value: string): string[] =>
 export const DoctorProfessionalInfoSection: FC = () => {
   const { profile, isLoading, isSaving, saveProfile, rawProfile } =
     useDoctorCabinet();
+  const { setActive } = useMyDataTabs();
   const [isEditing, setIsEditing] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [d, setD] = useState<D>({
@@ -119,11 +132,32 @@ export const DoctorProfessionalInfoSection: FC = () => {
     setIsEditing(false);
   };
 
+  const handleCancel = () => {
+    if (profile) {
+      setD({
+        specialty: profile.specialty,
+        additionalSpecialty: profile.additionalSpecialty,
+        experienceYears: profile.experienceYears,
+        currentPosition: profile.currentPosition,
+        workplace: profile.workplace,
+        qualification: profile.qualification,
+        scientificDegree: profile.scientificDegree,
+        equipment: profile.equipment,
+        patientConditions: profile.patientConditions,
+        paymentMethods: profile.paymentMethods,
+      });
+    }
+    setIsEditing(false);
+  };
+
   const title = isEditing ? "Редактировать" : "Профессиональные данные";
 
   if (isLoading) {
     return (
-      <DoctorPageLayout title="Профессиональные данные">
+      <DoctorPageLayout
+        title="Профессиональные данные"
+        onBack={() => setActive(null)}
+      >
         <div className="flex items-center justify-center py-20 text-muted">
           Загрузка...
         </div>
@@ -138,31 +172,37 @@ export const DoctorProfessionalInfoSection: FC = () => {
       onEditToggle={
         isEditing ? () => setShowSaveConfirm(true) : () => setIsEditing(true)
       }
+      onBack={isEditing ? handleCancel : () => setActive(null)}
     >
       <div className="hidden lg:flex items-center justify-between mb-6">
         <h2 className="text-[28px] font-semibold text-foreground">{title}</h2>
-        <Button
-          variant={isEditing ? "default" : "outline"}
-          size="sm"
-          onClick={
-            isEditing
-              ? () => setShowSaveConfirm(true)
-              : () => setIsEditing(true)
-          }
-          disabled={isSaving}
-        >
-          {isSaving
-            ? "Сохранение..."
-            : isEditing
-              ? "Сохранить"
-              : "Редактировать"}
-        </Button>
+        <div className="flex items-center gap-3">
+          {isEditing && (
+            <CancelEditButton onClick={handleCancel} disabled={isSaving} />
+          )}
+          <Button
+            variant={isEditing ? "default" : "outline"}
+            size="sm"
+            onClick={
+              isEditing
+                ? () => setShowSaveConfirm(true)
+                : () => setIsEditing(true)
+            }
+            disabled={isSaving}
+          >
+            {isSaving
+              ? "Сохранение..."
+              : isEditing
+                ? "Сохранить"
+                : "Редактировать"}
+          </Button>
+        </div>
       </div>
 
       <DoctorMyDataTabs />
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className={isEditing ? formGrid : fieldList}>
           <div>
             {isEditing ? (
               <Dropdown
