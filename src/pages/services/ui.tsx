@@ -5,7 +5,7 @@ import { FC } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -28,11 +28,15 @@ const MAX_PRICE = 10000;
 // (проверено напрямую — search ни на что не влияет), поэтому activeQuery
 // остаётся клиентским и фильтрует только уже подгруженные страницы.
 const PAGE_SIZE = 8;
-// Реальный ServiceListItem с бэка не содержит ни rating, ни clinic вообще —
-// эти поля сейчас всегда фабрикуются на фронте (0 / пустая строка), поэтому
-// фильтры "Оценка" и "Клиника" гарантированно возвращали бы пустой список.
-// Отключены до тех пор, пока бэк не добавит эти поля в /api/services/.
-const DISABLED_FILTERS_NOTE = "скоро";
+// Оценка и клиника раньше были заглушкой «скоро»: считалось, что бэк не отдаёт
+// эти поля. Сейчас отдаёт (clinic целым объектом, rating числом) и принимает
+// clinic_id/min_rating как query-параметры — проверено прямыми запросами.
+const RATING_OPTIONS = [
+  { value: "all", label: "Все" },
+  { value: "5.0", label: "5.0" },
+  { value: "4.0", label: "4.0" },
+  { value: "3.0", label: "3.0" },
+];
 
 const PREFIX = "svc";
 
@@ -48,6 +52,8 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
   const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
 
   const currentCategory = urlSearchParams.get(`${PREFIX}_spec`) ?? null;
+  const currentClinic = urlSearchParams.get(`${PREFIX}_clinic`) ?? null;
+  const currentRating = urlSearchParams.get(`${PREFIX}_rating`) ?? null;
   const priceParts = urlSearchParams
     .get(`${PREFIX}_price`)
     ?.split("-")
@@ -71,13 +77,20 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
     const params = new URLSearchParams(urlSearchParams.toString());
     params.delete(`${PREFIX}_spec`);
     params.delete(`${PREFIX}_price`);
+    params.delete(`${PREFIX}_clinic`);
+    params.delete(`${PREFIX}_rating`);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  // Категория и цена — реальные query-параметры /api/services/ (проверено
-  // напрямую). "Оценка"/"Клиника" не отправляем — см. DISABLED_FILTERS_NOTE.
+  // Категория, клиника, оценка и цена — реальные query-параметры
+  // /api/services/ (проверено прямыми запросами).
   const filters: Omit<ServiceFilters, "page" | "page_size"> = {
     category: currentCategory ?? undefined,
+    clinic_id: currentClinic ?? undefined,
+    min_rating:
+      currentRating && currentRating !== "all"
+        ? parseFloat(currentRating)
+        : undefined,
     min_price: priceParts ? priceRange[0] : undefined,
     max_price: priceParts ? priceRange[1] : undefined,
   };
@@ -116,6 +129,8 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
 
   const mobileFilters = {
     category: true as const,
+    clinic: true as const,
+    rating: true as const,
     price: true as const,
   };
 
@@ -123,6 +138,17 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
 
   // Категории — из реальных услуг, справочника у бэка нет
   const { options: categoryOptions } = useServiceCategories();
+
+  // Клиники для фильтра: значением уходит id, его и принимает clinic_id.
+  const { data: clinics = [] } = useQuery({
+    queryKey: ["clinics"],
+    queryFn: () => api.getClinics(),
+    staleTime: 60 * 60 * 1000,
+  });
+  const clinicOptions = clinics.map((clinic) => ({
+    value: String(clinic.id),
+    label: clinic.name,
+  }));
 
   return (
     <main className="min-h-screen bg-background md:bg-white flex flex-col">
@@ -143,6 +169,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
         prefix={PREFIX}
         fields={mobileFilters}
         categoryOptions={categoryOptions}
+        clinicOptions={clinicOptions}
       />
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
@@ -241,21 +268,23 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
               value={currentCategory ?? ""}
               onChange={(val) => updateURL("spec", val || null)}
             />
-            {/* Клиника/Оценка отключены — см. DISABLED_FILTERS_NOTE */}
-            <div className="flex flex-col gap-1.5 w-full">
-              <span className="text-overlay text-sm font-medium">Клиника</span>
-              <div className="h-12 px-4 flex items-center justify-between rounded-xl border border-border-soft bg-background text-muted text-sm cursor-not-allowed">
-                <span>Все</span>
-                <span className="text-xs">{DISABLED_FILTERS_NOTE}</span>
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5 w-full">
-              <span className="text-overlay text-sm font-medium">Оценка</span>
-              <div className="h-12 px-4 flex items-center justify-between rounded-xl border border-border-soft bg-background text-muted text-sm cursor-not-allowed">
-                <span>Все</span>
-                <span className="text-xs">{DISABLED_FILTERS_NOTE}</span>
-              </div>
-            </div>
+            <Dropdown
+              label="Клиника"
+              placeholder="Все"
+              options={clinicOptions}
+              searchable
+              value={currentClinic ?? ""}
+              onChange={(val) => updateURL("clinic", val || null)}
+            />
+            <Dropdown
+              label="Оценка"
+              placeholder="Все"
+              options={RATING_OPTIONS}
+              value={currentRating ?? ""}
+              onChange={(val) =>
+                updateURL("rating", val === "all" ? null : val || null)
+              }
+            />
             <RangeSlider
               id="price-desktop-svc"
               label="Стоимость, с"

@@ -25,6 +25,7 @@ export type ServiceFilters = {
   category?: string;
   clinic_id?: number | string;
   doctor_id?: number | string;
+  min_rating?: number;
   min_price?: number;
   max_price?: number;
   page?: number;
