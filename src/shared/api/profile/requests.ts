@@ -1,9 +1,9 @@
 import { apiClient } from "../client";
 import { PaginatedResponse } from "../types";
 import {
-  AddFavoriteRequest,
   ClientProfile,
-  FavoriteItem,
+  FavoriteTargetRequest,
+  FavoritesList,
   PatientReview,
   ProfileAppointment,
   UpdateProfileRequest,
@@ -50,27 +50,45 @@ export const getProfileAppointments = async (
   return data;
 };
 
-export const getFavorites = async (): Promise<FavoriteItem[]> => {
-  // Этот эндпоинт оборачивает список в { data: [...] } (в отличие от прочих
-  // списков, отдающих голый массив). Разворачиваем и подстраховываемся.
-  const { data } = await apiClient.get<{ data: FavoriteItem[] }>(
-    "/api/profile/favorites/",
-  );
-  return Array.isArray(data?.data) ? data.data : [];
+export const EMPTY_FAVORITES: FavoritesList = {
+  doctors: [],
+  clinics: [],
+  services: [],
+};
+
+// GET заворачивает ответ в { data: {...} }, а POST отдаёт тот же объект без
+// обёртки — принимаем оба варианта.
+const toFavoritesList = (payload: unknown): FavoritesList => {
+  const raw = payload as
+    | ({ data?: Partial<FavoritesList> } & Partial<FavoritesList>)
+    | undefined;
+  const list = raw?.data ?? raw;
+
+  return {
+    doctors: list?.doctors ?? [],
+    clinics: list?.clinics ?? [],
+    services: list?.services ?? [],
+  };
+};
+
+export const getFavorites = async (): Promise<FavoritesList> => {
+  const { data } = await apiClient.get("/api/profile/favorites/");
+  return toFavoritesList(data);
 };
 
 export const addFavorite = async (
-  body: AddFavoriteRequest,
-): Promise<FavoriteItem> => {
-  const { data } = await apiClient.post<FavoriteItem>(
-    "/api/profile/favorites/",
-    body,
-  );
-  return data;
+  body: FavoriteTargetRequest,
+): Promise<FavoritesList> => {
+  const { data } = await apiClient.post("/api/profile/favorites/", body);
+  return toFavoritesList(data);
 };
 
-export const removeFavorite = async (id: number): Promise<void> => {
-  await apiClient.delete(`/api/profile/favorites/${id}/`);
+// Отдельного /favorites/{id}/ у бэка нет (404) — удаление идёт по цели, тем же
+// телом, что и добавление.
+export const removeFavorite = async (
+  body: FavoriteTargetRequest,
+): Promise<void> => {
+  await apiClient.delete("/api/profile/favorites/", { data: body });
 };
 
 export const getProfileReviews = async (): Promise<

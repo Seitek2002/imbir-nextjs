@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useEffect, useState } from "react";
 
@@ -200,7 +200,7 @@ export const ClinicsPage: FC<Props> = ({ searchParams, initialCity }) => {
                   // Подтверждено: LCP-элементом на проде оказалось фото именно
                   // 3-й клиники в дефолтном порядке — она грузилась лениво.
                   priority={index < 4}
-                  initialSaved={isSaved(Number(clinic.id))}
+                  isSaved={isSaved(Number(clinic.id))}
                   onSave={() => toggle(Number(clinic.id))}
                 />
               ))
@@ -266,7 +266,7 @@ export const ClinicsPage: FC<Props> = ({ searchParams, initialCity }) => {
                     key={`desk-${clinic.id}`}
                     {...clinic}
                     priority={index < 4}
-                    initialSaved={isSaved(Number(clinic.id))}
+                    isSaved={isSaved(Number(clinic.id))}
                     onSave={() => toggle(Number(clinic.id))}
                   />
                 ))}

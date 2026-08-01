@@ -1,17 +1,17 @@
-﻿"use client";
+"use client";
 
 import { FC, useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useFavoriteToggle } from "@/features/favorite-toggle";
 
 import { ClinicCard } from "@/entities/clinic";
 import { DoctorCard } from "@/entities/doctor";
 import { ServiceCard } from "@/entities/service";
 
-import { profileKeys, removeFavorite } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { parsePrice } from "@/shared/lib/price";
 
 import { SavedItem, SavedType } from "../model";
 
@@ -20,9 +20,14 @@ type Props = {
   activeTab: SavedType;
 };
 
+const toRating = (value?: string | null) => {
+  if (!value) return undefined;
+  const parsed = parseFloat(value);
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
 export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
   const router = useRouter();
-  const [savedItems, setSavedItems] = useState(items);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -32,19 +37,13 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const filteredItems = savedItems.filter((item) => item.type === activeTab);
+  // Тот же хук, что и у сердечек в каталоге: список избранного — общий кеш,
+  // поэтому карточка исчезает отсюда сразу после снятия сердечка.
+  const doctors = useFavoriteToggle("doctor");
+  const clinics = useFavoriteToggle("clinic");
+  const services = useFavoriteToggle("service");
 
-  const queryClient = useQueryClient();
-  const { mutate: removeFromSaved } = useMutation({
-    mutationFn: (id: string) => removeFavorite(Number(id)),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: profileKeys.favorites() }),
-  });
-
-  const handleUnsave = (id: string) => {
-    removeFromSaved(id);
-    setSavedItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  const filteredItems = items.filter((item) => item.type === activeTab);
 
   if (filteredItems.length === 0) {
     return (
@@ -54,107 +53,73 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
     );
   }
 
+  const variant = isMobile ? "horizontal" : "vertical";
+
+  const renderCard = (item: SavedItem) => {
+    if (item.type === "doctor") {
+      const { id, full_name, specialty, photo, rating, experience_years } =
+        item.data;
+      return (
+        <DoctorCard
+          key={`doctor-${id}`}
+          id={id}
+          name={full_name}
+          specialty={specialty}
+          // Мест работы в избранном нет — карточка покажет «Не указана»
+          workplaces={[]}
+          experience={experience_years ?? 0}
+          rating={toRating(rating)}
+          image={photo ?? undefined}
+          isSaved
+          onSave={() => doctors.toggle(id)}
+          variant={variant}
+          onBook={() => router.push(ROUTES.RECORD_FOR_DOCTOR(id))}
+        />
+      );
+    }
+
+    if (item.type === "clinic") {
+      const { id, name, logo, city, rating } = item.data;
+      return (
+        <ClinicCard
+          key={`clinic-${id}`}
+          id={String(id)}
+          name={name}
+          address={city}
+          rating={toRating(rating)}
+          experience={0}
+          image={logo ?? undefined}
+          isSaved
+          onSave={() => clinics.toggle(id)}
+          variant={variant}
+        />
+      );
+    }
+
+    const { id, name, category, price } = item.data;
+    return (
+      <ServiceCard
+        key={`service-${id}`}
+        id={String(id)}
+        name={name}
+        category={category}
+        price={parsePrice(price)}
+        isSaved
+        onSave={() => services.toggle(id)}
+        variant={variant}
+      />
+    );
+  };
+
   if (isMobile) {
     return (
-      <div className="flex flex-col gap-4">
-        {filteredItems.map((item) => {
-          if (item.type === "doctor") {
-            return (
-              <DoctorCard
-                key={item.id}
-                {...item.data} // <-- Используем spread оператор для передачи всех свойств
-                initialSaved={true}
-                onSave={() => handleUnsave(item.id)}
-                variant="horizontal"
-                onBook={() =>
-                  router.push(
-                    ROUTES.RECORD_FOR_DOCTOR(item.data.id, {
-                      workplaces: item.data.workplaces,
-                    }),
-                  )
-                }
-              />
-            );
-          }
-
-          if (item.type === "clinic") {
-            return (
-              <ClinicCard
-                key={item.id}
-                {...item.data} // <-- Spread оператор
-                initialSaved={true}
-                onSave={() => handleUnsave(item.id)}
-                variant="horizontal" // Для мобилок клиники обычно тоже горизонтальные
-              />
-            );
-          }
-
-          if (item.type === "service") {
-            return (
-              <ServiceCard
-                key={item.id}
-                {...item.data}
-                initialSaved={true}
-                onSave={() => handleUnsave(item.id)}
-                variant="horizontal"
-              />
-            );
-          }
-
-          return null;
-        })}
-      </div>
+      <div className="flex flex-col gap-4">{filteredItems.map(renderCard)}</div>
     );
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
-      {filteredItems.map((item) => {
-        if (item.type === "doctor") {
-          return (
-            <DoctorCard
-              key={item.id}
-              {...item.data} // <-- Spread оператор
-              initialSaved={true}
-              onSave={() => handleUnsave(item.id)}
-              variant="vertical"
-              onBook={() =>
-                router.push(
-                  ROUTES.RECORD_FOR_DOCTOR(item.data.id, {
-                    workplaces: item.data.workplaces,
-                  }),
-                )
-              }
-            />
-          );
-        }
-
-        if (item.type === "clinic") {
-          return (
-            <ClinicCard
-              key={item.id}
-              {...item.data} // <-- Spread оператор
-              initialSaved={true}
-              onSave={() => handleUnsave(item.id)}
-              variant="vertical"
-            />
-          );
-        }
-
-        if (item.type === "service") {
-          return (
-            <ServiceCard
-              key={item.id}
-              {...item.data}
-              initialSaved={true}
-              onSave={() => handleUnsave(item.id)}
-              variant="vertical"
-            />
-          );
-        }
-
-        return null;
-      })}
+      {filteredItems.map(renderCard)}
     </div>
   );
 };

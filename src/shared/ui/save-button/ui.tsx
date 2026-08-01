@@ -1,32 +1,30 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC } from "react";
 
 import { HeartIcon2 } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 type Props = {
-  initialSaved?: boolean;
+  // Состояние приходит снаружи (из избранного на сервере). Своего состояния
+  // кнопка не держит: раньше она переключалась локально и расходилась с тем,
+  // что реально сохранено.
+  saved?: boolean;
   savedLabel?: string;
   unsavedLabel?: string;
   onSave?: () => void;
 };
 
 export const SaveButton: FC<Props> = ({
-  initialSaved = false,
+  saved = false,
   savedLabel = "Убрать из сохранённых",
   unsavedLabel = "Сохранить",
   onSave,
 }) => {
-  const [saved, setSaved] = useState(initialSaved);
-
   return (
     <button
       type="button"
-      onClick={() => {
-        setSaved((prev) => !prev);
-        onSave?.();
-      }}
+      onClick={() => onSave?.()}
       aria-label={saved ? savedLabel : unsavedLabel}
       className="transition-transform active:scale-90"
     >

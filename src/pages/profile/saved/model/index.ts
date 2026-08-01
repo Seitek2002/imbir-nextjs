@@ -1,23 +1,14 @@
-import { ClinicListItem, DoctorListItem, ServiceItem } from "@/shared/dummies";
+import type {
+  FavoriteClinic,
+  FavoriteDoctor,
+  FavoriteService,
+} from "@/shared/api";
 
 export type SavedType = "doctor" | "clinic" | "service";
 
+// /api/profile/favorites/ возвращает готовые данные карточек, поэтому
+// сохранённое больше не дочитывается отдельным запросом на каждую запись.
 export type SavedItem =
-  | {
-      id: string;
-      type: "doctor";
-      savedAt: string;
-      data: DoctorListItem;
-    }
-  | {
-      id: string;
-      type: "clinic";
-      savedAt: string;
-      data: ClinicListItem;
-    }
-  | {
-      id: string;
-      type: "service";
-      savedAt: string;
-      data: ServiceItem;
-    };
+  | { type: "doctor"; data: FavoriteDoctor }
+  | { type: "clinic"; data: FavoriteClinic }
+  | { type: "service"; data: FavoriteService };

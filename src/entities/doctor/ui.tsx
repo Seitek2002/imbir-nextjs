@@ -24,7 +24,7 @@ type Props = {
   image?: StaticImageData | string;
   onBook?: () => void;
   onSave?: () => void;
-  initialSaved?: boolean;
+  isSaved?: boolean;
   variant?: "vertical" | "horizontal";
 };
 
@@ -39,14 +39,16 @@ export const DoctorCard: FC<Props> = ({
   image,
   onBook,
   onSave,
-  initialSaved = false,
+  isSaved = false,
   variant = "vertical",
 }) => {
   const [loaded, setLoaded] = useState(false);
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "doctor";
 
-  const primaryClinic = workplaces[0]?.clinicName || "Не указана";
+  // Места работы может не быть (напр. карточка из избранного) — тогда просто
+  // не дорисовываем клинику к специальности.
+  const primaryClinic = workplaces[0]?.clinicName;
   const additionalClinicsCount = workplaces.length - 1;
 
   const href = id ? ROUTES.SPECIALIST_DETAILS(id) : "/";
@@ -94,11 +96,14 @@ export const DoctorCard: FC<Props> = ({
 
           <p className="text-[14px] text-secondary truncate mt-1">
             {specialty}
-            <span className="text-primary">
-              {" "}
-              • {primaryClinic}{" "}
-              {additionalClinicsCount > 0 && `+ еще ${additionalClinicsCount}`}
-            </span>
+            {primaryClinic && (
+              <span className="text-primary">
+                {" "}
+                • {primaryClinic}{" "}
+                {additionalClinicsCount > 0 &&
+                  `+ еще ${additionalClinicsCount}`}
+              </span>
+            )}
           </p>
 
           {(rating !== undefined || reviews !== undefined) && (
@@ -130,7 +135,7 @@ export const DoctorCard: FC<Props> = ({
             )}
             <div onClick={stopProp}>
               <SaveButton
-                initialSaved={initialSaved}
+                saved={isSaved}
                 onSave={onSave}
                 unsavedLabel="Сохранить врача"
               />
@@ -150,7 +155,7 @@ export const DoctorCard: FC<Props> = ({
         <DoctorPhoto image={image} name={name} />
         <div className="absolute top-2 right-2 z-10" onClick={stopProp}>
           <SaveButton
-            initialSaved={initialSaved}
+            saved={isSaved}
             onSave={onSave}
             unsavedLabel="Сохранить врача"
           />
@@ -163,11 +168,13 @@ export const DoctorCard: FC<Props> = ({
         </p>
         <p className="text-xs text-secondary truncate mt-0.5">
           {specialty}
-          <span className="text-primary">
-            {" "}
-            • {primaryClinic}{" "}
-            {additionalClinicsCount > 0 && `+${additionalClinicsCount}`}
-          </span>
+          {primaryClinic && (
+            <span className="text-primary">
+              {" "}
+              • {primaryClinic}{" "}
+              {additionalClinicsCount > 0 && `+${additionalClinicsCount}`}
+            </span>
+          )}
         </p>
         {(rating !== undefined || reviews !== undefined) && (
           <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">

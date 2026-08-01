@@ -37,16 +37,46 @@ export type ProfileAppointment = {
   google_meet_link: string | null;
 };
 
-export type FavoriteItem = {
+export type FavoriteTargetType = "doctor" | "clinic" | "service";
+
+// GET /api/profile/favorites/ отдаёт не список ссылок, а три готовых группы с
+// данными карточек (проверено живым запросом), поэтому дочитывать врача или
+// услугу отдельным запросом не нужно.
+export type FavoriteDoctor = {
   id: number;
-  target_type: "doctor" | "clinic" | "service";
-  target_id: number;
-  target: string;
-  created_at: string;
+  full_name: string;
+  specialty: string;
+  photo: string | null;
+  rating?: string | null;
+  experience_years?: number;
 };
 
-export type AddFavoriteRequest = {
-  target_type: "doctor" | "clinic" | "service";
+export type FavoriteClinic = {
+  id: number;
+  name: string;
+  logo: string | null;
+  city?: string;
+  clinic_type?: string;
+  rating?: string | null;
+};
+
+export type FavoriteService = {
+  id: number;
+  name: string;
+  category: string;
+  price?: string | null;
+};
+
+export type FavoritesList = {
+  doctors: FavoriteDoctor[];
+  clinics: FavoriteClinic[];
+  services: FavoriteService[];
+};
+
+// Одно и то же тело у POST (добавить) и DELETE (убрать): записи избранного не
+// адресуются собственным id, бэк работает по самой цели.
+export type FavoriteTargetRequest = {
+  target_type: FavoriteTargetType;
   target_id: number;
 };
 

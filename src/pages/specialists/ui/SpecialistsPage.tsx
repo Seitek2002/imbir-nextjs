@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useEffect, useState } from "react";
 
@@ -173,7 +173,7 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
                   key={`mob-${doc.id}`}
                   {...doc}
                   variant="horizontal"
-                  initialSaved={isSaved(Number(doc.id))}
+                  isSaved={isSaved(Number(doc.id))}
                   onSave={() => toggle(Number(doc.id))}
                   onBook={() =>
                     router.push(
@@ -255,7 +255,7 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
                   <DoctorCard
                     key={`desk-${doc.id}`}
                     {...doc}
-                    initialSaved={isSaved(Number(doc.id))}
+                    isSaved={isSaved(Number(doc.id))}
                     onSave={() => toggle(Number(doc.id))}
                     onBook={() =>
                       router.push(

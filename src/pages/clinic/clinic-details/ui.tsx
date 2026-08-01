@@ -13,6 +13,8 @@ import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 import { ReviewsSection } from "@/widgets/reviews";
 
+import { useFavoriteToggle } from "@/features/favorite-toggle";
+
 import { DoctorCard } from "@/entities/doctor";
 import { ServiceCard } from "@/entities/service";
 
@@ -49,6 +51,8 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
   const router = useRouter();
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [isOfflineInfoOpen, setIsOfflineInfoOpen] = useState(false);
+  const { isSaved, toggle } = useFavoriteToggle("clinic");
+  const isFavorite = isSaved(Number(id));
 
   // 1. ЗАПРАШИВАЕМ ДАННЫЕ ПАРАЛЛЕЛЬНО
   const {
@@ -188,8 +192,18 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
                 variant="outline"
                 size="sm"
                 className="bg-white/80 backdrop-blur"
+                aria-label={
+                  isFavorite ? "Убрать из сохранённых" : "Сохранить клинику"
+                }
+                onClick={() => toggle(Number(id))}
               >
-                <HeartIcon className="size-5 text-[#FFA18D]" />
+                <HeartIcon
+                  className={
+                    isFavorite
+                      ? "size-5 text-[#FFA18D] [&_path]:fill-[#FFA18D]"
+                      : "size-5 text-[#FFA18D]"
+                  }
+                />
               </IconBtn>
             </div>
 
@@ -277,8 +291,21 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
                     </div>
                   </div>
                 </div>
-                <IconBtn variant="outline" size="md">
-                  <HeartIcon className="size-5" />
+                <IconBtn
+                  variant="outline"
+                  size="md"
+                  aria-label={
+                    isFavorite ? "Убрать из сохранённых" : "Сохранить клинику"
+                  }
+                  onClick={() => toggle(Number(id))}
+                >
+                  <HeartIcon
+                    className={
+                      isFavorite
+                        ? "size-5 text-[#FFA18D] [&_path]:fill-[#FFA18D]"
+                        : "size-5"
+                    }
+                  />
                 </IconBtn>
               </div>
 

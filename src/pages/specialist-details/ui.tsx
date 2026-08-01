@@ -14,6 +14,7 @@ import { Header } from "@/widgets/header";
 import { ReviewsSection } from "@/widgets/reviews";
 import { VideosSwiper } from "@/widgets/videos-swiper";
 
+import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { StartChatButton } from "@/features/start-chat";
 
 // ИМПОРТЫ API
@@ -64,6 +65,9 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "doctor";
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
+  const { isSaved, toggle } = useFavoriteToggle("doctor");
+  const isFavorite = isSaved(Number(id));
+
   const { data: reviews = [] } = useQuery({
     queryKey: ["reviews", "doctor", id],
     queryFn: () => api.getReviewsByDoctor(id),
@@ -177,8 +181,18 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                 variant="outline"
                 size="sm"
                 className="bg-white/80 backdrop-blur"
+                aria-label={
+                  isFavorite ? "Убрать из сохранённых" : "Сохранить врача"
+                }
+                onClick={() => toggle(Number(id))}
               >
-                <HeartIcon className="size-5 text-[#FFA18D]" />
+                <HeartIcon
+                  className={
+                    isFavorite
+                      ? "size-5 text-[#FFA18D] [&_path]:fill-[#FFA18D]"
+                      : "size-5 text-[#FFA18D]"
+                  }
+                />
               </IconBtn>
             </div>
 
@@ -232,8 +246,21 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                     ))}
                   </div>
                 </div>
-                <IconBtn variant="outline" size="md">
-                  <HeartIcon className="size-5" />
+                <IconBtn
+                  variant="outline"
+                  size="md"
+                  aria-label={
+                    isFavorite ? "Убрать из сохранённых" : "Сохранить врача"
+                  }
+                  onClick={() => toggle(Number(id))}
+                >
+                  <HeartIcon
+                    className={
+                      isFavorite
+                        ? "size-5 text-[#FFA18D] [&_path]:fill-[#FFA18D]"
+                        : "size-5"
+                    }
+                  />
                 </IconBtn>
               </div>
 

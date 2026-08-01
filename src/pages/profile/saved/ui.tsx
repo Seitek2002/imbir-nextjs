@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 
@@ -6,13 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
 
-import { api, getFavorites, getServiceById, profileKeys } from "@/shared/api";
+import { getFavorites, profileKeys } from "@/shared/api";
 import {
   ClinicBuildingIcon,
   DoctorPersonIcon,
   ServiceRadialIcon,
 } from "@/shared/assets/icons";
-import { parsePrice } from "@/shared/lib/price";
 import { FilterTabBar } from "@/shared/ui";
 
 import { ProfileSaved } from "./ProfileSaved/ui";
@@ -36,87 +35,30 @@ const TABS = [
   },
 ];
 
-const emptySchedule = {
-  mon: null,
-  tue: null,
-  wed: null,
-  thu: null,
-  fri: null,
-  sat: null,
-  sun: null,
-  lunchBreak: null,
-};
-
 export const ProfileSavedPage: FC = () => {
   const [activeTab, setActiveTab] = useState<SavedType>("clinic");
 
-  const { data: favorites } = useQuery({
+  const { data: favorites, isLoading } = useQuery({
     queryKey: profileKeys.favorites(),
     queryFn: getFavorites,
   });
 
-  const { data: savedItems = [], isLoading } = useQuery({
-    queryKey: [
-      "saved-items",
-      (favorites ?? []).map((f) => `${f.target_type}-${f.target_id}`).join(","),
-    ],
-    queryFn: async (): Promise<SavedItem[]> => {
-      if (!favorites || favorites.length === 0) return [];
-      const results = await Promise.all(
-        favorites.map(async (fav) => {
-          try {
-            if (fav.target_type === "doctor") {
-              const data = await api.getDoctorById(String(fav.target_id));
-              if (!data) return null;
-              return {
-                id: String(fav.id),
-                type: "doctor" as const,
-                savedAt: fav.created_at,
-                data,
-              };
-            }
-            if (fav.target_type === "clinic") {
-              const data = await api.getClinicById(String(fav.target_id));
-              if (!data) return null;
-              return {
-                id: String(fav.id),
-                type: "clinic" as const,
-                savedAt: fav.created_at,
-                data,
-              };
-            }
-            if (fav.target_type === "service") {
-              const s = await getServiceById(fav.target_id);
-              const data = {
-                id: String(s.id),
-                clinicId: "",
-                clinicName: "",
-                name: s.name,
-                category: s.category,
-                price: parsePrice(s.price),
-                image: "",
-                schedule: emptySchedule,
-                doctorIds: [],
-                rating: 0,
-                reviews: 0,
-              };
-              return {
-                id: String(fav.id),
-                type: "service" as const,
-                savedAt: fav.created_at,
-                data,
-              };
-            }
-          } catch {
-            return null;
-          }
-          return null;
-        }),
-      );
-      return results.filter(Boolean) as SavedItem[];
-    },
-    enabled: !!favorites,
-  });
+  // Раскладываем три группы ответа в один плоский список — данные карточек уже
+  // пришли вместе с избранным, дочитывать врача/клинику/услугу не нужно.
+  const savedItems: SavedItem[] = [
+    ...(favorites?.doctors ?? []).map((data) => ({
+      type: "doctor" as const,
+      data,
+    })),
+    ...(favorites?.clinics ?? []).map((data) => ({
+      type: "clinic" as const,
+      data,
+    })),
+    ...(favorites?.services ?? []).map((data) => ({
+      type: "service" as const,
+      data,
+    })),
+  ];
 
   return (
     <>

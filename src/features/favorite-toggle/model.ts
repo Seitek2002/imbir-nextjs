@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
 import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  EMPTY_FAVORITES,
+  type FavoriteTargetType,
+  type FavoritesList,
   addFavorite,
   getFavorites,
   profileKeys,
@@ -13,58 +15,85 @@ import {
 } from "@/shared/api";
 import { useAuthStore } from "@/shared/store";
 
-type TargetType = "doctor" | "clinic" | "service";
+// Ключ группы в ответе /api/profile/favorites/ для каждого типа цели.
+const GROUP: Record<FavoriteTargetType, keyof FavoritesList> = {
+  doctor: "doctors",
+  clinic: "clinics",
+  service: "services",
+};
 
-// Карточки в каталоге (Специалисты/Клиники/Услуги) используют этот хук, чтобы
-// сердечко реально сохраняло/убирало избранное через /api/profile/favorites/,
-// а не просто переключало локальный вид.
-export const useFavoriteToggle = (targetType: TargetType) => {
+// Карточки в каталоге (Специалисты/Клиники/Услуги) и страницы деталей
+// используют этот хук, чтобы сердечко реально сохраняло/убирало избранное
+// через /api/profile/favorites/, а не просто переключало локальный вид.
+export const useFavoriteToggle = (targetType: FavoriteTargetType) => {
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
   const queryClient = useQueryClient();
 
-  const { data: favorites } = useQuery({
+  const { data: favorites = EMPTY_FAVORITES } = useQuery({
     queryKey: profileKeys.favorites(),
     queryFn: getFavorites,
     enabled: isAuthed,
   });
 
-  // target_id -> id самой записи избранного (нужен для DELETE)
-  const favoriteIdByTarget = useMemo(() => {
-    const map = new Map<number, number>();
-    favorites
-      ?.filter((f) => f.target_type === targetType)
-      .forEach((f) => map.set(f.target_id, f.id));
-    return map;
-  }, [favorites, targetType]);
+  const savedIds = new Set(favorites[GROUP[targetType]].map((item) => item.id));
 
-  const invalidate = () =>
+  // Сердечко должно отзываться сразу, поэтому правим кеш до ответа сервера и
+  // откатываем, если запрос не прошёл.
+  const patchCache = (targetId: number, saved: boolean) => {
+    const previous =
+      queryClient.getQueryData<FavoritesList>(profileKeys.favorites()) ??
+      EMPTY_FAVORITES;
+    const group = GROUP[targetType];
+    const items = previous[group];
+
+    queryClient.setQueryData<FavoritesList>(profileKeys.favorites(), {
+      ...previous,
+      [group]: saved
+        ? [...items, { id: targetId } as (typeof items)[number]]
+        : items.filter((item) => item.id !== targetId),
+    });
+
+    return previous;
+  };
+
+  const settle = () =>
     queryClient.invalidateQueries({ queryKey: profileKeys.favorites() });
 
   const addMutation = useMutation({
     mutationFn: addFavorite,
-    onSuccess: invalidate,
-    onError: () => toast.error("Не удалось сохранить. Попробуйте снова"),
+    onMutate: (body) => ({ previous: patchCache(body.target_id, true) }),
+    onError: (_error, _body, context) => {
+      if (context) {
+        queryClient.setQueryData(profileKeys.favorites(), context.previous);
+      }
+      toast.error("Не удалось сохранить. Попробуйте снова");
+    },
+    onSettled: settle,
   });
 
   const removeMutation = useMutation({
     mutationFn: removeFavorite,
-    onSuccess: invalidate,
-    onError: () => toast.error("Не удалось убрать из сохранённых"),
+    onMutate: (body) => ({ previous: patchCache(body.target_id, false) }),
+    onError: (_error, _body, context) => {
+      if (context) {
+        queryClient.setQueryData(profileKeys.favorites(), context.previous);
+      }
+      toast.error("Не удалось убрать из сохранённых");
+    },
+    onSettled: settle,
   });
 
-  const isSaved = (targetId: number) => favoriteIdByTarget.has(targetId);
+  const isSaved = (targetId: number) => savedIds.has(targetId);
 
   const toggle = (targetId: number) => {
     if (!isAuthed) {
       toast.error("Войдите в аккаунт, чтобы сохранять в избранное");
       return;
     }
-    const favoriteId = favoriteIdByTarget.get(targetId);
-    if (favoriteId) {
-      removeMutation.mutate(favoriteId);
-    } else {
-      addMutation.mutate({ target_type: targetType, target_id: targetId });
-    }
+
+    const body = { target_type: targetType, target_id: targetId };
+    if (savedIds.has(targetId)) removeMutation.mutate(body);
+    else addMutation.mutate(body);
   };
 
   return { isSaved, toggle };

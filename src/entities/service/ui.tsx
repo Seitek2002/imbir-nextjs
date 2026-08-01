@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC } from "react";
 
 import { StaticImageData } from "next/image";
 import Link from "next/link";
@@ -17,26 +17,25 @@ type Props = {
   category: string;
   clinic?: string;
   clinicId?: string;
-  rating: number;
-  reviews: number;
+  // Рейтинга может не быть (например, у услуги из избранного) — тогда строку
+  // с оценкой не рисуем вовсе, а не показываем «0 (0)».
+  rating?: number;
+  reviews?: number;
   price?: number | string | null;
   image?: string | StaticImageData;
   onBook?: () => void;
   onSave?: () => void;
-  initialSaved?: boolean;
+  isSaved?: boolean;
   variant?: "vertical" | "horizontal";
 };
 
 const SaveButton: FC<{
-  initialSaved: boolean;
+  isSaved: boolean;
   onSave?: () => void;
-}> = ({ initialSaved, onSave }) => {
-  const [isSaved, setIsSaved] = useState(initialSaved);
-
+}> = ({ isSaved, onSave }) => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsSaved(!isSaved);
     onSave?.();
   };
 
@@ -67,10 +66,12 @@ export const ServiceCard: FC<Props> = ({
   image,
   onBook,
   onSave,
-  initialSaved = false,
+  isSaved = false,
   variant = "vertical",
 }) => {
-  const displayClinic = clinic || clinicId || "Клиника не указана";
+  // Клиники может не быть в данных (напр. в избранном) — не подписываем
+  // «Клиника не указана», а просто опускаем строку.
+  const displayClinic = clinic || clinicId;
   // Цену прячем целиком, если бэк её не отдал — «0 с» читалось бы как «бесплатно»
   const showPrice = hasPrice(price);
   const user = useAuthStore((s) => s.user);
@@ -108,14 +109,21 @@ export const ServiceCard: FC<Props> = ({
           </h3>
 
           <p className="text-muted text-xs mb-1">
-            {category} <span className="text-primary">• {displayClinic}</span>
+            {category}
+            {displayClinic && (
+              <span className="text-primary"> • {displayClinic}</span>
+            )}
           </p>
 
-          <div className="flex items-center gap-1 mb-2 text-xs">
-            <StarIcon className="w-3.5 h-3.5 text-primary" />
-            <span className="text-primary font-medium">{rating}</span>
-            <span className="text-secondary">({reviews})</span>
-          </div>
+          {rating !== undefined && (
+            <div className="flex items-center gap-1 mb-2 text-xs">
+              <StarIcon className="w-3.5 h-3.5 text-primary" />
+              <span className="text-primary font-medium">{rating}</span>
+              {reviews !== undefined && (
+                <span className="text-secondary">({reviews})</span>
+              )}
+            </div>
+          )}
 
           <div className="mt-auto flex items-center justify-between gap-3">
             {showPrice && (
@@ -137,7 +145,7 @@ export const ServiceCard: FC<Props> = ({
                   Записаться
                 </Button>
               )}
-              <SaveButton initialSaved={initialSaved} onSave={onSave} />
+              <SaveButton isSaved={isSaved} onSave={onSave} />
             </div>
           </div>
         </div>
@@ -166,7 +174,7 @@ export const ServiceCard: FC<Props> = ({
           }
         />
         <div className="absolute top-4 right-4 z-10">
-          <SaveButton initialSaved={initialSaved} onSave={onSave} />
+          <SaveButton isSaved={isSaved} onSave={onSave} />
         </div>
       </div>
 
@@ -179,13 +187,21 @@ export const ServiceCard: FC<Props> = ({
           {name}
         </h3>
 
-        <p className="text-secondary text-xs mb-3 truncate">{displayClinic}</p>
+        {displayClinic && (
+          <p className="text-secondary text-xs mb-3 truncate">
+            {displayClinic}
+          </p>
+        )}
 
-        <div className="flex items-center gap-1 mb-4 text-sm">
-          <StarIcon className="w-3.5 h-3.5 text-primary" />
-          <span className="text-primary font-medium">{rating}</span>
-          <span className="text-secondary">({reviews})</span>
-        </div>
+        {rating !== undefined && (
+          <div className="flex items-center gap-1 mb-4 text-sm">
+            <StarIcon className="w-3.5 h-3.5 text-primary" />
+            <span className="text-primary font-medium">{rating}</span>
+            {reviews !== undefined && (
+              <span className="text-secondary">({reviews})</span>
+            )}
+          </div>
+        )}
 
         <div className="mt-auto pt-3 flex items-center justify-between gap-3 border-t border-border-soft">
           {showPrice && (

@@ -202,7 +202,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                   price={s.price}
                   image={s.image}
                   variant="horizontal"
-                  initialSaved={isSaved(Number(s.id))}
+                  isSaved={isSaved(Number(s.id))}
                   onSave={() => toggle(Number(s.id))}
                 />
               ))
@@ -331,7 +331,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                     reviews={s.reviews}
                     price={s.price}
                     image={s.image}
-                    initialSaved={isSaved(Number(s.id))}
+                    isSaved={isSaved(Number(s.id))}
                     onSave={() => toggle(Number(s.id))}
                   />
                 ))}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useState } from "react";
 
@@ -42,7 +42,7 @@ type Props = {
   address?: string;
   image?: StaticImageData | string;
   onSave?: () => void;
-  initialSaved?: boolean;
+  isSaved?: boolean;
   variant?: "vertical" | "horizontal";
   // Для карточек над сгибом (первые в списке) — грузим фото сразу,
   // без ленивой подгрузки, чтобы не задерживать LCP.
@@ -58,7 +58,7 @@ export const ClinicCard: FC<Props> = ({
   address,
   image,
   onSave,
-  initialSaved = false,
+  isSaved = false,
   variant = "vertical",
   priority = false,
 }) => {
@@ -130,7 +130,7 @@ export const ClinicCard: FC<Props> = ({
           )}
           <div className="flex justify-end mt-2" onClick={stopProp}>
             <SaveButton
-              initialSaved={initialSaved}
+              saved={isSaved}
               onSave={onSave}
               unsavedLabel="Сохранить клинику"
             />
@@ -170,7 +170,7 @@ export const ClinicCard: FC<Props> = ({
         )}
         <div className="absolute top-2 right-2" onClick={stopProp}>
           <SaveButton
-            initialSaved={initialSaved}
+            saved={isSaved}
             onSave={onSave}
             unsavedLabel="Сохранить клинику"
           />
