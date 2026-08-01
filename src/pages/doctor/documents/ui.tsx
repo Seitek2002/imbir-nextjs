@@ -35,7 +35,12 @@ export const DoctorDocumentsPage: FC = () => {
   const certRef = useRef<HTMLInputElement>(null);
 
   // Синхронизация с профилем прямо в рендере («adjust state during render»).
-  const [syncedProfile, setSyncedProfile] = useState(profile);
+  // Инициализируем трекер именно null, а не текущим profile: макет кабинета
+  // (DoctorPageLayoutSkeleton) держит тот же запрос смонтированным, поэтому при
+  // переходе между вкладками страница монтируется, когда профиль уже в кеше.
+  // С useState(profile) первый же рендер записывал его в трекер, условие ниже
+  // не срабатывало никогда — и форма оставалась пустой.
+  const [syncedProfile, setSyncedProfile] = useState<typeof profile>(null);
   if (profile && profile !== syncedProfile) {
     setSyncedProfile(profile);
     setLicenseNumber(profile.licenseNumber);

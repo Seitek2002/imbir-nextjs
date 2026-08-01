@@ -51,7 +51,12 @@ export const DoctorProfessionalInfoPage: FC = () => {
 
   // Синхронизация формы с профилем прямо в рендере (рекомендованный паттерн
   // «adjust state during render» вместо setState в эффекте).
-  const [syncedProfile, setSyncedProfile] = useState(profile);
+  // Инициализируем трекер именно null, а не текущим profile: макет кабинета
+  // (DoctorPageLayoutSkeleton) держит тот же запрос смонтированным, поэтому при
+  // переходе между вкладками страница монтируется, когда профиль уже в кеше.
+  // С useState(profile) первый же рендер записывал его в трекер, условие ниже
+  // не срабатывало никогда — и форма оставалась пустой.
+  const [syncedProfile, setSyncedProfile] = useState<typeof profile>(null);
   if (profile && profile !== syncedProfile) {
     setSyncedProfile(profile);
     setD({
