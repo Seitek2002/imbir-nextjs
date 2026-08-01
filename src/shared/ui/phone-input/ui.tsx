@@ -268,8 +268,8 @@ export const PhoneInput: FC<Props> = ({
               "transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
               "md:absolute md:inset-auto md:top-full md:mt-1 md:w-72 md:p-1 md:rounded-xl md:border md:border-border-soft md:shadow-[0_4px_20px_rgba(0,0,0,0.08)] md:ease-out",
               isActive
-                ? "translate-y-0 opacity-100 md:scale-100"
-                : "translate-y-full opacity-0 md:-translate-y-2 md:scale-95",
+                ? "translate-y-0 md:opacity-100 md:scale-100"
+                : "translate-y-full md:-translate-y-2 md:opacity-0 md:scale-95",
             )}
           >
             <div className="w-10 h-1.5 bg-border-soft rounded-full mx-auto mb-3 md:hidden" />
