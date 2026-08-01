@@ -52,7 +52,7 @@ type D = {
   additionalEducation: string[];
 };
 
-export const DoctorEducationPage: FC = () => {
+export const DoctorEducationSection: FC = () => {
   const { profile, isLoading, isSaving, saveProfile, rawProfile } =
     useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);

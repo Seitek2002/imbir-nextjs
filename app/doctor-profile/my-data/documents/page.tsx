@@ -1,5 +1,7 @@
-import { DoctorDocumentsPage } from "@/pages/doctor/documents";
+import { redirect } from "next/navigation";
 
+// Вкладки «Моих данных» больше не отдельные страницы — оставляем редирект,
+// чтобы старые ссылки и закладки продолжали открывать нужную вкладку.
 export default function Page() {
-  return <DoctorDocumentsPage />;
+  redirect("/doctor-profile/my-data?tab=documents");
 }

@@ -23,7 +23,7 @@ const GENDER_OPTIONS = [
   { label: "Женский", value: "female" },
 ];
 
-export const DoctorBasicInfoPage: FC = () => {
+export const DoctorBasicInfoSection: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);

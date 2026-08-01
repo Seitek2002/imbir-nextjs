@@ -31,7 +31,7 @@ const csv = (value: string): string[] =>
     .map((s) => s.trim())
     .filter(Boolean);
 
-export const DoctorProfessionalInfoPage: FC = () => {
+export const DoctorProfessionalInfoSection: FC = () => {
   const { profile, isLoading, isSaving, saveProfile, rawProfile } =
     useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);

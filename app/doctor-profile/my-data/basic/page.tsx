@@ -1,5 +1,7 @@
-import { DoctorBasicInfoPage } from "@/pages/doctor/basic-info";
+import { redirect } from "next/navigation";
 
+// Вкладки «Моих данных» больше не отдельные страницы — оставляем редирект,
+// чтобы старые ссылки и закладки продолжали открывать нужную вкладку.
 export default function Page() {
-  return <DoctorBasicInfoPage />;
+  redirect("/doctor-profile/my-data?tab=basic");
 }

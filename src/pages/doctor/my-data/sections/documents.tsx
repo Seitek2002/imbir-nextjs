@@ -26,7 +26,7 @@ const AddIcon: FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const DoctorDocumentsPage: FC = () => {
+export const DoctorDocumentsSection: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
   const [isEditing, setIsEditing] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
