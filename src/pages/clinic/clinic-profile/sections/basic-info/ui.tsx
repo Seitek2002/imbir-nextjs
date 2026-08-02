@@ -2,15 +2,34 @@
 
 import { FC, useRef, useState } from "react";
 
+import { DEFAULT_CLINIC_TYPES } from "@/pages/register/model/constants";
+
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 import { FieldRow, UploadIcon } from "@/entities/clinic-profile";
 
-import { Button, ImageWithFallback, Input, Textarea } from "@/shared/ui";
+import { getClinicTypes, referenceKeys } from "@/shared/api";
+import { useReferenceOptions } from "@/shared/lib/useReference";
+import {
+  Button,
+  Dropdown,
+  ImageWithFallback,
+  Input,
+  Textarea,
+} from "@/shared/ui";
 
 export const ClinicBasicInfoPage: FC = () => {
-  const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
+  const {
+    profile,
+    isLoading,
+    isSaving,
+    saveProfile,
+    photoItems,
+    uploadPhoto,
+    deletePhoto,
+    isUploadingPhoto,
+  } = useClinicCabinet();
   const [isEditing, setIsEditing] = useState(false);
 
   const [name, setName] = useState("");
@@ -19,6 +38,13 @@ export const ClinicBasicInfoPage: FC = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | undefined>(undefined);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const photosInputRef = useRef<HTMLInputElement>(null);
+
+  const { options: clinicTypeOptions } = useReferenceOptions(
+    referenceKeys.clinicTypes(),
+    getClinicTypes,
+    DEFAULT_CLINIC_TYPES,
+  );
 
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
@@ -36,6 +62,13 @@ export const ClinicBasicInfoPage: FC = () => {
     const reader = new FileReader();
     reader.onloadend = () => setLogoPreview(reader.result as string);
     reader.readAsDataURL(file);
+  };
+
+  const handlePhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (files.length === 0) return;
+    await Promise.all(files.map((file) => uploadPhoto(file)));
   };
 
   const handleSave = async () => {
@@ -124,10 +157,12 @@ export const ClinicBasicInfoPage: FC = () => {
               </div>
             </div>
 
-            <Input
+            <Dropdown
               label="Тип клиники"
+              placeholder="Выберите из списка"
+              options={clinicTypeOptions}
               value={type}
-              onChange={(e) => setType(e.target.value)}
+              onChange={setType}
             />
 
             <Textarea
@@ -136,6 +171,67 @@ export const ClinicBasicInfoPage: FC = () => {
               onChange={(e) => setDescription(e.target.value)}
               rows={5}
             />
+
+            <div>
+              <label className="block text-secondary text-sm mb-2">
+                Фотографии клиники
+              </label>
+              <input
+                ref={photosInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                className="sr-only"
+                onChange={handlePhotos}
+              />
+              <div className="rounded-2xl border-2 border-dashed border-border p-3">
+                {photoItems.length > 0 ? (
+                  <div className="flex flex-wrap gap-3">
+                    {photoItems.map((photo) => (
+                      <div key={photo.id} className="relative size-20">
+                        <ImageWithFallback
+                          src={photo.url}
+                          alt="Фотография клиники"
+                          width={80}
+                          height={80}
+                          sizes="80px"
+                          className="h-full w-full rounded-xl object-cover"
+                          fallback={
+                            <div className="h-full w-full rounded-xl bg-surface" />
+                          }
+                        />
+                        <button
+                          type="button"
+                          onClick={() => deletePhoto(photo.id)}
+                          className="absolute -right-2 -top-2 size-5 rounded-full bg-foreground text-xs leading-none text-white"
+                          aria-label="Удалить фотографию"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => photosInputRef.current?.click()}
+                      disabled={isUploadingPhoto}
+                      className="flex size-20 items-center justify-center rounded-xl border-2 border-dashed border-border text-2xl text-primary hover:border-primary/40 disabled:opacity-50"
+                      aria-label="Добавить фотографию"
+                    >
+                      +
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => photosInputRef.current?.click()}
+                    disabled={isUploadingPhoto}
+                    className="flex min-h-20 w-full items-center justify-center gap-2 text-sm font-medium text-secondary disabled:opacity-50"
+                  >
+                    {isUploadingPhoto ? "Загрузка..." : "Загрузить фотографии"}
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         ) : (
           <div>
@@ -169,29 +265,27 @@ export const ClinicBasicInfoPage: FC = () => {
             <FieldRow label="Тип">{profile.type}</FieldRow>
             <FieldRow label="Описание">{profile.description}</FieldRow>
 
-            {profile.photos.length > 0 && (
-              <div className="pt-3">
-                <div className="text-muted text-sm mb-2">Фотографии</div>
-                <div className="flex items-center gap-4 overflow-x-auto pb-2">
-                  {profile.photos.map((photo, i) => (
-                    <div
-                      key={i}
-                      className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
-                    >
-                      <ImageWithFallback
-                        src={photo}
-                        alt={`Photo ${i + 1}`}
-                        width={96}
-                        height={96}
-                        sizes="96px"
-                        className="w-full h-full object-cover"
-                        fallback={<div className="w-full h-full bg-surface" />}
-                      />
-                    </div>
-                  ))}
-                </div>
+            <div className="pt-3">
+              <div className="text-muted text-sm mb-2">Фотографии</div>
+              <div className="flex items-center gap-4 overflow-x-auto pb-2">
+                {photoItems.map((photo) => (
+                  <div
+                    key={photo.id}
+                    className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
+                  >
+                    <ImageWithFallback
+                      src={photo.url}
+                      alt="Фотография клиники"
+                      width={96}
+                      height={96}
+                      sizes="96px"
+                      className="w-full h-full object-cover"
+                      fallback={<div className="w-full h-full bg-surface" />}
+                    />
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>
