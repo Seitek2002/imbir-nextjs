@@ -1,12 +1,15 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
+
+import { maskDate } from "@/pages/register/model/constants";
 
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import {
   FieldRow,
   FileIcon,
+  UploadIcon,
   toApiDate,
   useClinicCabinet,
 } from "@/entities/clinic-profile";
@@ -14,8 +17,18 @@ import {
 import { Input } from "@/shared/ui";
 
 export const ClinicLegalPage: FC = () => {
-  const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
+  const {
+    profile,
+    isLoading,
+    isSaving,
+    saveProfile,
+    documentItems,
+    uploadDocument,
+    deleteDocument,
+    isUploadingDocument,
+  } = useClinicCabinet();
   const [isEditing, setIsEditing] = useState(false);
+  const documentsInputRef = useRef<HTMLInputElement>(null);
 
   const [legalName, setLegalName] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState("");
@@ -42,6 +55,15 @@ export const ClinicLegalPage: FC = () => {
       license_authority: licenseAuthority,
     });
     setIsEditing(false);
+  };
+
+  const handleDocuments = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = "";
+    if (files.length === 0) return;
+    await Promise.all(files.map((file) => uploadDocument(file)));
   };
 
   if (isLoading || !profile) {
@@ -86,8 +108,8 @@ export const ClinicLegalPage: FC = () => {
             <Input
               label="Дата выдачи лицензии"
               value={licenseDate}
-              onChange={(e) => setLicenseDate(e.target.value)}
-              placeholder="ГГГГ-ММ-ДД"
+              onChange={(e) => setLicenseDate(maskDate(e.target.value))}
+              placeholder="ДД.ММ.ГГГГ"
             />
             <Input
               label="Орган, выдавший лицензию"
@@ -98,19 +120,60 @@ export const ClinicLegalPage: FC = () => {
               <label className="block text-secondary text-sm mb-2">
                 Документы (лицензии, регистрационные документы)
               </label>
-              <div className="flex flex-wrap gap-4">
-                {profile.documents.map((doc, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1">
-                    <FileIcon />
-                    <span className="text-xs text-secondary max-w-20 text-center truncate">
-                      {doc.name}
-                    </span>
+              <input
+                ref={documentsInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,image/*"
+                className="sr-only"
+                onChange={handleDocuments}
+              />
+              <div className="rounded-2xl border-2 border-dashed border-border p-4">
+                {documentItems.length > 0 ? (
+                  <div className="flex flex-wrap gap-4">
+                    {documentItems.map((document) => (
+                      <div
+                        key={document.id}
+                        className="relative flex flex-col items-center gap-1"
+                      >
+                        <FileIcon />
+                        <span className="max-w-24 truncate text-center text-xs text-secondary">
+                          {document.url.split("/").pop() || "Документ"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => deleteDocument(document.id)}
+                          className="absolute -right-2 -top-2 size-5 rounded-full bg-foreground text-xs leading-none text-white"
+                          aria-label="Удалить документ"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => documentsInputRef.current?.click()}
+                      disabled={isUploadingDocument}
+                      className="flex size-8 items-center justify-center self-start rounded-full border-2 border-dashed border-border text-xl text-primary hover:border-primary/40 disabled:opacity-50"
+                      aria-label="Добавить документ"
+                    >
+                      +
+                    </button>
                   </div>
-                ))}
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => documentsInputRef.current?.click()}
+                    disabled={isUploadingDocument}
+                    className="flex min-h-20 w-full items-center justify-center gap-2 text-sm font-medium text-secondary disabled:opacity-50"
+                  >
+                    <UploadIcon className="size-7 text-primary" />
+                    {isUploadingDocument
+                      ? "Загрузка..."
+                      : "Загрузить документы"}
+                  </button>
+                )}
               </div>
-              <p className="text-xs text-muted mt-2">
-                Загрузка документов — в разработке
-              </p>
             </div>
           </div>
         ) : (
@@ -133,15 +196,17 @@ export const ClinicLegalPage: FC = () => {
                 Документы (лицензии, регистрационные документы)
               </div>
               <div className="flex flex-wrap gap-4">
-                {profile.documents.map((doc, i) => (
+                {documentItems.map((document) => (
                   <a
-                    key={i}
-                    href={doc.url}
+                    key={document.id}
+                    href={document.url}
+                    target="_blank"
+                    rel="noreferrer"
                     className="flex flex-col items-center gap-1 hover:opacity-70 transition-opacity"
                   >
                     <FileIcon />
                     <span className="text-xs text-secondary max-w-20 text-center truncate">
-                      {doc.name}
+                      {document.url.split("/").pop() || "Документ"}
                     </span>
                   </a>
                 ))}
