@@ -65,14 +65,12 @@ export const ProfileSavedPage: FC = () => {
       <MobilePageHeader
         title="Сохранённое"
         bottomElement={
-          <div className="rounded-full bg-background p-1 overflow-hidden">
-            <FilterTabBar
-              tabs={TABS}
-              value={activeTab}
-              onChange={setActiveTab}
-              className="pb-0"
-            />
-          </div>
+          <FilterTabBar
+            tabs={TABS}
+            value={activeTab}
+            onChange={setActiveTab}
+            className="pb-0"
+          />
         }
       />
       <div className="px-4 pt-6 pb-8 md:p-0">

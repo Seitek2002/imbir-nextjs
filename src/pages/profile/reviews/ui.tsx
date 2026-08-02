@@ -67,18 +67,25 @@ export const ProfileReviewsPage: FC = () => {
 
   return (
     <>
-      <MobilePageHeader title="Отзывы" />
-      <div className="px-4 py-8 md:p-0">
+      <MobilePageHeader
+        title="Отзывы"
+        bottomElement={
+          <FilterTabBar
+            tabs={TABS}
+            value={activeTab}
+            onChange={setActiveTab}
+            className="pb-0"
+          />
+        }
+      />
+      <div className="px-4 pt-6 pb-8 md:p-0">
         <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground mb-6 hidden md:block">
           Отзывы
         </h2>
 
-        <FilterTabBar
-          tabs={TABS}
-          value={activeTab}
-          onChange={setActiveTab}
-          className="mb-6"
-        />
+        <div className="hidden md:block mb-6">
+          <FilterTabBar tabs={TABS} value={activeTab} onChange={setActiveTab} />
+        </div>
 
         {isLoading ? (
           <div className="bg-white rounded-3xl p-10 text-center border border-border text-muted">
