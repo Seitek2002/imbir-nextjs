@@ -188,7 +188,22 @@ export const ClinicSchedulePage: FC = () => {
         ) : (
           profile.workSchedule.emergency24 && (
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-primary shrink-0" />
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary">
+                <svg
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  className="size-3 text-white"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M10 3L4.5 8.5L2 6"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
               <span className="text-sm text-foreground">
                 Экстренный приём 24/7
               </span>
