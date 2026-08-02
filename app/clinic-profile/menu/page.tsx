@@ -79,6 +79,7 @@ export default function ClinicProfileMenuPage() {
 
   return (
     <CabinetMobileMenu
+      headerVariant="card"
       avatar={
         clinicLogo ? (
           <Image

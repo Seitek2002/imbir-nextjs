@@ -42,37 +42,40 @@ export const ClinicSectionPage: FC<Props> = ({
 
   return (
     <div className="w-full min-h-screen bg-[#FAFAFA]">
-      <div className="flex items-center justify-between px-4 py-4 bg-white border-b border-border">
-        <IconBtn
-          onClick={() => router.back()}
-          variant="text"
-          size="sm"
-          aria-label="Назад"
-        >
-          <HeaderBackIcon className="w-5 h-5" />
-        </IconBtn>
+      <div className="bg-white px-4 pt-1 pb-4">
+        <div className="grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center min-h-10">
+          <IconBtn
+            onClick={() => router.back()}
+            variant="outline"
+            size="sm"
+            className="justify-self-start"
+            aria-label="Назад"
+          >
+            <HeaderBackIcon className="size-4" />
+          </IconBtn>
 
-        <h1 className="text-base font-semibold text-foreground truncate mx-2">
-          {title}
-        </h1>
+          <h1 className="text-center font-medium text-base text-foreground truncate px-2">
+            {title}
+          </h1>
 
-        <IconBtn
-          onClick={handleHeaderAction}
-          disabled={isSaving}
-          variant="text"
-          size="sm"
-          className={isEditing ? "text-primary" : "text-muted"}
-          aria-label={isEditing ? "Сохранить" : "Редактировать"}
-        >
-          {isEditing ? (
-            <CheckIcon className="w-5 h-5" />
-          ) : (
-            <EditIcon className="w-5 h-5" />
-          )}
-        </IconBtn>
+          <IconBtn
+            onClick={handleHeaderAction}
+            disabled={isSaving}
+            variant="text"
+            size="sm"
+            className="justify-self-end"
+            aria-label={isEditing ? "Сохранить" : "Редактировать"}
+          >
+            {isEditing ? (
+              <CheckIcon className="size-4" />
+            ) : (
+              <EditIcon className="size-4" />
+            )}
+          </IconBtn>
+        </div>
       </div>
 
-      <div className="max-w-360 mx-auto px-4 py-4">{children}</div>
+      <div className="max-w-360 mx-auto px-4 pt-4 pb-6">{children}</div>
 
       <ConfirmDialog
         isOpen={showSaveConfirm}

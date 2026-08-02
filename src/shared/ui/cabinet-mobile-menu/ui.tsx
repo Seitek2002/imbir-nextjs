@@ -17,6 +17,8 @@ export type CabinetMenuItem = {
 type Props = {
   // Заголовок экрана (по умолчанию «Мой профиль»).
   title?: string;
+  // В клиническом кабинете заголовок — отдельная белая верхняя карточка.
+  headerVariant?: "plain" | "card";
   // Содержимое аватар-круга: <img>/<Image> или буква-инициал.
   avatar: ReactNode;
   name: string;
@@ -51,6 +53,7 @@ const Chevron = () => (
 // приходят пропсами. Выход из профиля (с подтверждением) встроен.
 export const CabinetMobileMenu: FC<Props> = ({
   title = "Мой профиль",
+  headerVariant = "plain",
   avatar,
   name,
   subtitle,
@@ -65,10 +68,18 @@ export const CabinetMobileMenu: FC<Props> = ({
     <>
       <div className="min-h-screen bg-[#FAFAFA]">
         {/* pb под фиксированную нижнюю таб-панель (на мобильном) */}
-        <div className="px-4 py-6 pb-24 lg:pb-6">
-          <h1 className="text-2xl font-semibold text-foreground mb-6">
-            {title}
-          </h1>
+        <div className="px-4 pt-6 pb-24 lg:pb-6">
+          {headerVariant === "card" ? (
+            <div className="-mx-4 -mt-6 mb-3 rounded-b-3xl bg-white px-4 pt-6 pb-4">
+              <h1 className="text-2xl font-semibold text-foreground">
+                {title}
+              </h1>
+            </div>
+          ) : (
+            <h1 className="text-2xl font-semibold text-foreground mb-6">
+              {title}
+            </h1>
+          )}
 
           {/* Профиль — белая рамка с отступом 4px, внутри градиентная подложка */}
           <div className="bg-white border border-border-soft rounded-3xl p-1 mb-4">

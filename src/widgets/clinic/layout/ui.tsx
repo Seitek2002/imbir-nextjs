@@ -35,22 +35,27 @@ export const ClinicPageLayout: FC<Props> = ({
   return (
     <>
       {/* Mobile header */}
-      <div className="md:hidden flex items-center justify-between px-4 py-4 bg-white border-b border-border">
-        <IconBtn
-          onClick={() => router.back()}
-          variant="text"
-          size="sm"
-          aria-label="Назад"
-        >
-          <HeaderBackIcon className="w-5 h-5" />
-        </IconBtn>
-        <h1 className="text-base font-semibold text-foreground truncate mx-2">
-          {title}
-        </h1>
-        {mobileAction ?? <div className="w-10" />}
+      <div className="md:hidden bg-white px-4 pt-1 pb-4">
+        <div className="grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center min-h-10">
+          <IconBtn
+            onClick={() => router.back()}
+            variant="outline"
+            size="sm"
+            className="justify-self-start"
+            aria-label="Назад"
+          >
+            <HeaderBackIcon className="size-4" />
+          </IconBtn>
+          <h1 className="text-center font-medium text-base text-foreground truncate px-2">
+            {title}
+          </h1>
+          <div className="flex justify-end">{mobileAction}</div>
+        </div>
       </div>
 
-      <div className={cn("px-4 py-4 md:p-0", mainClassName)}>{children}</div>
+      <div className={cn("px-4 pt-4 pb-6 md:p-0", mainClassName)}>
+        {children}
+      </div>
     </>
   );
 };
