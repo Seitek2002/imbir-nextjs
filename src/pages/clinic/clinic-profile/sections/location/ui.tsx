@@ -2,6 +2,10 @@
 
 import { FC, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
+import { DEFAULT_COUNTRIES } from "@/pages/register/model/constants";
+
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import {
@@ -10,7 +14,10 @@ import {
   useClinicCabinet,
 } from "@/entities/clinic-profile";
 
-import { Input, PhoneInput } from "@/shared/ui";
+import { getCities, getCountryCodes, referenceKeys } from "@/shared/api";
+import { CITIES_BY_COUNTRY } from "@/shared/config";
+import { useReferenceOptions } from "@/shared/lib/useReference";
+import { Dropdown, Input, PhoneInput } from "@/shared/ui";
 
 export const ClinicLocationPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
@@ -23,6 +30,22 @@ export const ClinicLocationPage: FC = () => {
   const [website, setWebsite] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+
+  const { data: countryCodes = [] } = useQuery({
+    queryKey: referenceKeys.countryCodes(),
+    queryFn: getCountryCodes,
+    staleTime: 60 * 60 * 1000,
+  });
+  const countryOptions = (
+    countryCodes.length
+      ? countryCodes.map((country) => country.country)
+      : DEFAULT_COUNTRIES
+  ).map((country) => ({ label: country, value: country }));
+  const { options: cityOptions } = useReferenceOptions(
+    referenceKeys.cities(),
+    getCities,
+    CITIES_BY_COUNTRY[country] ?? [],
+  );
 
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
@@ -73,15 +96,19 @@ export const ClinicLocationPage: FC = () => {
       <div className="bg-white rounded-3xl border border-border p-5">
         {isEditing ? (
           <div className="flex flex-col gap-5">
-            <Input
+            <Dropdown
               label="Страна"
+              placeholder="Выберите из списка"
+              options={countryOptions}
               value={country}
-              onChange={(e) => setCountry(e.target.value)}
+              onChange={setCountry}
             />
-            <Input
+            <Dropdown
               label="Город"
+              placeholder="Выберите из списка"
+              options={cityOptions}
               value={city}
-              onChange={(e) => setCity(e.target.value)}
+              onChange={setCity}
             />
             <Input
               label="Полный адрес"

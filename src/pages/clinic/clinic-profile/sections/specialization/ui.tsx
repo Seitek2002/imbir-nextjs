@@ -61,22 +61,22 @@ export const ClinicSpecializationPage: FC = () => {
               label="Основные направления"
               value={mainDirections}
               onChange={(e) => setMainDirections(e.target.value)}
-              rows={2}
-              hint="Введите через запятую"
+              rows={3}
+              placeholder="Терапия, Кардиология, Педиатрия..."
             />
             <Textarea
               label="Узкие направления"
               value={narrowDirections}
               onChange={(e) => setNarrowDirections(e.target.value)}
-              rows={2}
-              hint="Введите через запятую"
+              rows={3}
+              placeholder="Эндокринолог, Невролог, Офтальмолог..."
             />
             <Textarea
               label="Дополнительные услуги"
               value={additionalServices}
               onChange={(e) => setAdditionalServices(e.target.value)}
-              rows={2}
-              hint="Введите через запятую"
+              rows={3}
+              placeholder="Анализы, УЗИ, Рентген..."
             />
           </div>
         ) : (
