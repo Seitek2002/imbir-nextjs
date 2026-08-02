@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { FC } from "react";
+import toast from "react-hot-toast";
 
 import Link from "next/link";
 
@@ -51,6 +52,7 @@ export const ClinicProceduresPage: FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.services() });
     },
+    onError: () => toast.error("Не удалось удалить процедуру"),
   });
 
   const procedures: Procedure[] = (data?.data ?? []).map((s) => ({
