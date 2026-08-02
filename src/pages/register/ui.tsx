@@ -148,6 +148,15 @@ const ROLE_REDIRECT: Record<string, string> = {
   clinic: "/clinic-profile",
 };
 
+const getRoleRedirect = (role: string): string => {
+  const isMobile =
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 767px)").matches;
+
+  if (role === "clinic" && isMobile) return "/clinic-profile/menu";
+  return ROLE_REDIRECT[role] ?? "/profile";
+};
+
 // Поля дат вводятся как ДД.ММ.ГГГГ, бэк принимает только YYYY-MM-DD.
 const toApiDate = (ddmmyyyy: string): string => {
   const [dd, mm, yyyy] = ddmmyyyy.split(".");
@@ -356,7 +365,7 @@ export const RegisterPage = () => {
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
-      router.push(ROLE_REDIRECT[res.user.role] ?? "/profile");
+      router.push(getRoleRedirect(res.user.role));
     } catch (err: unknown) {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
       toast.error(

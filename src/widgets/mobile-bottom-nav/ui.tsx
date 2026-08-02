@@ -67,7 +67,7 @@ export const MobileBottomNav: FC = () => {
     role === "doctor"
       ? "/doctor-profile"
       : role === "clinic"
-        ? "/clinic-profile"
+        ? "/clinic-profile/menu"
         : "/profile";
 
   const items = [

@@ -31,6 +31,15 @@ const ROLE_REDIRECT: Record<string, string> = {
   clinic: "/clinic-profile",
 };
 
+const getRoleRedirect = (role: string): string => {
+  const isMobile =
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 767px)").matches;
+
+  if (role === "clinic" && isMobile) return "/clinic-profile/menu";
+  return ROLE_REDIRECT[role] ?? ROUTES.PROFILE;
+};
+
 export const LoginPage = () => {
   const router = useRouter();
   const {
@@ -69,7 +78,7 @@ export const LoginPage = () => {
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
-      router.push(ROLE_REDIRECT[res.user.role] ?? ROUTES.PROFILE);
+      router.push(getRoleRedirect(res.user.role));
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { detail?: string; error?: string } } })
