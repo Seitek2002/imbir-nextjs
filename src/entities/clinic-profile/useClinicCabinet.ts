@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,9 +9,16 @@ import {
   ClinicPrivateProfile,
   type UpdateClinicProfileBody,
   clinicCabinetKeys,
+  deleteClinicDocument,
+  deleteClinicPhoto,
+  getClinicDocuments,
+  getClinicPhotos,
   getClinicProfile,
   updateClinicProfile,
+  uploadClinicDocument,
+  uploadClinicPhoto,
 } from "@/shared/api";
+import { toHttps } from "@/shared/lib/media";
 
 import type {
   ClinicProfile,
@@ -98,6 +106,18 @@ export const useClinicCabinet = () => {
     queryFn: getClinicProfile,
   });
 
+  const { data: documentsData = [] } = useQuery({
+    queryKey: clinicCabinetKeys.documents(),
+    queryFn: getClinicDocuments,
+    enabled: !!data,
+  });
+
+  const { data: photosData = [] } = useQuery({
+    queryKey: clinicCabinetKeys.photos(),
+    queryFn: getClinicPhotos,
+    enabled: !!data,
+  });
+
   const { mutateAsync: saveProfile, isPending: isSaving } = useMutation({
     mutationFn: (body: UpdateClinicProfileBody) => updateClinicProfile(body),
     onSuccess: (updated) => {
@@ -109,7 +129,92 @@ export const useClinicCabinet = () => {
     },
   });
 
-  const profile = data ? mapApiToClinicProfile(data) : null;
+  const uploadDocumentMutation = useMutation({
+    mutationFn: uploadClinicDocument,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: clinicCabinetKeys.documents(),
+      });
+      toast.success("Документ загружен");
+    },
+    onError: () => toast.error("Не удалось загрузить документ"),
+  });
 
-  return { profile, isLoading, isSaving, error, saveProfile, rawProfile: data };
+  const deleteDocumentMutation = useMutation({
+    mutationFn: deleteClinicDocument,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: clinicCabinetKeys.documents(),
+      });
+      toast.success("Документ удалён");
+    },
+    onError: () => toast.error("Не удалось удалить документ"),
+  });
+
+  const uploadPhotoMutation = useMutation({
+    mutationFn: uploadClinicPhoto,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.photos() });
+      toast.success("Фотография загружена");
+    },
+    onError: () => toast.error("Не удалось загрузить фотографию"),
+  });
+
+  const deletePhotoMutation = useMutation({
+    mutationFn: deleteClinicPhoto,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.photos() });
+      toast.success("Фотография удалена");
+    },
+    onError: () => toast.error("Не удалось удалить фотографию"),
+  });
+
+  const documentItems = useMemo(
+    () =>
+      documentsData.map((document, index) => ({
+        ...document,
+        url: toHttps(document.url) ?? document.url,
+        name:
+          decodeURIComponent(document.url.split("/").pop() || "") ||
+          `Документ ${index + 1}`,
+      })),
+    [documentsData],
+  );
+  const photoItems = useMemo(
+    () =>
+      photosData.map((photo) => ({
+        ...photo,
+        url: toHttps(photo.url) ?? photo.url,
+      })),
+    [photosData],
+  );
+
+  const profile = useMemo(
+    () =>
+      data
+        ? {
+            ...mapApiToClinicProfile(data),
+            documents: documentItems,
+            photos: photoItems.map((photo) => photo.url),
+          }
+        : null,
+    [data, documentItems, photoItems],
+  );
+
+  return {
+    profile,
+    isLoading,
+    isSaving,
+    error,
+    saveProfile,
+    rawProfile: data,
+    documentItems,
+    photoItems,
+    uploadDocument: uploadDocumentMutation.mutateAsync,
+    deleteDocument: deleteDocumentMutation.mutateAsync,
+    isUploadingDocument: uploadDocumentMutation.isPending,
+    uploadPhoto: uploadPhotoMutation.mutateAsync,
+    deletePhoto: deletePhotoMutation.mutateAsync,
+    isUploadingPhoto: uploadPhotoMutation.isPending,
+  };
 };
