@@ -5,6 +5,18 @@ export type ClinicProfileBranch = {
   address: string;
 };
 
+export type ClinicDocument = {
+  id: number;
+  url: string;
+  uploaded_at: string;
+};
+
+export type ClinicPhoto = {
+  id: number;
+  url: string;
+  uploaded_at: string;
+};
+
 // Соответствует реальному ответу GET/PUT /api/clinic/profile/ — плоский
 // объект, ОТЛИЧАЕТСЯ от публичной карточки клиники (ClinicDetail), у которой
 // другие имена полей (about вместо description, нет id и т.д.). Не путать!

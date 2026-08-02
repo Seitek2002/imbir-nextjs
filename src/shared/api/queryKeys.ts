@@ -71,6 +71,8 @@ export const doctorCabinetKeys = {
 export const clinicCabinetKeys = {
   all: ["clinic-cabinet"] as const,
   profile: () => [...clinicCabinetKeys.all, "profile"] as const,
+  documents: () => [...clinicCabinetKeys.all, "documents"] as const,
+  photos: () => [...clinicCabinetKeys.all, "photos"] as const,
   doctors: () => [...clinicCabinetKeys.all, "doctors"] as const,
   services: () => [...clinicCabinetKeys.all, "services"] as const,
   appointments: (filters: object) =>

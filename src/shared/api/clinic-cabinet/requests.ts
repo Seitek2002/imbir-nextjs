@@ -7,6 +7,8 @@ import { PaginatedResponse } from "../types";
 import {
   ClinicAppointmentFilters,
   ClinicDoctorItem,
+  ClinicDocument,
+  ClinicPhoto,
   ClinicPrivateProfile,
   ClinicServiceBody,
   ClinicServiceListItem,
@@ -90,6 +92,57 @@ export const updateClinicBranch = async (
   body: UpdateBranchRequest,
 ): Promise<void> => {
   await apiClient.put(`/api/clinic/branches/${branchId}/`, body);
+};
+
+const asCollection = <T>(data: T | T[] | null | undefined): T[] => {
+  if (!data) return [];
+  return Array.isArray(data) ? data : [data];
+};
+
+export const getClinicDocuments = async (): Promise<ClinicDocument[]> => {
+  const { data } = await apiClient.get<ClinicDocument[] | ClinicDocument>(
+    "/api/clinic/documents/",
+  );
+  return asCollection(data);
+};
+
+export const uploadClinicDocument = async (
+  file: File,
+): Promise<ClinicDocument> => {
+  const form = new FormData();
+  form.append("file", file);
+  const { data } = await apiClient.post<ClinicDocument>(
+    "/api/clinic/documents/",
+    form,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return data;
+};
+
+export const deleteClinicDocument = async (id: number): Promise<void> => {
+  await apiClient.delete(`/api/clinic/documents/${id}/`);
+};
+
+export const getClinicPhotos = async (): Promise<ClinicPhoto[]> => {
+  const { data } = await apiClient.get<ClinicPhoto[] | ClinicPhoto>(
+    "/api/clinic/photos/",
+  );
+  return asCollection(data);
+};
+
+export const uploadClinicPhoto = async (file: File): Promise<ClinicPhoto> => {
+  const form = new FormData();
+  form.append("file", file);
+  const { data } = await apiClient.post<ClinicPhoto>(
+    "/api/clinic/photos/",
+    form,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return data;
+};
+
+export const deleteClinicPhoto = async (id: number): Promise<void> => {
+  await apiClient.delete(`/api/clinic/photos/${id}/`);
 };
 
 // Списки кабинета пагинированы (по умолчанию бэк отдаёт page_size=20), а UI
