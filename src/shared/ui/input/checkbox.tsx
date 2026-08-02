@@ -97,7 +97,14 @@ export const Checkbox: FC<Props> = ({
       </div>
 
       {label && (
-        <span className="text-sm font-medium text-overlay">{label}</span>
+        <span
+          className={cn(
+            "font-medium text-overlay",
+            size === "large" ? "text-base" : "text-sm",
+          )}
+        >
+          {label}
+        </span>
       )}
     </label>
   );
