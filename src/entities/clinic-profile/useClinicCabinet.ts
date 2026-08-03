@@ -87,8 +87,10 @@ export const mapApiToClinicProfile = (
   licenseDate: api.license_date ?? "",
   licenseAuthority: api.license_authority ?? "",
   documents: [],
-  mainDirections: api.primary_specializations ?? [],
-  narrowDirections: api.narrow_specializations ?? [],
+  // Бэк отдаёт объекты {id, name, photo}, не строки — а Textarea в разделе
+  // «Специализация» работает с названиями через запятую.
+  mainDirections: (api.primary_specializations ?? []).map((s) => s.name),
+  narrowDirections: (api.narrow_specializations ?? []).map((s) => s.name),
   additionalServices: parseCsv(api.additional_services),
   equipment: api.equipment ?? [],
   patientConditions: api.patient_conditions ?? [],
@@ -119,7 +121,14 @@ export const useClinicCabinet = () => {
   });
 
   const { mutateAsync: saveProfile, isPending: isSaving } = useMutation({
-    mutationFn: (body: UpdateClinicProfileBody) => updateClinicProfile(body),
+    mutationFn: (body: UpdateClinicProfileBody) => {
+      // Бэк требует name на КАЖДОМ PUT профиля (проверено живым запросом: без
+      // него — 400 "Обязательное поле"), а разделы вроде «Специализация» или
+      // «Оборудование» его не редактируют и не шлют. Подставляем из текущего
+      // профиля, если явно не задано — тот же приём, что и в
+      // useDoctorCabinet для first_name/last_name.
+      return updateClinicProfile({ name: data?.name, ...body });
+    },
     onSuccess: (updated) => {
       queryClient.setQueryData(clinicCabinetKeys.profile(), updated);
       toast.success("Данные сохранены");

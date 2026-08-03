@@ -12,6 +12,10 @@ import {
   type ClinicProfileFormHandle,
   useClinicCabinet,
 } from "@/entities/clinic-profile";
+import {
+  resolveSpecializationIds,
+  useSpecializations,
+} from "@/entities/specialization";
 
 import {
   type ClinicProfileBranch,
@@ -151,10 +155,40 @@ export const ClinicProfilePage: FC = () => {
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const formRef = useRef<ClinicProfileFormHandle>(null);
 
+  // Форма отдаёт названия специализаций свободным текстом; бэк на запись
+  // принимает только id справочника — резолвим здесь же, перед отправкой
+  // (см. ClinicProfileFormHandle.getSpecializationNames).
+  const { data: specializationList = [] } = useSpecializations();
+
   const handleSave = async () => {
     // Берём реально введённые значения из формы (включая логотип-файл)
     const payload = formRef.current?.getPayload();
-    if (payload) await saveProfile(payload);
+    const names = formRef.current?.getSpecializationNames();
+    if (!payload) {
+      setIsEditing(false);
+      return;
+    }
+
+    const primary = resolveSpecializationIds(
+      names?.primary ?? [],
+      specializationList,
+    );
+    const narrow = resolveSpecializationIds(
+      names?.narrow ?? [],
+      specializationList,
+    );
+    const unmatched = [...primary.unmatched, ...narrow.unmatched];
+    if (unmatched.length > 0) {
+      toast.error(
+        `Не найдено в справочнике и не сохранено: ${unmatched.join(", ")}`,
+      );
+    }
+
+    await saveProfile({
+      ...payload,
+      primary_specialization_ids: primary.ids,
+      narrow_specialization_ids: narrow.ids,
+    });
     setIsEditing(false);
   };
   const handleEdit = () => setIsEditing(true);

@@ -101,7 +101,15 @@ const buildState = (p: ClinicProfile): FormState => ({
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export type ClinicProfileFormHandle = {
-  getPayload: () => UpdateClinicProfileBody;
+  // Без полей специализации: бэк принимает на запись только id справочника
+  // (см. entities/specialization), а форма работает со свободным текстом
+  // названий. Резолвинг названий в id — на странице, которая держит formRef
+  // (entities/clinic-profile не должен зависеть от entities/specialization).
+  getPayload: () => Omit<
+    UpdateClinicProfileBody,
+    "primary_specialization_ids" | "narrow_specialization_ids"
+  >;
+  getSpecializationNames: () => { primary: string[]; narrow: string[] };
 };
 
 type Props = ClinicProfile & { isEditing?: boolean };
@@ -154,7 +162,11 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
     }, [isEditing]);
 
     useImperativeHandle(ref, () => ({
-      getPayload: (): UpdateClinicProfileBody => ({
+      getSpecializationNames: () => ({
+        primary: csv(d.mainDirections),
+        narrow: csv(d.narrowDirections),
+      }),
+      getPayload: () => ({
         name: d.name,
         clinic_type: d.type,
         description: d.description,
@@ -170,8 +182,6 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         license_number: d.licenseNumber || undefined,
         license_date: toApiDate(d.licenseDate),
         license_authority: d.licenseAuthority || undefined,
-        primary_specializations: csv(d.mainDirections),
-        narrow_specializations: csv(d.narrowDirections),
         additional_services: d.additionalServices,
         equipment: csv(d.equipment),
         patient_conditions: csv(d.patientConditions),

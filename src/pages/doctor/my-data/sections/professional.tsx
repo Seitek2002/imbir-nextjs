@@ -10,7 +10,11 @@ import {
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
-import { useSpecializationOptions } from "@/entities/specialization";
+import {
+  resolveSpecializationIds,
+  useSpecializationOptions,
+  useSpecializations,
+} from "@/entities/specialization";
 
 import { CheckIcon } from "@/shared/assets/icons";
 import {
@@ -89,10 +93,12 @@ export const DoctorProfessionalInfoSection: FC = () => {
   const set = <K extends keyof D>(k: K, v: D[K]) =>
     setD((prev) => ({ ...prev, [k]: v }));
 
-  // Специализации — из справочника бэка: значение уходит в
-  // primary_specializations как есть, и по нему же врача находят фильтры.
+  // Специализации — из справочника бэка. Dropdown работает по названию (по
+  // нему же ищут фильтры врачей), а сохраняется профиль по id — резолвим
+  // название обратно в id перед отправкой (см. resolveSpecializationIds).
   const { options: specializationOptions, isLoading: isSpecsLoading } =
     useSpecializationOptions();
+  const { data: specializationList = [] } = useSpecializations();
   const specializationPlaceholder = isSpecsLoading
     ? "Загружаем список..."
     : "Выберите";
@@ -109,12 +115,20 @@ export const DoctorProfessionalInfoSection: FC = () => {
         } | null
       )?.work_experience?.[0] ?? {};
 
+    // API принимает на запись только id (см. resolveSpecializationIds) —
+    // Dropdown хранит название, поэтому резолвим перед отправкой.
+    const { ids: primaryIds } = resolveSpecializationIds(
+      d.specialty ? [d.specialty] : [],
+      specializationList,
+    );
+    const { ids: narrowIds } = resolveSpecializationIds(
+      d.additionalSpecialty ? [d.additionalSpecialty] : [],
+      specializationList,
+    );
+
     await saveProfile({
-      // API использует primary/narrow_specializations (не specialty)
-      primary_specializations: d.specialty ? [d.specialty] : [],
-      narrow_specializations: d.additionalSpecialty
-        ? [d.additionalSpecialty]
-        : [],
+      primary_specialization_ids: primaryIds,
+      narrow_specialization_ids: narrowIds,
       experience_years: parseInt(d.experienceYears) || 0,
       work_experience: [
         {

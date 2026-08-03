@@ -129,7 +129,9 @@ const adaptClinic = (c: ApiClinic): MockClinicListItem => ({
   address: c.address ?? "",
   city: c.city,
   coordinates: { lat: 0, lng: 0 },
-  specialties: c.primary_specializations ?? [],
+  // Бэк отдаёт объекты {id, name, photo}, не строки — а фильтры клиник
+  // (поиск/специализация) сравнивают именно название.
+  specialties: (c.primary_specializations ?? []).map((s) => s.name),
   image: toHttps(c.logo),
 });
 

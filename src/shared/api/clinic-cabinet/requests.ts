@@ -46,8 +46,10 @@ export type UpdateClinicProfileBody = {
   license_number?: string;
   license_date?: string | null;
   license_authority?: string;
-  primary_specializations?: string[];
-  narrow_specializations?: string[];
+  // Бэк принимает на запись только id (проверено живым запросом: массив
+  // названий строк молча очищает специализации клиники, без ошибки).
+  primary_specialization_ids?: number[];
+  narrow_specialization_ids?: number[];
   additional_services?: string;
   equipment?: string[];
   patient_conditions?: string[];

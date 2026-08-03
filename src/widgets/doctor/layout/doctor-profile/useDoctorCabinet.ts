@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   type DoctorPrivateProfile,
+  type SpecializationItem,
   type UpdateDoctorProfileBody,
   doctorCabinetKeys,
   getDoctorProfile,
@@ -48,8 +49,10 @@ export const mapApiToProfile = (
     phone?: string;
     email?: string;
     photo?: string | null;
-    primary_specializations?: string[];
-    narrow_specializations?: string[];
+    // Бэк отдаёт объекты {id, name, photo}, не строки (проверено живым
+    // запросом) — читаем .name, а не значение целиком.
+    primary_specializations?: SpecializationItem[];
+    narrow_specializations?: SpecializationItem[];
     additional_services?: string;
     experience_years?: number;
     education?: { institution: string; degree?: string; year?: number }[];
@@ -70,9 +73,9 @@ export const mapApiToProfile = (
   return {
     fullName:
       a.full_name ?? `${a.first_name ?? ""} ${a.last_name ?? ""}`.trim(),
-    specialty: translateSpecialty(a.primary_specializations?.[0] ?? ""),
+    specialty: translateSpecialty(a.primary_specializations?.[0]?.name ?? ""),
     additionalSpecialty: translateSpecialty(
-      a.narrow_specializations?.[0] ?? "",
+      a.narrow_specializations?.[0]?.name ?? "",
     ),
     experienceYears: String(a.experience_years ?? 0),
     // Проф. данные держим в первой записи work_experience: бэк сохраняет её как

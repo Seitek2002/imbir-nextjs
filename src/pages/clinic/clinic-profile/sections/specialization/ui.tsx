@@ -1,10 +1,15 @@
 "use client";
 
 import { FC, useState } from "react";
+import toast from "react-hot-toast";
 
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import { FieldRow, csv, useClinicCabinet } from "@/entities/clinic-profile";
+import {
+  resolveSpecializationIds,
+  useSpecializations,
+} from "@/entities/specialization";
 
 import { Textarea } from "@/shared/ui";
 
@@ -16,6 +21,12 @@ export const ClinicSpecializationPage: FC = () => {
   const [narrowDirections, setNarrowDirections] = useState("");
   const [additionalServices, setAdditionalServices] = useState("");
 
+  // Поле — свободный текст, а бэк на запись принимает только id справочника
+  // (см. resolveSpecializationIds). Название, которого нет в справочнике
+  // (опечатка, устаревшее значение), не находит id и было бы молча потеряно —
+  // предупреждаем об этом тостом вместо тихой потери данных.
+  const { data: specializationList = [] } = useSpecializations();
+
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
     setSynced(profile);
@@ -25,9 +36,24 @@ export const ClinicSpecializationPage: FC = () => {
   }
 
   const handleSave = async () => {
+    const primary = resolveSpecializationIds(
+      csv(mainDirections),
+      specializationList,
+    );
+    const narrow = resolveSpecializationIds(
+      csv(narrowDirections),
+      specializationList,
+    );
+    const unmatched = [...primary.unmatched, ...narrow.unmatched];
+    if (unmatched.length > 0) {
+      toast.error(
+        `Не найдено в справочнике и не сохранено: ${unmatched.join(", ")}`,
+      );
+    }
+
     await saveProfile({
-      primary_specializations: csv(mainDirections),
-      narrow_specializations: csv(narrowDirections),
+      primary_specialization_ids: primary.ids,
+      narrow_specialization_ids: narrow.ids,
       additional_services: additionalServices,
     });
     setIsEditing(false);

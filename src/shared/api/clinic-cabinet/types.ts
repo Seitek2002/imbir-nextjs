@@ -1,3 +1,4 @@
+import type { SpecializationItem } from "../references/types";
 import type { ServiceListItem } from "../services/types";
 
 export type ClinicProfileBranch = {
@@ -42,8 +43,11 @@ export type ClinicPrivateProfile = {
   license_number: string;
   license_date: string | null;
   license_authority: string;
-  primary_specializations: string[];
-  narrow_specializations: string[];
+  // Объекты {id, name, photo} на чтение; на запись PUT принимает отдельные
+  // поля primary_specialization_ids/narrow_specialization_ids (числа) — см.
+  // UpdateClinicProfileBody.
+  primary_specializations: SpecializationItem[];
+  narrow_specializations: SpecializationItem[];
   additional_services: string;
   equipment: string[];
   patient_conditions: string[];

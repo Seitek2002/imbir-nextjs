@@ -1,4 +1,5 @@
 import { DaySchedule } from "../auth/types";
+import type { SpecializationItem } from "../references/types";
 
 export type ClinicSchedule = {
   [day: string]: Pick<DaySchedule, "from" | "to" | "enabled">;
@@ -34,7 +35,9 @@ export type ClinicListItem = {
   doctors_count: number;
   experience_years?: number;
   address?: string;
-  primary_specializations?: string[];
+  // Объекты {id, name, photo}, не строки — бэк вернул этот эндпоинт к
+  // справочнику специализаций (проверено живым запросом).
+  primary_specializations?: SpecializationItem[];
 };
 
 export type ClinicDetail = ClinicListItem & {
