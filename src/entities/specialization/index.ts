@@ -6,4 +6,3 @@ export {
   useSpecializationTiles,
   useSpecializations,
 } from "./model";
-export type { SpecializationTile } from "./model";
