@@ -152,33 +152,35 @@ export const ScheduleEditor: FC<ScheduleEditorProps> = ({
       })}
     </div>
 
-    <div className="flex items-center gap-3 mt-4 pt-4 border-t border-background">
+    <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-background">
       <span className="text-sm font-medium text-foreground shrink-0">
         Обеденный перерыв
       </span>
-      {isEditing ? (
-        <>
-          <input
-            type="time"
-            value={lunchFrom}
-            onChange={(e) => setLunchFrom(e.target.value)}
-            className={timeInput}
-          />
-          <span className="text-muted">–</span>
-          <input
-            type="time"
-            value={lunchTo}
-            onChange={(e) => setLunchTo(e.target.value)}
-            className={timeInput}
-          />
-        </>
-      ) : (
-        <span className="text-sm text-foreground">
-          {lunchFrom}
-          <span className="mx-2 text-muted">–</span>
-          {lunchTo}
-        </span>
-      )}
+      <div className="flex items-center gap-3">
+        {isEditing ? (
+          <>
+            <input
+              type="time"
+              value={lunchFrom}
+              onChange={(e) => setLunchFrom(e.target.value)}
+              className={timeInput}
+            />
+            <span className="text-muted">–</span>
+            <input
+              type="time"
+              value={lunchTo}
+              onChange={(e) => setLunchTo(e.target.value)}
+              className={timeInput}
+            />
+          </>
+        ) : (
+          <span className="text-sm text-foreground">
+            {lunchFrom}
+            <span className="mx-2 text-muted">–</span>
+            {lunchTo}
+          </span>
+        )}
+      </div>
     </div>
   </div>
 );

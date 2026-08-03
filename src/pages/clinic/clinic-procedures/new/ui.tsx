@@ -225,7 +225,7 @@ export const ClinicNewProcedurePage: FC = () => {
           onChange={setCategory}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid items-end grid-cols-2 gap-4">
           <Input
             label="Стоимость"
             type="number"
@@ -238,6 +238,7 @@ export const ClinicNewProcedurePage: FC = () => {
             options={CURRENCY_OPTIONS}
             value={currency}
             onChange={setCurrency}
+            className=""
           />
         </div>
 
