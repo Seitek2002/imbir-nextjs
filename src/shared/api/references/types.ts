@@ -1,9 +1,20 @@
+// Большинство справочников (/cities, /languages, /clinic-types, /equipment,
+// /conditions, /payment-methods) отдают { data: string[] } — просто список
+// значений без id.
 export type ReferenceListResponse = {
-  data: {
-    id: number;
-    name: string;
-    photo?: string;
-  }[];
+  data: string[];
+};
+
+// Специализации — единственный справочник с полноценными объектами (id,
+// name, photo) вместо голых строк; проверено живым запросом.
+export type SpecializationItem = {
+  id: number;
+  name: string;
+  photo?: string | null;
+};
+
+export type SpecializationListResponse = {
+  data: SpecializationItem[];
 };
 
 // GET /api/references/country-codes/ — телефонные коды стран для выпадающего

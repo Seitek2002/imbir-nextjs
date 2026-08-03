@@ -39,6 +39,13 @@ export type ProfileAppointment = {
 
 export type FavoriteTargetType = "doctor" | "clinic" | "service";
 
+// По нашей просьбе бэк добавил clinic {id, name} в врача и услугу — раньше
+// карточка в «Сохранённом» не могла показать, в какой клинике приём.
+export type FavoriteTargetClinic = {
+  id: number;
+  name: string;
+};
+
 // GET /api/profile/favorites/ отдаёт не список ссылок, а три готовых группы с
 // данными карточек (проверено живым запросом), поэтому дочитывать врача или
 // услугу отдельным запросом не нужно.
@@ -49,6 +56,7 @@ export type FavoriteDoctor = {
   photo: string | null;
   rating?: string | null;
   experience_years?: number;
+  clinic: FavoriteTargetClinic;
 };
 
 export type FavoriteClinic = {
@@ -65,6 +73,7 @@ export type FavoriteService = {
   name: string;
   category: string;
   price?: string | null;
+  clinic: FavoriteTargetClinic;
 };
 
 export type FavoritesList = {

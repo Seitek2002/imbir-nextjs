@@ -4,9 +4,8 @@ import { FC, ReactNode } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { useQuery } from "@tanstack/react-query";
+import { useSpecializationOptions } from "@/entities/specialization";
 
-import { getSpecializations, referenceKeys } from "@/shared/api";
 import { RemoveIcon } from "@/shared/assets/icons";
 import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 
@@ -48,18 +47,11 @@ export const FilterBar: FC<Props> = ({
   const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
 
-  // Реальный список специализаций с бэка вместо захардкоженных 4 штук.
-  // Справочник почти не меняется — держим его в кеше подольше.
-  const { data: specializations = [] } = useQuery({
-    queryKey: referenceKeys.specializations(),
-    queryFn: getSpecializations,
-    enabled: !!fields.specialty,
-    staleTime: 60 * 60 * 1000,
-  });
-  const specialtyOptions = specializations.map((name) => ({
-    value: name,
-    label: name,
-  }));
+  // Общий хук на весь app — справочник почти не меняется, кешируется под
+  // одним ключом (FilterBar/MobileFiltersModal/формы регистрации).
+  const { options: specialtyOptions } = useSpecializationOptions(
+    !!fields.specialty,
+  );
 
   // Все значения — единственный источник правды: URL.
   // router.replace обновляет useSearchParams синхронно через React,

@@ -8,7 +8,8 @@ import { ServiceRadialIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 type Props = {
-  image?: StaticImageData;
+  // Локальная иллюстрация (fallback) или URL фото со справочника бэка.
+  image?: StaticImageData | string;
   name: string;
   // Значение для next/image sizes — у Главной и поиска плитки разного размера.
   sizes: string;

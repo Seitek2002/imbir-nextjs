@@ -24,12 +24,9 @@ import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
 // Постраничная подгрузка: 8 врачей за раз, дальше — по кнопке «Показать ещё»
-// (как на /clinics). Бэк поддерживает specialization только с одним
-// значением (точное вхождение) — при 2+ выбранных специальностях (наш
-// фильтр — мультиселект) сервер не отфильтрует по всем сразу, поэтому в
-// этом случае specialization на бэк не уходит, а фильтрация по
-// специальности остаётся клиентской и работает только по уже подгруженным
-// страницам (тот же компромисс, что и с фильтрами на /clinics).
+// (как на /clinics). specialization принимает несколько значений через
+// запятую (проверено живыми запросами) — мультиселект уходит на бэк целиком,
+// без клиентской доводки.
 const PAGE_SIZE = 8;
 
 type Props = {
@@ -67,8 +64,8 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
   const selectedCity = isHydrated ? storeCity : initialCity;
 
   // 2. Собираем реальные фильтры и отдаём их API — город/онлайн/оценка/
-  // цена/стаж/текстовый поиск реально сужают выборку на бэке. Специализация
-  // уходит на бэк только если выбрана ровно одна (см. комментарий выше).
+  // цена/стаж/текстовый поиск/специализация (в т.ч. несколько через запятую)
+  // реально сужают выборку на бэке.
   const [priceMin, priceMax] = currentPrice
     ? currentPrice.split("-").map(Number)
     : [undefined, undefined];
@@ -90,7 +87,8 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
     max_price: priceMax,
     min_experience: expMin,
     max_experience: expMax,
-    specialization: selectedSpecs.length === 1 ? selectedSpecs[0] : undefined,
+    specialization:
+      selectedSpecs.length > 0 ? selectedSpecs.join(",") : undefined,
     search: activeQuery || undefined,
   };
 
@@ -111,17 +109,6 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
     });
 
   const doctors = data?.pages.flatMap((page) => page.data) ?? [];
-
-  // Страховка на клиенте только для случая 2+ выбранных специальностей —
-  // единственное, что бэк не может отфильтровать сам за один запрос
-  // (фильтрует только уже подгруженные страницы, см. комментарий у PAGE_SIZE).
-  const filteredDoctors = doctors.filter((doc) => {
-    if (selectedSpecs.length > 1 && !selectedSpecs.includes(doc.specialty)) {
-      return false;
-    }
-
-    return true;
-  });
 
   const { isSaved, toggle } = useFavoriteToggle("doctor");
 
@@ -163,12 +150,12 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
           <div className="flex flex-col gap-2">
             {isLoading ? (
               <DoctorSkeleton count={4} variant="horizontal" />
-            ) : filteredDoctors.length === 0 ? (
+            ) : doctors.length === 0 ? (
               <p className="text-center text-muted py-10">
                 По вашим параметрам врачи не найдены
               </p>
             ) : (
-              filteredDoctors.map((doc) => (
+              doctors.map((doc) => (
                 <DoctorCard
                   key={`mob-${doc.id}`}
                   {...doc}
@@ -245,13 +232,13 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
           <div className="mt-2">
             {isLoading ? (
               <DoctorSkeleton count={8} variant="vertical" />
-            ) : filteredDoctors.length === 0 ? (
+            ) : doctors.length === 0 ? (
               <p className="text-center text-muted py-20 text-lg">
                 По вашим параметрам врачи не найдены
               </p>
             ) : (
               <div className="grid grid-cols-4 gap-5 items-stretch">
-                {filteredDoctors.map((doc) => (
+                {doctors.map((doc) => (
                   <DoctorCard
                     key={`desk-${doc.id}`}
                     {...doc}

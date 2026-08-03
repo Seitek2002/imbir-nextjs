@@ -4,9 +4,8 @@ import { FC, useState } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { useQuery } from "@tanstack/react-query";
+import { useSpecializationOptions } from "@/entities/specialization";
 
-import { getSpecializations, referenceKeys } from "@/shared/api";
 import { StarIcon } from "@/shared/assets/icons";
 import { Button, Dropdown, PageHeader, Radio, RangeSlider } from "@/shared/ui";
 
@@ -42,18 +41,10 @@ export const MobileFiltersModal: FC<Props> = ({
   const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
 
-  // Реальный список специализаций с бэка вместо захардкоженных 4 штук —
-  // тот же справочник, что и в десктопном FilterBar.
-  const { data: specializations = [] } = useQuery({
-    queryKey: referenceKeys.specializations(),
-    queryFn: getSpecializations,
-    enabled: !!fields?.specialty,
-    staleTime: 60 * 60 * 1000,
-  });
-  const specialtyOptions = specializations.map((name) => ({
-    value: name,
-    label: name,
-  }));
+  // Тот же общий хук, что и в десктопном FilterBar — один кеш на всё приложение.
+  const { options: specialtyOptions } = useSpecializationOptions(
+    !!fields?.specialty,
+  );
 
   const initialExp = searchParams.get(`${prefix}_exp`)?.split("-").map(Number);
   const [experience, setExperience] = useState<[number, number]>([

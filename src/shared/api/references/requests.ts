@@ -3,17 +3,11 @@ import {
   CountryCode,
   CountryCodesResponse,
   ReferenceListResponse,
+  SpecializationItem,
+  SpecializationListResponse,
 } from "./types";
 
-const fetchReference = async (
-  path: string,
-): Promise<
-  {
-    id: number;
-    name: string;
-    photo?: string;
-  }[]
-> => {
+const fetchReference = async (path: string): Promise<string[]> => {
   const { data } = await apiClient.get<ReferenceListResponse>(path);
   return data.data;
 };
@@ -28,8 +22,16 @@ export const getCountryCodes = async (): Promise<CountryCode[]> => {
 };
 
 export const getCities = () => fetchReference("/api/references/cities/");
-export const getSpecializations = () =>
-  fetchReference("/api/references/specializations/");
+
+// Единственный справочник, отдающий объекты, а не строки — с id и photo
+// (бэк подвёз миграцию значений и картинки после нашей просьбы).
+export const getSpecializations = async (): Promise<SpecializationItem[]> => {
+  const { data } = await apiClient.get<SpecializationListResponse>(
+    "/api/references/specializations/",
+  );
+  return data.data;
+};
+
 export const getClinicTypes = () =>
   fetchReference("/api/references/clinic-types/");
 export const getLanguages = () => fetchReference("/api/references/languages/");
@@ -38,3 +40,8 @@ export const getConditions = () =>
   fetchReference("/api/references/conditions/");
 export const getPaymentMethods = () =>
   fetchReference("/api/references/payment-methods/");
+
+// Появился после нашей просьбы — раньше оба кандидата отвечали 404, и
+// категории собирались на фронте из реальных услуг (см. entities/service).
+export const getServiceCategories = () =>
+  fetchReference("/api/references/service-categories/");

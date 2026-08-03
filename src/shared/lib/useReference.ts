@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 // Поэтому берём с сервера всё человекочитаемое, а сверху кладём локальный
 // набор по умолчанию — чтобы форма оставалась пригодной, даже если справочник
 // пуст или запрос не прошёл (в вебвью это обычное дело).
-const hasCyrillic = (value: string) => /[Ѐ-ӿ]/.test(value);
+export const hasCyrillic = (value: string) => /[Ѐ-ӿ]/.test(value);
 
 export const mergeReference = (
   fallback: string[],

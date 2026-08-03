@@ -100,6 +100,7 @@ export const referenceKeys = {
   conditions: () => [...referenceKeys.all, "conditions"] as const,
   paymentMethods: () => [...referenceKeys.all, "paymentMethods"] as const,
   countryCodes: () => [...referenceKeys.all, "countryCodes"] as const,
+  serviceCategories: () => [...referenceKeys.all, "serviceCategories"] as const,
 };
 
 export const notificationKeys = {

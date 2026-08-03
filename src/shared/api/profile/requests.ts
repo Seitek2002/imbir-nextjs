@@ -56,8 +56,9 @@ export const EMPTY_FAVORITES: FavoritesList = {
   services: [],
 };
 
-// GET заворачивает ответ в { data: {...} }, а POST отдаёт тот же объект без
-// обёртки — принимаем оба варианта.
+// GET и POST оба заворачивают ответ в { data: {...} } (по нашей просьбе бэк
+// привёл их к одному виду — раньше POST отдавал объект без обёртки).
+// Разбираем оба варианта на всякий случай — дешёвая подстраховка.
 const toFavoritesList = (payload: unknown): FavoritesList => {
   const raw = payload as
     | ({ data?: Partial<FavoritesList> } & Partial<FavoritesList>)

@@ -11,6 +11,7 @@ import { DoctorCard } from "@/entities/doctor";
 import { ServiceCard } from "@/entities/service";
 
 import { ROUTES } from "@/shared/config";
+import type { Schedule } from "@/shared/dummies";
 import { parsePrice } from "@/shared/lib/price";
 
 import { SavedItem, SavedType } from "../model";
@@ -24,6 +25,19 @@ const toRating = (value?: string | null) => {
   if (!value) return undefined;
   const parsed = parseFloat(value);
   return Number.isNaN(parsed) ? undefined : parsed;
+};
+
+// DoctorCard ждёт полноценный Workplace (со schedule) только чтобы прочитать
+// clinicName — расписание в избранном не нужно и не приходит.
+const EMPTY_SCHEDULE: Schedule = {
+  mon: null,
+  tue: null,
+  wed: null,
+  thu: null,
+  fri: null,
+  sat: null,
+  sun: null,
+  lunchBreak: null,
 };
 
 export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
@@ -59,14 +73,24 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
     if (item.type === "doctor") {
       const { id, full_name, specialty, photo, rating, experience_years } =
         item.data;
+      const clinic = item.data.clinic;
       return (
         <DoctorCard
           key={`doctor-${id}`}
           id={id}
           name={full_name}
           specialty={specialty}
-          // Мест работы в избранном нет — карточка покажет «Не указана»
-          workplaces={[]}
+          workplaces={
+            clinic
+              ? [
+                  {
+                    clinicId: String(clinic.id),
+                    clinicName: clinic.name,
+                    schedule: EMPTY_SCHEDULE,
+                  },
+                ]
+              : []
+          }
           experience={experience_years ?? 0}
           rating={toRating(rating)}
           image={photo ?? undefined}
@@ -96,13 +120,15 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
       );
     }
 
-    const { id, name, category, price } = item.data;
+    const { id, name, category, price, clinic } = item.data;
     return (
       <ServiceCard
         key={`service-${id}`}
         id={String(id)}
         name={name}
         category={category}
+        clinic={clinic?.name}
+        clinicId={clinic ? String(clinic.id) : undefined}
         price={parsePrice(price)}
         isSaved
         onSave={() => services.toggle(id)}

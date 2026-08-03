@@ -16,15 +16,17 @@ import {
   ServicePulmonology,
 } from "@/shared/assets/images";
 import { ROUTES } from "@/shared/config";
+import { hasCyrillic } from "@/shared/lib/useReference";
 
 // Сколько плиток показываем — одинаково на Главной и в блоке «Категории»
 // глобального поиска, чтобы наборы не разъезжались.
 export const SPECIALIZATION_TILES_LIMIT = 8;
 
-// Иллюстраций у нас восемь, а справочник с бэка — это ~60 сырых названий, где
-// одно и то же встречается в разных формах («Кардиолог» и «Кардиология», «ЛОР»,
-// «ЛОР-врач» и «Отоларинголог»). Поэтому картинку подбираем по корню названия,
-// а не по точному совпадению; для остальных карточка рисует нейтральный значок.
+// Справочник теперь отдаёт свою картинку (photo) для части специализаций —
+// её и используем в первую очередь. Эти правила остаются подстраховкой для
+// значений без photo, плюс парой строк-мусора ("das", "test" — старые тестовые
+// записи), которые попадаются раньше нормальных названий и не должны занимать
+// место в выдаче.
 const IMAGE_RULES: [RegExp, StaticImageData][] = [
   [/^лор|отоларинголог/i, ServiceLor],
   [/невролог/i, ServiceNevrology],
@@ -43,23 +45,31 @@ export const getSpecializationImage = (
 
 // Справочник почти не меняется — держим его в кеше подольше. Ключ тот же, что
 // у фильтров (FilterBar/MobileFiltersModal), так что на всё приложение уходит
-// один запрос.
-export const useSpecializations = () =>
-  useQuery({
+// один запрос. Мусорные записи без кириллицы ("das", "test") отфильтровываем
+// здесь же, до попадания в тайлы/дропдауны.
+export const useSpecializations = (enabled = true) => {
+  const query = useQuery({
     queryKey: referenceKeys.specializations(),
     queryFn: getSpecializations,
+    enabled,
     staleTime: 60 * 60 * 1000,
   });
+
+  return {
+    ...query,
+    data: query.data?.filter((item) => hasCyrillic(item.name)),
+  };
+};
 
 // Готовые options для Dropdown. Значение = само название: именно оно уходит на
 // бэк в primary_specializations/narrow_specializations и по нему же работают
 // фильтры врачей, поэтому никаких собственных кодов ("cardiologist") тут быть
 // не должно.
-export const useSpecializationOptions = () => {
-  const { data = [], isLoading } = useSpecializations();
+export const useSpecializationOptions = (enabled = true) => {
+  const { data = [], isLoading } = useSpecializations(enabled);
 
   return {
-    options: data.map((name) => ({ label: name, value: name })),
+    options: data.map((item) => ({ label: item.name, value: item.name })),
     isLoading,
   };
 };
@@ -67,10 +77,10 @@ export const useSpecializationOptions = () => {
 export const useSpecializationTiles = (limit = SPECIALIZATION_TILES_LIMIT) => {
   const { data = [], isLoading } = useSpecializations();
 
-  const tiles = data.slice(0, limit).map(({ name }) => {
+  const tiles = data.slice(0, limit).map(({ name, photo }) => {
     return {
       name,
-      image: getSpecializationImage(name),
+      image: photo ?? getSpecializationImage(name),
       href: `${ROUTES.SPECIALISTS}?doc_spec=${encodeURIComponent(name)}`,
     };
   });

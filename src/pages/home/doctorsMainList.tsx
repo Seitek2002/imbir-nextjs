@@ -19,13 +19,10 @@ import { Button } from "@/shared/ui";
 // Карусель на Главной раньше грузила только дефолтную (небольшую) страницу
 // врачей и фильтровала её целиком на клиенте — из-за этого фильтры FilterBar
 // могли молча не находить реальные совпадения, если они были за пределами
-// первой страницы. Теперь город/онлайн/оценка/цена/стаж и (при одной
-// выбранной специальности) сама специализация уходят в API реальными
-// параметрами — как на /specialists. page_size увеличен, т.к. при 2+
-// выбранных специальностях бэк не может отфильтровать по всем сразу
-// (specialization принимает только одно значение) — в этом случае остаётся
-// клиентская страховка ниже.
-const FULL_LIST_PAGE_SIZE = 200;
+// первой страницы. Теперь город/онлайн/оценка/цена/стаж/специализация (в т.ч.
+// несколько через запятую) уходят в API реальными параметрами — как на
+// /specialists, поэтому достаточно запросить ровно то, что показываем.
+const VISIBLE_COUNT = 8;
 
 const DoctorsListContent = () => {
   const router = useRouter();
@@ -63,8 +60,9 @@ const DoctorsListContent = () => {
     max_price: priceMax,
     min_experience: expMin,
     max_experience: expMax,
-    specialization: selectedSpecs.length === 1 ? selectedSpecs[0] : undefined,
-    page_size: FULL_LIST_PAGE_SIZE,
+    specialization:
+      selectedSpecs.length > 0 ? selectedSpecs.join(",") : undefined,
+    page_size: VISIBLE_COUNT,
   };
 
   const { data: doctors = [], isLoading } = useQuery({
@@ -86,29 +84,15 @@ const DoctorsListContent = () => {
     );
   }
 
-  // Страховка на клиенте только для случая 2+ выбранных специальностей —
-  // единственное, что бэк не может отфильтровать сам за один запрос.
-  const filteredDoctors = doctors.filter((doc) => {
-    if (selectedSpecs.length > 1 && !selectedSpecs.includes(doc.specialty)) {
-      return false;
-    }
-
-    return true;
-  });
-
-  // На Главной показываем только первых 8 врачей — это витрина, за полным
-  // списком ведём на /specialists (кнопка «Все»).
-  const visibleDoctors = filteredDoctors.slice(0, 8);
-
   return (
     <>
       <div className="flex flex-col gap-3 lg:mt-10">
         {/* Мобильный вид */}
         <div className="flex flex-col gap-2 md:hidden">
-          {filteredDoctors.length === 0 && (
+          {doctors.length === 0 && (
             <p className="text-center text-muted py-10">Врачи не найдены</p>
           )}
-          {visibleDoctors.map((doc) => (
+          {doctors.map((doc) => (
             <DoctorCard
               key={`mobile-doc-${doc.id}`}
               {...doc} // <-- ИСПРАВЛЕНО
@@ -126,12 +110,12 @@ const DoctorsListContent = () => {
 
         {/* Десктоп вид */}
         <div className="hidden md:grid md:grid-cols-4 gap-3 items-stretch">
-          {filteredDoctors.length === 0 && (
+          {doctors.length === 0 && (
             <p className="col-span-4 text-center text-muted py-20 text-lg">
               По вашим параметрам врачи не найдены
             </p>
           )}
-          {visibleDoctors.map((doc) => (
+          {doctors.map((doc) => (
             <DoctorCard
               key={`desktop-doc-${doc.id}`}
               {...doc} // <-- ИСПРАВЛЕНО

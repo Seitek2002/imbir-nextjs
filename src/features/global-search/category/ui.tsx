@@ -9,7 +9,7 @@ type Props = {
   title: string;
   // Иллюстрация есть не у каждой специализации из справочника — для остальных
   // SpecializationIllustration рисует нейтральный значок.
-  image?: StaticImageData;
+  image?: StaticImageData | string;
   href?: string;
   onClick?: () => void;
 };
