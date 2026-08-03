@@ -41,12 +41,6 @@ export const getSpecializationImage = (
 ): StaticImageData | undefined =>
   IMAGE_RULES.find(([pattern]) => pattern.test(name))?.[1];
 
-export type SpecializationTile = {
-  name: string;
-  image?: StaticImageData;
-  href: string;
-};
-
 // Справочник почти не меняется — держим его в кеше подольше. Ключ тот же, что
 // у фильтров (FilterBar/MobileFiltersModal), так что на всё приложение уходит
 // один запрос.
@@ -73,11 +67,13 @@ export const useSpecializationOptions = () => {
 export const useSpecializationTiles = (limit = SPECIALIZATION_TILES_LIMIT) => {
   const { data = [], isLoading } = useSpecializations();
 
-  const tiles: SpecializationTile[] = data.slice(0, limit).map((name) => ({
-    name,
-    image: getSpecializationImage(name),
-    href: `${ROUTES.SPECIALISTS}?doc_spec=${encodeURIComponent(name)}`,
-  }));
+  const tiles = data.slice(0, limit).map(({ name }) => {
+    return {
+      name,
+      image: getSpecializationImage(name),
+      href: `${ROUTES.SPECIALISTS}?doc_spec=${encodeURIComponent(name)}`,
+    };
+  });
 
   return { tiles, isLoading, limit };
 };

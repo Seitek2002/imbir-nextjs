@@ -5,8 +5,18 @@ import {
   ReferenceListResponse,
 } from "./types";
 
-const fetchReference = async (path: string): Promise<string[]> => {
+const fetchReference = async (
+  path: string,
+): Promise<
+  {
+    id: number;
+    name: string;
+    photo?: string;
+  }[]
+> => {
   const { data } = await apiClient.get<ReferenceListResponse>(path);
+  console.log(data);
+
   return data.data;
 };
 

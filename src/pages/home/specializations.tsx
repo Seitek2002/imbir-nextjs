@@ -47,25 +47,27 @@ export const SpecializationsSection = () => {
                 <div className="h-5 w-24 skeleton rounded" />
               </div>
             ))
-          : tiles.map(({ name, image, href }) => (
-              <Link
-                key={name}
-                href={href}
-                className={`group ${CARD_CLASS} cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all duration-200`}
-              >
-                <div className="relative w-20 h-20 md:w-28 md:h-28 shrink-0">
-                  <SpecializationIllustration
-                    image={image}
-                    name={name}
-                    sizes="(min-width: 768px) 112px, 80px"
-                    className="group-hover:scale-105 transition-transform duration-200"
-                  />
-                </div>
-                <span className="text-sm md:text-base font-medium text-foreground text-center leading-snug">
-                  {name}
-                </span>
-              </Link>
-            ))}
+          : tiles.map(({ name, image, href }) => {
+              return (
+                <Link
+                  key={name}
+                  href={href}
+                  className={`group ${CARD_CLASS} cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all duration-200`}
+                >
+                  <div className="relative w-20 h-20 md:w-28 md:h-28 shrink-0">
+                    <SpecializationIllustration
+                      image={image}
+                      name={name}
+                      sizes="(min-width: 768px) 112px, 80px"
+                      className="group-hover:scale-105 transition-transform duration-200"
+                    />
+                  </div>
+                  <span className="text-sm md:text-base font-medium text-foreground text-center leading-snug">
+                    {name}
+                  </span>
+                </Link>
+              );
+            })}
       </div>
     </section>
   );
