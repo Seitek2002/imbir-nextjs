@@ -2,14 +2,13 @@
 
 import { FC, useRef, useState } from "react";
 
-import { DEFAULT_CLINIC_TYPES } from "@/pages/register/model/constants";
-
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 import { FieldRow, UploadIcon } from "@/entities/clinic-profile";
 
 import { getClinicTypes, referenceKeys } from "@/shared/api";
+import { DEFAULT_CLINIC_TYPES } from "@/shared/config";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import {
   Button,

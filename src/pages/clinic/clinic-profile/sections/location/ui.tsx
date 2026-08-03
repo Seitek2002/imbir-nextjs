@@ -4,8 +4,6 @@ import { FC, useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 
-import { DEFAULT_COUNTRIES } from "@/pages/register/model/constants";
-
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import {
@@ -15,7 +13,7 @@ import {
 } from "@/entities/clinic-profile";
 
 import { getCities, getCountryCodes, referenceKeys } from "@/shared/api";
-import { CITIES_BY_COUNTRY } from "@/shared/config";
+import { CITIES_BY_COUNTRY, DEFAULT_COUNTRIES } from "@/shared/config";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import { Dropdown, Input, PhoneInput } from "@/shared/ui";
 

@@ -3,9 +3,9 @@
 import { useRef } from "react";
 
 import { colors } from "@/shared/config";
+import { maskDate } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui";
 
-import { maskDate } from "../model/constants";
 import type { ClinicFormData } from "../model/types";
 import { PhotoThumb } from "./PhotoThumb";
 

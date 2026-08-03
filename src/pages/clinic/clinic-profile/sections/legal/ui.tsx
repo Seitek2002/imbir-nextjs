@@ -2,8 +2,6 @@
 
 import { FC, useRef, useState } from "react";
 
-import { maskDate } from "@/pages/register/model/constants";
-
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import {
@@ -14,6 +12,7 @@ import {
   useClinicCabinet,
 } from "@/entities/clinic-profile";
 
+import { maskDate } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui";
 
 export const ClinicLegalPage: FC = () => {

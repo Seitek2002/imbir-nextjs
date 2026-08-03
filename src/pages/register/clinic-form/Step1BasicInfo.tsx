@@ -3,11 +3,10 @@
 import { useRef } from "react";
 
 import { getClinicTypes, referenceKeys } from "@/shared/api";
-import { colors } from "@/shared/config";
+import { DEFAULT_CLINIC_TYPES, colors } from "@/shared/config";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import { Dropdown, Input } from "@/shared/ui";
 
-import { DEFAULT_CLINIC_TYPES } from "../model/constants";
 import type { ClinicFormData } from "../model/types";
 import { PhotoThumb } from "./PhotoThumb";
 

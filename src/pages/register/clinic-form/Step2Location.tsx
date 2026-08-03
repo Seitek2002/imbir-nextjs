@@ -3,11 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { getCities, getCountryCodes, referenceKeys } from "@/shared/api";
-import { CITIES_BY_COUNTRY, colors } from "@/shared/config";
+import { CITIES_BY_COUNTRY, DEFAULT_COUNTRIES, colors } from "@/shared/config";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import { Dropdown, Input, PhoneInput } from "@/shared/ui";
 
-import { DEFAULT_COUNTRIES } from "../model/constants";
 import type { ClinicFormData } from "../model/types";
 
 type Props = {

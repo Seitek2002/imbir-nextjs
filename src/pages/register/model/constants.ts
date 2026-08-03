@@ -15,17 +15,6 @@ export const STEP_TITLES: Record<DoctorStep, string> = {
 
 export const TOTAL_STEPS = 4;
 
-export const DEFAULT_CLINIC_TYPES = [
-  "Частная",
-  "Государственная",
-  "Многопрофильная",
-  "Специализированная",
-];
-
-// Страны берём из справочника телефонных кодов (там же человеческие названия);
-// этот список — только на случай, если справочник не ответил.
-export const DEFAULT_COUNTRIES = ["Кыргызстан", "Казахстан", "Россия"];
-
 export const DAYS: { key: keyof ClinicFormData["schedule"]; label: string }[] =
   [
     { key: "mon", label: "ПН" },
@@ -67,10 +56,3 @@ export const CLINIC_STEP_TITLES: Record<ClinicStep, string> = {
 };
 
 export const CLINIC_TOTAL_STEPS = 7;
-
-export const maskDate = (raw: string): string => {
-  const digits = raw.replace(/\D/g, "").slice(0, 8);
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 4) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
-  return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4)}`;
-};
