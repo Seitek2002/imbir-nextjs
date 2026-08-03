@@ -15,8 +15,6 @@ const fetchReference = async (
   }[]
 > => {
   const { data } = await apiClient.get<ReferenceListResponse>(path);
-  console.log(data);
-
   return data.data;
 };
 
