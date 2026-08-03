@@ -73,7 +73,11 @@ export const CityConfirmBanner = () => {
   };
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+    // На мобиле баннер приподнят над нижней полосой экрана: там живут либо
+    // таб-панель, либо закреплённые кнопки действий («Добавить специалиста»,
+    // «Записаться»). Баннер шире их всех и лежит поверх (z-50), поэтому при
+    // bottom-4 он молча перехватывал нажатия по этим кнопкам.
+    <div className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
       <div className="bg-white rounded-2xl shadow-lg border border-border px-4 py-3 flex items-center gap-3">
         <div className="size-8 rounded-full bg-[#FEF3F0] flex items-center justify-center shrink-0">
           <GeoIcon className="size-4 text-primary" />
