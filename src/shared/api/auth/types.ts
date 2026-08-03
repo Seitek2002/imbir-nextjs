@@ -117,8 +117,8 @@ export type RegisterDoctorRequest = {
     documents?: File[];
   };
   step5: {
-    primary_specializations: string[];
-    narrow_specializations: string[];
+    primary_specialization_ids: number[];
+    narrow_specialization_ids: number[];
     additional_services?: string;
   };
   step6: {
@@ -166,8 +166,8 @@ export type RegisterClinicRequest = {
     documents?: File[];
   };
   step5: {
-    primary_specializations: string[];
-    narrow_specializations: string[];
+    primary_specialization_ids: number[];
+    narrow_specialization_ids: number[];
     additional_services?: string;
   };
   step6: {

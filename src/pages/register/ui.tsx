@@ -9,6 +9,11 @@ import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 
 import {
+  resolveSpecializationIds,
+  useSpecializations,
+} from "@/entities/specialization";
+
+import {
   getClinicById,
   registerClientFn,
   registerClinicFn,
@@ -173,6 +178,11 @@ export const RegisterPage = () => {
   const [activeForm, setActiveForm] = useState<ActiveForm>("role");
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [inviteClinic, setInviteClinic] = useState<InviteClinic | undefined>();
+
+  // Dropdown/текстовые поля специализации хранят название (см.
+  // useSpecializationOptions), а бэк на запись принимает только id — резолвим
+  // перед отправкой, как и в профилях врача/клиники.
+  const { data: specializationList = [] } = useSpecializations();
 
   useEffect(() => {
     const clinicId = searchParams.get("clinicId");
@@ -424,12 +434,16 @@ export const RegisterPage = () => {
             data.certificates.length > 0 ? data.certificates : undefined,
         },
         step5: {
-          primary_specializations: data.specialization
-            ? [data.specialization]
-            : [],
-          narrow_specializations: data.additionalSpecialization
-            ? [data.additionalSpecialization]
-            : [],
+          primary_specialization_ids: resolveSpecializationIds(
+            data.specialization ? [data.specialization] : [],
+            specializationList,
+          ).ids,
+          narrow_specialization_ids: resolveSpecializationIds(
+            data.additionalSpecialization
+              ? [data.additionalSpecialization]
+              : [],
+            specializationList,
+          ).ids,
           additional_services: data.position || undefined,
         },
         step6: { equipment: [], patient_conditions: [], payment_methods: [] },
@@ -502,17 +516,33 @@ export const RegisterPage = () => {
           license_authority: data.licensingAuthority,
           documents: data.documents.length > 0 ? data.documents : undefined,
         },
-        step5: {
-          primary_specializations: data.mainDirections
-            .split(/[,.]/)
-            .map((s) => s.trim())
-            .filter(Boolean),
-          narrow_specializations: data.narrowDirections
-            .split(/[,.]/)
-            .map((s) => s.trim())
-            .filter(Boolean),
-          additional_services: data.additionalServices || undefined,
-        },
+        step5: (() => {
+          const primary = resolveSpecializationIds(
+            data.mainDirections
+              .split(/[,.]/)
+              .map((s) => s.trim())
+              .filter(Boolean),
+            specializationList,
+          );
+          const narrow = resolveSpecializationIds(
+            data.narrowDirections
+              .split(/[,.]/)
+              .map((s) => s.trim())
+              .filter(Boolean),
+            specializationList,
+          );
+          const unmatched = [...primary.unmatched, ...narrow.unmatched];
+          if (unmatched.length > 0) {
+            toast.error(
+              `Не найдено в справочнике и не сохранено: ${unmatched.join(", ")}`,
+            );
+          }
+          return {
+            primary_specialization_ids: primary.ids,
+            narrow_specialization_ids: narrow.ids,
+            additional_services: data.additionalServices || undefined,
+          };
+        })(),
         step6: {
           equipment: data.equipment,
           patient_conditions: data.patientConditions,
