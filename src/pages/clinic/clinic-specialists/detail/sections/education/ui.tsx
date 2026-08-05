@@ -11,10 +11,10 @@ import { useSpecialistDetail } from "../../useSpecialistDetail";
 
 export const ClinicSpecialistEducationPage: FC = () => {
   const params = useParams<{ id: string }>() ?? { id: "" };
-  const { specialist, isLoading } = useSpecialistDetail(params.id);
+  const { specialist, initialForm, isLoading } = useSpecialistDetail(params.id);
   const [isEditing, setIsEditing] = useState(false);
 
-  const { d, set, notifyNotConnected } = useSpecialistForm();
+  const { d, set, notifyNotConnected } = useSpecialistForm(initialForm);
 
   if (isLoading || !specialist) {
     return (

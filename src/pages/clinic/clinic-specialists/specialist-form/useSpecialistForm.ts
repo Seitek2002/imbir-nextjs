@@ -17,6 +17,17 @@ export const useSpecialistForm = (initial?: Partial<SpecialistFormState>) => {
     ...initial,
   });
 
+  // Данные специалиста грузятся асинхронно, а useState-инициализатор отработает
+  // лишь однажды (на первом рендере initial обычно ещё пустой). Пересеиваем
+  // форму, когда приходит новое начальное значение — его ссылку даёт
+  // мемоизированный initialForm из useSpecialistDetail, поэтому это происходит
+  // один раз на загрузку, а не на каждый рендер.
+  const [seededFrom, setSeededFrom] = useState(initial);
+  if (initial && initial !== seededFrom) {
+    setSeededFrom(initial);
+    setD({ ...EMPTY_SPECIALIST_FORM, ...initial });
+  }
+
   const set = <K extends keyof SpecialistFormState>(
     key: K,
     value: SpecialistFormState[K],

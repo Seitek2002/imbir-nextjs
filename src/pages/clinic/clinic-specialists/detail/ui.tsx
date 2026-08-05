@@ -35,16 +35,13 @@ const HUB_ITEMS = [
 export const ClinicSpecialistDetailPage: FC = () => {
   const params = useParams<{ id: string }>() ?? { id: "" };
   const id = params.id;
-  const { specialist, isLoading, deleteMutation } = useSpecialistDetail(id);
+  const { specialist, initialForm, isLoading, deleteMutation } =
+    useSpecialistDetail(id);
 
   const [isEditing, setIsEditing] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { d, set, notifyNotConnected } = useSpecialistForm({
-    fullName: specialist?.full_name ?? "",
-    specialization: specialist?.specialty ?? "",
-    photoPreview: specialist?.photo ?? undefined,
-  });
+  const { d, set, notifyNotConnected } = useSpecialistForm(initialForm);
 
   const handleSave = () => {
     notifyNotConnected();
