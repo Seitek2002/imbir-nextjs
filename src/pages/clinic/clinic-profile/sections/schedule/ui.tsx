@@ -13,10 +13,7 @@ import {
   useClinicCabinet,
 } from "@/entities/clinic-profile";
 
-import { Checkbox } from "@/shared/ui";
-
-const timeInput =
-  "border border-border-soft rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none disabled:opacity-40";
+import { Checkbox, TimeField } from "@/shared/ui";
 
 export const ClinicSchedulePage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
@@ -53,14 +50,19 @@ export const ClinicSchedulePage: FC = () => {
     if (!days) return;
     await saveProfile({
       schedule: Object.fromEntries(
-        DAY_LABELS.map(({ key }) => [
-          DAY_API[key],
-          {
-            from: days[key].open,
-            to: days[key].close,
-            enabled: days[key].enabled,
-          },
-        ]),
+        DAY_LABELS.map(({ key }) => {
+          // По макету отдельного переключателя «Рабочий» нет: день считается
+          // рабочим, если заполнено и начало, и конец. Пустые поля = выходной.
+          const enabled = !!(days[key].open && days[key].close);
+          return [
+            DAY_API[key],
+            {
+              from: enabled ? days[key].open : "",
+              to: enabled ? days[key].close : "",
+              enabled,
+            },
+          ];
+        }),
       ),
       lunch_break: { from: lunchStart, to: lunchEnd },
       emergency_24_7: emergency24,
@@ -91,6 +93,12 @@ export const ClinicSchedulePage: FC = () => {
     >
       <div className="bg-white rounded-3xl border border-border p-5">
         <div className="mb-6">
+          {isEditing && (
+            <p className="text-sm text-muted mb-4">
+              Укажите время работы клиники (с какого времени до какого),
+              оставьте поля пустыми в дни, когда клиника не работает.
+            </p>
+          )}
           <div className="text-sm font-medium text-foreground mb-4">
             График работы
           </div>
@@ -104,28 +112,14 @@ export const ClinicSchedulePage: FC = () => {
                     <span className="w-8 text-sm text-secondary shrink-0">
                       {ru}
                     </span>
-                    <input
-                      type="time"
+                    <TimeField
                       value={day.open}
-                      disabled={!day.enabled}
-                      onChange={(e) => setDay(key, { open: e.target.value })}
-                      className={timeInput}
+                      onChange={(v) => setDay(key, { open: v })}
                     />
                     <span className="text-muted">–</span>
-                    <input
-                      type="time"
+                    <TimeField
                       value={day.close}
-                      disabled={!day.enabled}
-                      onChange={(e) => setDay(key, { close: e.target.value })}
-                      className={timeInput}
-                    />
-                    <Checkbox
-                      className="ml-2"
-                      label="Рабочий"
-                      checked={day.enabled}
-                      onChange={(e) =>
-                        setDay(key, { enabled: e.target.checked })
-                      }
+                      onChange={(v) => setDay(key, { close: v })}
                     />
                   </div>
                 );
@@ -155,19 +149,9 @@ export const ClinicSchedulePage: FC = () => {
           </div>
           {isEditing ? (
             <div className="flex items-center gap-3">
-              <input
-                type="time"
-                value={lunchStart}
-                onChange={(e) => setLunchStart(e.target.value)}
-                className={timeInput}
-              />
+              <TimeField value={lunchStart} onChange={setLunchStart} />
               <span className="text-muted">–</span>
-              <input
-                type="time"
-                value={lunchEnd}
-                onChange={(e) => setLunchEnd(e.target.value)}
-                className={timeInput}
-              />
+              <TimeField value={lunchEnd} onChange={setLunchEnd} />
             </div>
           ) : (
             <span className="text-sm text-foreground">
