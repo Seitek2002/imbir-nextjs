@@ -16,7 +16,7 @@ import {
 } from "@/shared/api";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
-import { Button } from "@/shared/ui";
+import { Button, ConfirmDialog, TimeField } from "@/shared/ui";
 
 const DAYS: { key: keyof WeekSchedule; label: string }[] = [
   { key: "monday", label: "Понедельник" },
@@ -80,24 +80,22 @@ const Toggle: FC<{ on: boolean; onClick: () => void; label?: string }> = ({
     onClick={onClick}
     className={cn(
       "relative w-11 h-6 rounded-full transition-colors shrink-0",
-      on ? "bg-primary" : "bg-border",
+      on ? "bg-primary" : "bg-border-soft",
     )}
   >
     <span
       className={cn(
-        "absolute top-0.5 size-5 rounded-full bg-white shadow transition-transform",
-        on ? "translate-x-5.5" : "translate-x-0.5",
+        "absolute top-0.5 size-5 rounded-full bg-white shadow-sm transition-all duration-200 ease-out",
+        on ? "left-[22px]" : "left-0.5",
       )}
     />
   </button>
 );
 
-const timeInput =
-  "w-24 px-3 py-2 rounded-xl border border-border text-foreground text-sm focus:outline-none focus:border-primary transition-colors bg-white disabled:opacity-40";
-
 export const DoctorSchedulePage: FC = () => {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: doctorCabinetKeys.schedule(),
@@ -152,7 +150,7 @@ export const DoctorSchedulePage: FC = () => {
         </h2>
         <Button
           size="sm"
-          onClick={() => save(toApiBody(form))}
+          onClick={() => setConfirmOpen(true)}
           disabled={isSaving}
         >
           {isSaving ? "Сохранение..." : "Сохранить"}
@@ -183,20 +181,16 @@ export const DoctorSchedulePage: FC = () => {
                 </span>
               </div>
               <div className="flex items-center gap-2 pl-14.5 sm:pl-0">
-                <input
-                  type="time"
+                <TimeField
                   value={day.from}
                   disabled={!day.enabled}
-                  onChange={(e) => setDay(key, { from: e.target.value })}
-                  className={timeInput}
+                  onChange={(v) => setDay(key, { from: v })}
                 />
                 <span className="text-muted">—</span>
-                <input
-                  type="time"
+                <TimeField
                   value={day.to}
                   disabled={!day.enabled}
-                  onChange={(e) => setDay(key, { to: e.target.value })}
-                  className={timeInput}
+                  onChange={(v) => setDay(key, { to: v })}
                 />
               </div>
             </div>
@@ -208,22 +202,14 @@ export const DoctorSchedulePage: FC = () => {
             Обеденный перерыв
           </span>
           <div className="flex items-center gap-2">
-            <input
-              type="time"
+            <TimeField
               value={form.lunchFrom}
-              onChange={(e) =>
-                setForm((p) => (p ? { ...p, lunchFrom: e.target.value } : p))
-              }
-              className={timeInput}
+              onChange={(v) => setForm((p) => (p ? { ...p, lunchFrom: v } : p))}
             />
             <span className="text-muted">—</span>
-            <input
-              type="time"
+            <TimeField
               value={form.lunchTo}
-              onChange={(e) =>
-                setForm((p) => (p ? { ...p, lunchTo: e.target.value } : p))
-              }
-              className={timeInput}
+              onChange={(v) => setForm((p) => (p ? { ...p, lunchTo: v } : p))}
             />
           </div>
         </div>
@@ -246,7 +232,7 @@ export const DoctorSchedulePage: FC = () => {
         <Button
           size="lg"
           className="w-full"
-          onClick={() => save(toApiBody(form))}
+          onClick={() => setConfirmOpen(true)}
           disabled={isSaving}
         >
           {isSaving ? "Сохранение..." : "Сохранить"}
@@ -257,6 +243,19 @@ export const DoctorSchedulePage: FC = () => {
         Свободные слоты для записи пациентов пересчитываются автоматически по
         этому графику.
       </p>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          save(toApiBody(form));
+        }}
+        title="Сохранить изменения?"
+        description="Обновлённое расписание приёма будет сохранено, а свободные слоты пересчитаны по нему."
+        confirmLabel="Сохранить"
+        cancelLabel="Отмена"
+      />
     </DoctorPageLayout>
   );
 };

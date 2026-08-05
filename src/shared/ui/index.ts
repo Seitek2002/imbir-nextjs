@@ -11,6 +11,7 @@ export { StatTiles } from "./stat-tiles";
 export { Modal } from "./modal";
 export { ConfirmDialog } from "./confirm-dialog";
 export { ContactInfoModal } from "./contact-info-modal";
+export { TimeField } from "./time-field";
 
 export { Input, Radio, Checkbox, SearchInput } from "./input";
 export { FilterTabBar } from "./filter-tabs";
