@@ -77,7 +77,6 @@ export const updateClinicProfile = async (
     const { data } = await apiClient.put<ClinicPrivateProfile>(
       "/api/clinic/profile/",
       form,
-      { headers: { "Content-Type": "multipart/form-data" } },
     );
     return data;
   }
@@ -116,7 +115,6 @@ export const uploadClinicDocument = async (
   const { data } = await apiClient.post<ClinicDocument>(
     "/api/clinic/documents/",
     form,
-    { headers: { "Content-Type": "multipart/form-data" } },
   );
   return data;
 };
@@ -138,7 +136,6 @@ export const uploadClinicPhoto = async (file: File): Promise<ClinicPhoto> => {
   const { data } = await apiClient.post<ClinicPhoto>(
     "/api/clinic/photos/",
     form,
-    { headers: { "Content-Type": "multipart/form-data" } },
   );
   return data;
 };

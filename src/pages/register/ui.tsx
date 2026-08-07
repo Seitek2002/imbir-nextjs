@@ -20,7 +20,10 @@ import {
   registerDoctorFn,
   registerPhoneConfirmFn,
   registerPhoneRequestFn,
+  updateClinicProfile,
   updateDoctorProfile,
+  uploadClinicDocument,
+  uploadClinicPhoto,
 } from "@/shared/api";
 import {
   EmailIcon,
@@ -610,6 +613,57 @@ export const RegisterPage = () => {
       setRememberMe(true);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
+
+      // Файлы внутри JSON-шагов регистрации бэкенд не получает. Сохраняем
+      // профиль и вложения отдельными поддерживаемыми endpoint'ами сразу
+      // после создания аккаунта.
+      try {
+        const primary = resolveSpecializationIds(
+          data.mainDirections
+            .split(/[,.]/)
+            .map((s) => s.trim())
+            .filter(Boolean),
+          specializationList,
+        );
+        const narrow = resolveSpecializationIds(
+          data.narrowDirections
+            .split(/[,.]/)
+            .map((s) => s.trim())
+            .filter(Boolean),
+          specializationList,
+        );
+        await updateClinicProfile({
+          name: data.clinicName,
+          clinic_type: data.clinicType,
+          description: data.description,
+          logo: data.logo ?? undefined,
+          country: data.country,
+          city: data.city,
+          address: data.fullAddress,
+          phone: data.phone,
+          website: data.website || undefined,
+          legal_name: data.legalName,
+          reg_number: data.registrationNumber,
+          license_number: data.licenseNumber,
+          license_date: toApiDate(data.licenseDate),
+          license_authority: data.licensingAuthority,
+          primary_specialization_ids: primary.ids,
+          narrow_specialization_ids: narrow.ids,
+          additional_services: data.additionalServices || undefined,
+          equipment: data.equipment,
+          patient_conditions: data.patientConditions,
+          payment_methods: data.paymentMethods,
+        });
+        await Promise.all([
+          ...data.photos.map(uploadClinicPhoto),
+          ...data.documents.map(uploadClinicDocument),
+        ]);
+      } catch {
+        toast.error(
+          "Клиника создана, но часть файлов или данных не сохранилась. Попробуйте загрузить их в кабинете.",
+        );
+      }
+
       toast.success(`Добро пожаловать, ${data.clinicName}!`);
       router.push(ROLE_REDIRECT[res.user.role] ?? "/clinic-profile");
     } catch (err: unknown) {
