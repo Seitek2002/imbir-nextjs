@@ -4,6 +4,7 @@ import { AppointmentStatus } from "../appointments/types";
 export type ClientProfile = {
   first_name: string;
   last_name: string;
+  patronymic?: string | null;
   email: string;
   phone?: string;
   avatar?: string | null;

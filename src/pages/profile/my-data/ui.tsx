@@ -38,11 +38,6 @@ export const ProfileMyDataPage: FC = () => {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
 
-  const savedPatronymic =
-    typeof window !== "undefined"
-      ? (localStorage.getItem("profile_patronymic") ?? "")
-      : "";
-
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
@@ -50,7 +45,7 @@ export const ProfileMyDataPage: FC = () => {
   const initialData: D = {
     firstName: user?.first_name ?? "",
     lastName: user?.last_name ?? "",
-    patronymic: savedPatronymic,
+    patronymic: "",
     phone: user?.phone ?? "",
     email: user?.email ?? "",
     photo: user?.avatar ?? undefined,
@@ -74,6 +69,7 @@ export const ProfileMyDataPage: FC = () => {
             ...prev,
             firstName: profile.first_name ?? prev.firstName,
             lastName: profile.last_name ?? prev.lastName,
+            patronymic: profile.patronymic ?? "",
             phone: profile.phone ?? prev.phone,
             email: profile.email ?? prev.email,
             photo: profile.avatar ?? prev.photo,
@@ -111,18 +107,17 @@ export const ProfileMyDataPage: FC = () => {
       const updated = await updateProfile({
         first_name: d.firstName,
         last_name: d.lastName,
+        patronymic: d.patronymic,
         phone: d.phone || undefined,
         ...(pendingPhoto ? { avatar_upload: pendingPhoto } : {}),
       });
-
-      // Patronymic — localStorage only (not in API schema)
-      localStorage.setItem("profile_patronymic", d.patronymic);
 
       const newAvatar = updated.avatar ?? d.photo;
       const savedData: D = {
         ...d,
         firstName: updated.first_name,
         lastName: updated.last_name,
+        patronymic: updated.patronymic ?? d.patronymic,
         phone: updated.phone ?? d.phone,
         photo: newAvatar,
       };
