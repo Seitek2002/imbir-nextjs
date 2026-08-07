@@ -20,6 +20,7 @@ import {
   registerDoctorFn,
   registerPhoneConfirmFn,
   registerPhoneRequestFn,
+  updateDoctorProfile,
 } from "@/shared/api";
 import {
   EmailIcon,
@@ -390,6 +391,15 @@ export const RegisterPage = () => {
     setIsLoadingDoctor(true);
     try {
       const emptyDay = { from: null, to: null, enabled: false };
+      const primarySpecializations = resolveSpecializationIds(
+        data.specialization ? [data.specialization] : [],
+        specializationList,
+      );
+      const narrowSpecializations = resolveSpecializationIds(
+        data.additionalSpecialization ? [data.additionalSpecialization] : [],
+        specializationList,
+      );
+
       const res = await registerDoctorFn({
         invite_clinic_id: inviteClinic?.clinicId,
         invite_branch_id: inviteClinic?.branchId ?? undefined,
@@ -434,16 +444,8 @@ export const RegisterPage = () => {
             data.certificates.length > 0 ? data.certificates : undefined,
         },
         step5: {
-          primary_specialization_ids: resolveSpecializationIds(
-            data.specialization ? [data.specialization] : [],
-            specializationList,
-          ).ids,
-          narrow_specialization_ids: resolveSpecializationIds(
-            data.additionalSpecialization
-              ? [data.additionalSpecialization]
-              : [],
-            specializationList,
-          ).ids,
+          primary_specialization_ids: primarySpecializations.ids,
+          narrow_specialization_ids: narrowSpecializations.ids,
           additional_services: data.position || undefined,
         },
         step6: { equipment: [], patient_conditions: [], payment_methods: [] },
@@ -457,6 +459,56 @@ export const RegisterPage = () => {
       setRememberMe(true);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
+
+      // Регистрационный endpoint сохраняет только часть профиля врача. Поля,
+      // которые уже поддерживает профильный API, переносим сразу после
+      // создания аккаунта, не заставляя врача повторно заполнять кабинет.
+      try {
+        const education = [
+          ...(data.university
+            ? [
+                {
+                  institution: data.university,
+                  degree: data.diplomaSpecialization,
+                  year: parseInt(data.graduationYear) || 0,
+                },
+              ]
+            : []),
+          ...(data.additionalEducation
+            ? [
+                {
+                  institution: data.additionalEducation,
+                  degree: "",
+                  year: 0,
+                },
+              ]
+            : []),
+        ];
+
+        await updateDoctorProfile({
+          first_name: res.user.first_name,
+          last_name: res.user.last_name,
+          photo: data.photo ?? undefined,
+          primary_specialization_ids: primarySpecializations.ids,
+          narrow_specialization_ids: narrowSpecializations.ids,
+          experience_years: parseInt(data.experience) || 0,
+          work_experience: [
+            {
+              position: data.position,
+              clinic: data.workplace,
+              qualification: data.category,
+              scientific_degree: data.academicDegree,
+            },
+          ],
+          education,
+          license_number: data.licenseNumber,
+        });
+      } catch {
+        toast.error(
+          "Аккаунт создан, но часть данных не сохранилась. Заполните их в кабинете врача.",
+        );
+      }
+
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
       router.push(ROLE_REDIRECT[res.user.role] ?? "/doctor-profile");
     } catch (err: unknown) {

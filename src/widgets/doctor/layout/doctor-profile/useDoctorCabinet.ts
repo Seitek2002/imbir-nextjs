@@ -99,7 +99,7 @@ export const mapApiToProfile = (
     graduationYear: a.education?.[0]?.year ? String(a.education[0].year) : "",
     internship: "",
     residency: "",
-    diplomaSpecialty: "",
+    diplomaSpecialty: a.education?.[0]?.degree ?? "",
     additionalEducation: a.education?.slice(1).map((e) => e.institution) ?? [],
     licenseNumber: a.license_number ?? "",
     certificates: [],
