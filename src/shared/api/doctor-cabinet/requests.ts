@@ -76,7 +76,6 @@ export const updateDoctorProfile = async (
     const { data } = await apiClient.put<DoctorPrivateProfile>(
       "/api/doctor/profile/",
       form,
-      { headers: { "Content-Type": "multipart/form-data" } },
     );
     return data;
   }

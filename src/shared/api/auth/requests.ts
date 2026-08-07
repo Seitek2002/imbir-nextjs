@@ -76,13 +76,18 @@ export const registerPhoneConfirmFn = async (
 export const registerDoctorFn = async (
   body: RegisterDoctorRequest,
 ): Promise<AuthResponse> => {
-  // Бэк ждёт вложенные step-объекты в JSON; multipart со stringified-шагами
-  // он отклоняет ("stepN: Обязательное поле"). Файлы (фото, документы) в JSON
-  // не уходят — грузятся отдельно в кабинете после регистрации.
+  // API объявляет шаги строковыми полями: каждый объект шага нужно передавать
+  // как JSON-строку. Файлы в этот endpoint не входят и загружаются из кабинета
+  // после регистрации.
   const payload = {
     ...body,
-    step1: { ...body.step1, photo: undefined },
-    step4: { ...body.step4, documents: undefined },
+    step1: JSON.stringify({ ...body.step1, photo: undefined }),
+    step2: JSON.stringify(body.step2),
+    step3: JSON.stringify(body.step3),
+    step4: JSON.stringify({ ...body.step4, documents: undefined }),
+    step5: JSON.stringify(body.step5),
+    step6: JSON.stringify(body.step6),
+    step7: JSON.stringify(body.step7),
   };
   const { data } = await apiClient.post<AuthResponse>(
     "/api/auth/register/doctor/",
