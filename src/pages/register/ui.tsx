@@ -617,26 +617,25 @@ export const RegisterPage = () => {
       // Файлы внутри JSON-шагов регистрации бэкенд не получает. Сохраняем
       // профиль и вложения отдельными поддерживаемыми endpoint'ами сразу
       // после создания аккаунта.
-      try {
-        const primary = resolveSpecializationIds(
-          data.mainDirections
-            .split(/[,.]/)
-            .map((s) => s.trim())
-            .filter(Boolean),
-          specializationList,
-        );
-        const narrow = resolveSpecializationIds(
-          data.narrowDirections
-            .split(/[,.]/)
-            .map((s) => s.trim())
-            .filter(Boolean),
-          specializationList,
-        );
-        await updateClinicProfile({
+      const primary = resolveSpecializationIds(
+        data.mainDirections
+          .split(/[,.]/)
+          .map((s) => s.trim())
+          .filter(Boolean),
+        specializationList,
+      );
+      const narrow = resolveSpecializationIds(
+        data.narrowDirections
+          .split(/[,.]/)
+          .map((s) => s.trim())
+          .filter(Boolean),
+        specializationList,
+      );
+      const profileResult = await Promise.allSettled([
+        updateClinicProfile({
           name: data.clinicName,
           clinic_type: data.clinicType,
           description: data.description,
-          logo: data.logo ?? undefined,
           country: data.country,
           city: data.city,
           address: data.fullAddress,
@@ -653,12 +652,30 @@ export const RegisterPage = () => {
           equipment: data.equipment,
           patient_conditions: data.patientConditions,
           payment_methods: data.paymentMethods,
-        });
-        await Promise.all([
-          ...data.photos.map(uploadClinicPhoto),
-          ...data.documents.map(uploadClinicDocument),
-        ]);
-      } catch {
+          schedule: {
+            monday: toDay(data.schedule.mon),
+            tuesday: toDay(data.schedule.tue),
+            wednesday: toDay(data.schedule.wed),
+            thursday: toDay(data.schedule.thu),
+            friday: toDay(data.schedule.fri),
+            saturday: toDay(data.schedule.sat),
+            sunday: toDay(data.schedule.sun),
+          },
+          lunch_break: data.lunchBreak,
+          emergency_24_7: data.emergency247,
+        }),
+        ...(data.logo
+          ? [
+              updateClinicProfile({
+                name: data.clinicName,
+                logo: data.logo,
+              }),
+            ]
+          : []),
+        ...data.photos.map(uploadClinicPhoto),
+        ...data.documents.map(uploadClinicDocument),
+      ]);
+      if (profileResult.some((result) => result.status === "rejected")) {
         toast.error(
           "Клиника создана, но часть файлов или данных не сохранилась. Попробуйте загрузить их в кабинете.",
         );

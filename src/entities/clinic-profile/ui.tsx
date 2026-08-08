@@ -112,7 +112,13 @@ export type ClinicProfileFormHandle = {
   getSpecializationNames: () => { primary: string[]; narrow: string[] };
 };
 
-type Props = ClinicProfile & { isEditing?: boolean };
+type Props = ClinicProfile & {
+  isEditing?: boolean;
+  onUploadPhoto?: (file: File) => Promise<unknown>;
+  onUploadDocument?: (file: File) => Promise<unknown>;
+  isUploadingPhoto?: boolean;
+  isUploadingDocument?: boolean;
+};
 
 export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
   (props, ref) => {
@@ -144,12 +150,18 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
       equipment,
       patientConditions,
       paymentMethods,
+      onUploadPhoto,
+      onUploadDocument,
+      isUploadingPhoto = false,
+      isUploadingDocument = false,
     } = props;
 
     const [d, setD] = useState<FormState>(() => buildState(props));
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [logoPreview, setLogoPreview] = useState<string | undefined>(logo);
     const logoInputRef = useRef<HTMLInputElement>(null);
+    const photoInputRef = useRef<HTMLInputElement>(null);
+    const documentInputRef = useRef<HTMLInputElement>(null);
 
     // При входе в режим редактирования подхватываем актуальные значения профиля
     useEffect(() => {
@@ -218,6 +230,19 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
       const reader = new FileReader();
       reader.onloadend = () => setLogoPreview(reader.result as string);
       reader.readAsDataURL(file);
+    };
+
+    const handleUpload = async (
+      e: React.ChangeEvent<HTMLInputElement>,
+      upload?: (file: File) => Promise<unknown>,
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file || !upload) return;
+      try {
+        await upload(file);
+      } finally {
+        e.target.value = "";
+      }
     };
 
     const days = d.days;
@@ -314,9 +339,23 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-muted mt-2">
-                  Загрузка галереи фото — в разработке
-                </p>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleUpload(e, onUploadPhoto)}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  IconLeft={UploadIcon}
+                  onClick={() => photoInputRef.current?.click()}
+                  disabled={!onUploadPhoto || isUploadingPhoto}
+                  className="mt-3"
+                >
+                  {isUploadingPhoto ? "Загрузка..." : "Добавить фото"}
+                </Button>
               </div>
             </>
           ) : (
@@ -598,9 +637,23 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-muted mt-2">
-                  Загрузка документов — в разработке
-                </p>
+                <input
+                  ref={documentInputRef}
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  onChange={(e) => handleUpload(e, onUploadDocument)}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  IconLeft={UploadIcon}
+                  onClick={() => documentInputRef.current?.click()}
+                  disabled={!onUploadDocument || isUploadingDocument}
+                  className="mt-3"
+                >
+                  {isUploadingDocument ? "Загрузка..." : "Добавить документ"}
+                </Button>
               </div>
             </div>
           ) : (

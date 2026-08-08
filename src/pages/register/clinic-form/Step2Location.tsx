@@ -27,7 +27,7 @@ export const Step2Location = ({ data, onChange }: Props) => {
     staleTime: 60 * 60 * 1000,
   });
   const countryNames = countryCodes.length
-    ? countryCodes.map((c) => c.country)
+    ? Array.from(new Set(countryCodes.map((c) => c.country)))
     : DEFAULT_COUNTRIES;
   const countryOptions = countryNames.map((name) => ({
     label: name,

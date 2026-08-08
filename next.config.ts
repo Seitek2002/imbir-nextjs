@@ -5,8 +5,23 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
+const backendUrl = (
+  process.env.NEXT_PUBLIC_API_URL ?? "http://155.212.216.197:8030"
+).replace(/\/$/, "");
+
 const nextConfig: NextConfig = {
   reactCompiler: true,
+
+  // Файлы отправляем через тот же origin, что и фронтенд: браузер не блокирует
+  // multipart по CORS, а все запросы по-прежнему идут через общий Axios-клиент.
+  async rewrites() {
+    return [
+      {
+        source: "/backend-api/:path*",
+        destination: `${backendUrl}/:path*`,
+      },
+    ];
+  },
 
   experimental: {
     // Старый обработчик скролла ищет первый DOM-узел сегмента через

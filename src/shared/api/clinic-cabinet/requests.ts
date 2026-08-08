@@ -19,6 +19,20 @@ import {
   UpdateBranchRequest,
 } from "./types";
 
+const sendMultipart = async <T>(
+  path: string,
+  method: "POST" | "PUT",
+  form: FormData,
+): Promise<T> => {
+  const { data } = await apiClient.request<T>({
+    baseURL: "/backend-api",
+    url: path,
+    method,
+    data: form,
+  });
+  return data;
+};
+
 export const getClinicProfile = async (): Promise<ClinicPrivateProfile> => {
   const { data } = await apiClient.get<ClinicPrivateProfile>(
     "/api/clinic/profile/",
@@ -55,7 +69,10 @@ export type UpdateClinicProfileBody = {
   patient_conditions?: string[];
   payment_methods?: string[];
   emergency_24_7?: boolean;
-  schedule?: Record<string, { from: string; to: string; enabled: boolean }>;
+  schedule?: Record<
+    string,
+    { from: string | null; to: string | null; enabled: boolean }
+  >;
   lunch_break?: { from: string; to: string };
 };
 
@@ -74,11 +91,11 @@ export const updateClinicProfile = async (
         form.append(key, JSON.stringify(value));
       else form.append(key, String(value));
     });
-    const { data } = await apiClient.put<ClinicPrivateProfile>(
+    return sendMultipart<ClinicPrivateProfile>(
       "/api/clinic/profile/",
+      "PUT",
       form,
     );
-    return data;
   }
 
   const { data } = await apiClient.put<ClinicPrivateProfile>(
@@ -112,11 +129,7 @@ export const uploadClinicDocument = async (
 ): Promise<ClinicDocument> => {
   const form = new FormData();
   form.append("file", file);
-  const { data } = await apiClient.post<ClinicDocument>(
-    "/api/clinic/documents/",
-    form,
-  );
-  return data;
+  return sendMultipart<ClinicDocument>("/api/clinic/documents/", "POST", form);
 };
 
 export const deleteClinicDocument = async (id: number): Promise<void> => {
@@ -133,11 +146,7 @@ export const getClinicPhotos = async (): Promise<ClinicPhoto[]> => {
 export const uploadClinicPhoto = async (file: File): Promise<ClinicPhoto> => {
   const form = new FormData();
   form.append("file", file);
-  const { data } = await apiClient.post<ClinicPhoto>(
-    "/api/clinic/photos/",
-    form,
-  );
-  return data;
+  return sendMultipart<ClinicPhoto>("/api/clinic/photos/", "POST", form);
 };
 
 export const deleteClinicPhoto = async (id: number): Promise<void> => {

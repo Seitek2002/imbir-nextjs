@@ -149,8 +149,17 @@ const PencilIcon = () => (
 );
 
 export const ClinicProfilePage: FC = () => {
-  const { profile, isLoading, isSaving, saveProfile, rawProfile } =
-    useClinicCabinet();
+  const {
+    profile,
+    isLoading,
+    isSaving,
+    saveProfile,
+    rawProfile,
+    uploadPhoto,
+    uploadDocument,
+    isUploadingPhoto,
+    isUploadingDocument,
+  } = useClinicCabinet();
   const [isEditing, setIsEditing] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const formRef = useRef<ClinicProfileFormHandle>(null);
@@ -236,7 +245,15 @@ export const ClinicProfilePage: FC = () => {
         {!isEditing && <BranchesCard branches={rawProfile?.branches ?? []} />}
 
         {profile && (
-          <ClinicProfileForm ref={formRef} {...profile} isEditing={isEditing} />
+          <ClinicProfileForm
+            ref={formRef}
+            {...profile}
+            isEditing={isEditing}
+            onUploadPhoto={uploadPhoto}
+            onUploadDocument={uploadDocument}
+            isUploadingPhoto={isUploadingPhoto}
+            isUploadingDocument={isUploadingDocument}
+          />
         )}
       </div>
 
