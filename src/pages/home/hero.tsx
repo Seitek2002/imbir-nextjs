@@ -14,12 +14,19 @@ export const Hero: FC = () => {
   const router = useRouter();
   const [symptom, setSymptom] = useState("");
 
-  // Hand the question to the AI assistant: the chat page reads `?ask` and sends
-  // it automatically.
+  // Открыть ИИ-помощника без вопроса. Без ?ai=1 это была ссылка на голый
+  // /chat — он открывал список переписок и не выбирал ни одну (на десктопе
+  // «Выберите чат»), хотя карточка обещает разговор с помощником.
+  const assistantHref = `${ROUTES.CHATS}?ai=1`;
+
+  // Передаём вопрос ИИ-помощнику: страница чата читает ?ask и отправляет его
+  // автоматически.
   const askAssistant = () => {
     const query = symptom.trim();
     router.push(
-      query ? `${ROUTES.CHATS}?ask=${encodeURIComponent(query)}` : ROUTES.CHATS,
+      query
+        ? `${ROUTES.CHATS}?ask=${encodeURIComponent(query)}`
+        : assistantHref,
     );
   };
 
@@ -59,7 +66,7 @@ export const Hero: FC = () => {
 
           <div className="border border-primary rounded-3xl bg-white p-4 w-full md:w-105 flex flex-col gap-4">
             <Link
-              href={ROUTES.CHATS}
+              href={assistantHref}
               className="flex items-center gap-3 group cursor-pointer"
             >
               <div className="w-12 h-12 overflow-hidden rounded-full shrink-0">
@@ -85,7 +92,7 @@ export const Hero: FC = () => {
 
             <div className="flex justify-between items-center">
               <Link
-                href={ROUTES.CHATS}
+                href={assistantHref}
                 className="text-sm text-primary hover:underline font-medium"
               >
                 Перейти в чат

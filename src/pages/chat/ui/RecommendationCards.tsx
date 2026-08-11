@@ -19,10 +19,15 @@ const GroupLabel: FC<{ label: string }> = ({ label }) => (
 // блоком, а не внутри текстового пузыря MessageBubble — иначе они были бы
 // зажаты в его 65–75% ширины колонки.
 export const RecommendationCards: FC<{
-  recommendations: AiRecommendations;
+  recommendations?: AiRecommendations | null;
 }> = ({ recommendations }) => {
   const router = useRouter();
-  const { doctors, clinics, services } = recommendations;
+  // Ответы бэка нигде рантаймом не валидируются, а тип обещает три
+  // обязательных массива. Если придёт частичный объект (или пустой список
+  // вместо объекта — обычная форма для пустой связи у DRF), голая
+  // деструктуризация дала бы undefined.length и уронила бы ВСЮ страницу чата
+  // в error boundary. Дефолты держат этот удар.
+  const { doctors = [], clinics = [], services = [] } = recommendations ?? {};
 
   if (doctors.length === 0 && clinics.length === 0 && services.length === 0) {
     return null;

@@ -3,7 +3,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -78,36 +78,46 @@ const EmptyState = () => (
   </div>
 );
 
-// One-shot query params, read on the client only — this workspace mounts after
-// the auth gate, so there is no SSR pass to mismatch against.
-// `?ask=` — a symptom typed on the home hero, goes to the AI assistant.
-// `?room=` — a room id to open right away (e.g. after "Написать" on a doctor page).
-const readAsk = (): string | undefined => {
-  if (typeof window === "undefined") return undefined;
-  return (
-    new URLSearchParams(window.location.search).get("ask")?.trim() || undefined
-  );
-};
+// Одноразовые параметры входа в чат:
+//   ?ask=<текст> — симптом с главной: открыть ИИ-помощника и сразу отправить
+//   ?ai=1        — просто открыть ИИ-помощника («Перейти в чат» на главной)
+//   ?room=<id>   — открыть переписку с пользователем (кнопка «Написать»)
+//
+// Раньше это читалось императивно из window.location внутри инициализатора
+// useState. Так делать нельзя: ChatWorkspace монтируется НЕ на первом рендере
+// страницы — до гидратации persist-стора `user` ещё null и рендерится
+// LoginPrompt (см. ChatPage внизу файла). Инициализатор срабатывал в момент,
+// который ничем не гарантирован, и параметр терялся. useSearchParams реактивен
+// и отдаёт значение независимо от того, когда воркспейс смонтировался.
+type EntryParams = { ask?: string; roomId: number | null };
 
-const readRoomParam = (): number | null => {
-  if (typeof window === "undefined") return null;
-  const raw = new URLSearchParams(window.location.search).get("room");
-  const id = raw ? Number(raw) : NaN;
-  return Number.isInteger(id) && id > 0 ? id : null;
+// «Чат не выбран» — это null, а не 0: у ИИ-помощника id именно 0
+// (AI_ROOM_ID), поэтому проверять roomId на truthy нельзя.
+const readEntryParams = (params: URLSearchParams): EntryParams => {
+  const ask = params.get("ask")?.trim() || undefined;
+  if (ask || params.get("ai") === "1") return { ask, roomId: AI_ROOM_ID };
+
+  const id = Number(params.get("room"));
+  return { roomId: Number.isInteger(id) && id > 0 ? id : null };
 };
 
 const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
   const router = useRouter();
-  const [pendingAsk, setPendingAsk] = useState<string | undefined>(readAsk);
-  const [activeId, setActiveId] = useState<number | null>(() =>
-    pendingAsk ? AI_ROOM_ID : readRoomParam(),
-  );
+  const searchParams = useSearchParams() ?? new URLSearchParams();
+  const { ask: askParam, roomId: entryRoomId } = readEntryParams(searchParams);
+
+  const [pendingAsk, setPendingAsk] = useState<string | undefined>(askParam);
+  const [activeId, setActiveId] = useState<number | null>(entryRoomId);
   const [search, setSearch] = useState("");
 
-  // Strip the one-shot params so a refresh doesn't repeat them (no state change).
+  // Чистим одноразовые параметры из URL — уже ПОСЛЕ того, как они прочитаны в
+  // состояние выше, иначе перезагрузка страницы повторно отправила бы симптом.
+  // replaceState не уведомляет роутер Next, поэтому useSearchParams не отдаст
+  // пустое значение и состояние не сбросится.
   useEffect(() => {
-    if (window.location.search)
+    if (window.location.search) {
       window.history.replaceState(null, "", ROUTES.CHATS);
+    }
   }, []);
 
   const { data: rooms } = useQuery({
