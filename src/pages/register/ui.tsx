@@ -312,7 +312,9 @@ export const RegisterPage = () => {
   const canContinueClient =
     clientAuthMethod === "email"
       ? !!(formData.name && formData.surname && formData.email)
-      : !!(formData.name && formData.surname && phone);
+      : // isRequestingCode учитывается только в телефонной ветке: почтовая
+        // ничего не запрашивает у бэка, шаг переключается синхронно.
+        !!(formData.name && formData.surname && phone) && !isRequestingCode;
 
   const canSubmitClient =
     !!formData.password &&
@@ -322,7 +324,7 @@ export const RegisterPage = () => {
   const handleClientFormSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (clientStep === 1) {
-      if (!canContinueClient || isRequestingCode) return;
+      if (!canContinueClient) return;
       void handleClientContinue();
       return;
     }
@@ -1020,7 +1022,7 @@ export const RegisterPage = () => {
                 type="submit"
                 className="w-full justify-center md:h-14 md:text-lg"
                 size="lg"
-                disabled={!canContinueClient || isRequestingCode}
+                disabled={!canContinueClient}
                 loading={isRequestingCode}
               >
                 Продолжить
