@@ -21,6 +21,10 @@ export const IconBtn = forwardRef<HTMLButtonElement, Props>(
       loading,
       variant = "default",
       size = "xs",
+      // См. комментарий про type в shared/ui/button/ui.tsx — иконочные кнопки
+      // (назад, закрыть, показать пароль) внутри формы тем более не должны
+      // сабмитить её по умолчанию.
+      type = "button",
       ...props
     },
     ref,
@@ -39,7 +43,7 @@ export const IconBtn = forwardRef<HTMLButtonElement, Props>(
     };
 
     const baseStyles =
-      "relative inline-flex items-center justify-center cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none " +
+      "relative inline-flex items-center justify-center cursor-pointer transition-all rounded-full outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.45)] disabled:opacity-50 disabled:pointer-events-none " +
       sizes[size];
 
     const variants: Record<Variant, string> = {
@@ -53,6 +57,7 @@ export const IconBtn = forwardRef<HTMLButtonElement, Props>(
     return (
       <button
         ref={ref}
+        type={type}
         className={cn(baseStyles, variants[variant], className)}
         {...props}
         disabled={props.disabled || loading}

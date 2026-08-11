@@ -80,7 +80,10 @@ export const DoctorRegistrationForm = ({
         ? !!data.password && data.password === data.confirmPassword
         : true;
 
+  // Один обработчик и на клик по кнопке, и на Enter из любого поля шага.
+  // Промежуточные шаги ведут к следующему, последний — сабмитит всю форму.
   const handleContinue = () => {
+    if (!isValid || isLoading) return;
     if (step < 4) {
       onContinue();
     } else {
@@ -113,7 +116,13 @@ export const DoctorRegistrationForm = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <form
+      className="flex-1 flex flex-col"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleContinue();
+      }}
+    >
       <ProgressBar current={step} total={TOTAL_STEPS} />
       <h2 className="text-2xl font-semibold text-foreground mb-6">
         {STEP_TITLES[step]}
@@ -121,10 +130,9 @@ export const DoctorRegistrationForm = ({
       {steps[step]}
       <FormSubmitButton
         label={step === 4 ? "Завершить регистрацию" : "Продолжить"}
-        onClick={handleContinue}
         disabled={!isValid || isLoading}
         loading={isLoading}
       />
-    </div>
+    </form>
   );
 };

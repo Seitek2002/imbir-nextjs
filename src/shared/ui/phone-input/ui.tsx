@@ -295,6 +295,15 @@ export const PhoneInput: FC<Props> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
+                // Поиск страны живёт внутри <form> страницы авторизации.
+                // Без этого Enter здесь сабмитил бы всю форму регистрации
+                // вместо выбора страны.
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter") return;
+                  e.preventDefault();
+                  const [first] = filteredCountries;
+                  if (first) handleSelectCountry(first);
+                }}
                 className="w-full text-base md:text-sm border border-border-soft text-foreground rounded-xl md:rounded-md py-2.5 md:py-1.5 px-3 outline-none focus:border-primary focus:shadow-[0_0_1px_3px_rgba(245,101,62,0.1)] transition-all"
               />
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX, useEffect, useState } from "react";
+import { type FormEvent, JSX, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -303,6 +303,31 @@ export const RegisterPage = () => {
   const handleContinueRole = () => {
     if (!selectedRole) return;
     setActiveForm(selectedRole);
+  };
+
+  // Условия готовности шагов клиентской формы. Вынесены в переменные, потому
+  // что их проверяют двое: атрибут disabled у кнопки и обработчик сабмита
+  // (Enter обходит disabled — браузер сабмитит форму независимо от состояния
+  // кнопки). Общая переменная не даёт этим двум проверкам разойтись.
+  const canContinueClient =
+    clientAuthMethod === "email"
+      ? !!(formData.name && formData.surname && formData.email)
+      : !!(formData.name && formData.surname && phone);
+
+  const canSubmitClient =
+    !!formData.password &&
+    !!formData.confirmPassword &&
+    (clientAuthMethod === "email" || verificationCode.length === 4);
+
+  const handleClientFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (clientStep === 1) {
+      if (!canContinueClient || isRequestingCode) return;
+      void handleClientContinue();
+      return;
+    }
+    if (!canSubmitClient || isLoadingClient) return;
+    void handleSubmitClient();
   };
 
   const handleClientContinue = async () => {
@@ -724,7 +749,13 @@ export const RegisterPage = () => {
 
       {/* Step: role selection */}
       {activeForm === "role" && (
-        <>
+        <form
+          className="flex flex-1 flex-col"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleContinueRole();
+          }}
+        >
           <div className="mt-8 mb-6 md:mt-12 text-center">
             <h2 className="text-2xl font-semibold text-foreground mb-2">
               Выберите свою роль
@@ -778,15 +809,15 @@ export const RegisterPage = () => {
 
           <div className="mt-auto pt-10 md:mt-10">
             <Button
+              type="submit"
               className="w-full justify-center md:h-14 md:text-lg"
               size="lg"
-              onClick={handleContinueRole}
               disabled={!selectedRole}
             >
               Продолжить
             </Button>
           </div>
-        </>
+        </form>
       )}
 
       {/* Doctor registration */}
@@ -831,7 +862,10 @@ export const RegisterPage = () => {
 
       {/* Client registration */}
       {activeForm === "client" && (
-        <>
+        <form
+          className="flex flex-1 flex-col"
+          onSubmit={handleClientFormSubmit}
+        >
           <div className="mt-8 mb-6 md:mt-12">
             <h2 className="text-2xl font-semibold text-foreground mb-2">
               Добро пожаловать в Imbir
@@ -847,6 +881,8 @@ export const RegisterPage = () => {
             <div className="flex flex-col gap-4">
               <Input
                 label="Имя"
+                name="given-name"
+                autoComplete="given-name"
                 placeholder="Введите ваше имя"
                 IconRight={ProfileIcon}
                 value={formData.name}
@@ -854,6 +890,8 @@ export const RegisterPage = () => {
               />
               <Input
                 label="Фамилия"
+                name="family-name"
+                autoComplete="family-name"
                 placeholder="Введите вашу фамилию"
                 IconRight={ProfileIcon}
                 value={formData.surname}
@@ -875,6 +913,8 @@ export const RegisterPage = () => {
                 <Input
                   label="Электронная почта"
                   type="email"
+                  name="email"
+                  autoComplete="email"
                   placeholder="Введите вашу почту"
                   IconRight={EmailIcon}
                   value={formData.email}
@@ -899,6 +939,8 @@ export const RegisterPage = () => {
                   <Input
                     label="Код подтверждения"
                     placeholder="Введите 4-значный код"
+                    name="one-time-code"
+                    autoComplete="one-time-code"
                     value={verificationCode}
                     onChange={(e) => {
                       const val = e.target.value.replace(/\D/g, "");
@@ -928,18 +970,28 @@ export const RegisterPage = () => {
               <Input
                 label="Пароль"
                 type={showPassword ? "text" : "password"}
+                name="new-password"
+                autoComplete="new-password"
                 placeholder="Введите пароль"
                 IconRight={showPassword ? EyeIcon : EyeOffIcon}
                 onIconRightClick={() => setShowPassword(!showPassword)}
+                iconRightLabel={
+                  showPassword ? "Скрыть пароль" : "Показать пароль"
+                }
                 value={formData.password}
                 onChange={(e) => handleChange("password", e.target.value)}
               />
               <Input
                 label="Подтвердите пароль"
                 type={showConfirm ? "text" : "password"}
+                name="confirm-password"
+                autoComplete="new-password"
                 placeholder="Введите пароль повторно"
                 IconRight={showConfirm ? EyeIcon : EyeOffIcon}
                 onIconRightClick={() => setShowConfirm(!showConfirm)}
+                iconRightLabel={
+                  showConfirm ? "Скрыть пароль" : "Показать пароль"
+                }
                 value={formData.confirmPassword}
                 onChange={(e) =>
                   handleChange("confirmPassword", e.target.value)
@@ -949,8 +1001,12 @@ export const RegisterPage = () => {
             </div>
           )}
 
+          {/* «Назад» стоит выше по разметке, но это type="button" — не
+              submit-кнопка, поэтому Enter её не выберет: браузер ищет первую
+              именно SUBMIT-кнопку формы, а она тут одна. */}
           <div className="mt-auto pt-10 md:mt-10 flex flex-col gap-3">
             <Button
+              type="button"
               variant="outline"
               className="w-full justify-center md:h-14 md:text-lg"
               size="lg"
@@ -961,44 +1017,27 @@ export const RegisterPage = () => {
 
             {clientStep === 1 ? (
               <Button
+                type="submit"
                 className="w-full justify-center md:h-14 md:text-lg"
                 size="lg"
-                onClick={handleClientContinue}
-                disabled={
-                  clientAuthMethod === "email"
-                    ? !formData.name || !formData.surname || !formData.email
-                    : !formData.name ||
-                      !formData.surname ||
-                      !phone ||
-                      isRequestingCode
-                }
+                disabled={!canContinueClient || isRequestingCode}
                 loading={isRequestingCode}
               >
                 Продолжить
               </Button>
             ) : (
               <Button
+                type="submit"
                 className="w-full justify-center md:h-14 md:text-lg"
                 size="lg"
-                onClick={handleSubmitClient}
-                disabled={
-                  clientAuthMethod === "email"
-                    ? !formData.password ||
-                      !formData.confirmPassword ||
-                      isLoadingClient
-                    : !formData.password ||
-                      !formData.confirmPassword ||
-                      !verificationCode ||
-                      verificationCode.length < 4 ||
-                      isLoadingClient
-                }
+                disabled={!canSubmitClient || isLoadingClient}
                 loading={isLoadingClient}
               >
                 Создать аккаунт
               </Button>
             )}
           </div>
-        </>
+        </form>
       )}
     </AuthShell>
   );

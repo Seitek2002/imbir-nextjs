@@ -94,6 +94,7 @@ export const Step4Certificates = ({ data, onChange, passwordError }: Props) => {
                 />
               ))}
               <button
+                type="button"
                 onClick={() => certInputRef.current?.click()}
                 className="size-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-primary text-2xl hover:border-primary/40 transition-colors"
               >
@@ -102,6 +103,7 @@ export const Step4Certificates = ({ data, onChange, passwordError }: Props) => {
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => certInputRef.current?.click()}
               className="w-full min-h-[80px] flex items-center justify-center gap-2"
             >

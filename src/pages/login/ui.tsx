@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import toast from "react-hot-toast";
 
 import Link from "next/link";
@@ -63,8 +63,12 @@ export const LoginPage = () => {
 
   const identifierFilled = loginBy === "email" ? !!email : !!phoneLocal;
 
-  const handleSubmit = async () => {
-    if (!identifierFilled || !password) return;
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    // Форма сабмитится и кнопкой, и Enter'ом из любого поля (implicit
+    // submission) — перезагрузку страницы гасим здесь, в одном месте.
+    e.preventDefault();
+    // Enter обходит disabled у кнопки, поэтому те же условия проверяем ещё раз.
+    if (!identifierFilled || !password || isLoading) return;
     setError("");
     setIsLoading(true);
 
@@ -124,79 +128,88 @@ export const LoginPage = () => {
         </p>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <SegmentedControl
-          options={[
-            { label: "Эл. почта", value: "email" },
-            { label: "Телефон", value: "phone" },
-          ]}
-          value={loginBy}
-          onChange={(val) => {
-            setLoginBy(val);
-            setError("");
-          }}
-        />
-
-        {loginBy === "email" ? (
-          <Input
-            label="Электронная почта"
-            type="email"
-            placeholder="Введите вашу почту"
-            IconRight={EmailIcon}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        ) : (
-          <PhoneInput
-            label="Номер телефона"
-            value={phoneLocal}
-            onChange={setPhoneLocal}
-            onCountryChange={(c: Country) => setDialCode(c.dialCode)}
-          />
-        )}
-
-        <div>
-          <Input
-            label="Пароль"
-            type={showPassword ? "text" : "password"}
-            placeholder="Введите пароль"
-            IconRight={showPassword ? EyeIcon : EyeOffIcon}
-            onIconRightClick={() => setShowPassword(!showPassword)}
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
+      <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
+        <div className="flex flex-col gap-4">
+          <SegmentedControl
+            options={[
+              { label: "Эл. почта", value: "email" },
+              { label: "Телефон", value: "phone" },
+            ]}
+            value={loginBy}
+            onChange={(val) => {
+              setLoginBy(val);
               setError("");
             }}
-            error={error}
           />
 
-          <div className="flex items-center justify-between mt-4">
-            <Checkbox
-              label="Запомнить меня"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
+          {loginBy === "email" ? (
+            <Input
+              label="Электронная почта"
+              type="email"
+              name="email"
+              autoComplete="username"
+              placeholder="Введите вашу почту"
+              IconRight={EmailIcon}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            <Link
-              href={ROUTES.FORGOT_PASSWORD}
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              Забыли пароль?
-            </Link>
+          ) : (
+            <PhoneInput
+              label="Номер телефона"
+              value={phoneLocal}
+              onChange={setPhoneLocal}
+              onCountryChange={(c: Country) => setDialCode(c.dialCode)}
+            />
+          )}
+
+          <div>
+            <Input
+              label="Пароль"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              autoComplete="current-password"
+              placeholder="Введите пароль"
+              IconRight={showPassword ? EyeIcon : EyeOffIcon}
+              onIconRightClick={() => setShowPassword(!showPassword)}
+              iconRightLabel={
+                showPassword ? "Скрыть пароль" : "Показать пароль"
+              }
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
+              error={error}
+            />
+
+            <div className="flex items-center justify-between mt-4">
+              <Checkbox
+                label="Запомнить меня"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <Link
+                href={ROUTES.FORGOT_PASSWORD}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Забыли пароль?
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-auto pt-10 md:mt-10">
-        <Button
-          className="w-full justify-center md:h-14 md:text-lg"
-          size="lg"
-          onClick={handleSubmit}
-          disabled={!identifierFilled || !password || isLoading}
-          loading={isLoading}
-        >
-          Продолжить
-        </Button>
-      </div>
+        <div className="mt-auto pt-10 md:mt-10">
+          <Button
+            type="submit"
+            className="w-full justify-center md:h-14 md:text-lg"
+            size="lg"
+            disabled={!identifierFilled || !password || isLoading}
+            loading={isLoading}
+          >
+            Продолжить
+          </Button>
+        </div>
+      </form>
     </AuthShell>
   );
 };

@@ -119,7 +119,10 @@ export const Step2Location = ({ data, onChange }: Props) => {
                 </svg>
               </div>
             </div>
-            <button className="absolute bottom-3 right-3 size-9 bg-white rounded-full shadow flex items-center justify-center">
+            <button
+              type="button"
+              className="absolute bottom-3 right-3 size-9 bg-white rounded-full shadow flex items-center justify-center"
+            >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path
                   d="M8 1l2.5 13L8 11.5 5.5 14 8 1z"

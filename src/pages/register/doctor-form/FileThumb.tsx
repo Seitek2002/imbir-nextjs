@@ -55,6 +55,7 @@ export const FileThumb = ({ file, onRemove }: Props) => {
           <DocIcon />
         )}
         <button
+          type="button"
           onClick={onRemove}
           className="absolute top-0 right-0 w-1/2 aspect-square bg-black/60 flex items-center justify-center text-white leading-none"
         >

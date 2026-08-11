@@ -23,6 +23,12 @@ export const Button: FC<Props> = ({
   IconLeft,
   variant = "default",
   size = "xs",
+  // Нативный дефолт <button> внутри <form> — type="submit". Кнопок в проекте
+  // сотни, и большинство из них (Назад, Отмена, переключатели) сабмитить форму
+  // не должны, а implicit submission по Enter выбирает ПЕРВУЮ submit-кнопку в
+  // DOM. Поэтому дефолт здесь "button", а главная кнопка формы явно объявляет
+  // type="submit".
+  type = "button",
   ...props
 }) => {
   // xs/sm — 32-40px высотой, меньше рекомендованного минимума в 44px для
@@ -39,8 +45,12 @@ export const Button: FC<Props> = ({
     lg: "h-[52px] text-base px-8",
   };
 
+  // outline-none снимает системную обводку (она не вписывается в скруглённые
+  // кнопки), поэтому фокус с клавиатуры рисуем сами тем же кольцом, что и у
+  // полей ввода. focus-visible, а не focus: по клику мышью кольца быть не
+  // должно — только при табе.
   const baseStyles =
-    "font-medium flex items-center justify-center gap-2 cursor-pointer transition-all rounded-full outline-none disabled:opacity-50 disabled:pointer-events-none shrink-0 " +
+    "font-medium flex items-center justify-center gap-2 cursor-pointer transition-all rounded-full outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.45)] disabled:opacity-50 disabled:pointer-events-none shrink-0 " +
     sizes[size];
 
   const variants: Record<Variant, string> = {
@@ -53,6 +63,7 @@ export const Button: FC<Props> = ({
 
   return (
     <button
+      type={type}
       className={cn(baseStyles, variants[variant], className)}
       {...props}
       disabled={props.disabled || loading}

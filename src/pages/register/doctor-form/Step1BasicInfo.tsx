@@ -164,6 +164,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
                 className="w-full h-full object-cover"
               />
               <button
+                type="button"
                 onClick={() => onChange("photo", null)}
                 className="absolute top-0 right-0 w-1/2 aspect-square bg-black/60 flex items-center justify-center text-white leading-none"
               >
@@ -174,6 +175,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
               {data.photo.name}
             </span>
             <button
+              type="button"
               onClick={() => photoInputRef.current?.click()}
               className="px-3 py-1.5 rounded-full border border-border text-secondary text-sm hover:bg-surface transition-colors shrink-0"
             >
@@ -182,6 +184,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
           </div>
         ) : (
           <button
+            type="button"
             onClick={() => photoInputRef.current?.click()}
             className="flex items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary/40 transition-colors w-full"
           >

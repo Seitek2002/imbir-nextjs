@@ -18,7 +18,7 @@
 | 5 | **P1** | Нет `.dockerignore` → `.env.local` попадает в слой образа | `dockerfile:10` | высокая |
 | 6 | **P1** | Multipart идёт двумя разными путями; три из четырёх — мимо anti-CORS прокси | `clinic-cabinet/requests.ts:22-34` vs `auth/requests.ts:99-108`, `profile/requests.ts:24-35`, `doctor-cabinet/requests.ts:64-81` | средняя |
 | 7 | **P1** | `timeout: 15_000` глобальный — распространяется на загрузку файлов | `shared/api/client.ts:10` | высокая |
-| 8 | **P1** | `/clinics/[id]` и `/specialists/[id]` без `revalidate` — данные врача/клиники могут залипнуть | `app/clinics/[id]/page.tsx`, `app/specialists/[id]/page.tsx` | средняя |
+| 8 | ~~P1~~ | ~~`/clinics/[id]` и `/specialists/[id]` без `revalidate`~~ — **СНЯТО**, ложное срабатывание, см. карточку | — | опровергнуто |
 | 9 | **P2** | Очередь refresh не помечает запросы `_retry` → повторный цикл refresh | `shared/api/client.ts:56-63` | высокая |
 | 10 | **P2** | Промис в очереди refresh без таймаута — запрос может повиснуть навсегда | `shared/api/client.ts:57-58` | средняя |
 | 11 | **P2** | Refresh идёт голым `axios.post` — теряет `timeout` | `shared/api/client.ts:69-72` | высокая |
@@ -130,18 +130,21 @@ process.env.NEXT_PUBLIC_API_URL ?? "https://imbir.sino0on.ru"
 
 ---
 
-### [P1] `/clinics/[id]` и `/specialists/[id]` без `revalidate` — данные могут залипнуть
-Файл: `app/clinics/[id]/page.tsx:1-21`, `app/specialists/[id]/page.tsx:1-22`
-Суть: обе страницы `async`, фетчат данные через axios (`api.getClinicById` / `api.getDoctorById`), но:
-- нет `export const revalidate`
-- нет `generateStaticParams`
-- не вызывают ни один динамический API (`cookies()`, `headers()`, `searchParams`)
+### ~~[P1] `/clinics/[id]` и `/specialists/[id]` без `revalidate`~~ — СНЯТО
+Файл: `app/clinics/[id]/page.tsx`, `app/specialists/[id]/page.tsx`
+**Ложное срабатывание.** Я предполагал, что динамический сегмент без `generateStaticParams` и без динамических API попадёт в Full Route Cache бессрочно, и честно пометил это как «уверенность средняя, проверяется выводом `next build`».
 
-Для сравнения: `/blog/[slug]` в такой же ситуации ставит `export const revalidate = 300` (`app/blog/[slug]/page.tsx:13`) с комментарием «статьи появляются без деплоя». Для врачей и клиник ровно та же логика применима, но `revalidate` не поставлен.
-Почему баг: Next считает такой сегмент статически кэшируемым. Отрендеренный вывод попадает в Full Route Cache без окна инвалидации. Врач меняет цену/специализацию в кабинете → его публичная карточка отдаёт старый SSR-снимок. Частично маскируется тем, что клиент всё равно перезапрашивает через React Query (данные приходят как `initialData`), но первый кадр и всё, что видит краулер, — устаревшее.
-Влияние: устаревшие цены и расписания на публичных карточках; поисковик индексирует старое.
-Предлагаемый фикс: добавить `export const revalidate = 300` (или сколько нужно) на обе страницы, как уже сделано в блоге. Проверить фактическое поведение по выводу `next build` (колонка `○/●/ƒ`) — я его не запускал, чтобы не менять `.next`.
-Уверенность: средняя (механизм — из конфигурации файлов; точный режим кэширования подтверждается только выводом сборки).
+Проверил — вывод сборки Next 16.2.3:
+```
+├ ƒ /blog/[slug]
+├ ƒ /clinics/[id]
+├ ƒ /specialists/[id]
+ƒ  (Dynamic)  server-rendered on demand
+```
+Все три рендерятся на каждый запрос. Устаревших данных на публичных карточках нет, `revalidate` добавлять не нужно.
+
+Побочно выяснилось обратное: `/blog/[slug]` со своим `export const revalidate = 300` (`app/blog/[slug]/page.tsx:13`) тоже помечен `ƒ` и в колонке Revalidate пуст — то есть его ISR **не применяется**, в отличие от `/` и `/blog`, у которых стоит `5m`. Это не баг (страница и так всегда свежая), но комментарий `:11-12` про ISR не соответствует фактическому режиму.
+Уверенность: опровергнуто выводом сборки.
 
 ---
 
@@ -444,7 +447,7 @@ useEffect(() => {
 
 Чтобы не тратить время повторно:
 
-- **`<img>` вместо `next/image`** — 0 вхождений `<img`, 68 `<Image`. Чисто.
+- **`<img>` вместо `next/image`** — ⚠ поправка: в первой версии этого документа я написал «0 вхождений». Это ошибка грепа (искал `"<img "` с пробелом и не увидел `<img` с переносом строки). Реально их **4**, все в формах регистрации, и eslint на них ругается: `register/clinic-form/PhotoThumb.tsx:7`, `register/clinic-form/Step1BasicInfo.tsx:73`, `register/doctor-form/FileThumb.tsx:47`, `register/doctor-form/Step1BasicInfo.tsx:161`. Это превью только что выбранных файлов через `URL.createObjectURL` — для них `next/image` и не нужен, но `eslint-disable-next-line` с объяснением поставить стоит, чтобы warning'и не шумели. P3.
 - **`any`** — 0 вхождений. Чисто.
 - **`dangerouslySetInnerHTML`** — 0 вхождений. Чисто.
 - **`Math.random()` в рендере** — 0 вхождений. Чисто.

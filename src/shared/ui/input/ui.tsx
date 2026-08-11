@@ -18,6 +18,9 @@ type Props = {
   error?: string;
   hint?: string;
   onIconRightClick?: () => void;
+  // Подпись для скринридера у кликабельной IconRight (например «Показать
+  // пароль»). Имеет смысл только вместе с onIconRightClick.
+  iconRightLabel?: string;
 } & InputHTMLAttributes<HTMLInputElement>;
 
 export const Input: FC<Props> = ({
@@ -31,6 +34,7 @@ export const Input: FC<Props> = ({
   size = "small" as Sizes,
   hint,
   onIconRightClick,
+  iconRightLabel,
   type = "text",
   ...props
 }) => {
@@ -77,15 +81,29 @@ export const Input: FC<Props> = ({
           {...props}
         />
 
-        {IconRight && (
-          <IconRight
-            className={cn(
-              "absolute right-3 top-1/2 -translate-y-1/2 size-5 text-foreground cursor-pointer",
-              iconClassName,
-            )}
-            onClick={onIconRightClick}
-          />
-        )}
+        {/* Кликабельная IconRight (глаз «показать пароль») — настоящая кнопка,
+            а не SVG с onClick: иначе её невозможно нажать с клавиатуры и
+            скринридер о ней не знает. type="button" обязателен — внутри формы
+            голая <button> сабмитила бы её. Декоративная IconRight (почта,
+            профиль) остаётся простым SVG и в таб-порядок не попадает. */}
+        {IconRight &&
+          (onIconRightClick ? (
+            <button
+              type="button"
+              onClick={onIconRightClick}
+              aria-label={iconRightLabel}
+              className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center size-8 rounded-md text-foreground cursor-pointer outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.45)]"
+            >
+              <IconRight className={cn("size-5", iconClassName)} />
+            </button>
+          ) : (
+            <IconRight
+              className={cn(
+                "absolute right-3 top-1/2 -translate-y-1/2 size-5 text-foreground",
+                iconClassName,
+              )}
+            />
+          ))}
       </div>
 
       {error && (

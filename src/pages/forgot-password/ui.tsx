@@ -165,7 +165,14 @@ export const ForgotPasswordPage = () => {
 
             {/* === ШАГ 1: ВВОД EMAIL (Логически необходим) === */}
             {step === "email" && (
-              <>
+              <form
+                className="flex flex-1 flex-col"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!email || requestResetMutation.isPending) return;
+                  requestResetMutation.mutate({ email });
+                }}
+              >
                 <div className="mt-4 mb-6 md:mt-0">
                   <h2 className="text-2xl font-semibold text-foreground mb-2">
                     Восстановить пароль
@@ -177,6 +184,8 @@ export const ForgotPasswordPage = () => {
                 <Input
                   label="Электронная почта"
                   type="email"
+                  name="email"
+                  autoComplete="email"
                   placeholder="Введите вашу почту"
                   IconRight={EmailIcon}
                   value={email}
@@ -184,9 +193,9 @@ export const ForgotPasswordPage = () => {
                 />
                 <div className="mt-auto pt-10 md:mt-10">
                   <Button
+                    type="submit"
                     className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
-                    onClick={() => requestResetMutation.mutate({ email })}
                     disabled={!email || requestResetMutation.isPending}
                   >
                     {requestResetMutation.isPending
@@ -194,12 +203,20 @@ export const ForgotPasswordPage = () => {
                       : "Получить код"}
                   </Button>
                 </div>
-              </>
+              </form>
             )}
 
             {/* === ШАГ 2: ВВОД КОДА === */}
             {step === "code" && (
-              <>
+              <form
+                className="flex flex-1 flex-col"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const value = code.join("");
+                  if (value.length < 4 || verifyMutation.isPending) return;
+                  verifyMutation.mutate({ email, code: value });
+                }}
+              >
                 <div className="mt-4 mb-6 md:mt-0 text-center md:text-left">
                   <h2 className="text-2xl font-semibold text-foreground mb-2">
                     Восстановить пароль
@@ -232,6 +249,9 @@ export const ForgotPasswordPage = () => {
                     </span>
                   ) : (
                     <button
+                      // Без type кнопка внутри <form> считается submit —
+                      // «Получить код повторно» отправляла бы форму проверки.
+                      type="button"
                       className="text-sm text-primary hover:underline disabled:opacity-50"
                       disabled={requestResetMutation.isPending}
                       onClick={() => requestResetMutation.mutate({ email })}
@@ -243,11 +263,9 @@ export const ForgotPasswordPage = () => {
 
                 <div className="mt-auto pt-10 md:mt-10">
                   <Button
+                    type="submit"
                     className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
-                    onClick={() =>
-                      verifyMutation.mutate({ email, code: code.join("") })
-                    }
                     disabled={
                       code.join("").length < 4 || verifyMutation.isPending
                     }
@@ -255,12 +273,23 @@ export const ForgotPasswordPage = () => {
                     {verifyMutation.isPending ? "Проверка..." : "Подтвердить"}
                   </Button>
                 </div>
-              </>
+              </form>
             )}
 
             {/* === ШАГ 3: НОВЫЙ ПАРОЛЬ (Твой 2-й скрин) === */}
             {step === "new_password" && (
-              <>
+              <form
+                className="flex flex-1 flex-col"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!isPasswordValid || confirmMutation.isPending) return;
+                  confirmMutation.mutate({
+                    email,
+                    code: code.join(""),
+                    password,
+                  });
+                }}
+              >
                 <div className="mt-4 mb-6 md:mt-0">
                   <h2 className="text-2xl font-semibold text-foreground mb-2">
                     Восстановить пароль
@@ -274,18 +303,28 @@ export const ForgotPasswordPage = () => {
                   <Input
                     label="Новый пароль"
                     type={showPassword ? "text" : "password"}
+                    name="new-password"
+                    autoComplete="new-password"
                     placeholder="Введите новый пароль"
                     IconRight={showPassword ? EyeIcon : EyeOffIcon}
                     onIconRightClick={() => setShowPassword(!showPassword)}
+                    iconRightLabel={
+                      showPassword ? "Скрыть пароль" : "Показать пароль"
+                    }
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <Input
                     label="Подтвердите новый пароль"
                     type={showConfirm ? "text" : "password"}
+                    name="confirm-password"
+                    autoComplete="new-password"
                     placeholder="Введите новый пароль повторно"
                     IconRight={showConfirm ? EyeIcon : EyeOffIcon}
                     onIconRightClick={() => setShowConfirm(!showConfirm)}
+                    iconRightLabel={
+                      showConfirm ? "Скрыть пароль" : "Показать пароль"
+                    }
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
@@ -309,15 +348,9 @@ export const ForgotPasswordPage = () => {
 
                 <div className="mt-auto pt-10 md:mt-10">
                   <Button
+                    type="submit"
                     className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
-                    onClick={() =>
-                      confirmMutation.mutate({
-                        email,
-                        code: code.join(""),
-                        password,
-                      })
-                    }
                     disabled={!isPasswordValid || confirmMutation.isPending}
                   >
                     {confirmMutation.isPending
@@ -325,7 +358,7 @@ export const ForgotPasswordPage = () => {
                       : "Сохранить пароль"}
                   </Button>
                 </div>
-              </>
+              </form>
             )}
 
             {/* === ШАГ 4: УСПЕХ === */}

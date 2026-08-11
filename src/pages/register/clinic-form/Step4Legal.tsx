@@ -106,6 +106,7 @@ export const Step4Legal = ({ data, onChange }: Props) => {
                 />
               ))}
               <button
+                type="button"
                 onClick={() => docsInputRef.current?.click()}
                 className="size-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center text-primary text-2xl hover:border-primary/40 transition-colors"
               >
@@ -114,6 +115,7 @@ export const Step4Legal = ({ data, onChange }: Props) => {
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => docsInputRef.current?.click()}
               className="w-full min-h-[80px] flex items-center justify-center gap-2"
             >
