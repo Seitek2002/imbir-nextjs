@@ -68,6 +68,9 @@ export const mapApiToProfile = (
     equipment?: string[];
     patient_conditions?: string[];
     payment_methods?: string[];
+    is_online_available?: boolean;
+    consultation_price?: string | number | null;
+    is_published?: boolean;
   };
 
   return {
@@ -105,6 +108,14 @@ export const mapApiToProfile = (
     certificates: [],
     rating: Number(a.rating) || 0,
     totalReviews: a.reviews_count ?? 0,
+    isOnlineAvailable: a.is_online_available ?? false,
+    // Приходит как "1500.00" — в поле формы показываем без дробной части,
+    // если она нулевая, иначе врач видит лишние нули при каждом открытии.
+    consultationPrice:
+      a.consultation_price == null
+        ? ""
+        : String(a.consultation_price).replace(/\.00$/, ""),
+    isPublished: a.is_published ?? false,
   };
 };
 
