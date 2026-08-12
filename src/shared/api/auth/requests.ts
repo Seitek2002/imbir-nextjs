@@ -3,7 +3,12 @@ import type { AuthUser } from "@/shared/store/authStore";
 import { apiClient } from "../client";
 import {
   AuthResponse,
+  EmailRegisterConfirmRequest,
+  EmailRegisterRequestRequest,
+  LoginOtpRequestRequest,
+  LoginOtpVerifyRequest,
   LoginRequest,
+  OtpDetailResponse,
   PasswordResetConfirmRequest,
   PasswordResetRequest,
   PasswordResetVerifyRequest,
@@ -14,6 +19,8 @@ import {
   RegisterClientRequest,
   RegisterClinicRequest,
   RegisterDoctorRequest,
+  VerifyEmailConfirmRequest,
+  VerifyPhoneConfirmRequest,
 } from "./types";
 
 // Helper: flatten a multipart registration object into FormData
@@ -68,6 +75,96 @@ export const registerPhoneConfirmFn = async (
 ): Promise<AuthResponse> => {
   const { data } = await apiClient.post<AuthResponse>(
     "/api/auth/register/phone/confirm/",
+    body,
+  );
+  return data;
+};
+
+// ── Пациент по email: код → аккаунт (2 запроса) ─────────────────────────────
+
+export const registerEmailRequestFn = async (
+  body: EmailRegisterRequestRequest,
+): Promise<OtpDetailResponse> => {
+  const { data } = await apiClient.post<OtpDetailResponse>(
+    "/api/auth/register/email/request/",
+    body,
+  );
+  return data;
+};
+
+// Проверяет код И создаёт аккаунт: в ответе сразу токены (201).
+export const registerEmailConfirmFn = async (
+  body: EmailRegisterConfirmRequest,
+): Promise<AuthResponse> => {
+  const { data } = await apiClient.post<AuthResponse>(
+    "/api/auth/register/email/confirm/",
+    body,
+  );
+  return data;
+};
+
+// ── Врач/клиника: подтверждение контакта ДО анкеты ──────────────────────────
+// Аккаунт не создаётся. Подтверждение снимает гейт с /register/doctor/ и
+// /register/clinic/ на 24 часа; подтвердить нужно ОДИН канал из анкеты.
+// Без него регистрация возвращает 400 non_field_errors.
+
+export const verifyEmailRequestFn = async (
+  body: EmailRegisterRequestRequest,
+): Promise<OtpDetailResponse> => {
+  const { data } = await apiClient.post<OtpDetailResponse>(
+    "/api/auth/verify/email/request/",
+    body,
+  );
+  return data;
+};
+
+export const verifyEmailConfirmFn = async (
+  body: VerifyEmailConfirmRequest,
+): Promise<OtpDetailResponse> => {
+  const { data } = await apiClient.post<OtpDetailResponse>(
+    "/api/auth/verify/email/confirm/",
+    body,
+  );
+  return data;
+};
+
+export const verifyPhoneRequestFn = async (
+  body: PhoneRegisterRequestRequest,
+): Promise<OtpDetailResponse> => {
+  const { data } = await apiClient.post<OtpDetailResponse>(
+    "/api/auth/verify/phone/request/",
+    body,
+  );
+  return data;
+};
+
+export const verifyPhoneConfirmFn = async (
+  body: VerifyPhoneConfirmRequest,
+): Promise<OtpDetailResponse> => {
+  const { data } = await apiClient.post<OtpDetailResponse>(
+    "/api/auth/verify/phone/confirm/",
+    body,
+  );
+  return data;
+};
+
+// ── Вход по коду, без пароля ────────────────────────────────────────────────
+
+export const loginOtpRequestFn = async (
+  body: LoginOtpRequestRequest,
+): Promise<OtpDetailResponse> => {
+  const { data } = await apiClient.post<OtpDetailResponse>(
+    "/api/auth/login/otp/request/",
+    body,
+  );
+  return data;
+};
+
+export const loginOtpVerifyFn = async (
+  body: LoginOtpVerifyRequest,
+): Promise<AuthResponse> => {
+  const { data } = await apiClient.post<AuthResponse>(
+    "/api/auth/login/otp/verify/",
     body,
   );
   return data;

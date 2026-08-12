@@ -47,16 +47,68 @@ export type PhoneRegisterRequestRequest = {
   phone: string;
 };
 
-export type PhoneRegisterRequestSuccess = {
+// Общий ответ всех «запросить код» и «подтвердить контакт» — только detail.
+export type OtpDetailResponse = {
   detail: string;
 };
+
+// Историческое имя, оставлено ради вызовов, написанных до появления остальных
+// OTP-эндпоинтов.
+export type PhoneRegisterRequestSuccess = OtpDetailResponse;
 
 export type PhoneRegisterConfirmRequest = {
   phone: string;
   code: string;
-  password?: string;
+  // Обязателен: схема PhoneRegisterConfirmRequest требует пароль наравне с
+  // именем и фамилией (раньше поле было опциональным).
+  password: string;
   first_name: string;
   last_name: string;
+};
+
+// ── Регистрация пациента по email через код ──────────────────────────────────
+// Два запроса: request отправляет код, confirm проверяет его И СРАЗУ создаёт
+// аккаунт, возвращая токены (в отличие от verify/* ниже).
+
+export type EmailRegisterRequestRequest = {
+  email: string;
+};
+
+export type EmailRegisterConfirmRequest = {
+  email: string;
+  code: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+};
+
+// ── Подтверждение контакта для врача/клиники ─────────────────────────────────
+// Аккаунт НЕ создаётся: подтверждение только снимает гейт с
+// /register/doctor/ и /register/clinic/ и действует 24 часа. Нужно подтвердить
+// ОДИН канал — email ИЛИ телефон, тот, что указан в анкете.
+
+export type VerifyEmailConfirmRequest = {
+  email: string;
+  code: string;
+};
+
+export type VerifyPhoneConfirmRequest = {
+  phone: string;
+  code: string;
+};
+
+// ── Вход по коду, без пароля ─────────────────────────────────────────────────
+// Работает для любой существующей роли. Канал один: email ЛИБО phone.
+
+export type LoginOtpRequestRequest = {
+  email?: string;
+  phone?: string;
+};
+
+export type LoginOtpVerifyRequest = {
+  email?: string;
+  phone?: string;
+  code: string;
 };
 
 export type DaySchedule = {
