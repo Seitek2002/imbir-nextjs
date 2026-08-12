@@ -13,7 +13,33 @@ type TriggerProps = {
   placeholder: string;
   onToggle: () => void;
   onRemove: (val: string) => void;
+  onClearAll: () => void;
 };
+
+// Сколько чипов показываем в триггере, остальные сворачиваем в «+N».
+// Без этого предела выбор «Все» в специализациях (их ~40) растягивал контрол
+// на сотню строк: чипы лежат во flex-wrap, высота ничем не ограничена, и
+// выпадающее меню (absolute top-full) уезжало далеко вниз за пределы экрана.
+const MAX_VISIBLE_CHIPS = 2;
+
+const Chip: FC<{ text: string; onDelete: () => void }> = ({
+  text,
+  onDelete,
+}) => (
+  <span className="flex items-center gap-1 max-w-full px-2 py-0.5 border border-border-soft rounded-md bg-white text-sm">
+    <span className="truncate">{text}</span>
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onDelete();
+      }}
+      className="shrink-0 hover:text-primary transition-colors"
+    >
+      <DropdownRemoveIcon className="size-3.5" />
+    </button>
+  </span>
+);
 
 export const DropdownTrigger: FC<TriggerProps> = ({
   isActive,
@@ -23,7 +49,17 @@ export const DropdownTrigger: FC<TriggerProps> = ({
   placeholder,
   onToggle,
   onRemove,
+  onClearAll,
 }) => {
+  const selected = isMulti && Array.isArray(value) ? value : [];
+  // Выбрано всё — показываем это одним чипом «Все», а не сорока штуками.
+  const allSelected = options.length > 0 && selected.length === options.length;
+  const visible = allSelected ? [] : selected.slice(0, MAX_VISIBLE_CHIPS);
+  const hiddenCount = selected.length - visible.length;
+
+  const labelOf = (val: string) =>
+    options.find((o) => o.value === val)?.label ?? val;
+
   return (
     <div
       onClick={onToggle}
@@ -35,28 +71,30 @@ export const DropdownTrigger: FC<TriggerProps> = ({
           : "hover:border-primary/50",
       )}
     >
-      <div className="flex flex-wrap gap-1.5 flex-1 overflow-hidden">
-        {isMulti && Array.isArray(value) && value.length > 0 ? (
-          value.map((val) => (
-            <div
-              key={val}
-              className="flex items-center gap-1 px-2 py-0.5 border border-border-soft rounded-md bg-white text-sm"
-            >
-              {options.find((o) => o.value === val)?.label}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove(val);
-                }}
-                className="hover:text-primary transition-colors"
-              >
-                <DropdownRemoveIcon className="size-3.5" />
-              </button>
-            </div>
-          ))
+      <div className="flex flex-wrap items-center gap-1.5 flex-1 min-w-0 overflow-hidden">
+        {selected.length > 0 ? (
+          allSelected ? (
+            <Chip text="Все" onDelete={onClearAll} />
+          ) : (
+            <>
+              {visible.map((val) => (
+                <Chip
+                  key={val}
+                  text={labelOf(val)}
+                  onDelete={() => onRemove(val)}
+                />
+              ))}
+              {hiddenCount > 0 && (
+                <span className="shrink-0 px-2 py-0.5 rounded-md bg-background text-sm text-secondary">
+                  +{hiddenCount}
+                </span>
+              )}
+            </>
+          )
         ) : (
-          <span className={cn(value ? "text-foreground" : "text-muted")}>
+          <span
+            className={cn("truncate", value ? "text-foreground" : "text-muted")}
+          >
             {/* Для не-multi мы уверены, что value это строка (или undefined) */}
             {options.find((o) => o.value === (value as string))?.label ||
               placeholder}

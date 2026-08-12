@@ -404,9 +404,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             initialReviews={reviews}
             averageRating={doctor.rating}
             onSubmitReview={
+              // mutateAsync, а не mutate: форма отзыва должна очиститься
+              // только после успешной отправки (см. ReviewsSection).
               isAuthed
                 ? (rating, text) =>
-                    createReviewMutation.mutate({ rating, text })
+                    createReviewMutation.mutateAsync({ rating, text })
                 : undefined
             }
             isSubmitting={createReviewMutation.isPending}

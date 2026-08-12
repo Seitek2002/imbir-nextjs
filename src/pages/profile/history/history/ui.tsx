@@ -89,7 +89,7 @@ export const ProfileHistory: FC<Props> = ({
     }
   };
 
-  const { mutate: submitReview } = useMutation({
+  const { mutateAsync: submitReview } = useMutation({
     mutationFn: (vars: {
       rating: number;
       comment: string;
@@ -121,7 +121,12 @@ export const ProfileHistory: FC<Props> = ({
       toast.error("Не удалось определить врача для отзыва");
       return;
     }
-    submitReview({ rating, comment, appointment: selectedAppointment });
+    // Возвращаем промис: модалка закроется только после успешной отправки.
+    return submitReview({
+      rating,
+      comment,
+      appointment: selectedAppointment,
+    });
   };
 
   if (filteredAppointments.length === 0) {

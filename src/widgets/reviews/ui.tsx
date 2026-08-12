@@ -25,7 +25,8 @@ type Props = {
   initialReviews: ReviewItem[];
   averageRating: number;
   // Отправка отзыва на бэк. Если не передана — форма не показывается.
-  onSubmitReview?: (rating: number, text: string) => void;
+  // Может вернуть промис — тогда форма очистится только после успеха.
+  onSubmitReview?: (rating: number, text: string) => void | Promise<unknown>;
   isSubmitting?: boolean;
 };
 
@@ -40,13 +41,21 @@ export const ReviewsSection: FC<Props> = ({
   const [newReviewText, setNewReviewText] = useState("");
   const [newReviewRating, setNewReviewRating] = useState(0);
 
-  const handleAddReview = () => {
+  const handleAddReview = async () => {
     if (!newReviewText.trim() || newReviewRating === 0 || !onSubmitReview)
       return;
 
-    onSubmitReview(newReviewRating, newReviewText);
-    setNewReviewText("");
-    setNewReviewRating(0);
+    try {
+      await onSubmitReview(newReviewRating, newReviewText);
+      // Чистим форму ТОЛЬКО после успеха. Раньше она очищалась сразу после
+      // вызова, и при любой ошибке (протухший токен, обрыв сети) написанный
+      // отзыв пропадал вместе с оценкой — переписывать приходилось заново.
+      setNewReviewText("");
+      setNewReviewRating(0);
+    } catch {
+      // Сообщение показывает вызывающий (onError мутации). Здесь важно только
+      // не тронуть форму.
+    }
   };
 
   return (

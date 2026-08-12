@@ -1,5 +1,5 @@
 // Core
-export { apiClient } from "./client";
+export { apiClient, SessionExpiredError } from "./client";
 export * from "./types";
 export * from "./queryKeys";
 

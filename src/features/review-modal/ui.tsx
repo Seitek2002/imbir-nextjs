@@ -17,7 +17,8 @@ type Props = {
   doctorImage?: string;
   initialRating?: number;
   initialComment?: string;
-  onSubmit: (rating: number, comment: string) => void;
+  // Может вернуть промис — тогда модалка закроется только после успеха.
+  onSubmit: (rating: number, comment: string) => void | Promise<unknown>;
 };
 
 const DURATION = 200;
@@ -37,6 +38,7 @@ export const ReviewModal: FC<Props> = ({
   const [rating, setRating] = useState(initialRating);
   const [comment, setComment] = useState(initialComment);
   const [isClosing, setIsClosing] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   useScrollLock(isOpen);
 
@@ -52,12 +54,23 @@ export const ReviewModal: FC<Props> = ({
 
   const state = isClosing ? "closed" : "open";
 
-  const handleSubmit = () => {
-    if (rating === 0) return;
-    onSubmit(rating, comment);
-    setRating(0);
-    setComment("");
-    handleClose();
+  const handleSubmit = async () => {
+    if (rating === 0 || isSending) return;
+    setIsSending(true);
+    try {
+      await onSubmit(rating, comment);
+      // Сбрасываем и закрываем ТОЛЬКО после успеха. Раньше модалка закрывалась
+      // сразу, и при ошибке (протухший токен, обрыв сети) написанный отзыв
+      // пропадал — оставался только красный тост.
+      setRating(0);
+      setComment("");
+      handleClose();
+    } catch {
+      // Сообщение показывает вызывающий (onError мутации) — модалку оставляем
+      // открытой с введённым текстом, чтобы можно было повторить отправку.
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const body = (
@@ -133,7 +146,8 @@ export const ReviewModal: FC<Props> = ({
         size="lg"
         className="w-full"
         onClick={handleSubmit}
-        disabled={rating === 0}
+        disabled={rating === 0 || isSending}
+        loading={isSending}
       >
         Отправить
       </Button>

@@ -94,6 +94,7 @@ export const Dropdown: FC<DropdownProps> = ({
           placeholder={placeholder}
           onToggle={() => (isActive ? closeDropdown() : openDropdown())}
           onRemove={handleSelect}
+          onClearAll={() => (onChange as (val: string[]) => void)?.([])}
         />
 
         {isMounted && (
