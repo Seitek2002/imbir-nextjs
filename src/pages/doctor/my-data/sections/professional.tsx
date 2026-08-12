@@ -5,6 +5,7 @@ import { FC, useState } from "react";
 import {
   DoctorMyDataTabs,
   DoctorPageLayout,
+  type DoctorProfileData,
   useMyDataTabs,
 } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
@@ -20,6 +21,7 @@ import { CheckIcon } from "@/shared/assets/icons";
 import {
   Button,
   CancelEditButton,
+  Checkbox,
   ConfirmDialog,
   Dropdown,
   Input,
@@ -36,6 +38,9 @@ type D = {
   equipment: string;
   patientConditions: string;
   paymentMethods: string;
+  isOnlineAvailable: boolean;
+  consultationPrice: string;
+  isPublished: boolean;
 };
 
 const { fieldList, formGrid } = formStyles;
@@ -47,24 +52,47 @@ const csv = (value: string): string[] =>
     .map((s) => s.trim())
     .filter(Boolean);
 
+const EMPTY: D = {
+  specialty: "",
+  additionalSpecialty: "",
+  experienceYears: "",
+  currentPosition: "",
+  workplace: "",
+  qualification: "",
+  scientificDegree: "",
+  equipment: "",
+  patientConditions: "",
+  paymentMethods: "",
+  isOnlineAvailable: false,
+  consultationPrice: "",
+  isPublished: false,
+};
+
+// Один источник для первичной синхронизации и для отмены правок — иначе при
+// добавлении поля легко забыть один из двух списков.
+const fromProfile = (p: DoctorProfileData): D => ({
+  specialty: p.specialty,
+  additionalSpecialty: p.additionalSpecialty,
+  experienceYears: p.experienceYears,
+  currentPosition: p.currentPosition,
+  workplace: p.workplace,
+  qualification: p.qualification,
+  scientificDegree: p.scientificDegree,
+  equipment: p.equipment,
+  patientConditions: p.patientConditions,
+  paymentMethods: p.paymentMethods,
+  isOnlineAvailable: p.isOnlineAvailable,
+  consultationPrice: p.consultationPrice,
+  isPublished: p.isPublished,
+});
+
 export const DoctorProfessionalInfoSection: FC = () => {
   const { profile, isLoading, isSaving, saveProfile, rawProfile } =
     useDoctorCabinet();
   const { setActive } = useMyDataTabs();
   const [isEditing, setIsEditing] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
-  const [d, setD] = useState<D>({
-    specialty: "",
-    additionalSpecialty: "",
-    experienceYears: "",
-    currentPosition: "",
-    workplace: "",
-    qualification: "",
-    scientificDegree: "",
-    equipment: "",
-    patientConditions: "",
-    paymentMethods: "",
-  });
+  const [d, setD] = useState<D>(EMPTY);
 
   // Синхронизация формы с профилем прямо в рендере (рекомендованный паттерн
   // «adjust state during render» вместо setState в эффекте).
@@ -76,18 +104,7 @@ export const DoctorProfessionalInfoSection: FC = () => {
   const [syncedProfile, setSyncedProfile] = useState<typeof profile>(null);
   if (profile && profile !== syncedProfile) {
     setSyncedProfile(profile);
-    setD({
-      specialty: profile.specialty,
-      additionalSpecialty: profile.additionalSpecialty,
-      experienceYears: profile.experienceYears,
-      currentPosition: profile.currentPosition,
-      workplace: profile.workplace,
-      qualification: profile.qualification,
-      scientificDegree: profile.scientificDegree,
-      equipment: profile.equipment,
-      patientConditions: profile.patientConditions,
-      paymentMethods: profile.paymentMethods,
-    });
+    setD(fromProfile(profile));
   }
 
   const set = <K extends keyof D>(k: K, v: D[K]) =>
@@ -142,25 +159,19 @@ export const DoctorProfessionalInfoSection: FC = () => {
       equipment: csv(d.equipment),
       patient_conditions: csv(d.patientConditions),
       payment_methods: csv(d.paymentMethods),
+      is_online_available: d.isOnlineAvailable,
+      // Бэк ждёт decimal-строку. Пустое поле отправляем как "0.00", иначе
+      // цена не сбрасывается: пустую строку сериализатор отклоняет.
+      consultation_price: d.consultationPrice.trim()
+        ? `${parseFloat(d.consultationPrice.replace(",", ".")) || 0}`
+        : "0.00",
+      is_published: d.isPublished,
     });
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    if (profile) {
-      setD({
-        specialty: profile.specialty,
-        additionalSpecialty: profile.additionalSpecialty,
-        experienceYears: profile.experienceYears,
-        currentPosition: profile.currentPosition,
-        workplace: profile.workplace,
-        qualification: profile.qualification,
-        scientificDegree: profile.scientificDegree,
-        equipment: profile.equipment,
-        patientConditions: profile.patientConditions,
-        paymentMethods: profile.paymentMethods,
-      });
-    }
+    if (profile) setD(fromProfile(profile));
     setIsEditing(false);
   };
 
@@ -352,6 +363,63 @@ export const DoctorProfessionalInfoSection: FC = () => {
               <FieldView label="Способы оплаты" value={d.paymentMethods} />
             )}
           </div>
+        </div>
+
+        {/* Онлайн-приём и публикация. Отдельным блоком, а не в сетке полей:
+            от этих двух флагов зависит, увидят ли врача в каталоге и смогут
+            ли записаться на видеоконсультацию. */}
+        <div className="mt-6 pt-6 border-t border-border">
+          <h3 className="text-base font-semibold text-foreground mb-4">
+            Онлайн-приём и публикация
+          </h3>
+
+          {isEditing ? (
+            <div className="flex flex-col gap-4">
+              <Checkbox
+                size="large"
+                label="Принимаю онлайн (видеоконсультации)"
+                checked={d.isOnlineAvailable}
+                onChange={(e) => set("isOnlineAvailable", e.target.checked)}
+              />
+              <div className="max-w-xs">
+                <Input
+                  label="Стоимость консультации, сом"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={d.consultationPrice}
+                  onChange={(e) => set("consultationPrice", e.target.value)}
+                  placeholder="0"
+                  disabled={!d.isOnlineAvailable}
+                />
+              </div>
+              <Checkbox
+                size="large"
+                label="Опубликовать профиль в каталоге"
+                checked={d.isPublished}
+                onChange={(e) => set("isPublished", e.target.checked)}
+              />
+              <p className="text-muted text-sm">
+                Пока профиль не опубликован, он не показывается в поиске и на
+                него нельзя записаться.
+              </p>
+            </div>
+          ) : (
+            <div className={fieldList}>
+              <FieldView
+                label="Приём онлайн"
+                value={d.isOnlineAvailable ? "Включён" : "Отключён"}
+              />
+              <FieldView
+                label="Стоимость консультации, сом"
+                value={d.consultationPrice}
+              />
+              <FieldView
+                label="Профиль в каталоге"
+                value={d.isPublished ? "Опубликован" : "Не опубликован"}
+              />
+            </div>
+          )}
         </div>
       </div>
 

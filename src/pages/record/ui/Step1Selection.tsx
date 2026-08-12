@@ -24,7 +24,15 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
     fetchMoreClinics,
     handleMobileStep1Select,
     isDoctorStageLoading,
+    workplaceOptions,
   } = form;
+
+  // У врача может не быть ни одного места приёма (зарегистрировался сам, без
+  // клиники). Тогда поле «Клиника» открывало модалку «Выберите место приёма»
+  // с пустым списком и надписью «Ничего не найдено» — тупик. Запись при этом
+  // проходит без клиники (clinic_id опционален), так что поле просто убираем.
+  const hideClinicField =
+    !selectedClinic && !!selectedDoctor && workplaceOptions.length === 0;
 
   return (
     <section
@@ -34,19 +42,21 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
         <StepTitle number={1} title="Выберите" />
 
         <div className="space-y-3 max-w-full lg:max-w-75">
-          <SelectField
-            label="Клиника"
-            value={selectedClinic?.name}
-            placeholder="Выберите из списка"
-            onClick={() =>
-              // Врач уже выбран, а клиника — ещё нет: значит, выбор места
-              // работы для него не завершён (несколько мест работы), и
-              // открывать нужно именно его список, а не все клиники подряд.
-              openModal(
-                !selectedClinic && selectedDoctor ? "workplace" : "clinic",
-              )
-            }
-          />
+          {!hideClinicField && (
+            <SelectField
+              label="Клиника"
+              value={selectedClinic?.name}
+              placeholder="Выберите из списка"
+              onClick={() =>
+                // Врач уже выбран, а клиника — ещё нет: значит, выбор места
+                // работы для него не завершён (несколько мест работы), и
+                // открывать нужно именно его список, а не все клиники подряд.
+                openModal(
+                  !selectedClinic && selectedDoctor ? "workplace" : "clinic",
+                )
+              }
+            />
+          )}
 
           <SelectField
             label="Специалист"

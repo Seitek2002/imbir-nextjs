@@ -760,6 +760,9 @@ export const useRecordForm = () => {
     selectedDoctor,
     selectedService,
     selectedServiceId,
+    // Места приёма выбранного врача. Нужны в Step1Selection: если их нет,
+    // поле «Клиника» скрывается, иначе оно ведёт в пустую модалку.
+    workplaceOptions,
     mobileSelectionStage,
     isStep2Complete,
     modalConfig,
