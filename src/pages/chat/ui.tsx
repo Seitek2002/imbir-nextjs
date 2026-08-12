@@ -192,6 +192,7 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
                 roomId={activeConversation.id}
                 name={activeConversation.name}
                 currentUserId={currentUserId}
+                partnerId={activeConversation.partnerId}
                 onBack={() => setActiveId(null)}
               />
             ) : (

@@ -1,6 +1,10 @@
 import { FC, ReactNode } from "react";
 
-import { HeaderBackIcon, TrashIcon } from "@/shared/assets/icons";
+import {
+  DocumentTextIcon,
+  HeaderBackIcon,
+  TrashIcon,
+} from "@/shared/assets/icons";
 
 import { ChatAvatar } from "./ChatAvatar";
 
@@ -10,6 +14,9 @@ type Props = {
   subtitle?: ReactNode;
   onBack: () => void;
   onClear?: () => void;
+  // Итоги видео-консультаций с этим собеседником. Кнопки нет, если итогов
+  // взять негде (чат с ИИ, роль «клиника»).
+  onOpenSummaries?: () => void;
 };
 
 export const ChatHeader: FC<Props> = ({
@@ -18,6 +25,7 @@ export const ChatHeader: FC<Props> = ({
   subtitle,
   onBack,
   onClear,
+  onOpenSummaries,
 }) => (
   <div className="flex items-center justify-between px-5 py-4 border-b border-border-soft">
     <div className="flex items-center gap-3 min-w-0">
@@ -40,15 +48,29 @@ export const ChatHeader: FC<Props> = ({
       </div>
     </div>
 
-    {onClear && (
-      <button
-        type="button"
-        onClick={onClear}
-        aria-label="Очистить историю"
-        className="flex items-center justify-center size-9 p-0 rounded-full hover:bg-background transition-colors text-muted hover:text-foreground"
-      >
-        <TrashIcon className="size-5" />
-      </button>
-    )}
+    <div className="flex items-center gap-2 shrink-0">
+      {onOpenSummaries && (
+        <button
+          type="button"
+          onClick={onOpenSummaries}
+          aria-label="Итоги видео-консультаций"
+          title="Итоги видео-консультаций"
+          className="flex items-center justify-center size-10 rounded-xl border border-border-soft text-foreground hover:border-primary/40 hover:text-primary transition-colors"
+        >
+          <DocumentTextIcon className="size-5" />
+        </button>
+      )}
+
+      {onClear && (
+        <button
+          type="button"
+          onClick={onClear}
+          aria-label="Очистить историю"
+          className="flex items-center justify-center size-9 p-0 rounded-full hover:bg-background transition-colors text-muted hover:text-foreground"
+        >
+          <TrashIcon className="size-5" />
+        </button>
+      )}
+    </div>
   </div>
 );

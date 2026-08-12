@@ -1,3 +1,6 @@
+import { toMediaUrl } from "@/shared/lib/media";
+
+import { getAppointmentById } from "../appointments/requests";
 import { apiClient } from "../client";
 import {
   AiChatMessage,
@@ -5,6 +8,7 @@ import {
   ChatMessage,
   ChatRoom,
   ChatUnreadCountResponse,
+  ConsultationSummary,
   CreateChatRoomRequest,
   SendAiMessageRequest,
 } from "./types";
@@ -66,6 +70,62 @@ export const getChatConsultations = async (
           appointment.is_online && appointment.status !== "cancelled",
       )
     : [];
+};
+
+// Сколько последних записей проверяем на наличие итогов. Расшифровка лежит
+// только в детальном ответе, поэтому на каждую запись — свой запрос; без
+// ограничения врач с сотней приёмов у одного пациента получил бы сотню
+// запросов при открытии модалки.
+const SUMMARY_LOOKUP_LIMIT = 10;
+
+const byDateDesc = (a: ChatConsultation, b: ChatConsultation) =>
+  `${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`);
+
+// Итоги созвонов с конкретным собеседником, свежие первыми.
+// Списки записей отдают ВСЕ записи пользователя и не содержат ai_summary,
+// поэтому: берём список → отбираем записи этого собеседника → дотягиваем
+// детали → оставляем те, где итог уже сформирован.
+export const getConsultationSummaries = async (
+  role: ConsultationRole,
+  partnerUserId: number,
+): Promise<ConsultationSummary[]> => {
+  if (role === "clinic") return [];
+
+  const consultations = await getChatConsultations(role);
+  const mine = consultations
+    .filter((c) => {
+      const partner = role === "doctor" ? c.patient : c.doctor;
+      return partner?.id === partnerUserId;
+    })
+    .sort(byDateDesc)
+    .slice(0, SUMMARY_LOOKUP_LIMIT);
+
+  const details = await Promise.all(
+    mine.map((c) => getAppointmentById(c.id).catch(() => null)),
+  );
+
+  return details.flatMap((appointment, index) => {
+    if (!appointment) return [];
+    const text = appointment.ai_summary?.trim() ?? "";
+    const docxUrl = toMediaUrl(appointment.ai_summary_docx_url) ?? "";
+    // До созвона бэк отдаёт оба поля пустыми строками — такие записи не итоги.
+    if (!text && !docxUrl) return [];
+
+    const source = mine[index];
+    const partner =
+      role === "doctor" ? appointment.patient : appointment.doctor;
+
+    return [
+      {
+        appointmentId: appointment.id,
+        date: appointment.date ?? source.date,
+        time: (appointment.time ?? source.time).slice(0, 5),
+        partnerName: partner?.full_name ?? "",
+        docxUrl,
+        text,
+      },
+    ];
+  });
 };
 
 // ── AI assistant chat (room 0) ──────────────────────────────────────────────

@@ -1,12 +1,14 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 
 import { cn } from "@/shared/lib/utils";
+import { useAuthStore } from "@/shared/store";
 
 import type { ConnectionState } from "../model/types";
 import { useChatRoom } from "../model/use-chat-room";
 import { ChatHeader } from "./ChatHeader";
+import { ConsultationSummaryModal } from "./ConsultationSummaryModal";
 import { MessageComposer } from "./MessageComposer";
 import { MessageThread } from "./MessageThread";
 
@@ -29,6 +31,8 @@ type Props = {
   roomId: number;
   name: string;
   currentUserId: number;
+  // ID собеседника. Нужен для итогов созвонов: записи отбираются по нему.
+  partnerId?: number;
   onBack: () => void;
 };
 
@@ -36,6 +40,7 @@ export const UserConversation: FC<Props> = ({
   roomId,
   name,
   currentUserId,
+  partnerId,
   onBack,
 }) => {
   const {
@@ -50,12 +55,22 @@ export const UserConversation: FC<Props> = ({
   const isOpen = connectionState === "open";
   const typing = typingLabel(typingNames);
 
+  const role = useAuthStore((state) => state.user?.role);
+  const [showSummaries, setShowSummaries] = useState(false);
+  // Итоги есть только у сторон приёма. Для клиники LiveKit-комнат нет
+  // (см. getChatConsultations), поэтому кнопку ей не показываем.
+  const canSeeSummaries =
+    !!partnerId && (role === "doctor" || role === "patient");
+
   return (
     <>
       <ChatHeader
         name={name}
         isAi={false}
         onBack={onBack}
+        onOpenSummaries={
+          canSeeSummaries ? () => setShowSummaries(true) : undefined
+        }
         subtitle={
           typing ? (
             <span className="text-primary">{typing}</span>
@@ -86,6 +101,19 @@ export const UserConversation: FC<Props> = ({
         onTyping={sendTyping}
         disabled={!isOpen}
       />
+
+      {canSeeSummaries && (
+        <ConsultationSummaryModal
+          isOpen={showSummaries}
+          onClose={() => setShowSummaries(false)}
+          role={role === "doctor" ? "doctor" : "patient"}
+          partnerUserId={partnerId!}
+          partnerName={name}
+          // Отправлять ссылку пациенту может только врач, и только пока
+          // сокет открыт — иначе сообщение молча потеряется.
+          onShare={role === "doctor" && isOpen ? sendMessage : undefined}
+        />
+      )}
     </>
   );
 };

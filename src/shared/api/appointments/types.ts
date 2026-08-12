@@ -35,10 +35,23 @@ export type AppointmentResponse = {
   google_meet_link: string | null;
   status: AppointmentStatus;
   doctor?: AppointmentDoctor;
+  // Схема объявляет patient строкой, но бэк отдаёт объект — как и author в
+  // отзывах (см. reviews/types.ts). Ориентируемся на реальный ответ.
+  patient?: AppointmentDoctor;
   notes?: string;
   guest_name?: string;
   guest_phone?: string;
   guest_email?: string;
+  // Итоги видео-консультации. Заполняются бэком ПОСЛЕ созвона: ai_summary —
+  // текст расшифровки, ai_summary_docx_url — ссылка на .docx. До созвона оба
+  // приходят пустыми строками (проверено живым запросом). Присутствуют только
+  // в GET /api/appointments/{id}/ — в списках /api/doctor/appointments/ и
+  // /api/profile/appointments/ этих полей нет.
+  ai_summary?: string;
+  ai_summary_docx_url?: string;
+  diagnosis?: string | null;
+  recommendations?: string | null;
+  doctor_notes?: string | null;
 };
 
 export type CancelAppointmentRequest = {

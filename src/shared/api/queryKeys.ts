@@ -114,4 +114,7 @@ export const chatKeys = {
   unreadCount: () => [...chatKeys.all, "unread-count"] as const,
   messages: (roomId: number) => [...chatKeys.all, "messages", roomId] as const,
   ai: () => [...chatKeys.all, "ai"] as const,
+  // Итоги созвонов с конкретным собеседником (см. getConsultationSummaries).
+  summaries: (partnerUserId: number) =>
+    [...chatKeys.all, "summaries", partnerUserId] as const,
 };

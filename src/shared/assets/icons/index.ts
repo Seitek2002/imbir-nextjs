@@ -16,6 +16,8 @@ import CheckIcon from "./common/check.svg";
 import ChevronRightIcon from "./common/chevron-right.svg";
 import ClinicBuildingIcon from "./common/clinic-building.svg";
 import DoctorPersonIcon from "./common/doctor-person.svg";
+import DocumentTextIcon from "./common/document-text.svg";
+import DownloadIcon from "./common/download.svg";
 import EditIcon from "./common/edit.svg";
 import MedicalServiceIcon from "./common/medical-service.svg";
 import ServiceRadialIcon from "./common/service-radial.svg";
@@ -63,6 +65,8 @@ export {
   ChevronRightIcon,
   ClinicBuildingIcon,
   DoctorPersonIcon,
+  DocumentTextIcon,
+  DownloadIcon,
   ServiceRadialIcon,
   TrashIcon,
   ArrowIcon,

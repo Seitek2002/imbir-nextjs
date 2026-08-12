@@ -66,6 +66,24 @@ export type ChatConsultation = {
   time: string;
   is_online: boolean;
   status: string;
+  // Кто вторая сторона записи. /api/doctor/appointments/ отдаёт patient,
+  // /api/profile/appointments/ — doctor. Нужно, чтобы отобрать записи именно
+  // этого чата: списки возвращают ВСЕ записи пользователя, а не по собеседнику.
+  patient?: ChatParticipant | null;
+  doctor?: ChatParticipant | null;
+};
+
+// Итог видео-консультации: расшифровка разговора и ссылка на .docx.
+// Собирается из GET /api/appointments/{id}/ — в списках записей этих полей нет.
+export type ConsultationSummary = {
+  appointmentId: number;
+  date: string; // YYYY-MM-DD
+  time: string; // HH:mm
+  // Имя второй стороны — для заголовка «…разговора с пациентом Имя».
+  partnerName: string;
+  // Абсолютная ссылка на .docx (пустая, если бэк отдал только текст).
+  docxUrl: string;
+  text: string;
 };
 
 // Индикатор «печатает…» — тот же сокет, поле type различает кадр.
