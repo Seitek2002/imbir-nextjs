@@ -705,6 +705,17 @@ export const useRecordForm = () => {
     }
   };
 
+  // Закрытие модалки успеха («Спасибо» или клик по подложке). Раньше здесь
+  // было только setShowSuccess(false): пользователь оставался на той же
+  // заполненной форме с активной кнопкой «Записаться» — выглядело как будто
+  // запись не прошла, и вторым кликом создавался дубль на тот же слот.
+  // Уводим на список записей; гостя — на главную, в профиль его не пустит
+  // AuthGuard.
+  const handleSuccessClose = () => {
+    setShowSuccess(false);
+    router.push(canUseOnline ? ROUTES.PROFILE_HISTORY : ROUTES.HOME);
+  };
+
   return {
     router,
     mobileStep,
@@ -734,7 +745,10 @@ export const useRecordForm = () => {
     setErrors,
     isSubmitting,
     showSuccess,
-    setShowSuccess,
+    // setShowSuccess наружу не отдаём: закрывать модалку успеха можно только
+    // через handleSuccessClose, иначе пользователь снова окажется на
+    // заполненной форме и создаст дубль записи.
+    handleSuccessClose,
     appointmentResult,
     canUseOnline,
     clinicMap,

@@ -27,7 +27,7 @@ export const RecordPage = () => {
     selectedDate,
     selectedTime,
     showSuccess,
-    setShowSuccess,
+    handleSuccessClose,
     appointmentResult,
   } = form;
 
@@ -80,7 +80,7 @@ export const RecordPage = () => {
 
       <SuccessModal
         isOpen={showSuccess}
-        onClose={() => setShowSuccess(false)}
+        onClose={handleSuccessClose}
         appointmentId={appointmentResult?.id ?? null}
         isOnline={mode === "online"}
       />

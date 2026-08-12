@@ -4,6 +4,7 @@ export const ROUTES = {
   CLINICS: "/clinics",
   SPECIALISTS: "/specialists",
   PROFILE: "/profile",
+  PROFILE_HISTORY: "/profile/history",
   CHATS: "/chat",
   VIDEOS: "/videos",
   RECORD: "/record",
