@@ -16,6 +16,8 @@ export type DoctorReview = {
   id: string;
   authorName: string;
   authorInitial: string;
+  // Фото автора, если он его загрузил. Иначе рисуем authorInitial.
+  authorAvatarUrl?: string;
   rating: number;
   date: string;
   text: string;

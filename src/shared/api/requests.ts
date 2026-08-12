@@ -5,7 +5,7 @@
 // This file adapts the new snake_case API types back to the camelCase
 // mock-type shape that existing entity components and views expect.
 // It acts as a backward-compatibility layer during migration.
-import { toHttps } from "@/shared/lib/media";
+import { toHttps, toMediaUrl } from "@/shared/lib/media";
 import { parsePrice } from "@/shared/lib/price";
 
 import type {
@@ -201,9 +201,18 @@ const resolveAuthor = (author: ApiReview["author"]): string => {
   return "";
 };
 
+// author бывает строкой (тогда фото просто нет) или объектом с avatar_url.
+const resolveAuthorAvatar = (
+  author: ApiReview["author"],
+): string | undefined => {
+  if (!author || typeof author === "string") return undefined;
+  return toMediaUrl(author.avatar_url);
+};
+
 const adaptReview = (r: ApiReview): MockReviewItem => ({
   id: String(r.id),
   author: resolveAuthor(r.author),
+  avatarUrl: resolveAuthorAvatar(r.author),
   date: r.created_at.slice(0, 10),
   text: r.text ?? "",
   rating: r.rating,

@@ -7,7 +7,9 @@ import { StaticImageData } from "next/image";
 export type ReviewItem = {
   id: string;
   author: string;
-  avatar?: string;
+  // Имя совпадает с пропом ReviewCard (@/widgets/reviews) — объект отдаётся
+  // туда как есть, и при расхождении имён аватар молча терялся бы.
+  avatarUrl?: string;
   date: string;
   text: string;
   rating: number;

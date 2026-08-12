@@ -9,7 +9,9 @@ export type ReviewProps = {
   date: string;
   text: string;
   rating: number;
-  avatarUrl?: string; // Для будущих реальных фото
+  // Абсолютный URL фото автора. Приходит из author.avatar_url (/api/reviews/),
+  // но только у тех, кто загрузил фото — остальным показываем инициал.
+  avatarUrl?: string;
   reply?: { text: string; date: string } | null;
 };
 
@@ -43,14 +45,19 @@ export const ReviewCard: FC<ReviewProps> = ({
       <div className="p-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* Аватарка */}
-          <div className="size-10.5 rounded-full bg-border-soft shrink-0 overflow-hidden relative">
+          <div className="size-10.5 rounded-full bg-[#FFF0EE] shrink-0 overflow-hidden relative flex items-center justify-center">
             <ImageWithFallback
               src={avatarUrl}
               alt={author}
               fill
               sizes="42px"
               className="object-cover"
-              fallback={null}
+              fallback={
+                // Инициал вместо пустого круга: фото есть далеко не у всех.
+                <span className="text-primary font-semibold">
+                  {author.trim().charAt(0).toUpperCase()}
+                </span>
+              }
             />
           </div>
 

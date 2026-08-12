@@ -20,13 +20,20 @@ import {
 import { ChatIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
+import { toMediaUrl } from "@/shared/lib/media";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
-import { Button, IconBtn, Textarea } from "@/shared/ui";
+import { Button, IconBtn, ImageWithFallback, Textarea } from "@/shared/ui";
 
 const resolveAuthorName = (author?: ReviewAuthor): string => {
   if (!author) return "Аноним";
   if (typeof author === "string") return author;
   return author.full_name;
+};
+
+// avatar_url приходит относительным и только у авторов с загруженным фото.
+const resolveAuthorAvatar = (author?: ReviewAuthor): string | undefined => {
+  if (!author || typeof author === "string") return undefined;
+  return toMediaUrl(author.avatar_url);
 };
 
 const DURATION = 200;
@@ -291,10 +298,19 @@ const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
     {/* Шапка: автор + дата, справа — плашка со звёздами */}
     <div className="flex items-start justify-between gap-3">
       <div className="flex items-center gap-3">
-        <div className="size-10.5 rounded-full bg-[#FFF0EE] flex items-center justify-center shrink-0">
-          <span className="text-primary font-semibold">
-            {review.authorInitial}
-          </span>
+        <div className="size-10.5 rounded-full bg-[#FFF0EE] flex items-center justify-center shrink-0 overflow-hidden relative">
+          <ImageWithFallback
+            src={review.authorAvatarUrl}
+            alt={review.authorName}
+            fill
+            sizes="42px"
+            className="object-cover"
+            fallback={
+              <span className="text-primary font-semibold">
+                {review.authorInitial}
+              </span>
+            }
+          />
         </div>
         <div>
           <p className="text-foreground font-medium text-base">
@@ -369,6 +385,7 @@ export const DoctorReviewsPage: FC = () => {
       id: String(r.id),
       authorName: name,
       authorInitial: name.charAt(0).toUpperCase(),
+      authorAvatarUrl: resolveAuthorAvatar(r.author),
       rating: r.rating,
       date: fmtReviewDate(r.created_at),
       text: r.text,

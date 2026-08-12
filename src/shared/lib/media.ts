@@ -10,3 +10,21 @@ export const toHttps = (url: string | null | undefined): string | undefined => {
     "https://imbir.sino0on.ru",
   );
 };
+
+// Тот же дефолт, что в shared/api/client.ts и next.config.ts.
+const API_ORIGIN = (
+  process.env.NEXT_PUBLIC_API_URL ?? "http://155.212.216.197:8030"
+).replace(/\/$/, "");
+
+// Часть media-ссылок бэк отдаёт абсолютными (фото врача, логотип клиники), а
+// часть — относительными: author.avatar_url в /api/reviews/ приходит как
+// "/media/users/avatars/xxx.webp". Относительный путь браузер разрешил бы
+// относительно origin фронтенда и получил бы 404, поэтому дописываем хост API.
+export const toMediaUrl = (
+  url: string | null | undefined,
+): string | undefined => {
+  if (!url) return undefined;
+  if (/^(https?:)?\/\//.test(url) || url.startsWith("data:"))
+    return toHttps(url);
+  return `${API_ORIGIN}${url.startsWith("/") ? "" : "/"}${url}`;
+};

@@ -1,7 +1,14 @@
 export type ReviewTargetType = "doctor" | "clinic" | "service";
 
 // Backend returns author/target as objects despite Swagger typing them string.
-export type ReviewParty = { id: number; full_name: string };
+// avatar_url приходит относительным ("/media/users/avatars/xxx.webp") и только
+// если фото загружено — у авторов без аватара поля просто нет.
+// Абсолютный адрес собирает toMediaUrl (shared/lib/media.ts).
+export type ReviewParty = {
+  id: number;
+  full_name: string;
+  avatar_url?: string | null;
+};
 export type ReviewAuthor = ReviewParty | string;
 
 // Ответ на отзыв от врача/клиники. null, если ответа ещё нет.
