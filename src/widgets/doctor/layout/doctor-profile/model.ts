@@ -55,4 +55,10 @@ export type DoctorProfileData = {
   certificates: string[];
   rating: number;
   totalReviews: number;
+  // Приём онлайн, цена видеоконсультации и публикация профиля в каталоге.
+  // Всё три — писчие поля /api/doctor/profile/, редактируются в секции
+  // «Профессиональные данные».
+  isOnlineAvailable: boolean;
+  consultationPrice: string;
+  isPublished: boolean;
 };

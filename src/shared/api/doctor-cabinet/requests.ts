@@ -54,6 +54,14 @@ export type UpdateDoctorProfileBody = {
   skills?: string[];
   education?: unknown[];
   work_experience?: unknown[];
+  // Схема DoctorOwnProfileRequest принимает эти три поля на запись (проверено
+  // живым PUT). Без них врач, зарегистрировавшийся сам, не мог ни включить
+  // онлайн-приём, ни опубликоваться — оставался невидимым в каталоге до
+  // правки в админке.
+  is_online_available?: boolean;
+  // Строка, а не число: бэк отдаёт и принимает decimal как "1500.00".
+  consultation_price?: string;
+  is_published?: boolean;
 };
 
 export const updateDoctorProfile = async (

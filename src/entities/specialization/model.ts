@@ -31,8 +31,12 @@ export const SPECIALIZATION_TILES_LIMIT = 8;
 // значений без photo, плюс парой строк-мусора ("das", "test" — старые тестовые
 // записи), которые попадаются раньше нормальных названий и не должны занимать
 // место в выдаче.
+// Порядок важен: в этом же порядке иллюстрированные плитки встают на Главной
+// (как в макете), см. useSpecializationTiles.
 const IMAGE_RULES: [RegExp, StaticImageData][] = [
-  [/^лор|отоларинголог/i, ServiceLor],
+  // В справочнике запись называется «Оториноларингология» — правило на
+  // «отоларинголог» её не ловило, и ЛОР оставался без картинки.
+  [/^лор|ото(?:рино)?ларинголог/i, ServiceLor],
   [/невролог/i, ServiceNevrology],
   [/гинеколог/i, ServiceGinecology],
   [/кардиолог/i, ServiceCardiology],
@@ -42,10 +46,12 @@ const IMAGE_RULES: [RegExp, StaticImageData][] = [
   [/стоматолог/i, ServiceDentistry],
 ];
 
+const findImageRuleIndex = (name: string): number =>
+  IMAGE_RULES.findIndex(([pattern]) => pattern.test(name));
+
 export const getSpecializationImage = (
   name: string,
-): StaticImageData | undefined =>
-  IMAGE_RULES.find(([pattern]) => pattern.test(name))?.[1];
+): StaticImageData | undefined => IMAGE_RULES[findImageRuleIndex(name)]?.[1];
 
 // Справочник почти не меняется — держим его в кеше подольше. Ключ тот же, что
 // у фильтров (FilterBar/MobileFiltersModal), так что на всё приложение уходит
@@ -112,8 +118,23 @@ export const resolveSpecializationIds = (
 export const useSpecializationTiles = (limit = SPECIALIZATION_TILES_LIMIT) => {
   const { data = [], isLoading } = useSpecializations();
 
+  // Справочник приходит по алфавиту, и по мере его роста в первые 8 записей
+  // перестали попадать специализации с иллюстрациями: блок на Главной стал
+  // сеткой одинаковых заглушек (Андрология, Анти-age, Аритмолог…). Поэтому
+  // сначала берём те, для которых картинка есть, в порядке IMAGE_RULES — как
+  // в макете, — а оставшиеся места добиваем алфавитным хвостом. Сортировка в
+  // JS стабильная, так что внутри одного ранга алфавит сохраняется.
+  const rank = (item: SpecializationItem): number => {
+    const ruleIndex = findImageRuleIndex(item.name);
+    if (ruleIndex >= 0) return ruleIndex;
+    // Фото из справочника (бэк пока не заполняет) — сразу после локальных.
+    if (item.photo) return IMAGE_RULES.length;
+    return Number.MAX_SAFE_INTEGER;
+  };
+
   const tiles = data
     .filter((item) => hasCyrillic(item.name))
+    .sort((a, b) => rank(a) - rank(b))
     .slice(0, limit)
     .map(({ name, photo }) => {
       return {
