@@ -39,6 +39,9 @@ const IMAGE_RULES: [RegExp, StaticImageData][] = [
   [/^лор|ото(?:рино)?ларинголог/i, ServiceLor],
   [/невролог/i, ServiceNevrology],
   [/гинеколог/i, ServiceGinecology],
+  // Сюда просится и «Аритмолог» — специализация кардиологическая. Но картинка
+  // у них тогда одна на двоих, и в сетке оказываются два одинаковых сердца, а
+  // вытесняется при этом нормальная плитка. Одна иллюстрация — одна плитка.
   [/кардиолог/i, ServiceCardiology],
   [/пульмонолог/i, ServicePulmonology],
   [/офтальмолог|окулист/i, ServiceOphthalmology],
@@ -118,31 +121,33 @@ export const resolveSpecializationIds = (
 export const useSpecializationTiles = (limit = SPECIALIZATION_TILES_LIMIT) => {
   const { data = [], isLoading } = useSpecializations();
 
-  // Справочник приходит по алфавиту, и по мере его роста в первые 8 записей
-  // перестали попадать специализации с иллюстрациями: блок на Главной стал
-  // сеткой одинаковых заглушек (Андрология, Анти-age, Аритмолог…). Поэтому
-  // сначала берём те, для которых картинка есть, в порядке IMAGE_RULES — как
-  // в макете, — а оставшиеся места добиваем алфавитным хвостом. Сортировка в
-  // JS стабильная, так что внутри одного ранга алфавит сохраняется.
+  // Плитку без картинки не показываем вовсе. Раньше блок добирал недостающие
+  // алфавитным хвостом справочника, и на Главной висели одинаковые серые
+  // заглушки — блок выглядел недогруженным. Лучше меньше плиток, но все с
+  // иллюстрацией; остальные специализации доступны на /specialists.
   const rank = (item: SpecializationItem): number => {
     const ruleIndex = findImageRuleIndex(item.name);
-    if (ruleIndex >= 0) return ruleIndex;
     // Фото из справочника (бэк пока не заполняет) — сразу после локальных.
-    if (item.photo) return IMAGE_RULES.length;
-    return Number.MAX_SAFE_INTEGER;
+    return ruleIndex >= 0 ? ruleIndex : IMAGE_RULES.length;
   };
 
-  const tiles = data
+  const illustrated = data
     .filter((item) => hasCyrillic(item.name))
+    .filter((item) => item.photo || findImageRuleIndex(item.name) >= 0)
+    // Порядок IMAGE_RULES = порядок плиток в макете. Сортировка в JS
+    // стабильная, поэтому внутри одного ранга сохраняется алфавит.
     .sort((a, b) => rank(a) - rank(b))
-    .slice(0, limit)
-    .map(({ name, photo }) => {
-      return {
-        name,
-        image: photo ?? getSpecializationImage(name),
-        href: `${ROUTES.SPECIALISTS}?doc_spec=${encodeURIComponent(name)}`,
-      };
-    });
+    .slice(0, limit);
+
+  // Сетка — 4 колонки на десктопе и 2 на мобильном. Нечётное число оставляет
+  // на мобильном одинокую плитку в последнем ряду, поэтому округляем вниз.
+  const evenCount = illustrated.length - (illustrated.length % 2);
+
+  const tiles = illustrated.slice(0, evenCount).map(({ name, photo }) => ({
+    name,
+    image: photo ?? getSpecializationImage(name),
+    href: `${ROUTES.SPECIALISTS}?doc_spec=${encodeURIComponent(name)}`,
+  }));
 
   return { tiles, isLoading, limit };
 };
