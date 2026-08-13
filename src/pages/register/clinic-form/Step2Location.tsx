@@ -1,9 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-
-import { getCities, getCountryCodes, referenceKeys } from "@/shared/api";
-import { CITIES_BY_COUNTRY, DEFAULT_COUNTRIES, colors } from "@/shared/config";
+import { getCities, referenceKeys } from "@/shared/api";
+import { CITIES_BY_COUNTRY, DEFAULT_COUNTRY, colors } from "@/shared/config";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import { Dropdown, Input, PhoneInput } from "@/shared/ui";
 
@@ -18,21 +16,10 @@ type Props = {
 };
 
 export const Step2Location = ({ data, onChange }: Props) => {
-  // Страны — из справочника телефонных кодов: другого списка стран у бэка нет,
-  // а там они уже человекочитаемые. Города — из /references/cities/ поверх
-  // локального каталога по выбранной стране.
-  const { data: countryCodes = [] } = useQuery({
-    queryKey: referenceKeys.countryCodes(),
-    queryFn: getCountryCodes,
-    staleTime: 60 * 60 * 1000,
-  });
-  const countryNames = countryCodes.length
-    ? Array.from(new Set(countryCodes.map((c) => c.country)))
-    : DEFAULT_COUNTRIES;
-  const countryOptions = countryNames.map((name) => ({
-    label: name,
-    value: name,
-  }));
+  // Временно только Кыргызстан — по просьбе поддержки, чтобы у операторов не
+  // возникало вопросов из-за случайно выбранной другой страны при
+  // регистрации. Города — из /references/cities/ поверх локального каталога.
+  const countryOptions = [{ label: DEFAULT_COUNTRY, value: DEFAULT_COUNTRY }];
 
   const { options: cityOptions } = useReferenceOptions(
     referenceKeys.cities(),

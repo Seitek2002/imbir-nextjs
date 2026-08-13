@@ -2,8 +2,6 @@
 
 import { FC, useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
-
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import {
@@ -12,8 +10,8 @@ import {
   useClinicCabinet,
 } from "@/entities/clinic-profile";
 
-import { getCities, getCountryCodes, referenceKeys } from "@/shared/api";
-import { CITIES_BY_COUNTRY, DEFAULT_COUNTRIES } from "@/shared/config";
+import { getCities, referenceKeys } from "@/shared/api";
+import { CITIES_BY_COUNTRY, DEFAULT_COUNTRY } from "@/shared/config";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import { Dropdown, Input, PhoneInput } from "@/shared/ui";
 
@@ -29,16 +27,13 @@ export const ClinicLocationPage: FC = () => {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
 
-  const { data: countryCodes = [] } = useQuery({
-    queryKey: referenceKeys.countryCodes(),
-    queryFn: getCountryCodes,
-    staleTime: 60 * 60 * 1000,
-  });
-  const countryOptions = (
-    countryCodes.length
-      ? countryCodes.map((country) => country.country)
-      : DEFAULT_COUNTRIES
-  ).map((country) => ({ label: country, value: country }));
+  // Временно только Кыргызстан — по просьбе поддержки, чтобы у операторов не
+  // возникало вопросов из-за случайно выбранной другой страны. Уже
+  // сохранённое значение (если вдруг не Кыргызстан) не прячем, чтобы не
+  // потерять данные существующей клиники.
+  const countryOptions = Array.from(
+    new Set([DEFAULT_COUNTRY, ...(country ? [country] : [])]),
+  ).map((name) => ({ label: name, value: name }));
   const { options: cityOptions } = useReferenceOptions(
     referenceKeys.cities(),
     getCities,
