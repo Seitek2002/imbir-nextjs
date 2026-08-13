@@ -113,6 +113,12 @@ export const COUNTRIES: Country[] = [
   { code: "JP", name: "Япония", dialCode: "+81", flag: "🇯🇵", phoneLength: 10 },
 ];
 
+// Временно только Кыргызстан — по просьбе поддержки, чтобы у операторов не
+// возникало вопросов из-за случайно выбранного кода другой страны при
+// регистрации/входе по телефону. Полный справочник остаётся в COUNTRIES —
+// когда ограничение снимут, здесь достаточно вернуть просто `COUNTRIES`.
+const AVAILABLE_COUNTRIES: Country[] = COUNTRIES.filter((c) => c.code === "KG");
+
 type Props = {
   label?: string;
   value?: string;
@@ -135,8 +141,8 @@ export const PhoneInput: FC<Props> = ({
   className,
 }) => {
   const defaultCountry =
-    COUNTRIES.find((c) => c.code === defaultCountryCode) ??
-    COUNTRIES.find((c) => c.code === "KG")!;
+    AVAILABLE_COUNTRIES.find((c) => c.code === defaultCountryCode) ??
+    AVAILABLE_COUNTRIES.find((c) => c.code === "KG")!;
 
   const [selectedCountry, setSelectedCountry] =
     useState<Country>(defaultCountry);
@@ -188,9 +194,9 @@ export const PhoneInput: FC<Props> = ({
   };
 
   const filteredCountries = useMemo(() => {
-    if (!searchQuery) return COUNTRIES;
+    if (!searchQuery) return AVAILABLE_COUNTRIES;
     const q = searchQuery.toLowerCase();
-    return COUNTRIES.filter(
+    return AVAILABLE_COUNTRIES.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         c.dialCode.includes(q) ||
