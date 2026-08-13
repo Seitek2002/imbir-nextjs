@@ -28,6 +28,10 @@ import { Button, IconBtn, Input } from "@/shared/ui";
 
 type Step = "email" | "code" | "new_password" | "success";
 
+// Бэк требует код ровно из 6 цифр (minLength/maxLength: 6 в
+// PasswordResetVerifyRequest/PasswordResetConfirmRequest).
+const CODE_LENGTH = 6;
+
 export const ForgotPasswordPage = () => {
   const router = useRouter();
 
@@ -35,7 +39,7 @@ export const ForgotPasswordPage = () => {
 
   // Стейты данных
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState(["", "", "", ""]);
+  const [code, setCode] = useState(Array(CODE_LENGTH).fill(""));
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -55,7 +59,7 @@ export const ForgotPasswordPage = () => {
     onSuccess: () => {
       setStep("code");
       setResendLeft(59);
-      setCode(["", "", "", ""]);
+      setCode(Array(CODE_LENGTH).fill(""));
     },
     onError: (err) => {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
@@ -110,7 +114,7 @@ export const ForgotPasswordPage = () => {
     setCode(newCode);
 
     // Автофокус на следующий инпут
-    if (value && index < 3) {
+    if (value && index < CODE_LENGTH - 1) {
       const nextInput = document.getElementById(`code-input-${index + 1}`);
       nextInput?.focus();
     }
@@ -213,7 +217,8 @@ export const ForgotPasswordPage = () => {
                 onSubmit={(e) => {
                   e.preventDefault();
                   const value = code.join("");
-                  if (value.length < 4 || verifyMutation.isPending) return;
+                  if (value.length < CODE_LENGTH || verifyMutation.isPending)
+                    return;
                   verifyMutation.mutate({ email, code: value });
                 }}
               >
@@ -226,7 +231,7 @@ export const ForgotPasswordPage = () => {
                   </p>
                 </div>
 
-                <div className="flex justify-center md:justify-start gap-3 md:gap-4 my-6">
+                <div className="flex justify-center md:justify-start gap-2 md:gap-3 my-6">
                   {code.map((digit, idx) => (
                     <input
                       key={idx}
@@ -236,7 +241,7 @@ export const ForgotPasswordPage = () => {
                       maxLength={1}
                       value={digit}
                       onChange={(e) => handleCodeChange(idx, e.target.value)}
-                      className="size-14 md:size-16 text-center text-2xl font-medium border border-border-soft rounded-xl focus:border-primary focus:outline-none focus:shadow-[0_0_0_2px_rgba(245,101,62,0.2)] transition-all"
+                      className="size-11 md:size-14 text-center text-2xl font-medium border border-border-soft rounded-xl focus:border-primary focus:outline-none focus:shadow-[0_0_0_2px_rgba(245,101,62,0.2)] transition-all"
                     />
                   ))}
                 </div>
@@ -267,7 +272,8 @@ export const ForgotPasswordPage = () => {
                     className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
                     disabled={
-                      code.join("").length < 4 || verifyMutation.isPending
+                      code.join("").length < CODE_LENGTH ||
+                      verifyMutation.isPending
                     }
                   >
                     {verifyMutation.isPending ? "Проверка..." : "Подтвердить"}
