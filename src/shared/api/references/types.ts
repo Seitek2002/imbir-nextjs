@@ -29,3 +29,27 @@ export type CountryCode = {
 export type CountryCodesResponse = {
   data: CountryCode[];
 };
+
+// GET /api/references/user-status/{user_id}/ — статус пользователя КАК
+// РЕЦЕНЗЕНТА, по среднему баллу отзывов, которые он сам оставил (не рейтинг
+// того, кого он оценивает). Авторизация не требуется. Если отзывов нет —
+// status: null.
+export type UserStatus = {
+  id: number;
+  name: string;
+  description: string;
+  percent: number;
+  image: string | null;
+};
+
+export type UserAccountStatus = {
+  user_id: number;
+  reviews_count: number;
+  average_rating: number | null;
+  percent: number | null;
+  status: UserStatus | null;
+};
+
+export type UserAccountStatusResponse = {
+  data: UserAccountStatus;
+};

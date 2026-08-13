@@ -5,6 +5,8 @@ import {
   ReferenceListResponse,
   SpecializationItem,
   SpecializationListResponse,
+  UserAccountStatus,
+  UserAccountStatusResponse,
 } from "./types";
 
 const fetchReference = async (path: string): Promise<string[]> => {
@@ -45,3 +47,12 @@ export const getPaymentMethods = () =>
 // категории собирались на фронте из реальных услуг (см. entities/service).
 export const getServiceCategories = () =>
   fetchReference("/api/references/service-categories/");
+
+export const getUserStatus = async (
+  userId: number,
+): Promise<UserAccountStatus> => {
+  const { data } = await apiClient.get<UserAccountStatusResponse>(
+    `/api/references/user-status/${userId}/`,
+  );
+  return data.data;
+};

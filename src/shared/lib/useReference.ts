@@ -2,6 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { getUserStatus, referenceKeys } from "@/shared/api";
+import { useAuthStore } from "@/shared/store";
+
 // Справочники бэка (/api/references/*) — это перечень значений, которые уже
 // встречаются в базе, а не выверенный каталог. Из-за старых форм, которые
 // отправляли служебные коды, туда попали "bishkek", "russian", "card",
@@ -51,6 +54,28 @@ export const useReferenceOptions = (
 
   return {
     options: values.map((value) => ({ label: value, value })),
+    isLoading,
+  };
+};
+
+// Статус текущего пользователя как рецензента (см.
+// GET /api/references/user-status/{user_id}/) — по среднему баллу ЕГО
+// СОБСТВЕННЫХ отзывов, не рейтинг того, кого он оценивает. Если отзывов нет,
+// бэк отдаёт status: null — в этом случае карточку статуса не показываем
+// вовсе, а не рисуем нулевые/заглушечные значения.
+export const useUserStatus = () => {
+  const userId = useAuthStore((s) => s.user?.id);
+
+  const { data, isLoading } = useQuery({
+    queryKey: referenceKeys.userStatus(userId ?? 0),
+    queryFn: () => getUserStatus(userId as number),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return {
+    status: data?.status ?? null,
+    percent: data?.percent ?? null,
     isLoading,
   };
 };

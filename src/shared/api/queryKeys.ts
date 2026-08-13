@@ -101,6 +101,8 @@ export const referenceKeys = {
   paymentMethods: () => [...referenceKeys.all, "paymentMethods"] as const,
   countryCodes: () => [...referenceKeys.all, "countryCodes"] as const,
   serviceCategories: () => [...referenceKeys.all, "serviceCategories"] as const,
+  userStatus: (userId: number) =>
+    [...referenceKeys.all, "userStatus", userId] as const,
 };
 
 export const notificationKeys = {
