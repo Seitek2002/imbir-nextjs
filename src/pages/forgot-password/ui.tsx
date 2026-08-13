@@ -106,7 +106,7 @@ export const ForgotPasswordPage = () => {
     password === confirmPassword &&
     password !== "";
 
-  // Хендлер для 4-значного кода
+  // Хендлер для посимвольного ввода кода
   const handleCodeChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return; // Только цифры
     const newCode = [...code];
