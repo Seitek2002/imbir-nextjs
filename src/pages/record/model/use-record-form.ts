@@ -29,6 +29,7 @@ import type {
 } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
+import { toHttps } from "@/shared/lib/media";
 import { useAuthStore, useCityStore } from "@/shared/store";
 
 import { SELECTION_LABELS } from "./constants";
@@ -356,10 +357,30 @@ export const useRecordForm = () => {
     [CLINICS],
   );
 
-  const selectedClinic = useMemo(
-    () => CLINICS.find((clinic) => clinic.id === selectedClinicId) ?? null,
-    [CLINICS, selectedClinicId],
-  );
+  // Клиника услуги может не входить в публичный список (см. CLINICS) — он
+  // отдаёт только "листингуемые" клиники, а бэк не гарантирует, что клиника
+  // конкретной услуги туда попадёт (проверено живым запросом: клиника с
+  // услугой id=15 отсутствует в /api/clinics/, хотя /api/clinics/{id}/
+  // отдаёт её полностью). clinicDetail грузится по ID именно этой клиники
+  // (см. запрос выше) — используем его как фолбэк, иначе поле «Клиника»
+  // молча остаётся пустым, хотя выбор внутри состояния уже произошёл.
+  const selectedClinic = useMemo(() => {
+    const fromList =
+      CLINICS.find((clinic) => clinic.id === selectedClinicId) ?? null;
+    if (fromList) return fromList;
+    if (clinicDetail && String(clinicDetail.id) === selectedClinicId) {
+      return {
+        id: String(clinicDetail.id),
+        name: clinicDetail.name,
+        rating: clinicDetail.rating,
+        reviews: clinicDetail.reviews_count,
+        experience: clinicDetail.experience_years ?? 0,
+        address: clinicDetail.address ?? "",
+        image: toHttps(clinicDetail.logo) ?? "",
+      };
+    }
+    return null;
+  }, [CLINICS, selectedClinicId, clinicDetail]);
   // Пул для поиска: если клиника выбрана — её врачи, иначе все по городу.
   // Объединяем, чтобы выбранный врач нашёлся, даже если детали клиники ещё
   // грузятся или врач был выбран до выбора клиники (deep link).
