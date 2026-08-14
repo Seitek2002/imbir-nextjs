@@ -7,6 +7,7 @@ import { useScrollLock } from "@/shared/lib/useScrollLock";
 import { Button, IconBtn, SearchInput } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
+import { LoadingState } from "./LoadingState";
 import { SelectionListItem } from "./SelectionListItem";
 
 const DURATION = 200;
@@ -28,7 +29,7 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
     selectedServiceId,
     closeModal,
     handleModalItemSelect,
-    isDoctorModalLoading,
+    isModalLoading,
   } = form;
 
   const [isClosing, setIsClosing] = useState(false);
@@ -90,10 +91,8 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
         </div>
 
         <div className="mt-3 max-h-95 overflow-y-auto pr-1 space-y-2">
-          {isDoctorModalLoading ? (
-            <p className="text-sm text-muted text-center py-6">
-              Загрузка врачей клиники...
-            </p>
+          {isModalLoading ? (
+            <LoadingState />
           ) : filteredModalItems.length > 0 ? (
             filteredModalItems.map((item) => (
               <SelectionListItem

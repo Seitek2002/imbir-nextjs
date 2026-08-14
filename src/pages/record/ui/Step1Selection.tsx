@@ -2,6 +2,7 @@ import { cn } from "@/shared/lib/utils";
 import { Button, SearchInput } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
+import { LoadingState } from "./LoadingState";
 import { SelectField } from "./SelectField";
 import { SelectionListItem } from "./SelectionListItem";
 import { StepTitle } from "./StepTitle";
@@ -23,7 +24,7 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
     isFetchingMoreClinics,
     fetchMoreClinics,
     handleMobileStep1Select,
-    isDoctorStageLoading,
+    isMobileStageLoading,
     workplaceOptions,
   } = form;
 
@@ -88,10 +89,8 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
         </div>
 
         <div className="mt-3 max-h-[52vh] overflow-y-auto pr-1 space-y-2">
-          {isDoctorStageLoading ? (
-            <p className="text-sm text-muted text-center py-6">
-              Загрузка врачей клиники...
-            </p>
+          {isMobileStageLoading ? (
+            <LoadingState />
           ) : filteredMobileStep1Items.length > 0 ? (
             filteredMobileStep1Items.map((item) => (
               <SelectionListItem

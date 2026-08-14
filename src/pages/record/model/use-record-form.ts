@@ -139,6 +139,7 @@ export const useRecordForm = () => {
     fetchNextPage: fetchMoreClinics,
     hasNextPage: hasMoreClinics,
     isFetchingNextPage: isFetchingMoreClinics,
+    isLoading: isLoadingClinics,
   } = useInfiniteQuery({
     queryKey: ["record-clinics"],
     queryFn: ({ pageParam }) =>
@@ -184,7 +185,7 @@ export const useRecordForm = () => {
 
   // Врачи выбранного города; page_size поднят, иначе бэк отдаст только
   // первую страницу (20 записей) и в форме будут видны не все врачи.
-  const { data: doctorsData = [] } = useQuery({
+  const { data: doctorsData = [], isLoading: isLoadingDoctors } = useQuery({
     queryKey: ["record-doctors", selectedCity],
     queryFn: () => api.getDoctors({ city: selectedCity, page_size: 200 }),
     enabled: isCityHydrated,
@@ -203,7 +204,7 @@ export const useRecordForm = () => {
   // передача clinic_id и doctor_id вместе даёт пересечение, которое всегда
   // пусто. Поэтому фильтруем по врачу, если он выбран, и только иначе — по
   // клинике целиком.
-  const { data: servicesRaw } = useQuery({
+  const { data: servicesRaw, isLoading: isLoadingServices } = useQuery({
     queryKey: ["record-services", selectedClinicId, selectedDoctorId],
     queryFn: () =>
       getServices(
@@ -434,6 +435,31 @@ export const useRecordForm = () => {
   }, [selectedClinicId, CLINIC_DOCTORS, DOCTORS, serviceDoctorIds]);
 
   const serviceOptions = SERVICES;
+
+  // Список, который сейчас показывает открытая модалка/этап, ещё грузится —
+  // без этого пользователь на секунду видит пустой список с надписью
+  // «Ничего не найдено», хотя ответ от сервера просто не пришёл.
+  const isDoctorListLoading = selectedClinicId
+    ? isLoadingClinicDoctors
+    : isLoadingDoctors;
+
+  const isModalLoading =
+    activeModal === "clinic"
+      ? isLoadingClinics
+      : activeModal === "doctor"
+        ? isDoctorListLoading
+        : activeModal === "service"
+          ? isLoadingServices
+          : false;
+
+  const isMobileStageLoading =
+    mobileSelectionStage === "clinic"
+      ? isLoadingClinics
+      : mobileSelectionStage === "doctor"
+        ? isDoctorListLoading
+        : mobileSelectionStage === "service"
+          ? isLoadingServices
+          : false;
 
   // Места работы текущего выбранного врача — показываются как обычные
   // «клиники» (та же карточка), когда у врача их несколько и нужно уточнить,
@@ -873,11 +899,8 @@ export const useRecordForm = () => {
     filteredModalItems,
     mobileStep1Config,
     filteredMobileStep1Items,
-    // Список врачей выбранной клиники грузится отдельным запросом — показываем
-    // загрузку вместо «Ничего не найдено», пока он не пришёл.
-    isDoctorModalLoading: activeModal === "doctor" && isLoadingClinicDoctors,
-    isDoctorStageLoading:
-      mobileSelectionStage === "doctor" && isLoadingClinicDoctors,
+    isModalLoading,
+    isMobileStageLoading,
     handleMobileStep1Select,
     handleRecordBack,
     openModal,
