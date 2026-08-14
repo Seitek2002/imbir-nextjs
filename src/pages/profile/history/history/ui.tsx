@@ -26,12 +26,16 @@ type Props = {
   activeTab: "upcoming" | "completed";
   // Строка из поиска в шапке — фильтруем на клиенте по врачу/клинике/услуге.
   searchQuery?: string;
+  // Только для вкладки "Прошедшие": сужает список до конкретного статуса
+  // (там показаны и завершённые, и отменённые записи вместе).
+  statusFilter?: "completed" | "cancelled";
 };
 
 export const ProfileHistory: FC<Props> = ({
   appointments,
   activeTab,
   searchQuery = "",
+  statusFilter,
 }) => {
   const [appointmentsList, setAppointmentsList] = useState(appointments);
 
@@ -48,11 +52,14 @@ export const ProfileHistory: FC<Props> = ({
 
   const query = searchQuery.trim().toLowerCase();
   const filteredAppointments = appointmentsList.filter((apt) => {
+    // "Прошедшие" объединяет завершённые и отменённые записи (бэк не относит
+    // отменённые ни к одной из вкладок) — statusFilter сужает до одной из них.
     const byTab =
       activeTab === "upcoming"
         ? apt.status === "upcoming"
-        : apt.status === "completed";
+        : apt.status === "completed" || apt.status === "cancelled";
     if (!byTab) return false;
+    if (statusFilter && apt.status !== statusFilter) return false;
     if (!query) return true;
     return [apt.doctorName, apt.doctorClinic, apt.service].some((field) =>
       field.toLowerCase().includes(query),

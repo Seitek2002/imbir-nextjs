@@ -119,12 +119,19 @@ export const AppointmentCard: FC<Props> = ({
 }) => {
   const isUpcoming = appointment.status === "upcoming";
   const isCompleted = appointment.status === "completed";
+  const isCancelled = appointment.status === "cancelled";
   const showCancel = isUpcoming && !!onCancel;
   const showReview = isCompleted && !!onReview;
   // Переносить можно только предстоящие записи и только если знаем врача —
   // свободные слоты запрашиваются именно по нему.
   const showReschedule = isUpcoming && !!onReschedule && !!appointment.doctorId;
   const showConsultation = isUpcoming && appointment.isOnline;
+
+  const cancelledBadge = isCancelled && (
+    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-red-50 text-red-500 text-xs font-medium">
+      Отменено
+    </span>
+  );
 
   const meta = (
     <p className="text-muted">
@@ -181,9 +188,12 @@ export const AppointmentCard: FC<Props> = ({
         </div>
 
         <div className="flex-1 min-w-0 pt-1">
-          <h3 className="text-foreground font-semibold text-[22px] leading-tight mb-1">
-            {appointment.doctorName}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-foreground font-semibold text-[22px] leading-tight">
+              {appointment.doctorName}
+            </h3>
+            {cancelledBadge}
+          </div>
           <div className="text-base mb-5">{meta}</div>
 
           <div className="flex flex-col gap-3 text-base text-foreground">
@@ -265,9 +275,12 @@ export const AppointmentCard: FC<Props> = ({
           </div>
 
           <div className="flex-1 min-w-0 pt-0.5">
-            <h3 className="text-foreground font-semibold text-base leading-tight mb-0.5">
-              {appointment.doctorName}
-            </h3>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <h3 className="text-foreground font-semibold text-base leading-tight truncate">
+                {appointment.doctorName}
+              </h3>
+              {cancelledBadge}
+            </div>
             <div className="text-sm mb-2.5">{meta}</div>
 
             <div className="flex flex-col gap-1.5 text-sm text-secondary">
