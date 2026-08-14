@@ -29,17 +29,31 @@ export const ContactInfoModal: FC<Props> = ({
         <span className="text-primary shrink-0">
           <PhoneIcon className="size-5" />
         </span>
-        <span className="text-foreground text-sm md:text-base">
-          {phone || "-"}
-        </span>
+        {phone ? (
+          <a
+            href={`tel:${phone}`}
+            className="text-foreground text-sm md:text-base hover:text-primary hover:underline transition-colors"
+          >
+            {phone}
+          </a>
+        ) : (
+          <span className="text-foreground text-sm md:text-base">-</span>
+        )}
       </div>
       <div className="flex items-center gap-3">
         <span className="text-primary shrink-0">
           <EmailIcon className="size-5" />
         </span>
-        <span className="text-foreground text-sm md:text-base">
-          {email || "-"}
-        </span>
+        {email ? (
+          <a
+            href={`mailto:${email}`}
+            className="text-foreground text-sm md:text-base hover:text-primary hover:underline transition-colors"
+          >
+            {email}
+          </a>
+        ) : (
+          <span className="text-foreground text-sm md:text-base">-</span>
+        )}
       </div>
     </div>
   </Modal>
