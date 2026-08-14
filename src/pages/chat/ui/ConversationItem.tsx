@@ -30,7 +30,18 @@ export const ConversationItem: FC<Props> = ({
         isActive ? "bg-[#FEF3F0]" : "bg-transparent hover:bg-gray-50",
       )}
     >
-      <ChatAvatar name={conversation.name} isAi={conversation.isAi} size={48} />
+      <span className="relative shrink-0">
+        <ChatAvatar
+          name={conversation.name}
+          isAi={conversation.isAi}
+          size={48}
+        />
+        {!!conversation.unreadCount && (
+          <span className="absolute -top-1 -right-1 min-w-4.5 h-4.5 px-1 rounded-full bg-primary text-white text-[10px] font-semibold flex items-center justify-center">
+            {conversation.unreadCount > 9 ? "9+" : conversation.unreadCount}
+          </span>
+        )}
+      </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-0.5">
           <span className="font-semibold text-foreground text-sm truncate">

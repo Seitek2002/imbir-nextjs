@@ -27,6 +27,9 @@ export type Conversation = {
   // ID собеседника (не комнаты). Нужен, чтобы отобрать итоги созвонов именно
   // с ним: списки записей отдают все записи пользователя. У ИИ-чата нет.
   partnerId?: number;
+  // Число непрочитанных сообщений в этой комнате (см. ChatRoom.unread_count).
+  // У ИИ-чата не отслеживается бэком — остаётся undefined, бейдж не рисуем.
+  unreadCount?: number;
 };
 
 export type ConnectionState = "connecting" | "open" | "closed" | "error";

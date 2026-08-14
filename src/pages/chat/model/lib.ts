@@ -29,6 +29,7 @@ export const roomToConversation = (
     lastMessageAt: room.last_message?.created_at ?? null,
     isAi: false,
     partnerId: interlocutor?.id,
+    unreadCount: room.unread_count,
   };
 };
 
