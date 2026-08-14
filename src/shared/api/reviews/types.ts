@@ -11,6 +11,18 @@ export type ReviewParty = {
 };
 export type ReviewAuthor = ReviewParty | string;
 
+// target — «на кого» отзыв (см. ниже) — бывает не только человеком (врач:
+// full_name), но и клиникой (name) — проверено живым запросом на
+// /api/profile/reviews/: {"id":271,"name":"Тестовая Клиника"} для клиники
+// против {"id":270,"full_name":"..."} для врача. Раньше код читал только
+// full_name, из-за чего название клиники в отзывах не отображалось.
+export type ReviewTarget = {
+  id: number;
+  full_name?: string;
+  name?: string;
+  avatar_url?: string | null;
+};
+
 // Ответ на отзыв от врача/клиники. null, если ответа ещё нет.
 export type ReviewReply = {
   text: string;
@@ -21,7 +33,7 @@ export type ReviewItem = {
   id: number;
   author?: ReviewAuthor;
   // /api/profile/reviews/ отдаёт target (на кого отзыв) вместо author.
-  target?: ReviewParty;
+  target?: ReviewTarget;
   target_type: ReviewTargetType;
   target_id?: number;
   appointment_id?: number | null;

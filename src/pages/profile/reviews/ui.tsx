@@ -45,7 +45,9 @@ export const ProfileReviewsPage: FC = () => {
 
   const reviews: UserReview[] = (data?.data ?? []).map((r) => {
     const type = r.target_type as ReviewType;
-    const targetName = r.target?.full_name ?? "";
+    // Врача бэк отдаёт как full_name, клинику — как name (два разных поля
+    // для одного и того же "на кого отзыв", проверено живым запросом).
+    const targetName = r.target?.full_name ?? r.target?.name ?? "";
     return {
       id: String(r.id),
       type,

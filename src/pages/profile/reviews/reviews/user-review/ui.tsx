@@ -31,12 +31,14 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
   const getSubtitle = () => {
     switch (review.type) {
       case "clinic":
-        return (
+        // /api/profile/reviews/ не присылает адрес клиники — показываем
+        // строку только если он всё же откуда-то есть, а не пустую иконку.
+        return review.clinicAddress ? (
           <div className="flex items-center gap-1 text-muted text-sm mt-0.5">
             <GeoIcon className="w-4 h-4 [&_path]:stroke-muted shrink-0" />
             <span className="truncate">{review.clinicAddress}</span>
           </div>
-        );
+        ) : null;
       case "doctor":
         return (
           <p className="text-muted text-sm mt-0.5">
