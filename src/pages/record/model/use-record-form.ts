@@ -239,37 +239,6 @@ export const useRecordForm = () => {
     [serviceDetail],
   );
 
-  // Заход "с услуги": она уже выбрана (из URL ?service=), а клиника/врач —
-  // ещё нет. Подставляем их сами, если это можно решить однозначно, вместо
-  // того чтобы заставлять пользователя искать вручную (и рисковать
-  // случайно выбрать врача, который эту услугу не ведёт).
-  useEffect(() => {
-    if (!serviceDetail) return;
-
-    const soleDoctorId =
-      serviceDetail.doctors.length === 1
-        ? String(serviceDetail.doctors[0].id)
-        : null;
-
-    const willSetClinic = !selectedClinicId && !!serviceClinicId;
-    const willSetDoctor = !selectedDoctorId && !!soleDoctorId;
-
-    if (willSetClinic) setSelectedClinicId(serviceClinicId as string);
-    if (willSetDoctor) setSelectedDoctorId(soleDoctorId as string);
-
-    const clinicResolved = Boolean(selectedClinicId) || willSetClinic;
-    const doctorResolved = Boolean(selectedDoctorId) || willSetDoctor;
-
-    if (clinicResolved && doctorResolved) {
-      setMobileStep(2);
-    } else if (clinicResolved) {
-      setMobileSelectionStage("doctor");
-    }
-    // Срабатывает только на смену самой услуги/её деталей — иначе перебивало
-    // бы дальнейший ручной выбор пользователя тем же автозаполнением.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serviceDetail]);
-
   const selectedDateStr = selectedDate ? toApiDate(selectedDate) : null;
 
   const { data: slotsData, isLoading: isLoadingSlots } = useQuery({
@@ -521,6 +490,48 @@ export const useRecordForm = () => {
   const selectService = (serviceId: string) => {
     setSelectedServiceId(serviceId);
   };
+
+  // Заход "с услуги" (страница услуг даёт только ?service=, без клиники и
+  // врача): услугу → фильтруем врачей по ней (см. serviceDoctorIds/
+  // doctorOptions) → а уже по врачу определяем клинику — тем же путём, что
+  // и при обычном ручном выборе врача (applyDoctorSelection сам подставит
+  // клинику молча, если место работы одно, или попросит уточнить, если их
+  // несколько). Раньше вместо этого клиника бралась прямо из услуги в обход
+  // врача — теперь единственный источник истины для клиники всегда врач.
+  useEffect(() => {
+    if (!serviceDetail || selectedDoctorId) return;
+
+    if (serviceDetail.doctors.length === 1) {
+      const soleDoctorId = String(serviceDetail.doctors[0].id);
+      const needsWorkplace = applyDoctorSelection(soleDoctorId);
+      if (needsWorkplace) {
+        setMobileSelectionStage("workplace");
+        setActiveModal("workplace");
+      } else if (selectedClinicId) {
+        // Место работы было одно — applyDoctorSelection уже подставил его.
+        setMobileStep(2);
+      }
+      return;
+    }
+
+    if (serviceDetail.doctors.length > 1) {
+      // Несколько подходящих врачей — список уже отфильтрован (doctorOptions
+      // через serviceDoctorIds), пусть пользователь выберет сам.
+      setMobileSelectionStage("doctor");
+      return;
+    }
+
+    // Услуга без привязки к конкретному врачу ("общеклиническая") — врача
+    // выбрать по ней нечем, но клиника у неё всё же известна напрямую.
+    if (serviceClinicId && !selectedClinicId) {
+      applyClinicSelection(serviceClinicId);
+      setMobileSelectionStage("doctor");
+    }
+    // Срабатывает на смену услуги/подгрузку списка врачей — не хотим также
+    // перезапускаться от selectedClinicId/selectedDoctorId, которые сами же
+    // меняем внутри, иначе перебило бы дальнейший ручной выбор пользователя.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serviceDetail, doctorPool]);
 
   const modalConfig = useMemo(() => {
     if (!activeModal) return null;
