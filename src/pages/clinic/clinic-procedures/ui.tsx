@@ -51,6 +51,7 @@ export const ClinicProceduresPage: FC = () => {
     mutationFn: (id: string) => deleteClinicService(Number(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.services() });
+      toast.success("Процедура удалена");
     },
     onError: () => toast.error("Не удалось удалить процедуру"),
   });

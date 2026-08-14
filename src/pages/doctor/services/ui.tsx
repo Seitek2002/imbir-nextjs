@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useState } from "react";
+import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -170,7 +171,9 @@ export const DoctorServicesPage: FC = () => {
     mutationFn: (id: number) => deleteDoctorService(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.services() });
+      toast.success("Услуга удалена");
     },
+    onError: () => toast.error("Не удалось удалить услугу"),
   });
 
   const services = data?.data ?? [];

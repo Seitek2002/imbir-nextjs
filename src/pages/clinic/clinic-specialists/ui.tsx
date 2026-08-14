@@ -49,6 +49,7 @@ export const ClinicSpecialistsPage: FC = () => {
     mutationFn: (id: string) => detachClinicDoctor(Number(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.doctors() });
+      toast.success("Специалист откреплён от клиники");
     },
     onError: () => toast.error("Не удалось удалить специалиста"),
   });
