@@ -21,6 +21,7 @@ type Props = {
   step: ClinicStep;
   onContinue: () => void;
   onSubmit: (data: ClinicFormData) => void;
+  onBack: () => void;
   isLoading?: boolean;
 };
 
@@ -73,6 +74,7 @@ export const ClinicRegistrationForm = ({
   step,
   onContinue,
   onSubmit,
+  onBack,
   isLoading = false,
 }: Props) => {
   const [data, setData] = useState<ClinicFormData>(INITIAL_DATA);
@@ -163,6 +165,7 @@ export const ClinicRegistrationForm = ({
         label={step === 7 ? "Завершить регистрацию" : "Продолжить"}
         disabled={!isValid || isLoading}
         loading={isLoading}
+        onBack={onBack}
       />
     </form>
   );

@@ -6,21 +6,11 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Footer } from "@/widgets/footer";
-import { Header } from "@/widgets/header";
-
 import { loginFn } from "@/shared/api";
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
-import {
-  AuthShell,
-  Button,
-  Checkbox,
-  type Country,
-  Input,
-  PhoneInput,
-} from "@/shared/ui";
+import { Button, Checkbox, type Country, Input, PhoneInput } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 type LoginBy = "email" | "phone";
@@ -48,7 +38,6 @@ export const LoginPage = () => {
     setRememberMe: setRememberMeStore,
   } = useAuthStore();
 
-  const [authMode, setAuthMode] = useState<string>("login");
   const [loginBy, setLoginBy] = useState<LoginBy>("email");
   const [email, setEmail] = useState("");
   // Телефон храним раздельно: национальную часть (phoneLocal) и код страны из
@@ -98,27 +87,8 @@ export const LoginPage = () => {
     }
   };
 
-  const AuthTabs = (
-    <SegmentedControl
-      options={[
-        { label: "Вход", value: "login" },
-        { label: "Регистрация", value: "register" },
-      ]}
-      value={authMode}
-      onChange={(val) => {
-        setAuthMode(val);
-        if (val === "register") router.push(ROUTES.REGISTER);
-      }}
-    />
-  );
-
   return (
-    <AuthShell
-      header={<Header backTo={ROUTES.HOME}>{AuthTabs}</Header>}
-      footer={<Footer />}
-    >
-      <div className="hidden md:block">{AuthTabs}</div>
-
+    <>
       <div className="mt-8 mb-6 md:mt-12">
         <h2 className="text-2xl font-semibold text-foreground mb-2">
           С возвращением!
@@ -210,6 +180,6 @@ export const LoginPage = () => {
           </Button>
         </div>
       </form>
-    </AuthShell>
+    </>
   );
 };

@@ -15,6 +15,7 @@ type Props = {
   step: DoctorStep;
   onContinue: () => void;
   onSubmit: (data: DoctorFormData) => void;
+  onBack: () => void;
   isLoading?: boolean;
   inviteClinic?: InviteClinic;
 };
@@ -23,6 +24,7 @@ export const DoctorRegistrationForm = ({
   step,
   onContinue,
   onSubmit,
+  onBack,
   isLoading = false,
   inviteClinic,
 }: Props) => {
@@ -132,6 +134,7 @@ export const DoctorRegistrationForm = ({
         label={step === 4 ? "Завершить регистрацию" : "Продолжить"}
         disabled={!isValid || isLoading}
         loading={isLoading}
+        onBack={onBack}
       />
     </form>
   );

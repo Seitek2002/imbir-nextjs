@@ -5,9 +5,6 @@ import toast from "react-hot-toast";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Footer } from "@/widgets/footer";
-import { Header } from "@/widgets/header";
-
 import {
   resolveSpecializationIds,
   useSpecializations,
@@ -29,14 +26,13 @@ import {
   EmailIcon,
   EyeIcon,
   EyeOffIcon,
-  HeaderBackIcon,
   ProfileIcon,
 } from "@/shared/assets/icons";
-import { ROUTES, colors } from "@/shared/config";
+import { colors } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { AuthShell, Button, IconBtn, Input, PhoneInput } from "@/shared/ui";
+import { Button, Input, PhoneInput } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import {
@@ -178,7 +174,6 @@ export const RegisterPage = () => {
   const searchParams = useSearchParams() ?? new URLSearchParams();
   const { setTokens, setUser, setRememberMe } = useAuthStore();
 
-  const [authMode, setAuthMode] = useState<string>("register");
   const [activeForm, setActiveForm] = useState<ActiveForm>("role");
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [inviteClinic, setInviteClinic] = useState<InviteClinic | undefined>();
@@ -721,34 +716,8 @@ export const RegisterPage = () => {
     }
   };
 
-  const AuthTabs = (
-    <SegmentedControl
-      options={[
-        { label: "Вход", value: "login" },
-        { label: "Регистрация", value: "register" },
-      ]}
-      value={authMode}
-      onChange={(val) => {
-        setAuthMode(val);
-        if (val === "login") router.push(ROUTES.LOGIN);
-      }}
-    />
-  );
-
   return (
-    <AuthShell
-      header={<Header onBack={handleBack}>{AuthTabs}</Header>}
-      footer={<Footer />}
-    >
-      {/* Desktop: back button + auth tabs */}
-      <div className="hidden md:flex items-center gap-4">
-        <IconBtn variant="outline" size="sm" onClick={handleBack}>
-          <HeaderBackIcon className="size-4" />
-        </IconBtn>
-        <div className="flex-1 flex justify-center">{AuthTabs}</div>
-        <div className="size-9" />
-      </div>
-
+    <>
       {/* Step: role selection */}
       {activeForm === "role" && (
         <form
@@ -842,6 +811,7 @@ export const RegisterPage = () => {
               setDoctorStep((s) => Math.min(s + 1, 4) as DoctorStep)
             }
             onSubmit={handleSubmitDoctor}
+            onBack={handleBack}
             isLoading={isLoadingDoctor}
             inviteClinic={inviteClinic}
           />
@@ -857,6 +827,7 @@ export const RegisterPage = () => {
               setClinicStep((s) => Math.min(s + 1, 7) as ClinicStep)
             }
             onSubmit={handleSubmitClinic}
+            onBack={handleBack}
             isLoading={isLoadingClinic}
           />
         </div>
@@ -1041,6 +1012,6 @@ export const RegisterPage = () => {
           </div>
         </form>
       )}
-    </AuthShell>
+    </>
   );
 };
