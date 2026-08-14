@@ -35,7 +35,13 @@ export type DoctorAppointment = {
   service: { id: number; name: string; price: number } | null;
   date: string;
   time: string;
-  status: "upcoming" | "completed" | "cancelled";
+  status:
+    | "pending"
+    | "upcoming"
+    | "confirmed"
+    | "scheduled"
+    | "completed"
+    | "cancelled";
   notes?: string;
 };
 

@@ -131,6 +131,7 @@ export const ProfileHistoryPage: FC = () => {
     return {
       id: String(a.id),
       doctorId: docId,
+      serviceId: toEntityId(a.service),
       doctorName: toDisplayName(a.doctor),
       doctorSpecialty: doctorDetails?.specialty || "",
       doctorClinic:
@@ -144,10 +145,7 @@ export const ProfileHistoryPage: FC = () => {
       service: toDisplayName(a.service),
       price: toServicePrice(a.service),
       address,
-      status:
-        a.status === "confirmed" || a.status === "pending"
-          ? "upcoming"
-          : a.status,
+      status: a.status,
       isOnline: a.is_online,
     };
   });

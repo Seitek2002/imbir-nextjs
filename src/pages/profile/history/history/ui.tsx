@@ -50,7 +50,10 @@ export const ProfileHistory: FC<Props> = ({
   const filteredAppointments = appointmentsList.filter((apt) => {
     const byTab =
       activeTab === "upcoming"
-        ? apt.status === "upcoming"
+        ? apt.status === "upcoming" ||
+          apt.status === "pending" ||
+          apt.status === "confirmed" ||
+          apt.status === "scheduled"
         : apt.status === "completed";
     if (!byTab) return false;
     if (!query) return true;
@@ -62,10 +65,18 @@ export const ProfileHistory: FC<Props> = ({
   const queryClient = useQueryClient();
   const { mutate: cancel } = useMutation({
     mutationFn: (id: string) => cancelAppointment(Number(id)),
-    onSuccess: () =>
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [...profileKeys.all, "appointments"],
-      }),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["record-available-slots"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["reschedule-available-slots"],
+      });
+      toast.success("Запись отменена");
+    },
   });
 
   const handleCancelConfirm = () => {
@@ -100,27 +111,23 @@ export const ProfileHistory: FC<Props> = ({
         target_id: Number(vars.appointment.doctorId),
         appointment_id: Number(vars.appointment.id),
         rating: vars.rating,
-        text: vars.comment.trim() || undefined,
+        text: vars.comment,
       }),
     onSuccess: () => {
-      toast.success("Спасибо за отзыв!");
       queryClient.invalidateQueries({ queryKey: reviewKeys.all });
-      queryClient.invalidateQueries({ queryKey: profileKeys.reviews() });
+      toast.success("Отзыв сохранён");
+      setReviewModalOpen(false);
+      setSelectedAppointment(null);
     },
     onError: (err: unknown) => {
       const errData = (err as { response?: { data?: unknown } })?.response
         ?.data;
-      toast.error(extractErrorMessage(errData, "Не удалось отправить отзыв"));
+      toast.error(extractErrorMessage(errData, "Не удалось сохранить отзыв"));
     },
   });
 
-  const handleSubmitReview = (rating: number, comment: string) => {
+  const handleSubmitReview = async (rating: number, comment: string) => {
     if (!selectedAppointment) return;
-    if (!selectedAppointment.doctorId) {
-      // Старые записи могли прийти без id врача — без цели отзыв не создать.
-      toast.error("Не удалось определить врача для отзыва");
-      return;
-    }
     // Возвращаем промис: модалка закроется только после успешной отправки.
     return submitReview({
       rating,

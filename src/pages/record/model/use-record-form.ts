@@ -215,12 +215,22 @@ export const useRecordForm = () => {
 
   const selectedDateStr = selectedDate ? toApiDate(selectedDate) : null;
 
-  const { data: slotsData, isLoading: isLoadingSlots } = useQuery({
-    queryKey: ["record-available-slots", selectedDoctorId, selectedDateStr],
+  const {
+    data: slotsData,
+    isLoading: isLoadingSlots,
+    refetch: refetchSlots,
+  } = useQuery({
+    queryKey: [
+      "record-available-slots",
+      selectedDoctorId,
+      selectedDateStr,
+      selectedServiceId,
+    ],
     queryFn: () =>
       getDoctorAvailableSlots(
         selectedDoctorId as string,
         selectedDateStr as string,
+        selectedServiceId,
       ),
     enabled: Boolean(selectedDoctorId) && Boolean(selectedDateStr),
   });
@@ -230,12 +240,11 @@ export const useRecordForm = () => {
     [slotsData],
   );
 
-  // Слоты зависят от врача и даты — старый выбор времени может не совпасть
-  // ни с одним реальным слотом новой пары, сбрасываем, чтобы не отправить
-  // невалидное время молча.
+  // Слоты зависят от врача, даты и услуги — при смене любого из них
+  // сбрасываем выбранное время.
   useEffect(() => {
     setSelectedTime(null);
-  }, [selectedDoctorId, selectedDateStr]);
+  }, [selectedDoctorId, selectedDateStr, selectedServiceId]);
 
   const CLINICS: Clinic[] = clinicsData.map((c) => ({
     id: c.id,
@@ -688,11 +697,24 @@ export const useRecordForm = () => {
       setAppointmentResult(result);
       setShowSuccess(true);
     } catch (err: unknown) {
-      // Бэк теперь отклоняет 400 при неопубликованном враче/клинике или
-      // is_online_available: false — показываем настоящую причину, а не
-      // общую заглушку.
-      const errData = (err as { response?: { data?: unknown } })?.response
-        ?.data;
+      const errData = (err as { response?: { data?: Record<string, unknown> } })
+        ?.response?.data;
+
+      // Если бэк вернул 400 на пересечение времени (например {"time": ["Врач уже занят..."]})
+      if (
+        errData?.time &&
+        Array.isArray(errData.time) &&
+        errData.time.length > 0
+      ) {
+        setSelectedTime(null);
+        setErrors((prev) => ({
+          ...prev,
+          submit: "Это время только что заняли. Выберите другой слот.",
+        }));
+        refetchSlots();
+        return;
+      }
+
       setErrors((prev) => ({
         ...prev,
         submit: extractErrorMessage(

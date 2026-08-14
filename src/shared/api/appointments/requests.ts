@@ -1,5 +1,6 @@
 import { apiClient } from "../client";
 import {
+  AppointmentMutableStatus,
   AppointmentResponse,
   CancelAppointmentRequest,
   CreateAppointmentRequest,
@@ -26,11 +27,22 @@ export const getAppointmentById = async (
   return data;
 };
 
+export const updateAppointmentStatus = async (
+  id: number,
+  status: AppointmentMutableStatus,
+): Promise<AppointmentResponse> => {
+  const { data } = await apiClient.patch<AppointmentResponse>(
+    `/api/appointments/${id}/`,
+    { status },
+  );
+  return data;
+};
+
 export const cancelAppointment = async (
   id: number,
   body: CancelAppointmentRequest = { status: "cancelled" },
 ): Promise<void> => {
-  await apiClient.patch(`/api/appointments/${id}/`, body);
+  await updateAppointmentStatus(id, body.status);
 };
 
 // Перенос записи. Возвращает обновлённую запись (в т.ч. новый google_meet_link

@@ -117,14 +117,16 @@ export const AppointmentCard: FC<Props> = ({
   onReview,
   onReschedule,
 }) => {
-  const isUpcoming = appointment.status === "upcoming";
+  const isActive =
+    appointment.status === "pending" ||
+    appointment.status === "confirmed" ||
+    appointment.status === "scheduled" ||
+    appointment.status === "upcoming";
   const isCompleted = appointment.status === "completed";
-  const showCancel = isUpcoming && !!onCancel;
+  const showCancel = isActive && !!onCancel;
   const showReview = isCompleted && !!onReview;
-  // Переносить можно только предстоящие записи и только если знаем врача —
-  // свободные слоты запрашиваются именно по нему.
-  const showReschedule = isUpcoming && !!onReschedule && !!appointment.doctorId;
-  const showConsultation = isUpcoming && appointment.isOnline;
+  const showReschedule = isActive && !!onReschedule && !!appointment.doctorId;
+  const showConsultation = isActive && appointment.isOnline;
 
   const meta = (
     <p className="text-muted">

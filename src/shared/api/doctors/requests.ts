@@ -27,10 +27,11 @@ export const getDoctorById = async (
 export const getDoctorAvailableSlots = async (
   id: string | number,
   date: string,
+  service_id?: string | number | null,
 ): Promise<AvailableSlotsResponse> => {
   const { data } = await apiClient.get<AvailableSlotsResponse>(
     `/api/doctors/${id}/available-slots/`,
-    { params: { date } },
+    { params: { date, ...(service_id ? { service_id } : {}) } },
   );
   return data;
 };
