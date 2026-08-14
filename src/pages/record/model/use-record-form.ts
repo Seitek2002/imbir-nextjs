@@ -19,6 +19,7 @@ import {
   getClinicById,
   getDoctorAvailableSlots,
   getProfile,
+  getServiceById,
   getServices,
   profileKeys,
 } from "@/shared/api";
@@ -213,6 +214,62 @@ export const useRecordForm = () => {
       ),
   });
 
+  // Собственная клиника/врач(и) выбранной услуги — GET /api/services/{id}/
+  // (в отличие от списка, отдаёт clinic целиком и doctors). Нужно для двух
+  // вещей: 1) когда услугу выбрали ДО клиники/врача (страница услуг даёт
+  // только ?service=), заполнить их автоматически, а не заставлять гадать;
+  // 2) не сбрасывать уже выбранную услугу, если следующий выбор клиники/
+  // врача ей не противоречит (см. applyClinicSelection/applyDoctorSelection).
+  const { data: serviceDetail } = useQuery({
+    queryKey: ["record-service-detail", selectedServiceId],
+    queryFn: () => getServiceById(selectedServiceId as string),
+    enabled: Boolean(selectedServiceId),
+  });
+
+  const serviceClinicId = serviceDetail?.clinic
+    ? String(serviceDetail.clinic.id)
+    : null;
+  // null = услуга не закреплена за конкретным врачом (или ещё грузится) —
+  // подходит любой врач клиники. Непустой набор — только эти id.
+  const serviceDoctorIds = useMemo(
+    () =>
+      serviceDetail && serviceDetail.doctors.length > 0
+        ? new Set(serviceDetail.doctors.map((d) => String(d.id)))
+        : null,
+    [serviceDetail],
+  );
+
+  // Заход "с услуги": она уже выбрана (из URL ?service=), а клиника/врач —
+  // ещё нет. Подставляем их сами, если это можно решить однозначно, вместо
+  // того чтобы заставлять пользователя искать вручную (и рисковать
+  // случайно выбрать врача, который эту услугу не ведёт).
+  useEffect(() => {
+    if (!serviceDetail) return;
+
+    const soleDoctorId =
+      serviceDetail.doctors.length === 1
+        ? String(serviceDetail.doctors[0].id)
+        : null;
+
+    const willSetClinic = !selectedClinicId && !!serviceClinicId;
+    const willSetDoctor = !selectedDoctorId && !!soleDoctorId;
+
+    if (willSetClinic) setSelectedClinicId(serviceClinicId as string);
+    if (willSetDoctor) setSelectedDoctorId(soleDoctorId as string);
+
+    const clinicResolved = Boolean(selectedClinicId) || willSetClinic;
+    const doctorResolved = Boolean(selectedDoctorId) || willSetDoctor;
+
+    if (clinicResolved && doctorResolved) {
+      setMobileStep(2);
+    } else if (clinicResolved) {
+      setMobileSelectionStage("doctor");
+    }
+    // Срабатывает только на смену самой услуги/её деталей — иначе перебивало
+    // бы дальнейший ручной выбор пользователя тем же автозаполнением.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serviceDetail]);
+
   const selectedDateStr = selectedDate ? toApiDate(selectedDate) : null;
 
   const { data: slotsData, isLoading: isLoadingSlots } = useQuery({
@@ -377,11 +434,14 @@ export const useRecordForm = () => {
   );
 
   // Клиника выбрана → список врачей из GET /api/clinics/{id}/;
-  // иначе — все врачи города.
-  const doctorOptions = useMemo(
-    () => (selectedClinicId ? CLINIC_DOCTORS : DOCTORS),
-    [selectedClinicId, CLINIC_DOCTORS, DOCTORS],
-  );
+  // иначе — все врачи города. Если вдобавок уже выбрана услуга, закреплённая
+  // за конкретным врачом (или несколькими) — сужаем список до них: иначе
+  // можно выбрать врача, который эту услугу не ведёт (см. serviceDoctorIds).
+  const doctorOptions = useMemo(() => {
+    const pool = selectedClinicId ? CLINIC_DOCTORS : DOCTORS;
+    if (!serviceDoctorIds) return pool;
+    return pool.filter((doctor) => serviceDoctorIds.has(doctor.id));
+  }, [selectedClinicId, CLINIC_DOCTORS, DOCTORS, serviceDoctorIds]);
 
   const serviceOptions = SERVICES;
 
@@ -410,10 +470,16 @@ export const useRecordForm = () => {
 
     setSelectedClinicId(clinicId);
     // Врачи берутся из выбранной клиники (свой список, грузится отдельно),
-    // поэтому прежний врач и услуги могут к ней не относиться — сбрасываем,
-    // чтобы пользователь выбрал специалиста заново из списка этой клиники.
+    // поэтому прежний врач ей может не соответствовать — сбрасываем, чтобы
+    // пользователь выбрал специалиста заново из списка этой клиники.
     setSelectedDoctorId(null);
-    setSelectedServiceId(null);
+    // Услугу сбрасываем, только если она закреплена за ДРУГОЙ клиникой.
+    // Раньше сбрасывали всегда — из-за этого при заходе "с услуги" (её
+    // выбрали раньше клиники, см. serviceDetail-эффект выше) любой выбор
+    // клиники тут же стирал уже сделанный пользователем выбор услуги.
+    if (serviceClinicId && serviceClinicId !== clinicId) {
+      setSelectedServiceId(null);
+    }
   };
 
   // Возвращает true, если после выбора врача нужно ещё уточнить у
@@ -423,8 +489,14 @@ export const useRecordForm = () => {
     if (!matchedDoctor) return false;
 
     setSelectedDoctorId(doctorId);
-    // Услуга привязана к паре клиника/врач — при смене врача сбрасываем выбор.
-    setSelectedServiceId(null);
+    // Услугу сбрасываем, только если она закреплена за конкретным врачом (или
+    // несколькими) и выбранного среди них нет — иначе, как и с клиникой
+    // выше, стирали бы уже сделанный выбор при заходе "с услуги". Услуги без
+    // привязки к конкретному врачу (serviceDoctorIds === null) годятся любому
+    // врачу этой клиники.
+    if (serviceDoctorIds && !serviceDoctorIds.has(doctorId)) {
+      setSelectedServiceId(null);
+    }
 
     // Врач выбран из списка уже выбранной клиники — место работы однозначно
     // (эта же клиника), трогать его не нужно.

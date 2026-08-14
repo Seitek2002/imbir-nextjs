@@ -14,10 +14,21 @@ export type ServiceListItem = {
   photo?: string | null;
 };
 
-export type ServiceDetail = ServiceListItem & {
+// GET /api/services/{id}/ — проверено живым запросом, отличается от списка:
+// clinic — объект (не просто имя), плюс doctor (один, если услуга закреплена
+// за конкретным врачом) и doctors (полный список врачей, которые её ведут;
+// пусто, если услуга «общеклиническая» и закреплённого врача нет).
+export type ServiceDoctor = {
+  id: number;
+  full_name: string;
+  photo?: string | null;
+};
+
+export type ServiceDetail = Omit<ServiceListItem, "clinic"> & {
   description: string;
-  clinic: string;
-  doctor: string;
+  clinic: { id: number; name: string; logo?: string | null } | null;
+  doctor: ServiceDoctor | null;
+  doctors: ServiceDoctor[];
 };
 
 export type ServiceFilters = {
