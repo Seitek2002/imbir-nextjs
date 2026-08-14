@@ -106,6 +106,7 @@ export const DoctorBasicInfoSection: FC = () => {
     });
     setPendingPhoto(null);
     setIsEditing(false);
+    setShowSaveConfirm(false);
   };
 
   const handleCancel = () => {
@@ -346,6 +347,8 @@ export const DoctorBasicInfoSection: FC = () => {
         description="Обновлённые данные профиля будут сохранены"
         confirmLabel="Сохранить"
         cancelLabel="Отмена"
+        isLoading={isSaving}
+        closeOnConfirm={false}
       />
     </DoctorPageLayout>
   );

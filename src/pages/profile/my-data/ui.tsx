@@ -138,6 +138,7 @@ export const ProfileMyDataPage: FC = () => {
 
       toast.success("Данные сохранены");
       setIsEditing(false);
+      setShowSaveConfirm(false);
     } catch {
       toast.error("Не удалось сохранить. Попробуйте снова");
     } finally {
@@ -326,6 +327,8 @@ export const ProfileMyDataPage: FC = () => {
         isOpen={showSaveConfirm}
         onClose={() => setShowSaveConfirm(false)}
         onConfirm={handleSave}
+        isLoading={isSaving}
+        closeOnConfirm={false}
         icon={<CheckIcon className="w-7 h-7 text-primary" />}
         title="Сохранить изменения?"
         description="Обновлённые данные профиля будут сохранены"

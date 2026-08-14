@@ -175,6 +175,7 @@ export const ClinicProfilePage: FC = () => {
     const names = formRef.current?.getSpecializationNames();
     if (!payload) {
       setIsEditing(false);
+      setShowSaveConfirm(false);
       return;
     }
 
@@ -193,12 +194,18 @@ export const ClinicProfilePage: FC = () => {
       );
     }
 
-    await saveProfile({
-      ...payload,
-      primary_specialization_ids: primary.ids,
-      narrow_specialization_ids: narrow.ids,
-    });
-    setIsEditing(false);
+    try {
+      await saveProfile({
+        ...payload,
+        primary_specialization_ids: primary.ids,
+        narrow_specialization_ids: narrow.ids,
+      });
+      setIsEditing(false);
+      setShowSaveConfirm(false);
+    } catch {
+      // Ошибка уже показана тостом в onError мутации (useClinicCabinet) —
+      // оставляем диалог открытым, чтобы можно было повторить попытку.
+    }
   };
   const handleEdit = () => setIsEditing(true);
 
@@ -270,6 +277,8 @@ export const ClinicProfilePage: FC = () => {
         description="Обновлённые данные профиля клиники будут сохранены"
         confirmLabel="Сохранить"
         cancelLabel="Отмена"
+        isLoading={isSaving}
+        closeOnConfirm={false}
       />
     </ClinicPageLayout>
   );

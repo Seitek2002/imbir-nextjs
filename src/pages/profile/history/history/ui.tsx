@@ -60,7 +60,7 @@ export const ProfileHistory: FC<Props> = ({
   });
 
   const queryClient = useQueryClient();
-  const { mutate: cancel } = useMutation({
+  const { mutateAsync: cancel, isPending: isCancelling } = useMutation({
     mutationFn: (id: string) => cancelAppointment(Number(id)),
     onSuccess: () =>
       queryClient.invalidateQueries({
@@ -68,17 +68,21 @@ export const ProfileHistory: FC<Props> = ({
       }),
   });
 
-  const handleCancelConfirm = () => {
+  const handleCancelConfirm = async () => {
     if (!cancelTarget) return;
-    cancel(cancelTarget);
-    setAppointmentsList((prev) =>
-      prev.map((apt) =>
-        apt.id === cancelTarget
-          ? { ...apt, status: "cancelled" as AppointmentStatus }
-          : apt,
-      ),
-    );
-    setCancelTarget(null);
+    try {
+      await cancel(cancelTarget);
+      setAppointmentsList((prev) =>
+        prev.map((apt) =>
+          apt.id === cancelTarget
+            ? { ...apt, status: "cancelled" as AppointmentStatus }
+            : apt,
+        ),
+      );
+      setCancelTarget(null);
+    } catch {
+      // Запрос не удался — диалог остаётся открытым, isCancelling сам сбросится.
+    }
   };
 
   const handleOpenReviewModal = (id: string) => {
@@ -182,6 +186,8 @@ export const ProfileHistory: FC<Props> = ({
         isOpen={!!cancelTarget}
         onClose={() => setCancelTarget(null)}
         onConfirm={handleCancelConfirm}
+        isLoading={isCancelling}
+        closeOnConfirm={false}
         icon={<WarningIcon className="w-7 h-7 [&_path]:stroke-primary" />}
         title="Отменить запись на приём?"
         description="История будет удалена без возможности восстановления"

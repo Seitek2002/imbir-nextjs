@@ -147,7 +147,18 @@ export const ClinicSidebar: FC<Props> = ({
 }) => {
   const { navRef, indicator, pathname } = useSidebarIndicator();
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const handleLogout = useLogout();
+
+  const handleLogoutConfirm = async () => {
+    setIsLoggingOut(true);
+    try {
+      await handleLogout();
+      setLogoutOpen(false);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <aside className="w-72 shrink-0 hidden lg:block">
@@ -235,7 +246,9 @@ export const ClinicSidebar: FC<Props> = ({
       <ConfirmDialog
         isOpen={logoutOpen}
         onClose={() => setLogoutOpen(false)}
-        onConfirm={handleLogout}
+        onConfirm={handleLogoutConfirm}
+        isLoading={isLoggingOut}
+        closeOnConfirm={false}
         icon={<LogoutIcon className="w-7 h-7 text-primary" />}
         title="Выйти из профиля?"
         description="Для продолжения работы потребуется снова войти в аккаунт"

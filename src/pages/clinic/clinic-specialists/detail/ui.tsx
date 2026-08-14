@@ -198,9 +198,14 @@ export const ClinicSpecialistDetailPage: FC = () => {
       <ConfirmDialog
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        onConfirm={() => {
-          setDeleteOpen(false);
-          deleteMutation.mutate();
+        onConfirm={async () => {
+          try {
+            await deleteMutation.mutateAsync();
+            setDeleteOpen(false);
+          } catch {
+            // Ошибка уже показана тостом в onError мутации — оставляем диалог
+            // открытым, чтобы можно было повторить попытку.
+          }
         }}
         icon={<TrashIcon className="w-7 h-7" />}
         variant="danger"
@@ -208,6 +213,8 @@ export const ClinicSpecialistDetailPage: FC = () => {
         description={`«${specialist.full_name}» будет удалён из списка специалистов клиники без возможности восстановления`}
         confirmLabel="Открепить"
         cancelLabel="Отмена"
+        isLoading={deleteMutation.isPending}
+        closeOnConfirm={false}
       />
     </>
   );

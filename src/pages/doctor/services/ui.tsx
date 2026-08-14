@@ -277,8 +277,14 @@ export const DoctorServicesPage: FC = () => {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => {
-          if (deleteTarget) deleteMutation.mutate(deleteTarget.id);
+          if (!deleteTarget) return;
+          // Диалог закроется сам только после успешного удаления.
+          deleteMutation.mutate(deleteTarget.id, {
+            onSuccess: () => setDeleteTarget(null),
+          });
         }}
+        isLoading={deleteMutation.isPending}
+        closeOnConfirm={false}
         icon={<TrashIcon className="w-6 h-6" />}
         variant="danger"
         title="Удалить услугу?"

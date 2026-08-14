@@ -14,12 +14,16 @@ import {
 
 type Props = {
   specialists: Specialist[];
-  onDelete: (id: string) => void;
+  // Реальный DELETE-запрос выполняется у родителя (ClinicSpecialistsPage) —
+  // здесь ждём его промис, чтобы показать спиннер в ConfirmDialog и закрыть
+  // диалог только после ответа сервера.
+  onDelete: (id: string) => Promise<void>;
 };
 
 export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(
     null,
@@ -129,9 +133,18 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
       <ConfirmDialog
         isOpen={pendingDeleteId !== null}
         onClose={() => setPendingDeleteId(null)}
-        onConfirm={() => {
-          if (pendingDeleteId) onDelete(pendingDeleteId);
-          setPendingDeleteId(null);
+        onConfirm={async () => {
+          if (!pendingDeleteId) return;
+          setIsDeleting(true);
+          try {
+            await onDelete(pendingDeleteId);
+            setPendingDeleteId(null);
+          } catch {
+            // Ошибка уже показана тостом в onError мутации у родителя —
+            // оставляем диалог открытым, чтобы можно было повторить попытку.
+          } finally {
+            setIsDeleting(false);
+          }
         }}
         icon={<TrashIcon className="w-7 h-7" />}
         variant="danger"
@@ -143,6 +156,8 @@ export const SpecialistsList: FC<Props> = ({ specialists, onDelete }) => {
         }
         confirmLabel="Удалить"
         cancelLabel="Отмена"
+        isLoading={isDeleting}
+        closeOnConfirm={false}
       />
     </div>
   );

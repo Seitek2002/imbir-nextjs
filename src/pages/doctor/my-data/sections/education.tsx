@@ -118,6 +118,7 @@ export const DoctorEducationSection: FC = () => {
       education: [...mainEdu, ...addEdu],
     });
     setIsEditing(false);
+    setShowSaveConfirm(false);
   };
 
   const handleCancel = () => {
@@ -321,6 +322,8 @@ export const DoctorEducationSection: FC = () => {
         description="Обновлённые данные профиля будут сохранены"
         confirmLabel="Сохранить"
         cancelLabel="Отмена"
+        isLoading={isSaving}
+        closeOnConfirm={false}
       />
     </DoctorPageLayout>
   );

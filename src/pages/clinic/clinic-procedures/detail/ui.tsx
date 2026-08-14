@@ -147,6 +147,15 @@ export const ClinicProcedureDetailPage: FC = () => {
     onError: () => toast.error("Не удалось удалить процедуру"),
   });
 
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteMutation.mutateAsync();
+      setDeleteOpen(false);
+    } catch {
+      // ошибка уже обработана в onError мутации (toast)
+    }
+  };
+
   if (isLoading) {
     return (
       <ClinicPageLayout title="Процедура" desktopTitle="Мой профиль">
@@ -415,10 +424,9 @@ export const ClinicProcedureDetailPage: FC = () => {
       <ConfirmDialog
         isOpen={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        onConfirm={() => {
-          setDeleteOpen(false);
-          deleteMutation.mutate();
-        }}
+        onConfirm={handleDeleteConfirm}
+        isLoading={deleteMutation.isPending}
+        closeOnConfirm={false}
         icon={<TrashIcon className="w-7 h-7" />}
         variant="danger"
         title="Удалить процедуру?"

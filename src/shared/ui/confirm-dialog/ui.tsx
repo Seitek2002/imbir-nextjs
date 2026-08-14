@@ -17,9 +17,39 @@ type Props = {
   cancelLabel?: string;
   // "danger" — для необратимых удалений (красный акцент вместо оранжевого).
   variant?: "default" | "danger";
+  // Пока ждём ответ на onConfirm — гасим модалку серой вуалью со спиннером и
+  // блокируем закрытие (оверлей, Escape, кнопки), чтобы не словить повторный
+  // сабмит или закрытие посреди запроса.
+  isLoading?: boolean;
+  // true (по умолчанию, как сейчас у всех вызовов) — модалка закрывается сама
+  // сразу после клика на confirm. Для async-подтверждения с isLoading родитель
+  // сам решает, когда закрыть (меняя isOpen после ответа) — передайте false.
+  closeOnConfirm?: boolean;
 };
 
 const DURATION = 200;
+
+const Spinner = () => (
+  <svg
+    className="animate-spin size-8 text-foreground"
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+    />
+  </svg>
+);
 
 export const ConfirmDialog: FC<Props> = ({
   isOpen,
@@ -31,6 +61,8 @@ export const ConfirmDialog: FC<Props> = ({
   confirmLabel = "Удалить",
   cancelLabel = "Отмена",
   variant = "default",
+  isLoading = false,
+  closeOnConfirm = true,
 }) => {
   const isDanger = variant === "danger";
   const iconWrapClass = isDanger
@@ -43,12 +75,13 @@ export const ConfirmDialog: FC<Props> = ({
   const mounted = useMounted();
 
   const handleClose = useCallback(() => {
+    if (isLoading) return;
     setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
       onClose();
     }, DURATION);
-  }, [onClose]);
+  }, [onClose, isLoading]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -102,13 +135,19 @@ export const ConfirmDialog: FC<Props> = ({
           <button
             onClick={() => {
               onConfirm();
-              handleClose();
+              if (closeOnConfirm) handleClose();
             }}
             className={`flex-1 py-3.5 rounded-full text-white font-medium text-base transition-colors active:scale-95 ${confirmBtnClass}`}
           >
             {confirmLabel}
           </button>
         </div>
+
+        {isLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-t-3xl bg-white/70 backdrop-blur-[1px]">
+            <Spinner />
+          </div>
+        )}
       </div>
 
       {/* Desktop centered */}
@@ -141,13 +180,19 @@ export const ConfirmDialog: FC<Props> = ({
           <button
             onClick={() => {
               onConfirm();
-              handleClose();
+              if (closeOnConfirm) handleClose();
             }}
             className={`flex-1 py-3.5 rounded-full text-white font-medium text-base transition-colors active:scale-95 ${confirmBtnClass}`}
           >
             {confirmLabel}
           </button>
         </div>
+
+        {isLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/70 backdrop-blur-[1px]">
+            <Spinner />
+          </div>
+        )}
       </div>
     </div>,
     document.body,

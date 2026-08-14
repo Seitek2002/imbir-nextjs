@@ -32,6 +32,25 @@ export const ClinicSectionPage: FC<Props> = ({
   // достаточно перехватить здесь один раз, а не в каждой странице-секции.
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
+  // isSaving передают только реально сохраняющие на бэке секции (профиль
+  // клиники) — там onEditToggle запускает настоящий PUT-запрос, и пока он не
+  // ответил, гасим диалог спиннером и закрываем его сами по завершении
+  // (успех или ошибка — тост об ошибке показывает сама секция). У секций
+  // специалиста onEditToggle синхронный (ещё не подключено к бэку), isSaving
+  // не передаётся — для них сохраняем старое поведение: диалог закрывается
+  // сразу по клику.
+  const isAsyncSave = isSaving !== undefined;
+
+  // Закрываем диалог, когда isSaving переходит true → false (сохранение
+  // завершилось, успешно или с ошибкой) — без useEffect, подстройкой state
+  // прямо во время рендера (тот же приём, что и в forgot-password/ui.tsx).
+  const [wasSaving, setWasSaving] = useState(false);
+  const isSavingNow = !!isSaving;
+  if (isSavingNow !== wasSaving) {
+    if (wasSaving && !isSavingNow) setShowSaveConfirm(false);
+    setWasSaving(isSavingNow);
+  }
+
   const handleHeaderAction = () => {
     if (isEditing) {
       setShowSaveConfirm(true);
@@ -86,6 +105,8 @@ export const ClinicSectionPage: FC<Props> = ({
         description="Обновлённые данные будут сохранены в профиле клиники"
         confirmLabel="Сохранить"
         cancelLabel="Отмена"
+        isLoading={isAsyncSave ? isSaving : false}
+        closeOnConfirm={!isAsyncSave}
       />
     </div>
   );

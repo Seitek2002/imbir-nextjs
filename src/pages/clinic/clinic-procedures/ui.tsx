@@ -82,7 +82,7 @@ export const ClinicProceduresPage: FC = () => {
         <div className="pb-24 md:pb-0">
           <ProceduresList
             procedures={procedures}
-            onDelete={(id) => deleteMutation.mutate(id)}
+            onDelete={(id) => deleteMutation.mutateAsync(id)}
           />
         </div>
       </ClinicPageLayout>

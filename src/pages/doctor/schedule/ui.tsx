@@ -248,9 +248,11 @@ export const DoctorSchedulePage: FC = () => {
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => {
-          setConfirmOpen(false);
-          save(toApiBody(form));
+          // Диалог закроется сам только после успешного сохранения (см. isLoading/closeOnConfirm).
+          save(toApiBody(form), { onSuccess: () => setConfirmOpen(false) });
         }}
+        isLoading={isSaving}
+        closeOnConfirm={false}
         title="Сохранить изменения?"
         description="Обновлённое расписание приёма будет сохранено, а свободные слоты пересчитаны по нему."
         confirmLabel="Сохранить"

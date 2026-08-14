@@ -74,6 +74,7 @@ export const DoctorDocumentsSection: FC = () => {
       license_number: licenseNumber,
     });
     setIsEditing(false);
+    setShowSaveConfirm(false);
   };
 
   const handleCancel = () => {
@@ -262,6 +263,8 @@ export const DoctorDocumentsSection: FC = () => {
         description="Обновлённые данные профиля будут сохранены"
         confirmLabel="Сохранить"
         cancelLabel="Отмена"
+        isLoading={isSaving}
+        closeOnConfirm={false}
       />
     </DoctorPageLayout>
   );

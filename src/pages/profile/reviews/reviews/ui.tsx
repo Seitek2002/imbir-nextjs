@@ -55,10 +55,14 @@ export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
     },
   });
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-    deleteMutation.mutate(deleteTarget);
-    setDeleteTarget(null);
+    try {
+      await deleteMutation.mutateAsync(deleteTarget);
+      setDeleteTarget(null);
+    } catch {
+      // ошибка уже обработана в onError мутации (toast)
+    }
   };
 
   const getEditData = (review: UserReview) => {
@@ -107,6 +111,8 @@ export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
+        isLoading={deleteMutation.isPending}
+        closeOnConfirm={false}
         icon={<RemoveIcon className="w-7 h-7 [&_path]:stroke-red-500" />}
         variant="danger"
         title="Удалить отзыв?"

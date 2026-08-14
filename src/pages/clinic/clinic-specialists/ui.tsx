@@ -83,7 +83,9 @@ export const ClinicSpecialistsPage: FC = () => {
         <div className="pb-24 md:pb-0">
           <SpecialistsList
             specialists={listItems}
-            onDelete={(id) => deleteMutation.mutate(id)}
+            onDelete={async (id) => {
+              await deleteMutation.mutateAsync(id);
+            }}
           />
         </div>
       </ClinicPageLayout>

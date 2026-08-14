@@ -10,12 +10,15 @@ import { ProcedureCard, ProcedureRow } from "./clinic-procedure/ui";
 
 type Props = {
   procedures: Procedure[];
-  onDelete?: (id: string) => void;
+  // Реальное удаление уходит в сеть на уровне родителя — здесь просто ждём
+  // промис, чтобы показать спиннер в ConfirmDialog и закрыть его по факту.
+  onDelete?: (id: string) => void | Promise<void>;
 };
 
 export const ProceduresList: FC<Props> = ({ procedures, onDelete }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -43,6 +46,19 @@ export const ProceduresList: FC<Props> = ({ procedures, onDelete }) => {
       !selectedCategory || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleDeleteConfirm = async () => {
+    if (!pendingDeleteId) return;
+    setIsDeleting(true);
+    try {
+      await onDelete?.(pendingDeleteId);
+      setPendingDeleteId(null);
+    } catch {
+      // ошибка уже обработана в onError мутации (toast) на уровне родителя
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div>
@@ -122,10 +138,9 @@ export const ProceduresList: FC<Props> = ({ procedures, onDelete }) => {
       <ConfirmDialog
         isOpen={pendingDeleteId !== null}
         onClose={() => setPendingDeleteId(null)}
-        onConfirm={() => {
-          if (pendingDeleteId) onDelete?.(pendingDeleteId);
-          setPendingDeleteId(null);
-        }}
+        onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
+        closeOnConfirm={false}
         variant="danger"
         title="Удалить процедуру?"
         description="Это действие нельзя отменить"
