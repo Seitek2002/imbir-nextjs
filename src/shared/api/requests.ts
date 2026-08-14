@@ -135,37 +135,70 @@ const adaptClinic = (c: ApiClinic): MockClinicListItem => ({
   image: toHttps(c.logo),
 });
 
+// Порядок и человекочитаемые подписи дней — Object.entries(schedule) отдаёт
+// ключи в том порядке, в котором их прислал бэк (не обязательно Пн→Вс), из-за
+// чего график до этой правки мог выглядеть как "ПТ: ..., ПН: ..., ВС: ..."
+const WEEK_ORDER: { key: string; name: string }[] = [
+  { key: "monday", name: "ПН" },
+  { key: "tuesday", name: "ВТ" },
+  { key: "wednesday", name: "СР" },
+  { key: "thursday", name: "ЧТ" },
+  { key: "friday", name: "ПТ" },
+  { key: "saturday", name: "СБ" },
+  { key: "sunday", name: "ВС" },
+];
+
 const formatClinicSchedule = (
   schedule?: ClinicSchedule,
 ): string | undefined => {
   if (!schedule) return undefined;
-  const daysMap: Record<string, string> = {
-    monday: "ПН",
-    tuesday: "ВТ",
-    wednesday: "СР",
-    thursday: "ЧТ",
-    friday: "ПТ",
-    saturday: "СБ",
-    sunday: "ВС",
-  };
-  const enabledDays = Object.entries(schedule)
-    .filter(([_, info]) => info?.enabled)
-    .map(([day, info]) => ({
-      name: daysMap[day.toLowerCase()] || day,
-      time: `${info.from}-${info.to}`,
-    }));
-  if (enabledDays.length === 0) return "По записи";
-  const firstTime = enabledDays[0].time;
-  const allSameTime = enabledDays.every((d) => d.time === firstTime);
-  if (
-    allSameTime &&
-    enabledDays.length === 5 &&
-    enabledDays[0].name === "ПН" &&
-    enabledDays[4].name === "ПТ"
-  ) {
-    return `ПН-ПТ • ${firstTime}`;
+
+  const byKey = new Map(
+    Object.entries(schedule).map(([day, info]) => [day.toLowerCase(), info]),
+  );
+  const week = WEEK_ORDER.map(({ key, name }) => {
+    const info = byKey.get(key);
+    return {
+      name,
+      enabled: !!info?.enabled,
+      time: info ? `${info.from}-${info.to}` : "",
+    };
+  });
+
+  // Группируем ПОДРЯД ИДУЩИЕ (в порядке Пн→Вс) дни с одинаковым временем в
+  // один диапазон — "ПН-ПТ • 9:00-18:00" вместо пяти отдельных строк, и
+  // "Ежедневно • 0:00-23:59", если время совпадает вообще у всех 7 дней.
+  const ranges: { from: string; to: string; time: string }[] = [];
+  for (const day of week) {
+    if (!day.enabled) continue;
+    const last = ranges[ranges.length - 1];
+    if (last && last.time === day.time && isNextWeekday(last.to, day.name)) {
+      last.to = day.name;
+    } else {
+      ranges.push({ from: day.name, to: day.name, time: day.time });
+    }
   }
-  return enabledDays.map((d) => `${d.name}: ${d.time}`).join(", ");
+
+  if (ranges.length === 0) return "По записи";
+  if (ranges.length === 1 && ranges[0].from === "ПН" && ranges[0].to === "ВС") {
+    return `Ежедневно • ${ranges[0].time}`;
+  }
+  return ranges
+    .map((r) =>
+      r.from === r.to
+        ? `${r.from} • ${r.time}`
+        : `${r.from}-${r.to} • ${r.time}`,
+    )
+    .join(", ");
+};
+
+// Идёт ли день с подписью `nextName` сразу за днём с подписью `prevName` в
+// календарной неделе (Пн→Вс) — нужно, чтобы группировать только настоящие
+// подряд идущие дни, а не, например, ПН и СР с одинаковым временем.
+const isNextWeekday = (prevName: string, nextName: string): boolean => {
+  const prevIndex = WEEK_ORDER.findIndex((d) => d.name === prevName);
+  const nextIndex = WEEK_ORDER.findIndex((d) => d.name === nextName);
+  return prevIndex !== -1 && nextIndex === prevIndex + 1;
 };
 
 const adaptClinicDetail = (c: ApiClinicDetail): MockClinicListItem => {
