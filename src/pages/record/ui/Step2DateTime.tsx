@@ -12,6 +12,7 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
     mode,
     setMode,
     canUseOnline,
+    selectedDoctorId,
     selectedDate,
     setSelectedDate,
     selectedTime,
@@ -36,6 +37,7 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
         mode={mode}
         onModeChange={setMode}
         canUseOnline={canUseOnline}
+        isDoctorSelected={Boolean(selectedDoctorId)}
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
         selectedTime={selectedTime}
