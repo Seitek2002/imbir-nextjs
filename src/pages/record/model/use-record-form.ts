@@ -910,6 +910,7 @@ export const useRecordForm = () => {
     selectedClinicId,
     selectedClinic,
     selectedDoctor,
+    selectedDoctorId,
     selectedService,
     selectedServiceId,
     // Места приёма выбранного врача. Нужны в Step1Selection: если их нет,

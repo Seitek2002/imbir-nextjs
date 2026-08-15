@@ -369,7 +369,11 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                   <button
                     key={cell.key}
                     type="button"
-                    onClick={() => !cell.disabled && handleDateSelect(date)}
+                    onClick={() =>
+                      !cell.disabled &&
+                      isDoctorSelected &&
+                      handleDateSelect(date)
+                    }
                     disabled={cell.disabled || !isDoctorSelected}
                     className={cn(
                       "h-9 rounded-lg border text-sm transition-all",
