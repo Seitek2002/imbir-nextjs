@@ -21,6 +21,7 @@ type Props = {
   onClose: () => void;
   appointmentId: string;
   doctorId: string;
+  serviceId?: string | number | null;
   // Формат консультации не меняется при переносе — нужен только чтобы пикер
   // отрисовался в правильном режиме (сам переключатель скрыт).
   isOnline: boolean;
@@ -29,16 +30,12 @@ type Props = {
 // Перенос записи на новую дату/время (POST /api/appointments/{id}/reschedule/).
 // LiveKit-комната остаётся привязана к id записи; бэк пошлёт системное
 // сообщение в чат врача и пациента.
-//
-// Живёт внутри страницы истории записей (её единственный потребитель), а не
-// отдельным feature-слайсом: перенос — конечная часть этого экрана и требует
-// виджет-пикера, а фичам импортировать виджеты нельзя (features → widgets —
-// это импорт с вышестоящего слоя). В составе страницы такой импорт легален.
 export const RescheduleModal: FC<Props> = ({
   isOpen,
   onClose,
   appointmentId,
   doctorId,
+  serviceId,
   isOnline,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -48,9 +45,19 @@ export const RescheduleModal: FC<Props> = ({
   const selectedDateStr = selectedDate ? toApiDate(selectedDate) : null;
 
   // Свободные слоты того же врача — тот же источник, что и в форме записи.
-  const { data: slotsData, isLoading: isLoadingSlots } = useQuery({
-    queryKey: ["reschedule-available-slots", doctorId, selectedDateStr],
-    queryFn: () => getDoctorAvailableSlots(doctorId, selectedDateStr as string),
+  const {
+    data: slotsData,
+    isLoading: isLoadingSlots,
+    refetch: refetchSlots,
+  } = useQuery({
+    queryKey: [
+      "reschedule-available-slots",
+      doctorId,
+      selectedDateStr,
+      serviceId,
+    ],
+    queryFn: () =>
+      getDoctorAvailableSlots(doctorId, selectedDateStr as string, serviceId),
     enabled: Boolean(doctorId) && Boolean(selectedDateStr),
   });
 
@@ -73,8 +80,18 @@ export const RescheduleModal: FC<Props> = ({
       handleClose();
     },
     onError: (err: unknown) => {
-      const errData = (err as { response?: { data?: unknown } })?.response
-        ?.data;
+      const errData = (err as { response?: { data?: Record<string, unknown> } })
+        ?.response?.data;
+      if (
+        errData?.time &&
+        Array.isArray(errData.time) &&
+        errData.time.length > 0
+      ) {
+        setSelectedTime(null);
+        toast.error("Это время только что заняли. Выберите другой слот.");
+        refetchSlots();
+        return;
+      }
       toast.error(extractErrorMessage(errData, "Не удалось перенести запись"));
     },
   });

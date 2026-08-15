@@ -13,6 +13,8 @@ import {
   doctorCabinetKeys,
   getAppointmentSummary,
   getDoctorAppointments,
+  profileKeys,
+  updateAppointmentStatus,
   updateAppointmentSummary,
 } from "@/shared/api";
 import { extractErrorMessage } from "@/shared/lib/errors";
@@ -27,13 +29,14 @@ const TABS = [
   { value: "completed" as const, label: "Завершенные" },
 ];
 
-// Плашка статуса записи (как в макете): предстоящая — оранжевая, завершённая —
-// зелёная, отменённая — серая.
 const STATUS_PILL: Record<
   DoctorAppointment["status"],
   { label: string; cls: string }
 > = {
+  pending: { label: "Ожидает", cls: "bg-amber-100 text-amber-800" },
   upcoming: { label: "Предстоящая", cls: "bg-primary-tint text-primary" },
+  confirmed: { label: "Подтверждена", cls: "bg-blue-100 text-blue-700" },
+  scheduled: { label: "Подтверждена", cls: "bg-blue-100 text-blue-700" },
   completed: { label: "Завершенная", cls: "bg-[#E3F5EC] text-[#2FA968]" },
   cancelled: { label: "Отменена", cls: "bg-surface text-muted" },
 };
@@ -147,10 +150,34 @@ const StatusPill: FC<{ status: DoctorAppointment["status"] }> = ({
 export const DoctorAppointmentsPage: FC = () => {
   const [tab, setTab] = useState<Tab>("all");
   const [summaryId, setSummaryId] = useState<number | null>(null);
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: doctorCabinetKeys.appointments({ status: tab }),
     queryFn: () => getDoctorAppointments(tab === "all" ? {} : { status: tab }),
+  });
+
+  const { mutate: changeStatus } = useMutation({
+    mutationFn: (vars: {
+      id: number;
+      status: "confirmed" | "completed" | "cancelled";
+    }) => updateAppointmentStatus(vars.id, vars.status),
+    onSuccess: (_, vars) => {
+      toast.success("Статус записи обновлён");
+      queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.all });
+      queryClient.invalidateQueries({ queryKey: profileKeys.all });
+      if (vars.status === "cancelled") {
+        queryClient.invalidateQueries({ queryKey: ["record-available-slots"] });
+        queryClient.invalidateQueries({
+          queryKey: ["reschedule-available-slots"],
+        });
+      }
+    },
+    onError: (err: unknown) => {
+      const errData = (err as { response?: { data?: unknown } })?.response
+        ?.data;
+      toast.error(extractErrorMessage(errData, "Не удалось изменить статус"));
+    },
   });
 
   const appointments = data?.data ?? [];
@@ -191,32 +218,100 @@ export const DoctorAppointmentsPage: FC = () => {
                   <th className={th}>Время</th>
                   <th className={th}>Тип</th>
                   <th className={th}>Статус</th>
+                  <th className={th}>Действия</th>
                 </tr>
               </thead>
               <tbody>
-                {appointments.map((a) => (
-                  <tr
-                    key={a.id}
-                    onClick={() => setSummaryId(a.id)}
-                    className="border-b border-border last:border-0 cursor-pointer hover:bg-surface transition-colors"
-                  >
-                    <td className={`${td} text-foreground font-medium`}>
-                      {a.patient.full_name}
-                    </td>
-                    <td className={`${td} text-foreground`}>
-                      {fmtDate(a.date)}
-                    </td>
-                    <td className={`${td} text-foreground`}>
-                      {fmtTime(a.time)}
-                    </td>
-                    <td className={`${td} text-foreground`}>
-                      {a.service?.name ?? "—"}
-                    </td>
-                    <td className={td}>
-                      <StatusPill status={a.status} />
-                    </td>
-                  </tr>
-                ))}
+                {appointments.map((a) => {
+                  const canConfirm = a.status === "pending";
+                  const canComplete =
+                    a.status === "pending" ||
+                    a.status === "confirmed" ||
+                    a.status === "scheduled" ||
+                    a.status === "upcoming";
+                  const canCancel =
+                    a.status === "pending" ||
+                    a.status === "confirmed" ||
+                    a.status === "scheduled" ||
+                    a.status === "upcoming";
+
+                  return (
+                    <tr
+                      key={a.id}
+                      className="border-b border-border last:border-0 hover:bg-surface transition-colors"
+                    >
+                      <td
+                        onClick={() => setSummaryId(a.id)}
+                        className={`${td} text-foreground font-medium cursor-pointer`}
+                      >
+                        {a.patient.full_name}
+                      </td>
+                      <td
+                        onClick={() => setSummaryId(a.id)}
+                        className={`${td} text-foreground cursor-pointer`}
+                      >
+                        {fmtDate(a.date)}
+                      </td>
+                      <td
+                        onClick={() => setSummaryId(a.id)}
+                        className={`${td} text-foreground cursor-pointer`}
+                      >
+                        {fmtTime(a.time)}
+                      </td>
+                      <td
+                        onClick={() => setSummaryId(a.id)}
+                        className={`${td} text-foreground cursor-pointer`}
+                      >
+                        {a.service?.name ?? "—"}
+                      </td>
+                      <td className={td}>
+                        <StatusPill status={a.status} />
+                      </td>
+                      <td className={td}>
+                        <div className="flex items-center gap-1.5">
+                          {canConfirm && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs px-2.5 h-8 border-primary text-primary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                changeStatus({ id: a.id, status: "confirmed" });
+                              }}
+                            >
+                              Подтвердить
+                            </Button>
+                          )}
+                          {canComplete && (
+                            <Button
+                              size="sm"
+                              className="text-xs px-2.5 h-8 bg-[#2FA968] hover:bg-[#258753]"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                changeStatus({ id: a.id, status: "completed" });
+                              }}
+                            >
+                              Завершить
+                            </Button>
+                          )}
+                          {canCancel && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs px-2.5 h-8 border-red-200 text-red-500 hover:bg-red-50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                changeStatus({ id: a.id, status: "cancelled" });
+                              }}
+                            >
+                              Отменить
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

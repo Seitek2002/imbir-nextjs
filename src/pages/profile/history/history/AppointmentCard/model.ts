@@ -1,8 +1,15 @@
-export type AppointmentStatus = "upcoming" | "completed" | "cancelled";
+export type AppointmentStatus =
+  | "pending"
+  | "upcoming"
+  | "confirmed"
+  | "scheduled"
+  | "completed"
+  | "cancelled";
 
 export type Appointment = {
   id: string;
   doctorId: string;
+  serviceId?: string | number | null;
   doctorName: string;
   doctorSpecialty: string;
   doctorClinic: string;

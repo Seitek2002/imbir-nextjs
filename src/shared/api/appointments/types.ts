@@ -54,6 +54,12 @@ export type AppointmentResponse = {
   doctor_notes?: string | null;
 };
 
+export type AppointmentMutableStatus = "confirmed" | "completed" | "cancelled";
+
+export type UpdateAppointmentStatusRequest = {
+  status: AppointmentMutableStatus;
+};
+
 export type CancelAppointmentRequest = {
   status: "cancelled";
 };
