@@ -48,6 +48,7 @@ export const AiConversation: FC<Props> = ({
         onSend={sendMessage}
         disabled={isSending}
         placeholder="Спросите ИИ-помощника"
+        disclaimer="Это ИИ, он может ошибаться. ИИ не врач — он может только проконсультировать или помочь направить к врачу."
       />
     </>
   );

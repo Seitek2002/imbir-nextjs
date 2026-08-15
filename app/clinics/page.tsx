@@ -30,6 +30,8 @@ export default async function Page({
 
   const params = await searchParams;
   const activeQuery = typeof params.q === "string" ? params.q : "";
+  const currentSpec =
+    typeof params.clinic_spec === "string" ? params.clinic_spec : null;
   const currentRating =
     typeof params.clinic_rating === "string" ? params.clinic_rating : null;
   const currentExp =
@@ -46,6 +48,7 @@ export default async function Page({
   const filters: Omit<ClinicFilters, "page" | "page_size"> = {
     city,
     search: activeQuery || undefined,
+    specialization: currentSpec || undefined,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)

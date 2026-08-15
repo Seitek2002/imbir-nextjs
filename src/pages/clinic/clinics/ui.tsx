@@ -88,6 +88,7 @@ export const ClinicsPage: FC<Props> = ({ initialCity }) => {
   const filters: Omit<ClinicFilters, "page" | "page_size"> = {
     city: selectedCity || undefined,
     search: activeQuery || undefined,
+    specialization: currentSpec || undefined,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)
@@ -123,17 +124,7 @@ export const ClinicsPage: FC<Props> = ({ initialCity }) => {
 
   // 3. Клиентской осталась только специализация (см. TODO вверху файла) —
   // поиск теперь фильтрует бэк, поэтому дублировать его тут не нужно.
-  const filteredClinics = clinics.filter((clinic) => {
-    if (currentSpec) {
-      const selectedSpecs = currentSpec.split(",");
-      const hasMatch = clinic.specialties?.some((spec) =>
-        selectedSpecs.includes(spec),
-      );
-      if (!hasMatch) return false;
-    }
-
-    return true;
-  });
+  const filteredClinics = clinics;
 
   const { isSaved, toggle } = useFavoriteToggle("clinic");
 

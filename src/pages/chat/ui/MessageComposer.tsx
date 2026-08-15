@@ -17,6 +17,7 @@ type Props = {
   placeholder?: string;
   // Сигнал "печатает/перестал" — троттлинг здесь, чтобы не спамить сокет.
   onTyping?: (isTyping: boolean) => void;
+  disclaimer?: React.ReactNode;
 };
 
 export const MessageComposer: FC<Props> = ({
@@ -24,6 +25,7 @@ export const MessageComposer: FC<Props> = ({
   disabled = false,
   placeholder = "Введите сообщение",
   onTyping,
+  disclaimer,
 }) => {
   const [text, setText] = useState("");
 
@@ -97,6 +99,11 @@ export const MessageComposer: FC<Props> = ({
           <SendIcon className="size-4.5" />
         </button>
       </div>
+      {disclaimer && (
+        <p className="mt-2 text-center text-[11px] text-muted leading-tight">
+          {disclaimer}
+        </p>
+      )}
     </div>
   );
 };

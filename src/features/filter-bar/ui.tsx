@@ -29,6 +29,7 @@ const RATING_OPTIONS = [
 
 const MAX_EXP = 50;
 const MAX_PRICE = 5000;
+const RANGE_COMMIT_DELAY = 250;
 
 export const FilterBar: FC<Props> = ({
   title = "Фильтры",
@@ -70,6 +71,12 @@ export const FilterBar: FC<Props> = ({
 
   const experienceDraftRef = useRef(experience);
   const priceDraftRef = useRef(price);
+  const experienceCommitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const priceCommitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   useEffect(() => {
     experienceDraftRef.current = [experienceMin, experienceMax];
@@ -77,9 +84,18 @@ export const FilterBar: FC<Props> = ({
   useEffect(() => {
     priceDraftRef.current = [priceMin, priceMax];
   }, [priceMin, priceMax]);
+  useEffect(
+    () => () => {
+      if (experienceCommitTimerRef.current)
+        clearTimeout(experienceCommitTimerRef.current);
+      if (priceCommitTimerRef.current)
+        clearTimeout(priceCommitTimerRef.current);
+    },
+    [],
+  );
 
   const updateURL = (key: string, value: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(window.location.search);
     if (value) {
       params.set(`${prefix}_${key}`, value);
     } else {
@@ -98,23 +114,48 @@ export const FilterBar: FC<Props> = ({
 
   const handleExpChange = (val: [number, number]) => {
     experienceDraftRef.current = val;
+    if (experienceCommitTimerRef.current)
+      clearTimeout(experienceCommitTimerRef.current);
+    experienceCommitTimerRef.current = setTimeout(
+      () => updateURL("exp", `${val[0]}-${val[1]}`),
+      RANGE_COMMIT_DELAY,
+    );
   };
 
   const handlePriceChange = (val: [number, number]) => {
     priceDraftRef.current = val;
+    if (priceCommitTimerRef.current) clearTimeout(priceCommitTimerRef.current);
+    priceCommitTimerRef.current = setTimeout(
+      () => updateURL("price", `${val[0]}-${val[1]}`),
+      RANGE_COMMIT_DELAY,
+    );
   };
 
   const commitExperience = (val?: [number, number]) => {
+    if (experienceCommitTimerRef.current) {
+      clearTimeout(experienceCommitTimerRef.current);
+      experienceCommitTimerRef.current = null;
+    }
     const next = val ?? experienceDraftRef.current;
     updateURL("exp", `${next[0]}-${next[1]}`);
   };
 
   const commitPrice = (val?: [number, number]) => {
+    if (priceCommitTimerRef.current) {
+      clearTimeout(priceCommitTimerRef.current);
+      priceCommitTimerRef.current = null;
+    }
     const next = val ?? priceDraftRef.current;
     updateURL("price", `${next[0]}-${next[1]}`);
   };
 
   const handleReset = () => {
+    if (experienceCommitTimerRef.current)
+      clearTimeout(experienceCommitTimerRef.current);
+    if (priceCommitTimerRef.current) clearTimeout(priceCommitTimerRef.current);
+    experienceCommitTimerRef.current = null;
+    priceCommitTimerRef.current = null;
+
     const params = new URLSearchParams(searchParams.toString());
     params.delete(`${prefix}_spec`);
     params.delete(`${prefix}_exp`);
