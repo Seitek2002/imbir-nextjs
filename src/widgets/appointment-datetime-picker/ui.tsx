@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 
@@ -25,6 +25,7 @@ type Props = {
   timeGroups?: TimeGroup[];
   isLoadingSlots?: boolean;
   isDateDisabled?: (date: Date) => boolean;
+  isDoctorSelected?: boolean;
   className?: string;
 };
 
@@ -72,15 +73,18 @@ export const AppointmentDateTimePicker: FC<Props> = ({
   timeGroups = [],
   isLoadingSlots,
   isDateDisabled,
+  isDoctorSelected = true,
   className,
 }) => {
-  const slotsMessage = isLoadingSlots
-    ? "Загрузка свободного времени..."
-    : !selectedDate
-      ? "Выберите дату, чтобы увидеть свободное время"
-      : timeGroups.length === 0
-        ? "Нет свободного времени на выбранную дату"
-        : null;
+  const slotsMessage = !isDoctorSelected
+    ? "Сначала выберите врача"
+    : isLoadingSlots
+      ? "Загрузка свободного времени..."
+      : !selectedDate
+        ? "Выберите дату, чтобы увидеть свободное время"
+        : timeGroups.length === 0
+          ? "Нет свободного времени на выбранную дату"
+          : null;
   const scrollRef = useRef<HTMLDivElement>(null);
   const selectedBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -276,13 +280,13 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                     onClick={() =>
                       !item.disabled && handleDateSelect(item.date)
                     }
-                    disabled={item.disabled}
+                    disabled={item.disabled || !isDoctorSelected}
                     className={cn(
                       "flex flex-col items-center justify-center gap-1 w-12 h-14 rounded-xl border text-sm transition-all shrink-0",
                       isSelected
                         ? "border-primary text-primary bg-[#FFF3EE]"
                         : "border-border-soft text-foreground bg-white",
-                      item.disabled &&
+                      (item.disabled || !isDoctorSelected) &&
                         "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
                     )}
                   >
@@ -366,13 +370,13 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                     key={cell.key}
                     type="button"
                     onClick={() => !cell.disabled && handleDateSelect(date)}
-                    disabled={cell.disabled}
+                    disabled={cell.disabled || !isDoctorSelected}
                     className={cn(
                       "h-9 rounded-lg border text-sm transition-all",
                       isSelected
                         ? "border-primary text-primary bg-[#FFF3EE]"
                         : "border-border-soft text-foreground hover:border-primary/40",
-                      cell.disabled &&
+                      (cell.disabled || !isDoctorSelected) &&
                         "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
                     )}
                   >
