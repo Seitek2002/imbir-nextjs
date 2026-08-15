@@ -5,7 +5,7 @@ import { FC, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -20,6 +20,7 @@ import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 
 import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { useUrlSearchParams } from "@/shared/lib/url-state";
 import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
@@ -30,28 +31,21 @@ import { Button } from "@/shared/ui";
 const PAGE_SIZE = 8;
 
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
   // City the server prefetched doctors for (from the city cookie).
   initialCity: string;
 };
 
-export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
+export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
   const router = useRouter();
+  const urlSearchParams = useUrlSearchParams();
   // 1. Читаем параметры из пропсов
-  const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
-  const isFiltersModalOpen = searchParams?.modal === "filters";
+  const activeQuery = urlSearchParams.get("q") ?? "";
+  const isFiltersModalOpen = urlSearchParams.get("modal") === "filters";
 
-  const currentSpec =
-    typeof searchParams?.doc_spec === "string" ? searchParams.doc_spec : null;
-  const currentRating =
-    typeof searchParams?.doc_rating === "string"
-      ? searchParams.doc_rating
-      : null;
-  const currentExp =
-    typeof searchParams?.doc_exp === "string" ? searchParams.doc_exp : null;
-  const currentPrice =
-    typeof searchParams?.doc_price === "string" ? searchParams.doc_price : null;
-  const isOnlineOnly = searchParams?.doc_online === "true";
+  const currentSpec = urlSearchParams.get("doc_spec");
+  const currentRating = urlSearchParams.get("doc_rating");
+  const currentExp = urlSearchParams.get("doc_exp");
+  const currentPrice = urlSearchParams.get("doc_price");
 
   const storeCity = useCityStore((s) => s.city);
   // Until the client store has hydrated, use the server-provided city so the
@@ -78,7 +72,6 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
 
   const filters: Omit<DoctorFilters, "page" | "page_size"> = {
     city: selectedCity || undefined,
-    is_online: isOnlineOnly || undefined,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)
@@ -95,13 +88,18 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: doctorKeys.list(filters),
-      queryFn: ({ pageParam }) =>
-        api.getDoctorsPaginated({
-          ...filters,
-          page: pageParam,
-          page_size: PAGE_SIZE,
-        }),
+      queryFn: ({ pageParam, signal }) =>
+        api.getDoctorsPaginated(
+          {
+            ...filters,
+            page: pageParam,
+            page_size: PAGE_SIZE,
+          },
+          signal,
+        ),
       initialPageParam: 1,
+      placeholderData: keepPreviousData,
+      retry: false,
       getNextPageParam: (lastPage) =>
         lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
           ? lastPage.pagination.page + 1
@@ -134,7 +132,6 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
           experience: true,
           rating: true,
           price: true,
-          online: true,
         }}
       />
 
@@ -225,7 +222,6 @@ export const SpecialistsPage: FC<Props> = ({ searchParams, initialCity }) => {
               experience: true,
               rating: true,
               price: true,
-              online: true,
             }}
           />
 

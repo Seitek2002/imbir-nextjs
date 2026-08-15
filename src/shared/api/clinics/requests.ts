@@ -4,10 +4,11 @@ import { ClinicDetail, ClinicFilters, ClinicListItem } from "./types";
 
 export const getClinics = async (
   filters: ClinicFilters = {},
+  signal?: AbortSignal,
 ): Promise<PaginatedResponse<ClinicListItem>> => {
   const { data } = await apiClient.get<PaginatedResponse<ClinicListItem>>(
     "/api/clinics/",
-    { params: filters },
+    { params: filters, signal },
   );
   return data;
 };

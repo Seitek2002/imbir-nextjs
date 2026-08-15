@@ -6,7 +6,6 @@ import { useAuthStore } from "@/shared/store";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://155.212.216.197:8030";
-
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   timeout: 15_000,

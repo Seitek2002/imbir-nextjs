@@ -2,11 +2,10 @@
 
 import { FC, useState } from "react";
 
-import { useRouter, useSearchParams } from "next/navigation";
-
 import { useSpecializationOptions } from "@/entities/specialization";
 
 import { StarIcon } from "@/shared/assets/icons";
+import { replaceUrlState, useUrlSearchParams } from "@/shared/lib/url-state";
 import { Button, Dropdown, PageHeader, Radio, RangeSlider } from "@/shared/ui";
 
 type DropdownOption = { value: string; label: string };
@@ -19,7 +18,6 @@ type Props = {
     experience?: boolean;
     rating?: boolean;
     price?: boolean;
-    online?: boolean;
     category?: boolean;
     clinic?: boolean;
   };
@@ -38,8 +36,7 @@ export const MobileFiltersModal: FC<Props> = ({
   categoryOptions = [],
   clinicOptions = [],
 }) => {
-  const router = useRouter();
-  const searchParams = useSearchParams() ?? new URLSearchParams();
+  const searchParams = useUrlSearchParams();
 
   // Тот же общий хук, что и в десктопном FilterBar — один кеш на всё приложение.
   const { options: specialtyOptions } = useSpecializationOptions(
@@ -77,10 +74,6 @@ export const MobileFiltersModal: FC<Props> = ({
     searchParams.get(`${prefix}_clinic`) ?? "",
   );
 
-  // Стейт для онлайна
-  const initialOnline = searchParams.get(`${prefix}_online`) === "true";
-  const [isOnline, setIsOnline] = useState<boolean>(initialOnline);
-
   const handleApply = () => {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -110,13 +103,7 @@ export const MobileFiltersModal: FC<Props> = ({
       else params.delete(`${prefix}_clinic`);
     }
 
-    if (fields?.online && isOnline) {
-      params.set(`${prefix}_online`, "true");
-    } else {
-      params.delete(`${prefix}_online`);
-    }
-
-    router.replace(`?${params.toString()}`, { scroll: false });
+    replaceUrlState(params);
   };
 
   const handleReset = () => {
@@ -126,7 +113,6 @@ export const MobileFiltersModal: FC<Props> = ({
     setSpecialty([]);
     setCategory("");
     setClinic("");
-    setIsOnline(false);
 
     const params = new URLSearchParams(searchParams.toString());
     params.delete("modal");
@@ -135,9 +121,7 @@ export const MobileFiltersModal: FC<Props> = ({
     params.delete(`${prefix}_rating`);
     params.delete(`${prefix}_spec`);
     params.delete(`${prefix}_clinic`);
-    params.delete(`${prefix}_online`);
-
-    router.replace(`?${params.toString()}`, { scroll: false });
+    replaceUrlState(params);
   };
 
   return (
@@ -147,25 +131,6 @@ export const MobileFiltersModal: FC<Props> = ({
       <PageHeader title="Фильтр" />
 
       <div className="flex-1 overflow-y-auto mt-2 px-2 pb-10 space-y-3">
-        {/* ЧЕКБОКС ОНЛАЙН */}
-        {fields?.online && (
-          <div
-            className="bg-white p-4 rounded-2xl flex items-center justify-between cursor-pointer"
-            onClick={() => setIsOnline(!isOnline)}
-          >
-            <span className="text-base font-medium text-foreground">
-              Только онлайн-консультация
-            </span>
-            <div
-              className={`w-12 h-6 rounded-full transition-colors relative ${isOnline ? "bg-primary" : "bg-border-soft"}`}
-            >
-              <div
-                className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isOnline ? "left-7" : "left-1"}`}
-              />
-            </div>
-          </div>
-        )}
-
         {/* БЛОК: УСЛУГА (категория) */}
         {fields?.category && (
           <div className="bg-white p-4 rounded-2xl">

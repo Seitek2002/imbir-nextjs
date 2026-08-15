@@ -17,6 +17,7 @@ import { UrlSearchInput } from "@/features/search-by-query";
 import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { hasPrice } from "@/shared/lib/price";
+import { useUrlSearchParams } from "@/shared/lib/url-state";
 import { Button } from "@/shared/ui";
 
 const MobileFiltersModal = dynamic(() =>
@@ -42,29 +43,19 @@ const ClinicCard = dynamic(() =>
   import("@/entities/clinic").then((mod) => mod.ClinicCard),
 );
 
-type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-export const SearchPage: FC<Props> = ({ searchParams }) => {
+export const SearchPage: FC = () => {
   const router = useRouter();
+  const urlSearchParams = useUrlSearchParams();
   // 1. Читаем параметры
-  const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
-  const isFiltersModalOpen = searchParams?.modal === "filters";
+  const activeQuery = urlSearchParams.get("q") ?? "";
+  const isFiltersModalOpen = urlSearchParams.get("modal") === "filters";
 
-  const currentSpec =
-    typeof searchParams?.doc_spec === "string" ? searchParams.doc_spec : null;
-  const currentRating =
-    typeof searchParams?.doc_rating === "string"
-      ? searchParams.doc_rating
-      : null;
-  const currentExp =
-    typeof searchParams?.doc_exp === "string" ? searchParams.doc_exp : null;
-  const currentPrice =
-    typeof searchParams?.doc_price === "string" ? searchParams.doc_price : null;
-  const isOnlineOnly = searchParams?.doc_online === "true";
+  const currentSpec = urlSearchParams.get("doc_spec");
+  const currentRating = urlSearchParams.get("doc_rating");
+  const currentExp = urlSearchParams.get("doc_exp");
+  const currentPrice = urlSearchParams.get("doc_price");
 
-  // Врачи: город/онлайн/оценка/цена/стаж/текст и (при одной выбранной
+  // Врачи: город/оценка/цена/стаж/текст и (при одной выбранной
   // специальности) сама специализация — реальные query-параметры API (как
   // на /specialists). page_size увеличен для клиентской страховки на случай
   // 2+ выбранных специальностей — бэк принимает только одно значение
@@ -80,7 +71,6 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
     : [];
 
   const doctorFilters: DoctorFilters = {
-    is_online: isOnlineOnly || undefined,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)
@@ -91,23 +81,30 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
     max_experience: expMax,
     specialization: selectedSpecs.length === 1 ? selectedSpecs[0] : undefined,
     search: activeQuery || undefined,
-    page_size: 200,
+    page_size: 24,
   };
 
   // 2. ПОЛУЧАЕМ ВСЕ ДАННЫЕ С СЕРВЕРА
   const { data: doctors = [], isLoading: isDocsLoading } = useQuery({
     queryKey: doctorKeys.list(doctorFilters),
-    queryFn: () => api.getDoctors(doctorFilters),
+    queryFn: ({ signal }) => api.getDoctors(doctorFilters, signal),
+    enabled: Boolean(activeQuery),
+    retry: false,
   });
 
+  const search = activeQuery || undefined;
   const { data: clinics = [], isLoading: isClinicsLoading } = useQuery({
-    queryKey: ["clinics"],
-    queryFn: () => api.getClinics(),
+    queryKey: ["search-clinics", activeQuery],
+    queryFn: ({ signal }) => api.getClinics({ search, page_size: 12 }, signal),
+    enabled: Boolean(activeQuery),
+    retry: false,
   });
 
   const { data: services = [], isLoading: isServicesLoading } = useQuery({
-    queryKey: ["services"],
-    queryFn: () => api.getServices(),
+    queryKey: ["search-services", activeQuery],
+    queryFn: ({ signal }) => api.getServices({ search, page_size: 20 }, signal),
+    enabled: Boolean(activeQuery),
+    retry: false,
   });
 
   const isLoading = isDocsLoading || isClinicsLoading || isServicesLoading;
@@ -177,7 +174,6 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
           experience: true,
           rating: true,
           price: true,
-          online: true,
         }}
       />
 
@@ -312,7 +308,6 @@ export const SearchPage: FC<Props> = ({ searchParams }) => {
                             experience: true,
                             rating: true,
                             price: true,
-                            online: true,
                           }}
                         >
                           <div className="flex items-end gap-3 mb-6">

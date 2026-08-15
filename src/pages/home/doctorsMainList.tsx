@@ -32,7 +32,6 @@ const DoctorsListContent = () => {
   const currentRating = searchParams.get("doc_rating");
   const currentExp = searchParams.get("doc_exp");
   const currentPrice = searchParams.get("doc_price");
-  const isOnlineOnly = searchParams.get("doc_online") === "true";
 
   // Раньше карусель на Главной игнорировала выбранный город (в отличие от
   // /specialists, где город уже учитывался) — теперь оба списка врачей
@@ -51,7 +50,6 @@ const DoctorsListContent = () => {
 
   const filters: DoctorFilters = {
     city: selectedCity || undefined,
-    is_online: isOnlineOnly || undefined,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)
@@ -151,7 +149,6 @@ export const DoctorsMainList: FC = () => {
             </div>
           }
         >
-          {/* Передаем online: true чтобы появился чекбокс */}
           <FilterBar
             prefix="doc"
             title="Специалисты"
@@ -160,7 +157,6 @@ export const DoctorsMainList: FC = () => {
               experience: true,
               rating: true,
               price: true,
-              online: true,
             }}
           />
         </Suspense>

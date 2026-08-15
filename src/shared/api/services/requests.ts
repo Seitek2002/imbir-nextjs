@@ -4,10 +4,11 @@ import { ServiceDetail, ServiceFilters, ServiceListItem } from "./types";
 
 export const getServices = async (
   filters: ServiceFilters = {},
+  signal?: AbortSignal,
 ): Promise<PaginatedResponse<ServiceListItem>> => {
   const { data } = await apiClient.get<PaginatedResponse<ServiceListItem>>(
     "/api/services/",
-    { params: filters },
+    { params: filters, signal },
   );
   return data;
 };
