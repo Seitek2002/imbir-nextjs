@@ -4,7 +4,7 @@ import { FC, useEffect, useState } from "react";
 
 import Link from "next/link";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -19,6 +19,7 @@ import { ClinicCard, ClinicSkeleton } from "@/entities/clinic";
 
 import { ClinicFilters, api, clinicKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { useUrlSearchParams } from "@/shared/lib/url-state";
 import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
@@ -37,33 +38,21 @@ const PAGE_SIZE = 8;
 // клиентский filter.
 
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
   // City the server prefetched clinics for (from the city cookie, see
   // app/clinics/page.tsx).
   initialCity: string;
 };
 
-export const ClinicsPage: FC<Props> = ({ searchParams, initialCity }) => {
-  const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
-  const isFiltersModalOpen = searchParams?.modal === "filters";
+export const ClinicsPage: FC<Props> = ({ initialCity }) => {
+  const urlSearchParams = useUrlSearchParams();
+  const activeQuery = urlSearchParams.get("q") ?? "";
+  const isFiltersModalOpen = urlSearchParams.get("modal") === "filters";
 
   // 1. Читаем параметры фильтров клиник из URL
-  const currentSpec =
-    typeof searchParams?.clinic_spec === "string"
-      ? searchParams.clinic_spec
-      : null;
-  const currentRating =
-    typeof searchParams?.clinic_rating === "string"
-      ? searchParams.clinic_rating
-      : null;
-  const currentExp =
-    typeof searchParams?.clinic_exp === "string"
-      ? searchParams.clinic_exp
-      : null;
-  const currentPrice =
-    typeof searchParams?.clinic_price === "string"
-      ? searchParams.clinic_price
-      : null;
+  const currentSpec = urlSearchParams.get("clinic_spec");
+  const currentRating = urlSearchParams.get("clinic_rating");
+  const currentExp = urlSearchParams.get("clinic_exp");
+  const currentPrice = urlSearchParams.get("clinic_price");
 
   const storeCity = useCityStore((s) => s.city);
   // Стор персистится из localStorage асинхронно, уже после маунта. Пока
@@ -112,13 +101,18 @@ export const ClinicsPage: FC<Props> = ({ searchParams, initialCity }) => {
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: clinicKeys.list(filters),
-      queryFn: ({ pageParam }) =>
-        api.getClinicsPaginated({
-          ...filters,
-          page: pageParam,
-          page_size: PAGE_SIZE,
-        }),
+      queryFn: ({ pageParam, signal }) =>
+        api.getClinicsPaginated(
+          {
+            ...filters,
+            page: pageParam,
+            page_size: PAGE_SIZE,
+          },
+          signal,
+        ),
       initialPageParam: 1,
+      placeholderData: keepPreviousData,
+      retry: false,
       getNextPageParam: (lastPage) =>
         lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
           ? lastPage.pagination.page + 1

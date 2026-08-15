@@ -2,15 +2,12 @@
 
 import { FC } from "react";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
 import { FilterSample } from "@/shared/assets/icons";
+import { pushUrlState, useUrlSearchParams } from "@/shared/lib/url-state";
 import { IconBtn } from "@/shared/ui";
 
 export const FiltersTrigger: FC = () => {
-  const router = useRouter();
-  const pathname = usePathname() ?? "";
-  const searchParams = useSearchParams() ?? new URLSearchParams();
+  const searchParams = useUrlSearchParams();
 
   const handleOpen = () => {
     // Берем все текущие параметры (чтобы не сбросить поиск)
@@ -19,7 +16,7 @@ export const FiltersTrigger: FC = () => {
     params.set("modal", "filters");
 
     // Пушим в историю, чтобы сработал свайп назад
-    router.push(`${pathname}?${params.toString()}`);
+    pushUrlState(params);
   };
 
   return (

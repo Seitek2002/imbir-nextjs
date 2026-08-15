@@ -2,19 +2,19 @@
 
 import { FC, useEffect, useState } from "react";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
+import { replaceUrlState, useUrlSearchParams } from "@/shared/lib/url-state";
 import { useSearchHistoryStore } from "@/shared/store";
 import { SearchInput } from "@/shared/ui";
 
 const QUERY_KEY = "q";
-
 export const UrlSearchInput: FC<{ placeholder?: string }> = ({
   placeholder = "Поиск клиники, специалиста, услуги",
 }) => {
   const router = useRouter();
   const pathname = usePathname() ?? "";
-  const searchParams = useSearchParams() ?? new URLSearchParams();
+  const searchParams = useUrlSearchParams();
 
   const addSearch = useSearchHistoryStore((state) => state.addSearch);
 
@@ -46,7 +46,7 @@ export const UrlSearchInput: FC<{ placeholder?: string }> = ({
         params.delete(QUERY_KEY);
       }
 
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      replaceUrlState(params);
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
@@ -66,7 +66,7 @@ export const UrlSearchInput: FC<{ placeholder?: string }> = ({
     if (pathname === "/") {
       router.push(`/search?${params.toString()}`);
     } else {
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      replaceUrlState(params);
     }
   };
 

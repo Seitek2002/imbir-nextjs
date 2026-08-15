@@ -9,10 +9,11 @@ import {
 
 export const getDoctors = async (
   filters: DoctorFilters = {},
+  signal?: AbortSignal,
 ): Promise<PaginatedResponse<DoctorListItem>> => {
   const { data } = await apiClient.get<PaginatedResponse<DoctorListItem>>(
     "/api/doctors/",
-    { params: filters },
+    { params: filters, signal },
   );
   return data;
 };

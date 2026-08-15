@@ -2,18 +2,15 @@
 
 import { FC } from "react";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
 import { RemoveIcon, StarIcon } from "@/shared/assets/icons";
+import { replaceUrlState, useUrlSearchParams } from "@/shared/lib/url-state";
 
 type Props = {
   prefix: string; // Обязательный префикс (doc или clinic)
 };
 
 export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
-  const router = useRouter();
-  const pathname = usePathname() ?? "";
-  const searchParams = useSearchParams() ?? new URLSearchParams();
+  const searchParams = useUrlSearchParams();
 
   // Достаем параметры из URL с учетом префикса
   const specs =
@@ -41,7 +38,7 @@ export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
     }
 
     // Обновляем URL без перезагрузки страницы
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    replaceUrlState(params);
   };
 
   // Если фильтров нет, ничего не рендерим

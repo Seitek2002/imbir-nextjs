@@ -1,12 +1,11 @@
 ﻿"use client";
 
-import { FC, ReactNode } from "react";
-
-import { useRouter, useSearchParams } from "next/navigation";
+import { FC, ReactNode, useEffect, useRef } from "react";
 
 import { useSpecializationOptions } from "@/entities/specialization";
 
 import { RemoveIcon } from "@/shared/assets/icons";
+import { replaceUrlState, useUrlSearchParams } from "@/shared/lib/url-state";
 import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 
 type Props = {
@@ -17,7 +16,6 @@ type Props = {
     experience?: boolean;
     rating?: boolean;
     price?: boolean;
-    online?: boolean;
   };
   children?: ReactNode;
 };
@@ -40,12 +38,10 @@ export const FilterBar: FC<Props> = ({
     experience: true,
     rating: true,
     price: true,
-    online: true,
   },
   children,
 }) => {
-  const router = useRouter();
-  const searchParams = useSearchParams() ?? new URLSearchParams();
+  const searchParams = useUrlSearchParams();
 
   // Общий хук на весь app — справочник почти не меняется, кешируется под
   // одним ключом (FilterBar/MobileFiltersModal/формы регистрации).
@@ -54,27 +50,33 @@ export const FilterBar: FC<Props> = ({
   );
 
   // Все значения — единственный источник правды: URL.
-  // router.replace обновляет useSearchParams синхронно через React,
-  // поэтому слайдеры не тормозят и состояние всегда в синхе с URL.
+  // URL и локальный интерфейс обновляются без серверной навигации.
   const specialty =
     searchParams.get(`${prefix}_spec`)?.split(",").filter(Boolean) ?? [];
   const rating = searchParams.get(`${prefix}_rating`) ?? "all";
-  const isOnline = searchParams.get(`${prefix}_online`) === "true";
 
   const expParts = searchParams.get(`${prefix}_exp`)?.split("-").map(Number);
-  const experience: [number, number] = [
-    expParts?.[0] ?? 0,
-    expParts?.[1] ?? MAX_EXP,
-  ];
+  const experienceMin = expParts?.[0] ?? 0;
+  const experienceMax = expParts?.[1] ?? MAX_EXP;
+  const experience: [number, number] = [experienceMin, experienceMax];
 
   const priceParts = searchParams
     .get(`${prefix}_price`)
     ?.split("-")
     .map(Number);
-  const price: [number, number] = [
-    priceParts?.[0] ?? 0,
-    priceParts?.[1] ?? MAX_PRICE,
-  ];
+  const priceMin = priceParts?.[0] ?? 0;
+  const priceMax = priceParts?.[1] ?? MAX_PRICE;
+  const price: [number, number] = [priceMin, priceMax];
+
+  const experienceDraftRef = useRef(experience);
+  const priceDraftRef = useRef(price);
+
+  useEffect(() => {
+    experienceDraftRef.current = [experienceMin, experienceMax];
+  }, [experienceMin, experienceMax]);
+  useEffect(() => {
+    priceDraftRef.current = [priceMin, priceMax];
+  }, [priceMin, priceMax]);
 
   const updateURL = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -83,7 +85,7 @@ export const FilterBar: FC<Props> = ({
     } else {
       params.delete(`${prefix}_${key}`);
     }
-    router.replace(`?${params.toString()}`, { scroll: false });
+    replaceUrlState(params);
   };
 
   const handleSpecialtyChange = (val: string[]) => {
@@ -95,15 +97,21 @@ export const FilterBar: FC<Props> = ({
   };
 
   const handleExpChange = (val: [number, number]) => {
-    updateURL("exp", `${val[0]}-${val[1]}`);
+    experienceDraftRef.current = val;
   };
 
   const handlePriceChange = (val: [number, number]) => {
-    updateURL("price", `${val[0]}-${val[1]}`);
+    priceDraftRef.current = val;
   };
 
-  const handleOnlineChange = (checked: boolean) => {
-    updateURL("online", checked ? "true" : null);
+  const commitExperience = (val?: [number, number]) => {
+    const next = val ?? experienceDraftRef.current;
+    updateURL("exp", `${next[0]}-${next[1]}`);
+  };
+
+  const commitPrice = (val?: [number, number]) => {
+    const next = val ?? priceDraftRef.current;
+    updateURL("price", `${next[0]}-${next[1]}`);
   };
 
   const handleReset = () => {
@@ -112,8 +120,7 @@ export const FilterBar: FC<Props> = ({
     params.delete(`${prefix}_exp`);
     params.delete(`${prefix}_rating`);
     params.delete(`${prefix}_price`);
-    params.delete(`${prefix}_online`);
-    router.replace(`?${params.toString()}`, { scroll: false });
+    replaceUrlState(params);
   };
 
   return (
@@ -131,37 +138,6 @@ export const FilterBar: FC<Props> = ({
               подходящими вариантами
             </p>
           </>
-        )}
-
-        {/* Чекбокс ОНЛАЙН */}
-        {fields.online && (
-          <div className="mb-6 flex items-center">
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative flex items-center justify-center">
-                <input
-                  type="checkbox"
-                  checked={isOnline}
-                  onChange={(e) => handleOnlineChange(e.target.checked)}
-                  className="peer sr-only"
-                />
-                <div className="w-6 h-6 border-2 border-border-soft rounded-md peer-checked:bg-primary peer-checked:border-primary transition-colors"></div>
-                <svg
-                  className="absolute w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </div>
-              <span className="text-foreground font-medium group-hover:text-primary transition-colors">
-                Только онлайн-консультация
-              </span>
-            </label>
-          </div>
         )}
 
         <div className="grid grid-cols-4 gap-5 items-start">
@@ -186,6 +162,7 @@ export const FilterBar: FC<Props> = ({
               step={1}
               value={experience}
               onChange={handleExpChange}
+              onChangeEnd={commitExperience}
               className="bg-white"
             />
           )}
@@ -208,6 +185,7 @@ export const FilterBar: FC<Props> = ({
               step={50}
               value={price}
               onChange={handlePriceChange}
+              onChangeEnd={commitPrice}
               className="bg-white"
             />
           )}
