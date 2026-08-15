@@ -8,11 +8,15 @@ import {
 
 import { ClinicsPage } from "@/pages/clinic/clinics";
 
-import { ClinicFilters, api, clinicKeys } from "@/shared/api";
+import {
+  ClinicFilters,
+  api,
+  clinicKeys,
+  getSpecializations,
+  referenceKeys,
+} from "@/shared/api";
 import { CITY_COOKIE, DEFAULT_CITY } from "@/shared/store";
 
-// Должно совпадать с PAGE_SIZE в clinics/ui.tsx, иначе ключ запроса тут
-// разойдётся с клиентским и SSR-префетч не подхватится.
 const PAGE_SIZE = 8;
 
 export default async function Page({
@@ -20,33 +24,18 @@ export default async function Page({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const resolvedSearchParams = await searchParams;
-
-  // Должно ЗНАЧЕНИЕ В ЗНАЧЕНИЕ совпадать с тем, как ClinicsPage (clinics/ui.tsx)
-  // строит свой `filters` — иначе ключ запроса тут не совпадёт с клиентским и
-  // HydrationBoundary ничего не подхватит (именно так раньше и было: сервер
-  // префетчил {} без единого фильтра, а клиент почти всегда запрашивает хотя
-  // бы город — префетч был не более чем шумом, клиент всё равно бил по API
-  // заново).
   const cookieStore = await cookies();
   const rawCity = cookieStore.get(CITY_COOKIE)?.value;
   const city = rawCity ? decodeURIComponent(rawCity) : DEFAULT_CITY;
 
-  const activeQuery =
-    typeof resolvedSearchParams?.q === "string" ? resolvedSearchParams.q : "";
+  const params = await searchParams;
+  const activeQuery = typeof params.q === "string" ? params.q : "";
   const currentRating =
-    typeof resolvedSearchParams?.clinic_rating === "string"
-      ? resolvedSearchParams.clinic_rating
-      : null;
+    typeof params.clinic_rating === "string" ? params.clinic_rating : null;
   const currentExp =
-    typeof resolvedSearchParams?.clinic_exp === "string"
-      ? resolvedSearchParams.clinic_exp
-      : null;
+    typeof params.clinic_exp === "string" ? params.clinic_exp : null;
   const currentPrice =
-    typeof resolvedSearchParams?.clinic_price === "string"
-      ? resolvedSearchParams.clinic_price
-      : null;
-
+    typeof params.clinic_price === "string" ? params.clinic_price : null;
   const [priceMin, priceMax] = currentPrice
     ? currentPrice.split("-").map(Number)
     : [undefined, undefined];
@@ -55,7 +44,7 @@ export default async function Page({
     : [undefined, undefined];
 
   const filters: Omit<ClinicFilters, "page" | "page_size"> = {
-    city: city || undefined,
+    city,
     search: activeQuery || undefined,
     min_rating:
       currentRating && currentRating !== "all"
@@ -66,18 +55,25 @@ export default async function Page({
     min_experience: expMin,
     max_experience: expMax,
   };
-
-  const queryClient = new QueryClient();
-  await queryClient.prefetchInfiniteQuery({
-    queryKey: clinicKeys.list(filters),
-    queryFn: () =>
-      api.getClinicsPaginated({ ...filters, page: 1, page_size: PAGE_SIZE }),
-    initialPageParam: 1,
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
   });
+  await Promise.all([
+    queryClient.prefetchInfiniteQuery({
+      queryKey: clinicKeys.list(filters),
+      queryFn: () =>
+        api.getClinicsPaginated({ ...filters, page: 1, page_size: PAGE_SIZE }),
+      initialPageParam: 1,
+    }),
+    queryClient.prefetchQuery({
+      queryKey: referenceKeys.specializations(),
+      queryFn: getSpecializations,
+    }),
+  ]);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ClinicsPage searchParams={resolvedSearchParams} initialCity={city} />
+      <ClinicsPage initialCity={city} />
     </HydrationBoundary>
   );
 }

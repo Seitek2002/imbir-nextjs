@@ -6,53 +6,38 @@ import {
 
 import { SearchPage } from "@/pages/search";
 
-import { DoctorFilters, api, doctorKeys } from "@/shared/api";
+import {
+  DoctorFilters,
+  api,
+  doctorKeys,
+  getSpecializations,
+  referenceKeys,
+} from "@/shared/api";
 
 export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const resolvedSearchParams = await searchParams;
+  const params = await searchParams;
+  const activeQuery = typeof params.q === "string" ? params.q : "";
 
-  // Должно ЗНАЧЕНИЕ В ЗНАЧЕНИЕ совпадать с тем, как SearchPage (search/ui.tsx)
-  // строит свои три useQuery — иначе ключи не совпадут и HydrationBoundary
-  // ничего не подхватит (тот же приём, что на /clinics и /services). Раньше
-  // тут префетча не было вообще: заголовок "Результаты по запросу" — LCP-
-  // элемент страницы — не мог отрисоваться, пока после гидратации не
-  // отработают все три клиентских запроса (см. Lighthouse: ~2.25с render delay).
-  const activeQuery =
-    typeof resolvedSearchParams?.q === "string" ? resolvedSearchParams.q : "";
+  if (!activeQuery) return <SearchPage />;
+
   const currentRating =
-    typeof resolvedSearchParams?.doc_rating === "string"
-      ? resolvedSearchParams.doc_rating
-      : null;
-  const currentExp =
-    typeof resolvedSearchParams?.doc_exp === "string"
-      ? resolvedSearchParams.doc_exp
-      : null;
+    typeof params.doc_rating === "string" ? params.doc_rating : null;
+  const currentExp = typeof params.doc_exp === "string" ? params.doc_exp : null;
   const currentPrice =
-    typeof resolvedSearchParams?.doc_price === "string"
-      ? resolvedSearchParams.doc_price
-      : null;
-  const isOnlineOnly = resolvedSearchParams?.doc_online === "true";
-  const currentSpec =
-    typeof resolvedSearchParams?.doc_spec === "string"
-      ? resolvedSearchParams.doc_spec
-      : null;
-
+    typeof params.doc_price === "string" ? params.doc_price : null;
+  const currentSpec = typeof params.doc_spec === "string" ? params.doc_spec : null;
+  const selectedSpecs = currentSpec?.split(",").filter(Boolean) ?? [];
   const [priceMin, priceMax] = currentPrice
     ? currentPrice.split("-").map(Number)
     : [undefined, undefined];
   const [expMin, expMax] = currentExp
     ? currentExp.split("-").map(Number)
     : [undefined, undefined];
-  const selectedSpecs = currentSpec
-    ? currentSpec.split(",").filter(Boolean)
-    : [];
-
   const doctorFilters: DoctorFilters = {
-    is_online: isOnlineOnly || undefined,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)
@@ -62,29 +47,35 @@ export default async function Page({
     min_experience: expMin,
     max_experience: expMax,
     specialization: selectedSpecs.length === 1 ? selectedSpecs[0] : undefined,
-    search: activeQuery || undefined,
-    page_size: 200,
+    search: activeQuery,
+    page_size: 24,
   };
 
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   await Promise.all([
     queryClient.prefetchQuery({
       queryKey: doctorKeys.list(doctorFilters),
       queryFn: () => api.getDoctors(doctorFilters),
     }),
     queryClient.prefetchQuery({
-      queryKey: ["clinics"],
-      queryFn: () => api.getClinics(),
+      queryKey: ["search-clinics", activeQuery],
+      queryFn: () => api.getClinics({ search: activeQuery, page_size: 12 }),
     }),
     queryClient.prefetchQuery({
-      queryKey: ["services"],
-      queryFn: () => api.getServices(),
+      queryKey: ["search-services", activeQuery],
+      queryFn: () => api.getServices({ search: activeQuery, page_size: 20 }),
+    }),
+    queryClient.prefetchQuery({
+      queryKey: referenceKeys.specializations(),
+      queryFn: getSpecializations,
     }),
   ]);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <SearchPage searchParams={resolvedSearchParams} />
+      <SearchPage />
     </HydrationBoundary>
   );
 }

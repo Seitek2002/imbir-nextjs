@@ -47,7 +47,9 @@ const Services = async ({ searchParams }: Props) => {
     max_price: priceParts ? priceRange[1] : undefined,
   };
 
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   await queryClient.prefetchInfiniteQuery({
     queryKey: serviceKeys.list(filters),
     queryFn: () =>

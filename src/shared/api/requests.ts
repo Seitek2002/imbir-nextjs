@@ -259,16 +259,16 @@ const adaptReview = (r: ApiReview): MockReviewItem => ({
 export const api = {
   // Принимает либо просто город (как раньше), либо полный набор фильтров —
   // так вызовы api.getDoctors(city) на других страницах остаются рабочими.
-  getDoctors: (filters?: string | DoctorFilters) => {
+  getDoctors: (filters?: string | DoctorFilters, signal?: AbortSignal) => {
     const resolved: DoctorFilters =
       typeof filters === "string" ? { city: filters } : (filters ?? {});
-    return getDoctors(resolved).then((r) => r.data.map(adaptDoctor));
+    return getDoctors(resolved, signal).then((r) => r.data.map(adaptDoctor));
   },
 
   // Как getDoctors, но сохраняет pagination — нужно для постраничной
   // подгрузки (кнопка «Показать ещё» на /specialists).
-  getDoctorsPaginated: (filters?: DoctorFilters) =>
-    getDoctors(filters).then((r) => ({
+  getDoctorsPaginated: (filters?: DoctorFilters, signal?: AbortSignal) =>
+    getDoctors(filters, signal).then((r) => ({
       data: r.data.map(adaptDoctor),
       pagination: r.pagination,
     })),
@@ -276,13 +276,13 @@ export const api = {
   getDoctorById: (id: string) =>
     _getDoctorById(id).then((d) => (d ? adaptDoctorDetail(d) : null)),
 
-  getClinics: (filters?: ClinicFilters) =>
-    getClinics(filters).then((r) => r.data.map(adaptClinic)),
+  getClinics: (filters?: ClinicFilters, signal?: AbortSignal) =>
+    getClinics(filters, signal).then((r) => r.data.map(adaptClinic)),
 
   // Как getClinics, но сохраняет pagination — нужно для постраничной
   // подгрузки (кнопка «Показать ещё» на /clinics).
-  getClinicsPaginated: (filters?: ClinicFilters) =>
-    getClinics(filters).then((r) => ({
+  getClinicsPaginated: (filters?: ClinicFilters, signal?: AbortSignal) =>
+    getClinics(filters, signal).then((r) => ({
       data: r.data.map(adaptClinic),
       pagination: r.pagination,
     })),
@@ -290,13 +290,13 @@ export const api = {
   getClinicById: (id: string) =>
     _getClinicById(id).then((c) => (c ? adaptClinicDetail(c) : null)),
 
-  getServices: (filters?: ServiceFilters) =>
-    getServices(filters).then((r) => r.data.map(adaptService)),
+  getServices: (filters?: ServiceFilters, signal?: AbortSignal) =>
+    getServices(filters, signal).then((r) => r.data.map(adaptService)),
 
   // Как getServices, но сохраняет pagination — нужно для постраничной
   // подгрузки (кнопка «Показать ещё» на /services).
-  getServicesPaginated: (filters?: ServiceFilters) =>
-    getServices(filters).then((r) => ({
+  getServicesPaginated: (filters?: ServiceFilters, signal?: AbortSignal) =>
+    getServices(filters, signal).then((r) => ({
       data: r.data.map(adaptService),
       pagination: r.pagination,
     })),
