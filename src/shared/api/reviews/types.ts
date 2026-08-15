@@ -23,6 +23,8 @@ export type ReviewTarget = {
   avatar_url?: string | null;
 };
 
+export type ReviewTargetValue = ReviewTarget | string;
+
 // Ответ на отзыв от врача/клиники. null, если ответа ещё нет.
 export type ReviewReply = {
   text: string;
@@ -33,7 +35,7 @@ export type ReviewItem = {
   id: number;
   author?: ReviewAuthor;
   // /api/profile/reviews/ отдаёт target (на кого отзыв) вместо author.
-  target?: ReviewTarget;
+  target?: ReviewTargetValue;
   target_type: ReviewTargetType;
   target_id?: number;
   appointment_id?: number | null;

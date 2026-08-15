@@ -110,7 +110,12 @@ export const RescheduleModal: FC<Props> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Перенести запись">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Перенести запись"
+      panelClassName="max-w-3xl"
+    >
       <div className="flex flex-col gap-4">
         <AppointmentDateTimePicker
           mode={isOnline ? "online" : "offline"}

@@ -6,17 +6,25 @@ import { createPortal } from "react-dom";
 import { RemoveIcon } from "@/shared/assets/icons";
 import { useMounted } from "@/shared/lib/useMounted";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
+import { cn } from "@/shared/lib/utils";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
   children: ReactNode;
+  panelClassName?: string;
 };
 
 const DURATION = 200;
 
-export const Modal: FC<Props> = ({ isOpen, onClose, title, children }) => {
+export const Modal: FC<Props> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  panelClassName,
+}) => {
   const [isClosing, setIsClosing] = useState(false);
   const mounted = useMounted();
 
@@ -69,7 +77,10 @@ export const Modal: FC<Props> = ({ isOpen, onClose, title, children }) => {
 
       {/* Desktop centered */}
       <div
-        className="modal-panel hidden sm:flex relative bg-white rounded-3xl w-full max-w-md flex-col max-h-[90vh] overflow-hidden shadow-xl"
+        className={cn(
+          "modal-panel hidden sm:flex relative bg-white rounded-3xl w-full max-w-md flex-col max-h-[90vh] overflow-hidden shadow-xl",
+          panelClassName,
+        )}
         data-state={state}
       >
         <div className="flex items-center justify-between p-5 border-b border-border-soft">
