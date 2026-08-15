@@ -3,6 +3,7 @@ import type { AuthUser } from "@/shared/store/authStore";
 import { apiClient } from "../client";
 import {
   AuthResponse,
+  DoctorInviteValidationResponse,
   EmailRegisterConfirmRequest,
   EmailRegisterRequestRequest,
   LoginOtpRequestRequest,
@@ -22,6 +23,17 @@ import {
   VerifyEmailConfirmRequest,
   VerifyPhoneConfirmRequest,
 } from "./types";
+
+export const validateDoctorInvite = async (params: {
+  invite_clinic_id: number;
+  invite_branch_id?: number;
+}): Promise<DoctorInviteValidationResponse> => {
+  const { data } = await apiClient.get<DoctorInviteValidationResponse>(
+    "/api/auth/invite/validate/",
+    { params },
+  );
+  return data;
+};
 
 // Helper: flatten a multipart registration object into FormData
 const toFormData = (data: Record<string, unknown>): FormData => {

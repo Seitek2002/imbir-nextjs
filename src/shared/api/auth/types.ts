@@ -133,8 +133,8 @@ export type LunchBreak = {
 };
 
 export type RegisterDoctorRequest = {
-  invite_clinic_id?: string;
-  invite_branch_id?: string;
+  invite_clinic_id?: number;
+  invite_branch_id?: number;
   password: string;
   step1: {
     full_name: string;
@@ -183,6 +183,30 @@ export type RegisterDoctorRequest = {
     agree_privacy: boolean;
     agree_data_processing: boolean;
     agree_publishing: boolean;
+  };
+};
+
+export type DoctorInviteValidationClinic = {
+  id: number;
+  name: string;
+  logo: string | null;
+  city: string;
+  rating: string | number;
+  reviews_count: number;
+  doctors_count: number;
+};
+
+export type DoctorInviteValidationBranch = {
+  id: number;
+  name: string;
+  address: string;
+};
+
+export type DoctorInviteValidationResponse = {
+  data: {
+    valid: boolean;
+    clinic: DoctorInviteValidationClinic | null;
+    branch: DoctorInviteValidationBranch | null;
   };
 };
 

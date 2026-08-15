@@ -11,7 +11,6 @@ import {
 } from "@/entities/specialization";
 
 import {
-  getClinicById,
   registerClientFn,
   registerClinicFn,
   registerDoctorFn,
@@ -21,6 +20,7 @@ import {
   updateDoctorProfile,
   uploadClinicDocument,
   uploadClinicPhoto,
+  validateDoctorInvite,
 } from "@/shared/api";
 import {
   EmailIcon,
@@ -32,7 +32,7 @@ import { colors } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { Button, Input, PhoneInput } from "@/shared/ui";
+import { Button, ImageWithFallback, Input, PhoneInput } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import {
@@ -173,10 +173,19 @@ export const RegisterPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
   const { setTokens, setUser, setRememberMe } = useAuthStore();
+  const hasInviteParams =
+    searchParams.has("invite_clinic_id") || searchParams.has("clinicId");
 
-  const [activeForm, setActiveForm] = useState<ActiveForm>("role");
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [activeForm, setActiveForm] = useState<ActiveForm>(
+    hasInviteParams ? "doctor" : "role",
+  );
+  const [selectedRole, setSelectedRole] = useState<Role | null>(
+    hasInviteParams ? "doctor" : null,
+  );
   const [inviteClinic, setInviteClinic] = useState<InviteClinic | undefined>();
+  const [inviteValidationStatus, setInviteValidationStatus] = useState<
+    "idle" | "loading" | "valid" | "invalid"
+  >(hasInviteParams ? "loading" : "idle");
 
   // Dropdown/текстовые поля специализации хранят название (см.
   // useSpecializationOptions), а бэк на запись принимает только id — резолвим
@@ -184,39 +193,54 @@ export const RegisterPage = () => {
   const { data: specializationList = [] } = useSpecializations();
 
   useEffect(() => {
-    const clinicId = searchParams.get("clinicId");
-    if (!clinicId) return;
-    const branchId = searchParams.get("branchId");
+    const clinicIdParam =
+      searchParams.get("invite_clinic_id") ?? searchParams.get("clinicId");
+    if (!clinicIdParam) return;
+    const branchIdParam =
+      searchParams.get("invite_branch_id") ?? searchParams.get("branchId");
+    const clinicId = Number(clinicIdParam);
+    const branchId = branchIdParam ? Number(branchIdParam) : null;
 
-    // Привязка врача (invite_clinic_id) идёт по id из ссылки и не зависит от
-    // того, опубликована ли клиника публично. Публичный /api/clinics/{id}/
-    // нужен только чтобы КРАСИВО показать имя/адрес клиники — если он
-    // недоступен (клиника ещё не опубликована), инвайт всё равно должен
-    // сработать при сабмите, просто с нейтральным превью вместо названия.
-    setInviteClinic({
-      clinicId,
-      clinicName: "Клиника",
-      branchId: branchId ?? null,
-      branchAddress: "",
-    });
+    // Проверяем приглашение до показа анкеты. Публичный каталог клиник здесь
+    // не подходит: invite_clinic_id — это user_id аккаунта клиники.
     setSelectedRole("doctor");
     setActiveForm("doctor");
+    setInviteClinic(undefined);
 
-    getClinicById(clinicId)
-      .then((clinic) => {
-        const branch = branchId
-          ? clinic.branches?.find((b) => b.id === branchId)
-          : null;
+    if (
+      !Number.isInteger(clinicId) ||
+      clinicId <= 0 ||
+      (branchId !== null && (!Number.isInteger(branchId) || branchId <= 0))
+    ) {
+      setInviteValidationStatus("invalid");
+      return;
+    }
+
+    setInviteValidationStatus("loading");
+
+    validateDoctorInvite({
+      invite_clinic_id: clinicId,
+      ...(branchId ? { invite_branch_id: branchId } : {}),
+    })
+      .then(({ data }) => {
+        if (!data.valid || !data.clinic) {
+          setInviteValidationStatus("invalid");
+          return;
+        }
         setInviteClinic({
           clinicId,
-          clinicName: clinic.name,
-          branchId: branchId ?? null,
-          branchAddress: branch?.address ?? clinic.address ?? "",
+          clinicName: data.clinic.name,
+          clinicLogo: data.clinic.logo,
+          clinicCity: data.clinic.city,
+          branchId: data.branch?.id ?? branchId,
+          branchName: data.branch?.name,
+          branchAddress: data.branch?.address ?? "",
         });
+        setInviteValidationStatus("valid");
       })
       .catch(() => {
-        // Клиника не опубликована или недоступна для публичного просмотра —
-        // оставляем нейтральное превью, заданное выше; сама привязка не блокируется.
+        setInviteClinic(undefined);
+        setInviteValidationStatus("invalid");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -794,27 +818,67 @@ export const RegisterPage = () => {
       {/* Doctor registration */}
       {activeForm === "doctor" && (
         <div className="mt-8 md:mt-12 flex-1 flex flex-col">
-          {inviteClinic && (
-            <div className="mb-4 px-4 py-3 rounded-xl bg-primary-tint border border-[#FDDDD5] text-sm text-secondary">
-              Вы приглашены клиникой{" "}
-              <span className="font-semibold text-foreground">
-                {inviteClinic.clinicName}
-              </span>
-              {inviteClinic.branchId && inviteClinic.branchAddress && (
-                <> — {inviteClinic.branchAddress}</>
-              )}
+          {inviteValidationStatus === "loading" && (
+            <div className="mb-4 px-4 py-4 rounded-xl bg-background border border-border text-sm text-secondary">
+              Проверяем приглашение клиники…
             </div>
           )}
-          <DoctorRegistrationForm
-            step={doctorStep}
-            onContinue={() =>
-              setDoctorStep((s) => Math.min(s + 1, 4) as DoctorStep)
-            }
-            onSubmit={handleSubmitDoctor}
-            onBack={handleBack}
-            isLoading={isLoadingDoctor}
-            inviteClinic={inviteClinic}
-          />
+
+          {inviteClinic && (
+            <div className="mb-4 p-4 rounded-xl bg-primary-tint border border-[#FDDDD5] flex items-center gap-3">
+              <div className="relative size-12 rounded-xl overflow-hidden bg-white shrink-0">
+                <ImageWithFallback
+                  src={inviteClinic.clinicLogo}
+                  alt={inviteClinic.clinicName}
+                  fill
+                  sizes="48px"
+                  className="object-cover"
+                  fallback={
+                    <div className="size-full flex items-center justify-center text-primary font-semibold text-lg">
+                      {inviteClinic.clinicName.charAt(0)}
+                    </div>
+                  }
+                />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-primary font-medium mb-0.5">
+                  Вас приглашает клиника
+                </p>
+                <p className="font-semibold text-foreground truncate">
+                  {inviteClinic.clinicName}
+                </p>
+                {(inviteClinic.branchAddress || inviteClinic.clinicCity) && (
+                  <p className="text-sm text-secondary truncate">
+                    {inviteClinic.branchName
+                      ? `${inviteClinic.branchName} — `
+                      : ""}
+                    {inviteClinic.branchAddress || inviteClinic.clinicCity}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {inviteValidationStatus === "invalid" && (
+            <div className="mb-4 px-4 py-4 rounded-xl bg-[#FFF8E6] border border-[#F5D889] text-sm text-secondary">
+              Приглашение недействительно или срок его действия истёк. Вы всё
+              равно можете зарегистрироваться как врач, но без привязки к
+              клинике.
+            </div>
+          )}
+
+          {inviteValidationStatus !== "loading" && (
+            <DoctorRegistrationForm
+              step={doctorStep}
+              onContinue={() =>
+                setDoctorStep((s) => Math.min(s + 1, 4) as DoctorStep)
+              }
+              onSubmit={handleSubmitDoctor}
+              onBack={handleBack}
+              isLoading={isLoadingDoctor}
+              inviteClinic={inviteClinic}
+            />
+          )}
         </div>
       )}
 

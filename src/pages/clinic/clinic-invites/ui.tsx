@@ -90,12 +90,13 @@ export const ClinicInvitesPage: FC = () => {
   const authUser = useAuthStore((s) => s.user);
   const queryClient = useQueryClient();
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const branchOptions = [
     { id: null, label: "Главный офис", address: profile?.fullAddress ?? "" },
     ...(rawProfile?.branches ?? []).map((b) => ({
-      id: b.id,
+      id: String(b.id),
       label: `Филиал — ${b.address}`,
       address: b.address,
     })),
@@ -118,9 +119,12 @@ export const ClinicInvitesPage: FC = () => {
 
   const createMutation = useMutation({
     mutationFn: () =>
-      createClinicInvite(
-        selectedBranch.id != null ? { branch: Number(selectedBranch.id) } : {},
-      ),
+      createClinicInvite({
+        ...(selectedBranch.id != null
+          ? { branch: Number(selectedBranch.id) }
+          : {}),
+        ...(expiresAt ? { expires_at: `${expiresAt}T00:00:00Z` } : {}),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.invites() });
     },
@@ -134,9 +138,9 @@ export const ClinicInvitesPage: FC = () => {
   });
 
   const handleCopy = (linkId: string, branchId: number | null) => {
-    const params = new URLSearchParams({ clinicId: String(clinicId) });
-    if (branchId != null) params.set("branchId", String(branchId));
-    const url = `${window.location.origin}/register?${params.toString()}`;
+    const params = new URLSearchParams({ invite_clinic_id: clinicId });
+    if (branchId != null) params.set("invite_branch_id", String(branchId));
+    const url = `${window.location.origin}/register/doctor?${params.toString()}`;
     navigator.clipboard.writeText(url);
     setCopiedId(linkId);
     setTimeout(() => setCopiedId(null), 2000);
@@ -144,7 +148,7 @@ export const ClinicInvitesPage: FC = () => {
 
   const getBranchLabel = (branchId: number | null) => {
     if (branchId == null) return profile?.name ?? "Главный офис";
-    const opt = branchOptions.find((b) => b.id === branchId);
+    const opt = branchOptions.find((b) => b.id === String(branchId));
     return opt ? `Филиал — ${opt.address}` : `Филиал #${branchId}`;
   };
 
@@ -168,7 +172,8 @@ export const ClinicInvitesPage: FC = () => {
           <p className="text-sm text-secondary">
             Создайте ссылку-приглашение для врача. Перейдя по ней, врач попадёт
             на регистрацию с уже предзаполненными данными вашей клиники и
-            филиала. Ссылка действует 7 дней.
+            филиала. Без указанной даты ссылка действует бессрочно и может быть
+            использована несколькими врачами.
           </p>
         </div>
       </div>
@@ -199,7 +204,7 @@ export const ClinicInvitesPage: FC = () => {
               <button
                 key={opt.id ?? "main"}
                 type="button"
-                onClick={() => setSelectedBranchId(opt.id + "")}
+                onClick={() => setSelectedBranchId(opt.id)}
                 className={cn(
                   "w-full rounded-xl border-2 p-3 text-left flex items-start gap-3 transition-colors",
                   selectedBranchId === opt.id
@@ -235,6 +240,26 @@ export const ClinicInvitesPage: FC = () => {
           </div>
         </div>
 
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="invite-expires-at"
+            className="text-sm font-medium text-overlay"
+          >
+            Действует до (необязательно)
+          </label>
+          <input
+            id="invite-expires-at"
+            type="date"
+            value={expiresAt}
+            min={new Date().toISOString().slice(0, 10)}
+            onChange={(event) => setExpiresAt(event.target.value)}
+            className="h-11 px-3 rounded-lg border border-border-soft bg-white text-sm text-foreground outline-none focus:border-primary"
+          />
+          <p className="text-xs text-muted">
+            Если дату не выбрать, приглашение будет бессрочным.
+          </p>
+        </div>
+
         <Button
           className="w-full justify-center"
           onClick={() => createMutation.mutate()}
@@ -265,7 +290,7 @@ export const ClinicInvitesPage: FC = () => {
                   </p>
                   <p className="text-xs text-muted mt-0.5 font-mono truncate">
                     {hasClinicId
-                      ? `/register?clinicId=${clinicId}${link.branch != null ? `&branchId=${link.branch}` : ""}`
+                      ? `/register/doctor?invite_clinic_id=${clinicId}${link.branch != null ? `&invite_branch_id=${link.branch}` : ""}`
                       : "ID клиники недоступен"}
                   </p>
                 </div>

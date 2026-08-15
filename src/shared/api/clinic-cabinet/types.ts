@@ -152,7 +152,8 @@ export type InviteLink = {
 };
 
 export type CreateInviteRequest = {
-  branch?: number;
+  branch?: number | null;
+  expires_at?: string | null;
 };
 
 export type UpdateBranchRequest = {

@@ -82,8 +82,11 @@ export type DoctorFormData = {
 };
 
 export type InviteClinic = {
-  clinicId: string;
+  clinicId: number;
   clinicName: string;
-  branchId: string | null;
+  clinicLogo?: string | null;
+  clinicCity?: string;
+  branchId: number | null;
+  branchName?: string;
   branchAddress: string;
 };
