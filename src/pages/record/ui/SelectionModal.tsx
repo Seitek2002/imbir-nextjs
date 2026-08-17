@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 
 import { RemoveIcon } from "@/shared/assets/icons";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
+import { useCityStore } from "@/shared/store";
 import { Button, IconBtn, SearchInput } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
@@ -55,6 +56,8 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
     return selectedServiceId === id;
   };
 
+  const city = useCityStore((s) => s.city);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3">
       <div
@@ -68,9 +71,16 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
         data-state={state}
       >
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-[28px] text-foreground leading-[130%] font-semibold">
-            {modalConfig?.title}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-[28px] text-foreground leading-[130%] font-semibold">
+              {modalConfig?.title}
+            </h3>
+            {city && (
+              <span className="inline-flex items-center text-xs font-medium text-primary bg-[#FFF0EE] px-2.5 py-0.5 rounded-full border border-primary/20 shrink-0 self-center">
+                в г. {city}
+              </span>
+            )}
+          </div>
 
           <IconBtn
             variant="outline"

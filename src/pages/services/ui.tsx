@@ -257,9 +257,9 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
 
           <div className="max-w-200">
             <div className="flex items-center gap-3">
-              <h2 className="text-[40px] font-semibold">Услуги</h2>
+              <h2 className="text-[40px] font-semibold leading-none">Услуги</h2>
               {city && (
-                <span className="text-sm font-medium text-primary bg-[#FFF0EE] px-3 py-1 rounded-full border border-primary/20 shrink-0">
+                <span className="inline-flex items-center text-xs font-medium text-primary bg-[#FFF0EE] px-3 py-1 rounded-full border border-primary/20 shrink-0 self-center">
                   в г. {city}
                 </span>
               )}

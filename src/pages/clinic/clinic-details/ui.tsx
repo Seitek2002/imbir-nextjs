@@ -31,7 +31,7 @@ import {
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
-import { useAuthStore } from "@/shared/store";
+import { useAuthStore, useCityStore } from "@/shared/store";
 import { Button, ContactInfoModal, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
@@ -47,6 +47,7 @@ type Props = {
 
 export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
   const user = useAuthStore((s) => s.user);
+  const city = useCityStore((s) => s.city);
   const isDoctor = user?.role === "doctor";
   const router = useRouter();
   const [activeImageIdx, setActiveImageIdx] = useState(0);
@@ -269,9 +270,16 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
             <div className="bg-white rounded-[20px] p-4 border border-border-soft">
               <div className="flex justify-center md:justify-between items-start mb-6">
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-semibold text-foreground mb-1">
-                    {clinic.name}
-                  </h1>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h1 className="text-2xl md:text-3xl font-semibold text-foreground leading-tight">
+                      {clinic.name}
+                    </h1>
+                    {(clinic.city || city) && (
+                      <span className="inline-flex items-center text-xs font-medium text-primary bg-[#FFF0EE] px-2.5 py-0.5 rounded-full border border-primary/20 shrink-0 self-center">
+                        в г. {clinic.city || city}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-muted text-center lg:text-left text-base mb-4">
                     Многопрофильная клиника
                   </p>
