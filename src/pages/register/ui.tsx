@@ -595,6 +595,14 @@ export const RegisterPage = () => {
           phone: data.phone,
           email: data.email,
           website: data.website || undefined,
+          // Формат гео внутри step2 в схеме не раскрыт (drf-spectacular отдаёт
+          // весь шаг как opaque string), поэтому полагаться на него нельзя —
+          // координаты дублируются ниже в updateClinicProfile, где поля
+          // latitude/longitude документированы. См. docs/QUESTIONS.md.
+          location:
+            data.latitude && data.longitude
+              ? { lat: Number(data.latitude), lng: Number(data.longitude) }
+              : undefined,
         },
         step3: {
           schedule: {
@@ -685,6 +693,8 @@ export const RegisterPage = () => {
           country: data.country,
           city: data.city,
           address: data.fullAddress,
+          latitude: data.latitude || undefined,
+          longitude: data.longitude || undefined,
           phone: data.phone,
           website: data.website || undefined,
           legal_name: data.legalName,

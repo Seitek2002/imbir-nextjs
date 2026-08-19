@@ -15,6 +15,10 @@ export type ClinicFormData = {
   phone: string;
   email: string;
   website: string;
+  // Координаты пина с карты (shared/ui/location-picker). Строки, а не числа:
+  // бэк ждёт decimal-строку, а пустая строка = «клиника точку не поставила».
+  latitude: string;
+  longitude: string;
 
   schedule: Record<
     "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun",

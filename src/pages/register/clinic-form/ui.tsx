@@ -39,6 +39,8 @@ const INITIAL_DATA: ClinicFormData = {
   phone: "",
   email: "",
   website: "",
+  latitude: "",
+  longitude: "",
   schedule: {
     mon: emptyDay,
     tue: emptyDay,

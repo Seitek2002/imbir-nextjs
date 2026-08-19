@@ -58,4 +58,8 @@ export * from "./upload/requests";
 export * from "./chat/types";
 export * from "./chat/requests";
 
+// Геокодинг (Nominatim / OpenStreetMap) — внешний сервис, не наш бэк
+export * from "./geocode/types";
+export * from "./geocode/requests";
+
 export * from "./requests";
