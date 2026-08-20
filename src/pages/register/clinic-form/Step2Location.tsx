@@ -66,6 +66,11 @@ export const Step2Location = ({ data, onChange }: Props) => {
         label="Телефон"
         value={data.phone}
         onChange={(v) => onChange("phone", v)}
+        // Код страны нужен отдельно: бэк и OTP-гейт ждут полный номер, а
+        // PhoneInput отдаёт только цифры без кода.
+        onCountryChange={(country) =>
+          onChange("phoneDialCode", country.dialCode)
+        }
       />
       <Input
         label="Почта"

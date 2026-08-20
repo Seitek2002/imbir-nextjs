@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
+
+import {
+  VerifyContactBlock,
+  useVerifyContact,
+} from "@/features/verify-contact";
 
 import { STEP_TITLES, TOTAL_STEPS } from "../model/constants";
 import type { DoctorFormData, DoctorStep, InviteClinic } from "../model/types";
@@ -34,6 +40,7 @@ export const DoctorRegistrationForm = ({
     birthDate: "",
     city: "",
     languages: [],
+    phoneDialCode: "+996",
     phone: "",
     email: "",
     photo: null,
@@ -57,6 +64,14 @@ export const DoctorRegistrationForm = ({
   });
 
   const [passwordError, setPasswordError] = useState("");
+  // Показываем блок подтверждения только после первой попытки отправки —
+  // см. тот же приём в clinic-form/ui.tsx.
+  const [showVerify, setShowVerify] = useState(false);
+
+  const verify = useVerifyContact({
+    email: data.email,
+    phone: data.phone ? `${data.phoneDialCode}${data.phone}` : "",
+  });
 
   const handleChange = <K extends keyof DoctorFormData>(
     key: K,
@@ -94,6 +109,17 @@ export const DoctorRegistrationForm = ({
         return;
       }
       setPasswordError("");
+
+      // Гейт бэка: /register/doctor/ отдаёт 400 non_field_errors, пока почта
+      // или телефон из анкеты не подтверждены кодом.
+      if (!verify.isVerified) {
+        setShowVerify(true);
+        if (verify.isSent)
+          toast.error("Сначала подтвердите почту или телефон кодом");
+        else void verify.requestCode();
+        return;
+      }
+
       onSubmit(data);
     }
   };
@@ -113,6 +139,14 @@ export const DoctorRegistrationForm = ({
         data={data}
         onChange={handleChange}
         passwordError={passwordError}
+        verifySlot={
+          showVerify ? (
+            <VerifyContactBlock
+              state={verify}
+              onConfirmed={() => onSubmit(data)}
+            />
+          ) : null
+        }
       />
     ),
   };

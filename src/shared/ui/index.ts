@@ -25,6 +25,7 @@ export { ImageWithFallback } from "./image-with-fallback";
 export { AuthShell } from "./auth-shell";
 export { CabinetShell } from "./cabinet-shell";
 export { CabinetMobileMenu } from "./cabinet-mobile-menu";
+export { DateField, YearField } from "./date-field";
 export { LocationPicker } from "./location-picker";
 export type { LocationValue } from "./location-picker";
 export type { CabinetMenuItem } from "./cabinet-mobile-menu";

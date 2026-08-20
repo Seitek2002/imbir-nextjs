@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
@@ -33,9 +33,17 @@ type Props = {
     value: ClinicFormData[K],
   ) => void;
   passwordError: string;
+  // Блок подтверждения контакта. Мастер отдаёт его готовым — этот шаг только
+  // выбирает, где он стоит: между согласиями и пояснением.
+  verifySlot?: ReactNode;
 };
 
-export const Step7Completion = ({ data, onChange, passwordError }: Props) => {
+export const Step7Completion = ({
+  data,
+  onChange,
+  passwordError,
+  verifySlot,
+}: Props) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -98,12 +106,13 @@ export const Step7Completion = ({ data, onChange, passwordError }: Props) => {
         </div>
       </div>
 
+      {verifySlot}
+
       <div className="flex gap-3 p-4 rounded-xl bg-background mt-2">
         <InfoIcon />
         <p className="text-sm text-muted">
-          После регистрации вы получите доступ к личному кабинету врача, где
-          сможете управлять расписанием, просматривать записи пациентов и вести
-          историю приёмов
+          После регистрации вы получите доступ к личному кабинету клиники, где
+          сможете управлять врачами, услугами и записями пациентов
         </p>
       </div>
     </div>

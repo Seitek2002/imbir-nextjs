@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
+
+import {
+  VerifyContactBlock,
+  useVerifyContact,
+} from "@/features/verify-contact";
 
 import {
   CLINIC_STEP_TITLES as STEP_TITLES,
@@ -36,6 +42,7 @@ const INITIAL_DATA: ClinicFormData = {
   country: "Кыргызстан",
   city: "Бишкек",
   fullAddress: "",
+  phoneDialCode: "+996",
   phone: "",
   email: "",
   website: "",
@@ -81,6 +88,14 @@ export const ClinicRegistrationForm = ({
 }: Props) => {
   const [data, setData] = useState<ClinicFormData>(INITIAL_DATA);
   const [passwordError, setPasswordError] = useState("");
+  // Блок подтверждения показывается только после первой попытки отправить
+  // анкету — до этого он был бы шумом, а код успел бы истечь.
+  const [showVerify, setShowVerify] = useState(false);
+
+  const verify = useVerifyContact({
+    email: data.email,
+    phone: data.phone ? `${data.phoneDialCode}${data.phone}` : "",
+  });
 
   const handleChange = <K extends keyof ClinicFormData>(
     key: K,
@@ -124,6 +139,18 @@ export const ClinicRegistrationForm = ({
         return;
       }
       setPasswordError("");
+
+      // Гейт бэка: /register/clinic/ отдаёт 400, пока почта или телефон из
+      // анкеты не подтверждены кодом. Подтверждение живёт 24 часа, поэтому
+      // повторная отправка упавшей анкеты кода уже не потребует.
+      if (!verify.isVerified) {
+        setShowVerify(true);
+        if (verify.isSent)
+          toast.error("Сначала подтвердите почту или телефон кодом");
+        else void verify.requestCode();
+        return;
+      }
+
       onSubmit(data);
     }
   };
@@ -146,6 +173,14 @@ export const ClinicRegistrationForm = ({
         data={data}
         onChange={handleChange}
         passwordError={passwordError}
+        verifySlot={
+          showVerify ? (
+            <VerifyContactBlock
+              state={verify}
+              onConfirmed={() => onSubmit(data)}
+            />
+          ) : null
+        }
       />
     ),
   };

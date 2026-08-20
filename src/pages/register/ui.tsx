@@ -438,6 +438,9 @@ export const RegisterPage = () => {
 
   const handleSubmitDoctor = async (data: DoctorFormData) => {
     setIsLoadingDoctor(true);
+    // Полный номер с кодом страны: PhoneInput отдаёт только цифры, код лежит
+    // в отдельном поле анкеты (см. DoctorFormData.phoneDialCode).
+    const doctorPhone = data.phone ? `${data.phoneDialCode}${data.phone}` : "";
     try {
       const emptyDay = { from: null, to: null, enabled: false };
       const primarySpecializations = resolveSpecializationIds(
@@ -459,7 +462,7 @@ export const RegisterPage = () => {
           birth_date: toApiDate(data.birthDate),
           city: data.city,
           languages: data.languages,
-          phone: data.phone,
+          phone: doctorPhone,
           email: data.email,
           photo: data.photo ?? undefined,
         },
@@ -467,7 +470,7 @@ export const RegisterPage = () => {
           country: "kg",
           city: data.city,
           address: "",
-          phone: data.phone,
+          phone: doctorPhone,
           email: data.email,
         },
         step3: {
@@ -573,6 +576,8 @@ export const RegisterPage = () => {
 
   const handleSubmitClinic = async (data: ClinicFormData) => {
     setIsLoadingClinic(true);
+    // Полный номер с кодом страны — см. ClinicFormData.phoneDialCode.
+    const clinicPhone = data.phone ? `${data.phoneDialCode}${data.phone}` : "";
     try {
       const toDay = (d: { from: string; to: string }) => ({
         from: d.from || null,
@@ -592,7 +597,7 @@ export const RegisterPage = () => {
           country: data.country,
           city: data.city,
           address: data.fullAddress,
-          phone: data.phone,
+          phone: clinicPhone,
           email: data.email,
           website: data.website || undefined,
           // Формат гео внутри step2 в схеме не раскрыт (drf-spectacular отдаёт
@@ -695,7 +700,7 @@ export const RegisterPage = () => {
           address: data.fullAddress,
           latitude: data.latitude || undefined,
           longitude: data.longitude || undefined,
-          phone: data.phone,
+          phone: clinicPhone,
           website: data.website || undefined,
           legal_name: data.legalName,
           reg_number: data.registrationNumber,

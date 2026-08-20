@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 
 import { EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
@@ -52,9 +52,16 @@ type Props = {
     value: DoctorFormData[K],
   ) => void;
   passwordError: string;
+  // Готовый блок подтверждения контакта от мастера — см. clinic-form.
+  verifySlot?: ReactNode;
 };
 
-export const Step4Certificates = ({ data, onChange, passwordError }: Props) => {
+export const Step4Certificates = ({
+  data,
+  onChange,
+  passwordError,
+  verifySlot,
+}: Props) => {
   const certInputRef = useRef<HTMLInputElement>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -142,6 +149,8 @@ export const Step4Certificates = ({ data, onChange, passwordError }: Props) => {
         onChange={(e) => onChange("confirmPassword", e.target.value)}
         error={passwordError}
       />
+
+      {verifySlot}
 
       <div className="flex gap-3 p-4 rounded-xl bg-background mt-2">
         <InfoIcon />

@@ -1,4 +1,4 @@
-import { Input, Textarea } from "@/shared/ui";
+import { Input, Textarea, YearField } from "@/shared/ui";
 
 import type { DoctorFormData } from "../model/types";
 
@@ -18,11 +18,10 @@ export const Step3Education = ({ data, onChange }: Props) => (
       value={data.university}
       onChange={(e) => onChange("university", e.target.value)}
     />
-    <Input
+    <YearField
       label="Год окончания"
-      placeholder="ГГГГ"
       value={data.graduationYear}
-      onChange={(e) => onChange("graduationYear", e.target.value)}
+      onChange={(v) => onChange("graduationYear", v)}
     />
     <Input
       label="Интернатура"

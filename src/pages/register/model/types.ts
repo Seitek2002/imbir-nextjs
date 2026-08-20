@@ -12,6 +12,10 @@ export type ClinicFormData = {
   country: string;
   city: string;
   fullAddress: string;
+  // PhoneInput отдаёт только цифры без кода страны, а бэку (и OTP-гейту при
+  // регистрации) нужен полный номер — код держим отдельным полем и склеиваем
+  // при отправке.
+  phoneDialCode: string;
   phone: string;
   email: string;
   website: string;
@@ -59,6 +63,8 @@ export type DoctorFormData = {
   birthDate: string;
   city: string;
   languages: string[];
+  // См. комментарий у ClinicFormData.phoneDialCode.
+  phoneDialCode: string;
   phone: string;
   email: string;
   photo: File | null;

@@ -6,7 +6,7 @@ import { getCities, getLanguages, referenceKeys } from "@/shared/api";
 import { CITIES, colors } from "@/shared/config";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import { cn } from "@/shared/lib/utils";
-import { Dropdown, Input, PhoneInput } from "@/shared/ui";
+import { DateField, Dropdown, Input, PhoneInput } from "@/shared/ui";
 
 import { DEFAULT_LANGUAGES } from "../model/constants";
 import type { DoctorFormData } from "../model/types";
@@ -104,11 +104,14 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
         </div>
       </div>
 
-      <Input
+      {/* Точки расставляются сами, календарь — по иконке. Верхняя граница
+          сегодня: дата рождения в будущем бессмысленна. */}
+      <DateField
         label="Дата рождения"
-        placeholder="ДД.ММ.ГГГГ"
         value={data.birthDate}
-        onChange={(e) => onChange("birthDate", e.target.value)}
+        onChange={(v) => onChange("birthDate", v)}
+        min="01.01.1920"
+        maxToday
       />
 
       <Dropdown
@@ -133,6 +136,10 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
         label="Телефон"
         value={data.phone}
         onChange={(v) => onChange("phone", v)}
+        // Код страны хранится отдельно: бэк и OTP-гейт ждут полный номер.
+        onCountryChange={(country) =>
+          onChange("phoneDialCode", country.dialCode)
+        }
       />
 
       <Input
