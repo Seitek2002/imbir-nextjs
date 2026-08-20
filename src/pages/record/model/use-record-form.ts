@@ -268,11 +268,14 @@ export const useRecordForm = () => {
     [slotsData],
   );
 
-  // Слоты зависят от врача, даты и услуги — при смене любого из них
-  // сбрасываем выбранное время.
+  // Слоты запрашиваются только по врачу и дате (см. getDoctorAvailableSlots),
+  // от услуги они не зависят — поэтому в зависимостях её быть не должно.
+  // С ней выбор услуги ПОСЛЕ времени молча обнулял слот: кнопка оставалась
+  // активной, запрос не уходил, а сообщение «Выберите дату и время» выглядело
+  // как заголовок шага, и пользователь упирался в тупик.
   useEffect(() => {
     setSelectedTime(null);
-  }, [selectedDoctorId, selectedDateStr, selectedServiceId]);
+  }, [selectedDoctorId, selectedDateStr]);
 
   const CLINICS: Clinic[] = clinicsData.map((c) => ({
     id: c.id,

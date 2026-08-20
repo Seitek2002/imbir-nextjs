@@ -64,22 +64,35 @@ export type UpdateDoctorProfileBody = {
   is_published?: boolean;
 };
 
+// Массив чисел в multipart нельзя слать JSON-строкой: DRF ждёт по одному
+// значению на поле и на "[1,9]" отвечает «Ожидалось значение первичного ключа,
+// получен str». Из-за этого весь PUT падал с 400, и вместе со
+// специализациями терялись стаж, образование и опыт работы — всё, что шло
+// тем же запросом. Массивы строк (languages, equipment) бэк как JSON
+// принимает, их не трогаем.
+const appendMultipart = (form: FormData, key: string, value: unknown) => {
+  if (value instanceof File) return form.append(key, value);
+  if (Array.isArray(value) && value.every((v) => typeof v === "number")) {
+    value.forEach((v) => form.append(key, String(v)));
+    return;
+  }
+  if (typeof value === "object" && value !== null)
+    return form.append(key, JSON.stringify(value));
+  form.append(key, String(value));
+};
+
 export const updateDoctorProfile = async (
   body: UpdateDoctorProfileBody,
 ): Promise<DoctorPrivateProfile> => {
-  // Если есть файл (фото) — шлём multipart, иначе JSON. В multipart массивы/
-  // объекты (languages, специализации и т.д.) сериализуем в JSON-строку —
-  // бэкенд их так принимает.
+  // Если есть файл (фото/логотип) — шлём multipart, иначе JSON.
+  // Правила упаковки полей в multipart — в appendMultipart выше.
   const hasFile = Object.values(body).some((v) => v instanceof File);
 
   if (hasFile) {
     const form = new FormData();
     Object.entries(body).forEach(([key, value]) => {
       if (value === undefined || value === null) return;
-      if (value instanceof File) form.append(key, value);
-      else if (typeof value === "object")
-        form.append(key, JSON.stringify(value));
-      else form.append(key, String(value));
+      appendMultipart(form, key, value);
     });
     const { data } = await apiClient.put<DoctorPrivateProfile>(
       "/api/doctor/profile/",

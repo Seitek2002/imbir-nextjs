@@ -45,6 +45,11 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
   }, [closeModal]);
 
   useScrollLock(isOpen);
+  // Хук обязан вызываться до раннего return ниже: когда модалка закрыта,
+  // компонент выходил раньше, и на открытии React видел на один хук больше —
+  // «Rendered more hooks than during the previous render», страница падала в
+  // error boundary и записаться было нельзя.
+  const city = useCityStore((s) => s.city);
 
   if (!isOpen && !isClosing) return null;
   const state = isClosing ? "closed" : "open";
@@ -55,8 +60,6 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
     if (activeModal === "workplace") return selectedClinicId === id;
     return selectedServiceId === id;
   };
-
-  const city = useCityStore((s) => s.city);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3">

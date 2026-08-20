@@ -24,14 +24,16 @@ export const ReviewCard: FC<ReviewProps> = ({
   reply,
 }) => {
   return (
-    <div className="bg-white border border-border-soft rounded-[20px] flex flex-col">
+    <div className="bg-white border border-border-soft rounded-[20px] flex flex-col min-w-0">
       {/* Верхняя часть: Текст отзыва */}
       <div className="p-5 border-b border-border-soft">
-        <p className="text-secondary text-[15px] leading-relaxed">{text}</p>
+        <p className="text-secondary text-[15px] leading-relaxed break-words">
+          {text}
+        </p>
         {reply && (
           <div className="mt-3 rounded-2xl bg-surface border border-border-soft p-3">
             <p className="text-foreground font-medium text-sm mb-1">Ответ</p>
-            <p className="text-secondary text-sm leading-relaxed">
+            <p className="text-secondary text-sm leading-relaxed break-words">
               {reply.text}
             </p>
             {reply.date && (

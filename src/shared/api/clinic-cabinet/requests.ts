@@ -76,20 +76,34 @@ export type UpdateClinicProfileBody = {
   lunch_break?: { from: string; to: string };
 };
 
+// Массив чисел в multipart нельзя слать JSON-строкой: DRF ждёт по одному
+// значению на поле и на "[1,9]" отвечает «Ожидалось значение первичного ключа,
+// получен str». Из-за этого весь PUT падал с 400, и вместе со
+// специализациями терялись стаж, образование и опыт работы — всё, что шло
+// тем же запросом. Массивы строк (languages, equipment) бэк как JSON
+// принимает, их не трогаем.
+const appendMultipart = (form: FormData, key: string, value: unknown) => {
+  if (value instanceof File) return form.append(key, value);
+  if (Array.isArray(value) && value.every((v) => typeof v === "number")) {
+    value.forEach((v) => form.append(key, String(v)));
+    return;
+  }
+  if (typeof value === "object" && value !== null)
+    return form.append(key, JSON.stringify(value));
+  form.append(key, String(value));
+};
+
 export const updateClinicProfile = async (
   body: UpdateClinicProfileBody,
 ): Promise<ClinicPrivateProfile> => {
-  // Логотип (File) требует multipart; массивы/объекты сериализуем в JSON-строку.
+  // Логотип (File) требует multipart; правила упаковки — в appendMultipart выше.
   const hasFile = Object.values(body).some((v) => v instanceof File);
 
   if (hasFile) {
     const form = new FormData();
     Object.entries(body).forEach(([key, value]) => {
       if (value === undefined || value === null) return;
-      if (value instanceof File) form.append(key, value);
-      else if (typeof value === "object")
-        form.append(key, JSON.stringify(value));
-      else form.append(key, String(value));
+      appendMultipart(form, key, value);
     });
     return sendMultipart<ClinicPrivateProfile>(
       "/api/clinic/profile/",

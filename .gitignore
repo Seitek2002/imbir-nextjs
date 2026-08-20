@@ -51,3 +51,5 @@ acc.md
 
 # Playwright MCP session artifacts (snapshots, console logs, screenshots)
 .playwright-mcp/
+# QA-прогон: логины тестовых аккаунтов, в репозиторий не попадают
+QA_CREDENTIALS.md

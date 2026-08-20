@@ -61,11 +61,34 @@ export const DropdownTrigger: FC<TriggerProps> = ({
     options.find((o) => o.value === val)?.label ?? val;
 
   return (
+    // Триггер — div, а не button: внутри лежат чипы с собственными кнопками
+    // удаления, а кнопка в кнопке невалидна. Поэтому клавиатурное поведение
+    // добавляем руками: без него Tab пропускал дропдаун целиком, и форму с
+    // обязательным полем-списком (например «Город» в анкете врача) нельзя
+    // было заполнить без мыши.
     <div
+      // role="button", а не "combobox": у combobox обязателен aria-controls с
+      // id списка, а список рендерится отдельным компонентом. Для триггера,
+      // раскрывающего меню, роли кнопки достаточно.
+      role="button"
+      tabIndex={0}
+      aria-expanded={isActive}
+      aria-haspopup="listbox"
       onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          // Пробел на непрокручиваемом элементе иначе листает страницу.
+          e.preventDefault();
+          onToggle();
+        } else if (e.key === "Escape" && isActive) {
+          onToggle();
+        }
+      }}
       className={cn(
         "flex items-center justify-between min-h-10.5 p-3 border rounded-lg cursor-pointer transition-all duration-200 bg-white select-none",
-        "border-border-soft",
+        "border-border-soft outline-none",
+        // Кольцо фокуса — то же, что у Input и Button в проекте.
+        "focus-visible:border-primary focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.45)]",
         isActive
           ? "border-primary shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]"
           : "hover:border-primary/50",

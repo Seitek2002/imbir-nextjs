@@ -112,6 +112,9 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
           <Input
             label="Стоимость, сом"
             type="number"
+            // Без min браузер пропускает минус, а бэк отрицательную цену
+            // принимает как есть — услуга сохранялась с price "-500.00".
+            min="0"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="0"
@@ -119,6 +122,7 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
           <Input
             label="Длительность, мин"
             type="number"
+            min="0"
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
             placeholder="0"

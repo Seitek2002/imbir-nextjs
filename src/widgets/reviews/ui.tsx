@@ -151,7 +151,10 @@ export const ReviewsSection: FC<Props> = ({
         </div>
 
         {/* Список отзывов */}
-        <div className="flex-1 flex flex-col gap-4">
+        {/* min-w-0: без него flex-элемент не сжимается уже содержимого, и отзыв
+            из длинной строки без пробелов растягивал страницу на десятки тысяч
+            пикселей — появлялся горизонтальный скролл всего сайта. */}
+        <div className="flex-1 min-w-0 flex flex-col gap-4">
           {reviews.map((review) => (
             <ReviewCard
               key={review.id}

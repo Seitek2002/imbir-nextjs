@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { StateStorage, createJSONStorage, persist } from "zustand/middleware";
 
+import { toMediaUrl } from "@/shared/lib/media";
+
 export type UserRole = "patient" | "doctor" | "clinic";
 
 // Отдельные от cityStore cookie-имена
@@ -98,7 +100,12 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       setUser: (user) => {
-        set({ user });
+        // /api/auth/login/ отдаёт avatar относительным ("/media/users/..."),
+        // а /api/auth/me/ и /api/profile/ — абсолютным. Из-за этого сразу
+        // после входа шапка и сайдбар просили картинку у localhost и ловили
+        // 404: аватар появлялся только после захода в «Мои данные».
+        // Нормализуем в одной точке — здесь проходят все источники user.
+        set({ user: { ...user, avatar: toMediaUrl(user.avatar) ?? null } });
         writeAuthCookies(get().accessToken, user.role, get().rememberMe);
       },
 

@@ -29,6 +29,7 @@ import {
   ProfileIcon,
 } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { isEmailValid } from "@/shared/lib/booking";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
@@ -265,6 +266,9 @@ export const RegisterPage = () => {
   const [phone, setPhone] = useState("");
   const [dialCode, setDialCode] = useState("+996");
   const [verificationCode, setVerificationCode] = useState("");
+  // Ошибка почты в клиентской форме. Показываем только после попытки
+  // отправки, чтобы не ругаться на каждую букву во время набора.
+  const [clientEmailError, setClientEmailError] = useState<string | null>(null);
   const [timer, setTimer] = useState(0);
   const [isRequestingCode, setIsRequestingCode] = useState(false);
 
@@ -353,6 +357,11 @@ export const RegisterPage = () => {
 
   const handleClientContinue = async () => {
     if (clientAuthMethod === "email") {
+      if (!isEmailValid(formData.email)) {
+        setClientEmailError("Введите корректный email");
+        return;
+      }
+      setClientEmailError(null);
       setClientStep(2);
       return;
     }
@@ -917,6 +926,10 @@ export const RegisterPage = () => {
         <form
           className="flex flex-1 flex-col"
           onSubmit={handleClientFormSubmit}
+          // Нативная проверка type="email" всплывает подсказкой браузера на
+          // языке ОС — на русском сайте пользователь видел английский текст.
+          // Проверяем сами и показываем сообщение под полем.
+          noValidate
         >
           <div className="mt-8 mb-6 md:mt-12">
             <h2 className="text-2xl font-semibold text-foreground mb-2">
@@ -970,7 +983,11 @@ export const RegisterPage = () => {
                   placeholder="Введите вашу почту"
                   IconRight={EmailIcon}
                   value={formData.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
+                  error={clientEmailError ?? undefined}
+                  onChange={(e) => {
+                    setClientEmailError(null);
+                    handleChange("email", e.target.value);
+                  }}
                 />
               ) : (
                 <PhoneInput
