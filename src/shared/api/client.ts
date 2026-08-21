@@ -11,6 +11,12 @@ export const apiClient = axios.create({
   timeout: 15_000,
 });
 
+// Отдельный таймаут для запросов с файлами. Общие 15 секунд рассчитаны на
+// JSON: аватар врача на мобильном интернете в них не укладывается, запрос
+// обрывается, и вместе с фото терялись все текстовые поля, которые шли тем же
+// PUT — специализации, стаж, образование, опыт работы.
+export const FILE_UPLOAD_TIMEOUT_MS = 120_000;
+
 // Attach access token to every request
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = useAuthStore.getState().accessToken;

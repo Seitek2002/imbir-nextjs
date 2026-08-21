@@ -20,6 +20,7 @@ import {
   updateDoctorProfile,
   uploadClinicDocument,
   uploadClinicPhoto,
+  uploadDoctorDocument,
   validateDoctorInvite,
 } from "@/shared/api";
 import {
@@ -546,10 +547,26 @@ export const RegisterPage = () => {
             : []),
         ];
 
-        await updateDoctorProfile({
+        // Специализации бэк принимает только id из справочника. Если
+        // название не нашлось, оно молча выпадало — теперь говорим об этом,
+        // как это уже делает регистрация клиники.
+        const unmatched = [
+          ...primarySpecializations.unmatched,
+          ...narrowSpecializations.unmatched,
+        ];
+        if (unmatched.length > 0) {
+          toast.error(
+            `Не найдено в справочнике и не сохранено: ${unmatched.join(", ")}`,
+          );
+        }
+
+        // Текстовые поля отправляем БЕЗ фото и отдельным запросом. Раньше всё
+        // шло одним PUT вместе с файлом: любой обрыв загрузки (аватар с
+        // телефона легко весит десятки мегабайт) уносил с собой
+        // специализации, стаж, образование и опыт работы.
+        const profileFields = {
           first_name: res.user.first_name,
           last_name: res.user.last_name,
-          photo: data.photo ?? undefined,
           primary_specialization_ids: primarySpecializations.ids,
           narrow_specialization_ids: narrowSpecializations.ids,
           experience_years: parseInt(data.experience) || 0,
@@ -563,7 +580,28 @@ export const RegisterPage = () => {
           ],
           education,
           license_number: data.licenseNumber,
-        });
+        };
+
+        await updateDoctorProfile(profileFields);
+
+        // Файлы — после текста и каждый своим запросом, чтобы упавшая
+        // загрузка не тянула за собой остальные. Сертификаты идут в
+        // /api/doctor/documents/: профильный endpoint их не принимает, и
+        // раньше они не отправлялись вообще.
+        const fileResults = await Promise.allSettled([
+          // Тот же набор полей плюс фото: PUT профиля очищает
+          // primary_specialization_ids, если поле не передано, поэтому запрос
+          // «только фото» стирал специализации, выставленные выше.
+          ...(data.photo
+            ? [updateDoctorProfile({ ...profileFields, photo: data.photo })]
+            : []),
+          ...data.certificates.map(uploadDoctorDocument),
+        ]);
+        if (fileResults.some((r) => r.status === "rejected")) {
+          toast.error(
+            "Аккаунт создан, но фото или сертификаты не загрузились. Добавьте их в кабинете врача.",
+          );
+        }
       } catch {
         toast.error(
           "Аккаунт создан, но часть данных не сохранилась. Заполните их в кабинете врача.",

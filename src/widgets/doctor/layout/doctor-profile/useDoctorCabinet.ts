@@ -9,6 +9,7 @@ import {
   type SpecializationItem,
   type UpdateDoctorProfileBody,
   doctorCabinetKeys,
+  getDoctorDocuments,
   getDoctorProfile,
   updateDoctorProfile,
 } from "@/shared/api";
@@ -105,6 +106,8 @@ export const mapApiToProfile = (
     diplomaSpecialty: a.education?.[0]?.degree ?? "",
     additionalEducation: a.education?.slice(1).map((e) => e.institution) ?? [],
     licenseNumber: a.license_number ?? "",
+    // Заполняется в useDoctorCabinet из /api/doctor/documents/: профильный
+    // ответ сертификаты не отдаёт, и раньше здесь навсегда оставался [].
     certificates: [],
     rating: Number(a.rating) || 0,
     totalReviews: a.reviews_count ?? 0,
@@ -125,6 +128,12 @@ export const useDoctorCabinet = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: doctorCabinetKeys.profile(),
     queryFn: getDoctorProfile,
+  });
+
+  // Сертификаты живут в отдельном endpoint — профиль их не возвращает.
+  const { data: documents = [] } = useQuery({
+    queryKey: [...doctorCabinetKeys.profile(), "documents"],
+    queryFn: getDoctorDocuments,
   });
 
   const { mutateAsync: saveProfile, isPending: isSaving } = useMutation({
@@ -151,7 +160,9 @@ export const useDoctorCabinet = () => {
     },
   });
 
-  const profile = data ? mapApiToProfile(data) : null;
+  const profile = data
+    ? { ...mapApiToProfile(data), certificates: documents.map((d) => d.url) }
+    : null;
 
   return { profile, isLoading, isSaving, error, saveProfile, rawProfile: data };
 };

@@ -4,6 +4,7 @@ import { type ReactNode, useRef, useState } from "react";
 
 import { EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { MAX_DOCUMENT_MB, filterAllowedFiles } from "@/shared/lib/files";
 import { Input } from "@/shared/ui";
 
 import type { DoctorFormData } from "../model/types";
@@ -80,7 +81,10 @@ export const Step4Certificates = ({
             if (!e.target.files) return;
             onChange("certificates", [
               ...data.certificates,
-              ...Array.from(e.target.files),
+              ...filterAllowedFiles(
+                Array.from(e.target.files),
+                MAX_DOCUMENT_MB,
+              ),
             ]);
             e.target.value = "";
           }}

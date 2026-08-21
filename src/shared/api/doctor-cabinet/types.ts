@@ -17,6 +17,13 @@ export type DoctorPrivateProfile = DoctorDetail & {
   appointments_total: number;
 };
 
+// GET/POST /api/doctor/documents/ (схема DoctorDocumentOut).
+export type DoctorDocument = {
+  id: number;
+  url: string;
+  uploaded_at: string;
+};
+
 export type DoctorSchedule = {
   schedule: WeekSchedule;
   lunch_break: LunchBreak;

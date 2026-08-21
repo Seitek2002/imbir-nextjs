@@ -4,6 +4,7 @@ import { useRef } from "react";
 
 import { getCities, getLanguages, referenceKeys } from "@/shared/api";
 import { CITIES, colors } from "@/shared/config";
+import { MAX_IMAGE_MB, isFileSizeAllowed } from "@/shared/lib/files";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import { cn } from "@/shared/lib/utils";
 import { DateField, Dropdown, Input, PhoneInput } from "@/shared/ui";
@@ -159,7 +160,9 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
           className="sr-only"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) onChange("photo", file);
+            if (file && isFileSizeAllowed(file, MAX_IMAGE_MB))
+              onChange("photo", file);
+            e.target.value = "";
           }}
         />
         {data.photo ? (

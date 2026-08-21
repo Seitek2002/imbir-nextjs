@@ -1,10 +1,11 @@
-import { apiClient } from "../client";
+import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
 import type { PaginatedReviewsResponse } from "../reviews/types";
 import { PaginatedResponse } from "../types";
 import {
   DoctorAppointment,
   DoctorAppointmentFilters,
   DoctorAppointmentSummary,
+  DoctorDocument,
   DoctorPatient,
   DoctorPatientFilters,
   DoctorPrivateProfile,
@@ -97,6 +98,7 @@ export const updateDoctorProfile = async (
     const { data } = await apiClient.put<DoctorPrivateProfile>(
       "/api/doctor/profile/",
       form,
+      { timeout: FILE_UPLOAD_TIMEOUT_MS },
     );
     return data;
   }
@@ -200,4 +202,40 @@ export const addDoctorService = async (
 
 export const deleteDoctorService = async (id: number): Promise<void> => {
   await apiClient.delete(`/api/doctor/services/${id}/`);
+};
+
+// ── Документы и сертификаты врача ───────────────────────────────────────────
+// Профильный endpoint файлы сертификатов не принимает (в схеме
+// DoctorOwnProfileRequest поля documents вообще нет) — для них есть отдельный
+// /api/doctor/documents/. До этого он не использовался нигде: регистрация
+// сертификаты молча теряла, а кабинет показывал захардкоженный пустой список.
+
+export const getDoctorDocuments = async (): Promise<DoctorDocument[]> => {
+  const { data } = await apiClient.get<
+    DoctorDocument[] | { data: DoctorDocument[] }
+  >("/api/doctor/documents/");
+  // Бэк по одним эндпоинтам отдаёт массив, по другим — { data: [...] }.
+  return Array.isArray(data) ? data : (data.data ?? []);
+};
+
+export const uploadDoctorDocument = async (
+  file: File,
+): Promise<DoctorDocument> => {
+  const form = new FormData();
+  form.append("file", file);
+  // Напрямую, без прокси /backend-api: Next не настроен на trailingSlash и
+  // редиректил /backend-api/.../documents/ на адрес без слэша (308). POST при
+  // таком редиректе терял тело, и бэк отвечал 500. CORS у API открыт
+  // (Allow-Origin: *, POST и authorization разрешены — проверено preflight),
+  // так что прокси тут и не нужен.
+  const { data } = await apiClient.post<DoctorDocument>(
+    "/api/doctor/documents/",
+    form,
+    { timeout: FILE_UPLOAD_TIMEOUT_MS },
+  );
+  return data;
+};
+
+export const deleteDoctorDocument = async (id: number): Promise<void> => {
+  await apiClient.delete(`/api/doctor/documents/${id}/`);
 };

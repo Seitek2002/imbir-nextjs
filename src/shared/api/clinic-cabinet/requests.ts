@@ -1,6 +1,6 @@
 import { toHttps } from "@/shared/lib/media";
 
-import { apiClient } from "../client";
+import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
 import type { DoctorAppointment } from "../doctor-cabinet/types";
 import type { PaginatedReviewsResponse } from "../reviews/types";
 import { PaginatedResponse } from "../types";
@@ -24,11 +24,15 @@ const sendMultipart = async <T>(
   method: "POST" | "PUT",
   form: FormData,
 ): Promise<T> => {
+  // Без прокси /backend-api: у Next trailingSlash выключен, и он редиректил
+  // путь со слэшем на адрес без него (308) — POST при этом терял тело, а бэк
+  // отвечал 500. CORS у API открыт, прямой multipart проходит.
   const { data } = await apiClient.request<T>({
-    baseURL: "/backend-api",
     url: path,
     method,
     data: form,
+    // Файлы не укладываются в общие 15 секунд на медленном канале.
+    timeout: FILE_UPLOAD_TIMEOUT_MS,
   });
   return data;
 };
