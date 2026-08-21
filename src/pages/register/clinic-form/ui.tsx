@@ -23,7 +23,7 @@ import { FormSubmitButton } from "./FormSubmitButton";
 import { ProgressBar } from "./ProgressBar";
 import { Step1BasicInfo } from "./Step1BasicInfo";
 import { Step2Location } from "./Step2Location";
-import { Step3Schedule } from "./Step3Schedule";
+import { Step3Schedule, validateSchedule } from "./Step3Schedule";
 import { Step4Legal } from "./Step4Legal";
 import { Step5Specialization } from "./Step5Specialization";
 import { Step6Equipment } from "./Step6Equipment";
@@ -94,6 +94,7 @@ export const ClinicRegistrationForm = ({
 }: Props) => {
   const [data, setData] = useState<ClinicFormData>(INITIAL_DATA);
   const [passwordError, setPasswordError] = useState("");
+  const [scheduleError, setScheduleError] = useState("");
   // Блок подтверждения показывается только после первой попытки отправить
   // анкету — до этого он был бы шумом, а код успел бы истечь.
   const [showVerify, setShowVerify] = useState(false);
@@ -108,17 +109,20 @@ export const ClinicRegistrationForm = ({
     value: ClinicFormData[K],
   ) => {
     if (key === "password" || key === "confirmPassword") setPasswordError("");
+    if (key === "lunchBreak" || key === "emergency247") setScheduleError("");
     setData((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleDayChange = (
     day: keyof ClinicFormData["schedule"],
     value: ScheduleDay,
-  ) =>
+  ) => {
+    setScheduleError("");
     setData((prev) => ({
       ...prev,
       schedule: { ...prev.schedule, [day]: value },
     }));
+  };
 
   const allAgreed =
     data.agreeRules &&
@@ -142,6 +146,13 @@ export const ClinicRegistrationForm = ({
   const handleContinue = () => {
     if (!isValid || isLoading) return;
     if (step < 7) {
+      if (step === 3) {
+        const error = validateSchedule(data);
+        if (error) {
+          setScheduleError(error);
+          return;
+        }
+      }
       onContinue();
     } else {
       if (data.password !== data.confirmPassword) {
@@ -176,6 +187,7 @@ export const ClinicRegistrationForm = ({
         data={data}
         onChange={handleChange}
         onDayChange={handleDayChange}
+        validationError={scheduleError}
       />
     ),
     4: <Step4Legal data={data} onChange={handleChange} />,

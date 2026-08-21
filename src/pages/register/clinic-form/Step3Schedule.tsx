@@ -4,6 +4,43 @@ import { DAYS } from "../model/constants";
 import type { ClinicFormData, ScheduleDay } from "../model/types";
 import { TimeRange } from "./TimeRange";
 
+const validateTimeRange = (
+  range: ScheduleDay,
+  label: string,
+): string | null => {
+  const hasFrom = Boolean(range.from);
+  const hasTo = Boolean(range.to);
+
+  if (hasFrom !== hasTo)
+    return `Укажите время начала и окончания для: ${label}`;
+  if (hasFrom && hasTo && range.from >= range.to)
+    return `Время окончания должно быть позже времени начала: ${label}`;
+  return null;
+};
+
+export const validateSchedule = (data: ClinicFormData): string | null => {
+  const scheduleDays = DAYS.map(({ key, label }) => ({
+    range: data.schedule[key],
+    label,
+  }));
+
+  for (const day of scheduleDays) {
+    const error = validateTimeRange(day.range, day.label);
+    if (error) return error;
+  }
+
+  const lunchError = validateTimeRange(data.lunchBreak, "обеденного перерыва");
+  if (lunchError) return lunchError;
+
+  const hasWorkingDay = scheduleDays.some(
+    ({ range }) => range.from && range.to,
+  );
+  if (!hasWorkingDay && !data.emergency247)
+    return "Выберите время хотя бы для одного дня или включите приём 24/7";
+
+  return null;
+};
+
 type Props = {
   data: ClinicFormData;
   onChange: <K extends keyof ClinicFormData>(
@@ -14,9 +51,15 @@ type Props = {
     day: keyof ClinicFormData["schedule"],
     value: ScheduleDay,
   ) => void;
+  validationError?: string;
 };
 
-export const Step3Schedule = ({ data, onChange, onDayChange }: Props) => (
+export const Step3Schedule = ({
+  data,
+  onChange,
+  onDayChange,
+  validationError,
+}: Props) => (
   <div className="flex flex-col gap-5">
     <p className="text-sm text-muted -mt-2">
       Укажите время проведения процедуры (с какого времени до какого), оставьте
@@ -54,5 +97,11 @@ export const Step3Schedule = ({ data, onChange, onDayChange }: Props) => (
       checked={data.emergency247}
       onChange={(e) => onChange("emergency247", e.target.checked)}
     />
+
+    {validationError && (
+      <p role="alert" className="text-sm text-[#DF1C41]">
+        {validationError}
+      </p>
+    )}
   </div>
 );

@@ -159,6 +159,20 @@ const browser = await chromium.launch();
     .fill("clinic@example.com");
   await clickContinue(page, "Продолжить");
 
+  // На графике незаполненный день допустим, но хотя бы один рабочий интервал
+  // обязателен. Неполный интервал не должен пропускать дальше.
+  const scheduleTimes = await visible(page, 'input[type="time"]').all();
+  await scheduleTimes[2].fill("09:00");
+  await clickContinue(page, "Продолжить");
+  ok(
+    "неполный рабочий интервал блокирует переход",
+    await page
+      .getByText("Укажите время начала и окончания для: ВТ")
+      .first()
+      .isVisible(),
+  );
+  await scheduleTimes[3].fill("18:00");
+
   // Шаги 3–6 проходим насквозь
   for (let i = 0; i < 4; i++) await clickContinue(page, "Продолжить");
 
