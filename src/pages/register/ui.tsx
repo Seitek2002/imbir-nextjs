@@ -172,6 +172,17 @@ const toApiDate = (ddmmyyyy: string): string => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+// Регистрационный endpoint иногда возвращает ФИО с собственной разбивкой на
+// first_name/last_name. Для профильного PUT используем то, что ввёл врач:
+// этот endpoint требует оба поля и иначе отклоняет весь запрос с данными.
+const splitFullName = (fullName: string) => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: parts[0] ?? "",
+    lastName: parts.slice(1).join(" "),
+  };
+};
+
 export const RegisterPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams() ?? new URLSearchParams();
@@ -527,6 +538,10 @@ export const RegisterPage = () => {
       // которые уже поддерживает профильный API, переносим сразу после
       // создания аккаунта, не заставляя врача повторно заполнять кабинет.
       try {
+        const enteredName = splitFullName(data.fullName);
+        const firstName = enteredName.firstName || res.user.first_name;
+        const lastName = enteredName.lastName || res.user.last_name;
+
         // Интернатура и ординатура заполнялись на шаге 3, но в анкету не
         // попадали вообще — теперь едут тем же массивом education
         // (см. entities/doctor-education).
@@ -559,10 +574,20 @@ export const RegisterPage = () => {
         // телефона легко весит десятки мегабайт) уносил с собой
         // специализации, стаж, образование и опыт работы.
         const profileFields = {
-          first_name: res.user.first_name,
-          last_name: res.user.last_name,
+          // first_name и last_name обязательны для каждого PUT профиля.
+          first_name: firstName,
+          last_name: lastName,
+          phone: doctorPhone,
+          gender: data.gender || undefined,
+          birth_date: data.birthDate ? toApiDate(data.birthDate) : undefined,
+          city: data.city,
+          languages: data.languages,
+          country: "kg",
+          address: "",
+          legal_name: data.fullName,
           primary_specialization_ids: primarySpecializations.ids,
           narrow_specialization_ids: narrowSpecializations.ids,
+          additional_services: data.position || undefined,
           experience_years: parseInt(data.experience) || 0,
           work_experience: [
             {
