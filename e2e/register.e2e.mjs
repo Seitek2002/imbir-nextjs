@@ -167,18 +167,36 @@ const browser = await chromium.launch();
     await page.getByText("Согласия и политики").first().isVisible(),
   );
 
-  // Шаг 7: пароль + согласия
+  // Слабый пароль не должен запрашивать OTP и должен показать ошибку до
+  // сетевого запроса.
+  await visible(page, 'input[placeholder="Придумайте пароль"]')
+    .first()
+    .fill("123456");
+  await visible(page, 'input[placeholder="Повторите пароль"]')
+    .first()
+    .fill("123456");
+  const boxes = await visible(page, "input[type=checkbox]").all();
+  for (const b of boxes) await b.check({ force: true });
+  await clickContinue(page, "Завершить регистрацию");
+  await page.waitForTimeout(500);
+  ok(
+    "слабый пароль блокирует OTP",
+    !rec.calls.some((c) => c.url === "verify/email/request") &&
+      (await page
+        .getByText("Пароль должен содержать минимум 8 символов")
+        .first()
+        .isVisible()),
+  );
+
   await visible(page, 'input[placeholder="Придумайте пароль"]')
     .first()
     .fill("Passw0rd!");
   await visible(page, 'input[placeholder="Повторите пароль"]')
     .first()
     .fill("Passw0rd!");
-  const boxes = await visible(page, "input[type=checkbox]").all();
-  for (const b of boxes) await b.check({ force: true });
 
-  // Первое нажатие «Завершить регистрацию» не должно отправлять анкету —
-  // сначала гейт подтверждения.
+  // Первое нажатие «Завершить регистрацию» только показывает выбор канала —
+  // код не должен уходить автоматически.
   await clickContinue(page, "Завершить регистрацию");
   await page.waitForTimeout(1200);
 
@@ -186,6 +204,12 @@ const browser = await chromium.launch();
     "блок подтверждения появился",
     await page.getByText("Подтвердите контакт").first().isVisible(),
   );
+  ok(
+    "код ещё не запрошен до выбора канала",
+    !rec.calls.some((c) => c.url === "verify/email/request"),
+  );
+  await visible(page, 'button:has-text("Отправить код")').first().click();
+  await page.waitForTimeout(800);
   const requested = rec.calls.find((c) => c.url === "verify/email/request");
   ok(
     "код запрошен на почту из анкеты",

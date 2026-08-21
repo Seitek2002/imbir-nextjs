@@ -9,6 +9,11 @@ import {
 } from "@/features/verify-contact";
 
 import {
+  PASSWORD_REQUIREMENTS_ERROR,
+  isStrongPassword,
+} from "@/shared/lib/password";
+
+import {
   CLINIC_STEP_TITLES as STEP_TITLES,
   CLINIC_TOTAL_STEPS as TOTAL_STEPS,
 } from "../model/constants";
@@ -138,6 +143,10 @@ export const ClinicRegistrationForm = ({
         setPasswordError("Пароли не совпадают");
         return;
       }
+      if (!isStrongPassword(data.password)) {
+        setPasswordError(PASSWORD_REQUIREMENTS_ERROR);
+        return;
+      }
       setPasswordError("");
 
       // Гейт бэка: /register/clinic/ отдаёт 400, пока почта или телефон из
@@ -147,7 +156,6 @@ export const ClinicRegistrationForm = ({
         setShowVerify(true);
         if (verify.isSent)
           toast.error("Сначала подтвердите почту или телефон кодом");
-        else void verify.requestCode();
         return;
       }
 
@@ -177,7 +185,13 @@ export const ClinicRegistrationForm = ({
           showVerify ? (
             <VerifyContactBlock
               state={verify}
-              onConfirmed={() => onSubmit(data)}
+              onConfirmed={() => {
+                if (!isStrongPassword(data.password)) {
+                  setPasswordError(PASSWORD_REQUIREMENTS_ERROR);
+                  return;
+                }
+                onSubmit(data);
+              }}
             />
           ) : null
         }

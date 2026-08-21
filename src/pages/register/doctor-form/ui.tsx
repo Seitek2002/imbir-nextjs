@@ -8,6 +8,11 @@ import {
   useVerifyContact,
 } from "@/features/verify-contact";
 
+import {
+  PASSWORD_REQUIREMENTS_ERROR,
+  isStrongPassword,
+} from "@/shared/lib/password";
+
 import { STEP_TITLES, TOTAL_STEPS } from "../model/constants";
 import type { DoctorFormData, DoctorStep, InviteClinic } from "../model/types";
 import { FormSubmitButton } from "./FormSubmitButton";
@@ -108,6 +113,10 @@ export const DoctorRegistrationForm = ({
         setPasswordError("Пароли не совпадают");
         return;
       }
+      if (!isStrongPassword(data.password)) {
+        setPasswordError(PASSWORD_REQUIREMENTS_ERROR);
+        return;
+      }
       setPasswordError("");
 
       // Гейт бэка: /register/doctor/ отдаёт 400 non_field_errors, пока почта
@@ -116,7 +125,6 @@ export const DoctorRegistrationForm = ({
         setShowVerify(true);
         if (verify.isSent)
           toast.error("Сначала подтвердите почту или телефон кодом");
-        else void verify.requestCode();
         return;
       }
 
@@ -143,7 +151,13 @@ export const DoctorRegistrationForm = ({
           showVerify ? (
             <VerifyContactBlock
               state={verify}
-              onConfirmed={() => onSubmit(data)}
+              onConfirmed={() => {
+                if (!isStrongPassword(data.password)) {
+                  setPasswordError(PASSWORD_REQUIREMENTS_ERROR);
+                  return;
+                }
+                onSubmit(data);
+              }}
             />
           ) : null
         }

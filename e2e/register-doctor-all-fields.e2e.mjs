@@ -218,6 +218,7 @@ const main = async () => {
   await visible('button:has-text("Завершить регистрацию")')
     .first()
     .click({ force: true });
+  await visible('button:has-text("Отправить код")').first().click();
   await page.waitForTimeout(800);
   await visible('input[name="one-time-code"]').first().fill("1234");
   await visible('button:has-text("Подтвердить код")').first().click();
