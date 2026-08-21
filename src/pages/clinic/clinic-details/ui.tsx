@@ -54,6 +54,11 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
   const [isOfflineInfoOpen, setIsOfflineInfoOpen] = useState(false);
   const { isSaved, toggle } = useFavoriteToggle("clinic");
   const isFavorite = isSaved(Number(id));
+  // Услуги и врачи в секциях ниже — свои target_type в /api/profile/favorites/,
+  // поэтому хука клиники им недостаточно. Без этих двух карточки рендерились
+  // без isSaved/onSave и сердечко на них просто ничего не делало.
+  const serviceFavorites = useFavoriteToggle("service");
+  const doctorFavorites = useFavoriteToggle("doctor");
 
   // 1. ЗАПРАШИВАЕМ ДАННЫЕ ПАРАЛЛЕЛЬНО
   const {
@@ -444,6 +449,8 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
                   price={service.price}
                   image={service.image}
                   variant="vertical"
+                  isSaved={serviceFavorites.isSaved(Number(service.id))}
+                  onSave={() => serviceFavorites.toggle(Number(service.id))}
                 />
               ))}
             </div>
@@ -464,6 +471,8 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
                   key={doc.id}
                   {...doc}
                   variant="vertical"
+                  isSaved={doctorFavorites.isSaved(Number(doc.id))}
+                  onSave={() => doctorFavorites.toggle(Number(doc.id))}
                   onBook={() =>
                     router.push(
                       ROUTES.RECORD_FOR_DOCTOR(doc.id, { clinicId: id }),
