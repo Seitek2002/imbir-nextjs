@@ -81,6 +81,14 @@ export const ServiceCard: FC<Props> = ({
     e.preventDefault();
     e.stopPropagation();
   };
+  // Кнопка лежит внутри Link на форму записи (?service=id). Своим onBook
+  // событие гасим, чтобы не было двойной навигации, а без него гасить нечего:
+  // preventDefault отменял переход по карточке и «Записаться» не делала ничего.
+  const handleBook = (e: React.MouseEvent) => {
+    if (!onBook) return;
+    stopProp(e);
+    onBook();
+  };
 
   if (variant === "horizontal") {
     return (
@@ -137,10 +145,7 @@ export const ServiceCard: FC<Props> = ({
                   variant="outline"
                   size="xs"
                   className="px-4 py-1.5 justify-center text-xs"
-                  onClick={(e) => {
-                    stopProp(e);
-                    onBook?.();
-                  }}
+                  onClick={handleBook}
                 >
                   Записаться
                 </Button>
@@ -214,10 +219,7 @@ export const ServiceCard: FC<Props> = ({
               variant="outline"
               size="sm"
               className="flex-1 justify-center"
-              onClick={(e) => {
-                stopProp(e);
-                onBook?.();
-              }}
+              onClick={handleBook}
             >
               Записаться
             </Button>
