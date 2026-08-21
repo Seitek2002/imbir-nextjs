@@ -52,6 +52,8 @@ const main = async () => {
     viewport: { width: 1280, height: 1800 },
   });
   const page = await context.newPage();
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(String(error)));
   const calls = { register: null, profile: [], documents: [] };
 
   // Catch-all ставим первым: Playwright применяет последний зарегистрированный
@@ -325,6 +327,11 @@ const main = async () => {
     "этап 4: сертификат загружен отдельно",
     calls.documents.length === 1 &&
       calls.documents[0].raw.includes("certificate.pdf"),
+  );
+  check(
+    "кабинет без циклического рендера",
+    !pageErrors.some((error) => error.includes("Too many re-renders")),
+    pageErrors.join(" | "),
   );
 
   await context.close();

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -199,9 +200,20 @@ export const useDoctorCabinet = () => {
     },
   });
 
-  const profile = data
-    ? { ...mapApiToProfile(data), certificates: documents.map((d) => d.url) }
-    : null;
+  // Секции кабинета синхронизируют локальную форму при изменении ссылки на
+  // profile. Без мемоизации новый объект создавался на каждом рендере, из-за
+  // чего условный setState в секциях basic/professional/education/documents
+  // запускался бесконечно и React показывал «Too many re-renders».
+  const profile = useMemo(
+    () =>
+      data
+        ? {
+            ...mapApiToProfile(data),
+            certificates: documents.map((d) => d.url),
+          }
+        : null,
+    [data, documents],
+  );
 
   return {
     profile,
