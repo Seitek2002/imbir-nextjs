@@ -5,7 +5,7 @@ import { useRef } from "react";
 import { getClinicTypes, referenceKeys } from "@/shared/api";
 import { DEFAULT_CLINIC_TYPES, colors } from "@/shared/config";
 import { useReferenceOptions } from "@/shared/lib/useReference";
-import { Dropdown, Input } from "@/shared/ui";
+import { Dropdown, Input, Textarea } from "@/shared/ui";
 
 import type { ClinicFormData } from "../model/types";
 import { PhotoThumb } from "./PhotoThumb";
@@ -116,7 +116,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
         onChange={(v) => onChange("clinicType", v)}
       />
 
-      <Input
+      <Textarea
         label="Описание клиники"
         placeholder="Введите описание клиники"
         value={data.description}
