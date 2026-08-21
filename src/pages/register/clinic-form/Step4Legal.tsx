@@ -3,8 +3,7 @@
 import { useRef } from "react";
 
 import { colors } from "@/shared/config";
-import { maskDate } from "@/shared/lib/utils";
-import { Input } from "@/shared/ui";
+import { DateField, Input } from "@/shared/ui";
 
 import type { ClinicFormData } from "../model/types";
 import { PhotoThumb } from "./PhotoThumb";
@@ -58,11 +57,11 @@ export const Step4Legal = ({ data, onChange }: Props) => {
         value={data.licenseNumber}
         onChange={(e) => onChange("licenseNumber", e.target.value)}
       />
-      <Input
+      <DateField
         label="Дата выдачи лицензии"
-        placeholder="ДД.ММ.ГГГГ"
         value={data.licenseDate}
-        onChange={(e) => onChange("licenseDate", maskDate(e.target.value))}
+        onChange={(v) => onChange("licenseDate", v)}
+        maxToday
       />
       <Input
         label="Орган, выдавший лицензию"

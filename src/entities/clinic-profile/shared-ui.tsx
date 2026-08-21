@@ -104,6 +104,16 @@ export const toApiDate = (v: string): string | null => {
   return m ? `${m[3]}-${m[2]}-${m[1]}` : t;
 };
 
+// Обратное преобразование: бэк отдаёт дату как "ГГГГ-ММ-ДД", формы — как
+// "ДД.ММ.ГГГГ". Без этого DateField получает ISO-строку и валит её как
+// несуществующую дату.
+export const fromApiDate = (v: string | null | undefined): string => {
+  const t = (v ?? "").trim();
+  if (!t) return "";
+  const m = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : t;
+};
+
 // ─── Layout primitives ──────────────────────────────────────────────────────
 
 export const SectionCard = ({

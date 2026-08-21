@@ -8,12 +8,12 @@ import {
   FieldRow,
   FileIcon,
   UploadIcon,
+  fromApiDate,
   toApiDate,
   useClinicCabinet,
 } from "@/entities/clinic-profile";
 
-import { maskDate } from "@/shared/lib/utils";
-import { Input } from "@/shared/ui";
+import { DateField, Input } from "@/shared/ui";
 
 export const ClinicLegalPage: FC = () => {
   const {
@@ -41,7 +41,7 @@ export const ClinicLegalPage: FC = () => {
     setLegalName(profile.legalName ?? "");
     setRegistrationNumber(profile.registrationNumber ?? "");
     setLicenseNumber(profile.licenseNumber ?? "");
-    setLicenseDate(profile.licenseDate ?? "");
+    setLicenseDate(fromApiDate(profile.licenseDate));
     setLicenseAuthority(profile.licenseAuthority ?? "");
   }
 
@@ -104,11 +104,11 @@ export const ClinicLegalPage: FC = () => {
               value={licenseNumber}
               onChange={(e) => setLicenseNumber(e.target.value)}
             />
-            <Input
+            <DateField
               label="Дата выдачи лицензии"
               value={licenseDate}
-              onChange={(e) => setLicenseDate(maskDate(e.target.value))}
-              placeholder="ДД.ММ.ГГГГ"
+              onChange={setLicenseDate}
+              maxToday
             />
             <Input
               label="Орган, выдавший лицензию"
@@ -185,7 +185,7 @@ export const ClinicLegalPage: FC = () => {
             </FieldRow>
             <FieldRow label="Номер лицензии">{profile.licenseNumber}</FieldRow>
             <FieldRow label="Дата выдачи лицензии">
-              {profile.licenseDate}
+              {fromApiDate(profile.licenseDate)}
             </FieldRow>
             <FieldRow label="Орган, выдавший лицензию">
               {profile.licenseAuthority}

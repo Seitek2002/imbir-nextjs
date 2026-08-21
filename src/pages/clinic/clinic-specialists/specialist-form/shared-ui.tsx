@@ -7,6 +7,7 @@ import { useSpecializationOptions } from "@/entities/specialization";
 import { UserCircleIcon } from "@/shared/assets/icons";
 import {
   Button,
+  DateField,
   Dropdown,
   ImageWithFallback,
   Input,
@@ -139,11 +140,12 @@ export const BasicInfoSection: FC<SectionProps> = ({ d, set, isEditing }) => {
         </div>
       </div>
 
-      <Input
+      <DateField
         label="Дата рождения"
         value={d.birthDate}
-        onChange={(e) => set("birthDate", e.target.value)}
-        placeholder="ДД.ММ.ГГГГ"
+        onChange={(v) => set("birthDate", v)}
+        min="01.01.1920"
+        maxToday
       />
 
       <Input

@@ -15,11 +15,20 @@ import {
   Button,
   CancelEditButton,
   ConfirmDialog,
+  DateField,
   IconBtn,
   ImageWithFallback,
   Input,
   PhoneInput,
 } from "@/shared/ui";
+
+// "ГГГГ-ММ-ДД" → "ДД.ММ.ГГГГ"; уже-ДД.ММ.ГГГГ/пусто отдаём как есть
+const fromApiDate = (v: string): string => {
+  const t = v.trim();
+  if (!t) return "";
+  const m = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : t;
+};
 
 const { lbl, fieldList, formGrid } = formStyles;
 
@@ -59,7 +68,7 @@ export const DoctorBasicInfoSection: FC = () => {
     setD({
       fullName: profile.fullName,
       gender: profile.gender,
-      birthDate: profile.birthDate,
+      birthDate: fromApiDate(profile.birthDate),
       city: profile.city,
       languages: profile.languages,
       phone: profile.phone,
@@ -114,7 +123,7 @@ export const DoctorBasicInfoSection: FC = () => {
       setD({
         fullName: profile.fullName,
         gender: profile.gender,
-        birthDate: profile.birthDate,
+        birthDate: fromApiDate(profile.birthDate),
         city: profile.city,
         languages: profile.languages,
         phone: profile.phone,
@@ -276,11 +285,12 @@ export const DoctorBasicInfoSection: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <Input
+              <DateField
                 label="Дата рождения"
                 value={d.birthDate}
-                onChange={(e) => set("birthDate", e.target.value)}
-                placeholder="ДД.ММ.ГГГГ"
+                onChange={(v) => set("birthDate", v)}
+                min="01.01.1920"
+                maxToday
               />
             ) : (
               <FieldView label="Дата рождения" value={d.birthDate} />

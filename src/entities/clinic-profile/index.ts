@@ -9,5 +9,12 @@ export {
   SectionCard,
   UploadIcon,
 } from "./shared-ui";
-export { DAY_API, DAY_LABELS, csv, toApiDate, toDay } from "./shared-ui";
+export {
+  DAY_API,
+  DAY_LABELS,
+  csv,
+  fromApiDate,
+  toApiDate,
+  toDay,
+} from "./shared-ui";
 export type { DayKey, DayState } from "./shared-ui";

@@ -12,6 +12,7 @@ import type { UpdateClinicProfileBody } from "@/shared/api";
 import {
   Button,
   Checkbox,
+  DateField,
   ImageWithFallback,
   Input,
   PhoneInput,
@@ -30,6 +31,7 @@ import {
   SectionCard,
   UploadIcon,
   csv,
+  fromApiDate,
   toApiDate,
   toDay,
 } from "./shared-ui";
@@ -76,7 +78,7 @@ const buildState = (p: ClinicProfile): FormState => ({
   legalName: p.legalName ?? "",
   registrationNumber: p.registrationNumber ?? "",
   licenseNumber: p.licenseNumber ?? "",
-  licenseDate: p.licenseDate ?? "",
+  licenseDate: fromApiDate(p.licenseDate),
   licenseAuthority: p.licenseAuthority ?? "",
   mainDirections: p.mainDirections.join(", "),
   narrowDirections: p.narrowDirections.join(", "),
@@ -612,11 +614,11 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 value={d.licenseNumber}
                 onChange={(e) => set("licenseNumber", e.target.value)}
               />
-              <Input
+              <DateField
                 label="Дата выдачи лицензии"
                 value={d.licenseDate}
-                onChange={(e) => set("licenseDate", e.target.value)}
-                placeholder="ГГГГ-ММ-ДД"
+                onChange={(v) => set("licenseDate", v)}
+                maxToday
               />
               <Input
                 label="Орган, выдавший лицензию"
@@ -663,7 +665,9 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 {registrationNumber}
               </FieldRow>
               <FieldRow label="Номер лицензии">{licenseNumber}</FieldRow>
-              <FieldRow label="Дата выдачи лицензии">{licenseDate}</FieldRow>
+              <FieldRow label="Дата выдачи лицензии">
+                {fromApiDate(licenseDate)}
+              </FieldRow>
               <FieldRow label="Орган, выдавший лицензию">
                 {licenseAuthority}
               </FieldRow>
