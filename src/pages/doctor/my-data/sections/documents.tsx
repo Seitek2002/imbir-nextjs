@@ -184,43 +184,53 @@ export const DoctorDocumentsSection: FC = () => {
                 key={documents[i]?.id ?? cert}
                 className="relative w-16 h-16 rounded-xl overflow-hidden border border-border bg-surface"
               >
-                <ImageWithFallback
-                  src={cert}
-                  alt={`cert-${i}`}
-                  width={64}
-                  height={64}
-                  className="w-full h-full object-cover"
-                  fallback={
-                    <div className="w-full h-full flex items-center justify-center text-dim">
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                      >
-                        <path
-                          d="M4 3h9l3 3v11a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M13 3v3h3"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </div>
-                  }
-                />
+                <a
+                  href={cert}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Скачать сертификат ${i + 1}`}
+                  title="Скачать сертификат"
+                  className="block w-full h-full cursor-pointer"
+                >
+                  <ImageWithFallback
+                    src={cert}
+                    alt={`cert-${i}`}
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                    fallback={
+                      <div className="w-full h-full flex items-center justify-center text-dim">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                        >
+                          <path
+                            d="M4 3h9l3 3v11a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M13 3v3h3"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    }
+                  />
+                </a>
                 {isEditing && (
                   <button
                     onClick={() => {
                       const id = documents[i]?.id;
                       if (id !== undefined) void deleteDocument(id);
                     }}
-                    className="absolute top-0 right-0 w-1/2 aspect-square bg-primary flex items-center justify-center"
+                    className="absolute top-0 right-0 z-10 w-1/2 aspect-square bg-primary flex items-center justify-center"
                   >
                     <svg className="w-1/2 h-1/2" viewBox="0 0 8 8" fill="none">
                       <path
