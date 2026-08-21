@@ -1,7 +1,8 @@
 "use client";
 
-import { type FC, useEffect, useRef } from "react";
+import { type FC, useEffect, useMemo, useRef, useState } from "react";
 
+import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/input";
@@ -54,18 +55,6 @@ const maskDate = (raw: string): string => {
     .join(".");
 };
 
-const toIso = (ddmmyyyy: string): string => {
-  const [dd, mm, yyyy] = ddmmyyyy.split(".");
-  if (!dd || !mm || !yyyy || yyyy.length !== 4) return "";
-  return `${yyyy}-${mm}-${dd}`;
-};
-
-const fromIso = (iso: string): string => {
-  const [yyyy, mm, dd] = iso.split("-");
-  if (!yyyy || !mm || !dd) return "";
-  return `${dd}.${mm}.${yyyy}`;
-};
-
 // Календарь может вернуть 31.02 — существование даты проверяем через Date,
 // иначе бэк получит несуществующий день и ответит невнятной ошибкой валидации.
 const isRealDate = (ddmmyyyy: string): boolean => {
@@ -76,6 +65,42 @@ const isRealDate = (ddmmyyyy: string): boolean => {
     d.getFullYear() === yyyy && d.getMonth() === mm - 1 && d.getDate() === dd
   );
 };
+
+const MONTHS = [
+  "Январь",
+  "Февраль",
+  "Март",
+  "Апрель",
+  "Май",
+  "Июнь",
+  "Июль",
+  "Август",
+  "Сентябрь",
+  "Октябрь",
+  "Ноябрь",
+  "Декабрь",
+];
+
+const WEEK_DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
+const pad = (value: number) => String(value).padStart(2, "0");
+
+const parseDate = (value: string): Date | null => {
+  if (!isRealDate(value)) return null;
+  const [day, month, year] = value.split(".").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const formatDate = (date: Date) =>
+  `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
+
+const startOfDay = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const isSameDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
 
 export const DateField: FC<Props> = ({
   label,
@@ -89,28 +114,98 @@ export const DateField: FC<Props> = ({
   placeholder = "ДД.ММ.ГГГГ",
   className,
 }) => {
-  const nativeRef = useRef<HTMLInputElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [monthCursor, setMonthCursor] = useState(() => {
+    const selected = parseDate(value) ?? new Date();
+    return new Date(selected.getFullYear(), selected.getMonth(), 1);
+  });
 
   useEffect(() => {
-    if (!maxToday || !nativeRef.current) return;
-    nativeRef.current.max = new Date().toISOString().slice(0, 10);
-  }, [maxToday]);
+    if (!isOpen) return;
+    const handleOutsidePointer = (event: PointerEvent) => {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", handleOutsidePointer);
+    return () =>
+      document.removeEventListener("pointerdown", handleOutsidePointer);
+  }, [isOpen]);
 
   const isComplete = value.replace(/\D/g, "").length === 8;
   const formatError =
     isComplete && !isRealDate(value) ? "Такой даты не существует" : undefined;
 
-  const openPicker = () => {
-    const el = nativeRef.current;
-    if (!el) return;
-    // showPicker — единственный способ открыть нативный календарь программно;
-    // click() оставлен фолбэком для браузеров без него.
-    if (typeof el.showPicker === "function") el.showPicker();
-    else el.click();
+  const selectedDate = parseDate(value);
+  const minDate = parseDate(min ?? "");
+  const maxDate = parseDate(max ?? "");
+  const today = startOfDay(new Date());
+  const lastAllowedDate = maxToday
+    ? maxDate && maxDate < today
+      ? maxDate
+      : today
+    : maxDate;
+
+  const isDateDisabled = (date: Date) => {
+    const current = startOfDay(date);
+    return Boolean(
+      (minDate && current < minDate) ||
+      (lastAllowedDate && current > lastAllowedDate),
+    );
+  };
+
+  const monthCells = useMemo(() => {
+    const firstDay = new Date(
+      monthCursor.getFullYear(),
+      monthCursor.getMonth(),
+      1,
+    );
+    const daysInMonth = new Date(
+      monthCursor.getFullYear(),
+      monthCursor.getMonth() + 1,
+      0,
+    ).getDate();
+    const leading = (firstDay.getDay() + 6) % 7;
+    const cells: Array<Date | null> = Array.from(
+      { length: leading },
+      () => null,
+    );
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      cells.push(
+        new Date(monthCursor.getFullYear(), monthCursor.getMonth(), day),
+      );
+    }
+    while (cells.length % 7 !== 0) cells.push(null);
+    return cells;
+  }, [monthCursor]);
+
+  const toggleCalendar = () => {
+    if (!isOpen) {
+      const nextMonth = selectedDate ?? new Date();
+      setMonthCursor(
+        new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 1),
+      );
+    }
+    setIsOpen((open) => !open);
+  };
+
+  const selectDate = (date: Date) => {
+    if (isDateDisabled(date)) return;
+    onChange(formatDate(date));
+    setIsOpen(false);
+  };
+
+  const selectToday = () => {
+    if (!isDateDisabled(today)) selectDate(today);
   };
 
   return (
-    <div className={cn("relative", className)}>
+    <div ref={calendarRef} className={cn("relative", className)}>
       <Input
         label={label}
         placeholder={placeholder}
@@ -121,23 +216,104 @@ export const DateField: FC<Props> = ({
         inputMode="numeric"
         autoComplete="off"
         IconRight={CalendarIcon}
-        onIconRightClick={openPicker}
+        onIconRightClick={toggleCalendar}
         iconRightLabel="Открыть календарь"
       />
-      {/* Нативный date-инпут держим в потоке, но невидимым: показывать его
-          вместо текстового поля нельзя — он рисует свой формат под локаль
-          браузера, а анкеты хранят дату как ДД.ММ.ГГГГ. */}
-      <input
-        ref={nativeRef}
-        type="date"
-        tabIndex={-1}
-        aria-hidden="true"
-        className="absolute bottom-0 right-10 size-0 opacity-0 pointer-events-none"
-        value={toIso(value)}
-        min={min ? toIso(min) : undefined}
-        max={max ? toIso(max) : undefined}
-        onChange={(e) => onChange(fromIso(e.target.value))}
-      />
+      {isOpen && (
+        <div
+          role="dialog"
+          aria-label="Выбор даты"
+          className="absolute right-0 top-full z-50 mt-2 w-[280px] rounded-lg border border-border-soft bg-white p-3 shadow-[0_8px_24px_rgba(24,32,38,0.12)]"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              aria-label="Предыдущий месяц"
+              onClick={() =>
+                setMonthCursor(
+                  (current) =>
+                    new Date(current.getFullYear(), current.getMonth() - 1, 1),
+                )
+              }
+              className="flex size-8 items-center justify-center rounded-lg text-secondary hover:bg-background"
+            >
+              <ArrowLeftIcon className="size-4" />
+            </button>
+            <span className="text-sm font-medium text-foreground">
+              {MONTHS[monthCursor.getMonth()]} {monthCursor.getFullYear()}
+            </span>
+            <button
+              type="button"
+              aria-label="Следующий месяц"
+              onClick={() =>
+                setMonthCursor(
+                  (current) =>
+                    new Date(current.getFullYear(), current.getMonth() + 1, 1),
+                )
+              }
+              className="flex size-8 items-center justify-center rounded-lg text-secondary hover:bg-background"
+            >
+              <ArrowRightIcon className="size-4" />
+            </button>
+          </div>
+
+          <div className="mt-3 grid grid-cols-7 gap-1">
+            {WEEK_DAYS.map((day) => (
+              <span key={day} className="py-1 text-center text-xs text-muted">
+                {day}
+              </span>
+            ))}
+            {monthCells.map((date, index) => {
+              if (!date) return <span key={`empty-${index}`} className="h-8" />;
+              const disabled = isDateDisabled(date);
+              const selected = selectedDate
+                ? isSameDay(selectedDate, date)
+                : false;
+              return (
+                <button
+                  key={date.toISOString()}
+                  type="button"
+                  disabled={disabled}
+                  aria-label={formatDate(date)}
+                  aria-pressed={selected}
+                  onClick={() => selectDate(date)}
+                  className={cn(
+                    "h-8 rounded-lg text-sm transition-colors",
+                    selected && "bg-primary text-white",
+                    !selected &&
+                      !disabled &&
+                      "text-foreground hover:bg-[#FFF3EE]",
+                    disabled && "cursor-not-allowed text-dim",
+                  )}
+                >
+                  {date.getDate()}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-2 flex items-center justify-between border-t border-border-soft pt-2 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                onChange("");
+                setIsOpen(false);
+              }}
+              className="rounded px-1 text-primary hover:bg-[#FFF3EE]"
+            >
+              Очистить
+            </button>
+            <button
+              type="button"
+              onClick={selectToday}
+              disabled={isDateDisabled(today)}
+              className="rounded px-1 text-secondary hover:bg-background disabled:cursor-not-allowed disabled:text-dim"
+            >
+              Сегодня
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
