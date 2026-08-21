@@ -1,5 +1,6 @@
-import bundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
+
+import bundleAnalyzer from "@next/bundle-analyzer";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -10,7 +11,19 @@ const backendUrl = (
 ).replace(/\/$/, "");
 
 const nextConfig: NextConfig = {
-  reactCompiler: true,
+  // React Compiler — это отдельный проход Babel по каждому файлу с
+  // компонентами (297 .tsx), а под Turbopack webpack-лоадеры выполняются не
+  // в процессе сервера, а в пуле дочерних нодов. В dev это стоило 1.8 ГБ и
+  // семи лишних процессов из 4.5 ГБ, которые занимало дерево dev-сервера
+  // (замерено на 12 маршрутах: 15 процессов / 4518 МБ против 8 / 2726 МБ).
+  // Оптимизация нужна на проде, а не при разработке, поэтому включаем её
+  // только в сборке.
+  //
+  // Плата: dev и прод расходятся по мемоизации. Если баг зависит от того,
+  // перерисовался компонент или нет, в dev его может не быть, а на проде —
+  // быть (и наоборот). Такое проверяем на `next build && next start`,
+  // а не только в dev.
+  reactCompiler: process.env.NODE_ENV === "production",
 
   // Файлы отправляем через тот же origin, что и фронтенд: браузер не блокирует
   // multipart по CORS, а все запросы по-прежнему идут через общий Axios-клиент.
