@@ -95,13 +95,13 @@ export const Step7Completion = ({
               },
             ] satisfies { key: keyof ClinicFormData; label: string }[]
           ).map(({ key, label }) => (
-            <div key={key} className="px-4 py-3">
-              <Checkbox
-                label={label}
-                checked={data[key] as boolean}
-                onChange={(e) => onChange(key, e.target.checked)}
-              />
-            </div>
+            <Checkbox
+              key={key}
+              className="w-full px-4 py-3"
+              label={label}
+              checked={data[key] as boolean}
+              onChange={(e) => onChange(key, e.target.checked)}
+            />
           ))}
         </div>
       </div>
