@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { toApiEducation } from "@/entities/doctor-education";
 import {
   resolveSpecializationIds,
   useSpecializations,
@@ -526,26 +527,19 @@ export const RegisterPage = () => {
       // которые уже поддерживает профильный API, переносим сразу после
       // создания аккаунта, не заставляя врача повторно заполнять кабинет.
       try {
-        const education = [
-          ...(data.university
-            ? [
-                {
-                  institution: data.university,
-                  degree: data.diplomaSpecialization,
-                  year: parseInt(data.graduationYear) || 0,
-                },
-              ]
-            : []),
-          ...(data.additionalEducation
-            ? [
-                {
-                  institution: data.additionalEducation,
-                  degree: "",
-                  year: 0,
-                },
-              ]
-            : []),
-        ];
+        // Интернатура и ординатура заполнялись на шаге 3, но в анкету не
+        // попадали вообще — теперь едут тем же массивом education
+        // (см. entities/doctor-education).
+        const education = toApiEducation({
+          university: data.university,
+          diplomaSpecialty: data.diplomaSpecialization,
+          graduationYear: data.graduationYear,
+          internship: data.internship,
+          residency: data.residency,
+          additionalEducation: data.additionalEducation
+            ? [data.additionalEducation]
+            : [],
+        });
 
         // Специализации бэк принимает только id из справочника. Если
         // название не нашлось, оно молча выпадало — теперь говорим об этом,

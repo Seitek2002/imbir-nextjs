@@ -11,6 +11,7 @@ import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView } from "@/widgets/doctor/layout";
 
 import { CheckIcon } from "@/shared/assets/icons";
+import { MAX_DOCUMENT_MB, isFileSizeAllowed } from "@/shared/lib/files";
 import {
   Button,
   CancelEditButton,
@@ -37,7 +38,16 @@ const AddIcon: FC<{ className?: string }> = ({ className }) => (
 );
 
 export const DoctorDocumentsSection: FC = () => {
-  const { profile, isLoading, isSaving, saveProfile } = useDoctorCabinet();
+  const {
+    profile,
+    isLoading,
+    isSaving,
+    saveProfile,
+    documents,
+    uploadDocument,
+    deleteDocument,
+    isUploadingDocument,
+  } = useDoctorCabinet();
   const { setActive } = useMyDataTabs();
   const [isEditing, setIsEditing] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
@@ -58,13 +68,13 @@ export const DoctorDocumentsSection: FC = () => {
     setCerts(profile.certificates);
   }
 
-  const handleCertUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCertUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () =>
-      setCerts((prev) => [...prev, reader.result as string]);
-    reader.readAsDataURL(file);
+    e.target.value = "";
+    if (!file || !isFileSizeAllowed(file, MAX_DOCUMENT_MB)) return;
+    // Файл уходит сразу: копить их в стейте нельзя — профильный endpoint
+    // сертификаты не принимает, и «Сохранить» их бы не отправило.
+    await uploadDocument(file);
   };
 
   const handleSave = async () => {
@@ -155,6 +165,7 @@ export const DoctorDocumentsSection: FC = () => {
                   className="text-primary"
                   IconLeft={AddIcon}
                   onClick={() => certRef.current?.click()}
+                  loading={isUploadingDocument}
                 >
                   Добавить документ
                 </Button>
@@ -170,7 +181,7 @@ export const DoctorDocumentsSection: FC = () => {
             ) : null}
             {certs.map((cert, i) => (
               <div
-                key={i}
+                key={documents[i]?.id ?? cert}
                 className="relative w-16 h-16 rounded-xl overflow-hidden border border-border bg-surface"
               >
                 <ImageWithFallback
@@ -205,9 +216,10 @@ export const DoctorDocumentsSection: FC = () => {
                 />
                 {isEditing && (
                   <button
-                    onClick={() =>
-                      setCerts((prev) => prev.filter((_, j) => j !== i))
-                    }
+                    onClick={() => {
+                      const id = documents[i]?.id;
+                      if (id !== undefined) void deleteDocument(id);
+                    }}
                     className="absolute top-0 right-0 w-1/2 aspect-square bg-primary flex items-center justify-center"
                   >
                     <svg className="w-1/2 h-1/2" viewBox="0 0 8 8" fill="none">
@@ -225,7 +237,8 @@ export const DoctorDocumentsSection: FC = () => {
             {isEditing && certs.length === 0 && (
               <button
                 onClick={() => certRef.current?.click()}
-                className="w-16 h-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center text-dim hover:border-primary hover:text-primary transition-colors"
+                disabled={isUploadingDocument}
+                className="w-16 h-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center text-dim hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
               >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path

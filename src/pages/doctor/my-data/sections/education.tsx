@@ -10,6 +10,8 @@ import {
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
+import { toApiEducation } from "@/entities/doctor-education";
+
 import { CheckIcon } from "@/shared/assets/icons";
 import {
   Button,
@@ -102,20 +104,17 @@ export const DoctorEducationSection: FC = () => {
     setD((prev) => ({ ...prev, [k]: v }));
 
   const handleSave = async () => {
-    const mainEdu = d.university
-      ? [
-          {
-            institution: d.university,
-            degree: d.diplomaSpecialty,
-            year: parseInt(d.graduationYear) || new Date().getFullYear(),
-          },
-        ]
-      : [];
-    const addEdu = d.additionalEducation
-      .filter(Boolean)
-      .map((e) => ({ institution: e, degree: "", year: 0 }));
+    // Интернатура и ординатура едут тем же массивом education — раньше они
+    // тут просто отбрасывались (см. entities/doctor-education).
     await saveProfile({
-      education: [...mainEdu, ...addEdu],
+      education: toApiEducation({
+        university: d.university,
+        diplomaSpecialty: d.diplomaSpecialty,
+        graduationYear: d.graduationYear,
+        internship: d.internship,
+        residency: d.residency,
+        additionalEducation: d.additionalEducation,
+      }),
     });
     setIsEditing(false);
     setShowSaveConfirm(false);

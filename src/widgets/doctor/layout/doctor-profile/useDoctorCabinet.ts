@@ -4,14 +4,18 @@ import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { fromApiEducation } from "@/entities/doctor-education";
+
 import {
   type DoctorPrivateProfile,
   type SpecializationItem,
   type UpdateDoctorProfileBody,
+  deleteDoctorDocument,
   doctorCabinetKeys,
   getDoctorDocuments,
   getDoctorProfile,
   updateDoctorProfile,
+  uploadDoctorDocument,
 } from "@/shared/api";
 
 import type { DoctorProfileData } from "./model";
@@ -99,12 +103,9 @@ export const mapApiToProfile = (
     phone: a.phone ?? "",
     email: a.email ?? "",
     photo: a.photo ?? undefined,
-    university: a.education?.[0]?.institution ?? "",
-    graduationYear: a.education?.[0]?.year ? String(a.education[0].year) : "",
-    internship: "",
-    residency: "",
-    diplomaSpecialty: a.education?.[0]?.degree ?? "",
-    additionalEducation: a.education?.slice(1).map((e) => e.institution) ?? [],
+    // Интернатура и ординатура лежат в том же массиве education,
+    // помеченные через degree — см. entities/doctor-education.
+    ...fromApiEducation(a.education),
     licenseNumber: a.license_number ?? "",
     // Заполняется в useDoctorCabinet из /api/doctor/documents/: профильный
     // ответ сертификаты не отдаёт, и раньше здесь навсегда оставался [].
@@ -131,9 +132,35 @@ export const useDoctorCabinet = () => {
   });
 
   // Сертификаты живут в отдельном endpoint — профиль их не возвращает.
+  const documentsKey = [...doctorCabinetKeys.profile(), "documents"];
   const { data: documents = [] } = useQuery({
-    queryKey: [...doctorCabinetKeys.profile(), "documents"],
+    queryKey: documentsKey,
     queryFn: getDoctorDocuments,
+  });
+
+  const invalidateDocuments = () =>
+    queryClient.invalidateQueries({ queryKey: documentsKey });
+
+  // Раньше кабинет только рисовал превью через FileReader: файл не уходил
+  // никуда, а удаление правило локальный стейт. Теперь оба действия идут на
+  // /api/doctor/documents/.
+  const { mutateAsync: uploadDocument, isPending: isUploadingDocument } =
+    useMutation({
+      mutationFn: uploadDoctorDocument,
+      onSuccess: () => {
+        invalidateDocuments();
+        toast.success("Файл загружен");
+      },
+      onError: () => toast.error("Не удалось загрузить файл"),
+    });
+
+  const { mutateAsync: deleteDocument } = useMutation({
+    mutationFn: deleteDoctorDocument,
+    onSuccess: () => {
+      invalidateDocuments();
+      toast.success("Файл удалён");
+    },
+    onError: () => toast.error("Не удалось удалить файл"),
   });
 
   const { mutateAsync: saveProfile, isPending: isSaving } = useMutation({
@@ -144,10 +171,22 @@ export const useDoctorCabinet = () => {
       const raw = data as unknown as {
         first_name?: string;
         last_name?: string;
+        primary_specializations?: SpecializationItem[];
+        narrow_specializations?: SpecializationItem[];
       } | null;
+      // Бэк очищает primary/narrow_specialization_ids, если поле не передано
+      // (проверено живым запросом). Из-за этого сохранение любой другой
+      // вкладки — образования, документов, расписания — стирало
+      // специализации врача. Досылаем текущие, если вкладка их не меняет.
       return updateDoctorProfile({
         first_name: raw?.first_name,
         last_name: raw?.last_name,
+        primary_specialization_ids: raw?.primary_specializations?.map(
+          (s) => s.id,
+        ),
+        narrow_specialization_ids: raw?.narrow_specializations?.map(
+          (s) => s.id,
+        ),
         ...body,
       });
     },
@@ -164,5 +203,16 @@ export const useDoctorCabinet = () => {
     ? { ...mapApiToProfile(data), certificates: documents.map((d) => d.url) }
     : null;
 
-  return { profile, isLoading, isSaving, error, saveProfile, rawProfile: data };
+  return {
+    profile,
+    isLoading,
+    isSaving,
+    error,
+    saveProfile,
+    rawProfile: data,
+    documents,
+    uploadDocument,
+    deleteDocument,
+    isUploadingDocument,
+  };
 };
