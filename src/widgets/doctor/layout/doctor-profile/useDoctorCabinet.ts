@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fromApiEducation } from "@/entities/doctor-education";
 
 import {
+  type DoctorDocument,
   type DoctorPrivateProfile,
   type SpecializationItem,
   type UpdateDoctorProfileBody,
@@ -33,6 +34,8 @@ const SPECIALIZATION_MAP: Record<string, string> = {
   ent: "Лор",
   dermatologist: "Дерматолог",
 };
+
+const EMPTY_DOCUMENTS: DoctorDocument[] = [];
 
 const translateSpecialty = (spec: string): string => {
   if (!spec) return "";
@@ -134,7 +137,7 @@ export const useDoctorCabinet = () => {
 
   // Сертификаты живут в отдельном endpoint — профиль их не возвращает.
   const documentsKey = [...doctorCabinetKeys.profile(), "documents"];
-  const { data: documents = [] } = useQuery({
+  const { data: documents = EMPTY_DOCUMENTS } = useQuery({
     queryKey: documentsKey,
     queryFn: getDoctorDocuments,
   });

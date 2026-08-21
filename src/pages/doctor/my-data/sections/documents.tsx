@@ -65,7 +65,7 @@ export const DoctorDocumentsSection: FC = () => {
   if (profile && profile !== syncedProfile) {
     setSyncedProfile(profile);
     setLicenseNumber(profile.licenseNumber);
-    setCerts(profile.certificates);
+    setCerts([...profile.certificates]);
   }
 
   const handleCertUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
