@@ -30,7 +30,11 @@ export const SaveButton: FC<Props> = ({
     >
       <HeartIcon2
         className={cn(
-          "transition-colors",
+          // Размер обязателен: в heart-2.svg нет width/height (только viewBox),
+          // поэтому без класса svg внутри shrink-to-fit кнопки схлопывался в
+          // 0×0 — сердечко на карточках врача и клиники было не видно и не
+          // нажать (проверено getBoundingClientRect на /specialists).
+          "size-6 transition-colors",
           saved && "[&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]",
         )}
       />
