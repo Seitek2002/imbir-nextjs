@@ -12,6 +12,7 @@ import {
   PASSWORD_REQUIREMENTS_ERROR,
   isStrongPassword,
 } from "@/shared/lib/password";
+import { getPhoneLength } from "@/shared/ui";
 
 import {
   CLINIC_STEP_TITLES as STEP_TITLES,
@@ -128,9 +129,13 @@ export const ClinicRegistrationForm = ({
   const isValid =
     step === 1
       ? !!data.clinicName
-      : step === 7
-        ? allAgreed && !!data.password && data.password === data.confirmPassword
-        : true;
+      : step === 2
+        ? data.phone.length === getPhoneLength(data.phoneDialCode)
+        : step === 7
+          ? allAgreed &&
+            !!data.password &&
+            data.password === data.confirmPassword
+          : true;
 
   // Один обработчик и на клик по кнопке, и на Enter из любого поля шага.
   // Промежуточные шаги ведут к следующему, последний — сабмитит всю форму.

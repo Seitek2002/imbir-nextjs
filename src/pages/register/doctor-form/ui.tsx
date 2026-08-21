@@ -12,6 +12,7 @@ import {
   PASSWORD_REQUIREMENTS_ERROR,
   isStrongPassword,
 } from "@/shared/lib/password";
+import { getPhoneLength } from "@/shared/ui";
 
 import { STEP_TITLES, TOTAL_STEPS } from "../model/constants";
 import type { DoctorFormData, DoctorStep, InviteClinic } from "../model/types";
@@ -91,7 +92,7 @@ export const DoctorRegistrationForm = ({
     data.gender &&
     data.birthDate &&
     data.city &&
-    data.phone.length > 0 &&
+    data.phone.length === getPhoneLength(data.phoneDialCode) &&
     data.email
   );
 

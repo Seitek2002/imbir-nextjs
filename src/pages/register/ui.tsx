@@ -35,7 +35,13 @@ import { isEmailValid } from "@/shared/lib/booking";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { Button, ImageWithFallback, Input, PhoneInput } from "@/shared/ui";
+import {
+  Button,
+  ImageWithFallback,
+  Input,
+  PhoneInput,
+  getPhoneLength,
+} from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 import {
@@ -350,7 +356,11 @@ export const RegisterPage = () => {
       ? !!(formData.name && formData.surname && formData.email)
       : // isRequestingCode учитывается только в телефонной ветке: почтовая
         // ничего не запрашивает у бэка, шаг переключается синхронно.
-        !!(formData.name && formData.surname && phone) && !isRequestingCode;
+        !!(
+          formData.name &&
+          formData.surname &&
+          phone.length === getPhoneLength(dialCode)
+        ) && !isRequestingCode;
 
   const canSubmitClient =
     !!formData.password &&

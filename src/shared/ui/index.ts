@@ -15,7 +15,7 @@ export { TimeField } from "./time-field";
 
 export { Input, Radio, Checkbox, SearchInput } from "./input";
 export { FilterTabBar } from "./filter-tabs";
-export { PhoneInput } from "./phone-input";
+export { PhoneInput, getPhoneLength } from "./phone-input";
 export type { Country } from "./phone-input";
 export { SaveButton } from "./save-button";
 export { FilterPanel } from "./filter-panel";

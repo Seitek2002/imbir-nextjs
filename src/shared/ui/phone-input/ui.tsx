@@ -119,6 +119,12 @@ export const COUNTRIES: Country[] = [
 // когда ограничение снимут, здесь достаточно вернуть просто `COUNTRIES`.
 const AVAILABLE_COUNTRIES: Country[] = COUNTRIES.filter((c) => c.code === "KG");
 
+// Сколько цифр должно быть в номере для кода страны — чтобы формы могли
+// проверить, что PhoneInput отдал полный номер, а не "12354567" на 9 цифр.
+// Фолбэк 9 — под KG, единственную сейчас доступную страну.
+export const getPhoneLength = (dialCode: string): number =>
+  COUNTRIES.find((c) => c.dialCode === dialCode)?.phoneLength ?? 9;
+
 type Props = {
   label?: string;
   value?: string;
