@@ -45,6 +45,18 @@ a,
   user-select: none;
 }
 
+/* ── Числовые инпуты: убираем нативные стрелки-степпер ───────────────────── */
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 @utility scrollbar-hide {
   -ms-overflow-style: none; /* IE и Edge */
   scrollbar-width: none; /* Firefox */
