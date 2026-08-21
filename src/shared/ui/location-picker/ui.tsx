@@ -112,11 +112,20 @@ export const LocationPicker: FC<Props> = ({
   // Точка, поставленная изнутри компонента. Нужна, чтобы эффект синхронизации
   // не дёргал карту в ответ на наше же изменение — пин уже там, где надо.
   const selfSetRef = useRef<string | null>(null);
+  // Ставится перед программным setQuery (после выбора подсказки, обратного
+  // геокодинга и т.д.), чтобы эффект поиска не запустил повторный запрос по
+  // тому же адресу и не открыл список подсказок заново.
+  const skipSearchRef = useRef(false);
 
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<GeocodeResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+
+  const setQuerySilently = (value: string) => {
+    skipSearchRef.current = true;
+    setQuery(value);
+  };
 
   onChangeRef.current = onChange;
   onAddressChangeRef.current = onAddressChange;
@@ -141,7 +150,10 @@ export const LocationPicker: FC<Props> = ({
       if (!geocode || !onAddressChangeRef.current) return;
       reverseGeocode({ lat, lng })
         .then((res) => {
-          if (res?.address) onAddressChangeRef.current?.(res.address);
+          if (res?.address) {
+            setQuerySilently(res.address);
+            onAddressChangeRef.current?.(res.address);
+          }
         })
         .catch(() => {
           // Адрес — удобство, а не обязательное поле: координаты уже
@@ -268,6 +280,15 @@ export const LocationPicker: FC<Props> = ({
 
   // --- Поиск адреса с дебаунсом ---
   useEffect(() => {
+    // Адрес подставлен программно (выбор подсказки, обратный геокодинг,
+    // сброс) — это не новый пользовательский ввод, поиск по нему не нужен.
+    if (skipSearchRef.current) {
+      skipSearchRef.current = false;
+      setSuggestions([]);
+      setIsSearching(false);
+      return;
+    }
+
     if (query.trim().length < 3) {
       setSuggestions([]);
       setIsSearching(false);
@@ -301,7 +322,10 @@ export const LocationPicker: FC<Props> = ({
   }, [query, countryCode, cityCenter]);
 
   const handlePickSuggestion = (result: GeocodeResult) => {
-    setQuery("");
+    // Оставляем выбранный адрес в поле поиска — иначе после выбора оно
+    // пустеет, и не видно, что подсказка вообще была применена (адрес
+    // уходит только в «Полный адрес» выше и в плашку под картой).
+    setQuerySilently(result.address);
     setSuggestions([]);
     // Адрес берём из самой подсказки — обратный геокодинг тут лишний запрос.
     commitPoint(result.point.lat, result.point.lng, { geocode: false });
@@ -337,6 +361,7 @@ export const LocationPicker: FC<Props> = ({
   // форме больше не привязано координат.
   const handleClear = () => {
     selfSetRef.current = null;
+    setQuerySilently("");
     onChangeRef.current({ latitude: "", longitude: "" });
     onAddressChangeRef.current?.("");
   };
