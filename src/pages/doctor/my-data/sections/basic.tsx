@@ -340,6 +340,10 @@ export const DoctorBasicInfoSection: FC = () => {
                 value={d.email}
                 onChange={(e) => set("email", e.target.value)}
                 placeholder="example@mail.com"
+                // UpdateDoctorProfileBody не принимает email — бэк его молча
+                // игнорирует на PUT /api/doctor/profile/ (см. тот же приём у
+                // пациента и клиники: поле там задизейблено по той же причине).
+                disabled
               />
             ) : (
               <FieldView label="Почта" value={d.email} />
