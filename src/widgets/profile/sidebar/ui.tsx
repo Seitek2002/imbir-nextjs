@@ -4,6 +4,8 @@ import { FC, useState } from "react";
 
 import Link from "next/link";
 
+import { UserStatusCard } from "@/entities/user-status";
+
 import {
   HistoryIcon,
   LogoutIcon,
@@ -12,7 +14,6 @@ import {
   SettingsIcon,
 } from "@/shared/assets/icons";
 import { useLogout } from "@/shared/lib/useLogout";
-import { useUserStatus } from "@/shared/lib/useReference";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
 import { useAuthStore } from "@/shared/store";
 import { ImageWithFallback } from "@/shared/ui";
@@ -60,7 +61,6 @@ export const ProfileSidebar: FC = () => {
   };
 
   const user = useAuthStore((s) => s.user);
-  const { status: userStatus, percent } = useUserStatus();
 
   const displayName = user
     ? `${user.first_name} ${user.last_name ?? ""}`.trim()
@@ -144,47 +144,7 @@ export const ProfileSidebar: FC = () => {
           </div>
         </button>
 
-        {/* Статус — GET /api/references/user-status/{id}/; нет отзывов у
-            пользователя, значит status: null и карточку не показываем. */}
-        {userStatus && percent !== null && (
-          <div className="bg-white rounded-3xl p-6">
-            <p className="text-muted text-sm mb-2">Статус пользователя</p>
-            <h4 className="text-primary text-2xl font-bold mb-3">
-              {userStatus.name}
-            </h4>
-            <p className="text-secondary text-sm leading-relaxed mb-6">
-              {userStatus.description}
-            </p>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-muted text-xs">
-                Положительных
-                <br />
-                отзывов
-              </span>
-              <span className="text-muted text-xs text-right">
-                Отрицательных
-                <br />
-                отзывов
-              </span>
-            </div>
-            {/* Единый трек: оранжевый сегмент + синий хвост, как в макете */}
-            <div className="flex items-center gap-2">
-              <span className="text-primary text-sm font-semibold border border-primary rounded-lg px-2 py-0.5">
-                {Math.round(percent)}%
-              </span>
-              <div className="flex-1 h-2 rounded-full overflow-hidden flex">
-                <div
-                  className="bg-primary h-full"
-                  style={{ width: `${percent}%` }}
-                />
-                <div className="bg-[#8B9FFF] h-full flex-1" />
-              </div>
-              <span className="text-[#8B9FFF] text-sm font-semibold border border-[#8B9FFF] rounded-lg px-2 py-0.5">
-                {Math.round(100 - percent)}%
-              </span>
-            </div>
-          </div>
-        )}
+        <UserStatusCard />
       </div>
 
       <ConfirmDialog
