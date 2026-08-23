@@ -16,12 +16,10 @@ import {
   ImageWithFallback,
 } from "@/shared/ui";
 
+// «Настройки профиля» — последний пункт, сразу перед «Выйти из профиля»:
+// сначала то, за чем в кабинет приходят (записи, сохранённое, отзывы), а
+// настройки и выход — рядом, в конце.
 const MENU_ITEMS: CabinetMenuItem[] = [
-  {
-    href: "/profile/my-data",
-    label: "Настройки профиля",
-    icon: <SettingsIcon className="w-5 h-5" />,
-  },
   {
     href: "/profile/history",
     label: "История записей",
@@ -36,6 +34,11 @@ const MENU_ITEMS: CabinetMenuItem[] = [
     href: "/profile/reviews",
     label: "Отзывы",
     icon: <ReviewsIcon className="w-5 h-5" />,
+  },
+  {
+    href: "/profile/my-data",
+    label: "Настройки профиля",
+    icon: <SettingsIcon className="w-5 h-5" />,
   },
 ];
 

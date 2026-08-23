@@ -18,11 +18,13 @@ import { useAuthStore } from "@/shared/store";
 import { ImageWithFallback } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
+// «Настройки профиля» — последний пункт, сразу перед «Выйти из профиля»
+// (порядок должен совпадать с мобильным меню, см. pages/profile/menu).
 const MENU_ITEMS = [
-  { href: "/profile/my-data", label: "Настройки профиля", icon: SettingsIcon },
   { href: "/profile/history", label: "История записей", icon: HistoryIcon },
   { href: "/profile/saved", label: "Сохранённое", icon: SavedIcon },
   { href: "/profile/reviews", label: "Отзывы", icon: ReviewsIcon },
+  { href: "/profile/my-data", label: "Настройки профиля", icon: SettingsIcon },
 ];
 
 const CHEVRON = (
