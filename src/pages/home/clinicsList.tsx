@@ -3,7 +3,6 @@
 import { FC, Suspense } from "react";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -13,10 +12,13 @@ import { FilterBar } from "@/features/filter-bar";
 import { ClinicCard, ClinicSkeleton } from "@/entities/clinic";
 
 import { api } from "@/shared/api";
+import { useUrlSearchParams } from "@/shared/lib/url-state";
 import { Button } from "@/shared/ui";
 
 const ClinicsListContent = () => {
-  const searchParams = useSearchParams() ?? new URLSearchParams();
+  // См. комментарий в doctorsMainList: адрес меняет FilterBar нативным
+  // replaceState, и реагировать на это умеет только useUrlSearchParams.
+  const searchParams = useUrlSearchParams();
   // Избранное клиник: без этого сердечко на главной не закрашивалось
   // и клик по нему ничего не сохранял (на /clinics подключено давно).
   const { isSaved, toggle } = useFavoriteToggle("clinic");

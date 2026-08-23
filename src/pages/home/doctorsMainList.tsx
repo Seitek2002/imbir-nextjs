@@ -3,7 +3,7 @@
 import { FC, Suspense } from "react";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -14,6 +14,7 @@ import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 
 import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { useUrlSearchParams } from "@/shared/lib/url-state";
 import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
@@ -30,7 +31,12 @@ const DoctorsListContent = () => {
   // Избранное было подключено только на /specialists — на главной сердечко
   // рисовалось в состоянии «не сохранено» и клик ни к чему не вёл.
   const { isSaved, toggle } = useFavoriteToggle("doctor");
-  const searchParams = useSearchParams() ?? new URLSearchParams();
+  // Именно useUrlSearchParams, а не useSearchParams из next/navigation:
+  // FilterBar меняет адрес нативным history.replaceState (чтобы не гонять
+  // серверную навигацию на каждый чих) и оповещает подписчиков своим
+  // событием. Хук Next про такое обновление не узнаёт — из-за этого на
+  // Главной фильтры переписывали URL, но список оставался прежним.
+  const searchParams = useUrlSearchParams();
 
   const currentSpec = searchParams.get("doc_spec");
   const currentRating = searchParams.get("doc_rating");
