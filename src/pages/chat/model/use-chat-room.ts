@@ -2,8 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { getChatConsultations, getRoomMessages } from "@/shared/api";
-import type { ChatConsultation, IncomingSocketFrame } from "@/shared/api";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { chatKeys, getChatConsultations, getRoomMessages } from "@/shared/api";
+import type {
+  ChatConsultation,
+  ChatRoom,
+  IncomingSocketFrame,
+} from "@/shared/api";
 import { useAuthStore } from "@/shared/store";
 
 import { CHAT_WS_BASE } from "./constants";
@@ -77,6 +83,7 @@ export const useChatRoom = (
   const [typingUsers, setTypingUsers] = useState<Record<number, string>>({});
   const socketRef = useRef<WebSocket | null>(null);
   const consultationsRef = useRef<ChatConsultation[]>([]);
+  const queryClient = useQueryClient();
   // Таймеры авто-снятия статуса по каждому user_id (на случай потери "false").
   const typingTimersRef = useRef<Record<number, ReturnType<typeof setTimeout>>>(
     {},
@@ -86,6 +93,29 @@ export const useChatRoom = (
   const token = useAuthStore((state) => state.accessToken);
   const role = useAuthStore((state) => state.user?.role);
   const authError = token ? null : "Требуется авторизация";
+
+  // Список переписок слева — отдельный запрос, который после отправки или
+  // получения сообщения оставался таким, каким был при открытии страницы: и
+  // порядок комнат, и текст последнего сообщения. Обновить его помогала
+  // только перезагрузка. Поэтому свежее сообщение сразу подкладываем в кэш
+  // (комната мгновенно уезжает наверх — сортировка в pages/chat/ui.tsx), а
+  // потом сверяемся с сервером: он last_message пересчитывает верно.
+  const touchRoom = useCallback(
+    (content: string, createdAt: string) => {
+      if (roomId === null) return;
+
+      queryClient.setQueryData<ChatRoom[]>(chatKeys.rooms(), (rooms) =>
+        rooms?.map((room) =>
+          room.id === roomId
+            ? { ...room, last_message: { content, created_at: createdAt } }
+            : room,
+        ),
+      );
+      void queryClient.invalidateQueries({ queryKey: chatKeys.rooms() });
+      void queryClient.invalidateQueries({ queryKey: chatKeys.unreadCount() });
+    },
+    [queryClient, roomId],
+  );
 
   useEffect(() => {
     if (roomId === null || currentUserId === null || !token || !role) return;
@@ -181,6 +211,8 @@ export const useChatRoom = (
         });
       }
 
+      touchRoom(payload.content, payload.created_at);
+
       setMessages((prev) => [
         ...prev,
         {
@@ -244,7 +276,7 @@ export const useChatRoom = (
       typingTimersRef.current = {};
       setTypingUsers({});
     };
-  }, [roomId, currentUserId, token, role]);
+  }, [roomId, currentUserId, token, role, touchRoom]);
 
   const sendTyping = useCallback((isTyping: boolean) => {
     const socket = socketRef.current;
@@ -261,19 +293,22 @@ export const useChatRoom = (
       // Сразу снимаем свой статус "печатает" у собеседника перед отправкой.
       sendTyping(false);
 
+      const createdAt = new Date().toISOString();
+      touchRoom(text, createdAt);
+
       // Optimistic render; the server's echo of this message is ignored above.
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now(),
           content: text,
-          createdAt: new Date().toISOString(),
+          createdAt,
           isMine: true,
         },
       ]);
       socket.send(JSON.stringify({ content: text }));
     },
-    [sendTyping],
+    [sendTyping, touchRoom],
   );
 
   return {

@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { Header } from "@/widgets/header";
 
-import { chatKeys, getChatRooms } from "@/shared/api";
+import { type ChatRoom, chatKeys, getChatRooms } from "@/shared/api";
 import { ChatIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { cn } from "@/shared/lib/utils";
@@ -30,6 +30,9 @@ const AI_CONVERSATION: Conversation = {
   lastMessageAt: null,
   isAi: true,
 };
+
+const activityTime = (room: ChatRoom) =>
+  new Date(room.last_message?.created_at ?? room.created_at).getTime();
 
 // h-dvh + overflow-hidden фиксируют страницу по высоте вьюпорта, чтобы
 // прокручивались только внутренние панели (лента чата и список переписок),
@@ -123,15 +126,30 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
   const { data: rooms } = useQuery({
     queryKey: chatKeys.rooms(),
     queryFn: getChatRooms,
+    // Сокет у бэка — на комнату (/ws/chat/{id}/), общего «все мои переписки»
+    // нет. Поэтому сообщение в НЕоткрытую комнату фронт узнать не может, и
+    // без опроса такая переписка не поднималась наверх до перезагрузки
+    // страницы. Раз в полминуты дёргаем лёгкий /api/chat/rooms/. Когда бэк
+    // отдаст один сокет на пользователя — опрос можно убрать.
+    refetchInterval: 30_000,
   });
 
-  const conversations = useMemo(
-    () => [
+  // Свежая переписка — первой: сортируем по времени последнего сообщения, у
+  // пустой комнаты берём время её создания. Сервер сейчас отдаёт комнаты в
+  // нужном порядке, но полагаться на это нельзя — порядок в контракте не
+  // закреплён, а после локального обновления кэша (см. useChatRoom) список
+  // всё равно нужно упорядочить самим.
+  const conversations = useMemo(() => {
+    const byActivity = [...(rooms ?? [])].sort(
+      (a, b) => activityTime(b) - activityTime(a),
+    );
+    return [
+      // Блок ИИ-помощника закреплён над перепиской — он не участвует в
+      // сортировке.
       AI_CONVERSATION,
-      ...(rooms ?? []).map((room) => roomToConversation(room, currentUserId)),
-    ],
-    [rooms, currentUserId],
-  );
+      ...byActivity.map((room) => roomToConversation(room, currentUserId)),
+    ];
+  }, [rooms, currentUserId]);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
