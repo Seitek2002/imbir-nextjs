@@ -93,6 +93,7 @@ export const CitySelectorModal: FC<Props> = ({ isOpen, onClose }) => {
       <div className="flex flex-col gap-5">
         <Button
           variant="outline"
+          size="sm"
           className="w-full justify-center border-border text-foreground hover:border-primary hover:text-primary"
           IconLeft={GeoIcon}
           onClick={handleGeoDetect}
