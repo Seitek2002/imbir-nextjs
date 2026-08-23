@@ -24,7 +24,7 @@ export const FormSubmitButton = ({
 }: Props) => (
   <>
     <div className={onBack ? "h-40 md:hidden" : "h-24 md:hidden"} />
-    <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] bg-white border-t border-border flex flex-col gap-3">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] bg-white border-t border-border flex flex-col gap-3">
       {onBack && (
         <Button
           type="button"
