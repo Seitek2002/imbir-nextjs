@@ -101,8 +101,10 @@ export const referenceKeys = {
   paymentMethods: () => [...referenceKeys.all, "paymentMethods"] as const,
   countryCodes: () => [...referenceKeys.all, "countryCodes"] as const,
   serviceCategories: () => [...referenceKeys.all, "serviceCategories"] as const,
+  // Префикс без id — по нему сбрасывается кэш статуса после изменения отзывов.
+  userStatuses: () => [...referenceKeys.all, "userStatus"] as const,
   userStatus: (userId: number) =>
-    [...referenceKeys.all, "userStatus", userId] as const,
+    [...referenceKeys.userStatuses(), userId] as const,
 };
 
 export const notificationKeys = {

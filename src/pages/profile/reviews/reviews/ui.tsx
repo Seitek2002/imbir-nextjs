@@ -10,6 +10,8 @@ import { ReviewModal } from "@/features/review-modal";
 import { deleteReview, profileKeys, updateReview } from "@/shared/api";
 import { RemoveIcon } from "@/shared/assets/icons";
 import { extractErrorMessage } from "@/shared/lib/errors";
+import { useInvalidateUserStatus } from "@/shared/lib/useReference";
+import { Button } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 import type { ReviewType, UserReview } from "./user-review/model";
@@ -20,15 +22,40 @@ type Props = {
   activeTab: ReviewType;
 };
 
+// Сколько отзывов видно сразу и на сколько прирастает список по кнопке.
+// Раньше все отзывы выводились одним длинным столбцом.
+const PAGE_SIZE = 2;
+
 export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [editTarget, setEditTarget] = useState<UserReview | null>(null);
 
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [countedTab, setCountedTab] = useState(activeTab);
+
   const filteredReviews = reviews.filter((review) => review.type === activeTab);
 
-  const invalidate = () =>
+  // Смена вкладки сворачивает список обратно к первым двум. Правим состояние
+  // во время рендера, а не в эффекте: так принято в проекте (эффект здесь
+  // запрещён правилом react-hooks/set-state-in-effect).
+  if (countedTab !== activeTab) {
+    setCountedTab(activeTab);
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  const visibleReviews = filteredReviews.slice(0, visibleCount);
+  const hiddenCount = filteredReviews.length - visibleReviews.length;
+
+  const invalidateUserStatus = useInvalidateUserStatus();
+
+  // Вместе со списком сбрасываем и статус пользователя: его проценты сервер
+  // считает по средней оценке отзывов, и без этого они менялись только после
+  // перезагрузки страницы.
+  const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: profileKeys.reviews() });
+    invalidateUserStatus();
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteReview(Number(id)),
@@ -97,7 +124,7 @@ export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
   return (
     <>
       <div className="flex flex-col gap-4">
-        {filteredReviews.map((review) => (
+        {visibleReviews.map((review) => (
           <UserReviewCard
             key={review.id}
             review={review}
@@ -106,6 +133,17 @@ export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
           />
         ))}
       </div>
+
+      {hiddenCount > 0 && (
+        <div className="flex justify-center mt-4">
+          <Button
+            variant="outline"
+            onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+          >
+            Показать ещё
+          </Button>
+        </div>
+      )}
 
       <ConfirmDialog
         isOpen={!!deleteTarget}

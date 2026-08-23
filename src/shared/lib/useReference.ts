@@ -1,6 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
+
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getUserStatus, referenceKeys } from "@/shared/api";
 import { useAuthStore } from "@/shared/store";
@@ -61,8 +63,8 @@ export const useReferenceOptions = (
 // Статус текущего пользователя как рецензента (см.
 // GET /api/references/user-status/{user_id}/) — по среднему баллу ЕГО
 // СОБСТВЕННЫХ отзывов, не рейтинг того, кого он оценивает. Если отзывов нет,
-// бэк отдаёт status: null — в этом случае карточку статуса не показываем
-// вовсе, а не рисуем нулевые/заглушечные значения.
+// бэк отдаёт status: null — карточка в этом случае рисуется с нулями
+// (см. entities/user-status).
 export const useUserStatus = () => {
   const userId = useAuthStore((s) => s.user?.id);
 
@@ -78,4 +80,18 @@ export const useUserStatus = () => {
     percent: data?.percent ?? null,
     isLoading,
   };
+};
+
+// Проценты в карточке статуса сервер считает по средней оценке отзывов
+// пользователя, поэтому после создания, изменения или удаления отзыва кэш
+// статуса надо сбросить — иначе цифры обновлялись только после перезагрузки
+// страницы. Ключ берём без id: карточка есть и в меню, и в сайдбаре.
+export const useInvalidateUserStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useCallback(
+    () =>
+      queryClient.invalidateQueries({ queryKey: referenceKeys.userStatuses() }),
+    [queryClient],
+  );
 };

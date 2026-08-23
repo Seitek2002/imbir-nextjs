@@ -15,6 +15,7 @@ import {
 } from "@/shared/api";
 import { WarningIcon } from "@/shared/assets/icons";
 import { extractErrorMessage } from "@/shared/lib/errors";
+import { useInvalidateUserStatus } from "@/shared/lib/useReference";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 import type { Appointment, AppointmentStatus } from "./AppointmentCard/model";
@@ -70,6 +71,7 @@ export const ProfileHistory: FC<Props> = ({
   });
 
   const queryClient = useQueryClient();
+  const invalidateUserStatus = useInvalidateUserStatus();
   const { mutateAsync: cancel, isPending: isCancelling } = useMutation({
     mutationFn: (id: string) => cancelAppointment(Number(id)),
     onSuccess: () => {
@@ -130,6 +132,9 @@ export const ProfileHistory: FC<Props> = ({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: reviewKeys.all });
+      // Новый отзыв меняет и список «Мои отзывы», и проценты в статусе.
+      queryClient.invalidateQueries({ queryKey: profileKeys.reviews() });
+      invalidateUserStatus();
       toast.success("Отзыв сохранён");
       setReviewModalOpen(false);
       setSelectedAppointment(null);

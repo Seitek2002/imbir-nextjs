@@ -18,7 +18,7 @@ import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { StartChatButton } from "@/features/start-chat";
 
 // ИМПОРТЫ API
-import { api, createReview, getBlogPosts } from "@/shared/api";
+import { api, createReview, getBlogPosts, profileKeys } from "@/shared/api";
 import {
   EmailIcon,
   GeoIcon,
@@ -30,6 +30,7 @@ import {
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
+import { useInvalidateUserStatus } from "@/shared/lib/useReference";
 import { useAuthStore } from "@/shared/store";
 import { Button, ContactInfoModal, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
@@ -62,6 +63,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
 
   // 2. ПОЛУЧАЕМ ОТЗЫВЫ ЭТОГО ВРАЧА
   const queryClient = useQueryClient();
+  const invalidateUserStatus = useInvalidateUserStatus();
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "doctor";
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
@@ -83,6 +85,10 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reviews", "doctor", id] });
+      // Свой отзыв попадает и в «Мои отзывы», и в проценты статуса — без
+      // сброса кэша они обновлялись только после перезагрузки страницы.
+      queryClient.invalidateQueries({ queryKey: profileKeys.reviews() });
+      invalidateUserStatus();
       toast.success("Спасибо за отзыв!");
     },
     onError: (err: unknown) => {

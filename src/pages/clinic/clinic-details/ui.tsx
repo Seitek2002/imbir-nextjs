@@ -19,7 +19,7 @@ import { DoctorCard } from "@/entities/doctor";
 import { ServiceCard } from "@/entities/service";
 
 // ИМПОРТЫ API
-import { api, createReview } from "@/shared/api";
+import { api, createReview, profileKeys } from "@/shared/api";
 import {
   EmailIcon,
   GeoIcon,
@@ -30,6 +30,7 @@ import {
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
+import { useInvalidateUserStatus } from "@/shared/lib/useReference";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import { Button, ContactInfoModal, IconBtn } from "@/shared/ui";
@@ -86,6 +87,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
   });
 
   const queryClient = useQueryClient();
+  const invalidateUserStatus = useInvalidateUserStatus();
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
   const { data: reviews = [] } = useQuery({
     queryKey: ["reviews", "clinic", id],
@@ -102,6 +104,10 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["reviews", "clinic", id] });
+      // Свой отзыв попадает и в «Мои отзывы», и в проценты статуса — без
+      // сброса кэша они обновлялись только после перезагрузки страницы.
+      queryClient.invalidateQueries({ queryKey: profileKeys.reviews() });
+      invalidateUserStatus();
       toast.success("Спасибо за отзыв!");
     },
     onError: (err: unknown) => {
