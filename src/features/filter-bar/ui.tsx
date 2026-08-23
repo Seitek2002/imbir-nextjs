@@ -174,15 +174,10 @@ export const FilterBar: FC<Props> = ({
           children
         ) : (
           <>
-            <div className="max-w-200 flex items-center gap-3">
+            <div className="max-w-200">
               <h2 className="text-[40px] font-semibold leading-none">
                 {title}
               </h2>
-              {city && (
-                <span className="inline-flex items-center text-xs font-medium text-primary bg-[#FFF0EE] px-3 py-1 rounded-full border border-primary/20 shrink-0 self-center">
-                  в г. {city}
-                </span>
-              )}
             </div>
             <p className="text-secondary text-lg mt-4 mb-6">
               Поиск в г.{" "}
