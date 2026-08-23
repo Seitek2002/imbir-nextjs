@@ -102,6 +102,7 @@ export const ReviewsSection: FC<Props> = ({
           <Button
             variant="outline"
             className="md:hidden w-full justify-center bg-white"
+            size="sm"
           >
             Оставить свой отзыв
           </Button>
