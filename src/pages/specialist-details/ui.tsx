@@ -417,18 +417,20 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
           />
         )}
 
-        <div className="mt-10 md:mt-20 mb-10 md:mb-20 px-4 md:px-0">
-          <div className="flex items-center justify-between mb-6 md:mb-8 md:hidden">
-            <h2 className="text-2xl font-semibold text-foreground">Интервью</h2>
-            <Link
-              href={ROUTES.VIDEOS}
-              className="text-primary text-sm font-medium hover:underline"
-            >
-              Все
-            </Link>
-          </div>
+        {blogVideos.length > 0 && (
+          <div className="mt-10 md:mt-20 mb-10 md:mb-20 px-4 md:px-0">
+            <div className="flex items-center justify-between mb-6 md:mb-8 md:hidden">
+              <h2 className="text-2xl font-semibold text-foreground">
+                Интервью
+              </h2>
+              <Link
+                href={ROUTES.VIDEOS}
+                className="text-primary text-sm font-medium hover:underline"
+              >
+                Все
+              </Link>
+            </div>
 
-          {blogVideos.length > 0 && (
             <VideosSwiper
               title="Интервью"
               viewAllHref={ROUTES.VIDEOS}
@@ -436,8 +438,8 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
               videos={blogVideos}
               className="px-0 md:px-0"
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="hidden md:block">
