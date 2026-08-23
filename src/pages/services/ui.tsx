@@ -5,7 +5,11 @@ import { FC } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -20,6 +24,7 @@ import { ServiceCard, useServiceCategories } from "@/entities/service";
 import { ServiceFilters, api, serviceKeys } from "@/shared/api";
 import { RemoveIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
+import { cn } from "@/shared/lib/utils";
 import { useCityStore } from "@/shared/store";
 import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 
@@ -96,21 +101,32 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
     max_price: priceParts ? priceRange[1] : undefined,
   };
 
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: serviceKeys.list(filters),
-      queryFn: ({ pageParam }) =>
-        api.getServicesPaginated({
-          ...filters,
-          page: pageParam,
-          page_size: PAGE_SIZE,
-        }),
-      initialPageParam: 1,
-      getNextPageParam: (lastPage) =>
-        lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
-          ? lastPage.pagination.page + 1
-          : undefined,
-    });
+  const {
+    data,
+    isLoading,
+    isPlaceholderData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: serviceKeys.list(filters),
+    queryFn: ({ pageParam }) =>
+      api.getServicesPaginated({
+        ...filters,
+        page: pageParam,
+        page_size: PAGE_SIZE,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
+        ? lastPage.pagination.page + 1
+        : undefined,
+    // Смена фильтра — это новый ключ запроса, то есть пустой кэш: сетка
+    // исчезала и на её месте появлялось «Загрузка...». Оставляем предыдущий
+    // список на экране (приглушённым), пока едет новый — так ожидание
+    // короче на вид и страница не прыгает.
+    placeholderData: keepPreviousData,
+  });
 
   const services = data?.pages.flatMap((page) => page.data) ?? [];
 
@@ -184,7 +200,14 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
             </h2>
           )}
 
-          <div className="flex flex-col gap-2">
+          <div
+            className={cn(
+              "flex flex-col gap-2 transition-opacity",
+              // Данные ещё едут, а на экране предыдущий список — показываем это
+              // прозрачностью, чтобы было видно, что фильтр применяется.
+              isPlaceholderData && "opacity-50",
+            )}
+          >
             {isLoading ? (
               <p className="text-center text-muted py-10">Загрузка...</p>
             ) : filteredServices.length === 0 ? (
@@ -299,7 +322,13 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
               max={MAX_PRICE}
               step={50}
               value={priceRange}
-              onChange={(val) => updateURL("price", `${val[0]}-${val[1]}`)}
+              // onChangeEnd, а не onChange: onChange срабатывает на КАЖДЫЙ шаг
+              // ползунка (50 сом), и каждый шаг переписывал URL. Так как
+              // фильтры живут в адресе, а /services — серверный компонент,
+              // одно перетаскивание давало до двух сотен обращений к серверу;
+              // они выстраивались в очередь, и список догонял пользователя
+              // через 3–5 секунд. Теперь запрос один — по отпусканию ползунка.
+              onChangeEnd={(val) => updateURL("price", `${val[0]}-${val[1]}`)}
               className="bg-white"
             />
           </div>
@@ -315,7 +344,12 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
             </Button>
           </div>
 
-          <div className="mt-2">
+          <div
+            className={cn(
+              "mt-2 transition-opacity",
+              isPlaceholderData && "opacity-50",
+            )}
+          >
             {isLoading ? (
               <p className="text-center text-muted py-20 text-lg">
                 Загрузка...
