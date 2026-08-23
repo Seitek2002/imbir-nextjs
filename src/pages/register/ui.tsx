@@ -12,6 +12,7 @@ import {
 } from "@/entities/specialization";
 
 import {
+  checkEmailAvailabilityFn,
   registerClientFn,
   registerClinicFn,
   registerDoctorFn,
@@ -290,6 +291,11 @@ export const RegisterPage = () => {
   const [clientEmailError, setClientEmailError] = useState<string | null>(null);
   const [timer, setTimer] = useState(0);
   const [isRequestingCode, setIsRequestingCode] = useState(false);
+  // Проверка занятости email (POST /api/auth/email/check/) — чистая, без
+  // побочных эффектов. Дёргаем её на шаге 1, а не молча создаём аккаунт на
+  // шаге 2 после пароля: иначе о занятом email пациент узнаёт только в самом
+  // конце, введя имя/фамилию/пароль заново впустую.
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   useEffect(() => {
     if (timer <= 0) return;
@@ -353,10 +359,9 @@ export const RegisterPage = () => {
   // кнопки). Общая переменная не даёт этим двум проверкам разойтись.
   const canContinueClient =
     clientAuthMethod === "email"
-      ? !!(formData.name && formData.surname && formData.email)
-      : // isRequestingCode учитывается только в телефонной ветке: почтовая
-        // ничего не запрашивает у бэка, шаг переключается синхронно.
-        !!(
+      ? !!(formData.name && formData.surname && formData.email) &&
+        !isCheckingEmail
+      : !!(
           formData.name &&
           formData.surname &&
           phone.length === getPhoneLength(dialCode)
@@ -385,7 +390,23 @@ export const RegisterPage = () => {
         return;
       }
       setClientEmailError(null);
-      setClientStep(2);
+      setIsCheckingEmail(true);
+      try {
+        const { data } = await checkEmailAvailabilityFn({
+          email: formData.email,
+        });
+        if (!data.available) {
+          setClientEmailError("Этот email уже используется");
+          return;
+        }
+        setClientStep(2);
+      } catch (err: unknown) {
+        const errData = (err as { response?: { data?: unknown } })?.response
+          ?.data;
+        toast.error(extractErrorMessage(errData, "Не удалось проверить email"));
+      } finally {
+        setIsCheckingEmail(false);
+      }
       return;
     }
 
@@ -1157,7 +1178,7 @@ export const RegisterPage = () => {
                 className="w-full justify-center md:h-14 md:text-lg"
                 size="lg"
                 disabled={!canContinueClient}
-                loading={isRequestingCode}
+                loading={isRequestingCode || isCheckingEmail}
               >
                 Продолжить
               </Button>

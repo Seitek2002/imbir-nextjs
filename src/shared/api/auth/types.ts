@@ -35,6 +35,20 @@ export type PasswordResetConfirmRequest = {
   password: string;
 };
 
+// POST /api/auth/email/check/ — чистая проверка занятости, без побочных
+// эффектов (кода не отправляет, аккаунт не создаёт). Некорректный формат
+// email — обычная 400-ошибка валидации, а не { available: false }.
+export type EmailCheckRequest = {
+  email: string;
+};
+
+export type EmailCheckResponse = {
+  data: {
+    email: string;
+    available: boolean;
+  };
+};
+
 export type RegisterClientRequest = {
   first_name: string;
   last_name: string;

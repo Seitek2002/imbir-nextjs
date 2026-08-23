@@ -4,6 +4,8 @@ import { apiClient } from "../client";
 import {
   AuthResponse,
   DoctorInviteValidationResponse,
+  EmailCheckRequest,
+  EmailCheckResponse,
   EmailRegisterConfirmRequest,
   EmailRegisterRequestRequest,
   LoginOtpRequestRequest,
@@ -55,6 +57,16 @@ const toFormData = (data: Record<string, unknown>): FormData => {
     }
   });
   return form;
+};
+
+export const checkEmailAvailabilityFn = async (
+  body: EmailCheckRequest,
+): Promise<EmailCheckResponse> => {
+  const { data } = await apiClient.post<EmailCheckResponse>(
+    "/api/auth/email/check/",
+    body,
+  );
+  return data;
 };
 
 export const loginFn = async (body: LoginRequest): Promise<AuthResponse> => {
