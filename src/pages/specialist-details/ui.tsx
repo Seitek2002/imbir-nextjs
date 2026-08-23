@@ -411,6 +411,15 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
           <ReviewsSection
             initialReviews={reviews}
             averageRating={doctor.rating}
+            doctorName={doctor.name}
+            doctorSpecialty={doctor.specialty}
+            doctorClinic={doctor.workplaces?.[0]?.clinicName}
+            doctorImage={
+              typeof doctor.image === "string" ? doctor.image : undefined
+            }
+            onReviewClick={
+              !isAuthed ? () => router.push(ROUTES.LOGIN) : undefined
+            }
             onSubmitReview={
               // mutateAsync, а не mutate: форма отзыва должна очиститься
               // только после успешной отправки (см. ReviewsSection).

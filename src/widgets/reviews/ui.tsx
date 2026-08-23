@@ -4,6 +4,8 @@ import { FC, useState } from "react";
 
 import Link from "next/link";
 
+import { ReviewModal } from "@/features/review-modal";
+
 import { ChatIcon, StarIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
@@ -27,17 +29,28 @@ type Props = {
   // Отправка отзыва на бэк. Если не передана — форма не показывается.
   // Может вернуть промис — тогда форма очистится только после успеха.
   onSubmitReview?: (rating: number, text: string) => void | Promise<unknown>;
+  onReviewClick?: () => void;
   isSubmitting?: boolean;
+  doctorName?: string;
+  doctorSpecialty?: string;
+  doctorClinic?: string;
+  doctorImage?: string;
 };
 
 export const ReviewsSection: FC<Props> = ({
   initialReviews,
   averageRating,
   onSubmitReview,
+  onReviewClick,
   isSubmitting,
+  doctorName = "Специалист",
+  doctorSpecialty = "",
+  doctorClinic = "",
+  doctorImage,
 }) => {
   // Источник истины — проп (данные из query); локально держим только форму.
   const reviews = initialReviews;
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [newReviewText, setNewReviewText] = useState("");
   const [newReviewRating, setNewReviewRating] = useState(0);
 
@@ -99,13 +112,19 @@ export const ReviewsSection: FC<Props> = ({
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            className="md:hidden w-full justify-center bg-white"
-            size="sm"
-          >
-            Оставить свой отзыв
-          </Button>
+          {(onSubmitReview || onReviewClick) && (
+            <Button
+              variant="outline"
+              className="md:hidden w-full justify-center bg-white"
+              size="sm"
+              onClick={() => {
+                if (onSubmitReview) setIsReviewModalOpen(true);
+                else onReviewClick?.();
+              }}
+            >
+              Оставить свой отзыв
+            </Button>
+          )}
 
           {/* Форма — только если подключена отправка на бэк */}
           {onSubmitReview && (
@@ -169,6 +188,18 @@ export const ReviewsSection: FC<Props> = ({
           ))}
         </div>
       </div>
+
+      {onSubmitReview && (
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          doctorName={doctorName}
+          doctorSpecialty={doctorSpecialty}
+          doctorClinic={doctorClinic}
+          doctorImage={doctorImage}
+          onSubmit={onSubmitReview}
+        />
+      )}
     </div>
   );
 };
