@@ -103,12 +103,18 @@ export const ProfileReviewsPage: FC = () => {
         }
       />
       <div className="px-4 pt-6 pb-8 md:p-0">
-        <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground mb-6 hidden md:block">
-          Отзывы
-        </h2>
-
-        <div className="hidden md:block mb-6">
-          <FilterTabBar tabs={TABS} value={activeTab} onChange={setActiveTab} />
+        {/* Заголовок и переключатель — одной строкой, табы справа (по макету).
+            Раньше табы стояли отдельной строкой под заголовком. */}
+        <div className="hidden md:flex items-center justify-between gap-4 mb-6">
+          <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground">
+            Отзывы
+          </h2>
+          <FilterTabBar
+            tabs={TABS}
+            value={activeTab}
+            onChange={setActiveTab}
+            className="pb-0"
+          />
         </div>
 
         {isLoading ? (
