@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 
-import { HeartIcon2 } from "@/shared/assets/icons";
+import { HeartIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 type Props = {
@@ -22,19 +22,24 @@ export const SaveButton: FC<Props> = ({
   onSave,
 }) => {
   return (
+    // Белый круг с тенью — как на карточке услуги (entities/service/ui.tsx).
+    // Раньше здесь было голое сердечко 24px без фона, и карточки врача и
+    // клиники выбивались из общего вида каталога.
     <button
       type="button"
       onClick={() => onSave?.()}
       aria-label={saved ? savedLabel : unsavedLabel}
-      className="transition-transform active:scale-90"
+      className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-surface transition-colors shadow-sm shrink-0"
     >
-      <HeartIcon2
+      <HeartIcon
         className={cn(
-          // Размер обязателен: в heart-2.svg нет width/height (только viewBox),
+          // Размер обязателен: в heart.svg нет width/height (только viewBox),
           // поэтому без класса svg внутри shrink-to-fit кнопки схлопывался в
           // 0×0 — сердечко на карточках врача и клиники было не видно и не
           // нажать (проверено getBoundingClientRect на /specialists).
           "size-6 transition-colors",
+          // Заливка только у сохранённого. Незалитому оставляем родную тёмную
+          // обводку из svg — так же выглядит сердечко на карточке услуги.
           saved && "[&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]",
         )}
       />

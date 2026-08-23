@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 
+import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { FilterBar } from "@/features/filter-bar";
 
 import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
@@ -26,6 +27,9 @@ const VISIBLE_COUNT = 8;
 
 const DoctorsListContent = () => {
   const router = useRouter();
+  // Избранное было подключено только на /specialists — на главной сердечко
+  // рисовалось в состоянии «не сохранено» и клик ни к чему не вёл.
+  const { isSaved, toggle } = useFavoriteToggle("doctor");
   const searchParams = useSearchParams() ?? new URLSearchParams();
 
   const currentSpec = searchParams.get("doc_spec");
@@ -93,7 +97,9 @@ const DoctorsListContent = () => {
           {doctors.map((doc) => (
             <DoctorCard
               key={`mobile-doc-${doc.id}`}
-              {...doc} // <-- ИСПРАВЛЕНО
+              {...doc}
+              isSaved={isSaved(Number(doc.id))}
+              onSave={() => toggle(Number(doc.id))}
               variant="horizontal"
               onBook={() =>
                 router.push(
@@ -116,7 +122,9 @@ const DoctorsListContent = () => {
           {doctors.map((doc) => (
             <DoctorCard
               key={`desktop-doc-${doc.id}`}
-              {...doc} // <-- ИСПРАВЛЕНО
+              {...doc}
+              isSaved={isSaved(Number(doc.id))}
+              onSave={() => toggle(Number(doc.id))}
               variant="vertical"
               onBook={() =>
                 router.push(

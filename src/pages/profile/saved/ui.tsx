@@ -36,7 +36,11 @@ const TABS = [
 ];
 
 export const ProfileSavedPage: FC = () => {
-  const [activeTab, setActiveTab] = useState<SavedType>("clinic");
+  // По умолчанию открывалась вкладка «Клиники» независимо от того, что
+  // сохранено. Пользователь лайкал врача, заходил в «Сохранённое» и видел
+  // «Список пуст» — казалось, что лайки не работают. Открываем первую
+  // непустую вкладку; выбор пользователя после этого не переопределяем.
+  const [activeTab, setActiveTab] = useState<SavedType | null>(null);
 
   const { data: favorites, isLoading } = useQuery({
     queryKey: profileKeys.favorites(),
@@ -60,6 +64,18 @@ export const ProfileSavedPage: FC = () => {
     })),
   ];
 
+  // Первая вкладка, в которой что-то есть. Пока пользователь не переключал
+  // сам (activeTab === null), показываем именно её.
+  const firstFilled: SavedType =
+    (favorites?.clinics?.length ?? 0) > 0
+      ? "clinic"
+      : (favorites?.doctors?.length ?? 0) > 0
+        ? "doctor"
+        : (favorites?.services?.length ?? 0) > 0
+          ? "service"
+          : "clinic";
+  const currentTab = activeTab ?? firstFilled;
+
   return (
     <>
       <MobilePageHeader
@@ -67,7 +83,7 @@ export const ProfileSavedPage: FC = () => {
         bottomElement={
           <FilterTabBar
             tabs={TABS}
-            value={activeTab}
+            value={currentTab}
             onChange={setActiveTab}
             className="pb-0"
           />
@@ -79,7 +95,11 @@ export const ProfileSavedPage: FC = () => {
         </h2>
 
         <div className="hidden md:block mb-6">
-          <FilterTabBar tabs={TABS} value={activeTab} onChange={setActiveTab} />
+          <FilterTabBar
+            tabs={TABS}
+            value={currentTab}
+            onChange={setActiveTab}
+          />
         </div>
 
         {isLoading ? (
@@ -87,7 +107,7 @@ export const ProfileSavedPage: FC = () => {
             Загрузка...
           </div>
         ) : (
-          <ProfileSaved items={savedItems} activeTab={activeTab} />
+          <ProfileSaved items={savedItems} activeTab={currentTab} />
         )}
       </div>
     </>

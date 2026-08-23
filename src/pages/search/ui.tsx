@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/widgets/header";
 
 import { ActiveFiltersChips } from "@/features/active-filters-chips";
+import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { FiltersTrigger } from "@/features/mobile-filters";
 import { UrlSearchInput } from "@/features/search-by-query";
 
@@ -85,6 +86,11 @@ export const SearchPage: FC = () => {
   };
 
   // 2. ПОЛУЧАЕМ ВСЕ ДАННЫЕ С СЕРВЕРА
+  // Избранное на странице поиска не было подключено: сердечки на найденных
+  // врачах и клиниках не закрашивались и по клику ничего не сохраняли.
+  const doctorFavorites = useFavoriteToggle("doctor");
+  const clinicFavorites = useFavoriteToggle("clinic");
+
   const { data: doctors = [], isLoading: isDocsLoading } = useQuery({
     queryKey: doctorKeys.list(doctorFilters),
     queryFn: ({ signal }) => api.getDoctors(doctorFilters, signal),
@@ -208,6 +214,8 @@ export const SearchPage: FC = () => {
                         <DoctorCard
                           key={`mob-doc-${doc.id}`}
                           {...doc}
+                          isSaved={doctorFavorites.isSaved(Number(doc.id))}
+                          onSave={() => doctorFavorites.toggle(Number(doc.id))}
                           variant="horizontal"
                           onBook={() =>
                             router.push(
@@ -233,6 +241,10 @@ export const SearchPage: FC = () => {
                         <ClinicCard
                           key={`mob-clinic-${clinic.id}`}
                           {...clinic}
+                          isSaved={clinicFavorites.isSaved(Number(clinic.id))}
+                          onSave={() =>
+                            clinicFavorites.toggle(Number(clinic.id))
+                          }
                           variant="horizontal"
                         />
                       ))}
@@ -324,6 +336,10 @@ export const SearchPage: FC = () => {
                             <DoctorCard
                               key={`desk-doc-${doc.id}`}
                               {...doc}
+                              isSaved={doctorFavorites.isSaved(Number(doc.id))}
+                              onSave={() =>
+                                doctorFavorites.toggle(Number(doc.id))
+                              }
                               variant="vertical"
                               onBook={() =>
                                 router.push(
@@ -354,6 +370,12 @@ export const SearchPage: FC = () => {
                             <ClinicCard
                               key={`desk-clinic-${clinic.id}`}
                               {...clinic}
+                              isSaved={clinicFavorites.isSaved(
+                                Number(clinic.id),
+                              )}
+                              onSave={() =>
+                                clinicFavorites.toggle(Number(clinic.id))
+                              }
                               variant="vertical"
                             />
                           ))}

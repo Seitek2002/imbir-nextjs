@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 
+import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { FilterBar } from "@/features/filter-bar";
 
 import { ClinicCard, ClinicSkeleton } from "@/entities/clinic";
@@ -16,6 +17,9 @@ import { Button } from "@/shared/ui";
 
 const ClinicsListContent = () => {
   const searchParams = useSearchParams() ?? new URLSearchParams();
+  // Избранное клиник: без этого сердечко на главной не закрашивалось
+  // и клик по нему ничего не сохранял (на /clinics подключено давно).
+  const { isSaved, toggle } = useFavoriteToggle("clinic");
 
   const currentRating = searchParams.get("clinic_rating");
   const currentSpec = searchParams.get("clinic_spec");
@@ -74,6 +78,8 @@ const ClinicsListContent = () => {
             experience={clinic.experience}
             address={clinic.address}
             image={clinic.image}
+            isSaved={isSaved(Number(clinic.id))}
+            onSave={() => toggle(Number(clinic.id))}
             variant="horizontal"
           />
         ))}
@@ -96,6 +102,8 @@ const ClinicsListContent = () => {
             experience={clinic.experience}
             address={clinic.address}
             image={clinic.image}
+            isSaved={isSaved(Number(clinic.id))}
+            onSave={() => toggle(Number(clinic.id))}
             variant="vertical"
           />
         ))}
