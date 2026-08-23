@@ -7,16 +7,17 @@ import { useQuery } from "@tanstack/react-query";
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
 
 import { getMyReviews, profileKeys } from "@/shared/api";
-import {
-  ClinicBuildingIcon,
-  DoctorPersonIcon,
-  ServiceRadialIcon,
-} from "@/shared/assets/icons";
+import { ClinicBuildingIcon, DoctorPersonIcon } from "@/shared/assets/icons";
 import { FilterTabBar } from "@/shared/ui";
 
 import { ProfileReviews } from "./reviews/ui";
 import { ReviewType, UserReview } from "./reviews/user-review/model";
 
+// Вкладки «Услуги» здесь нет намеренно: бэк не принимает отзывы на услуги
+// (ReviewTargetTypeEnum = ['doctor', 'clinic'], POST /api/reviews/ с
+// target_type: "service" отвечает 400), поэтому наполниться она не могла —
+// пользователь видел пустой список без объяснений. Вернуть вместе с
+// поддержкой отзывов на услуги на стороне сервера.
 const TABS = [
   {
     id: "clinic" as ReviewType,
@@ -28,12 +29,30 @@ const TABS = [
     label: "Специалисты",
     icon: <DoctorPersonIcon className="shrink-0" />,
   },
-  {
-    id: "service" as ReviewType,
-    label: "Услуги",
-    icon: <ServiceRadialIcon className="shrink-0" />,
-  },
 ];
+
+const MONTHS = [
+  "Января",
+  "Февраля",
+  "Марта",
+  "Апреля",
+  "Мая",
+  "Июня",
+  "Июля",
+  "Августа",
+  "Сентября",
+  "Октября",
+  "Ноября",
+  "Декабря",
+];
+
+// "2025-11-20T..." → "20 Ноября, 2025" — формат из макета. Раньше показывали
+// сырую дату из ответа ("2025-11-20").
+const fmtReviewDate = (iso: string): string => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso.slice(0, 10);
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}, ${d.getFullYear()}`;
+};
 
 export const ProfileReviewsPage: FC = () => {
   const [activeTab, setActiveTab] = useState<ReviewType>("clinic");
@@ -56,9 +75,9 @@ export const ProfileReviewsPage: FC = () => {
       type,
       rating: r.rating,
       comment: r.text ?? "",
-      date: r.created_at.slice(0, 10),
+      date: fmtReviewDate(r.created_at),
       reply: r.reply
-        ? { text: r.reply.text, date: r.reply.created_at.slice(0, 10) }
+        ? { text: r.reply.text, date: fmtReviewDate(r.reply.created_at) }
         : null,
       // /api/profile/reviews/ отдаёт только target.full_name — раскладываем
       // его в поле, которое рендерит карточка для этого типа.

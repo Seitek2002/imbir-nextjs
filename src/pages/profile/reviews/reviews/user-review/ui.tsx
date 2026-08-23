@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 
-import { EditIcon, GeoIcon, RemoveIcon } from "@/shared/assets/icons";
+import { EditIcon, GeoIcon, TrashIcon } from "@/shared/assets/icons";
 import { IconBtn, ImageWithFallback } from "@/shared/ui";
 import { StarRating } from "@/shared/ui/star-rating";
 
@@ -40,17 +40,25 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
           </div>
         ) : null;
       case "doctor":
+        // /api/profile/reviews/ отдаёт только имя врача — без специализации и
+        // клиники. Без этой проверки под именем висела одинокая точка «•».
+        if (!review.doctorSpecialty && !review.doctorClinic) return null;
         return (
           <p className="text-muted text-sm mt-0.5">
-            {review.doctorSpecialty}{" "}
-            <span className="text-primary">• {review.doctorClinic}</span>
+            {review.doctorSpecialty}
+            {review.doctorClinic && (
+              <span className="text-primary"> • {review.doctorClinic}</span>
+            )}
           </p>
         );
       case "service":
+        if (!review.serviceCategory && !review.serviceClinic) return null;
         return (
           <p className="text-muted text-sm mt-0.5">
-            {review.serviceCategory}{" "}
-            <span className="text-primary">• {review.serviceClinic}</span>
+            {review.serviceCategory}
+            {review.serviceClinic && (
+              <span className="text-primary"> • {review.serviceClinic}</span>
+            )}
           </p>
         );
       default:
@@ -59,7 +67,7 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-border flex flex-col gap-5">
+    <div className="bg-white rounded-3xl p-6 border border-border flex flex-col gap-5 min-w-0">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
@@ -103,7 +111,7 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
               aria-label="Удалить"
               className="hover:bg-[#FFE5E0] hover:border-[#FFE5E0]"
             >
-              <RemoveIcon className="w-5 h-5 [&_path]:stroke-primary" />
+              <TrashIcon className="w-5 h-5 text-primary" />
             </IconBtn>
           )}
         </div>
@@ -113,7 +121,10 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
         <StarRating rating={review.rating} size={20} />
       </div>
 
-      <p className="text-secondary text-base leading-relaxed">
+      {/* break-words: отзыв из длинной строки без пробелов иначе растягивал
+          страницу на десятки тысяч пикселей и добавлял горизонтальный скролл
+          всему кабинету. */}
+      <p className="text-secondary text-base leading-relaxed break-words">
         {review.comment}
       </p>
 
@@ -122,7 +133,7 @@ export const UserReviewCard: FC<Props> = ({ review, onEdit, onDelete }) => {
           <p className="text-foreground font-medium text-sm mb-1">
             Ответ {review.type === "clinic" ? "клиники" : "врача"}
           </p>
-          <p className="text-secondary text-sm leading-relaxed">
+          <p className="text-secondary text-sm leading-relaxed break-words">
             {review.reply.text}
           </p>
           {review.reply.date && (
