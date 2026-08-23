@@ -20,7 +20,12 @@ export default async function ProfileLayout({
         <Header />
       </div>
       <AuthGuard>{children}</AuthGuard>
-      <div className="hidden md:block">
+      {/* mt-auto прибивает футер к низу: body — flex-колонка на всю высоту
+          (см. app/layout.tsx), а шапка/контент/футер лежат в ней соседями и
+          сами не растягиваются. Без этого на коротких страницах кабинета
+          (пустое «Сохранённое», «Отзывы») футер вставал сразу под контентом,
+          а под ним оставалась полоса пустоты до конца экрана. */}
+      <div className="hidden md:block mt-auto">
         <Footer />
       </div>
     </InitialAuthProvider>
