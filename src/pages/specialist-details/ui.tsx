@@ -30,7 +30,7 @@ import {
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
-import { useAuthStore, useCityStore } from "@/shared/store";
+import { useAuthStore } from "@/shared/store";
 import { Button, ContactInfoModal, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
@@ -47,7 +47,6 @@ type Props = {
 
 export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
   const router = useRouter();
-  const city = useCityStore((s) => s.city);
   const [isOfflineInfoOpen, setIsOfflineInfoOpen] = useState(false);
 
   // 1. ПОЛУЧАЕМ ДАННЫЕ ВРАЧА
@@ -225,11 +224,6 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                     <h1 className="text-2xl md:text-3xl font-semibold text-foreground leading-tight">
                       {doctor.name}
                     </h1>
-                    {city && (
-                      <span className="inline-flex items-center text-xs font-medium text-primary bg-[#FFF0EE] px-2.5 py-0.5 rounded-full border border-primary/20 shrink-0 self-center">
-                        в г. {city}
-                      </span>
-                    )}
                   </div>
                   <p className="text-muted text-center lg:text-left text-base">
                     {doctor.specialty}

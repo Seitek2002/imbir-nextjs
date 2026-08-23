@@ -1,5 +1,4 @@
 import { cn } from "@/shared/lib/utils";
-import { useCityStore } from "@/shared/store";
 import { Button, SearchInput } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
@@ -35,8 +34,6 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
   // проходит без клиники (clinic_id опционален), так что поле просто убираем.
   const hideClinicField =
     !selectedClinic && !!selectedDoctor && workplaceOptions.length === 0;
-
-  const city = useCityStore((s) => s.city);
 
   return (
     <section
@@ -83,11 +80,6 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
           <h2 className="text-[40px] text-foreground leading-none font-semibold">
             {mobileStep1Config.title}
           </h2>
-          {city && (
-            <span className="inline-flex items-center text-xs font-medium text-primary bg-[#FFF0EE] px-2.5 py-0.5 rounded-full border border-primary/20 shrink-0 self-center">
-              в г. {city}
-            </span>
-          )}
         </div>
 
         <div className="mt-3">

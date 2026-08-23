@@ -4,7 +4,6 @@ import { useCallback, useState } from "react";
 
 import { RemoveIcon } from "@/shared/assets/icons";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
-import { useCityStore } from "@/shared/store";
 import { Button, IconBtn, SearchInput } from "@/shared/ui";
 
 import type { RecordForm } from "../model/use-record-form";
@@ -45,11 +44,6 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
   }, [closeModal]);
 
   useScrollLock(isOpen);
-  // Хук обязан вызываться до раннего return ниже: когда модалка закрыта,
-  // компонент выходил раньше, и на открытии React видел на один хук больше —
-  // «Rendered more hooks than during the previous render», страница падала в
-  // error boundary и записаться было нельзя.
-  const city = useCityStore((s) => s.city);
 
   if (!isOpen && !isClosing) return null;
   const state = isClosing ? "closed" : "open";
@@ -78,11 +72,6 @@ export const SelectionModal = ({ form }: { form: RecordForm }) => {
             <h3 className="text-[28px] text-foreground leading-[130%] font-semibold">
               {modalConfig?.title}
             </h3>
-            {city && (
-              <span className="inline-flex items-center text-xs font-medium text-primary bg-[#FFF0EE] px-2.5 py-0.5 rounded-full border border-primary/20 shrink-0 self-center">
-                в г. {city}
-              </span>
-            )}
           </div>
 
           <IconBtn
