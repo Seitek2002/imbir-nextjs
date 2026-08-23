@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 
 import { BlogSectionServer } from "@/widgets/blog-section";
 import { Header } from "@/widgets/header";
@@ -11,7 +10,6 @@ import {
   VideoThumbnail2,
   VideoThumbnail3,
 } from "@/shared/assets/images";
-import { ROUTES } from "@/shared/config";
 import { LazyInView } from "@/shared/ui";
 
 // Эти два блока рендерятся сразу (не за LazyInView, см. ниже), поэтому им не
@@ -90,29 +88,13 @@ export const HomePage = () => {
         />
       </LazyInView>
 
-      <section className="mx-auto w-full max-w-360 px-3 pt-3 pb-0 md:px-8 md:pt-8 md:pb-12">
-        <div className="rounded-2xl bg-white px-4 py-4 md:rounded-none md:bg-transparent md:px-0 md:py-0">
-          <div className="mb-4 flex items-start justify-between md:mb-6">
-            <div>
-              <h2 className="text-[18px] font-semibold leading-tight text-foreground md:text-[28px]">
-                Блог
-              </h2>
-              <p className="hidden md:block text-muted text-base mt-1">
-                Статьи о здоровье, советы специалистов и новости медицины
-              </p>
-            </div>
-            <Link
-              href={ROUTES.BLOG}
-              className="md:hidden text-primary text-sm font-medium mt-1"
-            >
-              Все
-            </Link>
-          </div>
-          <Suspense fallback={null}>
-            <BlogSectionServer variant="home" prioritizeFirstCard />
-          </Suspense>
-        </div>
-      </section>
+      {/* Заголовок, описание и ссылка «Все» рендерятся внутри
+          BlogSectionServer вместе с самим блоком — так весь блог целиком
+          скрывается, если статей нет, а не остаётся пустой секцией с
+          заголовком без содержимого. */}
+      <Suspense fallback={null}>
+        <BlogSectionServer variant="home" prioritizeFirstCard />
+      </Suspense>
 
       <LazyInView minHeight={300}>
         <Footer />
