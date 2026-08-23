@@ -23,7 +23,6 @@ export const RecordPage = () => {
     handleRecordBack,
     selectedDoctor,
     selectedService,
-    mode,
     selectedDate,
     selectedTime,
     showSuccess,
@@ -65,7 +64,7 @@ export const RecordPage = () => {
               <SummaryCard
                 doctor={selectedDoctor}
                 service={selectedService}
-                mode={mode}
+                isOnline={form.isAuthenticated}
                 selectedDate={selectedDate}
                 selectedTime={selectedTime}
                 appointmentId={appointmentResult?.id ?? null}
@@ -82,7 +81,7 @@ export const RecordPage = () => {
         isOpen={showSuccess}
         onClose={handleSuccessClose}
         appointmentId={appointmentResult?.id ?? null}
-        isOnline={mode === "online"}
+        isOnline={form.isAuthenticated}
       />
     </main>
   );

@@ -11,8 +11,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-import { ConsultationMode } from "@/widgets/appointment-datetime-picker";
-
 import {
   api,
   createAppointment,
@@ -77,7 +75,6 @@ export const useRecordForm = () => {
     string | null
   >(null);
 
-  const [mode, setMode] = useState<ConsultationMode>("offline");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
@@ -106,12 +103,15 @@ export const useRecordForm = () => {
     },
   });
 
-  const canUseOnline = useAuthStore((state) => Boolean(state.accessToken));
+  // Все приёмы на платформе онлайн, но бэк не разрешает онлайн-запись без
+  // аккаунта («Онлайн-запись доступна только авторизованным пользователям»,
+  // 400), поэтому гостевая запись уходит с is_online: false.
+  const isAuthenticated = useAuthStore((state) => Boolean(state.accessToken));
 
   const { data: profile } = useQuery({
     queryKey: ["record-profile"],
     queryFn: () => getProfile(),
-    enabled: canUseOnline,
+    enabled: isAuthenticated,
   });
 
   useEffect(() => {
@@ -346,9 +346,6 @@ export const useRecordForm = () => {
     if (doctorId) setSelectedDoctorId(doctorId);
     const clinicId = urlParams.get("clinic");
     if (clinicId) setSelectedClinicId(clinicId);
-    const modeParam = urlParams.get("mode");
-    if (modeParam === "online" || modeParam === "offline") setMode(modeParam);
-
     // Deep-link с карточки/страницы врача (или услуги) — сразу переводим
     // мобильный степпер на следующий актуальный этап цепочки клиника→врач→
     // услуга, иначе он всегда стартует с «clinic» и заставляет повторно
@@ -772,7 +769,7 @@ export const useRecordForm = () => {
     const request: CreateAppointmentRequest = {
       date: toApiDate(selectedDate),
       time: toApiTime(selectedTime),
-      is_online: mode === "online" && canUseOnline,
+      is_online: isAuthenticated,
     };
 
     if (selectedDoctorId) request.doctor_id = Number(selectedDoctorId);
@@ -782,7 +779,7 @@ export const useRecordForm = () => {
 
     // Guests pass their contacts explicitly; authenticated bookings are tied
     // to the logged-in user on the server, so no guest_* fields are sent.
-    if (!canUseOnline) {
+    if (!isAuthenticated) {
       request.guest_name = `${firstName.trim()} ${lastName.trim()}`.trim();
       request.guest_phone = `+996 ${phone.trim()}`;
       if (email.trim()) request.guest_email = email.trim();
@@ -797,7 +794,7 @@ export const useRecordForm = () => {
     // Для авторизованных пользователей имя/фамилия/телефон не уходят на бэк
     // (запись привязывается к JWT-юзеру, см. buildAppointmentRequest) —
     // требовать их незачем.
-    if (!canUseOnline) {
+    if (!isAuthenticated) {
       if (!firstName.trim()) nextErrors.firstName = "Введите ваше имя";
       if (!lastName.trim()) nextErrors.lastName = "Введите вашу фамилию";
 
@@ -868,15 +865,13 @@ export const useRecordForm = () => {
   // AuthGuard.
   const handleSuccessClose = () => {
     setShowSuccess(false);
-    router.push(canUseOnline ? ROUTES.PROFILE_HISTORY : ROUTES.HOME);
+    router.push(isAuthenticated ? ROUTES.PROFILE_HISTORY : ROUTES.HOME);
   };
 
   return {
     router,
     mobileStep,
     setMobileStep,
-    mode,
-    setMode,
     selectedDate,
     setSelectedDate,
     selectedTime,
@@ -905,7 +900,7 @@ export const useRecordForm = () => {
     // заполненной форме и создаст дубль записи.
     handleSuccessClose,
     appointmentResult,
-    canUseOnline,
+    isAuthenticated,
     clinicMap,
     hasMoreClinics: Boolean(hasMoreClinics),
     isFetchingMoreClinics,

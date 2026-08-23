@@ -17,7 +17,10 @@ type Props = {
   max: number;
   step?: number;
   value: [number, number];
-  onChange: (value: [number, number]) => void;
+  // Необязателен: если значение нужно только по окончании перетаскивания
+  // (например, чтобы не дёргать сервер на каждый шаг), передавайте лишь
+  // onChangeEnd — цифры на концах трека всё равно двигаются, они локальные.
+  onChange?: (value: [number, number]) => void;
   onChangeEnd?: (value: [number, number]) => void;
   className?: string;
   labelClassName?: string;
@@ -61,14 +64,14 @@ export const RangeSlider: FC<Props> = ({
     const val = Math.min(Number(e.target.value), maxVal - step);
     minValRef.current = val;
     setMinVal(val);
-    onChange([val, maxVal]);
+    onChange?.([val, maxVal]);
   };
 
   const handleMaxChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = Math.max(Number(e.target.value), minVal + step);
     maxValRef.current = val;
     setMaxVal(val);
-    onChange([minVal, val]);
+    onChange?.([minVal, val]);
   };
 
   const handleChangeEnd = () => {

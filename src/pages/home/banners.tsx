@@ -10,6 +10,7 @@ import {
   BannerImage2,
   BannerImage3,
   GridBlue,
+  GridFirst,
   GridPinkSlanted,
   GridPinkStraight,
 } from "@/shared/assets/images";
@@ -75,9 +76,9 @@ export const Banners: FC = () => {
         </Link>
       </div>
       <Image
-        src={GridPinkStraight}
+        src={GridFirst}
         alt=""
-        className="pointer-events-none absolute top-[100px] right-0 z-0 hidden h-[193px] w-[197px] md:block"
+        className="pointer-events-none absolute top-[100px] right-0 z-1 hidden md:block"
       />
       <Image
         src={BannerImage1}

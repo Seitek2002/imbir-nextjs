@@ -41,8 +41,23 @@ const Services = async ({ searchParams }: Props) => {
     priceParts?.[1] ?? MAX_PRICE,
   ];
 
+  // Клиника и оценка сюда не входили — и из-за этого при выборе любого из этих
+  // двух фильтров ключ запроса на сервере не совпадал с клиентским: сервер
+  // впустую ходил в API за неотфильтрованным списком, а браузер после
+  // гидрации шёл за данными второй раз. Две загрузки подряд вместо одной.
+  const rawClinic = resolvedSearchParams?.[`${PREFIX}_clinic`];
+  const currentClinic = typeof rawClinic === "string" ? rawClinic : null;
+
+  const rawRating = resolvedSearchParams?.[`${PREFIX}_rating`];
+  const currentRating = typeof rawRating === "string" ? rawRating : null;
+
   const filters: Omit<ServiceFilters, "page" | "page_size"> = {
     category: currentCategory ?? undefined,
+    clinic_id: currentClinic ?? undefined,
+    min_rating:
+      currentRating && currentRating !== "all"
+        ? parseFloat(currentRating)
+        : undefined,
     min_price: priceParts ? priceRange[0] : undefined,
     max_price: priceParts ? priceRange[1] : undefined,
   };
