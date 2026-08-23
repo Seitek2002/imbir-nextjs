@@ -19,9 +19,10 @@ type Props = {
     key: K,
     value: ClinicFormData[K],
   ) => void;
+  emailError?: string | null;
 };
 
-export const Step2Location = ({ data, onChange }: Props) => {
+export const Step2Location = ({ data, onChange, emailError }: Props) => {
   // Временно только Кыргызстан — по просьбе поддержки, чтобы у операторов не
   // возникало вопросов из-за случайно выбранной другой страны при
   // регистрации. Города — из /references/cities/ поверх локального каталога.
@@ -78,6 +79,7 @@ export const Step2Location = ({ data, onChange }: Props) => {
         placeholder="Введите вашу почту"
         value={data.email}
         onChange={(e) => onChange("email", e.target.value)}
+        error={emailError ?? undefined}
       />
       <Input
         label="Сайт (если есть)"

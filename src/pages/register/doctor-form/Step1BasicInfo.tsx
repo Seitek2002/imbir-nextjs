@@ -36,9 +36,10 @@ type Props = {
     key: K,
     value: DoctorFormData[K],
   ) => void;
+  emailError?: string | null;
 };
 
-export const Step1BasicInfo = ({ data, onChange }: Props) => {
+export const Step1BasicInfo = ({ data, onChange, emailError }: Props) => {
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   // Город и языки — из справочников бэка, поверх локальных наборов по
@@ -149,6 +150,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
         placeholder="Введите вашу почту"
         value={data.email}
         onChange={(e) => onChange("email", e.target.value)}
+        error={emailError ?? undefined}
       />
 
       <div className="flex flex-col gap-1.5">

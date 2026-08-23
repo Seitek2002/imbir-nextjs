@@ -8,6 +8,8 @@ import {
   useVerifyContact,
 } from "@/features/verify-contact";
 
+import { checkEmailAvailabilityFn } from "@/shared/api";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import {
   PASSWORD_REQUIREMENTS_ERROR,
   isStrongPassword,
@@ -73,6 +75,13 @@ export const DoctorRegistrationForm = ({
   // Показываем блок подтверждения только после первой попытки отправки —
   // см. тот же приём в clinic-form/ui.tsx.
   const [showVerify, setShowVerify] = useState(false);
+  // POST /api/auth/email/check/ — чистая проверка занятости, без побочных
+  // эффектов. Дёргаем её на шаге 1, а не только на финальном сабмите: иначе
+  // о занятом email врач узнаёт после всех 4 шагов анкеты и подтверждения
+  // кода (verify.isVerified проверяется НАРЯДУ с занятостью — это разные
+  // гейты: verify подтверждает владение контактом, но не его свободность).
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   const verify = useVerifyContact({
     email: data.email,
@@ -84,6 +93,7 @@ export const DoctorRegistrationForm = ({
     value: DoctorFormData[K],
   ) => {
     if (key === "password" || key === "confirmPassword") setPasswordError("");
+    if (key === "email") setEmailError(null);
     setData((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -98,16 +108,35 @@ export const DoctorRegistrationForm = ({
 
   const isValid =
     step === 1
-      ? isStep1Valid
+      ? isStep1Valid && !isCheckingEmail
       : step === 4
         ? !!data.password && data.password === data.confirmPassword
         : true;
 
   // Один обработчик и на клик по кнопке, и на Enter из любого поля шага.
   // Промежуточные шаги ведут к следующему, последний — сабмитит всю форму.
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!isValid || isLoading) return;
-    if (step < 4) {
+    if (step === 1) {
+      setIsCheckingEmail(true);
+      try {
+        const { data: check } = await checkEmailAvailabilityFn({
+          email: data.email,
+        });
+        if (!check.available) {
+          setEmailError("Этот email уже используется");
+          return;
+        }
+      } catch (err: unknown) {
+        const errData = (err as { response?: { data?: unknown } })?.response
+          ?.data;
+        toast.error(extractErrorMessage(errData, "Не удалось проверить email"));
+        return;
+      } finally {
+        setIsCheckingEmail(false);
+      }
+      onContinue();
+    } else if (step < 4) {
       onContinue();
     } else {
       if (data.password !== data.confirmPassword) {
@@ -134,7 +163,13 @@ export const DoctorRegistrationForm = ({
   };
 
   const steps: Record<DoctorStep, React.ReactNode> = {
-    1: <Step1BasicInfo data={data} onChange={handleChange} />,
+    1: (
+      <Step1BasicInfo
+        data={data}
+        onChange={handleChange}
+        emailError={emailError}
+      />
+    ),
     2: (
       <Step2Professional
         data={data}
@@ -182,7 +217,7 @@ export const DoctorRegistrationForm = ({
       <FormSubmitButton
         label={step === 4 ? "Завершить регистрацию" : "Продолжить"}
         disabled={!isValid || isLoading}
-        loading={isLoading}
+        loading={isLoading || isCheckingEmail}
         onBack={onBack}
       />
     </form>
