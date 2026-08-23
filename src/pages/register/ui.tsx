@@ -659,7 +659,7 @@ export const RegisterPage = () => {
       }
 
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
-      router.push(ROLE_REDIRECT[res.user.role] ?? "/doctor-profile");
+      router.push(getRoleRedirect(res.user.role));
     } catch (err: unknown) {
       const errData = (err as { response?: { data?: unknown } })?.response
         ?.data;
@@ -840,7 +840,7 @@ export const RegisterPage = () => {
       }
 
       toast.success(`Добро пожаловать, ${data.clinicName}!`);
-      router.push(ROLE_REDIRECT[res.user.role] ?? "/clinic-profile");
+      router.push(getRoleRedirect(res.user.role));
     } catch (err: unknown) {
       const errData = (err as { response?: { data?: unknown } })?.response
         ?.data;
