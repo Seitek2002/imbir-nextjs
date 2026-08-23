@@ -26,7 +26,9 @@ export const UserStatusCard: FC<Props> = ({ className }) => {
   const negative = hasData ? 100 - positive : 0;
 
   return (
-    <div className={cn("bg-white rounded-3xl p-6", className)}>
+    <div
+      className={cn("bg-white rounded-3xl border border-border p-6", className)}
+    >
       <p className="text-muted text-sm mb-2">Статус пользователя</p>
       <h4 className="text-primary text-2xl font-bold mb-3">
         {status?.name ?? "Пока не присвоен"}
@@ -36,45 +38,48 @@ export const UserStatusCard: FC<Props> = ({ className }) => {
           "Оставляйте отзывы о врачах и клиниках — по их средней оценке мы присвоим вам статус."}
       </p>
 
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-muted text-xs">
-          Положительных
-          <br />
-          отзывов
-        </span>
-        <span className="text-muted text-xs text-right">
-          Отрицательных
-          <br />
-          отзывов
-        </span>
-      </div>
-
-      {/* Единый трек: оранжевый сегмент + синий хвост, как в макете. Пока
-          данных нет, трек остаётся серым, а не «100% отрицательных». */}
-      <div className="flex items-center gap-2">
-        <span className="text-primary text-sm font-semibold border border-primary rounded-lg px-2 py-0.5">
-          {positive}%
-        </span>
-        <div className="flex-1 h-2 rounded-full overflow-hidden flex bg-border-soft">
-          {hasData && (
-            <>
-              <div
-                className="bg-primary h-full"
-                style={{ width: `${positive}%` }}
-              />
-              <div
-                className="h-full flex-1"
-                style={{ backgroundColor: NEGATIVE }}
-              />
-            </>
-          )}
+      {/* Подписи, чипы и трек — в отдельной светлой подложке, как в макете. */}
+      <div className="bg-background rounded-2xl p-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-muted text-xs">
+            Положительных
+            <br />
+            отзывов
+          </span>
+          <span className="text-muted text-xs text-right">
+            Отрицательных
+            <br />
+            отзывов
+          </span>
         </div>
-        <span
-          className="text-sm font-semibold border rounded-lg px-2 py-0.5"
-          style={{ color: NEGATIVE, borderColor: NEGATIVE }}
-        >
-          {negative}%
-        </span>
+
+        {/* Единый трек: оранжевый сегмент + синий хвост, как в макете. Пока
+          данных нет, трек остаётся серым, а не «100% отрицательных». */}
+        <div className="flex items-center gap-2">
+          <span className="text-primary text-sm font-semibold border border-primary rounded-lg px-2 py-0.5">
+            {positive}%
+          </span>
+          <div className="flex-1 h-2 rounded-full overflow-hidden flex bg-border-soft">
+            {hasData && (
+              <>
+                <div
+                  className="bg-primary h-full"
+                  style={{ width: `${positive}%` }}
+                />
+                <div
+                  className="h-full flex-1"
+                  style={{ backgroundColor: NEGATIVE }}
+                />
+              </>
+            )}
+          </div>
+          <span
+            className="text-sm font-semibold border rounded-lg px-2 py-0.5"
+            style={{ color: NEGATIVE, borderColor: NEGATIVE }}
+          >
+            {negative}%
+          </span>
+        </div>
       </div>
     </div>
   );
