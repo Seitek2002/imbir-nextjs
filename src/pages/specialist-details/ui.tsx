@@ -474,9 +474,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             <Button
               className="flex-1 justify-center"
               size="lg"
-              onClick={() =>
-                router.push(`${ROUTES.RECORD}?doctor=${id}&mode=online`)
-              }
+              onClick={() => router.push(`${ROUTES.RECORD}?doctor=${id}`)}
             >
               Онлайн консультация
             </Button>

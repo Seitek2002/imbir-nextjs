@@ -1,5 +1,8 @@
+import Link from "next/link";
+
 import { AppointmentDateTimePicker } from "@/widgets/appointment-datetime-picker";
 
+import { ROUTES } from "@/shared/config";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
 
@@ -9,9 +12,7 @@ import { StepTitle } from "./StepTitle";
 export const Step2DateTime = ({ form }: { form: RecordForm }) => {
   const {
     mobileStep,
-    mode,
-    setMode,
-    canUseOnline,
+    isAuthenticated,
     selectedDoctorId,
     selectedDate,
     setSelectedDate,
@@ -33,10 +34,23 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
     >
       <StepTitle number={2} title="Выберите дату и время" />
 
+      {/* Приёмы только онлайн, но бэк запрещает онлайн-запись без аккаунта
+          («Онлайн-запись доступна только авторизованным пользователям», 400),
+          поэтому гостю говорим прямо, чего он лишается. */}
+      {!isAuthenticated && (
+        <p className="text-xs text-muted mb-3">
+          Видеозвонок с врачом доступен после{" "}
+          <Link
+            href={ROUTES.LOGIN}
+            className="text-primary underline hover:no-underline"
+          >
+            авторизации
+          </Link>
+          . Без входа запись оформится без ссылки на консультацию.
+        </p>
+      )}
+
       <AppointmentDateTimePicker
-        mode={mode}
-        onModeChange={setMode}
-        canUseOnline={canUseOnline}
         isDoctorSelected={Boolean(selectedDoctorId)}
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}

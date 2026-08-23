@@ -2,22 +2,15 @@
 
 import { FC, useEffect, useMemo, useRef, useState } from "react";
 
-import Link from "next/link";
-
 import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets/icons";
 import type { TimeGroup } from "@/shared/lib/booking";
 import { cn } from "@/shared/lib/utils";
 import { IconBtn } from "@/shared/ui";
 
-export type ConsultationMode = "online" | "offline";
-
+// Переключателя «Онлайн / Оффлайн» здесь больше нет: приёмы на платформе
+// только онлайн. Раньше он предлагал офлайн у всех врачей подряд, хотя место
+// приёма заполнено у единиц, — прийти к остальным было физически некуда.
 type Props = {
-  mode: ConsultationMode;
-  onModeChange: (mode: ConsultationMode) => void;
-  canUseOnline?: boolean;
-  // Скрыть переключатель Онлайн/Оффлайн — нужен при переносе записи, где
-  // формат консультации уже зафиксирован и меняется только дата/время.
-  hideModeToggle?: boolean;
   selectedDate: Date | null;
   onDateChange: (date: Date) => void;
   selectedTime: string | null;
@@ -62,10 +55,6 @@ const addDays = (date: Date, days: number) => {
 const pad = (n: number) => String(n).padStart(2, "0");
 
 export const AppointmentDateTimePicker: FC<Props> = ({
-  mode,
-  onModeChange,
-  canUseOnline = true,
-  hideModeToggle = false,
   selectedDate,
   onDateChange,
   selectedTime,
@@ -92,11 +81,6 @@ export const AppointmentDateTimePicker: FC<Props> = ({
     const d = selectedDate ?? new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
-
-  useEffect(() => {
-    if (hideModeToggle) return;
-    if (!canUseOnline && mode === "online") onModeChange("offline");
-  }, [canUseOnline, mode, onModeChange, hideModeToggle]);
 
   // Auto-scroll selected date into view on mobile
   useEffect(() => {
@@ -209,54 +193,6 @@ export const AppointmentDateTimePicker: FC<Props> = ({
 
   return (
     <div className={cn("space-y-3", className)}>
-      {/* Mode toggle */}
-      <div className={cn("space-y-2", hideModeToggle && "hidden")}>
-        <div className="relative grid grid-cols-2 items-center bg-background p-1 rounded-full">
-          <div
-            className="absolute top-1 bottom-1 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-transform duration-300"
-            style={{
-              width: "calc(50% - 4px)",
-              left: "4px",
-              transform: `translateX(${mode === "online" ? "0%" : "100%"})`,
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => canUseOnline && onModeChange("online")}
-            disabled={!canUseOnline}
-            className={cn(
-              "relative z-10 py-2 text-sm font-medium transition-colors rounded-full",
-              mode === "online" ? "text-foreground" : "text-secondary",
-              !canUseOnline && "opacity-50 cursor-not-allowed",
-            )}
-          >
-            Онлайн
-          </button>
-          <button
-            type="button"
-            onClick={() => onModeChange("offline")}
-            className={cn(
-              "relative z-10 py-2 text-sm font-medium transition-colors rounded-full",
-              mode === "offline" ? "text-foreground" : "text-secondary",
-            )}
-          >
-            Оффлайн
-          </button>
-        </div>
-        {!canUseOnline && (
-          <p className="text-xs text-muted">
-            Онлайн-доступ доступен после{" "}
-            <Link
-              href="/login"
-              className="text-primary underline hover:no-underline"
-            >
-              авторизации
-            </Link>
-            .
-          </p>
-        )}
-      </div>
-
       {/* MOBILE layout */}
       <div className="lg:hidden space-y-3">
         <div className="border border-border-soft rounded-2xl p-3">

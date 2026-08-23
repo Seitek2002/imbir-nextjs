@@ -7,11 +7,8 @@ import Image from "next/image";
 
 import { useMutation } from "@tanstack/react-query";
 
-import { type ConsultationMode } from "@/widgets/appointment-datetime-picker";
-
 import { getAppointmentById } from "@/shared/api";
 import type { AppointmentStatus } from "@/shared/api";
-import { CalendarIcon } from "@/shared/assets/icons";
 import { Button } from "@/shared/ui";
 
 import { formatDateLabel, formatPrice } from "../model/lib";
@@ -28,7 +25,10 @@ const STATUS_LABELS: Record<AppointmentStatus, string> = {
 export const SummaryCard: FC<{
   doctor: Doctor;
   service: Service;
-  mode: ConsultationMode;
+  // Формат больше не выбирается: приёмы только онлайн. Но гостю бэк
+  // онлайн-запись не даёт (400), поэтому у него запись остаётся офлайновой —
+  // подписываем как есть, а не как хотелось бы.
+  isOnline: boolean;
   selectedDate: Date | null;
   selectedTime: string | null;
   // Появляются после успешного оформления — включают реальную проверку статуса.
@@ -37,7 +37,7 @@ export const SummaryCard: FC<{
 }> = ({
   doctor,
   service,
-  mode,
+  isOnline,
   selectedDate,
   selectedTime,
   appointmentId,
@@ -119,7 +119,7 @@ export const SummaryCard: FC<{
         <div className="flex flex-col gap-1">
           <span className="text-secondary text-xs">Формат приёма</span>
           <span className="font-medium text-foreground">
-            {mode === "online" ? "Онлайн-консультация" : "Офлайн-консультация"}
+            {isOnline ? "Онлайн-консультация" : "Офлайн-консультация"}
           </span>
         </div>
 

@@ -340,9 +340,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
               </Button>
               <Button
                 className="flex-1 justify-center"
-                onClick={() =>
-                  router.push(`${ROUTES.RECORD}?clinic=${id}&mode=online`)
-                }
+                onClick={() => router.push(`${ROUTES.RECORD}?clinic=${id}`)}
               >
                 Онлайн-консультация
               </Button>

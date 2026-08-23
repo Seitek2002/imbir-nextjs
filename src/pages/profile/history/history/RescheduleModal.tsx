@@ -24,7 +24,6 @@ type Props = {
   serviceId?: string | number | null;
   // Формат консультации не меняется при переносе — нужен только чтобы пикер
   // отрисовался в правильном режиме (сам переключатель скрыт).
-  isOnline: boolean;
 };
 
 // Перенос записи на новую дату/время (POST /api/appointments/{id}/reschedule/).
@@ -36,7 +35,6 @@ export const RescheduleModal: FC<Props> = ({
   appointmentId,
   doctorId,
   serviceId,
-  isOnline,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -118,9 +116,6 @@ export const RescheduleModal: FC<Props> = ({
     >
       <div className="flex flex-col gap-4">
         <AppointmentDateTimePicker
-          mode={isOnline ? "online" : "offline"}
-          onModeChange={() => {}}
-          hideModeToggle
           selectedDate={selectedDate}
           onDateChange={(date) => {
             setSelectedDate(date);

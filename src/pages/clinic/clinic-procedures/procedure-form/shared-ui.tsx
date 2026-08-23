@@ -65,14 +65,11 @@ export const DEMO_TIME_GROUPS: TimeGroup[] = [
 // здесь чисто иллюстративный (демо-данные, ничего не сохраняет и не читает
 // реальную занятость конкретной процедуры, такого API пока нет).
 export const RecordsPreview: FC = () => {
-  const [mode, setMode] = useState<"online" | "offline">("online");
   const [date, setDate] = useState<Date | null>(new Date());
   const [time, setTime] = useState<string | null>("11:00");
 
   return (
     <AppointmentDateTimePicker
-      mode={mode}
-      onModeChange={setMode}
       selectedDate={date}
       onDateChange={setDate}
       selectedTime={time}
