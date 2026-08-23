@@ -74,7 +74,19 @@ export const MobileBottomNav: FC = () => {
     { href: "/", label: "Home", Icon: HomeIcon },
     { href: "/search", label: "Поиск", Icon: SearchTabIcon },
     { href: "/chat", label: "Чат", Icon: ChatTabIcon },
-    { href: profileHref, label: "Профиль", Icon: ProfileTabIcon },
+    {
+      href: profileHref,
+      label: "Профиль",
+      Icon: ProfileTabIcon,
+      // Пока роль неизвестна (не залогинен), profileHref всё равно "/profile" —
+      // обычный auto-prefetch (эта ссылка всегда в вьюпорте, панель fixed)
+      // уйдёт туда ещё до входа, middleware ответит редиректом на /login, и
+      // Next закэширует именно его как результат для "/profile". После
+      // логина router.push("/profile") (login/ui.tsx) попадает в этот же
+      // кэш и остаётся на /login вместо настоящего перехода. Без prefetch
+      // такого кэша просто не появляется.
+      prefetch: role ? undefined : false,
+    },
   ];
 
   // Панель показываем только на самих вкладках-хабах; на вложенных экранах
@@ -88,12 +100,13 @@ export const MobileBottomNav: FC = () => {
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-border pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-stretch">
-        {items.map(({ href, label, Icon }) => {
+        {items.map(({ href, label, Icon, prefetch }) => {
           const active = href === "/" ? pathname === "/" : pathname === href;
           return (
             <Link
               key={label}
               href={href}
+              prefetch={prefetch}
               className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-colors ${
                 active ? "text-primary" : "text-muted"
               }`}
