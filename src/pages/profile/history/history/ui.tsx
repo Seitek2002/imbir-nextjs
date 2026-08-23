@@ -200,6 +200,7 @@ export const ProfileHistory: FC<Props> = ({
           onClose={() => setRescheduleTarget(null)}
           appointmentId={rescheduleTarget.id}
           doctorId={rescheduleTarget.doctorId}
+          serviceId={rescheduleTarget.serviceId}
           isOnline={!!rescheduleTarget.isOnline}
         />
       )}
