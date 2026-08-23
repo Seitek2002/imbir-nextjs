@@ -189,7 +189,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                 <HeartIcon
                   className={
                     isFavorite
-                      ? "size-5 text-[#FFA18D] [&_path]:fill-[#FFA18D]"
+                      ? "size-5 [&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]"
                       : "size-5 text-[#FFA18D]"
                   }
                 />
@@ -259,7 +259,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                   <HeartIcon
                     className={
                       isFavorite
-                        ? "size-5 text-[#FFA18D] [&_path]:fill-[#FFA18D]"
+                        ? "size-5 [&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]"
                         : "size-5"
                     }
                   />
