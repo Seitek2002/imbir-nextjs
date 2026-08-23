@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, JSX, useEffect, useState } from "react";
+import { type FormEvent, JSX, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -307,9 +307,11 @@ export const RegisterPage = () => {
 
   // Doctor form step (owned here for unified back navigation)
   const [doctorStep, setDoctorStep] = useState<DoctorStep>(1);
+  const doctorStepRef = useRef<DoctorStep>(1);
 
   // Clinic form step
   const [clinicStep, setClinicStep] = useState<ClinicStep>(1);
+  const clinicStepRef = useRef<ClinicStep>(1);
   const [isLoadingClinic, setIsLoadingClinic] = useState(false);
   const [isLoadingDoctor, setIsLoadingDoctor] = useState(false);
 
@@ -330,18 +332,26 @@ export const RegisterPage = () => {
         setVerificationCode("");
       }
     } else if (activeForm === "doctor") {
-      if (doctorStep === 1) {
+      const currentStep = doctorStepRef.current;
+      if (currentStep === 1) {
         setActiveForm("role");
+        doctorStepRef.current = 1;
         setDoctorStep(1);
       } else {
-        setDoctorStep((s) => (s - 1) as DoctorStep);
+        const previousStep = (currentStep - 1) as DoctorStep;
+        doctorStepRef.current = previousStep;
+        setDoctorStep(previousStep);
       }
     } else if (activeForm === "clinic") {
-      if (clinicStep === 1) {
+      const currentStep = clinicStepRef.current;
+      if (currentStep === 1) {
         setActiveForm("role");
+        clinicStepRef.current = 1;
         setClinicStep(1);
       } else {
-        setClinicStep((s) => (s - 1) as ClinicStep);
+        const previousStep = (currentStep - 1) as ClinicStep;
+        clinicStepRef.current = previousStep;
+        setClinicStep(previousStep);
       }
     } else {
       setActiveForm("role");
@@ -982,10 +992,18 @@ export const RegisterPage = () => {
           {inviteValidationStatus !== "loading" && (
             <DoctorRegistrationForm
               step={doctorStep}
-              onContinue={() =>
-                setDoctorStep((s) => Math.min(s + 1, 4) as DoctorStep)
-              }
-              onSubmit={handleSubmitDoctor}
+              onContinue={(fromStep) => {
+                if (doctorStepRef.current !== fromStep) return;
+                const nextStep = Math.min(
+                  doctorStepRef.current + 1,
+                  4,
+                ) as DoctorStep;
+                doctorStepRef.current = nextStep;
+                setDoctorStep(nextStep);
+              }}
+              onSubmit={(data) => {
+                if (doctorStepRef.current === 4) void handleSubmitDoctor(data);
+              }}
               onBack={handleBack}
               isLoading={isLoadingDoctor}
               inviteClinic={inviteClinic}
@@ -999,10 +1017,18 @@ export const RegisterPage = () => {
         <div className="mt-8 md:mt-12 flex-1 flex flex-col">
           <ClinicRegistrationForm
             step={clinicStep}
-            onContinue={() =>
-              setClinicStep((s) => Math.min(s + 1, 7) as ClinicStep)
-            }
-            onSubmit={handleSubmitClinic}
+            onContinue={(fromStep) => {
+              if (clinicStepRef.current !== fromStep) return;
+              const nextStep = Math.min(
+                clinicStepRef.current + 1,
+                7,
+              ) as ClinicStep;
+              clinicStepRef.current = nextStep;
+              setClinicStep(nextStep);
+            }}
+            onSubmit={(data) => {
+              if (clinicStepRef.current === 7) void handleSubmitClinic(data);
+            }}
             onBack={handleBack}
             isLoading={isLoadingClinic}
           />

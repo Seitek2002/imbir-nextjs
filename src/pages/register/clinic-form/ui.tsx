@@ -33,7 +33,7 @@ import { Step7Completion } from "./Step7Completion";
 
 type Props = {
   step: ClinicStep;
-  onContinue: () => void;
+  onContinue: (fromStep: ClinicStep) => void;
   onSubmit: (data: ClinicFormData) => void;
   onBack: () => void;
   isLoading?: boolean;
@@ -183,7 +183,7 @@ export const ClinicRegistrationForm = ({
           return;
         }
       }
-      onContinue();
+      onContinue(step);
     } else {
       if (data.password !== data.confirmPassword) {
         setPasswordError("Пароли не совпадают");

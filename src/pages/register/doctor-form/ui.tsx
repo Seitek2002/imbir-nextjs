@@ -27,7 +27,7 @@ import { Step4Certificates } from "./Step4Certificates";
 
 type Props = {
   step: DoctorStep;
-  onContinue: () => void;
+  onContinue: (fromStep: DoctorStep) => void;
   onSubmit: (data: DoctorFormData) => void;
   onBack: () => void;
   isLoading?: boolean;
@@ -135,9 +135,9 @@ export const DoctorRegistrationForm = ({
       } finally {
         setIsCheckingEmail(false);
       }
-      onContinue();
+      onContinue(step);
     } else if (step < 4) {
-      onContinue();
+      onContinue(step);
     } else {
       if (data.password !== data.confirmPassword) {
         setPasswordError("Пароли не совпадают");
