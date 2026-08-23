@@ -175,7 +175,6 @@ export const ProfileHistoryPage: FC = () => {
     queries: doctorIds.map((id) => ({
       queryKey: ["doctor", id],
       queryFn: () => getDoctorById(id),
-      staleTime: 5 * 60 * 1000,
     })),
   });
 

@@ -100,7 +100,6 @@ export const ProfileHistory: FC<Props> = ({
         ),
       );
       setCancelTarget(null);
-      toast.success("Запись отменена");
     } catch (err: unknown) {
       // Запрос не удался — диалог остаётся открытым, isCancelling сам сбросится.
       const errData = (err as { response?: { data?: unknown } })?.response
