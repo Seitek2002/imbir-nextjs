@@ -803,6 +803,13 @@ export const RegisterPage = () => {
         specializationList,
       );
       const profileResult = await Promise.allSettled([
+        // Логотип шёл отдельным параллельным PUT — бэк на этом эндпоинте
+        // стирает любое поле, которого нет в теле запроса (проверено живым
+        // запросом ранее на специализациях), а два PUT'а одновременно —
+        // это гонка: какой применится последним, тот и победит. Один из
+        // раз логотип после регистрации пропадал именно из-за этого.
+        // appendMultipart уже умеет сериализовать schedule/ID-массивы/File
+        // в одном мультипарт-запросе, так что объединяем в один вызов.
         updateClinicProfile({
           name: data.clinicName,
           clinic_type: data.clinicType,
@@ -836,15 +843,8 @@ export const RegisterPage = () => {
           },
           lunch_break: data.lunchBreak,
           emergency_24_7: data.emergency247,
+          logo: data.logo || undefined,
         }),
-        ...(data.logo
-          ? [
-              updateClinicProfile({
-                name: data.clinicName,
-                logo: data.logo,
-              }),
-            ]
-          : []),
         ...data.photos.map(uploadClinicPhoto),
         ...data.documents.map(uploadClinicDocument),
       ]);
