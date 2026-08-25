@@ -1,6 +1,9 @@
 import { FC } from "react";
+import ReactMarkdown, { type Components } from "react-markdown";
 
 import Link from "next/link";
+
+import remarkGfm from "remark-gfm";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -16,19 +19,68 @@ type Props = {
   relatedPosts: BlogPost[];
 };
 
-// Бэк отдаёт текст статьи одним полем content. Формат не типизирован, поэтому
-// разметку не интерпретируем (это был бы XSS через админку), а режем текст на
-// абзацы по пустым строкам и переводам строки.
-const toParagraphs = (content: string): string[] =>
-  content
-    .replace(/<[^>]+>/g, "")
-    .split(/\r?\n/)
-    .map((part) => part.trim())
-    .filter(Boolean);
+// Бэк отдаёт текст статьи одним полем content в markdown. react-markdown сам
+// парсит его в React-элементы и не выполняет сырой HTML из текста (мы не
+// подключаем rehype-raw) — это тот же результат, что и явная защита от XSS,
+// без ручного вырезания тегов.
+const markdownComponents: Components = {
+  h1: ({ children }) => (
+    <h2 className="text-2xl font-semibold text-foreground mt-2">{children}</h2>
+  ),
+  h2: ({ children }) => (
+    <h2 className="text-xl font-semibold text-foreground mt-2">{children}</h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="text-lg font-semibold text-foreground mt-2">{children}</h3>
+  ),
+  p: ({ children }) => (
+    <p className="text-base text-secondary leading-[145%]">{children}</p>
+  ),
+  ul: ({ children }) => (
+    <ul className="list-disc pl-5 space-y-1 text-base text-secondary leading-[145%]">
+      {children}
+    </ul>
+  ),
+  ol: ({ children }) => (
+    <ol className="list-decimal pl-5 space-y-1 text-base text-secondary leading-[145%]">
+      {children}
+    </ol>
+  ),
+  blockquote: ({ children }) => (
+    <blockquote className="border-l-4 border-primary/30 bg-primary-tint rounded-r-xl px-4 py-3 text-secondary italic">
+      {children}
+    </blockquote>
+  ),
+  a: ({ href, children }) => (
+    <Link
+      href={href ?? "#"}
+      className="text-primary underline hover:text-primary-dark transition-colors"
+    >
+      {children}
+    </Link>
+  ),
+  strong: ({ children }) => (
+    <strong className="font-semibold text-foreground">{children}</strong>
+  ),
+  hr: () => <hr className="border-border" />,
+  table: ({ children }) => (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm text-secondary border-collapse">
+        {children}
+      </table>
+    </div>
+  ),
+  th: ({ children }) => (
+    <th className="border border-border px-3 py-2 text-left font-semibold text-foreground">
+      {children}
+    </th>
+  ),
+  td: ({ children }) => (
+    <td className="border border-border px-3 py-2 text-left">{children}</td>
+  ),
+};
 
 export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
-  const paragraphs = toParagraphs(article.content);
-
   return (
     <main className="min-h-screen bg-background flex flex-col">
       <Header title="Статья" backTo={ROUTES.BLOG} />
@@ -78,14 +130,12 @@ export const BlogArticlePage: FC<Props> = ({ article, relatedPosts }) => {
                 </p>
               )}
 
-              {paragraphs.map((paragraph, index) => (
-                <p
-                  key={index}
-                  className="text-base text-secondary leading-[145%]"
-                >
-                  {paragraph}
-                </p>
-              ))}
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={markdownComponents}
+              >
+                {article.content}
+              </ReactMarkdown>
             </div>
           </article>
 
