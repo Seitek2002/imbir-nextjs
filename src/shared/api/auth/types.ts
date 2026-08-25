@@ -224,14 +224,19 @@ export type DoctorInviteValidationResponse = {
   };
 };
 
+// Файлы (logo/photos/documents) сюда не входят: бэк принимает их как
+// отдельные top-level multipart-поля запроса /register/clinic/, а не внутри
+// JSON-строки какого-либо шага — File внутри JSON.stringify всё равно
+// превращается в "{}". См. CLINIC_REGISTRATION.md (от бэкенд-разработчика) и
+// pages/register/ui.tsx: handleSubmitClinic грузит их отдельными вызовами
+// (updateClinicProfile/uploadClinicPhoto/uploadClinicDocument) сразу после
+// успешной регистрации.
 export type RegisterClinicRequest = {
   password: string;
   step1: {
     name: string;
-    logo?: File;
     type: string;
     description: string;
-    photos?: File[];
   };
   step2: {
     country: string;
@@ -253,11 +258,13 @@ export type RegisterClinicRequest = {
     license_number: string;
     license_date: string;
     license_authority: string;
-    documents?: File[];
   };
+  // Ключи без суффикса _ids — так задокументировал бэкенд-разработчик
+  // (CLINIC_REGISTRATION.md). Это ДРУГАЯ форма, чем у UpdateClinicProfileBody
+  // (там primary_specialization_ids/narrow_specialization_ids) — не путать.
   step5: {
-    primary_specialization_ids: number[];
-    narrow_specialization_ids: number[];
+    primary_specializations: number[];
+    narrow_specializations: number[];
     additional_services?: string;
   };
   step6: {

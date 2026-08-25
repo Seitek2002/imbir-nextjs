@@ -693,12 +693,15 @@ export const RegisterPage = () => {
       });
       const res = await registerClinicFn({
         password: data.password,
+        // Файлы (logo/photos/documents) сюда не кладём: бэк ждёт их как
+        // отдельные top-level multipart-поля запроса, а не внутри шагов —
+        // внутри JSON-строки шага File всё равно превратится в "{}"
+        // (JSON.stringify не умеет сериализовать бинарные данные). Реальная
+        // загрузка идёт отдельными вызовами сразу после регистрации, см. ниже.
         step1: {
           name: data.clinicName,
-          logo: data.logo ?? undefined,
           type: data.clinicType,
           description: data.description,
-          photos: data.photos.length > 0 ? data.photos : undefined,
         },
         step2: {
           country: data.country,
@@ -735,7 +738,6 @@ export const RegisterPage = () => {
           license_number: data.licenseNumber,
           license_date: toApiDate(data.licenseDate),
           license_authority: data.licensingAuthority,
-          documents: data.documents.length > 0 ? data.documents : undefined,
         },
         step5: (() => {
           const primary = resolveSpecializationIds(
@@ -758,9 +760,14 @@ export const RegisterPage = () => {
               `Не найдено в справочнике и не сохранено: ${unmatched.join(", ")}`,
             );
           }
+          // Внутри step5 бэк ждёт именно primary_specializations/
+          // narrow_specializations (без суффикса _ids) — так задокументировал
+          // сам бэкенд-разработчик (CLINIC_REGISTRATION.md). Названия с _ids
+          // — из PUT /api/clinic/profile/, это другой эндпоинт с другой
+          // схемой полей; здесь они не подходят.
           return {
-            primary_specialization_ids: primary.ids,
-            narrow_specialization_ids: narrow.ids,
+            primary_specializations: primary.ids,
+            narrow_specializations: narrow.ids,
             additional_services: data.additionalServices || undefined,
           };
         })(),
