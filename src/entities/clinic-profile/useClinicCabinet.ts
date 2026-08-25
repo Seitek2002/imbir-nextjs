@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  type ClinicDocument,
+  type ClinicPhoto,
   ClinicPrivateProfile,
   type UpdateClinicProfileBody,
   clinicCabinetKeys,
@@ -62,6 +64,18 @@ const parseCsv = (value?: string): string[] =>
         .filter(Boolean)
     : [];
 
+// Стабильные ссылки на пустой массив — те же константы, что уже используются
+// в useDoctorCabinet. Инлайновый `= []` в дефолте useQuery создаёт новый
+// массив на каждый рендер, пока запрос не пришёл: это меняет ссылку у
+// documentItems/photoItems/profile (все — useMemo) на каждый рендер, а
+// секции кабинета синхронизируют форму по "profile !== synced" — с новой
+// ссылкой на каждый рендер это условие никогда не гаснет и рендер уходит в
+// бесконечный цикл ("Too many re-renders"). Проверено живым запросом:
+// прямой заход на /clinic-profile/location стабильно крашился, пока
+// documents/photos ещё не загрузились.
+const EMPTY_DOCUMENTS: ClinicDocument[] = [];
+const EMPTY_PHOTOS: ClinicPhoto[] = [];
+
 export const mapApiToClinicProfile = (
   api: ClinicPrivateProfile,
 ): ClinicProfile => ({
@@ -108,13 +122,13 @@ export const useClinicCabinet = () => {
     queryFn: getClinicProfile,
   });
 
-  const { data: documentsData = [] } = useQuery({
+  const { data: documentsData = EMPTY_DOCUMENTS } = useQuery({
     queryKey: clinicCabinetKeys.documents(),
     queryFn: getClinicDocuments,
     enabled: !!data,
   });
 
-  const { data: photosData = [] } = useQuery({
+  const { data: photosData = EMPTY_PHOTOS } = useQuery({
     queryKey: clinicCabinetKeys.photos(),
     queryFn: getClinicPhotos,
     enabled: !!data,
