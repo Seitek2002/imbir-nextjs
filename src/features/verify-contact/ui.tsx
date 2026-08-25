@@ -142,6 +142,7 @@ export const VerifyContactBlock: FC<Props> = ({ state, onConfirmed }) => {
       {isSent ? (
         <Button
           type="button"
+          size="sm"
           className="w-full justify-center"
           onClick={async () => {
             if (await confirmCode()) onConfirmed?.();
@@ -154,6 +155,7 @@ export const VerifyContactBlock: FC<Props> = ({ state, onConfirmed }) => {
       ) : (
         <Button
           type="button"
+          size="sm"
           variant="outline"
           className="w-full justify-center"
           onClick={requestCode}
