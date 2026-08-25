@@ -77,12 +77,25 @@ const adaptDoctorDetail = (d: ApiDoctorDetail): MockDoctorListItem => {
   const formattedWorkExperience =
     d.work_experience && d.work_experience.length > 0
       ? d.work_experience.map((w) => {
-          const toVal = w.to || new Date().getFullYear();
-          const diff = toVal - w.from;
-          const durationText = diff > 0 ? `${diff} лет` : "менее года";
+          // from/to не гарантированы (свободный JSON) — если их нет, показываем
+          // квалификацию/степень вместо диапазона лет, а не "undefined-...".
+          const hasRange = typeof w.from === "number";
+          let years: string | undefined;
+          let duration: string | undefined;
+          if (hasRange) {
+            const toVal = w.to || new Date().getFullYear();
+            const diff = toVal - w.from!;
+            const durationText = diff > 0 ? `${diff} лет` : "менее года";
+            years = `${w.from}-${w.to || "Наст. время"}`;
+            duration = `(${durationText})`;
+          }
+          const qualification =
+            [w.qualification, w.scientific_degree].filter(Boolean).join(", ") ||
+            undefined;
           return {
-            years: `${w.from}-${w.to || "Наст. время"}`,
-            duration: `(${durationText})`,
+            years,
+            duration,
+            qualification: hasRange ? undefined : qualification,
             place: w.clinic,
             role: w.position,
           };
@@ -103,7 +116,6 @@ const adaptDoctorDetail = (d: ApiDoctorDetail): MockDoctorListItem => {
             return parts.trim();
           })
           .filter(Boolean)
-          .join(", ") || undefined
       : undefined;
 
   return {
@@ -112,8 +124,10 @@ const adaptDoctorDetail = (d: ApiDoctorDetail): MockDoctorListItem => {
     skills: d.skills && d.skills.length > 0 ? d.skills : undefined,
     education: formattedEducation,
     workExperience: formattedWorkExperience,
+    // Публичный профиль врача не отдаёт расписание (нет такого поля в
+    // DoctorDetail) — раньше здесь было одно и то же захардкоженное время для
+    // всех врачей; лучше не показывать строку вовсе, чем показывать неправду.
     contacts: {
-      schedule: "ПН-ПТ • 09:00-18:00",
       phone: d.phone || "",
       email: d.email || "",
     },

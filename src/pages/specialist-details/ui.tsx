@@ -306,9 +306,13 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             </div>
 
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
-              {education && (
+              {education && education.length > 0 && (
                 <InfoCard title="Образование" expandable lines={3}>
-                  {education}
+                  <div className="flex flex-col gap-1">
+                    {education.map((line, idx) => (
+                      <p key={idx}>{line}</p>
+                    ))}
+                  </div>
                 </InfoCard>
               )}
               {about && (
@@ -323,14 +327,24 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                     {workExperience.map((exp, idx) => (
                       <div key={idx} className="relative pl-5">
                         <span className="absolute left-0 top-2.5 w-2.5 h-0.5 bg-primary" />
-                        <div className="mb-1">
-                          <span className="text-foreground font-medium text-sm md:text-base">
-                            {exp.years}{" "}
-                          </span>
-                          <span className="text-primary text-sm md:text-base">
-                            {exp.duration}
-                          </span>
-                        </div>
+                        {exp.years ? (
+                          <div className="mb-1">
+                            <span className="text-foreground font-medium text-sm md:text-base">
+                              {exp.years}{" "}
+                            </span>
+                            <span className="text-primary text-sm md:text-base">
+                              {exp.duration}
+                            </span>
+                          </div>
+                        ) : (
+                          exp.qualification && (
+                            <div className="mb-1">
+                              <span className="text-primary text-sm md:text-base">
+                                {exp.qualification}
+                              </span>
+                            </div>
+                          )
+                        )}
                         <p className="text-foreground text-sm md:text-base">
                           {exp.place}
                         </p>

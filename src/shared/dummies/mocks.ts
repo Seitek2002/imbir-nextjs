@@ -62,17 +62,24 @@ export type DoctorListItem = {
   image?: StaticImageData | string;
 
   // Детальные поля
-  education?: string;
+  education?: string[];
   about?: string;
   workExperience?: {
-    years: string;
-    duration: string;
+    // Бэк хранит work_experience как произвольный JSON — у записи может
+    // быть либо диапазон лет (years/duration), либо квалификация без дат
+    // (qualification), в зависимости от того, через какую форму врач это
+    // заполнял. Оба варианта не гарантированы одновременно.
+    years?: string;
+    duration?: string;
+    qualification?: string;
     place: string;
     role: string;
   }[];
   skills?: string[];
   contacts?: {
-    schedule: string;
+    // Бэк не отдаёт расписание в публичном профиле врача — если поля нет,
+    // строку не показываем, а не подставляем одинаковое время всем.
+    schedule?: string;
     phone: string;
     email: string;
   };

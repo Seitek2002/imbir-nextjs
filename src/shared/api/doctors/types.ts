@@ -34,11 +34,17 @@ export type EducationItem = {
   year: number;
 };
 
+// Свободный JSON на бэке (в схеме API — nullable без типа) — разные записи
+// могут прислать разный набор полей. Диапазон лет (from/to) и квалификация
+// без дат (qualification/scientific_degree) — оба реально встречаются,
+// не одновременно.
 export type WorkExperienceItem = {
   clinic: string;
   position: string;
-  from: number;
-  to: number | null;
+  from?: number;
+  to?: number | null;
+  qualification?: string;
+  scientific_degree?: string;
 };
 
 export type DoctorDetail = DoctorListItem & {
