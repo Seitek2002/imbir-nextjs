@@ -127,7 +127,22 @@ export const useClinicCabinet = () => {
       // «Оборудование» его не редактируют и не шлют. Подставляем из текущего
       // профиля, если явно не задано — тот же приём, что и в
       // useDoctorCabinet для first_name/last_name.
-      return updateClinicProfile({ name: data?.name, ...body });
+      //
+      // Бэк также очищает primary/narrow_specialization_ids, если поле не
+      // передано (проверено живым запросом: сохранение раздела «Локация» без
+      // единого поля про специализации стирало их из профиля целиком). У
+      // врача от этого уже есть защита — досылаем текущие специализации и
+      // здесь, если раздел их явно не меняет.
+      return updateClinicProfile({
+        name: data?.name,
+        primary_specialization_ids: data?.primary_specializations?.map(
+          (s) => s.id,
+        ),
+        narrow_specialization_ids: data?.narrow_specializations?.map(
+          (s) => s.id,
+        ),
+        ...body,
+      });
     },
     onSuccess: (updated) => {
       queryClient.setQueryData(clinicCabinetKeys.profile(), updated);
