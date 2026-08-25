@@ -3,6 +3,7 @@ export { DoctorPageLayout } from "./ui";
 export type { DoctorProfileData, DoctorReview } from "./doctor-profile/model";
 export { formStyles } from "./doctor-profile/ui";
 export { FieldView } from "./doctor-profile/ui";
+export { CheckboxGroup } from "./doctor-profile/ui";
 export { DoctorSidebar } from "./sidebar";
 export {
   DoctorMyDataTabs,

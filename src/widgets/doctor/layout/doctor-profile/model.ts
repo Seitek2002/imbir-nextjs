@@ -35,10 +35,11 @@ export type DoctorProfileData = {
   workplace: string;
   qualification: string;
   scientificDegree: string;
-  // CSV-строки для формы («УЗИ, ЭКГ») — API хранит массивы.
-  equipment: string;
-  patientConditions: string;
-  paymentMethods: string;
+  // Названия из справочника (GET /api/references/equipment|conditions|
+  // payment-methods/), выбранные через CheckboxGroup — не свободный текст.
+  equipment: string[];
+  patientConditions: string[];
+  paymentMethods: string[];
   gender: string;
   birthDate: string;
   city: string;

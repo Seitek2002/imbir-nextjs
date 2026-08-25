@@ -1,5 +1,58 @@
 ﻿import { FC } from "react";
 
+import { Checkbox } from "@/shared/ui";
+
+type CheckboxGroupProps = {
+  label: string;
+  options: string[];
+  value: string[];
+  onChange: (value: string[]) => void;
+};
+
+// Тот же компонент, что уже используется у клиники (регистрация и кабинет,
+// см. pages/register/clinic-form/CheckboxGroup.tsx и
+// pages/clinic/clinic-profile/sections/equipment/ui.tsx) — здесь для кабинета
+// врача, чтобы список оборудования/условий/оплаты выбирался из справочника
+// бэка, а не терялся при опечатке в свободном тексте через запятую.
+export const CheckboxGroup: FC<CheckboxGroupProps> = ({
+  label,
+  options,
+  value,
+  onChange,
+}) => (
+  <div className="flex flex-col gap-1.5">
+    <div className="flex items-center justify-between">
+      <span className="text-sm font-medium text-overlay">{label}</span>
+      {value.length > 0 && (
+        <button
+          type="button"
+          onClick={() => onChange([])}
+          className="text-xs text-primary hover:underline"
+        >
+          Сбросить
+        </button>
+      )}
+    </div>
+    <div className="rounded-xl border border-border divide-y divide-border">
+      {options.map((opt) => (
+        <Checkbox
+          key={opt}
+          className="w-full px-4 py-3"
+          label={opt}
+          checked={value.includes(opt)}
+          onChange={(e) =>
+            onChange(
+              e.target.checked
+                ? [...value, opt]
+                : value.filter((v) => v !== opt),
+            )
+          }
+        />
+      ))}
+    </div>
+  </div>
+);
+
 type FieldViewProps = {
   label: string;
   value: string | string[];

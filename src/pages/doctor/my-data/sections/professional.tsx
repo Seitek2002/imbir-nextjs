@@ -3,6 +3,7 @@
 import { FC, useState } from "react";
 
 import {
+  CheckboxGroup,
   DoctorMyDataTabs,
   DoctorPageLayout,
   type DoctorProfileData,
@@ -17,7 +18,14 @@ import {
   useSpecializations,
 } from "@/entities/specialization";
 
+import {
+  getConditions,
+  getEquipment,
+  getPaymentMethods,
+  referenceKeys,
+} from "@/shared/api";
 import { CheckIcon } from "@/shared/assets/icons";
+import { useReferenceValues } from "@/shared/lib/useReference";
 import {
   Button,
   CancelEditButton,
@@ -27,6 +35,25 @@ import {
   Input,
 } from "@/shared/ui";
 
+// Те же дефолты, что у клиники (pages/clinic/clinic-profile/sections/
+// equipment/ui.tsx) — используются только пока справочник бэка не пришёл.
+const DEFAULT_EQUIPMENT = [
+  "УЗИ",
+  "КТ/МРТ",
+  "Операционная",
+  "Рентген",
+  "Лаборатория",
+  "Реанимация",
+];
+const DEFAULT_PATIENT_CONDITIONS = [
+  "Парковка",
+  "Детская зона",
+  "Онлайн-консультация",
+  "Доступ для инвалидов",
+  "Аптека",
+];
+const DEFAULT_PAYMENT_METHODS = ["Наличные", "Карта", "Онлайн"];
+
 type D = {
   specialty: string;
   additionalSpecialty: string;
@@ -35,22 +62,15 @@ type D = {
   workplace: string;
   qualification: string;
   scientificDegree: string;
-  equipment: string;
-  patientConditions: string;
-  paymentMethods: string;
+  equipment: string[];
+  patientConditions: string[];
+  paymentMethods: string[];
   isOnlineAvailable: boolean;
   consultationPrice: string;
   isPublished: boolean;
 };
 
 const { fieldList, formGrid } = formStyles;
-
-// "УЗИ, ЭКГ" → ["УЗИ", "ЭКГ"]
-const csv = (value: string): string[] =>
-  value
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
 
 const EMPTY: D = {
   specialty: "",
@@ -60,9 +80,9 @@ const EMPTY: D = {
   workplace: "",
   qualification: "",
   scientificDegree: "",
-  equipment: "",
-  patientConditions: "",
-  paymentMethods: "",
+  equipment: [],
+  patientConditions: [],
+  paymentMethods: [],
   isOnlineAvailable: false,
   consultationPrice: "",
   isPublished: false,
@@ -120,6 +140,24 @@ export const DoctorProfessionalInfoSection: FC = () => {
     ? "Загружаем список..."
     : "Выберите";
 
+  // Оборудование/условия/оплата — тот же справочник бэка, что и у клиники
+  // (GET /api/references/equipment|conditions|payment-methods/).
+  const { values: equipmentOptions } = useReferenceValues(
+    referenceKeys.equipment(),
+    getEquipment,
+    DEFAULT_EQUIPMENT,
+  );
+  const { values: conditionOptions } = useReferenceValues(
+    referenceKeys.conditions(),
+    getConditions,
+    DEFAULT_PATIENT_CONDITIONS,
+  );
+  const { values: paymentMethodOptions } = useReferenceValues(
+    referenceKeys.paymentMethods(),
+    getPaymentMethods,
+    DEFAULT_PAYMENT_METHODS,
+  );
+
   const handleSave = async () => {
     // Должность/место/категория/степень отдельных полей на бэке НЕ имеют —
     // храним их в первой записи work_experience (бэк сохраняет произвольные
@@ -156,9 +194,9 @@ export const DoctorProfessionalInfoSection: FC = () => {
           scientific_degree: d.scientificDegree,
         },
       ],
-      equipment: csv(d.equipment),
-      patient_conditions: csv(d.patientConditions),
-      payment_methods: csv(d.paymentMethods),
+      equipment: d.equipment,
+      patient_conditions: d.patientConditions,
+      payment_methods: d.paymentMethods,
       is_online_available: d.isOnlineAvailable,
       // Бэк ждёт decimal-строку. Пустое поле отправляем как "0.00", иначе
       // цена не сбрасывается: пустую строку сериализатор отклоняет.
@@ -330,35 +368,35 @@ export const DoctorProfessionalInfoSection: FC = () => {
           </div>
           <div className="lg:col-span-2">
             {isEditing ? (
-              <Input
-                label="Оборудование (через запятую)"
+              <CheckboxGroup
+                label="Оборудование"
+                options={equipmentOptions}
                 value={d.equipment}
-                onChange={(e) => set("equipment", e.target.value)}
-                placeholder="УЗИ, ЭКГ, Рентген"
+                onChange={(v) => set("equipment", v)}
               />
             ) : (
               <FieldView label="Оборудование" value={d.equipment} />
             )}
           </div>
-          <div>
+          <div className="lg:col-span-2">
             {isEditing ? (
-              <Input
-                label="Условия приёма (через запятую)"
+              <CheckboxGroup
+                label="Условия приёма"
+                options={conditionOptions}
                 value={d.patientConditions}
-                onChange={(e) => set("patientConditions", e.target.value)}
-                placeholder="Приём детей, Приём на дому"
+                onChange={(v) => set("patientConditions", v)}
               />
             ) : (
               <FieldView label="Условия приёма" value={d.patientConditions} />
             )}
           </div>
-          <div>
+          <div className="lg:col-span-2">
             {isEditing ? (
-              <Input
-                label="Способы оплаты (через запятую)"
+              <CheckboxGroup
+                label="Способы оплаты"
+                options={paymentMethodOptions}
                 value={d.paymentMethods}
-                onChange={(e) => set("paymentMethods", e.target.value)}
-                placeholder="Наличные, Карта, Перевод"
+                onChange={(v) => set("paymentMethods", v)}
               />
             ) : (
               <FieldView label="Способы оплаты" value={d.paymentMethods} />
