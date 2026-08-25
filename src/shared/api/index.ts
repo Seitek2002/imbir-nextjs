@@ -43,6 +43,10 @@ export * from "./clinic-cabinet/requests";
 export * from "./blog/types";
 export * from "./blog/requests";
 
+// Interviews
+export * from "./interviews/types";
+export * from "./interviews/requests";
+
 // References (справочники)
 export * from "./references/types";
 export * from "./references/requests";

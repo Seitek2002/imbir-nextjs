@@ -17,8 +17,10 @@ import { VideosSwiper } from "@/widgets/videos-swiper";
 import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { StartChatButton } from "@/features/start-chat";
 
+import { fetchDoctorInterviews } from "@/entities/interview";
+
 // ИМПОРТЫ API
-import { api, createReview, getBlogPosts, profileKeys } from "@/shared/api";
+import { api, createReview, profileKeys } from "@/shared/api";
 import {
   EmailIcon,
   GeoIcon,
@@ -97,19 +99,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
     },
   });
 
-  // 3. ПОЛУЧАЕМ ПОСТЫ БЛОГА ДЛЯ СЕКЦИИ «ИНТЕРВЬЮ»
-  const { data: blogData } = useQuery({
-    queryKey: ["blog-posts"],
-    queryFn: () => getBlogPosts({ page_size: 3 }),
+  // 3. ПОЛУЧАЕМ ИНТЕРВЬЮ ЭТОГО ВРАЧА
+  const { data: doctorInterviews = [] } = useQuery({
+    queryKey: ["interviews", "doctor", id],
+    queryFn: () => fetchDoctorInterviews(id),
   });
-  const blogVideos = (blogData?.data ?? []).map((post) => ({
-    id: String(post.id),
-    title: post.title,
-    authorName: post.category.name,
-    authorRole: post.category.name,
-    thumbnail: post.image ?? "",
-    youtubeUrl: `/blog/${post.slug}`,
-  }));
 
   if (isDoctorError || (!isDoctorLoading && !doctor)) {
     return (
@@ -432,7 +426,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
           />
         )}
 
-        {blogVideos.length > 0 && (
+        {doctorInterviews.length > 0 && (
           <div className="mt-10 md:mt-20 mb-10 md:mb-20 px-4 md:px-0">
             <div className="flex items-center justify-between mb-6 md:mb-8 md:hidden">
               <h2 className="text-2xl font-semibold text-foreground">
@@ -449,8 +443,8 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             <VideosSwiper
               title="Интервью"
               viewAllHref={ROUTES.VIDEOS}
-              description="Ознакомьтесь с интересными материалами"
-              videos={blogVideos}
+              description="Ознакомьтесь с интервью этого врача"
+              videos={doctorInterviews}
               className="px-0 md:px-0"
             />
           </div>

@@ -4,13 +4,25 @@ import { FC, useState } from "react";
 
 import { StaticImageData } from "next/image";
 
+import { DoctorPersonIcon } from "@/shared/assets/icons";
 import { ImageWithFallback } from "@/shared/ui";
+
+// У врача может не быть загруженного фото — вместо голого фона показываем
+// иконку на мягком фирменном фоне. В отличие от BlogImageFallback — без
+// кружка-подложки под иконкой: тут по центру уже сидит кружок play-оверлея
+// того же размера (size-12), и он рисуется поверх, полностью его перекрывая.
+const ThumbnailFallback = () => (
+  <div className="absolute inset-0 flex items-center justify-center bg-primary-tint">
+    <DoctorPersonIcon className="size-20 text-primary/25" />
+  </div>
+);
 
 type Props = {
   title: string;
   authorName: string;
   authorRole: string;
-  thumbnail: StaticImageData | string;
+  // У врача может не быть загруженного фото.
+  thumbnail?: StaticImageData | string;
   youtubeUrl: string;
 };
 
@@ -40,7 +52,7 @@ export const VideoCard: FC<Props> = ({
           className="object-cover"
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}
-          fallback={<div className="absolute inset-0 bg-surface" />}
+          fallback={<ThumbnailFallback />}
         />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="size-12 rounded-full bg-white/90 flex items-center justify-center shadow-md pl-0.5">

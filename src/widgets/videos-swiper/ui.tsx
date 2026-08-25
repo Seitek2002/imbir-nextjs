@@ -13,7 +13,8 @@ type Video = {
   title: string;
   authorName: string;
   authorRole: string;
-  thumbnail: string;
+  // У врача может не быть загруженного фото.
+  thumbnail?: string;
   youtubeUrl: string;
 };
 

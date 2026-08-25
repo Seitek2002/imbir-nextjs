@@ -5,11 +5,8 @@ import dynamic from "next/dynamic";
 import { BlogSectionServer } from "@/widgets/blog-section";
 import { Header } from "@/widgets/header";
 
-import {
-  VideoThumbnail1,
-  VideoThumbnail2,
-  VideoThumbnail3,
-} from "@/shared/assets/images";
+import { fetchInterviews } from "@/entities/interview";
+
 import { LazyInView } from "@/shared/ui";
 
 // Эти два блока рендерятся сразу (не за LazyInView, см. ниже), поэтому им не
@@ -33,7 +30,9 @@ const Footer = dynamic(() =>
   import("@/widgets/footer").then((mod) => mod.Footer),
 );
 
-export const HomePage = () => {
+export const HomePage = async () => {
+  const interviews = await fetchInterviews(6);
+
   return (
     <main className="pb-16 lg:pb-0">
       <Header searchable />
@@ -54,39 +53,16 @@ export const HomePage = () => {
         <Banners />
       </LazyInView>
 
-      <LazyInView minHeight={320} className="w-full">
-        <VideosSwiper
-          title="Интервью"
-          viewAllHref="/videos"
-          description="Ознакомьтесь с интервью наших специалистов"
-          videos={[
-            {
-              id: "1",
-              title: "3 шага к консультации с врачом",
-              authorName: "Садыкова А. Т.",
-              authorRole: "Врач-терапевт",
-              thumbnail: VideoThumbnail1.src,
-              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            },
-            {
-              id: "2",
-              title: "Врач онлайн: как это работает за 1 минуту",
-              authorName: "Садыкова А. Т.",
-              authorRole: "Врач-терапевт",
-              thumbnail: VideoThumbnail2.src,
-              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            },
-            {
-              id: "3",
-              title: "Врач онлайн: как это работает за 1 минуту",
-              authorName: "Садыкова А. Т.",
-              authorRole: "Врач-терапевт",
-              thumbnail: VideoThumbnail3.src,
-              youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            },
-          ]}
-        />
-      </LazyInView>
+      {interviews.length > 0 && (
+        <LazyInView minHeight={320} className="w-full">
+          <VideosSwiper
+            title="Интервью"
+            viewAllHref="/videos"
+            description="Ознакомьтесь с интервью наших специалистов"
+            videos={interviews}
+          />
+        </LazyInView>
+      )}
 
       {/* Заголовок, описание и ссылка «Все» рендерятся внутри
           BlogSectionServer вместе с самим блоком — так весь блог целиком
