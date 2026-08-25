@@ -4,7 +4,12 @@ import { FC, useState } from "react";
 
 import Link from "next/link";
 
-import { BlogCard, BlogCategory, BlogPost } from "@/entities/blog";
+import {
+  BlogCard,
+  BlogCategory,
+  BlogImageFallback,
+  BlogPost,
+} from "@/entities/blog";
 
 import { colors } from "@/shared/config";
 import { ImageWithFallback } from "@/shared/ui";
@@ -91,7 +96,7 @@ export const BlogSection: FC<Props> = ({
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               onLoad={() => setFeaturedLoaded(true)}
               onError={() => setFeaturedLoaded(true)}
-              fallback={<div className="absolute inset-0 bg-surface" />}
+              fallback={<BlogImageFallback />}
             />
           </Link>
 
@@ -163,7 +168,7 @@ export const BlogSection: FC<Props> = ({
               className="object-cover object-top"
               onLoad={() => setFeaturedLoaded(true)}
               onError={() => setFeaturedLoaded(true)}
-              fallback={<div className="absolute inset-0 bg-surface" />}
+              fallback={<BlogImageFallback />}
             />
           </Link>
         </div>
@@ -251,7 +256,7 @@ const HomePostImage: FC<{
         className="object-cover"
         onLoad={() => setLoaded(true)}
         onError={() => setLoaded(true)}
-        fallback={<div className="absolute inset-0 bg-surface" />}
+        fallback={<BlogImageFallback />}
       />
     </div>
   );

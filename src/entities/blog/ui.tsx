@@ -7,6 +7,8 @@ import Link from "next/link";
 import { colors } from "@/shared/config";
 import { ImageWithFallback } from "@/shared/ui";
 
+import { BlogImageFallback } from "./image-fallback";
+
 type Props = {
   title: string;
   category: string;
@@ -47,7 +49,7 @@ export const BlogCard: FC<Props> = ({
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}
-          fallback={<div className="absolute inset-0 bg-surface" />}
+          fallback={<BlogImageFallback />}
         />
       </div>
 

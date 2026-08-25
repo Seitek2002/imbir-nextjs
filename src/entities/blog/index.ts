@@ -1,4 +1,5 @@
 export { BlogCard } from "./ui";
+export { BlogImageFallback } from "./image-fallback";
 export { BlogSkeleton } from "./skeleton";
 export {
   fetchBlogArticle,

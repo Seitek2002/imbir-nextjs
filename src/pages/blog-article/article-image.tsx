@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { BlogImageFallback } from "@/entities/blog";
+
 import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
@@ -24,7 +26,7 @@ export const ArticleImage = ({ src, alt }: Props) => {
         className="object-cover"
         onLoad={() => setLoaded(true)}
         onError={() => setLoaded(true)}
-        fallback={<div className="absolute inset-0 skeleton" />}
+        fallback={<BlogImageFallback />}
       />
     </div>
   );
