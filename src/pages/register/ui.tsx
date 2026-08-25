@@ -519,6 +519,12 @@ export const RegisterPage = () => {
         invite_clinic_id: inviteClinic?.clinicId,
         invite_branch_id: inviteClinic?.branchId ?? undefined,
         password: data.password,
+        // Фото сюда не кладём: как и logo/photos/documents у клиники, файл
+        // внутри JSON-строки шага превращается в "{}" (JSON.stringify не
+        // умеет сериализовать File). Бэк ждёт фото отдельным top-level
+        // multipart-полем на этом же запросе, но раз реальная загрузка уже
+        // идёт отдельным updateDoctorProfile({photo}) сразу после регистрации
+        // (см. ниже), оставляем как есть — без него это поле ничего не делало.
         step1: {
           full_name: data.fullName,
           gender: data.gender as "male" | "female",
@@ -527,7 +533,6 @@ export const RegisterPage = () => {
           languages: data.languages,
           phone: doctorPhone,
           email: data.email,
-          photo: data.photo ?? undefined,
         },
         step2: {
           country: "kg",

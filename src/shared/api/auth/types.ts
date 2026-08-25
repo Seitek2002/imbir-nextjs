@@ -146,6 +146,11 @@ export type LunchBreak = {
   to: string;
 };
 
+// Фото сюда не входит: бэк принимает его отдельным top-level multipart-полем
+// запроса /register/doctor/, а не внутри JSON-строки шага — File внутри
+// JSON.stringify всё равно превращается в "{}" (та же история, что с
+// logo/photos/documents у RegisterClinicRequest). Реальная загрузка идёт
+// отдельным updateDoctorProfile({photo}) сразу после регистрации.
 export type RegisterDoctorRequest = {
   invite_clinic_id?: number;
   invite_branch_id?: number;
@@ -158,7 +163,6 @@ export type RegisterDoctorRequest = {
     languages: string[];
     phone: string;
     email: string;
-    photo?: File;
   };
   step2: {
     country: string;
