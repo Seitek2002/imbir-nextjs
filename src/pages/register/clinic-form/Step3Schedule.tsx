@@ -67,19 +67,35 @@ export const Step3Schedule = ({
     </p>
 
     <div className="flex flex-col gap-3">
-      {DAYS.map(({ key, label }) => (
-        <div key={key} className="flex items-center gap-3">
-          <span className="text-sm font-medium text-overlay w-6 shrink-0">
-            {label}
-          </span>
-          <div className="flex-1">
-            <TimeRange
-              value={data.schedule[key]}
-              onChange={(v) => onDayChange(key, v)}
+      {DAYS.map(({ key, label }) => {
+        const day = data.schedule[key];
+        return (
+          <div key={key} className="flex flex-wrap items-center gap-3">
+            <span className="text-sm font-medium text-overlay w-6 shrink-0">
+              {label}
+            </span>
+            <div className="flex-1 min-w-50">
+              <TimeRange
+                value={day}
+                onChange={(v) => onDayChange(key, v)}
+                disabled={day.allDay}
+              />
+            </div>
+            <Checkbox
+              label="Круглосуточно"
+              checked={!!day.allDay}
+              onChange={(e) =>
+                onDayChange(
+                  key,
+                  e.target.checked
+                    ? { from: "00:00", to: "23:59", allDay: true }
+                    : { from: "", to: "", allDay: false },
+                )
+              }
             />
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
 
     <div className="flex flex-col gap-2">

@@ -1,6 +1,6 @@
 export type ClinicStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
-export type ScheduleDay = { from: string; to: string };
+export type ScheduleDay = { from: string; to: string; allDay?: boolean };
 
 export type ClinicFormData = {
   clinicName: string;
