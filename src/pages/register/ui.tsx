@@ -740,18 +740,17 @@ export const RegisterPage = () => {
           license_authority: data.licensingAuthority,
         },
         step5: (() => {
+          // mainDirections/narrowDirections теперь выбираются через Dropdown
+          // из того же справочника, что и specializationList — резолвинг
+          // остаётся на случай, если справочник обновится между загрузкой
+          // формы и отправкой, но реально "unmatched" здесь уже не должно
+          // случаться (раньше, со свободным текстом, это было основным риском).
           const primary = resolveSpecializationIds(
-            data.mainDirections
-              .split(/[,.]/)
-              .map((s) => s.trim())
-              .filter(Boolean),
+            data.mainDirections,
             specializationList,
           );
           const narrow = resolveSpecializationIds(
-            data.narrowDirections
-              .split(/[,.]/)
-              .map((s) => s.trim())
-              .filter(Boolean),
+            data.narrowDirections,
             specializationList,
           );
           const unmatched = [...primary.unmatched, ...narrow.unmatched];
@@ -791,17 +790,11 @@ export const RegisterPage = () => {
       // профиль и вложения отдельными поддерживаемыми endpoint'ами сразу
       // после создания аккаунта.
       const primary = resolveSpecializationIds(
-        data.mainDirections
-          .split(/[,.]/)
-          .map((s) => s.trim())
-          .filter(Boolean),
+        data.mainDirections,
         specializationList,
       );
       const narrow = resolveSpecializationIds(
-        data.narrowDirections
-          .split(/[,.]/)
-          .map((s) => s.trim())
-          .filter(Boolean),
+        data.narrowDirections,
         specializationList,
       );
       const profileResult = await Promise.allSettled([

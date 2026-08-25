@@ -38,8 +38,11 @@ export type ClinicFormData = {
   licensingAuthority: string;
   documents: File[];
 
-  mainDirections: string;
-  narrowDirections: string;
+  // Названия из справочника специализаций (GET /api/references/specializations/),
+  // выбранные через Dropdown — не свободный текст, поэтому не может
+  // разойтись со справочником при резолвинге в id перед отправкой.
+  mainDirections: string[];
+  narrowDirections: string[];
   additionalServices: string;
 
   equipment: string[];
