@@ -7,6 +7,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
 
+import { useServiceCategories } from "@/entities/service";
+
 import {
   type DoctorServiceBody,
   type DoctorServiceItem,
@@ -15,7 +17,14 @@ import {
   doctorCabinetKeys,
   getDoctorServices,
 } from "@/shared/api";
-import { Button, ConfirmDialog, IconBtn, Input, Modal } from "@/shared/ui";
+import {
+  Button,
+  ConfirmDialog,
+  Dropdown,
+  IconBtn,
+  Input,
+  Modal,
+} from "@/shared/ui";
 
 const TrashIcon: FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -60,8 +69,9 @@ type AddServiceModalProps = {
 };
 
 // Боттом-шит добавления услуги (общий Modal: снизу на телефоне, по центру на
-// десктопе). Категория в макете не показывается, но обязательна на бэке —
-// подставляем название услуги как категорию.
+// десктопе). Специализацию выбираем из справочника: раньше поля не было и в
+// category молча уезжало название услуги — из-за этого справочник
+// /references/service-categories/ засорялся названиями вроде «Расшифровка ЭКГ».
 const AddServiceModal: FC<AddServiceModalProps> = ({
   isOpen,
   onClose,
@@ -69,22 +79,29 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
   isLoading,
 }) => {
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
 
+  const { options: categoryOptions, isLoading: isCategoriesLoading } =
+    useServiceCategories();
+
   const reset = () => {
     setName("");
+    setCategory("");
     setDescription("");
     setPrice("");
     setDuration("");
   };
 
+  const canSubmit = !!name.trim() && !!category;
+
   const handleSubmit = () => {
-    if (!name.trim()) return;
+    if (!canSubmit) return;
     onAdd({
       name: name.trim(),
-      category: name.trim(),
+      category,
       description: description || undefined,
       price: price ? String(price) : undefined,
       duration: duration ? Number(duration) : undefined,
@@ -101,6 +118,16 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Введите название"
+        />
+        <Dropdown
+          label="Специализация"
+          placeholder={
+            isCategoriesLoading ? "Загружаем список..." : "Выберите из списка"
+          }
+          options={categoryOptions}
+          searchable
+          value={category}
+          onChange={setCategory}
         />
         <Input
           label="Описание услуги"
@@ -141,7 +168,7 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
             size="lg"
             className="flex-1"
             onClick={handleSubmit}
-            disabled={!name.trim() || isLoading}
+            disabled={!canSubmit || isLoading}
           >
             {isLoading ? "Сохранение..." : "Добавить"}
           </Button>
@@ -216,6 +243,7 @@ export const DoctorServicesPage: FC = () => {
                   <thead>
                     <tr className="border-b border-border">
                       <th className={th}>Название</th>
+                      <th className={th}>Специализация</th>
                       <th className={th}>Описание</th>
                       <th className={th}>Стоимость</th>
                       <th className={th}>Длительность</th>
@@ -230,6 +258,9 @@ export const DoctorServicesPage: FC = () => {
                       >
                         <td className={`${td} text-foreground font-medium`}>
                           {s.name}
+                        </td>
+                        <td className={`${td} text-muted`}>
+                          {s.category || "—"}
                         </td>
                         <td className="px-6 py-4 text-muted">
                           {s.description || "—"}
