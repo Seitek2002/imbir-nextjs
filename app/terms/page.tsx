@@ -3,6 +3,7 @@ import { Header } from "@/widgets/header";
 
 import { getSiteSettings } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { Markdown } from "@/shared/ui";
 
 const Section = ({
   num,
@@ -46,11 +47,11 @@ export default async function TermsPage() {
           </div>
 
           {text ? (
-            // TextField на бэке — это обычный текст, без разметки.
-            // whitespace-pre-line сохраняет абзацы, которые набрали в админке.
-            <div className="text-secondary text-sm leading-relaxed whitespace-pre-line">
-              {text}
-            </div>
+            // В админке текст хранится одной строкой в markdown — тем же
+            // форматом, что и статьи блога, поэтому рендерим общим Markdown:
+            // заголовки, списки и ссылки получаются оформленными, а не
+            // сплошной простынёй.
+            <Markdown className="flex flex-col gap-3">{text}</Markdown>
           ) : (
             <>
               <Section num={1} title="Общие положения">

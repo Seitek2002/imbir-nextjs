@@ -30,3 +30,4 @@ export { DateField, YearField } from "./date-field";
 export { LocationPicker } from "./location-picker";
 export type { LocationValue } from "./location-picker";
 export type { CabinetMenuItem } from "./cabinet-mobile-menu";
+export { Markdown } from "./markdown";

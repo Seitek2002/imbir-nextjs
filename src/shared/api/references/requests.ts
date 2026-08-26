@@ -69,7 +69,7 @@ export const getUserStatus = async (
 export const getSiteSettings = async (): Promise<SiteSettings | null> => {
   try {
     const res = await fetch(`${API_BASE_URL}/api/references/site-settings/`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 60 },
     });
     if (!res.ok) return null;
     const json = (await res.json()) as SiteSettingsResponse;
