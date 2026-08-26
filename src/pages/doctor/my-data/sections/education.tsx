@@ -6,7 +6,11 @@ import { DoctorPageLayout, useMyDataTabs } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
-import { toApiEducation } from "@/entities/doctor-education";
+import {
+  type AdditionalEducationEntry,
+  toApiAdditionalEducation,
+  toApiEducation,
+} from "@/entities/doctor-education";
 
 import { CheckIcon } from "@/shared/assets/icons";
 import {
@@ -54,7 +58,7 @@ const CloseIcon: FC<{ className?: string }> = ({ className }) => (
 );
 
 type D = {
-  additionalEducation: string[];
+  additionalEducation: AdditionalEducationEntry[];
   diplomaSpecialty: string;
   graduationYear: string;
   internship: string;
@@ -100,8 +104,8 @@ export const DoctorEducationSection: FC = () => {
     setD((prev) => ({ ...prev, [k]: v }));
 
   const handleSave = async () => {
-    // Интернатура и ординатура едут тем же массивом education — раньше они
-    // тут просто отбрасывались (см. entities/doctor-education).
+    // Дополнительное образование теперь уходит отдельным полем вместе с
+    // годом, поэтому сохранение диплома не затирает его метаданные.
     await saveProfile({
       education: toApiEducation({
         university: d.university,
@@ -109,8 +113,9 @@ export const DoctorEducationSection: FC = () => {
         graduationYear: d.graduationYear,
         internship: d.internship,
         residency: d.residency,
-        additionalEducation: d.additionalEducation,
+        additionalEducation: [],
       }),
+      additional_education: toApiAdditionalEducation(d.additionalEducation),
     });
     setIsEditing(false);
     setShowSaveConfirm(false);
@@ -254,7 +259,10 @@ export const DoctorEducationSection: FC = () => {
                   className="text-primary"
                   IconLeft={PlusIcon}
                   onClick={() =>
-                    set("additionalEducation", [...d.additionalEducation, ""])
+                    set("additionalEducation", [
+                      ...d.additionalEducation,
+                      { name: "", year: "" },
+                    ])
                   }
                 >
                   Добавить
@@ -271,17 +279,30 @@ export const DoctorEducationSection: FC = () => {
                 {d.additionalEducation.map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Input
-                      value={item}
+                      value={item.name}
                       onChange={(e) =>
                         set(
                           "additionalEducation",
                           d.additionalEducation.map((v, j) =>
-                            j === i ? e.target.value : v,
+                            j === i ? { ...v, name: e.target.value } : v,
                           ),
                         )
                       }
-                      placeholder="Курс, год"
+                      placeholder="Курс"
                       className="flex-1"
+                    />
+                    <Input
+                      value={item.year}
+                      onChange={(e) =>
+                        set(
+                          "additionalEducation",
+                          d.additionalEducation.map((v, j) =>
+                            j === i ? { ...v, year: e.target.value } : v,
+                          ),
+                        )
+                      }
+                      placeholder="Год"
+                      className="w-24"
                     />
                     <IconBtn
                       onClick={() =>
@@ -300,7 +321,12 @@ export const DoctorEducationSection: FC = () => {
                 ))}
               </div>
             ) : (
-              <FieldView label="" value={d.additionalEducation} />
+              <FieldView
+                label=""
+                value={d.additionalEducation.map(({ name, year }) =>
+                  year ? `${name} (${year})` : name,
+                )}
+              />
             )}
           </div>
         </div>

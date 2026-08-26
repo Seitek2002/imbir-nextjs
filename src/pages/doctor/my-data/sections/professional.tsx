@@ -158,16 +158,22 @@ export const DoctorProfessionalInfoSection: FC = () => {
   );
 
   const handleSave = async () => {
-    // Должность/место/категория/степень отдельных полей на бэке НЕ имеют —
-    // храним их в первой записи work_experience (бэк сохраняет произвольные
-    // ключи как JSON, проверено прямыми запросами). Сохраняем существующие
-    // from/to, если они уже были.
-    const existing =
+    // Плоские профессиональные поля не трогают историю работ. Для старого
+    // workplace сохраняем все записи и правим только первую, если она есть.
+    const workExperience =
       (
         rawProfile as unknown as {
           work_experience?: Record<string, unknown>[];
         } | null
-      )?.work_experience?.[0] ?? {};
+      )?.work_experience ?? [];
+    const [currentWorkplace = {}, ...pastWorkplaces] = workExperience;
+    const nextWorkExperience =
+      d.workplace.trim() || Object.keys(currentWorkplace).length > 0
+        ? [
+            { ...currentWorkplace, clinic: d.workplace.trim() },
+            ...pastWorkplaces,
+          ]
+        : workExperience;
 
     // API принимает на запись только id (см. resolveSpecializationIds) —
     // Dropdown хранит название, поэтому резолвим перед отправкой.
@@ -184,15 +190,10 @@ export const DoctorProfessionalInfoSection: FC = () => {
       primary_specialization_ids: primaryIds,
       narrow_specialization_ids: narrowIds,
       experience_years: parseInt(d.experienceYears) || 0,
-      work_experience: [
-        {
-          ...existing,
-          position: d.currentPosition,
-          clinic: d.workplace,
-          qualification: d.qualification,
-          scientific_degree: d.scientificDegree,
-        },
-      ],
+      position: d.currentPosition.trim(),
+      qualification_category: d.qualification.trim(),
+      academic_degree: d.scientificDegree.trim(),
+      work_experience: nextWorkExperience,
       equipment: d.equipment,
       patient_conditions: d.patientConditions,
       payment_methods: d.paymentMethods,

@@ -26,7 +26,7 @@ export type DoctorReview = {
 };
 
 export type DoctorProfileData = {
-  additionalEducation: string[];
+  additionalEducation: { name: string; year: string }[];
   additionalSpecialty: string;
   birthDate: string;
   certificates: string[];

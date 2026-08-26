@@ -15,6 +15,45 @@ export type ApiEducationEntry = {
   year?: number;
 };
 
+export type AdditionalEducationEntry = { name: string; year: string };
+export type ApiAdditionalEducationEntry = {
+  name?: string;
+  year?: number | null;
+};
+
+export const toApiAdditionalEducation = (
+  entries: AdditionalEducationEntry[],
+): { name: string; year: number | null }[] =>
+  entries
+    .map(({ name, year }) => ({
+      name: name.trim(),
+      year: parseInt(year, 10) || null,
+    }))
+    .filter(({ name }) => Boolean(name));
+
+export const fromApiAdditionalEducation = (
+  entries: ApiAdditionalEducationEntry[] | null | undefined,
+): AdditionalEducationEntry[] =>
+  (entries ?? [])
+    .filter((entry) => Boolean(entry.name?.trim()))
+    .map((entry) => ({
+      name: entry.name!.trim(),
+      year: entry.year ? String(entry.year) : "",
+    }));
+
+export const fromLegacyAdditionalEducation = (
+  entries: ApiEducationEntry[] | null | undefined,
+): AdditionalEducationEntry[] => {
+  const rest = (entries ?? []).filter(
+    (entry) =>
+      !isMarked(entry, INTERNSHIP_DEGREE) && !isMarked(entry, RESIDENCY_DEGREE),
+  );
+  return rest.slice(1).map((entry) => ({
+    name: entry.institution,
+    year: entry.year ? String(entry.year) : "",
+  }));
+};
+
 export type EducationForm = {
   additionalEducation: string[];
   diplomaSpecialty: string;
@@ -81,7 +120,7 @@ export const fromApiEducation = (
   const rest = list.filter(
     (e) => !isMarked(e, INTERNSHIP_DEGREE) && !isMarked(e, RESIDENCY_DEGREE),
   );
-  const [diploma, ...additional] = rest;
+  const [diploma] = rest;
 
   return {
     university: diploma?.institution ?? "",
@@ -89,6 +128,6 @@ export const fromApiEducation = (
     graduationYear: diploma?.year ? String(diploma.year) : "",
     internship: internship?.institution ?? "",
     residency: residency?.institution ?? "",
-    additionalEducation: additional.map((e) => e.institution),
+    additionalEducation: fromLegacyAdditionalEducation(list).map((e) => e.name),
   };
 };

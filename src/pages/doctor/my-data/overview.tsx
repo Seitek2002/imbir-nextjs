@@ -10,7 +10,11 @@ import {
   useDoctorCabinet,
 } from "@/widgets/doctor/layout";
 
-import { toApiEducation } from "@/entities/doctor-education";
+import {
+  type AdditionalEducationEntry,
+  toApiAdditionalEducation,
+  toApiEducation,
+} from "@/entities/doctor-education";
 import {
   resolveSpecializationIds,
   useSpecializationOptions,
@@ -137,7 +141,7 @@ const PencilIcon = () => (
 // экраны остаются отдельными: там разделы открываются по одному с экрана-
 // списка «Мои данные» (DoctorMyDataList), макет этого не касается.
 type D = {
-  additionalEducation: string[];
+  additionalEducation: AdditionalEducationEntry[];
   additionalSpecialty: string;
   birthDate: string;
   city: string;
@@ -315,15 +319,23 @@ export const DoctorMyDataOverview: FC = () => {
   };
 
   const handleSave = async () => {
-    // Должность/место/категория/степень отдельных полей на бэке не имеют —
-    // храним их в первой записи work_experience (бэк сохраняет произвольные
-    // ключи как JSON). Сохраняем существующие ключи, если они уже были.
-    const existing =
+    // Историю работ не переписываем одной записью. Для совместимости со
+    // старым полем меняем только clinic у первой записи, а должность,
+    // категорию и степень уходят новыми плоскими полями.
+    const workExperience =
       (
         rawProfile as unknown as {
           work_experience?: Record<string, unknown>[];
         } | null
-      )?.work_experience?.[0] ?? {};
+      )?.work_experience ?? [];
+    const [currentWorkplace = {}, ...pastWorkplaces] = workExperience;
+    const nextWorkExperience =
+      d.workplace.trim() || Object.keys(currentWorkplace).length > 0
+        ? [
+            { ...currentWorkplace, clinic: d.workplace.trim() },
+            ...pastWorkplaces,
+          ]
+        : workExperience;
 
     const { ids: primaryIds } = resolveSpecializationIds(
       d.specialty ? [d.specialty] : [],
@@ -352,15 +364,10 @@ export const DoctorMyDataOverview: FC = () => {
       primary_specialization_ids: primaryIds,
       narrow_specialization_ids: narrowIds,
       experience_years: parseInt(d.experienceYears) || 0,
-      work_experience: [
-        {
-          ...existing,
-          position: d.currentPosition,
-          clinic: d.workplace,
-          qualification: d.qualification,
-          scientific_degree: d.scientificDegree,
-        },
-      ],
+      position: d.currentPosition.trim(),
+      qualification_category: d.qualification.trim(),
+      academic_degree: d.scientificDegree.trim(),
+      work_experience: nextWorkExperience,
       equipment: d.equipment,
       patient_conditions: d.patientConditions,
       payment_methods: d.paymentMethods,
@@ -377,8 +384,9 @@ export const DoctorMyDataOverview: FC = () => {
         graduationYear: d.graduationYear,
         internship: d.internship,
         residency: d.residency,
-        additionalEducation: d.additionalEducation,
+        additionalEducation: [],
       }),
+      additional_education: toApiAdditionalEducation(d.additionalEducation),
       license_number: d.licenseNumber,
     });
     setPendingPhoto(null);
@@ -866,7 +874,10 @@ export const DoctorMyDataOverview: FC = () => {
                   className="text-primary"
                   IconLeft={PlusIcon}
                   onClick={() =>
-                    set("additionalEducation", [...d.additionalEducation, ""])
+                    set("additionalEducation", [
+                      ...d.additionalEducation,
+                      { name: "", year: "" },
+                    ])
                   }
                 >
                   Добавить
@@ -883,17 +894,30 @@ export const DoctorMyDataOverview: FC = () => {
                 {d.additionalEducation.map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <Input
-                      value={item}
+                      value={item.name}
                       onChange={(e) =>
                         set(
                           "additionalEducation",
                           d.additionalEducation.map((v, j) =>
-                            j === i ? e.target.value : v,
+                            j === i ? { ...v, name: e.target.value } : v,
                           ),
                         )
                       }
-                      placeholder="Курс, год"
+                      placeholder="Курс"
                       className="flex-1"
+                    />
+                    <Input
+                      value={item.year}
+                      onChange={(e) =>
+                        set(
+                          "additionalEducation",
+                          d.additionalEducation.map((v, j) =>
+                            j === i ? { ...v, year: e.target.value } : v,
+                          ),
+                        )
+                      }
+                      placeholder="Год"
+                      className="w-24"
                     />
                     <IconBtn
                       onClick={() =>
@@ -912,7 +936,12 @@ export const DoctorMyDataOverview: FC = () => {
                 ))}
               </div>
             ) : (
-              <FieldView label="" value={d.additionalEducation} />
+              <FieldView
+                label=""
+                value={d.additionalEducation.map(({ name, year }) =>
+                  year ? `${name} (${year})` : name,
+                )}
+              />
             )}
           </div>
         </div>

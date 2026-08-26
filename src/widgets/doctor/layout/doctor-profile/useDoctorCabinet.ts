@@ -5,7 +5,11 @@ import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { fromApiEducation } from "@/entities/doctor-education";
+import {
+  fromApiAdditionalEducation,
+  fromApiEducation,
+  fromLegacyAdditionalEducation,
+} from "@/entities/doctor-education";
 
 import {
   type DoctorDocument,
@@ -48,6 +52,8 @@ export const mapApiToProfile = (
   // Реальный ответ /api/doctor/profile/ (плоский DoctorOwnProfile) отличается
   // от устаревшего типа DoctorPrivateProfile — читаем через каст.
   const a = api as unknown as {
+    academic_degree?: string;
+    additional_education?: { name?: string; year?: number | null }[];
     additional_services?: string;
     birth_date?: null | string;
     city?: string;
@@ -72,6 +78,8 @@ export const mapApiToProfile = (
     // Бэк отдаёт объекты {id, name, photo}, не строки (проверено живым
     // запросом) — читаем .name, а не значение целиком.
     primary_specializations?: SpecializationItem[];
+    position?: string;
+    qualification_category?: string;
     rating?: number | string;
     reviews_count?: number;
     work_experience?: {
@@ -82,6 +90,12 @@ export const mapApiToProfile = (
     }[];
   };
 
+  const education = fromApiEducation(a.education);
+  const additionalEducation = fromApiAdditionalEducation(
+    a.additional_education,
+  );
+  const legacyProfessional = a.work_experience?.[0];
+
   return {
     fullName:
       a.full_name ?? `${a.first_name ?? ""} ${a.last_name ?? ""}`.trim(),
@@ -90,13 +104,14 @@ export const mapApiToProfile = (
       a.narrow_specializations?.[0]?.name ?? "",
     ),
     experienceYears: String(a.experience_years ?? 0),
-    // Проф. данные держим в первой записи work_experience: бэк сохраняет её как
-    // произвольный JSON и возвращает лишние ключи как есть (проверено), а
-    // отдельных полей должность/место/категория/степень в контракте нет.
-    currentPosition: a.work_experience?.[0]?.position ?? "",
-    workplace: a.work_experience?.[0]?.clinic ?? "",
-    qualification: a.work_experience?.[0]?.qualification ?? "",
-    scientificDegree: a.work_experience?.[0]?.scientific_degree ?? "",
+    // Новые плоские поля не смешиваются с историей работы. Fallback оставлен
+    // только для старых профилей, где данные ещё лежат в первой JSON-записи.
+    currentPosition: a.position ?? legacyProfessional?.position ?? "",
+    workplace: legacyProfessional?.clinic ?? "",
+    qualification:
+      a.qualification_category ?? legacyProfessional?.qualification ?? "",
+    scientificDegree:
+      a.academic_degree ?? legacyProfessional?.scientific_degree ?? "",
     equipment: a.equipment ?? [],
     patientConditions: a.patient_conditions ?? [],
     paymentMethods: a.payment_methods ?? [],
@@ -107,9 +122,13 @@ export const mapApiToProfile = (
     phone: a.phone ?? "",
     email: a.email ?? "",
     photo: a.photo ?? undefined,
-    // Интернатура и ординатура лежат в том же массиве education,
-    // помеченные через degree — см. entities/doctor-education.
-    ...fromApiEducation(a.education),
+    // Интернатура и ординатура остаются в education, а дополнительные курсы
+    // теперь хранятся отдельно вместе с годом. Старый формат читаем как fallback.
+    ...education,
+    additionalEducation:
+      additionalEducation.length > 0
+        ? additionalEducation
+        : fromLegacyAdditionalEducation(a.education),
     licenseNumber: a.license_number ?? "",
     // Заполняется в useDoctorCabinet из /api/doctor/documents/: профильный
     // ответ сертификаты не отдаёт, и раньше здесь навсегда оставался [].

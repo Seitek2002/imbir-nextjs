@@ -27,6 +27,8 @@ export const getDoctorProfile = async (): Promise<DoctorPrivateProfile> => {
 // рассинхронизирован с реальным ответом бэка (first_name/last_name, gender...).
 export type UpdateDoctorProfileBody = {
   about?: string;
+  academic_degree?: string;
+  additional_education?: { name: string; year?: number | null }[];
   additional_services?: string;
   address?: string;
   birth_date?: null | string;
@@ -39,6 +41,8 @@ export type UpdateDoctorProfileBody = {
   experience_years?: number;
   first_name?: string;
   gender?: string;
+  position?: string;
+  qualification_category?: string;
   // Схема DoctorOwnProfileRequest принимает эти три поля на запись (проверено
   // живым PUT). Без них врач, зарегистрировавшийся сам, не мог ни включить
   // онлайн-приём, ни опубликоваться — оставался невидимым в каталоге до
