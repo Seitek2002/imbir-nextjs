@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import Image from "next/image";
@@ -22,6 +22,16 @@ type Props = {
 export const PhotoLightbox: FC<Props> = ({ src, alt = "", onClose }) => {
   const mounted = useMounted();
   useScrollLock(!!src);
+
+  // Полноразмерный вариант обычно ещё не в кеше next/image (миниатюра
+  // грузилась под другой размер) — без индикатора при клике какое-то время
+  // просто ничего не происходит.
+  const [loaded, setLoaded] = useState(false);
+  const [prevSrc, setPrevSrc] = useState(src);
+  if (src !== prevSrc) {
+    setPrevSrc(src);
+    setLoaded(false);
+  }
 
   useEffect(() => {
     if (!src) return;
@@ -52,12 +62,36 @@ export const PhotoLightbox: FC<Props> = ({ src, alt = "", onClose }) => {
         className="relative h-[85vh] w-[90vw] max-w-4xl"
         onClick={(e) => e.stopPropagation()}
       >
+        {!loaded && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg
+              className="size-10 animate-spin text-white"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              />
+            </svg>
+          </div>
+        )}
         <Image
           src={src}
           alt={alt}
           fill
           sizes="90vw"
           className="object-contain"
+          onLoad={() => setLoaded(true)}
         />
       </div>
     </div>,
