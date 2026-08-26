@@ -2,8 +2,8 @@ import type { DayKey, DayState } from "@/entities/clinic-profile";
 
 // Локальная модель формы процедуры — поля с макета «Добавить/Редактировать
 // процедуру». Бэк (ClinicServiceBody) реально принимает только name/category/
-// description/price/duration/is_active — остальное (клиника-адрес отдельно от
-// профиля, список специалистов, график, слоты записи) в схеме отсутствует,
+// description/price/duration/is_active/doctor_ids — остальное (фото, клиника-
+// адрес отдельно от профиля, график, слоты записи) в схеме отсутствует,
 // поэтому эти поля живут только в браузере до появления нужных ручек.
 export type ProcedureFormState = {
   photoPreview?: string;
@@ -49,3 +49,30 @@ export const CURRENCY_OPTIONS = [
   { label: "KGS", value: "KGS" },
   { label: "USD", value: "USD" },
 ];
+
+// Что из введённого пользователем реально не сохранится — используется для
+// честного тоста при сохранении вместо тихой потери данных (см. фото/адрес/
+// график в комментарии типа выше).
+export const describeUnsupportedFields = (form: {
+  photoPreview?: string;
+  clinicName: string;
+  clinicAddress: string;
+  schedule: Record<DayKey, DayState>;
+  lunchFrom: string;
+  lunchTo: string;
+}): string[] => {
+  const parts: string[] = [];
+
+  if (form.photoPreview) parts.push("фото");
+
+  if (form.clinicName.trim() || form.clinicAddress.trim())
+    parts.push("клиника/адрес проведения");
+
+  const hasSchedule =
+    Object.values(form.schedule).some((day) => day.enabled) ||
+    !!form.lunchFrom.trim() ||
+    !!form.lunchTo.trim();
+  if (hasSchedule) parts.push("график работы");
+
+  return parts;
+};

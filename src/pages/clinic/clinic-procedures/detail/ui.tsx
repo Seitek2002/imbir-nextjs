@@ -30,6 +30,7 @@ import {
   RecordsPreview,
   ScheduleEditor,
   SpecialistsPicker,
+  describeUnsupportedFields,
 } from "../procedure-form";
 
 export const ClinicProcedureDetailPage: FC = () => {
@@ -133,6 +134,22 @@ export const ClinicProcedureDetailPage: FC = () => {
     if (!category) {
       toast.error("Выберите специализацию");
       return;
+    }
+    // Честно предупреждаем: бэк эти поля не принимает, они останутся только
+    // в браузере — вместо того чтобы тихо потерять то, что ввёл пользователь.
+    const unsupported = describeUnsupportedFields({
+      photoPreview,
+      clinicName,
+      clinicAddress,
+      schedule,
+      lunchFrom,
+      lunchTo,
+    });
+    if (unsupported.length > 0) {
+      toast(
+        `Бэк пока не сохраняет: ${unsupported.join(", ")} — эти данные останутся только на экране`,
+        { icon: "ℹ️" },
+      );
     }
     saveMutation.mutate();
   };
