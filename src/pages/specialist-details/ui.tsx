@@ -27,6 +27,8 @@ import {
   HeaderBackIcon,
   HeartIcon,
   HistoryIcon,
+  OfflineRecordIcon,
+  OnlineRecordIcon,
   PhoneIcon,
   UserCircleIcon,
 } from "@/shared/assets/icons";
@@ -172,7 +174,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
         <Header />
       </div>
 
-      <div className="flex-1 w-full max-w-350 mx-auto md:px-10 flex flex-col pt-0 md:pt-6 pb-10">
+      <div className="flex-1 w-full max-w-350 mx-auto md:px-8 flex flex-col pt-0 md:pt-6 pb-10">
         <div className="hidden md:flex text-sm text-secondary mb-6 items-center gap-2">
           <Link
             href={ROUTES.HOME}
@@ -192,7 +194,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
         </div>
 
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-          <div className="relative w-full md:w-100 shrink-0">
+          <div className="sticky top-0 h-fit w-full md:w-130 shrink-0">
             <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 md:hidden">
               <IconBtn
                 variant="outline"
@@ -323,7 +325,10 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                     className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-primary hover:bg-[#FFEAE5]"
                     onClick={() => setIsOfflineInfoOpen(true)}
                   >
-                    Офлайн-запись
+                    <span className="flex gap-2.5">
+                      <OfflineRecordIcon className="size-5" />
+                      Офлайн-запись
+                    </span>
                   </Button>
                   {doctor.isOnlineAvailable && (
                     <Button
@@ -338,7 +343,10 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                         )
                       }
                     >
-                      Онлайн консультация
+                      <span className="flex gap-2.5">
+                        <OnlineRecordIcon className="size-6" />
+                        Онлайн консультация
+                      </span>
                     </Button>
                   )}
                 </>
