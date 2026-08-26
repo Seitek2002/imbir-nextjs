@@ -15,7 +15,6 @@ import { ReviewsSection } from "@/widgets/reviews";
 import { VideosSwiper } from "@/widgets/videos-swiper";
 
 import { useFavoriteToggle } from "@/features/favorite-toggle";
-import { StartChatButton } from "@/features/start-chat";
 
 import { fetchDoctorInterviews } from "@/entities/interview";
 
