@@ -21,6 +21,75 @@ import { extractErrorMessage } from "@/shared/lib/errors";
 import { Button, Modal, Textarea } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
+const TH = "px-6 py-4 text-muted text-sm font-normal whitespace-nowrap";
+const TD = "px-6 py-4 whitespace-nowrap";
+
+// Заглушка повторяет саму таблицу записей — та же шапка и колонки, чтобы при
+// появлении данных ничего не прыгало.
+const AppointmentsSkeleton: FC = () => (
+  <div className="bg-white rounded-3xl border border-border overflow-hidden">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-160 text-left border-collapse">
+        <thead>
+          <tr className="border-b border-border">
+            <th className={TH}>Пациент</th>
+            <th className={TH}>Дата</th>
+            <th className={TH}>Время</th>
+            <th className={TH}>Тип</th>
+            <th className={TH}>Статус</th>
+            <th className={TH}>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <tr key={i} className="border-b border-border last:border-0">
+              <td className={TD}>
+                <div className="h-4 w-40 rounded-md skeleton" />
+              </td>
+              <td className={TD}>
+                <div className="h-4 w-24 rounded-md skeleton" />
+              </td>
+              <td className={TD}>
+                <div className="h-4 w-14 rounded-md skeleton" />
+              </td>
+              <td className={TD}>
+                <div className="h-4 w-32 rounded-md skeleton" />
+              </td>
+              <td className={TD}>
+                <div className="h-6 w-28 rounded-full skeleton" />
+              </td>
+              <td className={TD}>
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-24 rounded-full skeleton" />
+                  <div className="h-8 w-24 rounded-full skeleton" />
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+// Итоги приёма грузятся в модалке — скелетон под три поля (диагноз,
+// рекомендации, заметки) и кнопку сохранения справа.
+const SummarySkeleton: FC = () => (
+  <div className="flex flex-col gap-3">
+    {/* Ширины подписей заданы литералами: Tailwind не генерирует классы,
+        собранные интерполяцией строк. */}
+    {["w-20", "w-28", "w-44"].map((w) => (
+      <div key={w} className="flex flex-col gap-1.5">
+        <div className={`h-3.5 rounded-md skeleton ${w}`} />
+        <div className="h-16 w-full rounded-2xl skeleton" />
+      </div>
+    ))}
+    <div className="flex justify-end">
+      <div className="h-9 w-36 rounded-full skeleton" />
+    </div>
+  </div>
+);
+
 type Tab = "all" | "upcoming" | "completed";
 
 const TABS = [
@@ -96,7 +165,7 @@ const SummaryEditor: FC<{ appointmentId: number }> = ({ appointmentId }) => {
   });
 
   if (isLoading || !form) {
-    return <div className="py-6 text-muted text-sm">Загрузка...</div>;
+    return <SummarySkeleton />;
   }
 
   const set = (key: keyof DoctorAppointmentSummary, value: string) =>
@@ -181,8 +250,6 @@ export const DoctorAppointmentsPage: FC = () => {
   });
 
   const appointments = data?.data ?? [];
-  const th = "px-6 py-4 text-muted text-sm font-normal whitespace-nowrap";
-  const td = "px-6 py-4 whitespace-nowrap";
 
   return (
     <DoctorPageLayout title="Записи">
@@ -200,9 +267,7 @@ export const DoctorAppointmentsPage: FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
-          Загрузка...
-        </div>
+        <AppointmentsSkeleton />
       ) : appointments.length === 0 ? (
         <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
           Нет записей
@@ -213,12 +278,12 @@ export const DoctorAppointmentsPage: FC = () => {
             <table className="w-full min-w-160 text-left border-collapse">
               <thead>
                 <tr className="border-b border-border">
-                  <th className={th}>Пациент</th>
-                  <th className={th}>Дата</th>
-                  <th className={th}>Время</th>
-                  <th className={th}>Тип</th>
-                  <th className={th}>Статус</th>
-                  <th className={th}>Действия</th>
+                  <th className={TH}>Пациент</th>
+                  <th className={TH}>Дата</th>
+                  <th className={TH}>Время</th>
+                  <th className={TH}>Тип</th>
+                  <th className={TH}>Статус</th>
+                  <th className={TH}>Действия</th>
                 </tr>
               </thead>
               <tbody>
@@ -242,32 +307,32 @@ export const DoctorAppointmentsPage: FC = () => {
                     >
                       <td
                         onClick={() => setSummaryId(a.id)}
-                        className={`${td} text-foreground font-medium cursor-pointer`}
+                        className={`${TD} text-foreground font-medium cursor-pointer`}
                       >
                         {a.patient.full_name}
                       </td>
                       <td
                         onClick={() => setSummaryId(a.id)}
-                        className={`${td} text-foreground cursor-pointer`}
+                        className={`${TD} text-foreground cursor-pointer`}
                       >
                         {fmtDate(a.date)}
                       </td>
                       <td
                         onClick={() => setSummaryId(a.id)}
-                        className={`${td} text-foreground cursor-pointer`}
+                        className={`${TD} text-foreground cursor-pointer`}
                       >
                         {fmtTime(a.time)}
                       </td>
                       <td
                         onClick={() => setSummaryId(a.id)}
-                        className={`${td} text-foreground cursor-pointer`}
+                        className={`${TD} text-foreground cursor-pointer`}
                       >
                         {a.service?.name ?? "—"}
                       </td>
-                      <td className={td}>
+                      <td className={TD}>
                         <StatusPill status={a.status} />
                       </td>
-                      <td className={td}>
+                      <td className={TD}>
                         <div className="flex items-center gap-1.5">
                           {canConfirm && (
                             <Button

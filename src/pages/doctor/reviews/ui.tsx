@@ -293,6 +293,42 @@ type ReviewCardProps = {
   onComplain: (r: DoctorReview) => void;
 };
 
+// Заглушка повторяет ReviewCard: аватар + имя/дата, плашка рейтинга,
+// разделитель, текст отзыва и кнопки действий.
+const ReviewsSkeleton: FC = () => (
+  <div className="flex flex-col gap-4">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <div
+        key={i}
+        className="bg-white border border-border-soft rounded-[20px] p-5"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="size-10.5 rounded-full skeleton shrink-0" />
+            <div className="flex flex-col gap-1.5">
+              <div className="h-4 w-36 rounded-md skeleton" />
+              <div className="h-3.5 w-24 rounded-md skeleton" />
+            </div>
+          </div>
+          <div className="h-7 w-16 rounded-full skeleton" />
+        </div>
+
+        <div className="h-px bg-border-soft my-4" />
+
+        <div className="flex flex-col gap-2">
+          <div className="h-3.5 w-full rounded-md skeleton" />
+          <div className="h-3.5 w-4/5 rounded-md skeleton" />
+        </div>
+
+        <div className="flex items-center gap-5 mt-4">
+          <div className="h-5 w-24 rounded-md skeleton" />
+          <div className="h-5 w-28 rounded-md skeleton" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 const ReviewCard: FC<ReviewCardProps> = ({ review, onReply, onComplain }) => (
   <div className="bg-white border border-border-soft rounded-[20px] p-5">
     {/* Шапка: автор + дата, справа — плашка со звёздами */}
@@ -442,9 +478,7 @@ export const DoctorReviewsPage: FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="bg-white rounded-[20px] border border-border-soft p-10 text-center text-muted text-sm">
-            Загрузка...
-          </div>
+          <ReviewsSkeleton />
         ) : reviews.length === 0 ? (
           <div className="bg-white rounded-[20px] border border-border-soft p-10 text-center text-muted text-sm">
             Отзывов пока нет

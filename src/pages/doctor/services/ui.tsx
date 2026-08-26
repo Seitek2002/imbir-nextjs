@@ -178,6 +178,54 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
   );
 };
 
+const TH = "px-6 py-4 text-muted text-sm font-normal whitespace-nowrap";
+const TD = "px-6 py-4 whitespace-nowrap";
+
+// Заглушка повторяет саму таблицу — та же шапка и колонки, чтобы при
+// появлении данных ничего не прыгало.
+const ServicesSkeleton: FC = () => (
+  <div className="bg-white rounded-3xl border border-border overflow-hidden">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-160 text-left border-collapse">
+        <thead>
+          <tr className="border-b border-border">
+            <th className={TH}>Название</th>
+            <th className={TH}>Специализация</th>
+            <th className={TH}>Описание</th>
+            <th className={TH}>Стоимость</th>
+            <th className={TH}>Длительность</th>
+            <th className="px-6 py-4 w-12" />
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <tr key={i} className="border-b border-border last:border-0">
+              <td className={TD}>
+                <div className="h-4 w-40 rounded-md skeleton" />
+              </td>
+              <td className={TD}>
+                <div className="h-4 w-28 rounded-md skeleton" />
+              </td>
+              <td className={TD}>
+                <div className="h-4 w-48 rounded-md skeleton" />
+              </td>
+              <td className={TD}>
+                <div className="h-4 w-20 rounded-md skeleton" />
+              </td>
+              <td className={TD}>
+                <div className="h-4 w-16 rounded-md skeleton" />
+              </td>
+              <td className="px-6 py-4">
+                <div className="size-5 rounded-md skeleton" />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
 export const DoctorServicesPage: FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DoctorServiceItem | null>(
@@ -208,8 +256,6 @@ export const DoctorServicesPage: FC = () => {
   });
 
   const services = data?.data ?? [];
-  const th = "px-6 py-4 text-muted text-sm font-normal whitespace-nowrap";
-  const td = "px-6 py-4 whitespace-nowrap";
 
   return (
     <>
@@ -229,9 +275,7 @@ export const DoctorServicesPage: FC = () => {
 
         <div className="pb-24 lg:pb-0">
           {isLoading ? (
-            <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
-              Загрузка...
-            </div>
+            <ServicesSkeleton />
           ) : services.length === 0 ? (
             <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
               Услуг пока нет
@@ -242,11 +286,11 @@ export const DoctorServicesPage: FC = () => {
                 <table className="w-full min-w-160 text-left border-collapse">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className={th}>Название</th>
-                      <th className={th}>Специализация</th>
-                      <th className={th}>Описание</th>
-                      <th className={th}>Стоимость</th>
-                      <th className={th}>Длительность</th>
+                      <th className={TH}>Название</th>
+                      <th className={TH}>Специализация</th>
+                      <th className={TH}>Описание</th>
+                      <th className={TH}>Стоимость</th>
+                      <th className={TH}>Длительность</th>
                       <th className="px-6 py-4 w-12" />
                     </tr>
                   </thead>
@@ -256,19 +300,19 @@ export const DoctorServicesPage: FC = () => {
                         key={s.id}
                         className="group border-b border-border last:border-0"
                       >
-                        <td className={`${td} text-foreground font-medium`}>
+                        <td className={`${TD} text-foreground font-medium`}>
                           {s.name}
                         </td>
-                        <td className={`${td} text-muted`}>
+                        <td className={`${TD} text-muted`}>
                           {s.category || "—"}
                         </td>
                         <td className="px-6 py-4 text-muted">
                           {s.description || "—"}
                         </td>
-                        <td className={`${td} text-foreground`}>
+                        <td className={`${TD} text-foreground`}>
                           {s.price != null ? `${s.price} сом` : "—"}
                         </td>
-                        <td className={`${td} text-foreground`}>
+                        <td className={`${TD} text-foreground`}>
                           {s.duration != null ? `${s.duration} мин` : "—"}
                         </td>
                         <td className="px-6 py-4">
