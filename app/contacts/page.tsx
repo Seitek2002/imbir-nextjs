@@ -6,6 +6,10 @@ import { LocationMap } from "@/entities/clinic-profile";
 import { ROUTES } from "@/shared/config";
 
 const BRANCH_ADDRESS = "ул. Мидина Алыбаева, 10";
+// Координаты нужны именно для пина: без них keyless-embed показывает только
+// район по текстовому запросу, без метки филиала (см. LocationMap).
+const BRANCH_LAT = "42.866893";
+const BRANCH_LNG = "74.559023";
 
 const ContactCard = ({
   icon,
@@ -80,7 +84,11 @@ export default function ContactsPage() {
 
         {/* Карта */}
         <div className="mb-4">
-          <LocationMap address={`${BRANCH_ADDRESS}, г. Бишкек`} />
+          <LocationMap
+            latitude={BRANCH_LAT}
+            longitude={BRANCH_LNG}
+            address={`${BRANCH_ADDRESS}, г. Бишкек`}
+          />
         </div>
 
         <div className="bg-white rounded-3xl border border-border p-6 mb-6">
