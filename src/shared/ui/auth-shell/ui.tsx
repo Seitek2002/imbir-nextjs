@@ -24,7 +24,12 @@ export const AuthShell = ({ header, footer, children }: Props) => (
         <div className="rounded-2xl bg-[#FEF3F0] overflow-hidden flex items-center justify-center">
           <div className="relative w-full aspect-square">
             <Image
-              src="/assets/auth-bg.png"
+              // WebP без потерь вместо исходного PNG: пиксели те же (альфа и
+              // видимый цвет сверены побитово), но мастер весит 1.1МБ вместо
+              // 1.6МБ. Пользователю всё равно уходит вариант от next/image,
+              // так что исходник держим несжатым — иначе получится двойное
+              // пережатие.
+              src="/assets/auth-bg.webp"
               fill
               // Медиа-условие, а не голое "640px": панель скрыта до md, но
               // <img> внутри display:none браузер всё равно грузит — без
