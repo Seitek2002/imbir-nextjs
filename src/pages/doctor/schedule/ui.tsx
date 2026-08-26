@@ -52,6 +52,42 @@ const toFormState = (api: DoctorSchedule): FormState => ({
   emergency24: api.emergency_24_7 ?? false,
 });
 
+// Включённый день без времени бэк принимает молча (200), но слотов по нему
+// потом ноль — ровно как у выключенного дня. То есть врач видит включённый
+// тумблер и «сохранено», а записаться к нему нельзя. Ловим это до отправки.
+// TimeField отдаёт "ЧЧ:ММ", поэтому строки сравниваются напрямую.
+const findProblems = (form: FormState): string[] => {
+  const problems: string[] = [];
+
+  const noTime = DAYS.filter(
+    ({ key }) =>
+      form.days[key].enabled && (!form.days[key].from || !form.days[key].to),
+  );
+  if (noTime.length)
+    problems.push(
+      `Укажите время приёма: ${noTime.map((d) => d.label).join(", ")}`,
+    );
+
+  const inverted = DAYS.filter(({ key }) => {
+    const day = form.days[key];
+    return day.enabled && day.from && day.to && day.from >= day.to;
+  });
+  if (inverted.length)
+    problems.push(
+      `Конец приёма должен быть позже начала: ${inverted
+        .map((d) => d.label)
+        .join(", ")}`,
+    );
+
+  // Половинчатый обед бэк тоже сохранит как есть — получится «13:00 — ».
+  if (!!form.lunchFrom !== !!form.lunchTo)
+    problems.push("Укажите обеденный перерыв полностью или очистите оба поля");
+  else if (form.lunchFrom && form.lunchTo && form.lunchFrom >= form.lunchTo)
+    problems.push("Обед: конец перерыва должен быть позже начала");
+
+  return problems;
+};
+
 const toApiBody = (form: FormState): DoctorSchedule => ({
   schedule: Object.fromEntries(
     DAYS.map(({ key }) => [
@@ -132,6 +168,18 @@ export const DoctorSchedulePage: FC = () => {
         : prev,
     );
 
+  // Проверяем до открытия диалога: подтверждать сохранение, которое всё равно
+  // не пройдёт проверку, — лишний шаг.
+  const handleSaveClick = () => {
+    if (!form) return;
+    const problems = findProblems(form);
+    if (problems.length > 0) {
+      toast.error(problems.join("\n"));
+      return;
+    }
+    setConfirmOpen(true);
+  };
+
   if (isLoading || !form) {
     return (
       <DoctorPageLayout title="Расписание">
@@ -148,11 +196,7 @@ export const DoctorSchedulePage: FC = () => {
         <h2 className="text-[28px] font-semibold text-foreground">
           Расписание приёма
         </h2>
-        <Button
-          size="sm"
-          onClick={() => setConfirmOpen(true)}
-          disabled={isSaving}
-        >
+        <Button size="sm" onClick={handleSaveClick} disabled={isSaving}>
           {isSaving ? "Сохранение..." : "Сохранить"}
         </Button>
       </div>
@@ -232,7 +276,7 @@ export const DoctorSchedulePage: FC = () => {
         <Button
           size="lg"
           className="w-full"
-          onClick={() => setConfirmOpen(true)}
+          onClick={handleSaveClick}
           disabled={isSaving}
         >
           {isSaving ? "Сохранение..." : "Сохранить"}
