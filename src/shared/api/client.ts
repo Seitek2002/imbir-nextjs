@@ -60,12 +60,31 @@ export class SessionExpiredError extends Error {
 // Раньше здесь был голый logout(): пользователя молча разлогинивало, форма
 // отзыва просто исчезала, и никто не объяснял почему. id у тоста
 // дедуплицирует сообщение, если 401 прилетел сразу по нескольким запросам.
+// Разделы, из которых при истёкшей сессии нужно уходить: смотреть чужой
+// кабинет без данных бессмысленно. С публичной страницы (каталог, блог)
+// не уводим — там просто перестают работать избранное и запись.
+const PROTECTED_PREFIXES = [
+  "/profile",
+  "/doctor-profile",
+  "/clinic-profile",
+  "/consultation",
+];
+
 const handleSessionExpired = () => {
   useAuthStore.getState().logout();
   if (typeof window === "undefined") return;
   toast.error("Сессия истекла. Войдите снова, чтобы продолжить", {
     id: "session-expired",
   });
+
+  // Раньше редирект случался лишь побочно: logout() чистил стор, AuthGuard
+  // это замечал и уводил на /login. Работало только пока гейт смонтирован —
+  // то есть зависело от того, на какой странице застал 401. Уводим явно.
+  const { pathname } = window.location;
+  const inCabinet = PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+  if (inCabinet) window.location.href = "/login?expired=1";
 };
 
 // Auto-refresh on 401

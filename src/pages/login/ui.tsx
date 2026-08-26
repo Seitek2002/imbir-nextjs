@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { loginFn } from "@/shared/api";
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
+import { useUrlSearchParams } from "@/shared/lib/url-state";
 import { useAuthStore } from "@/shared/store";
 import { Button, Checkbox, type Country, Input, PhoneInput } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
@@ -37,6 +38,9 @@ export const LoginPage = () => {
     setUser,
     setRememberMe: setRememberMeStore,
   } = useAuthStore();
+
+  // Перехватчик 401 уводит сюда с ?expired=1, когда сессию продлить не вышло.
+  const isExpired = useUrlSearchParams().get("expired") === "1";
 
   const [loginBy, setLoginBy] = useState<LoginBy>("email");
   const [email, setEmail] = useState("");
@@ -96,6 +100,15 @@ export const LoginPage = () => {
         <p className="text-muted text-sm md:text-base">
           Заполните данные, чтобы войти в свой аккаунт
         </p>
+        {/* ?expired=1 ставит перехватчик 401, когда продлить сессию не
+            удалось (см. handleSessionExpired). Без этой строки человек
+            оказывался на форме входа без единого объяснения, почему его
+            выбросило из кабинета. */}
+        {isExpired && (
+          <div className="mt-4 rounded-2xl bg-primary-tint px-4 py-3 text-sm text-foreground">
+            Сессия истекла — войдите снова, чтобы продолжить.
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-1 flex-col">

@@ -33,9 +33,12 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
   const city = useCityStore((state) => state.city);
   const { isAuthed, role } = useAuthDisplay();
   const isDoctor = role === "doctor";
-  const profileHref = isAuthed
-    ? ((role && ROLE_ROUTE[role]) ?? ROUTES.PROFILE)
-    : ROUTES.LOGIN;
+  // Роль неизвестна при живом токене — это сломанная сессия (в сторе есть
+  // accessToken, но нет user). Раньше тут стоял фолбэк на ROUTES.PROFILE, и
+  // врача с клиникой уводило в кабинет пациента: там их данные не грузились,
+  // и пользователь упирался в 404. Отправляем на вход — перелогин это чинит.
+  const profileHref =
+    isAuthed && role ? (ROLE_ROUTE[role] ?? ROUTES.PROFILE) : ROUTES.LOGIN;
 
   return (
     <>

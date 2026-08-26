@@ -9,7 +9,13 @@ export type UserRole = "patient" | "doctor" | "clinic";
 export const AUTH_COOKIE = "is_authed";
 export const ROLE_COOKIE = "role";
 
-const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 дней
+// Ровно столько же, сколько живёт refresh-токен у бэка (проверено: access —
+// 60 минут, refresh — 7 дней). Раньше тут было 30 дней, и с 8-го по 30-й день
+// cookie утверждала, что пользователь авторизован, хотя оба токена уже
+// мертвы: middleware пропускал в кабинет, AuthGuard видел непустую строку
+// токена и рендерил его, и только первый запрос ловил 401. Срок куки должен
+// умирать вместе с сессией, иначе гейт врёт.
+const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 дней — как refresh-токен
 
 // Зеркалим факт авторизации и роль в cookie, чтобы их мог прочитать сервер.
 // Время жизни куки (max-age) задаётся только если rememberMe = true.
@@ -26,9 +32,13 @@ const writeAuthCookies = (
   }
   const maxAgeStr = rememberMe ? `; max-age=${AUTH_COOKIE_MAX_AGE}` : "";
   document.cookie = `${AUTH_COOKIE}=1; path=/${maxAgeStr}; samesite=lax`;
-  if (role) {
-    document.cookie = `${ROLE_COOKIE}=${role}; path=/${maxAgeStr}; samesite=lax`;
-  }
+  // Роль пишем всегда в паре с is_authed, в том числе пустую. Раньше стояло
+  // `if (role)`, а setTokens вызывается раньше setUser — оставалось окно, где
+  // is_authed уже 1, а роли ещё нет. Хедер в этот момент не знал, куда вести,
+  // и падал в ROUTES.PROFILE, отправляя врача с клиникой в кабинет пациента.
+  document.cookie = role
+    ? `${ROLE_COOKIE}=${role}; path=/${maxAgeStr}; samesite=lax`
+    : `${ROLE_COOKIE}=; path=/; max-age=0; samesite=lax`;
 };
 
 const customStateStorage: StateStorage = {
