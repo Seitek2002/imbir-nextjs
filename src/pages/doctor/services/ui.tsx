@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,14 +17,44 @@ import {
   doctorCabinetKeys,
   getDoctorServices,
 } from "@/shared/api";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import {
   Button,
   ConfirmDialog,
   Dropdown,
   IconBtn,
+  ImageWithFallback,
   Input,
   Modal,
 } from "@/shared/ui";
+
+// Нейтральная заглушка вместо фото — в стиле остальных плейсхолдеров проекта
+// (приглушённая иконка на bg-surface), а не серый прямоугольник.
+const ServicePhotoPlaceholder: FC<{ className?: string }> = ({ className }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    className={`text-dim ${className ?? ""}`}
+  >
+    <rect
+      x="3"
+      y="5"
+      width="18"
+      height="14"
+      rx="3"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <circle cx="8.5" cy="10" r="1.5" fill="currentColor" />
+    <path
+      d="M4 17l4.5-4.5a2 2 0 0 1 2.8 0L16 17"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 const TrashIcon: FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -83,6 +113,9 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | undefined>();
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const { options: categoryOptions, isLoading: isCategoriesLoading } =
     useServiceCategories();
@@ -93,6 +126,19 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
     setDescription("");
     setPrice("");
     setDuration("");
+    setPhotoFile(null);
+    setPhotoPreview(undefined);
+  };
+
+  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    // Превью рисуем из data-URL, а на бэк уходит сам File (multipart).
+    setPhotoFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setPhotoPreview(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const canSubmit = !!name.trim() && !!category;
@@ -106,6 +152,7 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
       price: price ? String(price) : undefined,
       duration: duration ? Number(duration) : undefined,
       is_active: true,
+      ...(photoFile ? { photo: photoFile } : {}),
     });
     reset();
   };
@@ -155,6 +202,43 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
             placeholder="0"
           />
         </div>
+        <div>
+          <label className="block text-foreground text-sm font-medium mb-1.5">
+            Фото услуги
+          </label>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhoto}
+          />
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-surface flex items-center justify-center shrink-0">
+              {photoPreview ? (
+                <ImageWithFallback
+                  src={photoPreview}
+                  alt="Фото услуги"
+                  width={80}
+                  height={80}
+                  unoptimized
+                  className="w-full h-full object-cover"
+                  fallback={<ServicePhotoPlaceholder className="size-8" />}
+                />
+              ) : (
+                <ServicePhotoPlaceholder className="size-8" />
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => photoInputRef.current?.click()}
+            >
+              {photoPreview ? "Заменить фото" : "+ Добавить фото"}
+            </Button>
+          </div>
+        </div>
+
         <div className="flex gap-3 pt-1">
           <Button
             variant="outline"
@@ -189,6 +273,7 @@ const ServicesSkeleton: FC = () => (
       <table className="w-full min-w-160 text-left border-collapse">
         <thead>
           <tr className="border-b border-border">
+            <th className="px-6 py-4 w-20" />
             <th className={TH}>Название</th>
             <th className={TH}>Специализация</th>
             <th className={TH}>Описание</th>
@@ -200,6 +285,9 @@ const ServicesSkeleton: FC = () => (
         <tbody>
           {Array.from({ length: 4 }).map((_, i) => (
             <tr key={i} className="border-b border-border last:border-0">
+              <td className={TD}>
+                <div className="size-12 rounded-xl skeleton" />
+              </td>
               <td className={TD}>
                 <div className="h-4 w-40 rounded-md skeleton" />
               </td>
@@ -242,7 +330,15 @@ export const DoctorServicesPage: FC = () => {
     mutationFn: addDoctorService,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.services() });
+      toast.success("Услуга добавлена");
       setModalOpen(false);
+    },
+    // Без этого неудачное сохранение проходило совершенно молча: модалка
+    // оставалась открытой, и было непонятно, ушло что-то или нет. Бэк
+    // отвечает 400 с полями (например «Загрузите правильное изображение»).
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось добавить услугу"));
     },
   });
 
@@ -286,6 +382,7 @@ export const DoctorServicesPage: FC = () => {
                 <table className="w-full min-w-160 text-left border-collapse">
                   <thead>
                     <tr className="border-b border-border">
+                      <th className="px-6 py-4 w-20" />
                       <th className={TH}>Название</th>
                       <th className={TH}>Специализация</th>
                       <th className={TH}>Описание</th>
@@ -300,6 +397,24 @@ export const DoctorServicesPage: FC = () => {
                         key={s.id}
                         className="group border-b border-border last:border-0"
                       >
+                        <td className={TD}>
+                          <div className="size-12 rounded-xl overflow-hidden bg-surface flex items-center justify-center">
+                            {s.photo ? (
+                              <ImageWithFallback
+                                src={s.photo}
+                                alt={s.name}
+                                width={48}
+                                height={48}
+                                className="w-full h-full object-cover"
+                                fallback={
+                                  <ServicePhotoPlaceholder className="size-6" />
+                                }
+                              />
+                            ) : (
+                              <ServicePhotoPlaceholder className="size-6" />
+                            )}
+                          </div>
+                        </td>
                         <td className={`${TD} text-foreground font-medium`}>
                           {s.name}
                         </td>

@@ -333,12 +333,14 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
             <div className="hidden md:flex gap-4 mb-10 mt-4">
               <Button
                 variant="outline"
+                size="sm"
                 className="flex-1 justify-center bg-[#FFF2F0] border-transparent text-primary"
                 onClick={() => setIsOfflineInfoOpen(true)}
               >
                 Офлайн-консультация
               </Button>
               <Button
+                size="sm"
                 className="flex-1 justify-center"
                 onClick={() => router.push(`${ROUTES.RECORD}?clinic=${id}`)}
               >

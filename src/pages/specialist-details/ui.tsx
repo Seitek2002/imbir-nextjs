@@ -48,9 +48,34 @@ type Props = {
   initialDoctor?: Awaited<ReturnType<typeof api.getDoctorById>>;
 };
 
+// Заглушка вместо фото врача. Инициал в фирменном градиентном круге — тот же
+// приём, что в сайдбаре кабинета и в карточках отзывов, поэтому читается как
+// часть оформления, а не как «картинка не загрузилась». Фон плашки остаётся
+// персиковым, так что блок не выбивается из общей палитры страницы.
+const DoctorPhotoFallback: FC<{ name: string }> = ({ name }) => {
+  const initial = name.trim().charAt(0).toUpperCase();
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div className="size-32 md:size-40 rounded-full bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shadow-sm">
+        {initial ? (
+          <span className="text-white text-5xl md:text-6xl font-semibold select-none">
+            {initial}
+          </span>
+        ) : (
+          <UserCircleIcon className="size-16 text-white/80" />
+        )}
+      </div>
+      <span className="text-muted text-sm">Фото не добавлено</span>
+    </div>
+  );
+};
+
 export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
   const router = useRouter();
   const [isOfflineInfoOpen, setIsOfflineInfoOpen] = useState(false);
+  const [photoLoaded, setPhotoLoaded] = useState(false);
+  const [photoFailed, setPhotoFailed] = useState(false);
 
   // 1. ПОЛУЧАЕМ ДАННЫЕ ВРАЧА
   const {
@@ -197,21 +222,36 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             </div>
 
             <div className="relative w-full h-85 md:h-125 bg-[#FFEFE5] md:rounded-3xl overflow-hidden flex items-center justify-center">
-              {doctor.image ? (
-                <Image
-                  src={doctor.image}
-                  alt={doctor.name}
-                  fill
-                  // Это LCP-элемент страницы (виден сразу, без скролла) —
-                  // без priority next/image ставит loading="lazy" и браузер
-                  // не начинает грузить фото, пока JS до него не дойдёт.
-                  // Подтверждено Lighthouse: ~1.3с чистой задержки на LCP.
-                  priority
-                  sizes="(min-width: 768px) 400px, 100vw"
-                  className="object-cover object-top"
-                />
+              {doctor.image && !photoFailed ? (
+                <>
+                  {/* Фото большое и грузится заметно дольше остальной
+                      страницы. Пока оно идёт — шиммер во всю плашку, иначе
+                      пользователь видит пустой персиковый прямоугольник и не
+                      понимает, есть фото или нет. */}
+                  {!photoLoaded && (
+                    <div className="absolute inset-0 skeleton" />
+                  )}
+                  <Image
+                    src={doctor.image}
+                    alt={doctor.name}
+                    fill
+                    // Это LCP-элемент страницы (виден сразу, без скролла) —
+                    // без priority next/image ставит loading="lazy" и браузер
+                    // не начинает грузить фото, пока JS до него не дойдёт.
+                    // Подтверждено Lighthouse: ~1.3с чистой задержки на LCP.
+                    priority
+                    sizes="(min-width: 768px) 400px, 100vw"
+                    className={`object-cover object-top transition-opacity duration-300 ${
+                      photoLoaded ? "opacity-100" : "opacity-0"
+                    }`}
+                    onLoad={() => setPhotoLoaded(true)}
+                    // Битая ссылка — показываем ту же заглушку, что и при
+                    // отсутствии фото, а не сломанную картинку поверх шиммера.
+                    onError={() => setPhotoFailed(true)}
+                  />
+                </>
               ) : (
-                <UserCircleIcon className="size-32 text-dim/60" />
+                <DoctorPhotoFallback name={doctor.name} />
               )}
             </div>
           </div>

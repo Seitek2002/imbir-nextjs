@@ -82,11 +82,13 @@ const appendMultipart = (form: FormData, key: string, value: unknown) => {
   form.append(key, String(value));
 };
 
-export const updateDoctorProfile = async (
-  body: UpdateDoctorProfileBody,
-): Promise<DoctorPrivateProfile> => {
-  // Если есть файл (фото/логотип) — шлём multipart, иначе JSON.
-  // Правила упаковки полей в multipart — в appendMultipart выше.
+// Если есть файл (фото) — шлём multipart, иначе обычный JSON. Правила
+// упаковки полей в multipart — в appendMultipart выше.
+const sendMaybeMultipart = async <T>(
+  path: string,
+  method: "POST" | "PUT" | "PATCH",
+  body: Record<string, unknown>,
+): Promise<T> => {
   const hasFile = Object.values(body).some((v) => v instanceof File);
 
   if (hasFile) {
@@ -95,20 +97,28 @@ export const updateDoctorProfile = async (
       if (value === undefined || value === null) return;
       appendMultipart(form, key, value);
     });
-    const { data } = await apiClient.put<DoctorPrivateProfile>(
-      "/api/doctor/profile/",
-      form,
-      { timeout: FILE_UPLOAD_TIMEOUT_MS },
-    );
+    const { data } = await apiClient.request<T>({
+      url: path,
+      method,
+      data: form,
+      // Файлы не укладываются в общие 15 секунд на медленном канале.
+      timeout: FILE_UPLOAD_TIMEOUT_MS,
+    });
     return data;
   }
 
-  const { data } = await apiClient.put<DoctorPrivateProfile>(
-    "/api/doctor/profile/",
-    body,
-  );
+  const { data } = await apiClient.request<T>({
+    url: path,
+    method,
+    data: body,
+  });
   return data;
 };
+
+export const updateDoctorProfile = async (
+  body: UpdateDoctorProfileBody,
+): Promise<DoctorPrivateProfile> =>
+  sendMaybeMultipart<DoctorPrivateProfile>("/api/doctor/profile/", "PUT", body);
 
 // Ответ плоский ({schedule, lunch_break, emergency_24_7}), без обёртки data —
 // проверено живым запросом.
@@ -192,13 +202,9 @@ export const getDoctorServices = async (): Promise<{
 
 export const addDoctorService = async (
   body: DoctorServiceBody,
-): Promise<DoctorServiceItem> => {
-  const { data } = await apiClient.post<DoctorServiceItem>(
-    "/api/doctor/services/",
-    body,
-  );
-  return data;
-};
+): Promise<DoctorServiceItem> =>
+  // photo может быть File — тогда уходит multipart'ом.
+  sendMaybeMultipart<DoctorServiceItem>("/api/doctor/services/", "POST", body);
 
 export const deleteDoctorService = async (id: number): Promise<void> => {
   await apiClient.delete(`/api/doctor/services/${id}/`);

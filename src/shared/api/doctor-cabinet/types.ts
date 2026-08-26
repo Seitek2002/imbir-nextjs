@@ -107,6 +107,7 @@ export type DoctorServiceItem = {
   description?: string;
   price: string | null;
   duration?: number | null;
+  photo?: string | null;
   is_active?: boolean;
   created_at?: string;
 };
@@ -117,5 +118,7 @@ export type DoctorServiceBody = {
   description?: string;
   price?: string;
   duration?: number;
+  // File уходит multipart'ом, строка — URL уже загруженной картинки.
+  photo?: File | string | null;
   is_active?: boolean;
 };
