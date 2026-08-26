@@ -4,7 +4,6 @@ import { FC, useState } from "react";
 
 import {
   CheckboxGroup,
-  DoctorMyDataTabs,
   DoctorPageLayout,
   type DoctorProfileData,
   useMyDataTabs,
@@ -262,8 +261,6 @@ export const DoctorProfessionalInfoSection: FC = () => {
           </Button>
         </div>
       </div>
-
-      <DoctorMyDataTabs />
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8">
         <div className={isEditing ? formGrid : fieldList}>

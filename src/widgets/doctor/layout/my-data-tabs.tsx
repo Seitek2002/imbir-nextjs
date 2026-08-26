@@ -6,7 +6,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useRef,
   useState,
 } from "react";
 
@@ -67,56 +66,6 @@ export const MyDataTabsProvider: FC<{
   );
 };
 
-// Вкладки — только десктопные: на мобильном по макету разделы открываются
-// с экрана-списка «Мои данные» (DoctorMyDataList), а не переключаются табами.
-export const DoctorMyDataTabs: FC = () => {
-  const { active, setActive } = useMyDataTabs();
-  // Раздел не выбран — на десктопе показывается первая вкладка, её и
-  // подсвечиваем.
-  const current = active ?? MY_DATA_TABS[0].id;
-  const refs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  // Стрелками ходим по вкладкам, как ожидается от роли tablist.
-  const handleKeyDown = (event: React.KeyboardEvent, index: number) => {
-    const delta =
-      event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-    if (!delta) return;
-    event.preventDefault();
-    const next = (index + delta + MY_DATA_TABS.length) % MY_DATA_TABS.length;
-    setActive(MY_DATA_TABS[next].id);
-    refs.current[next]?.focus();
-  };
-
-  return (
-    <div
-      role="tablist"
-      aria-label="Мои данные"
-      className="hidden lg:flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none"
-    >
-      {MY_DATA_TABS.map((tab, index) => {
-        const isActive = current === tab.id;
-        return (
-          <button
-            key={tab.id}
-            ref={(node) => {
-              refs.current[index] = node;
-            }}
-            type="button"
-            role="tab"
-            aria-selected={isActive}
-            tabIndex={isActive ? 0 : -1}
-            onClick={() => setActive(tab.id)}
-            onKeyDown={(event) => handleKeyDown(event, index)}
-            className={`shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all cursor-pointer ${
-              isActive
-                ? "bg-primary text-white shadow-xs"
-                : "bg-white border border-border text-secondary hover:bg-surface"
-            }`}
-          >
-            {tab.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-};
+// Раньше здесь же был десктопный DoctorMyDataTabs (переключатель разделов
+// пилюлями) — убран вместе с переходом десктопа на общий скролл со всеми
+// разделами (см. pages/doctor/my-data/overview.tsx), как в /clinic-profile.

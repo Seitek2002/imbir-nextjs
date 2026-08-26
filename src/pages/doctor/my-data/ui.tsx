@@ -11,6 +11,7 @@ import {
 } from "@/widgets/doctor/layout";
 
 import { DoctorMyDataList } from "./list";
+import { DoctorMyDataOverview } from "./overview";
 import { DoctorBasicInfoSection } from "./sections/basic";
 import { DoctorDocumentsSection } from "./sections/documents";
 import { DoctorEducationSection } from "./sections/education";
@@ -32,22 +33,22 @@ const ActiveSection: FC = () => {
 };
 
 // Мобильный и десктопный сценарии расходятся, и разводим их только классами —
-// без media-запросов в JS, чтобы не ловить скачок после гидратации:
-//  • раздел не выбран — на мобильном это экран-список разделов (макет),
-//    а на десктопе списка нет, там сразу первая вкладка;
-//  • раздел выбран — экран раздела виден на обеих ширинах.
+// без media-запросов в JS, чтобы не ловить скачок после гидратации.
+// Мобильный (как в макете): раздел не выбран — экран-список разделов
+// (DoctorMyDataList), раздел выбран — экран этого раздела на весь экран.
+// Десктоп (как в ЛК клиники, /clinic-profile): один общий скролл со всеми
+// разделами сразу и одним «Редактировать/Сохранить» — на activeTab не
+// смотрит, из мобильного `?tab=` не переключается.
 const MyDataScreen: FC = () => {
   const { active } = useMyDataTabs();
 
   return (
     <>
-      {active === null && (
-        <div className="lg:hidden">
-          <DoctorMyDataList />
-        </div>
-      )}
-      <div className={active === null ? "hidden lg:block" : undefined}>
-        <ActiveSection />
+      <div className="lg:hidden">
+        {active === null ? <DoctorMyDataList /> : <ActiveSection />}
+      </div>
+      <div className="hidden lg:block">
+        <DoctorMyDataOverview />
       </div>
     </>
   );

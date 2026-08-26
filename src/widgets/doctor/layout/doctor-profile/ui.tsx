@@ -1,4 +1,4 @@
-﻿import { FC } from "react";
+﻿import { FC, ReactNode } from "react";
 
 import { Checkbox } from "@/shared/ui";
 
@@ -50,6 +50,20 @@ export const CheckboxGroup: FC<CheckboxGroupProps> = ({
         />
       ))}
     </div>
+  </div>
+);
+
+// Заголовок + белая карточка с рамкой — обёртка секции на объединённой
+// странице «Мои данные» (pages/doctor/my-data/overview.tsx). Тот же вид, что
+// у SectionCard клиники (entities/clinic-profile/shared-ui.tsx); свой, а не
+// импорт оттуда — не тащить в кабинет врача сущность клиники за 10 строк вёрстки.
+export const SectionCard: FC<{ title: string; children: ReactNode }> = ({
+  title,
+  children,
+}) => (
+  <div className="bg-white rounded-3xl p-5 lg:p-6 border border-border mb-6">
+    <h3 className="text-xl font-semibold text-foreground mb-4">{title}</h3>
+    {children}
   </div>
 );
 

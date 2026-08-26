@@ -2,11 +2,7 @@
 
 import { FC, useRef, useState } from "react";
 
-import {
-  DoctorMyDataTabs,
-  DoctorPageLayout,
-  useMyDataTabs,
-} from "@/widgets/doctor/layout";
+import { DoctorPageLayout, useMyDataTabs } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
@@ -186,8 +182,6 @@ export const DoctorBasicInfoSection: FC = () => {
           </Button>
         </div>
       </div>
-
-      <DoctorMyDataTabs />
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8 flex flex-col lg:block">
         {/* По макету на мобильном «Фото» — последнее поле карточки, поэтому

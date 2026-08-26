@@ -2,11 +2,7 @@
 
 import { FC, useRef, useState } from "react";
 
-import {
-  DoctorMyDataTabs,
-  DoctorPageLayout,
-  useMyDataTabs,
-} from "@/widgets/doctor/layout";
+import { DoctorPageLayout, useMyDataTabs } from "@/widgets/doctor/layout";
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 import { FieldView } from "@/widgets/doctor/layout";
 
@@ -143,8 +139,6 @@ export const DoctorDocumentsSection: FC = () => {
           </Button>
         </div>
       </div>
-
-      <DoctorMyDataTabs />
 
       <div className="bg-white rounded-3xl border border-border p-5 lg:p-8 space-y-6">
         <div>
