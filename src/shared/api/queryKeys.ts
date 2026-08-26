@@ -74,7 +74,11 @@ export const clinicCabinetKeys = {
   documents: () => [...clinicCabinetKeys.all, "documents"] as const,
   photos: () => [...clinicCabinetKeys.all, "photos"] as const,
   doctors: () => [...clinicCabinetKeys.all, "doctors"] as const,
+  doctor: (id: number) => [...clinicCabinetKeys.all, "doctor", id] as const,
+  doctorDocuments: (id: number) =>
+    [...clinicCabinetKeys.all, "doctor", id, "documents"] as const,
   services: () => [...clinicCabinetKeys.all, "services"] as const,
+  service: (id: number) => [...clinicCabinetKeys.all, "service", id] as const,
   appointments: (filters: object) =>
     [...clinicCabinetKeys.all, "appointments", filters] as const,
   stats: () => [...clinicCabinetKeys.all, "stats"] as const,

@@ -14,10 +14,31 @@ import { useSpecialistDetail } from "../../useSpecialistDetail";
 
 export const ClinicSpecialistCertificatesPage: FC = () => {
   const params = useParams<{ id: string }>() ?? { id: "" };
-  const { specialist, initialForm, isLoading } = useSpecialistDetail(params.id);
+  const {
+    specialist,
+    initialForm,
+    isLoading,
+    saveMutation,
+    documents,
+    uploadDocument,
+    deleteDocument,
+    isUploadingDocument,
+  } = useSpecialistDetail(params.id);
   const [isEditing, setIsEditing] = useState(false);
 
-  const { d, set, notifyNotConnected } = useSpecialistForm(initialForm);
+  const { d, set } = useSpecialistForm(initialForm);
+
+  // Кнопка в шапке переключает просмотр/правку; при выходе из правки
+  // отправляем карточку целиком (PATCH принимает частичное тело).
+  const handleToggle = async () => {
+    if (!isEditing) return setIsEditing(true);
+    try {
+      await saveMutation.mutateAsync(d);
+      setIsEditing(false);
+    } catch {
+      // Ошибка уже показана тостом — остаёмся в правке.
+    }
+  };
 
   if (isLoading || !specialist) {
     return (
@@ -37,13 +58,18 @@ export const ClinicSpecialistCertificatesPage: FC = () => {
     <ClinicSectionPage
       title="Сертификаты и документы"
       isEditing={isEditing}
-      onEditToggle={() => {
-        if (isEditing) notifyNotConnected();
-        setIsEditing((v) => !v);
-      }}
+      onEditToggle={handleToggle}
     >
       <div className="bg-white rounded-3xl border border-border p-5">
-        <CertificatesSection d={d} set={set} isEditing={isEditing} />
+        <CertificatesSection
+          d={d}
+          set={set}
+          isEditing={isEditing}
+          documents={documents}
+          onUpload={uploadDocument}
+          onDelete={deleteDocument}
+          isUploading={isUploadingDocument}
+        />
       </div>
     </ClinicSectionPage>
   );

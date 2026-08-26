@@ -1,10 +1,16 @@
-import type { DayKey, DayState } from "@/entities/clinic-profile";
+import {
+  DAY_API,
+  type DayKey,
+  type DayState,
+  toDay,
+} from "@/entities/clinic-profile";
+
+import type { ClinicScheduleDay } from "@/shared/api";
 
 // Локальная модель формы процедуры — поля с макета «Добавить/Редактировать
-// процедуру». Бэк (ClinicServiceBody) реально принимает только name/category/
-// description/price/duration/is_active/doctor_ids — остальное (фото, клиника-
-// адрес отдельно от профиля, график, слоты записи) в схеме отсутствует,
-// поэтому эти поля живут только в браузере до появления нужных ручек.
+// процедуру». Бэк принимает их все: name/category/description/price/duration/
+// is_active/doctor_ids, плюс photo, branch_id (филиал проведения), schedule и
+// lunch_break — последние четыре появились после доработки бэка.
 export type ProcedureFormState = {
   photoPreview?: string;
   name: string;
@@ -12,8 +18,7 @@ export type ProcedureFormState = {
   price: string;
   currency: string;
   duration: string;
-  clinicName: string;
-  clinicAddress: string;
+  branchId: string;
   specialistIds: string[];
   schedule: Record<DayKey, DayState>;
   lunchFrom: string;
@@ -37,8 +42,7 @@ export const EMPTY_PROCEDURE_FORM: ProcedureFormState = {
   price: "",
   currency: "KGS",
   duration: "",
-  clinicName: "",
-  clinicAddress: "",
+  branchId: "",
   specialistIds: [],
   schedule: EMPTY_SCHEDULE,
   lunchFrom: "",
@@ -50,29 +54,39 @@ export const CURRENCY_OPTIONS = [
   { label: "USD", value: "USD" },
 ];
 
-// Что из введённого пользователем реально не сохранится — используется для
-// честного тоста при сохранении вместо тихой потери данных (см. фото/адрес/
-// график в комментарии типа выше).
-export const describeUnsupportedFields = (form: {
-  photoPreview?: string;
-  clinicName: string;
-  clinicAddress: string;
-  schedule: Record<DayKey, DayState>;
-  lunchFrom: string;
-  lunchTo: string;
-}): string[] => {
-  const parts: string[] = [];
+// Форма ↔ бэк: у формы дни это mon/tue/… с open/close, у бэка — monday/tuesday/…
+// с from/to (тот же формат, что у графика клиники, см. DAY_API).
+export const scheduleToApi = (
+  schedule: Record<DayKey, DayState>,
+): Record<string, ClinicScheduleDay> =>
+  Object.fromEntries(
+    (Object.keys(DAY_API) as DayKey[]).map((key) => [
+      DAY_API[key],
+      {
+        enabled: schedule[key].enabled,
+        from: schedule[key].open,
+        to: schedule[key].close,
+      },
+    ]),
+  );
 
-  if (form.photoPreview) parts.push("фото");
-
-  if (form.clinicName.trim() || form.clinicAddress.trim())
-    parts.push("клиника/адрес проведения");
-
-  const hasSchedule =
-    Object.values(form.schedule).some((day) => day.enabled) ||
-    !!form.lunchFrom.trim() ||
-    !!form.lunchTo.trim();
-  if (hasSchedule) parts.push("график работы");
-
-  return parts;
+export const scheduleFromApi = (
+  api: Record<string, { from?: string; to?: string; enabled?: boolean }> | null,
+): Record<DayKey, DayState> => {
+  if (!api) return EMPTY_SCHEDULE;
+  return Object.fromEntries(
+    (Object.keys(DAY_API) as DayKey[]).map((key) => {
+      const day = api[DAY_API[key]];
+      return [
+        key,
+        toDay({ open: day?.from, close: day?.to, enabled: day?.enabled }),
+      ];
+    }),
+  ) as Record<DayKey, DayState>;
 };
+
+// Обед отправляем только если заполнены обе границы — половинчатый интервал
+// бэк сохранит как есть, и в карточке появится «13:00 – », что читается как
+// сломанные данные.
+export const lunchToApi = (from: string, to: string) =>
+  from.trim() && to.trim() ? { from: from.trim(), to: to.trim() } : null;

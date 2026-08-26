@@ -71,6 +71,23 @@ export type ClinicDoctorItem = {
   is_active: boolean;
 };
 
+// Филиал, где проводится процедура. На запись — branch_id, на чтение бэк
+// отдаёт объект с готовыми названием и адресом.
+export type ClinicServiceBranch = {
+  id: number;
+  name: string;
+  address: string;
+};
+
+// График процедуры: по дню недели, ключи английские (monday…sunday).
+export type ClinicScheduleDay = {
+  enabled: boolean;
+  from: string;
+  to: string;
+};
+
+export type ClinicLunchBreak = { from: string; to: string };
+
 // POST/PUT /api/clinic/services/. doctor_ids — список User ID врачей ЭТОЙ
 // клиники, которым назначается услуга (при PUT старые связи заменяются на
 // новые). Допускаются только врачи, привязанные к клинике через
@@ -83,6 +100,12 @@ export type ClinicServiceBody = {
   duration?: number | null;
   is_active?: boolean;
   doctor_ids?: number[];
+  // Появились после доработки бэка: фото процедуры, филиал проведения и
+  // собственный график. photo принимает и File (multipart), и URL-строку.
+  photo?: File | string | null;
+  branch_id?: number | null;
+  schedule?: Record<string, ClinicScheduleDay> | null;
+  lunch_break?: ClinicLunchBreak | null;
 };
 
 // Врач в ответе услуги (POST/PUT/GET возвращают услугу с doctors[]).
@@ -109,10 +132,87 @@ export type ClinicServiceResponse = {
   created_at: string;
 };
 
+// GET /api/clinic/services/{id}/ — полная карточка процедуры.
+export type ClinicServiceDetail = {
+  id: number;
+  name: string;
+  category: string;
+  description?: string;
+  price: string | null;
+  duration: number | null;
+  photo: string | null;
+  branch: ClinicServiceBranch | null;
+  schedule: Record<string, ClinicScheduleDay> | null;
+  lunch_break: ClinicLunchBreak | null;
+  is_active: boolean;
+  doctors: ClinicServiceDoctor[];
+  created_at: string;
+};
+
+// Запись образования врача. Интернатура/ординатура/специализация по диплому
+// лежат тут же отдельными ключами — в отличие от кабинета самого врача, где
+// бэк принимает только плоский массив institution/degree/year.
+export type ClinicDoctorEducation = {
+  institution?: string;
+  year?: number | null;
+  internship?: string;
+  residency?: string;
+  diploma_specialization?: string;
+};
+
+export type ClinicDoctorCourse = {
+  name?: string;
+  year?: number | null;
+};
+
+// Поля карточки врача, которые заполняет клиника. Логин (email/пароль),
+// график приёма и цена консультации сюда НЕ входят — их меняет только сам
+// врач через /api/doctor/profile/, бэк их здесь не примет.
+export type ClinicDoctorProfileBody = {
+  gender?: string;
+  birth_date?: string | null;
+  city?: string;
+  languages?: string[];
+  // Как и логотип клиники: File уходит multipart'ом, строка — это URL уже
+  // загруженной картинки.
+  photo?: File | string | null;
+  primary_specialization_ids?: number[];
+  narrow_specialization_ids?: number[];
+  experience_years?: number;
+  position?: string;
+  qualification_category?: string;
+  academic_degree?: string;
+  education?: ClinicDoctorEducation[];
+  additional_education?: ClinicDoctorCourse[];
+  license_number?: string;
+};
+
+// GET /api/clinic/doctors/{id}/ — полная карточка прикреплённого врача.
+// Поля из ClinicDoctorProfileBody на чтение приходят как есть, кроме
+// специализаций: пишутся *_ids, читаются объектами.
+export type ClinicDoctorProfile = Omit<
+  ClinicDoctorProfileBody,
+  "photo" | "primary_specialization_ids" | "narrow_specialization_ids"
+> & {
+  id: number;
+  first_name: string;
+  last_name: string;
+  // Отчество бэк теперь хранит и отдаёт — но только на чтение: при создании
+  // врача его передать нельзя (в ClinicDoctorCreateRequest поля нет).
+  patronymic: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  photo: string | null;
+  primary_specializations: SpecializationItem[];
+  narrow_specializations: SpecializationItem[];
+};
+
 // POST /api/clinic/doctors/ — регистрация врача клиникой из кабинета.
 // password необязателен (по умолчанию бэк ставит "Doctor123!"). Почта и
-// телефон должны быть уникальны — иначе 400.
-export type CreateClinicDoctorRequest = {
+// телефон должны быть уникальны — иначе 400. Профильные поля опциональны:
+// можно завести врача одним запросом сразу с заполненной карточкой.
+export type CreateClinicDoctorRequest = ClinicDoctorProfileBody & {
   first_name: string;
   last_name: string;
   email: string;

@@ -10,14 +10,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
-import { type DayKey, type DayState } from "@/entities/clinic-profile";
+import {
+  type DayKey,
+  type DayState,
+  useClinicCabinet,
+} from "@/entities/clinic-profile";
 import { useServiceCategories } from "@/entities/service";
 
 import {
   clinicCabinetKeys,
   deleteClinicService,
   getClinicDoctors,
-  getClinicServices,
+  getClinicService,
   updateClinicService,
 } from "@/shared/api";
 import { EditIcon, TrashIcon } from "@/shared/assets/icons";
@@ -30,7 +34,9 @@ import {
   RecordsPreview,
   ScheduleEditor,
   SpecialistsPicker,
-  describeUnsupportedFields,
+  lunchToApi,
+  scheduleFromApi,
+  scheduleToApi,
 } from "../procedure-form";
 
 export const ClinicProcedureDetailPage: FC = () => {
@@ -42,11 +48,12 @@ export const ClinicProcedureDetailPage: FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { data, isLoading } = useQuery({
-    queryKey: clinicCabinetKeys.services(),
-    queryFn: getClinicServices,
+  // Раньше карточку искали в общем списке — теперь у бэка есть своя ручка.
+  const { data: service = null, isLoading } = useQuery({
+    queryKey: clinicCabinetKeys.service(serviceId),
+    queryFn: () => getClinicService(serviceId),
+    enabled: Number.isFinite(serviceId),
   });
-  const service = (data?.data ?? []).find((s) => s.id === serviceId) ?? null;
 
   const { data: doctorsData } = useQuery({
     queryKey: clinicCabinetKeys.doctors(),
@@ -54,8 +61,8 @@ export const ClinicProcedureDetailPage: FC = () => {
   });
   const doctors = doctorsData?.data ?? [];
 
-  // Локальная форма — сюда же входят поля, которых нет на бэке (фото, адрес
-  // клиники, специалисты, график, слоты записи).
+  // Локальная форма. Все поля ниже бэк принимает — включая фото, филиал
+  // проведения и график (появились после доработки).
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   // Категории собираем из существующих услуг — справочника у бэка нет
@@ -63,15 +70,22 @@ export const ClinicProcedureDetailPage: FC = () => {
   const [price, setPrice] = useState("");
   const [currency, setCurrency] = useState("KGS");
   const [duration, setDuration] = useState("");
-  const [clinicName, setClinicName] = useState("");
-  const [clinicAddress, setClinicAddress] = useState("");
+  const [branchId, setBranchId] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | undefined>();
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [specialistIds, setSpecialistIds] = useState<string[]>([]);
   const [schedule, setSchedule] =
     useState<Record<DayKey, DayState>>(EMPTY_SCHEDULE);
   const [lunchFrom, setLunchFrom] = useState("");
   const [lunchTo, setLunchTo] = useState("");
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // Филиалы уже есть в профиле клиники — отдельного запроса не нужно.
+  const { rawProfile } = useClinicCabinet();
+  const branchOptions = (rawProfile?.branches ?? []).map((b) => ({
+    label: b.address || `Филиал #${b.id}`,
+    value: String(b.id),
+  }));
 
   const [synced, setSynced] = useState<typeof service>(null);
   if (service && service !== synced) {
@@ -80,7 +94,12 @@ export const ClinicProcedureDetailPage: FC = () => {
     setCategory(service.category ?? "");
     setPrice(service.price ?? "");
     setDuration(service.duration != null ? String(service.duration) : "");
-    setClinicName(service.clinic?.name ?? "");
+    setBranchId(service.branch ? String(service.branch.id) : "");
+    setPhotoPreview(service.photo ?? undefined);
+    setPhotoFile(null);
+    setSchedule(scheduleFromApi(service.schedule));
+    setLunchFrom(service.lunch_break?.from ?? "");
+    setLunchTo(service.lunch_break?.to ?? "");
     // Врачи, которым услуга уже назначена (бэк отдаёт их в doctors[]).
     setSpecialistIds((service.doctors ?? []).map((d) => String(d.id)));
   }
@@ -91,6 +110,8 @@ export const ClinicProcedureDetailPage: FC = () => {
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Превью — data-URL, на бэк уходит сам File (multipart).
+    setPhotoFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setPhotoPreview(reader.result as string);
     reader.readAsDataURL(file);
@@ -106,9 +127,18 @@ export const ClinicProcedureDetailPage: FC = () => {
         is_active: true,
         // При PUT бэк заменяет старые связи врач↔услуга на переданные.
         doctor_ids: specialistIds.map(Number),
+        // Фото шлём только когда его реально меняли: иначе PUT затрёт
+        // уже загруженную картинку пустым значением.
+        ...(photoFile ? { photo: photoFile } : {}),
+        branch_id: branchId ? Number(branchId) : null,
+        schedule: scheduleToApi(schedule),
+        lunch_break: lunchToApi(lunchFrom, lunchTo),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.services() });
+      queryClient.invalidateQueries({
+        queryKey: clinicCabinetKeys.service(serviceId),
+      });
       toast.success("Процедура сохранена");
       setIsEditing(false);
     },
@@ -134,22 +164,6 @@ export const ClinicProcedureDetailPage: FC = () => {
     if (!category) {
       toast.error("Выберите специализацию");
       return;
-    }
-    // Честно предупреждаем: бэк эти поля не принимает, они останутся только
-    // в браузере — вместо того чтобы тихо потерять то, что ввёл пользователь.
-    const unsupported = describeUnsupportedFields({
-      photoPreview,
-      clinicName,
-      clinicAddress,
-      schedule,
-      lunchFrom,
-      lunchTo,
-    });
-    if (unsupported.length > 0) {
-      toast(
-        `Бэк пока не сохраняет: ${unsupported.join(", ")} — эти данные останутся только на экране`,
-        { icon: "ℹ️" },
-      );
     }
     saveMutation.mutate();
   };
@@ -376,17 +390,18 @@ export const ClinicProcedureDetailPage: FC = () => {
                   onChange={setCurrency}
                 />
               </div>
-              <Input
-                label="Клиника, проводящая процедуру"
-                value={clinicName}
-                onChange={(e) => setClinicName(e.target.value)}
-                placeholder="Введите название клиники"
-              />
-              <Input
-                label="Адрес клиники, проводящей процедуру"
-                value={clinicAddress}
-                onChange={(e) => setClinicAddress(e.target.value)}
-                placeholder="Введите адрес клиники"
+              {/* Филиал вместо свободного текста: бэк хранит branch_id, а
+                  название с адресом берёт из самого филиала. */}
+              <Dropdown
+                label="Филиал, где проводится процедура"
+                placeholder={
+                  branchOptions.length
+                    ? "Выберите филиал"
+                    : "У клиники нет филиалов"
+                }
+                options={branchOptions}
+                value={branchId}
+                onChange={setBranchId}
               />
             </div>
           ) : (
@@ -394,10 +409,10 @@ export const ClinicProcedureDetailPage: FC = () => {
               <FieldRow label="Стоимость">
                 {service.price ? `${service.price} с` : "—"}
               </FieldRow>
-              <FieldRow label="Клиника">
-                {clinicName || service.clinic?.name}
+              <FieldRow label="Филиал">{service.branch?.name}</FieldRow>
+              <FieldRow label="Адрес филиала">
+                {service.branch?.address}
               </FieldRow>
-              <FieldRow label="Адрес клиники">{clinicAddress}</FieldRow>
             </>
           )}
         </div>

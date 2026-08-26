@@ -1,4 +1,9 @@
-export { EMPTY_SPECIALIST_FORM, splitFullName } from "./model";
+export {
+  EMPTY_SPECIALIST_FORM,
+  fromDoctorProfile,
+  splitFullName,
+  toDoctorProfileBody,
+} from "./model";
 export type { SpecialistFormState } from "./model";
 export { useSpecialistForm } from "./useSpecialistForm";
 export {

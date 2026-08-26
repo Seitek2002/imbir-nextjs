@@ -35,17 +35,31 @@ const HUB_ITEMS = [
 export const ClinicSpecialistDetailPage: FC = () => {
   const params = useParams<{ id: string }>() ?? { id: "" };
   const id = params.id;
-  const { specialist, initialForm, isLoading, deleteMutation } =
-    useSpecialistDetail(id);
+  const {
+    specialist,
+    initialForm,
+    isLoading,
+    saveMutation,
+    deleteMutation,
+    documents,
+    uploadDocument,
+    deleteDocument,
+    isUploadingDocument,
+  } = useSpecialistDetail(id);
 
   const [isEditing, setIsEditing] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { d, set, notifyNotConnected } = useSpecialistForm(initialForm);
+  const { d, set } = useSpecialistForm(initialForm);
 
-  const handleSave = () => {
-    notifyNotConnected();
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      await saveMutation.mutateAsync(d);
+      setIsEditing(false);
+    } catch {
+      // Ошибка уже показана тостом — остаёмся в режиме правки, чтобы можно
+      // было исправить и повторить, а не потерять введённое.
+    }
   };
 
   if (isLoading) {
@@ -103,10 +117,19 @@ export const ClinicSpecialistDetailPage: FC = () => {
             <div className="flex items-center gap-3">
               {isEditing ? (
                 <>
-                  <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEditing(false)}
+                    disabled={saveMutation.isPending}
+                  >
                     Отмена
                   </Button>
-                  <Button onClick={handleSave}>Сохранить</Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={saveMutation.isPending}
+                  >
+                    {saveMutation.isPending ? "Сохранение..." : "Сохранить"}
+                  </Button>
                 </>
               ) : (
                 <>
@@ -139,7 +162,15 @@ export const ClinicSpecialistDetailPage: FC = () => {
             <EducationSection d={d} set={set} isEditing={isEditing} />
           </SectionCard>
           <SectionCard title="Сертификаты и документы">
-            <CertificatesSection d={d} set={set} isEditing={isEditing} />
+            <CertificatesSection
+              d={d}
+              set={set}
+              isEditing={isEditing}
+              documents={documents}
+              onUpload={uploadDocument}
+              onDelete={deleteDocument}
+              isUploading={isUploadingDocument}
+            />
           </SectionCard>
         </div>
 
@@ -171,7 +202,7 @@ export const ClinicSpecialistDetailPage: FC = () => {
                 {specialist.full_name}
               </h3>
               <p className="text-muted text-sm mt-0.5">
-                {specialist.specialty}
+                {specialist.primary_specializations?.[0]?.name}
               </p>
             </div>
           </div>

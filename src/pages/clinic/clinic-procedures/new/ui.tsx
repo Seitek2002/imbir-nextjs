@@ -10,7 +10,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
-import { type DayKey, type DayState } from "@/entities/clinic-profile";
+import {
+  type DayKey,
+  type DayState,
+  useClinicCabinet,
+} from "@/entities/clinic-profile";
 import { useServiceCategories } from "@/entities/service";
 
 import {
@@ -27,7 +31,8 @@ import {
   RecordsPreview,
   ScheduleEditor,
   SpecialistsPicker,
-  describeUnsupportedFields,
+  lunchToApi,
+  scheduleToApi,
 } from "../procedure-form";
 
 export const ClinicNewProcedurePage: FC = () => {
@@ -41,7 +46,15 @@ export const ClinicNewProcedurePage: FC = () => {
   });
   const doctors = doctorsData?.data ?? [];
 
+  // Филиалы уже приходят в профиле клиники — отдельного запроса не нужно.
+  const { rawProfile } = useClinicCabinet();
+  const branchOptions = (rawProfile?.branches ?? []).map((b) => ({
+    label: b.address || `Филиал #${b.id}`,
+    value: String(b.id),
+  }));
+
   const [photoPreview, setPhotoPreview] = useState<string | undefined>();
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState(false);
   const [category, setCategory] = useState("");
@@ -50,8 +63,7 @@ export const ClinicNewProcedurePage: FC = () => {
   const [price, setPrice] = useState("");
   const [currency, setCurrency] = useState("KGS");
   const [duration, setDuration] = useState("");
-  const [clinicName, setClinicName] = useState("");
-  const [clinicAddress, setClinicAddress] = useState("");
+  const [branchId, setBranchId] = useState("");
   const [specialistIds, setSpecialistIds] = useState<string[]>([]);
   const [schedule, setSchedule] =
     useState<Record<DayKey, DayState>>(EMPTY_SCHEDULE);
@@ -64,6 +76,8 @@ export const ClinicNewProcedurePage: FC = () => {
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Превью рисуем из data-URL, а на бэк уходит сам File (multipart).
+    setPhotoFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setPhotoPreview(reader.result as string);
     reader.readAsDataURL(file);
@@ -101,22 +115,6 @@ export const ClinicNewProcedurePage: FC = () => {
       toast.error("Выберите специализацию");
       return;
     }
-    // Честно предупреждаем: бэк эти поля не принимает, они останутся только
-    // в браузере — вместо того чтобы тихо потерять то, что ввёл пользователь.
-    const unsupported = describeUnsupportedFields({
-      photoPreview,
-      clinicName,
-      clinicAddress,
-      schedule,
-      lunchFrom,
-      lunchTo,
-    });
-    if (unsupported.length > 0) {
-      toast(
-        `Бэк пока не сохраняет: ${unsupported.join(", ")} — эти данные останутся только на экране`,
-        { icon: "ℹ️" },
-      );
-    }
     addMutation.mutate({
       name: name.trim(),
       category,
@@ -127,6 +125,10 @@ export const ClinicNewProcedurePage: FC = () => {
       // врачей, привязанных к этой клинике (иначе 400), и сам проставляет
       // услугу им в список.
       doctor_ids: specialistIds.map(Number),
+      ...(photoFile ? { photo: photoFile } : {}),
+      branch_id: branchId ? Number(branchId) : null,
+      schedule: scheduleToApi(schedule),
+      lunch_break: lunchToApi(lunchFrom, lunchTo),
     });
   };
 
@@ -267,18 +269,16 @@ export const ClinicNewProcedurePage: FC = () => {
           placeholder="0"
         />
 
-        <Input
-          label="Клиника, проводящая процедуру"
-          value={clinicName}
-          onChange={(e) => setClinicName(e.target.value)}
-          placeholder="Введите название клиники"
-        />
-
-        <Input
-          label="Адрес клиники, проводящей процедуру"
-          value={clinicAddress}
-          onChange={(e) => setClinicAddress(e.target.value)}
-          placeholder="Введите адрес клиники"
+        {/* Бэк привязывает процедуру к филиалу (branch_id), а не к свободному
+            тексту: название и адрес у филиала уже есть. */}
+        <Dropdown
+          label="Филиал, где проводится процедура"
+          placeholder={
+            branchOptions.length ? "Выберите филиал" : "У клиники нет филиалов"
+          }
+          options={branchOptions}
+          value={branchId}
+          onChange={setBranchId}
         />
       </div>
 

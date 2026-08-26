@@ -7,10 +7,13 @@ import { PaginatedResponse } from "../types";
 import {
   ClinicAppointmentFilters,
   ClinicDoctorItem,
+  ClinicDoctorProfile,
+  ClinicDoctorProfileBody,
   ClinicDocument,
   ClinicPhoto,
   ClinicPrivateProfile,
   ClinicServiceBody,
+  ClinicServiceDetail,
   ClinicServiceListItem,
   ClinicStats,
   CreateClinicDoctorRequest,
@@ -21,7 +24,7 @@ import {
 
 const sendMultipart = async <T>(
   path: string,
-  method: "POST" | "PUT",
+  method: "POST" | "PUT" | "PATCH",
   form: FormData,
 ): Promise<T> => {
   // Без прокси /backend-api: у Next trailingSlash выключен, и он редиректил
@@ -97,10 +100,14 @@ const appendMultipart = (form: FormData, key: string, value: unknown) => {
   form.append(key, String(value));
 };
 
-export const updateClinicProfile = async (
-  body: UpdateClinicProfileBody,
-): Promise<ClinicPrivateProfile> => {
-  // Логотип (File) требует multipart; правила упаковки — в appendMultipart выше.
+// Файл в теле требует multipart, без файла — обычный JSON. Разница важна не
+// только для кодировки: в multipart всё превращается в строки, поэтому пустой
+// JSON-путь оставляем для запросов без картинок.
+const sendMaybeMultipart = async <T>(
+  path: string,
+  method: "POST" | "PUT" | "PATCH",
+  body: Record<string, unknown>,
+): Promise<T> => {
   const hasFile = Object.values(body).some((v) => v instanceof File);
 
   if (hasFile) {
@@ -109,19 +116,22 @@ export const updateClinicProfile = async (
       if (value === undefined || value === null) return;
       appendMultipart(form, key, value);
     });
-    return sendMultipart<ClinicPrivateProfile>(
-      "/api/clinic/profile/",
-      "PUT",
-      form,
-    );
+    return sendMultipart<T>(path, method, form);
   }
 
-  const { data } = await apiClient.put<ClinicPrivateProfile>(
-    "/api/clinic/profile/",
-    body,
-  );
+  const { data } = await apiClient.request<T>({
+    url: path,
+    method,
+    data: body,
+  });
   return data;
 };
+
+export const updateClinicProfile = async (
+  body: UpdateClinicProfileBody,
+): Promise<ClinicPrivateProfile> =>
+  // Логотип (File) требует multipart; правила упаковки — в appendMultipart выше.
+  sendMaybeMultipart<ClinicPrivateProfile>("/api/clinic/profile/", "PUT", body);
 
 export const updateClinicBranch = async (
   branchId: string,
@@ -195,16 +205,75 @@ export const getClinicDoctors = async (): Promise<
 // должны быть уникальны (иначе 400).
 export const createClinicDoctor = async (
   body: CreateClinicDoctorRequest,
-): Promise<ClinicDoctorItem> => {
-  const { data } = await apiClient.post<ClinicDoctorItem>(
-    "/api/clinic/doctors/",
-    body,
-  );
-  return data;
-};
+): Promise<ClinicDoctorItem> =>
+  // Профильные поля (включая фото) бэк принимает тем же запросом — врача
+  // можно завести сразу с заполненной карточкой.
+  sendMaybeMultipart<ClinicDoctorItem>("/api/clinic/doctors/", "POST", body);
 
 export const detachClinicDoctor = async (doctorId: number): Promise<void> => {
   await apiClient.delete(`/api/clinic/doctors/${doctorId}/`);
+};
+
+const withHttpsPhoto = <T extends { photo?: string | null }>(item: T): T => ({
+  ...item,
+  photo: toHttps(item.photo ?? null) ?? null,
+});
+
+// Полная карточка прикреплённого врача. Раньше этой ручки не было вообще —
+// страница врача собиралась из общего списка и публичной карточки.
+export const getClinicDoctor = async (
+  doctorId: number,
+): Promise<ClinicDoctorProfile> => {
+  const { data } = await apiClient.get<ClinicDoctorProfile>(
+    `/api/clinic/doctors/${doctorId}/`,
+  );
+  return withHttpsPhoto(data);
+};
+
+// PATCH, а не PUT: бэк принимает частичное обновление, и слать целиком всю
+// карточку ради одного поля не нужно (в отличие от PUT /api/clinic/profile/,
+// который стирает всё непереданное).
+export const updateClinicDoctor = async (
+  doctorId: number,
+  body: ClinicDoctorProfileBody,
+): Promise<ClinicDoctorProfile> => {
+  const data = await sendMaybeMultipart<ClinicDoctorProfile>(
+    `/api/clinic/doctors/${doctorId}/`,
+    "PATCH",
+    body,
+  );
+  return withHttpsPhoto(data);
+};
+
+export const getClinicDoctorDocuments = async (
+  doctorId: number,
+): Promise<ClinicDocument[]> => {
+  const { data } = await apiClient.get<ClinicDocument[] | ClinicDocument>(
+    `/api/clinic/doctors/${doctorId}/documents/`,
+  );
+  return asCollection(data);
+};
+
+export const uploadClinicDoctorDocument = async (
+  doctorId: number,
+  file: File,
+): Promise<ClinicDocument> => {
+  const form = new FormData();
+  form.append("file", file);
+  return sendMultipart<ClinicDocument>(
+    `/api/clinic/doctors/${doctorId}/documents/`,
+    "POST",
+    form,
+  );
+};
+
+export const deleteClinicDoctorDocument = async (
+  doctorId: number,
+  documentId: number,
+): Promise<void> => {
+  await apiClient.delete(
+    `/api/clinic/doctors/${doctorId}/documents/${documentId}/`,
+  );
 };
 
 export const getClinicServices = async (): Promise<
@@ -216,26 +285,36 @@ export const getClinicServices = async (): Promise<
   return data;
 };
 
+// Полная карточка процедуры. Раньше ручки не было и страница редактирования
+// искала запись в общем списке — теперь читаем напрямую.
+export const getClinicService = async (
+  id: number,
+): Promise<ClinicServiceDetail> => {
+  const { data } = await apiClient.get<ClinicServiceDetail>(
+    `/api/clinic/services/${id}/`,
+  );
+  return { ...data, photo: toHttps(data.photo) ?? null };
+};
+
 export const addClinicService = async (
   body: ClinicServiceBody,
-): Promise<ClinicServiceListItem> => {
-  const { data } = await apiClient.post<ClinicServiceListItem>(
+): Promise<ClinicServiceListItem> =>
+  // photo может быть File — тогда уходит multipart'ом (см. sendMaybeMultipart).
+  sendMaybeMultipart<ClinicServiceListItem>(
     "/api/clinic/services/",
+    "POST",
     body,
   );
-  return data;
-};
 
 export const updateClinicService = async (
   id: number,
   body: ClinicServiceBody,
-): Promise<ClinicServiceListItem> => {
-  const { data } = await apiClient.put<ClinicServiceListItem>(
+): Promise<ClinicServiceListItem> =>
+  sendMaybeMultipart<ClinicServiceListItem>(
     `/api/clinic/services/${id}/`,
+    "PUT",
     body,
   );
-  return data;
-};
 
 export const deleteClinicService = async (id: number): Promise<void> => {
   await apiClient.delete(`/api/clinic/services/${id}/`);

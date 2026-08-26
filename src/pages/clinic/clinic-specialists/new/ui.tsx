@@ -10,6 +10,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
+import {
+  resolveSpecializationIds,
+  useSpecializations,
+} from "@/entities/specialization";
+
 import { clinicCabinetKeys, createClinicDoctor } from "@/shared/api";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { Button } from "@/shared/ui";
@@ -21,6 +26,7 @@ import {
   ProfessionalSection,
   SectionCard,
   splitFullName,
+  toDoctorProfileBody,
   useSpecialistForm,
 } from "../specialist-form";
 
@@ -29,15 +35,29 @@ const isEmailValid = (value: string) =>
 
 // Тот же макет, что у просмотра/редактирования уже прикреплённого специалиста
 // (specialist-form) — по просьбе не верстать это заново отдельной формой.
-// Но бэк (POST /api/clinic/doctors/) реально принимает только first_name/
-// last_name/email/phone/password — секции ниже честно показывают, какие поля
-// не сохранятся, вместо того чтобы выглядеть рабочими и тихо терять ввод.
+// Бэк принимает всю карточку одним POST /api/clinic/doctors/, поэтому врача
+// можно завести сразу заполненным (кроме сертификатов — они грузятся
+// отдельной ручкой, которой нужен уже существующий id).
 export const ClinicNewSpecialistPage: FC = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { d, set } = useSpecialistForm();
 
   const { firstName, lastName, droppedPatronymic } = splitFullName(d.fullName);
+
+  // Dropdown хранит название специализации, а бэк принимает только id.
+  const { data: specializationList = [] } = useSpecializations();
+  const resolveSpecs = () => {
+    const primary = resolveSpecializationIds(
+      d.specialization ? [d.specialization] : [],
+      specializationList,
+    );
+    const narrow = resolveSpecializationIds(
+      d.additionalSpecialization ? [d.additionalSpecialization] : [],
+      specializationList,
+    );
+    return { primary: primary.ids, narrow: narrow.ids };
+  };
 
   const emailTouched = d.email.length > 0;
   const emailError =
@@ -57,6 +77,7 @@ export const ClinicNewSpecialistPage: FC = () => {
         // PhoneInput отдаёт национальную часть — приводим к формату бэка.
         phone: d.phone ? `+996${d.phone}` : undefined,
         password: d.password.trim() || undefined,
+        ...toDoctorProfileBody(d, resolveSpecs()),
       }),
     onSuccess: (doctor) => {
       toast.success(`Врач ${doctor.full_name} добавлен`);
@@ -93,11 +114,11 @@ export const ClinicNewSpecialistPage: FC = () => {
       </div>
 
       <div className="bg-primary-tint text-sm text-foreground rounded-2xl px-4 py-3 mb-6">
-        Создаётся аккаунт врача, привязанный к вашей клинике. По-настоящему
-        сохранятся только ФИО, почта, телефон и пароль — остальные поля ниже
-        помечены как несохраняемые. Специализацию, образование и документы врач
-        заполнит сам после первого входа. Если хотите, чтобы он
-        зарегистрировался самостоятельно — отправьте{" "}
+        Создаётся аккаунт врача, привязанный к вашей клинике. Карточку можно
+        заполнить сразу — сохранится всё, кроме сертификатов: их получится
+        загрузить после создания. График приёма и цену консультации врач
+        выставляет сам в своём кабинете. Если хотите, чтобы он зарегистрировался
+        самостоятельно — отправьте{" "}
         <Link
           href="/clinic-profile/invites"
           className="text-primary font-medium hover:underline"
