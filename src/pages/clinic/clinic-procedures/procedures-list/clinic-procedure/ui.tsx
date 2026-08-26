@@ -56,6 +56,30 @@ const PlaceholderPhoto: FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+// Заглушки на время загрузки списка — той же формы, что настоящие
+// карточка/строка (см. SpecialistCardSkeleton — тот же приём).
+export const ProcedureCardSkeleton: FC = () => (
+  <div className="bg-white rounded-3xl border border-border-soft p-2">
+    <div className="aspect-square w-full rounded-2xl skeleton mb-3" />
+    <div className="px-1 flex flex-col gap-2">
+      <div className="h-4 w-3/4 rounded-md skeleton" />
+      <div className="h-3.5 w-1/2 rounded-md skeleton" />
+      <div className="h-3.5 w-1/3 rounded-md skeleton" />
+    </div>
+  </div>
+);
+
+export const ProcedureRowSkeleton: FC = () => (
+  <div className="flex items-center gap-3 bg-white rounded-2xl border border-border-soft p-3">
+    <div className="w-14 h-14 rounded-xl skeleton shrink-0" />
+    <div className="flex-1 flex flex-col gap-2">
+      <div className="h-3.5 w-2/3 rounded-md skeleton" />
+      <div className="h-3 w-1/2 rounded-md skeleton" />
+      <div className="h-3 w-1/3 rounded-md skeleton" />
+    </div>
+  </div>
+);
+
 export const ProcedureCard: FC<Props> = ({
   id,
   name,

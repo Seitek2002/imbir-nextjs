@@ -6,16 +6,28 @@ import { colors } from "@/shared/config";
 import { ConfirmDialog, FilterPanel, IconBtn, SearchInput } from "@/shared/ui";
 
 import type { Procedure } from "./clinic-procedure/model";
-import { ProcedureCard, ProcedureRow } from "./clinic-procedure/ui";
+import {
+  ProcedureCard,
+  ProcedureCardSkeleton,
+  ProcedureRow,
+  ProcedureRowSkeleton,
+} from "./clinic-procedure/ui";
 
 type Props = {
   procedures: Procedure[];
+  // Список ещё не пришёл — отдельно от "procedures пуст", иначе на время
+  // загрузки на секунду мигает "Процедур пока нет".
+  isLoading?: boolean;
   // Реальное удаление уходит в сеть на уровне родителя — здесь просто ждём
   // промис, чтобы показать спиннер в ConfirmDialog и закрыть его по факту.
   onDelete?: (id: string) => void | Promise<void>;
 };
 
-export const ProceduresList: FC<Props> = ({ procedures, onDelete }) => {
+export const ProceduresList: FC<Props> = ({
+  procedures,
+  isLoading = false,
+  onDelete,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -101,7 +113,23 @@ export const ProceduresList: FC<Props> = ({ procedures, onDelete }) => {
       )}
 
       {/* Grid */}
-      {filteredItems.length === 0 ? (
+      {isLoading ? (
+        <>
+          {/* Десктоп: сетка карточек */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ProcedureCardSkeleton key={i} />
+            ))}
+          </div>
+
+          {/* Мобайл: компактный список строк */}
+          <div className="md:hidden flex flex-col gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <ProcedureRowSkeleton key={i} />
+            ))}
+          </div>
+        </>
+      ) : filteredItems.length === 0 ? (
         <div className="bg-white rounded-3xl p-10 text-center border border-border">
           <p className="text-muted text-lg">
             {searchQuery || selectedCategory

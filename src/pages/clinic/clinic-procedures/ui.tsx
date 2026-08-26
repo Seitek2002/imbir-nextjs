@@ -42,7 +42,7 @@ export const ClinicProceduresPage: FC = () => {
   const { profile } = useClinicCabinet();
   const queryClient = useQueryClient();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: clinicCabinetKeys.services(),
     queryFn: getClinicServices,
   });
@@ -83,6 +83,7 @@ export const ClinicProceduresPage: FC = () => {
         <div className="pb-24 md:pb-0">
           <ProceduresList
             procedures={procedures}
+            isLoading={isLoading}
             onDelete={(id) => deleteMutation.mutateAsync(id)}
           />
         </div>
