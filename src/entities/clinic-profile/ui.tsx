@@ -153,7 +153,6 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
       additionalServices,
       equipment,
       patientConditions,
-      paymentMethods,
       onUploadPhoto,
       onUploadDocument,
       isUploadingPhoto = false,
@@ -202,6 +201,10 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         additional_services: d.additionalServices,
         equipment: csv(d.equipment),
         patient_conditions: csv(d.patientConditions),
+        // Поля «Способы оплаты» в форме больше нет — оплата у всех только
+        // онлайн. Но значение читаем из профиля и отправляем обратно как
+        // есть: PUT затирает всё, чего нет в теле, и без этой строки первое
+        // же сохранение стёрло бы данные у существующих клиник.
         payment_methods: csv(d.paymentMethods),
         emergency_24_7: d.emergency24,
         schedule: Object.fromEntries(
@@ -762,13 +765,6 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 rows={2}
                 hint="Введите через запятую"
               />
-              <Textarea
-                label="Способы оплаты"
-                value={d.paymentMethods}
-                onChange={(e) => set("paymentMethods", e.target.value)}
-                rows={2}
-                hint="Введите через запятую"
-              />
             </div>
           ) : (
             <div className="flex flex-col divide-y divide-background">
@@ -785,25 +781,12 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                   ))}
                 </ul>
               </div>
-              <div className="py-4">
+              <div className="pt-4">
                 <div className="text-xs text-muted mb-2">
                   Условия для пациентов
                 </div>
                 <ul className="flex flex-col gap-1">
                   {patientConditions.map((item) => (
-                    <li
-                      key={item}
-                      className="text-sm text-foreground flex items-center gap-2"
-                    >
-                      <span className="text-muted">–</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="pt-4">
-                <div className="text-xs text-muted mb-2">Способы оплаты</div>
-                <ul className="flex flex-col gap-1">
-                  {paymentMethods.map((item) => (
                     <li
                       key={item}
                       className="text-sm text-foreground flex items-center gap-2"

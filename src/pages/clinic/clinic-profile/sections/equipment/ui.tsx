@@ -6,12 +6,7 @@ import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
-import {
-  getConditions,
-  getEquipment,
-  getPaymentMethods,
-  referenceKeys,
-} from "@/shared/api";
+import { getConditions, getEquipment, referenceKeys } from "@/shared/api";
 import { useReferenceValues } from "@/shared/lib/useReference";
 import { Checkbox } from "@/shared/ui";
 
@@ -30,7 +25,6 @@ const DEFAULT_PATIENT_CONDITIONS = [
   "Доступ для инвалидов",
   "Аптека",
 ];
-const DEFAULT_PAYMENT_METHODS = ["Наличные", "Карта", "Онлайн"];
 
 const OptionGroup: FC<{
   label: string;
@@ -85,6 +79,10 @@ export const ClinicEquipmentPage: FC = () => {
 
   const [equipment, setEquipment] = useState<string[]>([]);
   const [patientConditions, setPatientConditions] = useState<string[]>([]);
+  // Поля «Способы оплаты» в интерфейсе больше нет — оплата у всех только
+  // онлайн. Значение продолжаем читать и отправлять обратно как есть: PUT
+  // /api/clinic/profile/ затирает всё, чего нет в теле запроса, так что без
+  // этого сохранение раздела молча стёрло бы данные у существующих клиник.
   const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
 
   const { values: equipmentOptions } = useReferenceValues(
@@ -96,11 +94,6 @@ export const ClinicEquipmentPage: FC = () => {
     referenceKeys.conditions(),
     getConditions,
     DEFAULT_PATIENT_CONDITIONS,
-  );
-  const { values: paymentMethodOptions } = useReferenceValues(
-    referenceKeys.paymentMethods(),
-    getPaymentMethods,
-    DEFAULT_PAYMENT_METHODS,
   );
 
   const [synced, setSynced] = useState<typeof profile>(null);
@@ -156,12 +149,6 @@ export const ClinicEquipmentPage: FC = () => {
               value={patientConditions}
               onChange={setPatientConditions}
             />
-            <OptionGroup
-              label="Способы оплаты"
-              options={paymentMethodOptions}
-              value={paymentMethods}
-              onChange={setPaymentMethods}
-            />
           </div>
         ) : (
           <div className="flex flex-col divide-y divide-background">
@@ -170,7 +157,6 @@ export const ClinicEquipmentPage: FC = () => {
               label="Условия для пациентов"
               items={profile.patientConditions}
             />
-            <BulletList label="Способы оплаты" items={profile.paymentMethods} />
           </div>
         )}
       </div>
