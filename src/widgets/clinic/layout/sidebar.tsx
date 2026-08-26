@@ -161,7 +161,7 @@ export const ClinicSidebar: FC<Props> = ({
   };
 
   return (
-    <aside className="w-72 shrink-0 hidden lg:block">
+    <aside className="w-72 shrink-0 hidden lg:block sticky top-0 h-fit">
       {/* Profile Card — белая рамка с отступом 4px, внутри градиентная подложка */}
       <Link
         href="/clinic-profile"
