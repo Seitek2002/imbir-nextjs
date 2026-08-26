@@ -8,6 +8,31 @@ import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { ImageWithFallback } from "@/shared/ui";
 
+// Заглушки на время загрузки списка — тех же размеров, что настоящие
+// карточка/строка, чтобы во время подгрузки не мигало "Специалистов пока
+// нет" (пустой стейт) там, где на самом деле просто ещё не пришёл ответ.
+export const SpecialistCardSkeleton: FC = () => (
+  <div className="bg-white rounded-3xl border border-border-soft p-2">
+    <div className="aspect-square w-full rounded-2xl skeleton mb-3" />
+    <div className="px-1 flex flex-col gap-2">
+      <div className="h-4 w-3/4 rounded-md skeleton" />
+      <div className="h-3.5 w-1/2 rounded-md skeleton" />
+      <div className="h-3.5 w-2/3 rounded-md skeleton" />
+    </div>
+  </div>
+);
+
+export const SpecialistRowSkeleton: FC = () => (
+  <div className="flex items-center gap-3 bg-white rounded-2xl border border-border-soft p-3">
+    <div className="w-14 h-14 rounded-xl skeleton shrink-0" />
+    <div className="flex-1 flex flex-col gap-2">
+      <div className="h-3.5 w-2/3 rounded-md skeleton" />
+      <div className="h-3 w-1/2 rounded-md skeleton" />
+      <div className="h-3 w-1/3 rounded-md skeleton" />
+    </div>
+  </div>
+);
+
 export type Specialist = {
   id: string;
   name: string;

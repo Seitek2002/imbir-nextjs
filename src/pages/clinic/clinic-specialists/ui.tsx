@@ -40,7 +40,7 @@ export const ClinicSpecialistsPage: FC = () => {
   const { profile } = useClinicCabinet();
   const queryClient = useQueryClient();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: clinicCabinetKeys.doctors(),
     queryFn: getClinicDoctors,
   });
@@ -84,6 +84,7 @@ export const ClinicSpecialistsPage: FC = () => {
         <div className="pb-24 md:pb-0">
           <SpecialistsList
             specialists={listItems}
+            isLoading={isLoading}
             onDelete={async (id) => {
               await deleteMutation.mutateAsync(id);
             }}
