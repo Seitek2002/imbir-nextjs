@@ -23,7 +23,7 @@ import {
   getClinicDoctors,
 } from "@/shared/api";
 import { EditIcon } from "@/shared/assets/icons";
-import { Button, Dropdown, IconBtn, Input } from "@/shared/ui";
+import { Button, Dropdown, IconBtn, Input, Textarea } from "@/shared/ui";
 
 import {
   CURRENCY_OPTIONS,
@@ -60,6 +60,7 @@ export const ClinicNewProcedurePage: FC = () => {
   // Категории — из справочника бэка (/api/references/service-categories/)
   const { options: categoryOptions } = useServiceCategories();
   const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
   const [currency, setCurrency] = useState("KGS");
   const [duration, setDuration] = useState("");
   const [branchId, setBranchId] = useState("");
@@ -117,6 +118,7 @@ export const ClinicNewProcedurePage: FC = () => {
     addMutation.mutate({
       name: name.trim(),
       category,
+      description: description.trim() || undefined,
       price: price.trim() || undefined,
       duration: duration ? Number(duration) : undefined,
       is_active: true,
@@ -266,6 +268,13 @@ export const ClinicNewProcedurePage: FC = () => {
           value={duration}
           onChange={(e) => setDuration(e.target.value)}
           placeholder="0"
+        />
+        <Textarea
+          label="Описание"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Расскажите, как проходит процедура"
+          rows={3}
         />
 
         {/* Бэк привязывает процедуру к филиалу (branch_id), а не к свободному

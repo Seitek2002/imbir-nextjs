@@ -25,7 +25,14 @@ import {
   updateClinicService,
 } from "@/shared/api";
 import { EditIcon, TrashIcon } from "@/shared/assets/icons";
-import { Button, ConfirmDialog, Dropdown, IconBtn, Input } from "@/shared/ui";
+import {
+  Button,
+  ConfirmDialog,
+  Dropdown,
+  IconBtn,
+  Input,
+  Textarea,
+} from "@/shared/ui";
 
 import {
   CURRENCY_OPTIONS,
@@ -68,6 +75,7 @@ export const ClinicProcedureDetailPage: FC = () => {
   // Категории — из справочника бэка (/api/references/service-categories/)
   const { options: categoryOptions } = useServiceCategories();
   const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
   const [currency, setCurrency] = useState("KGS");
   const [duration, setDuration] = useState("");
   const [branchId, setBranchId] = useState("");
@@ -92,6 +100,7 @@ export const ClinicProcedureDetailPage: FC = () => {
     setSynced(service);
     setName(service.name);
     setCategory(service.category ?? "");
+    setDescription(service.description ?? "");
     setPrice(service.price ?? "");
     setDuration(service.duration != null ? String(service.duration) : "");
     setBranchId(service.branch ? String(service.branch.id) : "");
@@ -122,6 +131,7 @@ export const ClinicProcedureDetailPage: FC = () => {
       updateClinicService(serviceId, {
         name: name.trim(),
         category,
+        description: description.trim(),
         price: price.trim() || undefined,
         duration: duration ? Number(duration) : undefined,
         is_active: true,
@@ -375,6 +385,13 @@ export const ClinicProcedureDetailPage: FC = () => {
                 value={category}
                 onChange={setCategory}
               />
+              <Textarea
+                label="Описание"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Расскажите, как проходит процедура"
+                rows={3}
+              />
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="Стоимость"
@@ -409,6 +426,7 @@ export const ClinicProcedureDetailPage: FC = () => {
               <FieldRow label="Стоимость">
                 {service.price ? `${service.price} с` : "—"}
               </FieldRow>
+              <FieldRow label="Описание">{service.description || "—"}</FieldRow>
               <FieldRow label="Филиал">{service.branch?.name}</FieldRow>
               <FieldRow label="Адрес филиала">
                 {service.branch?.address}
