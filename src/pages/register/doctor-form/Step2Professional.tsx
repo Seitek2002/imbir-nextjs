@@ -39,6 +39,7 @@ export const Step2Professional = ({ data, onChange, inviteClinic }: Props) => {
       />
       <Input
         label="Стаж работы (лет)"
+        autoComplete="off"
         type="number"
         placeholder="0"
         value={data.experience}
@@ -46,6 +47,7 @@ export const Step2Professional = ({ data, onChange, inviteClinic }: Props) => {
       />
       <Input
         label="Текущая должность"
+        autoComplete="organization-title"
         placeholder="Введите должность"
         value={data.position}
         onChange={(e) => onChange("position", e.target.value)}
@@ -101,6 +103,7 @@ export const Step2Professional = ({ data, onChange, inviteClinic }: Props) => {
       ) : (
         <Input
           label="Место работы (клиника)"
+          autoComplete="organization"
           placeholder="Введите название клиники"
           value={data.workplace}
           onChange={(e) => onChange("workplace", e.target.value)}
@@ -108,12 +111,14 @@ export const Step2Professional = ({ data, onChange, inviteClinic }: Props) => {
       )}
       <Input
         label="Категория/Квалификация"
+        autoComplete="off"
         placeholder="Введите категорию/квалификацию"
         value={data.category}
         onChange={(e) => onChange("category", e.target.value)}
       />
       <Input
         label="Научная степень"
+        autoComplete="off"
         placeholder="Введите научную степень"
         value={data.academicDegree}
         onChange={(e) => onChange("academicDegree", e.target.value)}

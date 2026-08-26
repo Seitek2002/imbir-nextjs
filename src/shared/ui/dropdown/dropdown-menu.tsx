@@ -65,6 +65,10 @@ export const DropdownMenu: FC<MenuProps> = ({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             onClick={(e) => e.stopPropagation()}
+            // Поле фильтрует список, а не собирает данные пользователя. Без
+            // этого Chrome по эвристике принимает его за адресное (дропдауны
+            // стоят рядом с городом/страной) и подставляет сюда мусор.
+            autoComplete="off"
             className="w-full text-base md:text-sm border border-border-soft text-foreground rounded-xl md:rounded-md py-2.5 md:py-1.5 px-3 outline-none focus:border-primary focus:shadow-[0_0_1px_3px_rgba(245,101,62,0.1)] transition-all"
           />
         </div>

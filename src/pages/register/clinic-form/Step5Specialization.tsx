@@ -45,6 +45,7 @@ export const Step5Specialization = ({ data, onChange }: Props) => {
       />
       <Textarea
         label="Дополнительные услуги"
+        autoComplete="off"
         placeholder="Анализы, УЗИ, Рентген..."
         rows={3}
         value={data.additionalServices}

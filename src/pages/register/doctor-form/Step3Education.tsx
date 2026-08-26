@@ -14,10 +14,12 @@ export const Step3Education = ({ data, onChange }: Props) => (
   <div className="flex flex-col gap-4">
     <Input
       label="ВУЗ"
+      autoComplete="off"
       placeholder="Введите название"
       value={data.university}
       onChange={(e) => onChange("university", e.target.value)}
     />
+    {/* YearField сам ставит autoComplete="off" внутри. */}
     <YearField
       label="Год окончания"
       value={data.graduationYear}
@@ -25,24 +27,28 @@ export const Step3Education = ({ data, onChange }: Props) => (
     />
     <Input
       label="Интернатура"
+      autoComplete="off"
       placeholder="Введите интернатуру"
       value={data.internship}
       onChange={(e) => onChange("internship", e.target.value)}
     />
     <Input
       label="Ординатура"
+      autoComplete="off"
       placeholder="Введите ординатуру"
       value={data.residency}
       onChange={(e) => onChange("residency", e.target.value)}
     />
     <Input
       label="Специализация по диплому"
+      autoComplete="off"
       placeholder="Введите специализацию по диплому"
       value={data.diplomaSpecialization}
       onChange={(e) => onChange("diplomaSpecialization", e.target.value)}
     />
     <Textarea
       label="Дополнительное образование"
+      autoComplete="off"
       placeholder="Курсы повышения квалификации, сертификаты..."
       value={data.additionalEducation}
       onChange={(e) => onChange("additionalEducation", e.target.value)}

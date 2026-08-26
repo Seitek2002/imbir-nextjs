@@ -59,6 +59,7 @@ export const Step1BasicInfo = ({ data, onChange, emailError }: Props) => {
     <div className="flex flex-col gap-4">
       <Input
         label="ФИО"
+        autoComplete="name"
         placeholder="Введите ваше полное имя"
         value={data.fullName}
         onChange={(e) => onChange("fullName", e.target.value)}
@@ -146,6 +147,7 @@ export const Step1BasicInfo = ({ data, onChange, emailError }: Props) => {
 
       <Input
         label="Почта"
+        autoComplete="email"
         type="email"
         placeholder="Введите вашу почту"
         value={data.email}

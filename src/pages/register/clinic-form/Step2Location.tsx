@@ -59,6 +59,7 @@ export const Step2Location = ({ data, onChange, emailError }: Props) => {
       />
       <Input
         label="Полный адрес"
+        autoComplete="street-address"
         placeholder="Введите полный адрес"
         value={data.fullAddress}
         onChange={(e) => onChange("fullAddress", e.target.value)}
@@ -75,6 +76,7 @@ export const Step2Location = ({ data, onChange, emailError }: Props) => {
       />
       <Input
         label="Почта"
+        autoComplete="email"
         type="email"
         placeholder="Введите вашу почту"
         value={data.email}
@@ -83,6 +85,7 @@ export const Step2Location = ({ data, onChange, emailError }: Props) => {
       />
       <Input
         label="Сайт (если есть)"
+        autoComplete="url"
         placeholder="Введите ссылку на сайт"
         value={data.website}
         onChange={(e) => onChange("website", e.target.value)}

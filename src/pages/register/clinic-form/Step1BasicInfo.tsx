@@ -50,6 +50,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
     <div className="flex flex-col gap-4">
       <Input
         label="Название клиники"
+        autoComplete="organization"
         placeholder="Введите название"
         value={data.clinicName}
         onChange={(e) => onChange("clinicName", e.target.value)}
@@ -118,6 +119,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
 
       <Textarea
         label="Описание клиники"
+        autoComplete="off"
         placeholder="Введите описание клиники"
         value={data.description}
         onChange={(e) => onChange("description", e.target.value)}

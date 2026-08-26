@@ -129,6 +129,7 @@ export const Step4Certificates = ({
 
       <Input
         label="Лицензия"
+        autoComplete="off"
         placeholder="Введите номер лицензии"
         value={data.licenseNumber}
         onChange={(e) => onChange("licenseNumber", e.target.value)}
@@ -136,6 +137,7 @@ export const Step4Certificates = ({
 
       <Input
         label="Пароль"
+        autoComplete="new-password"
         type={showPassword ? "text" : "password"}
         placeholder="Придумайте пароль"
         IconRight={showPassword ? EyeIcon : EyeOffIcon}
@@ -145,6 +147,7 @@ export const Step4Certificates = ({
       />
       <Input
         label="Подтвердите пароль"
+        autoComplete="new-password"
         type={showConfirm ? "text" : "password"}
         placeholder="Повторите пароль"
         IconRight={showConfirm ? EyeIcon : EyeOffIcon}

@@ -257,6 +257,11 @@ export const PhoneInput: FC<Props> = ({
             value={value}
             onChange={handlePhoneChange}
             maxLength={selectedCountry.phoneLength}
+            // Именно tel-national, а не tel: код страны выбирается отдельным
+            // селектом слева, а сюда влезает только национальная часть
+            // (maxLength). С обычным tel Chrome подставляет номер целиком
+            // с «+996», и он обрезается по длине — получается битый номер.
+            autoComplete="tel-national"
             className="flex-1 px-3 py-[9px] text-base text-foreground outline-none bg-transparent placeholder:text-[#C5C8CA] rounded-r-lg min-w-0"
           />
         </div>
@@ -307,6 +312,10 @@ export const PhoneInput: FC<Props> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
+                // Поиск по списку стран, а не поле «страна» в анкете: со
+                // словом «Страна» в плейсхолдере Chrome охотно подставляет
+                // сюда сохранённый адрес.
+                autoComplete="off"
                 // Поиск страны живёт внутри <form> страницы авторизации.
                 // Без этого Enter здесь сабмитил бы всю форму регистрации
                 // вместо выбора страны.

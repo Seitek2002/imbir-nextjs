@@ -41,18 +41,21 @@ export const Step4Legal = ({ data, onChange }: Props) => {
     <div className="flex flex-col gap-4">
       <Input
         label="Юридическое название"
+        autoComplete="off"
         placeholder="Введите название"
         value={data.legalName}
         onChange={(e) => onChange("legalName", e.target.value)}
       />
       <Input
         label="Регистрационный номер"
+        autoComplete="off"
         placeholder="Введите номер"
         value={data.registrationNumber}
         onChange={(e) => onChange("registrationNumber", e.target.value)}
       />
       <Input
         label="Номер лицензии"
+        autoComplete="off"
         placeholder="Введите номер"
         value={data.licenseNumber}
         onChange={(e) => onChange("licenseNumber", e.target.value)}
@@ -65,6 +68,7 @@ export const Step4Legal = ({ data, onChange }: Props) => {
       />
       <Input
         label="Орган, выдавший лицензию"
+        autoComplete="off"
         placeholder="Введите название органа"
         value={data.licensingAuthority}
         onChange={(e) => onChange("licensingAuthority", e.target.value)}

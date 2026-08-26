@@ -51,6 +51,7 @@ export const Step7Completion = ({
     <div className="flex flex-col gap-4">
       <Input
         label="Пароль"
+        autoComplete="new-password"
         type={showPassword ? "text" : "password"}
         placeholder="Придумайте пароль"
         IconRight={showPassword ? EyeIcon : EyeOffIcon}
@@ -60,6 +61,7 @@ export const Step7Completion = ({
       />
       <Input
         label="Подтвердите пароль"
+        autoComplete="new-password"
         type={showConfirm ? "text" : "password"}
         placeholder="Повторите пароль"
         IconRight={showConfirm ? EyeIcon : EyeOffIcon}
