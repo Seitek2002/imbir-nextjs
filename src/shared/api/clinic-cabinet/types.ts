@@ -197,9 +197,11 @@ export type ClinicDoctorProfile = Omit<
   id: number;
   first_name: string;
   last_name: string;
-  // Отчество бэк теперь хранит и отдаёт — но только на чтение: при создании
-  // врача его передать нельзя (в ClinicDoctorCreateRequest поля нет).
-  patronymic: string;
+  // Отчество бэк отдаёт только на чтение: при создании врача его передать
+  // некуда (в ClinicDoctorCreateRequest поля нет), поэтому у заведённого из
+  // кабинета врача оно приходит null — схема обещает string, но проверено
+  // живым запросом, что бывает и null.
+  patronymic: string | null;
   full_name: string;
   email: string;
   phone: string;
