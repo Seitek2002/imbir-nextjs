@@ -12,6 +12,22 @@ import { Button } from "@/shared/ui";
 
 import { ReviewCard } from "./ReviewCard";
 
+// Отзывов ещё нет. Без этого правая колонка оставалась пустой, и рядом с
+// заполненной левой это читалось как не догрузившийся блок. Виджет общий для
+// врача и клиники, поэтому текст без упоминания того и другого.
+const EmptyReviews: FC = () => (
+  <div className="h-full min-h-70 bg-white md:bg-transparent border border-border-soft border-dashed rounded-2xl flex flex-col items-center justify-center text-center px-6 py-12 gap-3">
+    <div className="size-14 rounded-2xl bg-[#FFF0EE] flex items-center justify-center">
+      <ChatIcon className="size-6 text-primary" />
+    </div>
+    <p className="text-foreground font-medium text-base">Отзывов пока нет</p>
+    <p className="text-muted text-sm max-w-70">
+      Здесь появятся отзывы после приёма. Оставьте первый — он поможет другим
+      пациентам с выбором.
+    </p>
+  </div>
+);
+
 // Тип для отдельного отзыва
 export type ReviewItem = {
   id: string | number;
@@ -175,17 +191,21 @@ export const ReviewsSection: FC<Props> = ({
             из длинной строки без пробелов растягивал страницу на десятки тысяч
             пикселей — появлялся горизонтальный скролл всего сайта. */}
         <div className="flex-1 min-w-0 flex flex-col gap-4">
-          {reviews.map((review) => (
-            <ReviewCard
-              key={review.id}
-              author={review.author}
-              date={review.date}
-              text={review.text}
-              rating={review.rating}
-              avatarUrl={review.avatarUrl}
-              reply={review.reply}
-            />
-          ))}
+          {reviews.length === 0 ? (
+            <EmptyReviews />
+          ) : (
+            reviews.map((review) => (
+              <ReviewCard
+                key={review.id}
+                author={review.author}
+                date={review.date}
+                text={review.text}
+                rating={review.rating}
+                avatarUrl={review.avatarUrl}
+                reply={review.reply}
+              />
+            ))
+          )}
         </div>
       </div>
 
