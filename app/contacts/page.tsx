@@ -1,7 +1,11 @@
 ﻿import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 
+import { LocationMap } from "@/entities/clinic-profile";
+
 import { ROUTES } from "@/shared/config";
+
+const BRANCH_ADDRESS = "ул. Мидина Алыбаева, 10";
 
 const ContactCard = ({
   icon,
@@ -65,7 +69,7 @@ export default function ContactsPage() {
           <ContactCard
             icon="📍"
             title="Адрес"
-            lines={["г. Бишкек", "ул. Тыныстанова, 56"]}
+            lines={["г. Бишкек", BRANCH_ADDRESS]}
           />
           <ContactCard
             icon="🕐"
@@ -74,25 +78,19 @@ export default function ContactsPage() {
           />
         </div>
 
-        {/* Map placeholder */}
-        <div className="bg-white rounded-3xl overflow-hidden border border-border mb-6">
-          <div className="h-64 md:h-80 bg-[#E9EBEE] flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-5xl mb-3">🗺️</div>
-              <p className="text-muted text-sm font-medium">
-                ул. Тыныстанова, 56, г. Бишкек
-              </p>
-            </div>
-          </div>
-          <div className="p-6">
-            <h2 className="text-foreground font-semibold text-lg mb-1">
-              Как нас найти
-            </h2>
-            <p className="text-secondary text-sm">
-              Офис находится в центре Бишкека. Ближайшая остановка — «ЦУМ». Есть
-              парковка для клиентов.
-            </p>
-          </div>
+        {/* Карта */}
+        <div className="mb-4">
+          <LocationMap address={`${BRANCH_ADDRESS}, г. Бишкек`} />
+        </div>
+
+        <div className="bg-white rounded-3xl border border-border p-6 mb-6">
+          <h2 className="text-foreground font-semibold text-lg mb-1">
+            Как нас найти
+          </h2>
+          <p className="text-secondary text-sm">
+            Офис находится в жилмассиве «Пишпек», Ленинский район Бишкека.
+            Есть парковка для клиентов.
+          </p>
         </div>
 
         {/* Support + Social */}
