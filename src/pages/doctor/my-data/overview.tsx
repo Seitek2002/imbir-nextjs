@@ -80,7 +80,9 @@ const toApiDate = (v: string): string | null => {
   return m ? `${m[3]}-${m[2]}-${m[1]}` : t;
 };
 
-const { fieldList, formGrid } = formStyles;
+// По макету (screenshots/main-info.png) разделы — одна колонка с тонкими
+// разделителями, а не сетка в две колонки, как на мобильных экранах-разделах.
+const { stackedList: fieldList, stackedForm: formGrid } = formStyles;
 
 const PlusIcon: FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -430,55 +432,8 @@ export const DoctorMyDataOverview: FC = () => {
 
       {/* ── 1. Основная информация ─────────────────────────────────────── */}
       <SectionCard title="Основная информация">
-        {/* Компонент рендерится только на десктопе (lg:block в overview),
-            поэтому без мобильной раскладки sections/basic.tsx (order-last и
-            т.п.) — сразу как на десктопе там: фото сверху по центру. */}
-        <div className="flex justify-center mb-6">
-          <div className="relative w-20 h-20">
-            <div className="w-full h-full rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
-              <ImageWithFallback
-                src={photoPreview}
-                alt={d.fullName}
-                width={80}
-                height={80}
-                className="w-full h-full object-cover"
-                fallback={
-                  <span className="text-white text-2xl font-bold">
-                    {d.fullName.charAt(0)}
-                  </span>
-                }
-              />
-            </div>
-            {isEditing && (
-              <>
-                <input
-                  ref={photoRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhoto}
-                  className="hidden"
-                />
-                <IconBtn
-                  onClick={() => photoRef.current?.click()}
-                  className="absolute bottom-0 right-0"
-                >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path
-                      d="M10 1.5a1.5 1.5 0 012.121 2.121L4.5 11.25 2 12l.75-2.5L10 1.5z"
-                      stroke="white"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </IconBtn>
-              </>
-            )}
-          </div>
-        </div>
-
         <div className={isEditing ? formGrid : fieldList}>
-          <div className="lg:col-span-2">
+          <div>
             {isEditing ? (
               <Input
                 label="ФИО"
@@ -587,6 +542,53 @@ export const DoctorMyDataOverview: FC = () => {
               <FieldView label="Почта" value={d.email} />
             )}
           </div>
+
+          {/* По макету «Фото» — последнее поле карточки, с подписью и по
+              левому краю (а не аватар сверху по центру). */}
+          <div>
+            <p className="text-muted text-sm mb-2">Фото</p>
+            <div className="relative w-28 h-28">
+              <div className="w-full h-full rounded-full overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center">
+                <ImageWithFallback
+                  src={photoPreview}
+                  alt={d.fullName}
+                  width={112}
+                  height={112}
+                  className="w-full h-full object-cover"
+                  fallback={
+                    <span className="text-white text-3xl font-bold">
+                      {d.fullName.charAt(0)}
+                    </span>
+                  }
+                />
+              </div>
+              {isEditing && (
+                <>
+                  <input
+                    ref={photoRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhoto}
+                    className="hidden"
+                  />
+                  <IconBtn
+                    onClick={() => photoRef.current?.click()}
+                    className="absolute bottom-1 right-1"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path
+                        d="M10 1.5a1.5 1.5 0 012.121 2.121L4.5 11.25 2 12l.75-2.5L10 1.5z"
+                        stroke="white"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </IconBtn>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </SectionCard>
 
@@ -680,7 +682,7 @@ export const DoctorMyDataOverview: FC = () => {
               />
             )}
           </div>
-          <div className="lg:col-span-2">
+          <div>
             {isEditing ? (
               <Input
                 label="Научная степень"
@@ -692,7 +694,7 @@ export const DoctorMyDataOverview: FC = () => {
               <FieldView label="Научная степень" value={d.scientificDegree} />
             )}
           </div>
-          <div className="lg:col-span-2">
+          <div>
             {isEditing ? (
               <CheckboxGroup
                 label="Оборудование"
@@ -704,7 +706,7 @@ export const DoctorMyDataOverview: FC = () => {
               <FieldView label="Оборудование" value={d.equipment} />
             )}
           </div>
-          <div className="lg:col-span-2">
+          <div>
             {isEditing ? (
               <CheckboxGroup
                 label="Условия приёма"
@@ -716,7 +718,7 @@ export const DoctorMyDataOverview: FC = () => {
               <FieldView label="Условия приёма" value={d.patientConditions} />
             )}
           </div>
-          <div className="lg:col-span-2">
+          <div>
             {isEditing ? (
               <CheckboxGroup
                 label="Способы оплаты"
@@ -839,7 +841,7 @@ export const DoctorMyDataOverview: FC = () => {
               <FieldView label="Ординатура" value={d.residency} />
             )}
           </div>
-          <div className="lg:col-span-2">
+          <div>
             {isEditing ? (
               <Input
                 label="Специализация по диплому"
@@ -854,7 +856,7 @@ export const DoctorMyDataOverview: FC = () => {
               />
             )}
           </div>
-          <div className="lg:col-span-2">
+          <div>
             <div className="flex items-center justify-between mb-2">
               <p className="text-muted text-sm">Дополнительное образование</p>
               {isEditing && (

@@ -103,4 +103,11 @@ export const formStyles = {
   // Та же сетка в режиме редактирования: поля-инпуты идут с отступами,
   // без разделителей.
   formGrid: "flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-5",
+  // Одна колонка с разделителями — раскладка сводного экрана «Мои данные»
+  // (overview.tsx) по макету: подпись сверху, значение снизу, тонкая линия
+  // между полями. Та же форма, что FieldRow у клиники, поэтому колонка
+  // остаётся одна и на широком экране.
+  stackedList:
+    "divide-y divide-background [&>div]:py-3 [&>div:first-child]:pt-0 [&>div:last-child]:pb-0",
+  stackedForm: "flex flex-col gap-4",
 } as const;
