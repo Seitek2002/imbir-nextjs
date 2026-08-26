@@ -65,7 +65,7 @@ export const ClinicProcedureDetailPage: FC = () => {
   // проведения и график (появились после доработки).
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
-  // Категории собираем из существующих услуг — справочника у бэка нет
+  // Категории — из справочника бэка (/api/references/service-categories/)
   const { options: categoryOptions } = useServiceCategories();
   const [price, setPrice] = useState("");
   const [currency, setCurrency] = useState("KGS");

@@ -28,7 +28,6 @@ import { Button, Dropdown, IconBtn, Input } from "@/shared/ui";
 import {
   CURRENCY_OPTIONS,
   EMPTY_SCHEDULE,
-  RecordsPreview,
   ScheduleEditor,
   SpecialistsPicker,
   lunchToApi,
@@ -58,7 +57,7 @@ export const ClinicNewProcedurePage: FC = () => {
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState(false);
   const [category, setCategory] = useState("");
-  // Категории собираем из существующих услуг — справочника у бэка нет
+  // Категории — из справочника бэка (/api/references/service-categories/)
   const { options: categoryOptions } = useServiceCategories();
   const [price, setPrice] = useState("");
   const [currency, setCurrency] = useState("KGS");
@@ -312,10 +311,9 @@ export const ClinicNewProcedurePage: FC = () => {
         />
       </div>
 
-      <div className="bg-white rounded-3xl border border-border p-5">
-        <h3 className="text-foreground font-semibold text-lg mb-3">Записи</h3>
-        <RecordsPreview />
-      </div>
+      {/* Блока «Записи» здесь нет: процедуры ещё не существует, записаться на
+          неё нельзя — календарь показывался бы заведомо пустым. Он остаётся
+          на странице уже созданной процедуры (detail). */}
     </ClinicPageLayout>
   );
 };
