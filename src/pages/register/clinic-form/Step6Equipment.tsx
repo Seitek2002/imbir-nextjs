@@ -1,17 +1,11 @@
 "use client";
 
-import {
-  getConditions,
-  getEquipment,
-  getPaymentMethods,
-  referenceKeys,
-} from "@/shared/api";
+import { getConditions, getEquipment, referenceKeys } from "@/shared/api";
 import { useReferenceValues } from "@/shared/lib/useReference";
 
 import {
   DEFAULT_EQUIPMENT,
   DEFAULT_PATIENT_CONDITIONS,
-  DEFAULT_PAYMENT_METHODS,
 } from "../model/constants";
 import type { ClinicFormData } from "../model/types";
 import { CheckboxGroup } from "./CheckboxGroup";
@@ -24,8 +18,11 @@ type Props = {
   ) => void;
 };
 
+// Способов оплаты здесь больше нет — оплата у всех только онлайн, выбирать
+// не из чего. Значение проставляется константой CLINIC_PAYMENT_METHODS в
+// начальном состоянии формы (clinic-form/ui.tsx) и уходит в step6 как есть.
 export const Step6Equipment = ({ data, onChange }: Props) => {
-  // Все три списка — из справочников бэка поверх наборов по умолчанию: клиники
+  // Оба списка — из справочников бэка поверх наборов по умолчанию: клиники
   // уже завели там реальные позиции («Фиброскан», «HILT-лазер», «BTL
   // магнитотерапия»), которых в захардкоженном списке не было.
   const { values: equipment } = useReferenceValues(
@@ -37,11 +34,6 @@ export const Step6Equipment = ({ data, onChange }: Props) => {
     referenceKeys.conditions(),
     getConditions,
     DEFAULT_PATIENT_CONDITIONS,
-  );
-  const { values: paymentMethods } = useReferenceValues(
-    referenceKeys.paymentMethods(),
-    getPaymentMethods,
-    DEFAULT_PAYMENT_METHODS,
   );
 
   return (
@@ -57,12 +49,6 @@ export const Step6Equipment = ({ data, onChange }: Props) => {
         options={conditions}
         value={data.patientConditions}
         onChange={(v) => onChange("patientConditions", v)}
-      />
-      <CheckboxGroup
-        label="Способы оплаты"
-        options={paymentMethods}
-        value={data.paymentMethods}
-        onChange={(v) => onChange("paymentMethods", v)}
       />
     </div>
   );

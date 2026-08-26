@@ -17,6 +17,7 @@ import {
 import { getPhoneLength } from "@/shared/ui";
 
 import {
+  CLINIC_PAYMENT_METHODS,
   CLINIC_STEP_TITLES as STEP_TITLES,
   CLINIC_TOTAL_STEPS as TOTAL_STEPS,
 } from "../model/constants";
@@ -78,7 +79,8 @@ const INITIAL_DATA: ClinicFormData = {
   additionalServices: "",
   equipment: [],
   patientConditions: [],
-  paymentMethods: [],
+  // Не выбирается пользователем: поля в форме нет, оплата у всех онлайн.
+  paymentMethods: CLINIC_PAYMENT_METHODS,
   agreeRules: false,
   agreePrivacy: false,
   agreeDataProcessing: false,
