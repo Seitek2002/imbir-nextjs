@@ -25,6 +25,46 @@ const fmtDate = (iso: string): string => {
 const diagnosisOf = (p: DoctorPatient): string =>
   (p as unknown as { diagnosis?: string }).diagnosis || "—";
 
+const th = "px-6 py-4 text-muted text-sm font-normal whitespace-nowrap";
+const td = "px-6 py-4 whitespace-nowrap";
+
+// Заглушка повторяет саму таблицу — с той же шапкой и теми же колонками,
+// чтобы при появлении данных ничего не прыгало.
+const PatientsSkeleton: FC = () => (
+  <div className="bg-white rounded-3xl border border-border overflow-hidden">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-160 text-left border-collapse">
+        <thead>
+          <tr className="border-b border-border">
+            <th className={th}>Пациент</th>
+            <th className={th}>Последний визит</th>
+            <th className={th}>Диагноз</th>
+            <th className="px-6 py-4" />
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <tr key={i} className="border-b border-border last:border-0">
+              <td className={td}>
+                <div className="h-4 w-40 rounded-md skeleton" />
+              </td>
+              <td className={td}>
+                <div className="h-4 w-24 rounded-md skeleton" />
+              </td>
+              <td className={td}>
+                <div className="h-4 w-32 rounded-md skeleton" />
+              </td>
+              <td className="px-6 py-4">
+                <div className="h-8 w-32 rounded-full skeleton ml-auto" />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
 export const DoctorPatientsPage: FC = () => {
   const { data, isLoading } = useQuery({
     queryKey: doctorCabinetKeys.patients({}),
@@ -32,8 +72,6 @@ export const DoctorPatientsPage: FC = () => {
   });
 
   const patients = data?.data ?? [];
-  const th = "px-6 py-4 text-muted text-sm font-normal whitespace-nowrap";
-  const td = "px-6 py-4 whitespace-nowrap";
 
   return (
     <DoctorPageLayout title="Пациенты">
@@ -42,9 +80,7 @@ export const DoctorPatientsPage: FC = () => {
       </h2>
 
       {isLoading ? (
-        <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
-          Загрузка...
-        </div>
+        <PatientsSkeleton />
       ) : patients.length === 0 ? (
         <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
           Нет пациентов
