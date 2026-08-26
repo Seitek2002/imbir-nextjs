@@ -13,6 +13,7 @@ type BaseDropdownProps = {
   options: Option[];
   placeholder?: string;
   searchable?: boolean;
+  showSelectAll?: boolean;
   type?: DropdownType;
 };
 

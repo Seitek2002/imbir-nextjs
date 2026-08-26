@@ -19,6 +19,7 @@ export const Dropdown: FC<DropdownProps> = ({
   type = "default",
   isMulti = false,
   searchable = false,
+  showSelectAll = false,
   value,
   onChange,
   className,
@@ -117,17 +118,14 @@ export const Dropdown: FC<DropdownProps> = ({
             onSearchChange={setSearchQuery}
             onClose={closeDropdown}
           >
-            {isMulti && !searchQuery && (
+            {isMulti && showSelectAll && !searchQuery && (
               <>
                 <div
                   className="p-4 md:px-3 md:py-2.5 flex items-center justify-between border-b border-border-soft md:border-none md:hover:bg-background cursor-pointer transition-colors"
                   onClick={() =>
-                    // Явно указываем TS, что здесь onChange работает с массивом
-                    (onChange as (val: string[]) => void)?.(
-                      Array.isArray(value) && value.length === options.length
-                        ? []
-                        : options.map((o) => o.value),
-                    )
+                    // «Все» означает отсутствие фильтра, а не выбор каждой
+                    // специализации: так не отправляем огромный список в API.
+                    (onChange as (val: string[]) => void)?.([])
                   }
                 >
                   <span className="text-foreground text-base md:text-sm flex-1">
@@ -135,9 +133,7 @@ export const Dropdown: FC<DropdownProps> = ({
                   </span>
                   <div className="pointer-events-none">
                     <Checkbox
-                      checked={
-                        Array.isArray(value) && value.length === options.length
-                      }
+                      checked={Array.isArray(value) && value.length === 0}
                       readOnly
                     />
                   </div>

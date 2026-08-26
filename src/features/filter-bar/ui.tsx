@@ -199,6 +199,7 @@ export const FilterBar: FC<Props> = ({
               isMulti={true}
               type="checkbox"
               searchable
+              showSelectAll
             />
           )}
           {fields.experience && (

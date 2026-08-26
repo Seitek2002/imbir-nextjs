@@ -56,11 +56,7 @@ export const SearchPage: FC = () => {
   const currentExp = urlSearchParams.get("doc_exp");
   const currentPrice = urlSearchParams.get("doc_price");
 
-  // Врачи: город/оценка/цена/стаж/текст и (при одной выбранной
-  // специальности) сама специализация — реальные query-параметры API (как
-  // на /specialists). page_size увеличен для клиентской страховки на случай
-  // 2+ выбранных специальностей — бэк принимает только одно значение
-  // specialization за запрос.
+  // Врачи: город/оценка/цена/стаж/текст и список специализаций уходят в API.
   const [priceMin, priceMax] = currentPrice
     ? currentPrice.split("-").map(Number)
     : [undefined, undefined];
@@ -80,7 +76,8 @@ export const SearchPage: FC = () => {
     max_price: priceMax,
     min_experience: expMin,
     max_experience: expMax,
-    specialization: selectedSpecs.length === 1 ? selectedSpecs[0] : undefined,
+    specialization:
+      selectedSpecs.length > 0 ? selectedSpecs.join(",") : undefined,
     search: activeQuery || undefined,
     page_size: 24,
   };
@@ -117,15 +114,8 @@ export const SearchPage: FC = () => {
 
   // 3. ФИЛЬТРУЕМ ДАННЫЕ НА ЛЕТУ ПО ЗАПРОСУ И ФИЛЬТРАМ
 
-  // --- ФИЛЬТР ВРАЧЕЙ --- страховка на клиенте только для случая 2+
-  // выбранных специальностей, всё остальное уже отфильтровано на бэке.
-  const filteredDoctors = doctors.filter((doc) => {
-    if (selectedSpecs.length > 1 && !selectedSpecs.includes(doc.specialty)) {
-      return false;
-    }
-
-    return true;
-  });
+  // --- ФИЛЬТР ВРАЧЕЙ --- список специализаций уже обработан API.
+  const filteredDoctors = doctors;
 
   // --- ФИЛЬТР КЛИНИК ---
   const filteredClinics = clinics.filter((clinic) => {

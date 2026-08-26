@@ -178,6 +178,7 @@ export const MobileFiltersModal: FC<Props> = ({
               isMulti={true}
               type="checkbox"
               searchable
+              showSelectAll
             />
           </div>
         )}

@@ -52,7 +52,7 @@ export const DropdownTrigger: FC<TriggerProps> = ({
   onClearAll,
 }) => {
   const selected = isMulti && Array.isArray(value) ? value : [];
-  // Выбрано всё — показываем это одним чипом «Все», а не сорока штуками.
+  // Если выбраны все значения вручную, сворачиваем их в один чип «Все».
   const allSelected = options.length > 0 && selected.length === options.length;
   const visible = allSelected ? [] : selected.slice(0, MAX_VISIBLE_CHIPS);
   const hiddenCount = selected.length - visible.length;
