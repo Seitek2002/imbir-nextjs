@@ -22,6 +22,7 @@ export { FilterPanel } from "./filter-panel";
 export { PageHeader } from "./page-header";
 export { LazyInView } from "./lazy-in-view";
 export { ImageWithFallback } from "./image-with-fallback";
+export { PhotoLightbox } from "./photo-lightbox";
 export { AuthShell } from "./auth-shell";
 export { CabinetShell } from "./cabinet-shell";
 export { CabinetMobileMenu } from "./cabinet-mobile-menu";

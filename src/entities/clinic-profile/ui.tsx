@@ -16,6 +16,7 @@ import {
   ImageWithFallback,
   Input,
   PhoneInput,
+  PhotoLightbox,
   Textarea,
 } from "@/shared/ui";
 
@@ -29,6 +30,7 @@ import {
   FileIcon,
   LocationMap,
   SectionCard,
+  TimeChip,
   UploadIcon,
   csv,
   fromApiDate,
@@ -161,6 +163,7 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
     const [d, setD] = useState<FormState>(() => buildState(props));
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [logoPreview, setLogoPreview] = useState<string | undefined>(logo);
+    const [openPhoto, setOpenPhoto] = useState<string | null>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
     const photoInputRef = useRef<HTMLInputElement>(null);
     const documentInputRef = useRef<HTMLInputElement>(null);
@@ -325,9 +328,11 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 </label>
                 <div className="flex items-center gap-4 overflow-x-auto pb-2">
                   {photos.map((photo, i) => (
-                    <div
+                    <button
                       key={i}
-                      className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
+                      type="button"
+                      onClick={() => setOpenPhoto(photo)}
+                      className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0 cursor-pointer"
                     >
                       <ImageWithFallback
                         src={photo}
@@ -338,7 +343,7 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                         className="w-full h-full object-cover"
                         fallback={null}
                       />
-                    </div>
+                    </button>
                   ))}
                 </div>
                 <input
@@ -390,9 +395,11 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 <div className="text-muted text-sm mb-2">Фотографии</div>
                 <div className="flex items-center gap-4 overflow-x-auto pb-2">
                   {photos.map((photo, i) => (
-                    <div
+                    <button
                       key={i}
-                      className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
+                      type="button"
+                      onClick={() => setOpenPhoto(photo)}
+                      className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0 cursor-pointer"
                     >
                       <ImageWithFallback
                         src={photo}
@@ -403,13 +410,15 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                         className="w-full h-full object-cover"
                         fallback={null}
                       />
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
             </div>
           )}
         </SectionCard>
+
+        <PhotoLightbox src={openPhoto} onClose={() => setOpenPhoto(null)} />
 
         {/* ── 2. Локация и контакты ──────────────────────────────────────── */}
         <SectionCard title="Локация и контакты">
@@ -531,13 +540,13 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                   ({ key, ru }) => {
                     const day = days[key];
                     return (
-                      <div key={key} className="flex items-center gap-6">
-                        <span className="w-8 text-sm text-secondary">{ru}</span>
-                        <span className="text-sm text-foreground">
-                          {day.open}
-                          <span className="mx-2 text-muted">–</span>
-                          {day.close}
+                      <div key={key} className="flex items-center gap-3">
+                        <span className="w-8 shrink-0 text-sm text-secondary">
+                          {ru}
                         </span>
+                        <TimeChip>{day.open}</TimeChip>
+                        <span className="text-muted">–</span>
+                        <TimeChip>{day.close}</TimeChip>
                       </div>
                     );
                   },
@@ -567,11 +576,11 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 />
               </div>
             ) : (
-              <span className="text-sm text-foreground">
-                {workSchedule.lunchStart}
-                <span className="mx-2 text-muted">–</span>
-                {workSchedule.lunchEnd}
-              </span>
+              <div className="flex items-center gap-3">
+                <TimeChip>{workSchedule.lunchStart}</TimeChip>
+                <span className="text-muted">–</span>
+                <TimeChip>{workSchedule.lunchEnd}</TimeChip>
+              </div>
             )}
           </div>
 
@@ -762,8 +771,8 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
               />
             </div>
           ) : (
-            <div className="flex flex-col gap-5">
-              <div>
+            <div className="flex flex-col divide-y divide-background">
+              <div className="pb-4">
                 <div className="text-xs text-muted mb-2">Оборудование</div>
                 <ul className="flex flex-col gap-1">
                   {equipment.map((item) => (
@@ -776,7 +785,7 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                   ))}
                 </ul>
               </div>
-              <div>
+              <div className="py-4">
                 <div className="text-xs text-muted mb-2">
                   Условия для пациентов
                 </div>
@@ -791,7 +800,7 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                   ))}
                 </ul>
               </div>
-              <div>
+              <div className="pt-4">
                 <div className="text-xs text-muted mb-2">Способы оплаты</div>
                 <ul className="flex flex-col gap-1">
                   {paymentMethods.map((item) => (

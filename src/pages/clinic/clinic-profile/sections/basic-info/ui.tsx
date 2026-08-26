@@ -15,6 +15,7 @@ import {
   Dropdown,
   ImageWithFallback,
   Input,
+  PhotoLightbox,
   Textarea,
 } from "@/shared/ui";
 
@@ -36,6 +37,7 @@ export const ClinicBasicInfoPage: FC = () => {
   const [description, setDescription] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | undefined>(undefined);
+  const [openPhoto, setOpenPhoto] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const photosInputRef = useRef<HTMLInputElement>(null);
 
@@ -188,17 +190,23 @@ export const ClinicBasicInfoPage: FC = () => {
                   <div className="flex flex-wrap gap-3">
                     {photoItems.map((photo) => (
                       <div key={photo.id} className="relative size-20">
-                        <ImageWithFallback
-                          src={photo.url}
-                          alt="Фотография клиники"
-                          width={80}
-                          height={80}
-                          sizes="80px"
-                          className="h-full w-full rounded-xl object-cover"
-                          fallback={
-                            <div className="h-full w-full rounded-xl bg-surface" />
-                          }
-                        />
+                        <button
+                          type="button"
+                          onClick={() => setOpenPhoto(photo.url)}
+                          className="size-full cursor-pointer"
+                        >
+                          <ImageWithFallback
+                            src={photo.url}
+                            alt="Фотография клиники"
+                            width={80}
+                            height={80}
+                            sizes="80px"
+                            className="h-full w-full rounded-xl object-cover"
+                            fallback={
+                              <div className="h-full w-full rounded-xl bg-surface" />
+                            }
+                          />
+                        </button>
                         <button
                           type="button"
                           onClick={() => deletePhoto(photo.id)}
@@ -268,9 +276,11 @@ export const ClinicBasicInfoPage: FC = () => {
               <div className="text-muted text-sm mb-2">Фотографии</div>
               <div className="flex items-center gap-4 overflow-x-auto pb-2">
                 {photoItems.map((photo) => (
-                  <div
+                  <button
                     key={photo.id}
-                    className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0"
+                    type="button"
+                    onClick={() => setOpenPhoto(photo.url)}
+                    className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0 cursor-pointer"
                   >
                     <ImageWithFallback
                       src={photo.url}
@@ -281,13 +291,15 @@ export const ClinicBasicInfoPage: FC = () => {
                       className="w-full h-full object-cover"
                       fallback={<div className="w-full h-full bg-surface" />}
                     />
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
           </div>
         )}
       </div>
+
+      <PhotoLightbox src={openPhoto} onClose={() => setOpenPhoto(null)} />
     </ClinicSectionPage>
   );
 };

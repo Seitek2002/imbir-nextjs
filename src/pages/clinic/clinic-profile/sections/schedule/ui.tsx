@@ -9,6 +9,7 @@ import {
   DAY_LABELS,
   type DayKey,
   type DayState,
+  TimeChip,
   toDay,
   useClinicCabinet,
 } from "@/entities/clinic-profile";
@@ -129,13 +130,13 @@ export const ClinicSchedulePage: FC = () => {
             <div className="flex flex-col gap-3">
               {DAY_LABELS.filter(({ key }) => days[key].enabled).map(
                 ({ key, ru }) => (
-                  <div key={key} className="flex items-center gap-6">
-                    <span className="w-8 text-sm text-secondary">{ru}</span>
-                    <span className="text-sm text-foreground">
-                      {days[key].open}
-                      <span className="mx-2 text-muted">–</span>
-                      {days[key].close}
+                  <div key={key} className="flex items-center gap-3">
+                    <span className="w-8 shrink-0 text-sm text-secondary">
+                      {ru}
                     </span>
+                    <TimeChip>{days[key].open}</TimeChip>
+                    <span className="text-muted">–</span>
+                    <TimeChip>{days[key].close}</TimeChip>
                   </div>
                 ),
               )}
@@ -154,11 +155,11 @@ export const ClinicSchedulePage: FC = () => {
               <TimeField value={lunchEnd} onChange={setLunchEnd} />
             </div>
           ) : (
-            <span className="text-sm text-foreground">
-              {profile.workSchedule.lunchStart}
-              <span className="mx-2 text-muted">–</span>
-              {profile.workSchedule.lunchEnd}
-            </span>
+            <div className="flex items-center gap-3">
+              <TimeChip>{profile.workSchedule.lunchStart}</TimeChip>
+              <span className="text-muted">–</span>
+              <TimeChip>{profile.workSchedule.lunchEnd}</TimeChip>
+            </div>
           )}
         </div>
 

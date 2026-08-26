@@ -7,6 +7,7 @@ export {
   FileIcon,
   LocationMap,
   SectionCard,
+  TimeChip,
   UploadIcon,
 } from "./shared-ui";
 export {

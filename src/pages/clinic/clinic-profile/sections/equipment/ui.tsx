@@ -64,7 +64,7 @@ const BulletList: FC<{ label: string; items: string[] }> = ({
   label,
   items,
 }) => (
-  <div>
+  <div className="py-4 first:pt-0 last:pb-0">
     <div className="text-muted text-sm mb-2">{label}</div>
     <ul className="flex flex-col gap-1">
       {items.map((item) => (
@@ -164,7 +164,7 @@ export const ClinicEquipmentPage: FC = () => {
             />
           </div>
         ) : (
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col divide-y divide-background">
             <BulletList label="Оборудование" items={profile.equipment} />
             <BulletList
               label="Условия для пациентов"
