@@ -10,6 +10,7 @@ export type SpecialistFormState = {
   languages: string;
   phone: string;
   email: string;
+  password: string;
   photoPreview?: string;
 
   specialization: string;
@@ -38,6 +39,7 @@ export const EMPTY_SPECIALIST_FORM: SpecialistFormState = {
   languages: "",
   phone: "",
   email: "",
+  password: "",
   photoPreview: undefined,
   specialization: "",
   additionalSpecialization: "",
@@ -53,4 +55,19 @@ export const EMPTY_SPECIALIST_FORM: SpecialistFormState = {
   diplomaSpecialty: "",
   additionalEducation: "",
   licenseNumber: "",
+};
+
+// Макет вводит ФИО одним полем в порядке "Фамилия Имя Отчество" (см. пример
+// в макете: "Садыкова Алина Тимуровна"). Бэк при создании врача принимает
+// только first_name/last_name (ClinicDoctorCreateRequest) — поля для отчества
+// там нет вообще, поэтому третье слово, если оно есть, не с чем сохранить.
+// Возвращаем его отдельно, чтобы явно предупредить, а не потерять молча.
+export const splitFullName = (
+  fullName: string,
+): { firstName: string; lastName: string; droppedPatronymic?: string } => {
+  const [lastName = "", firstName = "", patronymic] = fullName
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  return { firstName, lastName, droppedPatronymic: patronymic };
 };

@@ -36,6 +36,11 @@ const mapDoctorToForm = (d: DoctorDetail): Partial<SpecialistFormState> => {
     city: d.city ?? "",
     position: work?.position ?? "",
     workplace: work?.clinic ?? "",
+    // work_experience — свободный JSON: qualification/scientific_degree там
+    // реально встречаются (проверено живым запросом), просто не у каждой
+    // записи сразу.
+    qualification: work?.qualification ?? "",
+    degree: work?.scientific_degree ?? "",
     university: edu?.institution ?? "",
     graduationYear: edu?.year ? String(edu.year) : "",
     diplomaSpecialty: edu?.degree ?? "",

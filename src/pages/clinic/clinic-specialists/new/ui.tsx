@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC } from "react";
 import toast from "react-hot-toast";
 
 import Link from "next/link";
@@ -12,51 +12,51 @@ import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
 import { clinicCabinetKeys, createClinicDoctor } from "@/shared/api";
 import { extractErrorMessage } from "@/shared/lib/errors";
-import { Button, Input, PhoneInput } from "@/shared/ui";
+import { Button } from "@/shared/ui";
 
-// Пароль по умолчанию задаёт бэк, если поле не прислать (см. спецификацию
-// POST /api/clinic/doctors/). Показываем его клинике, чтобы было что передать
-// врачу для первого входа.
-const DEFAULT_PASSWORD = "Doctor123!";
+import {
+  BasicInfoSection,
+  CertificatesSection,
+  EducationSection,
+  ProfessionalSection,
+  SectionCard,
+  splitFullName,
+  useSpecialistForm,
+} from "../specialist-form";
 
 const isEmailValid = (value: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-// Создание аккаунта врача клиникой. Бэк (POST /api/clinic/doctors/) принимает
-// только first_name/last_name/email/phone/password — создаёт User(role=doctor),
-// DoctorProfile с городом клиники и связь DoctorClinicLink. Остальные данные
-// (специализация, образование, сертификаты) врач заполняет сам после входа:
-// эндпоинтов для правки чужого профиля со стороны клиники у бэка нет
-// (GET/PUT /api/clinic/doctors/{id}/ → 405), поэтому форма намеренно
-// ограничена тем, что реально сохраняется.
+// Тот же макет, что у просмотра/редактирования уже прикреплённого специалиста
+// (specialist-form) — по просьбе не верстать это заново отдельной формой.
+// Но бэк (POST /api/clinic/doctors/) реально принимает только first_name/
+// last_name/email/phone/password — секции ниже честно показывают, какие поля
+// не сохранятся, вместо того чтобы выглядеть рабочими и тихо терять ввод.
 export const ClinicNewSpecialistPage: FC = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { d, set } = useSpecialistForm();
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneLocal, setPhoneLocal] = useState("");
-  const [password, setPassword] = useState("");
+  const { firstName, lastName, droppedPatronymic } = splitFullName(d.fullName);
 
-  const emailTouched = email.length > 0;
+  const emailTouched = d.email.length > 0;
   const emailError =
-    emailTouched && !isEmailValid(email) ? "Неверный формат почты" : undefined;
+    emailTouched && !isEmailValid(d.email)
+      ? "Неверный формат почты"
+      : undefined;
 
   const canSubmit =
-    firstName.trim().length > 0 &&
-    lastName.trim().length > 0 &&
-    isEmailValid(email);
+    firstName.length > 0 && lastName.length > 0 && isEmailValid(d.email);
 
   const { mutate: create, isPending } = useMutation({
     mutationFn: () =>
       createClinicDoctor({
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        email: email.trim(),
+        first_name: firstName,
+        last_name: lastName,
+        email: d.email.trim(),
         // PhoneInput отдаёт национальную часть — приводим к формату бэка.
-        phone: phoneLocal ? `+996${phoneLocal}` : undefined,
-        password: password.trim() || undefined,
+        phone: d.phone ? `+996${d.phone}` : undefined,
+        password: d.password.trim() || undefined,
       }),
     onSuccess: (doctor) => {
       toast.success(`Врач ${doctor.full_name} добавлен`);
@@ -71,21 +71,33 @@ export const ClinicNewSpecialistPage: FC = () => {
     },
   });
 
+  const handleSubmit = () => {
+    if (droppedPatronymic) {
+      toast(
+        `Отчество «${droppedPatronymic}» не сохранится — у бэка нет для него поля`,
+        { icon: "ℹ️" },
+      );
+    }
+    create();
+  };
+
   return (
     <ClinicPageLayout title="Добавить специалиста" desktopTitle="Мой профиль">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <h2 className="text-[28px] md:text-[32px] font-semibold text-foreground">
           Добавить специалиста
         </h2>
-        <Button onClick={() => create()} disabled={!canSubmit || isPending}>
+        <Button onClick={handleSubmit} disabled={!canSubmit || isPending}>
           {isPending ? "Добавляем..." : "Добавить"}
         </Button>
       </div>
 
       <div className="bg-primary-tint text-sm text-foreground rounded-2xl px-4 py-3 mb-6">
-        Создаётся аккаунт врача, привязанный к вашей клинике. Специализацию,
-        образование и документы врач заполнит сам после первого входа. Если
-        хотите, чтобы он зарегистрировался самостоятельно — отправьте{" "}
+        Создаётся аккаунт врача, привязанный к вашей клинике. По-настоящему
+        сохранятся только ФИО, почта, телефон и пароль — остальные поля ниже
+        помечены как несохраняемые. Специализацию, образование и документы врач
+        заполнит сам после первого входа. Если хотите, чтобы он
+        зарегистрировался самостоятельно — отправьте{" "}
         <Link
           href="/clinic-profile/invites"
           className="text-primary font-medium hover:underline"
@@ -95,44 +107,24 @@ export const ClinicNewSpecialistPage: FC = () => {
         .
       </div>
 
-      <div className="bg-white rounded-3xl border border-border p-5 lg:p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <Input
-            label="Имя"
-            placeholder="Асан"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-          <Input
-            label="Фамилия"
-            placeholder="Усенов"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-          <Input
-            label="Почта"
-            placeholder="doctor@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={emailError}
-            hint="На неё врач будет входить в систему"
-          />
-          <PhoneInput
-            label="Телефон"
-            value={phoneLocal}
-            onChange={setPhoneLocal}
-          />
-          <div className="lg:col-span-2">
-            <Input
-              label="Пароль"
-              placeholder={DEFAULT_PASSWORD}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              hint={`Необязательно. Если оставить пустым — будет ${DEFAULT_PASSWORD}. Передайте пароль врачу для первого входа.`}
-            />
-          </div>
-        </div>
-      </div>
+      <SectionCard title="Основная информация">
+        <BasicInfoSection
+          d={d}
+          set={set}
+          isEditing
+          isNew
+          emailError={emailError}
+        />
+      </SectionCard>
+      <SectionCard title="Профессиональные данные">
+        <ProfessionalSection d={d} set={set} isEditing isNew />
+      </SectionCard>
+      <SectionCard title="Образование">
+        <EducationSection d={d} set={set} isEditing isNew />
+      </SectionCard>
+      <SectionCard title="Сертификаты и документы">
+        <CertificatesSection d={d} set={set} isEditing isNew />
+      </SectionCard>
     </ClinicPageLayout>
   );
 };
