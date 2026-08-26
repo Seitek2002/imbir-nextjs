@@ -1,8 +1,10 @@
-import { apiClient } from "../client";
+import { API_BASE_URL, apiClient } from "../client";
 import {
   CountryCode,
   CountryCodesResponse,
   ReferenceListResponse,
+  SiteSettings,
+  SiteSettingsResponse,
   SpecializationItem,
   SpecializationListResponse,
   UserAccountStatus,
@@ -55,4 +57,24 @@ export const getUserStatus = async (
     `/api/references/user-status/${userId}/`,
   );
   return data.data;
+};
+
+// Настройки сайта тянет серверный футер, который стоит почти на каждой
+// странице. Поэтому не apiClient (axios), а нативный fetch: только он
+// попадает в кеш Next, иначе на каждый рендер уходил бы отдельный запрос к
+// бэку. Меняются они раз в год из админки — часа кеша более чем достаточно.
+//
+// Ошибку не пробрасываем: футер и страницы условий обязаны отрисоваться даже
+// если бэк лежит. Вызывающий код в этом случае показывает свои значения.
+export const getSiteSettings = async (): Promise<SiteSettings | null> => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/references/site-settings/`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as SiteSettingsResponse;
+    return json.data ?? null;
+  } catch {
+    return null;
+  }
 };

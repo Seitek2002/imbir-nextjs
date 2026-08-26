@@ -53,3 +53,22 @@ export type UserAccountStatus = {
 export type UserAccountStatusResponse = {
   data: UserAccountStatus;
 };
+
+// Общесайтовые настройки (синглтон в админке): контакты, соцсети и
+// юридические тексты. На бэке заведены прямо под футер и страницы условий —
+// любое поле может быть пустой строкой, если его ещё не заполнили.
+export type SiteSettings = {
+  facebook_url: string;
+  instagram_url: string;
+  twitter_url: string;
+  linkedin_url: string;
+  contact_email: string;
+  contact_phone: string;
+  address: string;
+  terms_text: string;
+  privacy_policy_text: string;
+};
+
+export type SiteSettingsResponse = {
+  data: SiteSettings;
+};

@@ -4,8 +4,11 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 import { useAuthStore } from "@/shared/store";
 
-const BASE_URL =
+// Экспортируем: серверные компоненты берут тот же адрес, но ходят нативным
+// fetch'ем ради кеша Next (axios мимо него проходит) — см. getSiteSettings.
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://155.212.216.197:8030";
+const BASE_URL = API_BASE_URL;
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   timeout: 15_000,

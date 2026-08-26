@@ -4,6 +4,8 @@ import { Onest } from "next/font/google";
 import "@livekit/components-styles";
 
 import "@/app/globals.css";
+import { getSiteSettings } from "@/shared/api";
+import { SiteSettingsProvider } from "@/shared/lib/siteSettingsContext";
 import { Providers } from "@/app/providers";
 
 const onest = Onest({
@@ -25,11 +27,17 @@ export const metadata: Metadata = {
 // clinic-profile}/layout.tsx). Публичным страницам достаётся дефолт "гость" из
 // InitialAuthContext, а реальное состояние хедера поднимает клиентская
 // гидратация (useAuthDisplay).
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Контакты и соцсети для футера. Тянем здесь, а не в самом футере: он
+  // стоит и внутри клиентских страниц, где async-компонент не отрендерить.
+  // Запрос кешируется на час и не делает дерево динамическим (в отличие от
+  // cookies(), см. комментарий выше) — статика остаётся статикой.
+  const siteSettings = await getSiteSettings();
+
   return (
     <html
       lang="en"
@@ -46,7 +54,9 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col bg-background lg:bg-white"
       >
-        <Providers>{children}</Providers>
+        <SiteSettingsProvider value={siteSettings}>
+          <Providers>{children}</Providers>
+        </SiteSettingsProvider>
       </body>
     </html>
   );
