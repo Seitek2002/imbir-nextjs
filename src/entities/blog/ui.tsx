@@ -10,16 +10,16 @@ import { ImageWithFallback } from "@/shared/ui";
 import { BlogImageFallback } from "./image-fallback";
 
 type Props = {
-  title: string;
   category: string;
   categoryColor?: string;
   date: string;
+  href?: string;
   // У поста с бэка может не быть картинки — тогда ImageWithFallback рисует фон
   image?: string;
-  href?: string;
   // Eager-load this card's image (use for the first card above the fold so it
   // isn't lazy and can become the LCP element sooner).
   priority?: boolean;
+  title: string;
 };
 
 export const BlogCard: FC<Props> = ({

@@ -7,10 +7,10 @@ import { RemoveIcon, SearchIcon } from "@/shared/assets/icons";
 import { Input } from "@/shared/ui";
 
 type Props = {
-  placeholder?: string;
-  value: string;
   onChange: (val: string) => void;
   onEnter?: () => void;
+  placeholder?: string;
+  value: string;
 };
 
 export const SearchInput: FC<Props> = ({

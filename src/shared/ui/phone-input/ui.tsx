@@ -15,9 +15,9 @@ import { useDropdownSwipe } from "../dropdown/use-dropdown-swipe";
 
 export type Country = {
   code: string;
-  name: string;
   dialCode: string;
   flag: string;
+  name: string;
   phoneLength: number;
 };
 
@@ -126,14 +126,14 @@ export const getPhoneLength = (dialCode: string): number =>
   COUNTRIES.find((c) => c.dialCode === dialCode)?.phoneLength ?? 9;
 
 type Props = {
-  label?: string;
-  value?: string;
+  className?: string;
   defaultCountryCode?: string;
-  onChange?: (value: string) => void;
-  onCountryChange?: (country: Country) => void;
   error?: string;
   hint?: string;
-  className?: string;
+  label?: string;
+  onChange?: (value: string) => void;
+  onCountryChange?: (country: Country) => void;
+  value?: string;
 };
 
 export const PhoneInput: FC<Props> = ({

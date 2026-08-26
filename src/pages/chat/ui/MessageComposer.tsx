@@ -12,12 +12,12 @@ const SendIcon: FC<{ className?: string }> = ({ className }) => (
 const TYPING_IDLE_MS = 2000;
 
 type Props = {
-  onSend: (text: string) => void;
   disabled?: boolean;
-  placeholder?: string;
+  disclaimer?: React.ReactNode;
+  onSend: (text: string) => void;
   // Сигнал "печатает/перестал" — троттлинг здесь, чтобы не спамить сокет.
   onTyping?: (isTyping: boolean) => void;
-  disclaimer?: React.ReactNode;
+  placeholder?: string;
 };
 
 export const MessageComposer: FC<Props> = ({
@@ -31,7 +31,7 @@ export const MessageComposer: FC<Props> = ({
 
   // Уже отправили "true" и ждём тишины, чтобы отправить "false".
   const typingActiveRef = useRef(false);
-  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const idleTimerRef = useRef<null | ReturnType<typeof setTimeout>>(null);
 
   const stopTyping = () => {
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);

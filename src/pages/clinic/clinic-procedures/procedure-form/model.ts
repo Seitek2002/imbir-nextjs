@@ -12,17 +12,17 @@ import type { ClinicScheduleDay } from "@/shared/api";
 // is_active/doctor_ids, плюс photo, branch_id (филиал проведения), schedule и
 // lunch_break — последние четыре появились после доработки бэка.
 export type ProcedureFormState = {
-  photoPreview?: string;
-  name: string;
+  branchId: string;
   category: string;
-  price: string;
   currency: string;
   duration: string;
-  branchId: string;
-  specialistIds: string[];
-  schedule: Record<DayKey, DayState>;
   lunchFrom: string;
   lunchTo: string;
+  name: string;
+  photoPreview?: string;
+  price: string;
+  schedule: Record<DayKey, DayState>;
+  specialistIds: string[];
 };
 
 export const EMPTY_SCHEDULE: Record<DayKey, DayState> = {
@@ -71,7 +71,7 @@ export const scheduleToApi = (
   );
 
 export const scheduleFromApi = (
-  api: Record<string, { from?: string; to?: string; enabled?: boolean }> | null,
+  api: null | Record<string, { enabled?: boolean; from?: string; to?: string }>,
 ): Record<DayKey, DayState> => {
   if (!api) return EMPTY_SCHEDULE;
   return Object.fromEntries(

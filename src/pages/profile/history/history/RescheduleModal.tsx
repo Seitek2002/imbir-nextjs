@@ -17,11 +17,11 @@ import { extractErrorMessage } from "@/shared/lib/errors";
 import { Button, Modal } from "@/shared/ui";
 
 type Props = {
-  isOpen: boolean;
-  onClose: () => void;
   appointmentId: string;
   doctorId: string;
-  serviceId?: string | number | null;
+  isOpen: boolean;
+  onClose: () => void;
+  serviceId?: null | number | string;
   // Формат консультации не меняется при переносе — нужен только чтобы пикер
   // отрисовался в правильном режиме (сам переключатель скрыт).
 };
@@ -37,7 +37,7 @@ export const RescheduleModal: FC<Props> = ({
   serviceId,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<null | string>(null);
   const queryClient = useQueryClient();
 
   const selectedDateStr = selectedDate ? toApiDate(selectedDate) : null;

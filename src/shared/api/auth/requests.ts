@@ -27,8 +27,8 @@ import {
 } from "./types";
 
 export const validateDoctorInvite = async (params: {
-  invite_clinic_id: number;
   invite_branch_id?: number;
+  invite_clinic_id: number;
 }): Promise<DoctorInviteValidationResponse> => {
   const { data } = await apiClient.get<DoctorInviteValidationResponse>(
     "/api/auth/invite/validate/",

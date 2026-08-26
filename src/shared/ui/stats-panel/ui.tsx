@@ -3,13 +3,13 @@
 import { cn } from "@/shared/lib/utils";
 
 type Props = {
-  rating: number | string;
-  ratingLabel?: string;
+  className?: string;
   experience: number | string;
   experienceLabel?: string;
+  rating: number | string;
+  ratingLabel?: string;
   reviews: number | string;
   reviewsLabel?: string;
-  className?: string;
 };
 
 export const StatsPanel: FC<Props> = ({

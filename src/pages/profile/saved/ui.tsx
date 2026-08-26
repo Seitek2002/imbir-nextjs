@@ -40,7 +40,7 @@ export const ProfileSavedPage: FC = () => {
   // сохранено. Пользователь лайкал врача, заходил в «Сохранённое» и видел
   // «Список пуст» — казалось, что лайки не работают. Открываем первую
   // непустую вкладку; выбор пользователя после этого не переопределяем.
-  const [activeTab, setActiveTab] = useState<SavedType | null>(null);
+  const [activeTab, setActiveTab] = useState<null | SavedType>(null);
 
   const { data: favorites, isLoading } = useQuery({
     queryKey: profileKeys.favorites(),

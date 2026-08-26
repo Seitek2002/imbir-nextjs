@@ -37,7 +37,7 @@ export const ClinicBasicInfoPage: FC = () => {
   const [description, setDescription] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | undefined>(undefined);
-  const [openPhoto, setOpenPhoto] = useState<string | null>(null);
+  const [openPhoto, setOpenPhoto] = useState<null | string>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const photosInputRef = useRef<HTMLInputElement>(null);
 

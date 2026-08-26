@@ -54,12 +54,12 @@ const CloseIcon: FC<{ className?: string }> = ({ className }) => (
 );
 
 type D = {
-  university: string;
+  additionalEducation: string[];
+  diplomaSpecialty: string;
   graduationYear: string;
   internship: string;
   residency: string;
-  diplomaSpecialty: string;
-  additionalEducation: string[];
+  university: string;
 };
 
 export const DoctorEducationSection: FC = () => {

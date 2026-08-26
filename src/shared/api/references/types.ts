@@ -10,7 +10,7 @@ export type ReferenceListResponse = {
 export type SpecializationItem = {
   id: number;
   name: string;
-  photo?: string | null;
+  photo?: null | string;
 };
 
 export type SpecializationListResponse = {
@@ -35,19 +35,19 @@ export type CountryCodesResponse = {
 // того, кого он оценивает). Авторизация не требуется. Если отзывов нет —
 // status: null.
 export type UserStatus = {
-  id: number;
-  name: string;
   description: string;
+  id: number;
+  image: null | string;
+  name: string;
   percent: number;
-  image: string | null;
 };
 
 export type UserAccountStatus = {
-  user_id: number;
+  average_rating: null | number;
+  percent: null | number;
   reviews_count: number;
-  average_rating: number | null;
-  percent: number | null;
-  status: UserStatus | null;
+  status: null | UserStatus;
+  user_id: number;
 };
 
 export type UserAccountStatusResponse = {
@@ -58,15 +58,15 @@ export type UserAccountStatusResponse = {
 // юридические тексты. На бэке заведены прямо под футер и страницы условий —
 // любое поле может быть пустой строкой, если его ещё не заполнили.
 export type SiteSettings = {
-  facebook_url: string;
-  instagram_url: string;
-  twitter_url: string;
-  linkedin_url: string;
+  address: string;
   contact_email: string;
   contact_phone: string;
-  address: string;
-  terms_text: string;
+  facebook_url: string;
+  instagram_url: string;
+  linkedin_url: string;
   privacy_policy_text: string;
+  terms_text: string;
+  twitter_url: string;
 };
 
 export type SiteSettingsResponse = {

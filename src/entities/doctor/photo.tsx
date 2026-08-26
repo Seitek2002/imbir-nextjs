@@ -8,10 +8,10 @@ import { UserCircleIcon } from "@/shared/assets/icons";
 import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
+  fallbackSize?: string;
   image?: StaticImageData | string;
   name: string;
   sizes?: string;
-  fallbackSize?: string;
 };
 
 export const DoctorPhoto: FC<Props> = ({

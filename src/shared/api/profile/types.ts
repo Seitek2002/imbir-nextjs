@@ -2,43 +2,43 @@ import { AppointmentStatus } from "../appointments/types";
 
 // Matches real PatientProfile schema
 export type ClientProfile = {
-  first_name: string;
-  last_name: string;
-  patronymic?: string | null;
-  email: string;
-  phone?: string;
-  avatar?: string | null;
-  blood_type?: string;
   allergies?: string[];
+  avatar?: null | string;
+  blood_type?: string;
+  email: string;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   emergency_contact_relation?: string;
+  first_name: string;
+  last_name: string;
+  patronymic?: null | string;
+  phone?: string;
 };
 
 // `avatar` is read-only (a URL); the API accepts a new image via the binary
 // `avatar_upload` field as multipart/form-data (see PatientProfileRequest).
 export type UpdateProfileRequest = Partial<
-  Omit<ClientProfile, "email" | "avatar">
+  Omit<ClientProfile, "avatar" | "email">
 > & {
   avatar_upload?: File;
 };
 
 export type ProfileAppointment = {
-  id: number;
-  date: string;
-  time: string;
-  status: AppointmentStatus;
-  notes?: string;
-  doctor: string;
-  clinic: string;
-  service: string;
   can_review: string;
+  clinic: string;
   created_at: string;
+  date: string;
+  doctor: string;
+  google_meet_link: null | string;
+  id: number;
   is_online: boolean;
-  google_meet_link: string | null;
+  notes?: string;
+  service: string;
+  status: AppointmentStatus;
+  time: string;
 };
 
-export type FavoriteTargetType = "doctor" | "clinic" | "service";
+export type FavoriteTargetType = "clinic" | "doctor" | "service";
 
 // По нашей просьбе бэк добавил clinic {id, name} в врача и услугу — раньше
 // карточка в «Сохранённом» не могла показать, в какой клинике приём.
@@ -51,49 +51,49 @@ export type FavoriteTargetClinic = {
 // данными карточек (проверено живым запросом), поэтому дочитывать врача или
 // услугу отдельным запросом не нужно.
 export type FavoriteDoctor = {
-  id: number;
-  full_name: string;
-  specialty: string;
-  photo: string | null;
-  rating?: string | null;
-  experience_years?: number;
   clinic: FavoriteTargetClinic;
+  experience_years?: number;
+  full_name: string;
+  id: number;
+  photo: null | string;
+  rating?: null | string;
+  specialty: string;
 };
 
 export type FavoriteClinic = {
-  id: number;
-  name: string;
-  logo: string | null;
   city?: string;
   clinic_type?: string;
-  rating?: string | null;
+  id: number;
+  logo: null | string;
+  name: string;
+  rating?: null | string;
 };
 
 export type FavoriteService = {
+  category: string;
+  clinic: FavoriteTargetClinic;
   id: number;
   name: string;
-  category: string;
-  price?: string | null;
-  clinic: FavoriteTargetClinic;
+  price?: null | string;
 };
 
 export type FavoritesList = {
-  doctors: FavoriteDoctor[];
   clinics: FavoriteClinic[];
+  doctors: FavoriteDoctor[];
   services: FavoriteService[];
 };
 
 // Одно и то же тело у POST (добавить) и DELETE (убрать): записи избранного не
 // адресуются собственным id, бэк работает по самой цели.
 export type FavoriteTargetRequest = {
-  target_type: FavoriteTargetType;
   target_id: number;
+  target_type: FavoriteTargetType;
 };
 
 export type PatientReview = {
-  id: number;
-  target_type: string;
-  rating: number;
-  text?: string;
   created_at: string;
+  id: number;
+  rating: number;
+  target_type: string;
+  text?: string;
 };

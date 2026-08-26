@@ -54,19 +54,19 @@ const DEFAULT_PATIENT_CONDITIONS = [
 const DEFAULT_PAYMENT_METHODS = ["Наличные", "Карта", "Онлайн"];
 
 type D = {
-  specialty: string;
   additionalSpecialty: string;
-  experienceYears: string;
+  consultationPrice: string;
   currentPosition: string;
-  workplace: string;
-  qualification: string;
-  scientificDegree: string;
   equipment: string[];
+  experienceYears: string;
+  isOnlineAvailable: boolean;
+  isPublished: boolean;
   patientConditions: string[];
   paymentMethods: string[];
-  isOnlineAvailable: boolean;
-  consultationPrice: string;
-  isPublished: boolean;
+  qualification: string;
+  scientificDegree: string;
+  specialty: string;
+  workplace: string;
 };
 
 const { fieldList, formGrid } = formStyles;

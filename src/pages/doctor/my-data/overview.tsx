@@ -73,7 +73,7 @@ const fromApiDate = (v: string): string => {
 };
 
 // "ДД.ММ.ГГГГ" → "ГГГГ-ММ-ДД"; уже-ISO значение оставляем как есть
-const toApiDate = (v: string): string | null => {
+const toApiDate = (v: string): null | string => {
   const t = v.trim();
   if (!t) return null;
   const m = t.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
@@ -137,33 +137,33 @@ const PencilIcon = () => (
 // экраны остаются отдельными: там разделы открываются по одному с экрана-
 // списка «Мои данные» (DoctorMyDataList), макет этого не касается.
 type D = {
-  fullName: string;
-  gender: string;
+  additionalEducation: string[];
+  additionalSpecialty: string;
   birthDate: string;
   city: string;
-  languages: string;
-  phone: string;
-  email: string;
-  specialty: string;
-  additionalSpecialty: string;
-  experienceYears: string;
-  currentPosition: string;
-  workplace: string;
-  qualification: string;
-  scientificDegree: string;
-  equipment: string[];
-  patientConditions: string[];
-  paymentMethods: string[];
-  isOnlineAvailable: boolean;
   consultationPrice: string;
-  isPublished: boolean;
-  university: string;
+  currentPosition: string;
+  diplomaSpecialty: string;
+  email: string;
+  equipment: string[];
+  experienceYears: string;
+  fullName: string;
+  gender: string;
   graduationYear: string;
   internship: string;
-  residency: string;
-  diplomaSpecialty: string;
-  additionalEducation: string[];
+  isOnlineAvailable: boolean;
+  isPublished: boolean;
+  languages: string;
   licenseNumber: string;
+  patientConditions: string[];
+  paymentMethods: string[];
+  phone: string;
+  qualification: string;
+  residency: string;
+  scientificDegree: string;
+  specialty: string;
+  university: string;
+  workplace: string;
 };
 
 const EMPTY: D = {

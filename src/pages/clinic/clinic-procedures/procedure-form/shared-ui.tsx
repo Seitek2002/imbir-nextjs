@@ -14,7 +14,7 @@ import type { ClinicDoctorItem } from "@/shared/api";
 import type { TimeGroup } from "@/shared/lib/booking";
 import { Button, Dropdown, IconBtn, Modal } from "@/shared/ui";
 
-export const FieldRow: FC<{ label: string; children: React.ReactNode }> = ({
+export const FieldRow: FC<{ children: React.ReactNode; label: string }> = ({
   label,
   children,
 }) => (
@@ -66,7 +66,7 @@ export const DEMO_TIME_GROUPS: TimeGroup[] = [
 // реальную занятость конкретной процедуры, такого API пока нет).
 export const RecordsPreview: FC = () => {
   const [date, setDate] = useState<Date | null>(new Date());
-  const [time, setTime] = useState<string | null>("11:00");
+  const [time, setTime] = useState<null | string>("11:00");
 
   return (
     <AppointmentDateTimePicker
@@ -80,13 +80,13 @@ export const RecordsPreview: FC = () => {
 };
 
 type ScheduleEditorProps = {
-  schedule: Record<DayKey, DayState>;
-  setDay: (key: DayKey, patch: Partial<DayState>) => void;
+  isEditing: boolean;
   lunchFrom: string;
   lunchTo: string;
+  schedule: Record<DayKey, DayState>;
+  setDay: (key: DayKey, patch: Partial<DayState>) => void;
   setLunchFrom: (v: string) => void;
   setLunchTo: (v: string) => void;
-  isEditing: boolean;
 };
 
 const timeInput =
@@ -184,10 +184,10 @@ export const ScheduleEditor: FC<ScheduleEditorProps> = ({
 
 type SpecialistsPickerProps = {
   doctors: ClinicDoctorItem[];
-  selectedIds: string[];
+  isEditing: boolean;
   onAdd: (id: string) => void;
   onRemove: (id: string) => void;
-  isEditing: boolean;
+  selectedIds: string[];
 };
 
 // Список «Специалисты, выполняющие услугу» — реальные имена из списка врачей

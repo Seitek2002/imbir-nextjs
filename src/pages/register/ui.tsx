@@ -122,14 +122,14 @@ const ClientIcon = () => (
 
 // --- Types ---
 
-type Role = "clinic" | "doctor" | "client";
-type ActiveForm = "role" | "client" | "doctor" | "clinic";
+type Role = "client" | "clinic" | "doctor";
+type ActiveForm = "client" | "clinic" | "doctor" | "role";
 
 type RoleOption = {
-  value: Role;
-  label: string;
   description: string;
   Icon: () => JSX.Element;
+  label: string;
+  value: Role;
 };
 
 const ROLES: RoleOption[] = [
@@ -200,12 +200,12 @@ export const RegisterPage = () => {
   const [activeForm, setActiveForm] = useState<ActiveForm>(
     hasInviteParams ? "doctor" : "role",
   );
-  const [selectedRole, setSelectedRole] = useState<Role | null>(
+  const [selectedRole, setSelectedRole] = useState<null | Role>(
     hasInviteParams ? "doctor" : null,
   );
   const [inviteClinic, setInviteClinic] = useState<InviteClinic | undefined>();
   const [inviteValidationStatus, setInviteValidationStatus] = useState<
-    "idle" | "loading" | "valid" | "invalid"
+    "idle" | "invalid" | "loading" | "valid"
   >(hasInviteParams ? "loading" : "idle");
 
   // Dropdown/текстовые поля специализации хранят название (см.
@@ -288,7 +288,7 @@ export const RegisterPage = () => {
   const [verificationCode, setVerificationCode] = useState("");
   // Ошибка почты в клиентской форме. Показываем только после попытки
   // отправки, чтобы не ругаться на каждую букву во время набора.
-  const [clientEmailError, setClientEmailError] = useState<string | null>(null);
+  const [clientEmailError, setClientEmailError] = useState<null | string>(null);
   const [timer, setTimer] = useState(0);
   const [isRequestingCode, setIsRequestingCode] = useState(false);
   // Проверка занятости email (POST /api/auth/email/check/) — чистая, без
@@ -527,7 +527,7 @@ export const RegisterPage = () => {
         // (см. ниже), оставляем как есть — без него это поле ничего не делало.
         step1: {
           full_name: data.fullName,
-          gender: data.gender as "male" | "female",
+          gender: data.gender as "female" | "male",
           birth_date: toApiDate(data.birthDate),
           city: data.city,
           languages: data.languages,

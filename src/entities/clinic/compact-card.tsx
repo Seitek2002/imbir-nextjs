@@ -10,12 +10,12 @@ import { useAuthStore } from "@/shared/store";
 import { Button, ImageWithFallback } from "@/shared/ui";
 
 type Props = {
-  id: string | number;
-  name: string;
-  logo?: string | null;
   city?: string;
-  rating?: string | number;
+  id: number | string;
+  logo?: null | string;
+  name: string;
   onBook?: () => void;
+  rating?: number | string;
 };
 
 const getInitials = (name: string) =>

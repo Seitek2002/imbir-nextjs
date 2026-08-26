@@ -12,19 +12,19 @@ import {
 import { cn } from "@/shared/lib/utils";
 
 type Props = {
+  className?: string;
+  id?: string;
   label?: string;
-  min: number;
+  labelClassName?: string;
   max: number;
-  step?: number;
-  value: [number, number];
+  min: number;
   // Необязателен: если значение нужно только по окончании перетаскивания
   // (например, чтобы не дёргать сервер на каждый шаг), передавайте лишь
   // onChangeEnd — цифры на концах трека всё равно двигаются, они локальные.
   onChange?: (value: [number, number]) => void;
   onChangeEnd?: (value: [number, number]) => void;
-  className?: string;
-  labelClassName?: string;
-  id?: string;
+  step?: number;
+  value: [number, number];
 };
 
 export const RangeSlider: FC<Props> = ({

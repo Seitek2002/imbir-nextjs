@@ -4,9 +4,9 @@ import { Checkbox } from "@/shared/ui";
 
 type CheckboxGroupProps = {
   label: string;
+  onChange: (value: string[]) => void;
   options: string[];
   value: string[];
-  onChange: (value: string[]) => void;
 };
 
 // Тот же компонент, что уже используется у клиники (регистрация и кабинет,
@@ -57,7 +57,7 @@ export const CheckboxGroup: FC<CheckboxGroupProps> = ({
 // странице «Мои данные» (pages/doctor/my-data/overview.tsx). Тот же вид, что
 // у SectionCard клиники (entities/clinic-profile/shared-ui.tsx); свой, а не
 // импорт оттуда — не тащить в кабинет врача сущность клиники за 10 строк вёрстки.
-export const SectionCard: FC<{ title: string; children: ReactNode }> = ({
+export const SectionCard: FC<{ children: ReactNode; title: string }> = ({
   title,
   children,
 }) => (

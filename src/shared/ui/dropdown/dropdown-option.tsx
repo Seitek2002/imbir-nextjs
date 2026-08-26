@@ -7,10 +7,10 @@ import { Checkbox, Radio } from "@/shared/ui";
 import { DropdownType, Option } from "./types";
 
 type OptionProps = {
-  option: Option;
-  type: DropdownType;
   isSelected: boolean;
   onClick: () => void;
+  option: Option;
+  type: DropdownType;
 };
 
 export const DropdownOption: FC<OptionProps> = ({

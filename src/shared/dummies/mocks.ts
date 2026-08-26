@@ -5,84 +5,84 @@ import { StaticImageData } from "next/image";
 // ==========================================
 
 export type ReviewItem = {
-  id: string;
+  appointmentId?: string;
   author: string;
   // Имя совпадает с пропом ReviewCard (@/widgets/reviews) — объект отдаётся
   // туда как есть, и при расхождении имён аватар молча терялся бы.
   avatarUrl?: string;
+  clinicId: string;
   date: string;
-  text: string;
-  rating: number;
-  // Ответ врача/клиники на отзыв, если есть.
-  reply?: { text: string; date: string } | null;
-
   // СВЯЗИ (Foreign Keys)
   doctorId: string;
-  clinicId: string;
+  id: string;
+
+  rating: number;
+  // Ответ врача/клиники на отзыв, если есть.
+  reply?: { date: string; text: string } | null;
   serviceId?: string;
 
-  appointmentId?: string;
+  text: string;
 };
 
 export type TimeSlot = {
-  start: string; // "09:00"
   end: string; // "18:00"
+  start: string; // "09:00"
 } | null;
 
 export type Schedule = {
-  mon: TimeSlot;
-  tue: TimeSlot;
-  wed: TimeSlot;
-  thu: TimeSlot;
   fri: TimeSlot;
+  lunchBreak: TimeSlot;
+  mon: TimeSlot;
   sat: TimeSlot;
   sun: TimeSlot;
-  lunchBreak: TimeSlot;
+  thu: TimeSlot;
+  tue: TimeSlot;
+  wed: TimeSlot;
 };
 
 export type Workplace = {
+  branchId?: string;
+  clinicAddress?: string;
   clinicId: string;
   clinicName: string;
-  clinicAddress?: string;
-  branchId?: string;
   // Бэк может не отдать цену за приём — тогда блок цены прячется
   price?: number;
   schedule: Schedule;
 };
 
 export type DoctorListItem = {
-  id: string | number;
-  name: string;
-  specialty: string;
-  workplaces: Workplace[];
-  isOnlineAvailable: boolean;
-  rating: number;
-  reviews: number;
-  experience: number;
-  image?: StaticImageData | string;
-
+  about?: string;
+  contacts?: {
+    email: string;
+    phone: string;
+    // Бэк не отдаёт расписание в публичном профиле врача — если поля нет,
+    // строку не показываем, а не подставляем одинаковое время всем.
+    schedule?: string;
+  };
   // Детальные поля
   education?: string[];
-  about?: string;
+  experience: number;
+  id: number | string;
+  image?: StaticImageData | string;
+  isOnlineAvailable: boolean;
+  name: string;
+  rating: number;
+
+  reviews: number;
+  skills?: string[];
+  specialty: string;
   workExperience?: {
+    duration?: string;
+    place: string;
+    qualification?: string;
+    role: string;
     // Бэк хранит work_experience как произвольный JSON — у записи может
     // быть либо диапазон лет (years/duration), либо квалификация без дат
     // (qualification), в зависимости от того, через какую форму врач это
     // заполнял. Оба варианта не гарантированы одновременно.
     years?: string;
-    duration?: string;
-    qualification?: string;
-    place: string;
-    role: string;
   }[];
-  skills?: string[];
-  contacts?: {
-    // Бэк не отдаёт расписание в публичном профиле врача — если поля нет,
-    // строку не показываем, а не подставляем одинаковое время всем.
-    schedule?: string;
-    phone: string;
-    email: string;
-  };
+  workplaces: Workplace[];
 };
 
 export type Coordinates = {
@@ -91,46 +91,46 @@ export type Coordinates = {
 };
 
 export type Branch = {
-  id: string;
   address: string;
-  phone?: string;
-  schedule?: string;
   city?: string;
   coordinates?: Coordinates;
+  id: string;
+  phone?: string;
+  schedule?: string;
 };
 
 export type ClinicListItem = {
-  id: string;
-  name: string;
-  rating: number;
-  reviews: number;
-  experience: number;
   address: string;
+  branches?: Branch[];
   city: string;
   coordinates: Coordinates;
-  specialties: string[];
-  image?: StaticImageData | string;
-  branches?: Branch[];
-
   // Детальные поля
   description?: string;
-  schedule?: string;
-  phone?: string;
   email?: string;
+  experience: number;
+  id: string;
+  image?: StaticImageData | string;
   images?: string[];
+  name: string;
+
+  phone?: string;
+  rating: number;
+  reviews: number;
+  schedule?: string;
+  specialties: string[];
 };
 
 export type ServiceItem = {
-  id: string;
+  category: string;
   clinicId: string;
   clinicName: string;
+  doctorIds: string[];
+  id: string;
+  image: string;
   name: string;
-  category: string;
   // Может отсутствовать — см. parsePrice в @/shared/lib/price
   price?: number;
-  image: string;
-  schedule: Schedule;
-  doctorIds: string[];
   rating: number;
   reviews: number;
+  schedule: Schedule;
 };

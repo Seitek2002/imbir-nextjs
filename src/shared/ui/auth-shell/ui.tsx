@@ -3,12 +3,12 @@ import { ReactNode } from "react";
 import Image from "next/image";
 
 type Props = {
+  // Содержимое правой карточки (форма конкретной страницы).
+  children: ReactNode;
+  footer: ReactNode;
   // Хедер и футер приходят пропсами (это виджеты — shared их не импортирует),
   // а их поведение всё равно различается на входе/регистрации.
   header: ReactNode;
-  footer: ReactNode;
-  // Содержимое правой карточки (форма конкретной страницы).
-  children: ReactNode;
 };
 
 // Общая оболочка страниц авторизации (вход/регистрация): декоративная картинка

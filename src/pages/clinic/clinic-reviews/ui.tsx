@@ -46,7 +46,7 @@ const Stars: FC<{ rating: number }> = ({ rating }) => (
 
 export const ClinicReviewsPage: FC = () => {
   const queryClient = useQueryClient();
-  const [replyingId, setReplyingId] = useState<number | null>(null);
+  const [replyingId, setReplyingId] = useState<null | number>(null);
   const [replyText, setReplyText] = useState("");
 
   const { data, isLoading } = useQuery({

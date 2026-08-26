@@ -8,7 +8,6 @@ import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets/icons";
 import { IconBtn } from "@/shared/ui";
 
 type Props = {
-  title: string;
   children: ReactNode;
   /**
    * editAction — рендерит стандартную кнопку карандаш/галочку.
@@ -16,7 +15,6 @@ type Props = {
    * Передавать что-то одно.
    */
   editAction?: "edit" | "save";
-  onEditToggle?: () => void;
   headerRight?: ReactNode;
   /**
    * onBack — что делает стрелка «назад» в мобильной шапке. По умолчанию
@@ -25,6 +23,8 @@ type Props = {
    * «Моих данных» — к списку разделов), а не уйти из кабинета.
    */
   onBack?: () => void;
+  onEditToggle?: () => void;
+  title: string;
 };
 
 export const DoctorPageLayout: FC<Props> = ({

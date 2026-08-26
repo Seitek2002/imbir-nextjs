@@ -21,11 +21,11 @@ import {
 } from "@/shared/ui";
 
 type D = {
+  email: string;
   firstName: string;
   lastName: string;
   patronymic: string;
   phone: string;
-  email: string;
   photo?: string;
 };
 

@@ -1,10 +1,10 @@
 export type Service = {
-  id: string;
-  name: string;
   category: string;
   clinic: string;
+  id: string;
+  image?: string;
+  name: string;
+  price: number;
   rating: number;
   reviews: number;
-  price: number;
-  image?: string;
 };

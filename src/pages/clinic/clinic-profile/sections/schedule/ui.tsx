@@ -20,7 +20,7 @@ export const ClinicSchedulePage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
   const [isEditing, setIsEditing] = useState(false);
 
-  const [days, setDays] = useState<Record<DayKey, DayState> | null>(null);
+  const [days, setDays] = useState<null | Record<DayKey, DayState>>(null);
   const [lunchStart, setLunchStart] = useState("");
   const [lunchEnd, setLunchEnd] = useState("");
   const [emergency24, setEmergency24] = useState(false);

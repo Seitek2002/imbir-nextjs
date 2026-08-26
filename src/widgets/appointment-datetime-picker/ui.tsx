@@ -11,15 +11,15 @@ import { IconBtn } from "@/shared/ui";
 // только онлайн. Раньше он предлагал офлайн у всех врачей подряд, хотя место
 // приёма заполнено у единиц, — прийти к остальным было физически некуда.
 type Props = {
-  selectedDate: Date | null;
-  onDateChange: (date: Date) => void;
-  selectedTime: string | null;
-  onTimeChange: (time: string) => void;
-  timeGroups?: TimeGroup[];
-  isLoadingSlots?: boolean;
+  className?: string;
   isDateDisabled?: (date: Date) => boolean;
   isDoctorSelected?: boolean;
-  className?: string;
+  isLoadingSlots?: boolean;
+  onDateChange: (date: Date) => void;
+  onTimeChange: (time: string) => void;
+  selectedDate: Date | null;
+  selectedTime: null | string;
+  timeGroups?: TimeGroup[];
 };
 
 const WEEK_DAYS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];

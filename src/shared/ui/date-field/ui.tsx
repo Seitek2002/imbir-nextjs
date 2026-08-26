@@ -8,22 +8,22 @@ import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/input";
 
 type Props = {
-  label?: string;
-  // Значение в формате ДД.ММ.ГГГГ — так его хранят анкеты регистрации, а на
-  // бэк оно уходит через toApiDate.
-  value: string;
-  onChange: (value: string) => void;
+  className?: string;
   error?: string;
   hint?: string;
-  // Границы для календаря, тоже в ДД.ММ.ГГГГ.
-  min?: string;
+  label?: string;
   max?: string;
   // Запретить будущие даты (для дат рождения). Отдельным флагом, а не max с
   // сегодняшним числом: new Date() в рендере дал бы разные значения на сервере
   // и на клиенте, и React ругнулся бы на несовпадение атрибутов.
   maxToday?: boolean;
+  // Границы для календаря, тоже в ДД.ММ.ГГГГ.
+  min?: string;
+  onChange: (value: string) => void;
   placeholder?: string;
-  className?: string;
+  // Значение в формате ДД.ММ.ГГГГ — так его хранят анкеты регистрации, а на
+  // бэк оно уходит через toApiDate.
+  value: string;
 };
 
 const CalendarIcon = () => (

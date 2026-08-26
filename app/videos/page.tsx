@@ -1,8 +1,8 @@
-import { fetchInterviews } from "@/entities/interview";
-
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 import { VideoCard } from "@/widgets/videos-swiper";
+
+import { fetchInterviews } from "@/entities/interview";
 
 import { ROUTES } from "@/shared/config";
 

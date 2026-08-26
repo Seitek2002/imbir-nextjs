@@ -17,8 +17,8 @@ const ContactCard = ({
   lines,
 }: {
   icon: string;
-  title: string;
   lines: string[];
+  title: string;
 }) => (
   <div className="bg-white rounded-3xl p-6 flex flex-col gap-3 border border-border">
     <div className="size-12 rounded-2xl bg-[#FEF3F0] flex items-center justify-center text-2xl">

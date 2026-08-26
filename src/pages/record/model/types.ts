@@ -1,39 +1,39 @@
 import { StaticImageData } from "next/image";
 
-type SelectionModalType = "clinic" | "doctor" | "workplace" | "service" | null;
+type SelectionModalType = "clinic" | "doctor" | "service" | "workplace" | null;
 type MobileStep = 1 | 2 | 3;
-type MobileSelectionStage = "clinic" | "doctor" | "workplace" | "service";
+type MobileSelectionStage = "clinic" | "doctor" | "service" | "workplace";
 
 type Clinic = {
+  address: string;
+  experience: number;
   id: string;
+  image: StaticImageData | string;
   name: string;
   rating: number;
   reviews: number;
-  experience: number;
-  address: string;
-  image: StaticImageData | string;
 };
 
 type Workplace = {
+  clinicAddress?: string;
   clinicId: string;
   clinicName: string;
-  clinicAddress?: string;
 };
 
 type Doctor = {
-  id: string;
   clinicId: string;
-  workplaces: Workplace[];
+  experience: number;
+  id: string;
+  image: StaticImageData | string;
   name: string;
-  specialty: string;
   rating: number;
   reviews: number;
-  experience: number;
-  image: StaticImageData | string;
+  specialty: string;
+  workplaces: Workplace[];
 };
 
 type Service = {
-  id: string;
+  category: string;
   clinicId: string;
   // Название клиники берём напрямую из ответа API (см. use-record-form.ts),
   // а не через clinicMap.get(clinicId) — тот строится из отдельного,
@@ -42,21 +42,21 @@ type Service = {
   // неотличимо друг от друга.
   clinicName?: string;
   doctorIds: string[];
-  title: string;
-  category: string;
+  id: string;
+  image: StaticImageData | string;
   price: number;
   rating: number;
   reviews: number;
-  image: StaticImageData | string;
+  title: string;
 };
 
 type SelectionItem = Clinic | Doctor | Service;
 
 type OptionalFormErrors = {
+  email?: string;
   firstName?: string;
   lastName?: string;
   phone?: string;
-  email?: string;
   submit?: string;
 };
 export type {

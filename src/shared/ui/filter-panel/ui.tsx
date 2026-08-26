@@ -4,9 +4,9 @@ import { FC } from "react";
 
 type Props = {
   label: string;
+  onSelect: (value: null | string) => void;
   options: string[];
-  selected: string | null;
-  onSelect: (value: string | null) => void;
+  selected: null | string;
 };
 
 export const FilterPanel: FC<Props> = ({

@@ -22,12 +22,12 @@ export const ROUTES = {
   PRIVACY: "/privacy",
 
   // Динамические страницы (передаем ID)
-  CLINIC_DETAILS: (id: string | number) => `/clinics/${id}`,
-  SPECIALIST_DETAILS: (id: string | number) => `/specialists/${id}`,
+  CLINIC_DETAILS: (id: number | string) => `/clinics/${id}`,
+  SPECIALIST_DETAILS: (id: number | string) => `/specialists/${id}`,
   BLOG_ARTICLE: (slug: string) => `/blog/${slug}`,
 
   // Страницы с Query-параметрами (Search)
-  SEARCH: (params?: { query?: string; category?: string }) => {
+  SEARCH: (params?: { category?: string; query?: string }) => {
     if (!params) return "/search";
 
     const searchParams = new URLSearchParams();
@@ -43,11 +43,11 @@ export const ROUTES = {
   // единственное место работы врача (иначе неоднозначно, пусть выберет сам
   // на странице записи).
   RECORD_FOR_DOCTOR: (
-    doctorId: string | number,
+    doctorId: number | string,
     options?: {
       clinicId?: string;
+      mode?: "offline" | "online";
       workplaces?: { clinicId: string }[];
-      mode?: "online" | "offline";
     },
   ) => {
     const params = new URLSearchParams({ doctor: String(doctorId) });

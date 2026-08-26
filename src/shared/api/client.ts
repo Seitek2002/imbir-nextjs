@@ -32,11 +32,11 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 // Track whether a refresh is already in-flight to prevent loops
 let isRefreshing = false;
 let pendingQueue: Array<{
-  resolve: (value: string) => void;
   reject: (reason: unknown) => void;
+  resolve: (value: string) => void;
 }> = [];
 
-const processPendingQueue = (error: unknown, token: string | null) => {
+const processPendingQueue = (error: unknown, token: null | string) => {
   pendingQueue.forEach(({ resolve, reject }) => {
     if (error) reject(error);
     else resolve(token!);

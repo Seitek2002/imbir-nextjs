@@ -4,9 +4,10 @@ import { Onest } from "next/font/google";
 import "@livekit/components-styles";
 
 import "@/app/globals.css";
+import { Providers } from "@/app/providers";
+
 import { getSiteSettings } from "@/shared/api";
 import { SiteSettingsProvider } from "@/shared/lib/siteSettingsContext";
-import { Providers } from "@/app/providers";
 
 const onest = Onest({
   variable: "--font-onest",

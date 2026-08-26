@@ -26,12 +26,12 @@ import { Step3Education } from "./Step3Education";
 import { Step4Certificates } from "./Step4Certificates";
 
 type Props = {
-  step: DoctorStep;
+  inviteClinic?: InviteClinic;
+  isLoading?: boolean;
+  onBack: () => void;
   onContinue: (fromStep: DoctorStep) => void;
   onSubmit: (data: DoctorFormData) => void;
-  onBack: () => void;
-  isLoading?: boolean;
-  inviteClinic?: InviteClinic;
+  step: DoctorStep;
 };
 
 export const DoctorRegistrationForm = ({
@@ -80,7 +80,7 @@ export const DoctorRegistrationForm = ({
   // о занятом email врач узнаёт после всех 4 шагов анкеты и подтверждения
   // кода (verify.isVerified проверяется НАРЯДУ с занятостью — это разные
   // гейты: verify подтверждает владение контактом, но не его свободность).
-  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<null | string>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   const verify = useVerifyContact({

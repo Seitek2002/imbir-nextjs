@@ -12,11 +12,11 @@ export const SelectionListItem = ({
   compact = false,
   onSelect,
 }: {
-  item: SelectionItem;
   clinicMap: Map<string, Clinic>;
-  selected: boolean;
   compact?: boolean;
+  item: SelectionItem;
   onSelect: () => void;
+  selected: boolean;
 }) => {
   const isClinic = "address" in item;
   const isDoctor = "specialty" in item;

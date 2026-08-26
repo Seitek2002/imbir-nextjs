@@ -86,7 +86,7 @@ export const reverseGeocode = async (
 // `near` поднимает наверх результаты вокруг выбранного города.
 export const searchAddress = async (
   query: string,
-  opts: { countryCode?: string; near?: GeoPoint; limit?: number } = {},
+  opts: { countryCode?: string; limit?: number; near?: GeoPoint } = {},
   signal?: AbortSignal,
 ): Promise<GeocodeResult[]> => {
   const trimmed = query.trim();

@@ -9,7 +9,7 @@ import { ClinicPageLayout } from "@/widgets/clinic/layout";
 import { clinicCabinetKeys, getClinicAppointments } from "@/shared/api";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
-type Tab = "all" | "upcoming" | "completed" | "cancelled";
+type Tab = "all" | "cancelled" | "completed" | "upcoming";
 
 const TABS = [
   { value: "all" as const, label: "Все" },

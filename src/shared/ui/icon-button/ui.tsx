@@ -5,12 +5,12 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/shared/lib/utils";
 
 type Variant = "default" | "outline" | "text";
-type Sizes = "xs" | "sm" | "md" | "lg";
+type Sizes = "lg" | "md" | "sm" | "xs";
 
 type Props = {
   loading?: boolean;
-  variant?: Variant;
   size?: Sizes;
+  variant?: Variant;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const IconBtn = forwardRef<HTMLButtonElement, Props>(

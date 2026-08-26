@@ -19,16 +19,16 @@ export const getDoctors = async (
 };
 
 export const getDoctorById = async (
-  id: string | number,
+  id: number | string,
 ): Promise<DoctorDetail> => {
   const { data } = await apiClient.get<DoctorDetail>(`/api/doctors/${id}/`);
   return data;
 };
 
 export const getDoctorAvailableSlots = async (
-  id: string | number,
+  id: number | string,
   date: string,
-  service_id?: string | number | null,
+  service_id?: null | number | string,
 ): Promise<AvailableSlotsResponse> => {
   const { data } = await apiClient.get<AvailableSlotsResponse>(
     `/api/doctors/${id}/available-slots/`,

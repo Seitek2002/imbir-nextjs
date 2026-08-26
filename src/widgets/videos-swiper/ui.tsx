@@ -9,21 +9,21 @@ import { cn } from "@/shared/lib/utils";
 import { VideoCard } from "./video/ui";
 
 type Video = {
-  id: string;
-  title: string;
   authorName: string;
   authorRole: string;
+  id: string;
   // У врача может не быть загруженного фото.
   thumbnail?: string;
+  title: string;
   youtubeUrl: string;
 };
 
 type Props = {
-  title?: string;
+  className?: string;
   description?: string;
+  title?: string;
   videos: Video[];
   viewAllHref?: string;
-  className?: string;
 };
 
 export const VideosSwiper: FC<Props> = ({

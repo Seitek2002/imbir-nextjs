@@ -7,9 +7,9 @@ import { BlogImageFallback } from "@/entities/blog";
 import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
+  alt: string;
   // У статьи с бэка картинки может не быть
   src?: string;
-  alt: string;
 };
 
 export const ArticleImage = ({ src, alt }: Props) => {

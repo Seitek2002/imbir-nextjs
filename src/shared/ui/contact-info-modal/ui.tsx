@@ -6,11 +6,11 @@ import { EmailIcon, PhoneIcon } from "@/shared/assets/icons";
 import { Modal } from "@/shared/ui/modal";
 
 type Props = {
+  email?: null | string;
   isOpen: boolean;
   onClose: () => void;
+  phone?: null | string;
   title?: string;
-  phone?: string | null;
-  email?: string | null;
 };
 
 export const ContactInfoModal: FC<Props> = ({

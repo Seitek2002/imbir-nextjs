@@ -12,10 +12,10 @@ import { ImageWithFallback } from "@/shared/ui";
 
 type RowProps = {
   href: string;
-  image: string | null;
-  title: string;
-  subtitle: string;
+  image: null | string;
   onNavigate: () => void;
+  subtitle: string;
+  title: string;
 };
 
 const Row: FC<RowProps> = ({ href, image, title, subtitle, onNavigate }) => (
@@ -52,8 +52,8 @@ const GroupLabel: FC<{ label: string }> = ({ label }) => (
 );
 
 export const SearchSuggestions: FC<{
-  query: string;
   onNavigate: () => void;
+  query: string;
 }> = ({ query, onNavigate }) => {
   const { data, isLoading, isError } = useQuery({
     queryKey: searchKeys.suggest(query),

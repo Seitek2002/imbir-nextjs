@@ -8,12 +8,12 @@ import { Option } from "./types";
 type TriggerProps = {
   isActive: boolean;
   isMulti: boolean;
-  value?: string | string[];
+  onClearAll: () => void;
+  onRemove: (val: string) => void;
+  onToggle: () => void;
   options: Option[];
   placeholder: string;
-  onToggle: () => void;
-  onRemove: (val: string) => void;
-  onClearAll: () => void;
+  value?: string | string[];
 };
 
 // Сколько чипов показываем в триггере, остальные сворачиваем в «+N».
@@ -22,7 +22,7 @@ type TriggerProps = {
 // выпадающее меню (absolute top-full) уезжало далеко вниз за пределы экрана.
 const MAX_VISIBLE_CHIPS = 2;
 
-const Chip: FC<{ text: string; onDelete: () => void }> = ({
+const Chip: FC<{ onDelete: () => void; text: string }> = ({
   text,
   onDelete,
 }) => (

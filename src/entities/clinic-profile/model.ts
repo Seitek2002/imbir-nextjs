@@ -1,20 +1,20 @@
 export type WorkDaySchedule = {
+  close: string;
   enabled: boolean;
   open: string;
-  close: string;
 };
 
 export type ClinicScheduleData = {
-  mon: WorkDaySchedule;
-  tue: WorkDaySchedule;
-  wed: WorkDaySchedule;
-  thu: WorkDaySchedule;
+  emergency24: boolean;
   fri: WorkDaySchedule;
+  lunchEnd: string;
+  lunchStart: string;
+  mon: WorkDaySchedule;
   sat: WorkDaySchedule;
   sun: WorkDaySchedule;
-  lunchStart: string;
-  lunchEnd: string;
-  emergency24: boolean;
+  thu: WorkDaySchedule;
+  tue: WorkDaySchedule;
+  wed: WorkDaySchedule;
 };
 
 export type ClinicDocument = {
@@ -23,45 +23,45 @@ export type ClinicDocument = {
 };
 
 export type ClinicProfile = {
-  id: string;
+  additionalServices: string[];
 
-  // Основная информация
-  name: string;
-  logo?: string;
-  type: string;
-  description: string;
-  photos: string[];
-
+  city: string;
   // Локация и контакты
   country: string;
-  city: string;
-  fullAddress: string;
-  phone: string;
-  email: string;
-  website: string;
-  latitude: string;
-  longitude: string;
-
-  // Расписание
-  workSchedule: ClinicScheduleData;
-
-  // Юридическая информация
-  legalName: string;
-  registrationNumber: string;
-  licenseNumber: string;
-  licenseDate: string;
-  licenseAuthority: string;
+  description: string;
   documents: ClinicDocument[];
-
-  // Специализация и услуги
-  mainDirections: string[];
-  narrowDirections: string[];
-  additionalServices: string[];
+  email: string;
 
   // Оборудование и условия
   equipment: string[];
+  fullAddress: string;
+  id: string;
+  latitude: string;
+  // Юридическая информация
+  legalName: string;
+  licenseAuthority: string;
+  licenseDate: string;
+  licenseNumber: string;
+
+  logo?: string;
+
+  longitude: string;
+  // Специализация и услуги
+  mainDirections: string[];
+  // Основная информация
+  name: string;
+  narrowDirections: string[];
   patientConditions: string[];
   paymentMethods: string[];
 
+  phone: string;
+  photos: string[];
   rating?: number;
+
+  registrationNumber: string;
+  type: string;
+  website: string;
+
+  // Расписание
+  workSchedule: ClinicScheduleData;
 };

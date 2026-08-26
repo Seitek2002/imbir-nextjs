@@ -14,7 +14,7 @@ export const getClinics = async (
 };
 
 export const getClinicById = async (
-  id: string | number,
+  id: number | string,
 ): Promise<ClinicDetail> => {
   const { data } = await apiClient.get<ClinicDetail>(`/api/clinics/${id}/`);
   return data;

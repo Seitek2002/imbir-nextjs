@@ -92,10 +92,10 @@ const AddIcon: FC<{ className?: string }> = ({ className }) => (
 );
 
 type AddServiceModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onAdd: (service: DoctorServiceBody) => void;
   isLoading?: boolean;
+  isOpen: boolean;
+  onAdd: (service: DoctorServiceBody) => void;
+  onClose: () => void;
 };
 
 // Боттом-шит добавления услуги (общий Modal: снизу на телефоне, по центру на

@@ -1,6 +1,6 @@
 ﻿type Props = {
   count?: number;
-  variant?: "vertical" | "horizontal";
+  variant?: "horizontal" | "vertical";
 };
 
 const ClinicCardSkeletonVertical = () => (

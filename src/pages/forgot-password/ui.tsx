@@ -26,7 +26,7 @@ import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { Button, IconBtn, Input } from "@/shared/ui";
 
-type Step = "email" | "code" | "new_password" | "success";
+type Step = "code" | "email" | "new_password" | "success";
 
 // Бэк требует код ровно из 6 цифр (minLength/maxLength: 6 в
 // PasswordResetVerifyRequest/PasswordResetConfirmRequest).

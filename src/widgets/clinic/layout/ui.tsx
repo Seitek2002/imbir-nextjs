@@ -9,16 +9,16 @@ import { cn } from "@/shared/lib/utils";
 import { IconBtn } from "@/shared/ui";
 
 type Props = {
-  // Заголовок страницы в мобильной шапке.
-  title: string;
+  children: ReactNode;
   // Больше не используется: крупный desktop-h1 («Мой профиль») рендерит
   // постоянный ClinicPageLayoutSkeleton в app/clinic-profile/layout.tsx.
   desktopTitle?: string;
-  // Правый слот мобильной шапки (кнопки «Добавить»/«Пригласить» и т.п.).
-  mobileAction?: ReactNode;
   // Доп-классы для контентной обёртки (напр. "flex flex-col gap-6").
   mainClassName?: string;
-  children: ReactNode;
+  // Правый слот мобильной шапки (кнопки «Добавить»/«Пригласить» и т.п.).
+  mobileAction?: ReactNode;
+  // Заголовок страницы в мобильной шапке.
+  title: string;
 };
 
 // Пер-страничная часть кабинета клиники: мобильная шапка + контент.

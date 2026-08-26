@@ -30,7 +30,8 @@ export default async function Page({
 
   const params = await searchParams;
   const activeQuery = typeof params.q === "string" ? params.q : "";
-  const currentSpec = typeof params.doc_spec === "string" ? params.doc_spec : null;
+  const currentSpec =
+    typeof params.doc_spec === "string" ? params.doc_spec : null;
   const currentRating =
     typeof params.doc_rating === "string" ? params.doc_rating : null;
   const currentExp = typeof params.doc_exp === "string" ? params.doc_exp : null;
@@ -44,10 +45,11 @@ export default async function Page({
     ? currentExp.split("-").map(Number)
     : [undefined, undefined];
 
-  const filters: Omit<DoctorFilters, "page" | "page_size"> = {
+  const filters: Omit<DoctorFilters, "page_size" | "page"> = {
     city,
     search: activeQuery || undefined,
-    specialization: selectedSpecs.length > 0 ? selectedSpecs.join(",") : undefined,
+    specialization:
+      selectedSpecs.length > 0 ? selectedSpecs.join(",") : undefined,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)

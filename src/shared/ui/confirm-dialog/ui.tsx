@@ -7,24 +7,24 @@ import { useMounted } from "@/shared/lib/useMounted";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  icon?: ReactNode;
-  title: string;
-  description?: string;
-  confirmLabel?: string;
   cancelLabel?: string;
-  // "danger" — для необратимых удалений (красный акцент вместо оранжевого).
-  variant?: "default" | "danger";
-  // Пока ждём ответ на onConfirm — гасим модалку серой вуалью со спиннером и
-  // блокируем закрытие (оверлей, Escape, кнопки), чтобы не словить повторный
-  // сабмит или закрытие посреди запроса.
-  isLoading?: boolean;
   // true (по умолчанию, как сейчас у всех вызовов) — модалка закрывается сама
   // сразу после клика на confirm. Для async-подтверждения с isLoading родитель
   // сам решает, когда закрыть (меняя isOpen после ответа) — передайте false.
   closeOnConfirm?: boolean;
+  confirmLabel?: string;
+  description?: string;
+  icon?: ReactNode;
+  // Пока ждём ответ на onConfirm — гасим модалку серой вуалью со спиннером и
+  // блокируем закрытие (оверлей, Escape, кнопки), чтобы не словить повторный
+  // сабмит или закрытие посреди запроса.
+  isLoading?: boolean;
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  // "danger" — для необратимых удалений (красный акцент вместо оранжевого).
+  variant?: "danger" | "default";
 };
 
 const DURATION = 200;

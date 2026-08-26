@@ -25,13 +25,13 @@ export type PasswordResetRequest = {
 };
 
 export type PasswordResetVerifyRequest = {
-  email: string;
   code: string;
+  email: string;
 };
 
 export type PasswordResetConfirmRequest = {
-  email: string;
   code: string;
+  email: string;
   password: string;
 };
 
@@ -44,15 +44,15 @@ export type EmailCheckRequest = {
 
 export type EmailCheckResponse = {
   data: {
-    email: string;
     available: boolean;
+    email: string;
   };
 };
 
 export type RegisterClientRequest = {
+  email: string;
   first_name: string;
   last_name: string;
-  email: string;
   password: string;
   phone: string;
 };
@@ -71,13 +71,13 @@ export type OtpDetailResponse = {
 export type PhoneRegisterRequestSuccess = OtpDetailResponse;
 
 export type PhoneRegisterConfirmRequest = {
-  phone: string;
   code: string;
+  first_name: string;
+  last_name: string;
   // Обязателен: схема PhoneRegisterConfirmRequest требует пароль наравне с
   // именем и фамилией (раньше поле было опциональным).
   password: string;
-  first_name: string;
-  last_name: string;
+  phone: string;
 };
 
 // ── Регистрация пациента по email через код ──────────────────────────────────
@@ -89,11 +89,11 @@ export type EmailRegisterRequestRequest = {
 };
 
 export type EmailRegisterConfirmRequest = {
-  email: string;
   code: string;
-  password: string;
+  email: string;
   first_name: string;
   last_name: string;
+  password: string;
 };
 
 // ── Подтверждение контакта для врача/клиники ─────────────────────────────────
@@ -102,13 +102,13 @@ export type EmailRegisterConfirmRequest = {
 // ОДИН канал — email ИЛИ телефон, тот, что указан в анкете.
 
 export type VerifyEmailConfirmRequest = {
-  email: string;
   code: string;
+  email: string;
 };
 
 export type VerifyPhoneConfirmRequest = {
-  phone: string;
   code: string;
+  phone: string;
 };
 
 // ── Вход по коду, без пароля ─────────────────────────────────────────────────
@@ -120,25 +120,25 @@ export type LoginOtpRequestRequest = {
 };
 
 export type LoginOtpVerifyRequest = {
+  code: string;
   email?: string;
   phone?: string;
-  code: string;
 };
 
 export type DaySchedule = {
-  from: string | null;
-  to: string | null;
   enabled: boolean;
+  from: null | string;
+  to: null | string;
 };
 
 export type WeekSchedule = {
-  monday: DaySchedule;
-  tuesday: DaySchedule;
-  wednesday: DaySchedule;
-  thursday: DaySchedule;
   friday: DaySchedule;
+  monday: DaySchedule;
   saturday: DaySchedule;
   sunday: DaySchedule;
+  thursday: DaySchedule;
+  tuesday: DaySchedule;
+  wednesday: DaySchedule;
 };
 
 export type LunchBreak = {
@@ -152,44 +152,44 @@ export type LunchBreak = {
 // logo/photos/documents у RegisterClinicRequest). Реальная загрузка идёт
 // отдельным updateDoctorProfile({photo}) сразу после регистрации.
 export type RegisterDoctorRequest = {
-  invite_clinic_id?: number;
   invite_branch_id?: number;
+  invite_clinic_id?: number;
   password: string;
   step1: {
-    full_name: string;
-    gender: "male" | "female";
     birth_date: string;
     city: string;
+    email: string;
+    full_name: string;
+    gender: "female" | "male";
     languages: string[];
     phone: string;
-    email: string;
   };
   step2: {
-    country: string;
-    city: string;
     address: string;
-    phone: string;
+    city: string;
+    country: string;
     email: string;
-    website?: string;
     location?: { lat: number; lng: number };
+    phone: string;
+    website?: string;
   };
   step3: {
-    schedule: WeekSchedule;
-    lunch_break: LunchBreak;
     emergency_24_7: boolean;
+    lunch_break: LunchBreak;
+    schedule: WeekSchedule;
   };
   step4: {
-    legal_name: string;
-    reg_number: string;
-    license_number: string;
-    license_date?: string;
-    license_authority: string;
     documents?: File[];
+    legal_name: string;
+    license_authority: string;
+    license_date?: string;
+    license_number: string;
+    reg_number: string;
   };
   step5: {
-    primary_specialization_ids: number[];
-    narrow_specialization_ids: number[];
     additional_services?: string;
+    narrow_specialization_ids: number[];
+    primary_specialization_ids: number[];
   };
   step6: {
     equipment: string[];
@@ -197,34 +197,34 @@ export type RegisterDoctorRequest = {
     payment_methods: string[];
   };
   step7: {
-    agree_terms: boolean;
-    agree_privacy: boolean;
     agree_data_processing: boolean;
+    agree_privacy: boolean;
     agree_publishing: boolean;
+    agree_terms: boolean;
   };
 };
 
 export type DoctorInviteValidationClinic = {
-  id: number;
-  name: string;
-  logo: string | null;
   city: string;
-  rating: string | number;
-  reviews_count: number;
   doctors_count: number;
+  id: number;
+  logo: null | string;
+  name: string;
+  rating: number | string;
+  reviews_count: number;
 };
 
 export type DoctorInviteValidationBranch = {
+  address: string;
   id: number;
   name: string;
-  address: string;
 };
 
 export type DoctorInviteValidationResponse = {
   data: {
-    valid: boolean;
-    clinic: DoctorInviteValidationClinic | null;
     branch: DoctorInviteValidationBranch | null;
+    clinic: DoctorInviteValidationClinic | null;
+    valid: boolean;
   };
 };
 
@@ -238,38 +238,38 @@ export type DoctorInviteValidationResponse = {
 export type RegisterClinicRequest = {
   password: string;
   step1: {
+    description: string;
     name: string;
     type: string;
-    description: string;
   };
   step2: {
-    country: string;
-    city: string;
     address: string;
-    phone: string;
+    city: string;
+    country: string;
     email: string;
-    website?: string;
     location?: { lat: number; lng: number };
+    phone: string;
+    website?: string;
   };
   step3: {
-    schedule: WeekSchedule;
-    lunch_break: LunchBreak;
     emergency_24_7: boolean;
+    lunch_break: LunchBreak;
+    schedule: WeekSchedule;
   };
   step4: {
     legal_name: string;
-    reg_number: string;
-    license_number: string;
-    license_date: string;
     license_authority: string;
+    license_date: string;
+    license_number: string;
+    reg_number: string;
   };
   // Ключи без суффикса _ids — так задокументировал бэкенд-разработчик
   // (CLINIC_REGISTRATION.md). Это ДРУГАЯ форма, чем у UpdateClinicProfileBody
   // (там primary_specialization_ids/narrow_specialization_ids) — не путать.
   step5: {
-    primary_specializations: number[];
-    narrow_specializations: number[];
     additional_services?: string;
+    narrow_specializations: number[];
+    primary_specializations: number[];
   };
   step6: {
     equipment: string[];
@@ -277,9 +277,9 @@ export type RegisterClinicRequest = {
     payment_methods: string[];
   };
   step7: {
-    agree_terms: boolean;
-    agree_privacy: boolean;
     agree_data_processing: boolean;
+    agree_privacy: boolean;
     agree_publishing: boolean;
+    agree_terms: boolean;
   };
 };

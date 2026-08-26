@@ -64,19 +64,19 @@ export const useRecordForm = () => {
   const [mobileSelectionStage, setMobileSelectionStage] =
     useState<MobileSelectionStage>("clinic");
 
-  const [selectedClinicId, setSelectedClinicId] = useState<string | null>(null);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+  const [selectedClinicId, setSelectedClinicId] = useState<null | string>(null);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<null | string>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<null | string>(
     null,
   );
   // Врач пришёл по ссылке без явной клиники (см. эффект ниже) — пока список
   // врачей не загрузился, не знаем, сколько у него мест работы.
   const [pendingWorkplaceDoctorId, setPendingWorkplaceDoctorId] = useState<
-    string | null
+    null | string
   >(null);
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<null | string>(null);
 
   const [activeModal, setActiveModal] = useState<SelectionModalType>(null);
   const [searchQuery, setSearchQuery] = useState("");

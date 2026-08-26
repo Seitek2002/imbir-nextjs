@@ -15,14 +15,14 @@ import type { SiteSettings } from "@/shared/api";
 //
 // null означает «настройки не получены» (бэк недоступен или поле пустое) —
 // потребитель обязан иметь свой фолбэк.
-const SiteSettingsContext = createContext<SiteSettings | null>(null);
+const SiteSettingsContext = createContext<null | SiteSettings>(null);
 
 export const SiteSettingsProvider = ({
   value,
   children,
 }: {
-  value: SiteSettings | null;
   children: ReactNode;
+  value: null | SiteSettings;
 }) => <SiteSettingsContext value={value}>{children}</SiteSettingsContext>;
 
 export const useSiteSettings = () => useContext(SiteSettingsContext);

@@ -74,11 +74,11 @@ const StarPill: FC<{ rating: number }> = ({ rating }) => (
 );
 
 type ReplyModalProps = {
+  initialText?: string;
   isOpen: boolean;
   onClose: () => void;
-  reviewAuthor: string;
-  initialText?: string;
   onSubmit: (text: string) => void;
+  reviewAuthor: string;
 };
 
 const ReplyModal: FC<ReplyModalProps> = ({
@@ -288,9 +288,9 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
 };
 
 type ReviewCardProps = {
-  review: DoctorReview;
-  onReply: (r: DoctorReview) => void;
   onComplain: (r: DoctorReview) => void;
+  onReply: (r: DoctorReview) => void;
+  review: DoctorReview;
 };
 
 // Заглушка повторяет ReviewCard: аватар + имя/дата, плашка рейтинга,

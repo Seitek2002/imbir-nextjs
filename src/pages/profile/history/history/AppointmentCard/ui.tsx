@@ -25,8 +25,8 @@ import type { Appointment } from "./model";
 type Props = {
   appointment: Appointment;
   onCancel?: (id: string) => void;
-  onReview?: (id: string) => void;
   onReschedule?: (id: string) => void;
+  onReview?: (id: string) => void;
 };
 
 const CalendarEditIcon: FC<{ className?: string }> = ({ className }) => (
@@ -71,7 +71,7 @@ const CloseIcon: FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-const Price: FC<{ value?: number; className?: string }> = ({
+const Price: FC<{ className?: string; value?: number }> = ({
   value,
   className,
 }) =>
@@ -142,7 +142,7 @@ export const AppointmentCard: FC<Props> = ({
     </p>
   );
 
-  const ratingBadge = (size: "sm" | "lg") => (
+  const ratingBadge = (size: "lg" | "sm") => (
     <div
       className={
         size === "lg"

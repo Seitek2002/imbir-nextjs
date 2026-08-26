@@ -3,122 +3,122 @@ import { DoctorDetail } from "../doctors/types";
 
 export type LegalInfo = {
   company_name: string;
-  reg_number: string;
-  license_number: string;
-  license_date: string;
-  license_authority: string;
   documents: string[];
+  license_authority: string;
+  license_date: string;
+  license_number: string;
+  reg_number: string;
 };
 
 export type DoctorPrivateProfile = DoctorDetail & {
-  legal: LegalInfo;
-  is_published: boolean;
-  profile_views: number;
   appointments_total: number;
+  is_published: boolean;
+  legal: LegalInfo;
+  profile_views: number;
 };
 
 // GET/POST /api/doctor/documents/ (схема DoctorDocumentOut).
 export type DoctorDocument = {
   id: number;
-  url: string;
   uploaded_at: string;
+  url: string;
 };
 
 export type DoctorSchedule = {
-  schedule: WeekSchedule;
-  lunch_break: LunchBreak;
   emergency_24_7: boolean;
+  lunch_break: LunchBreak;
+  schedule: WeekSchedule;
 };
 
 export type DoctorAppointmentPatient = {
-  id: number;
   full_name: string;
+  id: number;
   phone: string;
 };
 
 export type DoctorAppointment = {
+  date: string;
   id: number;
+  notes?: string;
   patient: DoctorAppointmentPatient;
   service: { id: number; name: string; price: number } | null;
-  date: string;
-  time: string;
   status:
-    | "pending"
-    | "upcoming"
-    | "confirmed"
-    | "scheduled"
+    | "cancelled"
     | "completed"
-    | "cancelled";
-  notes?: string;
+    | "confirmed"
+    | "pending"
+    | "scheduled"
+    | "upcoming";
+  time: string;
 };
 
 export type DoctorPatient = {
-  id: number;
+  avatar: null | string;
   full_name: string;
-  phone: string;
-  avatar: string | null;
+  id: number;
   last_visit: string;
+  phone: string;
   total_visits: number;
 };
 
 // Реальный ответ GET /api/doctor/stats/ (проверен живым запросом) — плоский,
 // записи приходят с разбивкой по статусам.
 export type DoctorStats = {
+  appointments: {
+    cancelled: number;
+    completed: number;
+    confirmed: number;
+    pending: number;
+    total: number;
+  };
+  completion_rate: number;
+  patients_count: number;
   profile_views: number;
   rating: number;
   reviews_count: number;
-  appointments: {
-    total: number;
-    pending: number;
-    confirmed: number;
-    completed: number;
-    cancelled: number;
-  };
-  patients_count: number;
-  completion_rate: number;
 };
 
 // Итоги приёма (GET/PATCH /api/doctor/appointments/{id}/summary/).
 export type DoctorAppointmentSummary = {
   diagnosis: string;
-  recommendations: string;
   doctor_notes: string;
+  recommendations: string;
 };
 
 export type DoctorAppointmentFilters = {
-  status?: "upcoming" | "completed" | "cancelled" | "all";
   date_from?: string;
   date_to?: string;
   page?: number;
   page_size?: number;
+  status?: "all" | "cancelled" | "completed" | "upcoming";
 };
 
 export type DoctorPatientFilters = {
-  search?: string;
   page?: number;
   page_size?: number;
+  search?: string;
 };
 
 // Соответствует схеме DoctorServiceRead / DoctorServiceWriteRequest.
 export type DoctorServiceItem = {
-  id: number;
-  name: string;
   category: string;
-  description?: string;
-  price: string | null;
-  duration?: number | null;
-  photo?: string | null;
-  is_active?: boolean;
   created_at?: string;
+  description?: string;
+  duration?: null | number;
+  id: number;
+  is_active?: boolean;
+  name: string;
+  photo?: null | string;
+  price: null | string;
 };
 
 export type DoctorServiceBody = {
-  name: string;
   category: string; // обязательное поле на бэке
   description?: string;
-  price?: string;
   duration?: number;
-  // File уходит multipart'ом, строка — URL уже загруженной картинки.
-  photo?: File | string | null;
   is_active?: boolean;
+  name: string;
+  // File уходит multipart'ом, строка — URL уже загруженной картинки.
+  photo?: File | null | string;
+  price?: string;
 };

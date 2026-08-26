@@ -86,7 +86,7 @@ export const DoctorBasicInfoSection: FC = () => {
   };
 
   // "ДД.ММ.ГГГГ" → "ГГГГ-ММ-ДД"; уже-ISO значение оставляем как есть
-  const toApiDate = (v: string): string | null => {
+  const toApiDate = (v: string): null | string => {
     const t = v.trim();
     if (!t) return null;
     const m = t.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);

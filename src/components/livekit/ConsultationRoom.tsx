@@ -31,7 +31,7 @@ export default function ConsultationRoom({
   const router = useRouter();
   const { data, error, isLoading, retry } = useLiveKitToken(consultationId);
   const [choices, setChoices] = useState<LocalUserChoices | null>(null);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState<null | string>(null);
 
   if (isLoading) {
     return (

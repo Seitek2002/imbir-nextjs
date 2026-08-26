@@ -26,43 +26,43 @@ export const getDoctorProfile = async (): Promise<DoctorPrivateProfile> => {
 // Заданы явно, т.к. DoctorPrivateProfile унаследован от публичного типа и
 // рассинхронизирован с реальным ответом бэка (first_name/last_name, gender...).
 export type UpdateDoctorProfileBody = {
-  first_name?: string;
-  last_name?: string;
-  phone?: string;
-  gender?: string;
-  birth_date?: string | null;
-  city?: string;
-  languages?: string[];
-  photo?: File | string | null;
-  country?: string;
-  address?: string;
-  website?: string;
   about?: string;
-  experience_years?: number;
-  legal_name?: string;
-  reg_number?: string;
-  license_number?: string;
-  license_date?: string | null;
-  license_authority?: string;
-  // Бэк принимает на запись только id (проверено живым запросом: массив
-  // названий строк молча очищает специализации врача, без ошибки).
-  primary_specialization_ids?: number[];
-  narrow_specialization_ids?: number[];
   additional_services?: string;
-  equipment?: string[];
-  patient_conditions?: string[];
-  payment_methods?: string[];
-  skills?: string[];
+  address?: string;
+  birth_date?: null | string;
+  city?: string;
+  // Строка, а не число: бэк отдаёт и принимает decimal как "1500.00".
+  consultation_price?: string;
+  country?: string;
   education?: unknown[];
-  work_experience?: unknown[];
+  equipment?: string[];
+  experience_years?: number;
+  first_name?: string;
+  gender?: string;
   // Схема DoctorOwnProfileRequest принимает эти три поля на запись (проверено
   // живым PUT). Без них врач, зарегистрировавшийся сам, не мог ни включить
   // онлайн-приём, ни опубликоваться — оставался невидимым в каталоге до
   // правки в админке.
   is_online_available?: boolean;
-  // Строка, а не число: бэк отдаёт и принимает decimal как "1500.00".
-  consultation_price?: string;
   is_published?: boolean;
+  languages?: string[];
+  last_name?: string;
+  legal_name?: string;
+  license_authority?: string;
+  license_date?: null | string;
+  license_number?: string;
+  narrow_specialization_ids?: number[];
+  patient_conditions?: string[];
+  payment_methods?: string[];
+  phone?: string;
+  photo?: File | null | string;
+  // Бэк принимает на запись только id (проверено живым запросом: массив
+  // названий строк молча очищает специализации врача, без ошибки).
+  primary_specialization_ids?: number[];
+  reg_number?: string;
+  skills?: string[];
+  website?: string;
+  work_experience?: unknown[];
 };
 
 // Массив чисел в multipart нельзя слать JSON-строкой: DRF ждёт по одному
@@ -86,7 +86,7 @@ const appendMultipart = (form: FormData, key: string, value: unknown) => {
 // упаковки полей в multipart — в appendMultipart выше.
 const sendMaybeMultipart = async <T>(
   path: string,
-  method: "POST" | "PUT" | "PATCH",
+  method: "PATCH" | "POST" | "PUT",
   body: Record<string, unknown>,
 ): Promise<T> => {
   const hasFile = Object.values(body).some((v) => v instanceof File);
@@ -218,7 +218,7 @@ export const deleteDoctorService = async (id: number): Promise<void> => {
 
 export const getDoctorDocuments = async (): Promise<DoctorDocument[]> => {
   const { data } = await apiClient.get<
-    DoctorDocument[] | { data: DoctorDocument[] }
+    { data: DoctorDocument[] } | DoctorDocument[]
   >("/api/doctor/documents/");
   // Бэк по одним эндпоинтам отдаёт массив, по другим — { data: [...] }.
   return Array.isArray(data) ? data : (data.data ?? []);

@@ -55,22 +55,22 @@ const findConsultationId = (
 };
 
 type UseChatRoomResult = {
-  messages: ChatThreadMessage[];
   connectionState: ConnectionState;
+  error: null | string;
   isLoadingHistory: boolean;
-  error: string | null;
+  messages: ChatThreadMessage[];
   sendMessage: (content: string) => void;
-  // Имена участников, которые сейчас печатают (своё событие сервер не шлёт).
-  typingNames: string[];
   // Сырой сигнал в сокет; дебаунс — на стороне композера.
   sendTyping: (isTyping: boolean) => void;
+  // Имена участников, которые сейчас печатают (своё событие сервер не шлёт).
+  typingNames: string[];
 };
 
 // Drives a single user-to-user room: loads history over HTTP, then keeps a live
 // WebSocket open for incoming messages. Reconnects whenever the room changes.
 export const useChatRoom = (
-  roomId: number | null,
-  currentUserId: number | null,
+  roomId: null | number,
+  currentUserId: null | number,
 ): UseChatRoomResult => {
   // The component is keyed by room id, so a fresh instance starts each room
   // already "connecting"/"loading" — no synchronous resets needed in the effect.
@@ -78,10 +78,10 @@ export const useChatRoom = (
   const [connectionState, setConnectionState] =
     useState<ConnectionState>("connecting");
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<null | string>(null);
   // user_id → имя печатающего участника.
   const [typingUsers, setTypingUsers] = useState<Record<number, string>>({});
-  const socketRef = useRef<WebSocket | null>(null);
+  const socketRef = useRef<null | WebSocket>(null);
   const consultationsRef = useRef<ChatConsultation[]>([]);
   const queryClient = useQueryClient();
   // Таймеры авто-снятия статуса по каждому user_id (на случай потери "false").

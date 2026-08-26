@@ -18,7 +18,7 @@ export const MY_DATA_TABS = [
 
 export type MyDataTab = (typeof MY_DATA_TABS)[number]["id"];
 
-export const isMyDataTab = (value: string | null): value is MyDataTab =>
+export const isMyDataTab = (value: null | string): value is MyDataTab =>
   MY_DATA_TABS.some((tab) => tab.id === value);
 
 type ContextValue = {
@@ -44,8 +44,8 @@ export const useMyDataTabs = () => {
 // состоянием, а в адресной строке остаётся ?tab=… через history.replaceState:
 // ссылку по-прежнему можно скинуть или обновить, но без навигации Next.
 export const MyDataTabsProvider: FC<{
-  initialTab: MyDataTab | null;
   children: ReactNode;
+  initialTab: MyDataTab | null;
 }> = ({ initialTab, children }) => {
   const [active, setActiveState] = useState<MyDataTab | null>(initialTab);
 

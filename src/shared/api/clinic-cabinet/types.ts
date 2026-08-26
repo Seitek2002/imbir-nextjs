@@ -2,81 +2,81 @@ import type { SpecializationItem } from "../references/types";
 import type { ServiceListItem } from "../services/types";
 
 export type ClinicProfileBranch = {
-  id: number;
   address: string;
+  id: number;
 };
 
 export type ClinicDocument = {
   id: number;
-  url: string;
   uploaded_at: string;
+  url: string;
 };
 
 export type ClinicPhoto = {
   id: number;
-  url: string;
   uploaded_at: string;
+  url: string;
 };
 
 // Соответствует реальному ответу GET/PUT /api/clinic/profile/ — плоский
 // объект, ОТЛИЧАЕТСЯ от публичной карточки клиники (ClinicDetail), у которой
 // другие имена полей (about вместо description, нет id и т.д.). Не путать!
 export type ClinicPrivateProfile = {
-  id?: number;
-  name: string;
-  clinic_type: string;
-  description: string;
-  logo: string | null;
-  email: string;
-  phone: string;
-  website: string;
-  country: string;
-  city: string;
+  additional_services: string;
   address: string;
-  latitude: string | null;
-  longitude: string | null;
-  schedule: Record<string, { from: string; to: string; enabled: boolean }>;
-  lunch_break: { from: string; to: string } | null;
+  branches: ClinicProfileBranch[];
+  city: string;
+  clinic_type: string;
+  country: string;
+  description: string;
+  doctors_count: number;
+  email: string;
   emergency_24_7: boolean;
+  equipment: string[];
+  experience_years: number;
+  id?: number;
+  is_published: boolean;
+  latitude: null | string;
   legal_name: string;
-  reg_number: string;
-  license_number: string;
-  license_date: string | null;
   license_authority: string;
+  license_date: null | string;
+  license_number: string;
+  logo: null | string;
+  longitude: null | string;
+  lunch_break: { from: string; to: string } | null;
+  name: string;
+  narrow_specializations: SpecializationItem[];
+  patient_conditions: string[];
+  payment_methods: string[];
+  phone: string;
   // Объекты {id, name, photo} на чтение; на запись PUT принимает отдельные
   // поля primary_specialization_ids/narrow_specialization_ids (числа) — см.
   // UpdateClinicProfileBody.
   primary_specializations: SpecializationItem[];
-  narrow_specializations: SpecializationItem[];
-  additional_services: string;
-  equipment: string[];
-  patient_conditions: string[];
-  payment_methods: string[];
-  experience_years: number;
-  rating: string;
-  reviews_count: number;
-  doctors_count: number;
-  is_published: boolean;
   profile_views: number;
-  branches: ClinicProfileBranch[];
+  rating: string;
+  reg_number: string;
+  reviews_count: number;
+  schedule: Record<string, { enabled: boolean; from: string; to: string }>;
+  website: string;
 };
 
 export type ClinicDoctorItem = {
-  id: number;
-  full_name: string;
-  specialty: string;
-  photo: string | null;
-  rating: number;
   appointments_total: number;
+  full_name: string;
+  id: number;
   is_active: boolean;
+  photo: null | string;
+  rating: number;
+  specialty: string;
 };
 
 // Филиал, где проводится процедура. На запись — branch_id, на чтение бэк
 // отдаёт объект с готовыми названием и адресом.
 export type ClinicServiceBranch = {
+  address: string;
   id: number;
   name: string;
-  address: string;
 };
 
 // График процедуры: по дню недели, ключи английские (monday…sunday).
@@ -93,98 +93,98 @@ export type ClinicLunchBreak = { from: string; to: string };
 // новые). Допускаются только врачи, привязанные к клинике через
 // DoctorClinicLink — иначе бэк вернёт 400.
 export type ClinicServiceBody = {
-  name: string;
+  branch_id?: null | number;
   category: string;
   description?: string;
-  price?: string | null;
-  duration?: number | null;
-  is_active?: boolean;
   doctor_ids?: number[];
+  duration?: null | number;
+  is_active?: boolean;
+  lunch_break?: ClinicLunchBreak | null;
+  name: string;
   // Появились после доработки бэка: фото процедуры, филиал проведения и
   // собственный график. photo принимает и File (multipart), и URL-строку.
-  photo?: File | string | null;
-  branch_id?: number | null;
-  schedule?: Record<string, ClinicScheduleDay> | null;
-  lunch_break?: ClinicLunchBreak | null;
+  photo?: File | null | string;
+  price?: null | string;
+  schedule?: null | Record<string, ClinicScheduleDay>;
 };
 
 // Врач в ответе услуги (POST/PUT/GET возвращают услугу с doctors[]).
 export type ClinicServiceDoctor = {
-  id: number;
   full_name: string;
+  id: number;
 };
 
 // Услуга в кабинете клиники = публичная услуга + назначенные врачи.
 // doctors приходит и в списке, и в ответе создания/обновления.
 export type ClinicServiceListItem = ServiceListItem & {
-  doctors?: ClinicServiceDoctor[];
   description?: string;
+  doctors?: ClinicServiceDoctor[];
   is_active?: boolean;
 };
 
 // Ответ создания/обновления услуги клиники (с назначенными врачами).
 export type ClinicServiceResponse = {
+  category: string;
+  created_at: string;
+  doctors: ClinicServiceDoctor[];
   id: number;
   name: string;
-  category: string;
-  price: string | null;
-  doctors: ClinicServiceDoctor[];
-  created_at: string;
+  price: null | string;
 };
 
 // GET /api/clinic/services/{id}/ — полная карточка процедуры.
 export type ClinicServiceDetail = {
-  id: number;
-  name: string;
-  category: string;
-  description?: string;
-  price: string | null;
-  duration: number | null;
-  photo: string | null;
   branch: ClinicServiceBranch | null;
-  schedule: Record<string, ClinicScheduleDay> | null;
-  lunch_break: ClinicLunchBreak | null;
-  is_active: boolean;
-  doctors: ClinicServiceDoctor[];
+  category: string;
   created_at: string;
+  description?: string;
+  doctors: ClinicServiceDoctor[];
+  duration: null | number;
+  id: number;
+  is_active: boolean;
+  lunch_break: ClinicLunchBreak | null;
+  name: string;
+  photo: null | string;
+  price: null | string;
+  schedule: null | Record<string, ClinicScheduleDay>;
 };
 
 // Запись образования врача. Интернатура/ординатура/специализация по диплому
 // лежат тут же отдельными ключами — в отличие от кабинета самого врача, где
 // бэк принимает только плоский массив institution/degree/year.
 export type ClinicDoctorEducation = {
+  diploma_specialization?: string;
   institution?: string;
-  year?: number | null;
   internship?: string;
   residency?: string;
-  diploma_specialization?: string;
+  year?: null | number;
 };
 
 export type ClinicDoctorCourse = {
   name?: string;
-  year?: number | null;
+  year?: null | number;
 };
 
 // Поля карточки врача, которые заполняет клиника. Логин (email/пароль),
 // график приёма и цена консультации сюда НЕ входят — их меняет только сам
 // врач через /api/doctor/profile/, бэк их здесь не примет.
 export type ClinicDoctorProfileBody = {
-  gender?: string;
-  birth_date?: string | null;
+  academic_degree?: string;
+  additional_education?: ClinicDoctorCourse[];
+  birth_date?: null | string;
   city?: string;
+  education?: ClinicDoctorEducation[];
+  experience_years?: number;
+  gender?: string;
   languages?: string[];
+  license_number?: string;
+  narrow_specialization_ids?: number[];
   // Как и логотип клиники: File уходит multipart'ом, строка — это URL уже
   // загруженной картинки.
-  photo?: File | string | null;
-  primary_specialization_ids?: number[];
-  narrow_specialization_ids?: number[];
-  experience_years?: number;
+  photo?: File | null | string;
   position?: string;
+  primary_specialization_ids?: number[];
   qualification_category?: string;
-  academic_degree?: string;
-  education?: ClinicDoctorEducation[];
-  additional_education?: ClinicDoctorCourse[];
-  license_number?: string;
 };
 
 // GET /api/clinic/doctors/{id}/ — полная карточка прикреплённого врача.
@@ -192,22 +192,22 @@ export type ClinicDoctorProfileBody = {
 // специализаций: пишутся *_ids, читаются объектами.
 export type ClinicDoctorProfile = Omit<
   ClinicDoctorProfileBody,
-  "photo" | "primary_specialization_ids" | "narrow_specialization_ids"
+  "narrow_specialization_ids" | "photo" | "primary_specialization_ids"
 > & {
-  id: number;
+  email: string;
   first_name: string;
+  full_name: string;
+  id: number;
   last_name: string;
+  narrow_specializations: SpecializationItem[];
   // Отчество бэк отдаёт только на чтение: при создании врача его передать
   // некуда (в ClinicDoctorCreateRequest поля нет), поэтому у заведённого из
   // кабинета врача оно приходит null — схема обещает string, но проверено
   // живым запросом, что бывает и null.
-  patronymic: string | null;
-  full_name: string;
-  email: string;
+  patronymic: null | string;
   phone: string;
-  photo: string | null;
+  photo: null | string;
   primary_specializations: SpecializationItem[];
-  narrow_specializations: SpecializationItem[];
 };
 
 // POST /api/clinic/doctors/ — регистрация врача клиникой из кабинета.
@@ -215,47 +215,47 @@ export type ClinicDoctorProfile = Omit<
 // телефон должны быть уникальны — иначе 400. Профильные поля опциональны:
 // можно завести врача одним запросом сразу с заполненной карточкой.
 export type CreateClinicDoctorRequest = ClinicDoctorProfileBody & {
+  email: string;
   first_name: string;
   last_name: string;
-  email: string;
-  phone?: string;
   password?: string;
+  phone?: string;
 };
 
 export type ClinicAppointmentFilters = {
-  status?: string;
-  doctor_id?: number;
   date_from?: string;
   date_to?: string;
+  doctor_id?: number;
   page?: number;
   page_size?: number;
+  status?: string;
 };
 
 export type ClinicStats = {
-  profile_views: number;
-  profile_views_this_month: number;
-  appointments_total: number;
   appointments_this_month: number;
+  appointments_total: number;
   average_rating: number;
-  reviews_count: number;
   doctors_count: number;
   patients_total: number;
+  profile_views: number;
+  profile_views_this_month: number;
   revenue_this_month: number;
+  reviews_count: number;
 };
 
 // Real API: branch is integer, has is_valid field
 export type InviteLink = {
+  branch: null | number;
+  created_at: string;
+  expires_at: null | string;
   id: string;
-  branch: number | null;
-  expires_at: string | null;
   is_active: boolean;
   is_valid: boolean;
-  created_at: string;
 };
 
 export type CreateInviteRequest = {
-  branch?: number | null;
-  expires_at?: string | null;
+  branch?: null | number;
+  expires_at?: null | string;
 };
 
 export type UpdateBranchRequest = {

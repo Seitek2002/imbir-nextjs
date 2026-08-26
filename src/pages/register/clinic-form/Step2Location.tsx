@@ -15,11 +15,11 @@ import type { ClinicFormData } from "../model/types";
 
 type Props = {
   data: ClinicFormData;
+  emailError?: null | string;
   onChange: <K extends keyof ClinicFormData>(
     key: K,
     value: ClinicFormData[K],
   ) => void;
-  emailError?: string | null;
 };
 
 export const Step2Location = ({ data, onChange, emailError }: Props) => {

@@ -11,16 +11,16 @@ import { ImageWithFallback } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 type Props = {
-  clinicName: string;
   clinicLogo?: string;
+  clinicName: string;
   rating?: number;
 };
 
 type MenuItem = {
-  href: string;
-  label: string;
-  icon: ReactNode;
   exact?: boolean;
+  href: string;
+  icon: ReactNode;
+  label: string;
 };
 
 const MENU_ITEMS: MenuItem[] = [

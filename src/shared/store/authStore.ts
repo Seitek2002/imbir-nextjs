@@ -3,7 +3,7 @@ import { StateStorage, createJSONStorage, persist } from "zustand/middleware";
 
 import { toMediaUrl } from "@/shared/lib/media";
 
-export type UserRole = "patient" | "doctor" | "clinic";
+export type UserRole = "clinic" | "doctor" | "patient";
 
 // Отдельные от cityStore cookie-имена
 export const AUTH_COOKIE = "is_authed";
@@ -20,8 +20,8 @@ const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 дней — как refresh-�
 // Зеркалим факт авторизации и роль в cookie, чтобы их мог прочитать сервер.
 // Время жизни куки (max-age) задаётся только если rememberMe = true.
 const writeAuthCookies = (
-  token: string | null,
-  role: UserRole | undefined,
+  token: null | string,
+  role: undefined | UserRole,
   rememberMe: boolean = true,
 ) => {
   if (typeof document === "undefined") return;
@@ -42,7 +42,7 @@ const writeAuthCookies = (
 };
 
 const customStateStorage: StateStorage = {
-  getItem: (name: string): string | null => {
+  getItem: (name: string): null | string => {
     if (typeof window === "undefined") return null;
     const local = localStorage.getItem(name);
     if (local) return local;
@@ -72,28 +72,28 @@ const customStateStorage: StateStorage = {
 };
 
 export type AuthUser = {
-  id: number;
-  role: UserRole;
-  first_name: string;
-  last_name: string;
-  full_name: string;
-  email: string;
-  phone: string;
+  avatar?: null | string;
   date_joined: string;
-  avatar?: string | null;
+  email: string;
+  first_name: string;
+  full_name: string;
+  id: number;
+  last_name: string;
+  phone: string;
+  role: UserRole;
 };
 
 type AuthStore = {
-  accessToken: string | null;
-  refreshToken: string | null;
-  user: AuthUser | null;
+  accessToken: null | string;
+  isAuthenticated: () => boolean;
+  logout: () => void;
+  refreshToken: null | string;
   rememberMe: boolean;
-  setTokens: (tokens: { access: string; refresh: string }) => void;
-  setUser: (user: AuthUser) => void;
   setAccessToken: (token: string) => void;
   setRememberMe: (remember: boolean) => void;
-  logout: () => void;
-  isAuthenticated: () => boolean;
+  setTokens: (tokens: { access: string; refresh: string }) => void;
+  setUser: (user: AuthUser) => void;
+  user: AuthUser | null;
 };
 
 export const useAuthStore = create<AuthStore>()(

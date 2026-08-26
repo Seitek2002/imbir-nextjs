@@ -58,9 +58,9 @@ export const ControlBar = ({ onLeave }: ControlBarProps) => {
   const { localParticipant, isCameraEnabled, isMicrophoneEnabled } =
     useLocalParticipant();
   const [pending, setPending] = useState<
-    "camera" | "microphone" | "leave" | null
+    "camera" | "leave" | "microphone" | null
   >(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<null | string>(null);
 
   const toggleCamera = async () => {
     setPending("camera");

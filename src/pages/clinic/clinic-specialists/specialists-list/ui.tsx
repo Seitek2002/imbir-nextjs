@@ -15,7 +15,6 @@ import {
 } from "./SpecialistCard";
 
 type Props = {
-  specialists: Specialist[];
   // Список ещё не пришёл — отдельно от "specialists пуст", иначе на время
   // загрузки на секунду мигает "Специалистов пока нет".
   isLoading?: boolean;
@@ -23,6 +22,7 @@ type Props = {
   // здесь ждём его промис, чтобы показать спиннер в ConfirmDialog и закрыть
   // диалог только после ответа сервера.
   onDelete: (id: string) => Promise<void>;
+  specialists: Specialist[];
 };
 
 export const SpecialistsList: FC<Props> = ({
@@ -31,10 +31,10 @@ export const SpecialistsList: FC<Props> = ({
   onDelete,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<null | string>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(
+  const [selectedSpecialty, setSelectedSpecialty] = useState<null | string>(
     null,
   );
 

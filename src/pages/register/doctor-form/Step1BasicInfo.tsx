@@ -32,11 +32,11 @@ const UploadIcon = () => (
 
 type Props = {
   data: DoctorFormData;
+  emailError?: null | string;
   onChange: <K extends keyof DoctorFormData>(
     key: K,
     value: DoctorFormData[K],
   ) => void;
-  emailError?: string | null;
 };
 
 export const Step1BasicInfo = ({ data, onChange, emailError }: Props) => {

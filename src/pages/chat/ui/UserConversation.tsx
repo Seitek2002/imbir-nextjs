@@ -20,7 +20,7 @@ const CONNECTION_LABEL: Record<ConnectionState, string> = {
 };
 
 // "Иван печатает…" / "Иван и Мария печатают…" / "…и ещё N печатают…"
-const typingLabel = (names: string[]): string | null => {
+const typingLabel = (names: string[]): null | string => {
   if (names.length === 0) return null;
   if (names.length === 1) return `${names[0]} печатает…`;
   if (names.length === 2) return `${names[0]} и ${names[1]} печатают…`;
@@ -28,12 +28,12 @@ const typingLabel = (names: string[]): string | null => {
 };
 
 type Props = {
-  roomId: number;
-  name: string;
   currentUserId: number;
+  name: string;
+  onBack: () => void;
   // ID собеседника. Нужен для итогов созвонов: записи отбираются по нему.
   partnerId?: number;
-  onBack: () => void;
+  roomId: number;
 };
 
 export const UserConversation: FC<Props> = ({

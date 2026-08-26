@@ -7,7 +7,7 @@ import { TimeRange } from "./TimeRange";
 const validateTimeRange = (
   range: ScheduleDay,
   label: string,
-): string | null => {
+): null | string => {
   const hasFrom = Boolean(range.from);
   const hasTo = Boolean(range.to);
 
@@ -18,7 +18,7 @@ const validateTimeRange = (
   return null;
 };
 
-export const validateSchedule = (data: ClinicFormData): string | null => {
+export const validateSchedule = (data: ClinicFormData): null | string => {
   const scheduleDays = DAYS.map(({ key, label }) => ({
     range: data.schedule[key],
     label,

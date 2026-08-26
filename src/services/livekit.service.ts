@@ -4,9 +4,9 @@ import { apiClient } from "@/shared/api/client";
 import { extractErrorMessage } from "@/shared/lib/errors";
 
 export type LiveKitCredentials = {
-  url: string;
   room: string;
   token: string;
+  url: string;
 };
 
 export type LiveKitErrorCode =
@@ -19,7 +19,7 @@ export type LiveKitErrorCode =
 export class LiveKitServiceError extends Error {
   constructor(
     message: string,
-    public readonly status: number | null,
+    public readonly status: null | number,
     public readonly code: LiveKitErrorCode,
     public readonly startsAt?: string,
   ) {
@@ -41,7 +41,7 @@ const isLiveKitCredentials = (value: unknown): value is LiveKitCredentials => {
   );
 };
 
-const getErrorCode = (status: number | null, message: string) => {
+const getErrorCode = (status: null | number, message: string) => {
   if (status === 403) return "access_denied" as const;
 
   const normalized = message.toLocaleLowerCase("ru");

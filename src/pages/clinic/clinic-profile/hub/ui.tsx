@@ -7,7 +7,7 @@ import Link from "next/link";
 import { ChevronRightIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 
-type HubItem = { href: string; label: string; icon: React.ReactNode };
+type HubItem = { href: string; icon: React.ReactNode; label: string };
 
 const ITEMS: HubItem[] = [
   {

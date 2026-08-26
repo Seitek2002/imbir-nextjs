@@ -15,10 +15,10 @@ const SparkleIcon: FC<SVGProps<SVGSVGElement>> = (props) => (
 );
 
 type Props = {
-  name: string;
-  isAi?: boolean;
-  size?: number;
   className?: string;
+  isAi?: boolean;
+  name: string;
+  size?: number;
 };
 
 export const ChatAvatar: FC<Props> = ({

@@ -13,7 +13,7 @@ import {
   SendAiMessageRequest,
 } from "./types";
 
-type ConsultationRole = "patient" | "doctor" | "clinic";
+type ConsultationRole = "clinic" | "doctor" | "patient";
 
 // ── User-to-user chat ───────────────────────────────────────────────────────
 

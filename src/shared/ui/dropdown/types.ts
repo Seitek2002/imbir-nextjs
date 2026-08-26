@@ -3,32 +3,32 @@ export type Option = {
   value: string;
 };
 
-export type DropdownType = "default" | "checkbox" | "radio";
+export type DropdownType = "checkbox" | "default" | "radio";
 
 // Общие пропсы, которые есть всегда
 type BaseDropdownProps = {
-  label?: string;
-  placeholder?: string;
-  hint?: string;
-  options: Option[];
-  type?: DropdownType;
-  searchable?: boolean;
   className?: string;
+  hint?: string;
+  label?: string;
+  options: Option[];
+  placeholder?: string;
+  searchable?: boolean;
+  type?: DropdownType;
 };
 
 // Пропсы для обычного выпадающего списка (isMulti === false или не передан)
 export type SingleDropdownProps = BaseDropdownProps & {
   isMulti?: false;
-  value?: string;
   onChange?: (value: string) => void;
+  value?: string;
 };
 
 // Пропсы для списка с множественным выбором (isMulti === true)
 export type MultiDropdownProps = BaseDropdownProps & {
   isMulti: true;
-  value?: string[];
   onChange?: (value: string[]) => void;
+  value?: string[];
 };
 
 // Объединяем их
-export type DropdownProps = SingleDropdownProps | MultiDropdownProps;
+export type DropdownProps = MultiDropdownProps | SingleDropdownProps;

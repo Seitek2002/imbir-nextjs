@@ -8,21 +8,21 @@ import { StarIcon } from "@/shared/assets/icons";
 import { replaceUrlState, useUrlSearchParams } from "@/shared/lib/url-state";
 import { Button, Dropdown, PageHeader, Radio, RangeSlider } from "@/shared/ui";
 
-type DropdownOption = { value: string; label: string };
+type DropdownOption = { label: string; value: string };
 
 type Props = {
-  isOpen: boolean;
-  prefix: string;
-  fields?: {
-    specialty?: boolean;
-    experience?: boolean;
-    rating?: boolean;
-    price?: boolean;
-    category?: boolean;
-    clinic?: boolean;
-  };
   categoryOptions?: DropdownOption[];
   clinicOptions?: DropdownOption[];
+  fields?: {
+    category?: boolean;
+    clinic?: boolean;
+    experience?: boolean;
+    price?: boolean;
+    rating?: boolean;
+    specialty?: boolean;
+  };
+  isOpen: boolean;
+  prefix: string;
 };
 
 const RATINGS = ["5.0", "4.0", "3.0", "2.0", "1.0"];
@@ -58,7 +58,7 @@ export const MobileFiltersModal: FC<Props> = ({
     initialPrice?.[1] ?? MAX_PRICE,
   ]);
 
-  const [rating, setRating] = useState<string | null>(
+  const [rating, setRating] = useState<null | string>(
     searchParams.get(`${prefix}_rating`),
   );
 

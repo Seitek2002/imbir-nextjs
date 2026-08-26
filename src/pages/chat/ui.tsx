@@ -92,7 +92,7 @@ const EmptyState = () => (
 // LoginPrompt (см. ChatPage внизу файла). Инициализатор срабатывал в момент,
 // который ничем не гарантирован, и параметр терялся. useSearchParams реактивен
 // и отдаёт значение независимо от того, когда воркспейс смонтировался.
-type EntryParams = { ask?: string; roomId: number | null };
+type EntryParams = { ask?: string; roomId: null | number };
 
 // «Чат не выбран» — это null, а не 0: у ИИ-помощника id именно 0
 // (AI_ROOM_ID), поэтому проверять roomId на truthy нельзя.
@@ -110,7 +110,7 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
   const { ask: askParam, roomId: entryRoomId } = readEntryParams(searchParams);
 
   const [pendingAsk, setPendingAsk] = useState<string | undefined>(askParam);
-  const [activeId, setActiveId] = useState<number | null>(entryRoomId);
+  const [activeId, setActiveId] = useState<null | number>(entryRoomId);
   const [search, setSearch] = useState("");
 
   // Чистим одноразовые параметры из URL — уже ПОСЛЕ того, как они прочитаны в

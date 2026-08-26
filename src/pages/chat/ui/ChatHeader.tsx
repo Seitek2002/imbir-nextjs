@@ -9,14 +9,14 @@ import {
 import { ChatAvatar } from "./ChatAvatar";
 
 type Props = {
-  name: string;
   isAi: boolean;
-  subtitle?: ReactNode;
+  name: string;
   onBack: () => void;
   onClear?: () => void;
   // Итоги видео-консультаций с этим собеседником. Кнопки нет, если итогов
   // взять негде (чат с ИИ, роль «клиника»).
   onOpenSummaries?: () => void;
+  subtitle?: ReactNode;
 };
 
 export const ChatHeader: FC<Props> = ({

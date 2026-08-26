@@ -11,7 +11,7 @@ import {
 // GET /api/reviews/?target_type=doctor&target_id=1
 export const getReviews = async (
   targetType: ReviewTargetType,
-  targetId: string | number,
+  targetId: number | string,
 ): Promise<PaginatedResponse<ReviewItem>> => {
   const { data } = await apiClient.get<PaginatedResponse<ReviewItem>>(
     "/api/reviews/",

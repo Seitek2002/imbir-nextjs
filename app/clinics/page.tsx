@@ -45,7 +45,7 @@ export default async function Page({
     ? currentExp.split("-").map(Number)
     : [undefined, undefined];
 
-  const filters: Omit<ClinicFilters, "page" | "page_size"> = {
+  const filters: Omit<ClinicFilters, "page_size" | "page"> = {
     city,
     search: activeQuery || undefined,
     specialization: currentSpec || undefined,

@@ -13,15 +13,15 @@ import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 type Props = {
   fullName: string;
   photo?: string;
-  specialty: string;
   rating: number;
+  specialty: string;
 };
 
 type MenuItem = {
-  href: string;
-  label: string;
-  icon: ReactNode;
   exact?: boolean;
+  href: string;
+  icon: ReactNode;
+  label: string;
 };
 
 const MENU_ITEMS: MenuItem[] = [

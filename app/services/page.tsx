@@ -51,7 +51,7 @@ const Services = async ({ searchParams }: Props) => {
   const rawRating = resolvedSearchParams?.[`${PREFIX}_rating`];
   const currentRating = typeof rawRating === "string" ? rawRating : null;
 
-  const filters: Omit<ServiceFilters, "page" | "page_size"> = {
+  const filters: Omit<ServiceFilters, "page_size" | "page"> = {
     category: currentCategory ?? undefined,
     clinic_id: currentClinic ?? undefined,
     min_rating:

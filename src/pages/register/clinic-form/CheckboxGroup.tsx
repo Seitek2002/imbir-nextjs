@@ -2,9 +2,9 @@ import { Checkbox } from "@/shared/ui";
 
 type Props = {
   label: string;
+  onChange: (v: string[]) => void;
   options: string[];
   value: string[];
-  onChange: (v: string[]) => void;
 };
 
 export const CheckboxGroup = ({ label, options, value, onChange }: Props) => (

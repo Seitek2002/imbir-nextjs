@@ -8,11 +8,11 @@ import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets/icons";
 import { ConfirmDialog, IconBtn } from "@/shared/ui";
 
 type Props = {
-  title: string;
   children: ReactNode;
   isEditing: boolean;
-  onEditToggle: () => void;
   isSaving?: boolean;
+  onEditToggle: () => void;
+  title: string;
 };
 
 // Мобильный экран одной секции drill-down-профиля (клиника или специалист

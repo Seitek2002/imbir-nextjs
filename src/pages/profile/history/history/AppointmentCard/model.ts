@@ -1,26 +1,26 @@
 export type AppointmentStatus =
-  | "pending"
-  | "upcoming"
-  | "confirmed"
-  | "scheduled"
+  | "cancelled"
   | "completed"
-  | "cancelled";
+  | "confirmed"
+  | "pending"
+  | "scheduled"
+  | "upcoming";
 
 export type Appointment = {
-  id: string;
-  doctorId: string;
-  serviceId?: string | number | null;
-  doctorName: string;
-  doctorSpecialty: string;
-  doctorClinic: string;
-  doctorRating: number;
-  doctorImage?: string;
+  address: string;
   date: string;
-  time: string;
-  service: string;
+  doctorClinic: string;
+  doctorId: string;
+  doctorImage?: string;
+  doctorName: string;
+  doctorRating: number;
+  doctorSpecialty: string;
+  id: string;
+  isOnline: boolean;
   // Цена фиксируется при записи, но бэк может её не отдать — тогда прячем
   price?: number;
-  address: string;
+  service: string;
+  serviceId?: null | number | string;
   status: AppointmentStatus;
-  isOnline: boolean;
+  time: string;
 };

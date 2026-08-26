@@ -55,7 +55,7 @@ export const FileIcon: FC<SVGProps<SVGSVGElement>> = (props) => (
 
 // ─── Schedule helpers ────────────────────────────────────────────────────────
 
-export type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+export type DayKey = "fri" | "mon" | "sat" | "sun" | "thu" | "tue" | "wed";
 
 export const DAY_LABELS: { key: DayKey; ru: string }[] = [
   { key: "mon", ru: "ПН" },
@@ -78,12 +78,12 @@ export const DAY_API: Record<DayKey, string> = {
   sun: "sunday",
 };
 
-export type DayState = { open: string; close: string; enabled: boolean };
+export type DayState = { close: string; enabled: boolean; open: string };
 
 export const toDay = (d: {
-  open?: string;
   close?: string;
   enabled?: boolean;
+  open?: string;
 }): DayState => ({
   open: d?.open ?? "",
   close: d?.close ?? "",
@@ -97,7 +97,7 @@ export const csv = (s: string): string[] =>
     .filter(Boolean);
 
 // "ДД.ММ.ГГГГ" → "ГГГГ-ММ-ДД"; уже-ISO/пусто отдаём как есть
-export const toApiDate = (v: string): string | null => {
+export const toApiDate = (v: string): null | string => {
   const t = v.trim();
   if (!t) return null;
   const m = t.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
@@ -107,7 +107,7 @@ export const toApiDate = (v: string): string | null => {
 // Обратное преобразование: бэк отдаёт дату как "ГГГГ-ММ-ДД", формы — как
 // "ДД.ММ.ГГГГ". Без этого DateField получает ISO-строку и валит её как
 // несуществующую дату.
-export const fromApiDate = (v: string | null | undefined): string => {
+export const fromApiDate = (v: null | string | undefined): string => {
   const t = (v ?? "").trim();
   if (!t) return "";
   const m = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -120,8 +120,8 @@ export const SectionCard = ({
   title,
   children,
 }: {
-  title: string;
   children: React.ReactNode;
+  title: string;
 }) => (
   <div className="bg-white rounded-3xl p-5 lg:p-6 border border-border mb-6">
     <h3 className="text-xl font-semibold text-foreground mb-4">{title}</h3>
@@ -145,8 +145,8 @@ export const FieldRow = ({
   label,
   children,
 }: {
-  label: string;
   children: React.ReactNode;
+  label: string;
 }) => (
   <div className="py-3 border-b border-background last:border-b-0">
     <div className="text-muted text-sm mb-1">{label}</div>
@@ -159,9 +159,9 @@ export const FieldRow = ({
 // Карта локации — keyless Google Maps embed (без API-ключа): по факту
 // координат показывает пин, без них — просто область по адресу/названию.
 export const LocationMap: FC<{
+  address?: string;
   latitude?: string;
   longitude?: string;
-  address?: string;
 }> = ({ latitude, longitude, address }) => {
   const query =
     latitude && longitude ? `${latitude},${longitude}` : address || "";

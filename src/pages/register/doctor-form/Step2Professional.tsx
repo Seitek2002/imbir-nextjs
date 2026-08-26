@@ -6,11 +6,11 @@ import type { DoctorFormData, InviteClinic } from "../model/types";
 
 type Props = {
   data: DoctorFormData;
+  inviteClinic?: InviteClinic;
   onChange: <K extends keyof DoctorFormData>(
     key: K,
     value: DoctorFormData[K],
   ) => void;
-  inviteClinic?: InviteClinic;
 };
 
 export const Step2Professional = ({ data, onChange, inviteClinic }: Props) => {

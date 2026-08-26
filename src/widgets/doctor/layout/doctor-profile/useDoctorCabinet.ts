@@ -48,38 +48,38 @@ export const mapApiToProfile = (
   // Реальный ответ /api/doctor/profile/ (плоский DoctorOwnProfile) отличается
   // от устаревшего типа DoctorPrivateProfile — читаем через каст.
   const a = api as unknown as {
+    additional_services?: string;
+    birth_date?: null | string;
+    city?: string;
+    consultation_price?: null | number | string;
+    education?: { degree?: string; institution: string; year?: number }[];
+    email?: string;
+    equipment?: string[];
+    experience_years?: number;
     first_name?: string;
-    last_name?: string;
     full_name?: string;
     gender?: string;
-    birth_date?: string | null;
-    city?: string;
+    is_online_available?: boolean;
+    is_published?: boolean;
     languages?: string[];
+    last_name?: string;
+    license_number?: string;
+    narrow_specializations?: SpecializationItem[];
+    patient_conditions?: string[];
+    payment_methods?: string[];
     phone?: string;
-    email?: string;
-    photo?: string | null;
+    photo?: null | string;
     // Бэк отдаёт объекты {id, name, photo}, не строки (проверено живым
     // запросом) — читаем .name, а не значение целиком.
     primary_specializations?: SpecializationItem[];
-    narrow_specializations?: SpecializationItem[];
-    additional_services?: string;
-    experience_years?: number;
-    education?: { institution: string; degree?: string; year?: number }[];
+    rating?: number | string;
+    reviews_count?: number;
     work_experience?: {
-      position?: string;
       clinic?: string;
+      position?: string;
       qualification?: string;
       scientific_degree?: string;
     }[];
-    license_number?: string;
-    rating?: number | string;
-    reviews_count?: number;
-    equipment?: string[];
-    patient_conditions?: string[];
-    payment_methods?: string[];
-    is_online_available?: boolean;
-    consultation_price?: string | number | null;
-    is_published?: boolean;
   };
 
   return {
@@ -175,8 +175,8 @@ export const useDoctorCabinet = () => {
       const raw = data as unknown as {
         first_name?: string;
         last_name?: string;
-        primary_specializations?: SpecializationItem[];
         narrow_specializations?: SpecializationItem[];
+        primary_specializations?: SpecializationItem[];
       } | null;
       // Бэк очищает primary/narrow_specialization_ids, если поле не передано
       // (проверено живым запросом). Из-за этого сохранение любой другой

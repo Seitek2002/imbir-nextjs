@@ -14,17 +14,17 @@ export type BlogCategory = {
 };
 
 export type BlogPost = {
-  id: string;
-  slug: string;
-  title: string;
-  description?: string;
-  categoryId: string;
   category: string;
+  categoryId: string;
   date: string;
   dateShort: string;
-  image?: string;
-  href: string;
+  description?: string;
   featured: boolean;
+  href: string;
+  id: string;
+  image?: string;
+  slug: string;
+  title: string;
 };
 
 // Деталь статьи: тот же пост плюс текст. Бэк отдаёт его одним полем content,

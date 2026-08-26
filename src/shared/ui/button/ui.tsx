@@ -5,14 +5,14 @@ import { cn } from "@/shared/lib/utils";
 type IconType = ComponentType<SVGProps<SVGSVGElement>>;
 
 type Variant = "default" | "outline" | "text";
-type Sizes = "xs" | "sm" | "md" | "lg";
+type Sizes = "lg" | "md" | "sm" | "xs";
 
 type Props = {
-  loading?: boolean;
-  variant?: Variant;
   IconLeft?: IconType;
   IconRight?: IconType;
+  loading?: boolean;
   size?: Sizes;
+  variant?: Variant;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const Button: FC<Props> = ({

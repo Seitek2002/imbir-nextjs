@@ -23,13 +23,13 @@ import { AppointmentCard } from "./AppointmentCard/ui";
 import { RescheduleModal } from "./RescheduleModal";
 
 type Props = {
+  activeTab: "completed" | "upcoming";
   appointments: Appointment[];
-  activeTab: "upcoming" | "completed";
   // Строка из поиска в шапке — фильтруем на клиенте по врачу/клинике/услуге.
   searchQuery?: string;
   // Только для вкладки "Прошедшие": сужает список до конкретного статуса
   // (там показаны и завершённые, и отменённые записи вместе).
-  statusFilter?: "completed" | "cancelled";
+  statusFilter?: "cancelled" | "completed";
 };
 
 export const ProfileHistory: FC<Props> = ({
@@ -46,7 +46,7 @@ export const ProfileHistory: FC<Props> = ({
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
-  const [cancelTarget, setCancelTarget] = useState<string | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<null | string>(null);
   const [rescheduleTarget, setRescheduleTarget] = useState<Appointment | null>(
     null,
   );
@@ -118,9 +118,9 @@ export const ProfileHistory: FC<Props> = ({
 
   const { mutateAsync: submitReview } = useMutation({
     mutationFn: (vars: {
-      rating: number;
-      comment: string;
       appointment: Appointment;
+      comment: string;
+      rating: number;
     }) =>
       createReview({
         target_type: "doctor",

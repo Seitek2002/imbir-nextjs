@@ -14,14 +14,14 @@ import { useAuthStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
 type Props = {
-  // id пользователя-собеседника (для врача совпадает с id из каталога).
-  userId: number;
   className?: string;
-  size?: "xs" | "sm" | "md" | "lg";
-  variant?: "default" | "outline" | "text";
-  label?: string;
   // Круглая иконка-кнопка для тесных мест (мобильные карточки).
   compact?: boolean;
+  label?: string;
+  size?: "lg" | "md" | "sm" | "xs";
+  // id пользователя-собеседника (для врача совпадает с id из каталога).
+  userId: number;
+  variant?: "default" | "outline" | "text";
 };
 
 // Кнопка «Написать»: создаёт комнату (или получает существующую — бэк не

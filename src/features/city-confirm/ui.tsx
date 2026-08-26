@@ -5,7 +5,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { GeoIcon } from "@/shared/assets/icons";
 import { useCityStore } from "@/shared/store";
 
-function getCookie(name: string): string | null {
+function getCookie(name: string): null | string {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
   return match ? decodeURIComponent(match[1]) : null;
@@ -24,7 +24,7 @@ const noopSubscribe = () => () => {};
  * so the first client render matches the server (both render nothing) and the
  * banner only appears on a subsequent client render — no hydration mismatch.
  */
-function useDetectedCity(): string | null {
+function useDetectedCity(): null | string {
   return useSyncExternalStore(
     noopSubscribe,
     () => getCookie("imbir-detected-city"),

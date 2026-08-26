@@ -14,7 +14,7 @@ export const getServices = async (
 };
 
 export const getServiceById = async (
-  id: string | number,
+  id: number | string,
 ): Promise<ServiceDetail> => {
   const { data } = await apiClient.get<ServiceDetail>(`/api/services/${id}/`);
   return data;

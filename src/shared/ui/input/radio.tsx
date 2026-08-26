@@ -4,11 +4,11 @@ import { FC, InputHTMLAttributes } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
-type RadioSize = "small" | "large";
+type RadioSize = "large" | "small";
 
 type Props = {
-  size?: RadioSize;
   label?: string;
+  size?: RadioSize;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "size">;
 
 export const Radio: FC<Props> = ({

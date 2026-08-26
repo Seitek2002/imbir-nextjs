@@ -5,22 +5,22 @@ import { cn } from "@/shared/lib/utils";
 
 type IconType = ComponentType<SVGProps<SVGSVGElement>>;
 
-type Sizes = "small" | "large";
+type Sizes = "large" | "small";
 
 type Props = {
-  label?: string;
   className?: string;
-  labelClassName?: string;
+  error?: string;
+  hint?: string;
   iconClassName?: string;
   IconLeft?: IconType;
   IconRight?: IconType;
-  size?: Sizes;
-  error?: string;
-  hint?: string;
-  onIconRightClick?: () => void;
   // Подпись для скринридера у кликабельной IconRight (например «Показать
   // пароль»). Имеет смысл только вместе с onIconRightClick.
   iconRightLabel?: string;
+  label?: string;
+  labelClassName?: string;
+  onIconRightClick?: () => void;
+  size?: Sizes;
 } & InputHTMLAttributes<HTMLInputElement>;
 
 export const Input: FC<Props> = ({

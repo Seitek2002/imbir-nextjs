@@ -7,10 +7,10 @@ import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
 
 type Props = {
-  title: string;
   children: ReactNode;
   expandable?: boolean; // Разрешить сворачивание, если текст длиннее lines
   lines?: number; // Сколько строк показывать в закрытом состоянии (по умолчанию 3)
+  title: string;
 };
 
 export const InfoCard: FC<Props> = ({

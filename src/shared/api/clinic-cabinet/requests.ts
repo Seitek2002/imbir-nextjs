@@ -24,7 +24,7 @@ import {
 
 const sendMultipart = async <T>(
   path: string,
-  method: "POST" | "PUT" | "PATCH",
+  method: "PATCH" | "POST" | "PUT",
   form: FormData,
 ): Promise<T> => {
   // Без прокси /backend-api: у Next trailingSlash выключен, и он редиректил
@@ -51,36 +51,36 @@ export const getClinicProfile = async (): Promise<ClinicPrivateProfile> => {
 // Заданы явно: ClinicPrivateProfile унаследован от публичного типа и
 // не совпадает с реальным ответом (description, logo-binary и т.д.).
 export type UpdateClinicProfileBody = {
-  name?: string;
-  clinic_type?: string;
-  description?: string;
-  logo?: File | string | null;
-  phone?: string;
-  website?: string;
-  country?: string;
-  city?: string;
+  additional_services?: string;
   address?: string;
+  city?: string;
+  clinic_type?: string;
+  country?: string;
+  description?: string;
+  emergency_24_7?: boolean;
+  equipment?: string[];
   latitude?: string;
-  longitude?: string;
   legal_name?: string;
-  reg_number?: string;
-  license_number?: string;
-  license_date?: string | null;
   license_authority?: string;
+  license_date?: null | string;
+  license_number?: string;
+  logo?: File | null | string;
+  longitude?: string;
+  lunch_break?: { from: string; to: string };
+  name?: string;
+  narrow_specialization_ids?: number[];
+  patient_conditions?: string[];
+  payment_methods?: string[];
+  phone?: string;
   // Бэк принимает на запись только id (проверено живым запросом: массив
   // названий строк молча очищает специализации клиники, без ошибки).
   primary_specialization_ids?: number[];
-  narrow_specialization_ids?: number[];
-  additional_services?: string;
-  equipment?: string[];
-  patient_conditions?: string[];
-  payment_methods?: string[];
-  emergency_24_7?: boolean;
+  reg_number?: string;
   schedule?: Record<
     string,
-    { from: string | null; to: string | null; enabled: boolean }
+    { enabled: boolean; from: null | string; to: null | string }
   >;
-  lunch_break?: { from: string; to: string };
+  website?: string;
 };
 
 // Массив чисел в multipart нельзя слать JSON-строкой: DRF ждёт по одному
@@ -105,7 +105,7 @@ const appendMultipart = (form: FormData, key: string, value: unknown) => {
 // JSON-путь оставляем для запросов без картинок.
 const sendMaybeMultipart = async <T>(
   path: string,
-  method: "POST" | "PUT" | "PATCH",
+  method: "PATCH" | "POST" | "PUT",
   body: Record<string, unknown>,
 ): Promise<T> => {
   const hasFile = Object.values(body).some((v) => v instanceof File);
@@ -140,13 +140,13 @@ export const updateClinicBranch = async (
   await apiClient.put(`/api/clinic/branches/${branchId}/`, body);
 };
 
-const asCollection = <T>(data: T | T[] | null | undefined): T[] => {
+const asCollection = <T>(data: null | T | T[] | undefined): T[] => {
   if (!data) return [];
   return Array.isArray(data) ? data : [data];
 };
 
 export const getClinicDocuments = async (): Promise<ClinicDocument[]> => {
-  const { data } = await apiClient.get<ClinicDocument[] | ClinicDocument>(
+  const { data } = await apiClient.get<ClinicDocument | ClinicDocument[]>(
     "/api/clinic/documents/",
   );
   return asCollection(data);
@@ -165,7 +165,7 @@ export const deleteClinicDocument = async (id: number): Promise<void> => {
 };
 
 export const getClinicPhotos = async (): Promise<ClinicPhoto[]> => {
-  const { data } = await apiClient.get<ClinicPhoto[] | ClinicPhoto>(
+  const { data } = await apiClient.get<ClinicPhoto | ClinicPhoto[]>(
     "/api/clinic/photos/",
   );
   return asCollection(data);
@@ -214,7 +214,7 @@ export const detachClinicDoctor = async (doctorId: number): Promise<void> => {
   await apiClient.delete(`/api/clinic/doctors/${doctorId}/`);
 };
 
-const withHttpsPhoto = <T extends { photo?: string | null }>(item: T): T => ({
+const withHttpsPhoto = <T extends { photo?: null | string }>(item: T): T => ({
   ...item,
   photo: toHttps(item.photo ?? null) ?? null,
 });
@@ -248,7 +248,7 @@ export const updateClinicDoctor = async (
 export const getClinicDoctorDocuments = async (
   doctorId: number,
 ): Promise<ClinicDocument[]> => {
-  const { data } = await apiClient.get<ClinicDocument[] | ClinicDocument>(
+  const { data } = await apiClient.get<ClinicDocument | ClinicDocument[]>(
     `/api/clinic/doctors/${doctorId}/documents/`,
   );
   return asCollection(data);

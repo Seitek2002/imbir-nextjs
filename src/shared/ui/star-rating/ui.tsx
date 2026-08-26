@@ -5,10 +5,10 @@ import { FC } from "react";
 import { StarIcon } from "@/shared/assets/icons";
 
 type Props = {
-  rating: number;
-  maxRating?: number;
-  size?: number;
   className?: string;
+  maxRating?: number;
+  rating: number;
+  size?: number;
 };
 
 // Плашка с оценкой — та же, что в публичном виджете отзывов

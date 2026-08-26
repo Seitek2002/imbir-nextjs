@@ -14,13 +14,13 @@ import {
 } from "./clinic-procedure/ui";
 
 type Props = {
-  procedures: Procedure[];
   // Список ещё не пришёл — отдельно от "procedures пуст", иначе на время
   // загрузки на секунду мигает "Процедур пока нет".
   isLoading?: boolean;
   // Реальное удаление уходит в сеть на уровне родителя — здесь просто ждём
   // промис, чтобы показать спиннер в ConfirmDialog и закрыть его по факту.
-  onDelete?: (id: string) => void | Promise<void>;
+  onDelete?: (id: string) => Promise<void> | void;
+  procedures: Procedure[];
 };
 
 export const ProceduresList: FC<Props> = ({
@@ -29,10 +29,10 @@ export const ProceduresList: FC<Props> = ({
   onDelete,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<null | string>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<null | string>(null);
 
   const filterBtnRef = useRef<HTMLButtonElement>(null);
   const filterPanelRef = useRef<HTMLDivElement>(null);

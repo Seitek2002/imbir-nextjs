@@ -4,14 +4,14 @@ import { ReactNode } from "react";
 
 // Используем дженерик <T>, чтобы TypeScript строго типизировал значения (value)
 export type SegmentOption<T extends string> = {
-  label: string | ReactNode;
+  label: ReactNode | string;
   value: T;
 };
 
 type Props<T extends string> = {
+  onChange: (value: T) => void;
   options: SegmentOption<T>[];
   value: T;
-  onChange: (value: T) => void;
 };
 
 export const SegmentedControl = <T extends string>({

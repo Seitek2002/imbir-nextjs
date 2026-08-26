@@ -6,11 +6,11 @@ import { BackButton } from "./back-button";
 import { DefaultContent } from "./default-content";
 
 type Props = {
-  title?: string;
   backTo?: string;
-  onBack?: () => void;
   children?: ReactNode;
+  onBack?: () => void;
   searchable?: boolean;
+  title?: string;
 };
 
 export const Header: FC<Props> = ({

@@ -60,11 +60,11 @@ const BranchesCard: FC<{ branches: ClinicProfileBranch[] }> = ({
   branches,
 }) => {
   const queryClient = useQueryClient();
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<null | number>(null);
   const [address, setAddress] = useState("");
 
   const { mutate: save, isPending } = useMutation({
-    mutationFn: (vars: { id: number; address: string }) =>
+    mutationFn: (vars: { address: string; id: number }) =>
       updateClinicBranch(String(vars.id), { address: vars.address }),
     onSuccess: () => {
       toast.success("Филиал обновлён");

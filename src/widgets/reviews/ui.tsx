@@ -30,27 +30,27 @@ const EmptyReviews: FC = () => (
 
 // Тип для отдельного отзыва
 export type ReviewItem = {
-  id: string | number;
   author: string;
-  date: string;
-  text: string;
-  rating: number;
   avatarUrl?: string;
-  reply?: { text: string; date: string } | null;
+  date: string;
+  id: number | string;
+  rating: number;
+  reply?: { date: string; text: string } | null;
+  text: string;
 };
 
 type Props = {
-  initialReviews: ReviewItem[];
   averageRating: number;
-  // Отправка отзыва на бэк. Если не передана — форма не показывается.
-  // Может вернуть промис — тогда форма очистится только после успеха.
-  onSubmitReview?: (rating: number, text: string) => void | Promise<unknown>;
-  onReviewClick?: () => void;
-  isSubmitting?: boolean;
-  doctorName?: string;
-  doctorSpecialty?: string;
   doctorClinic?: string;
   doctorImage?: string;
+  doctorName?: string;
+  doctorSpecialty?: string;
+  initialReviews: ReviewItem[];
+  isSubmitting?: boolean;
+  onReviewClick?: () => void;
+  // Отправка отзыва на бэк. Если не передана — форма не показывается.
+  // Может вернуть промис — тогда форма очистится только после успеха.
+  onSubmitReview?: (rating: number, text: string) => Promise<unknown> | void;
 };
 
 export const ReviewsSection: FC<Props> = ({

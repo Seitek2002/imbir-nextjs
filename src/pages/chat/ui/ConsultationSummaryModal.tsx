@@ -16,13 +16,13 @@ import { Button, Modal } from "@/shared/ui";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  // Роль текущего пользователя: врач видит итоги своих приёмов, пациент — своих.
-  role: "doctor" | "patient";
-  // ID собеседника — по нему отбираются записи именно этого чата.
-  partnerUserId: number;
-  partnerName: string;
   // Отправка ссылки собеседнику сообщением в этот же чат. Есть только у врача.
   onShare?: (text: string) => void;
+  partnerName: string;
+  // ID собеседника — по нему отбираются записи именно этого чата.
+  partnerUserId: number;
+  // Роль текущего пользователя: врач видит итоги своих приёмов, пациент — своих.
+  role: "doctor" | "patient";
 };
 
 // "2026-05-13" + "16:47" → "13 мая 2026 г. • 16:47"
@@ -40,9 +40,9 @@ const formatWhen = (date: string, time: string): string => {
 // Файл лежит на домене API, поэтому атрибут download кросс-доменно не работает
 // — браузер просто откроет .docx в новой вкладке и скачает его сам.
 const DownloadLink: FC<{
-  url: string;
-  className?: string;
   children: React.ReactNode;
+  className?: string;
+  url: string;
 }> = ({ url, className, children }) => (
   <a
     href={url}

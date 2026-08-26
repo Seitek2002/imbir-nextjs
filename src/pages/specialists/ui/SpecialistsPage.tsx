@@ -70,7 +70,7 @@ export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
     ? currentSpec.split(",").filter(Boolean)
     : [];
 
-  const filters: Omit<DoctorFilters, "page" | "page_size"> = {
+  const filters: Omit<DoctorFilters, "page_size" | "page"> = {
     city: selectedCity || undefined,
     min_rating:
       currentRating && currentRating !== "all"

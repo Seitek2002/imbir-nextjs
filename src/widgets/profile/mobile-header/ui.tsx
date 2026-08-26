@@ -8,11 +8,11 @@ import { HeaderBackIcon } from "@/shared/assets/icons";
 import { IconBtn } from "@/shared/ui";
 
 type Props = {
-  title: string;
-  rightElement?: ReactNode;
   bottomElement?: ReactNode;
   hasBorder?: boolean;
   onBack?: () => void;
+  rightElement?: ReactNode;
+  title: string;
 };
 
 export const MobilePageHeader: FC<Props> = ({

@@ -6,11 +6,11 @@ import { useInView } from "@/shared/lib/useInView";
 
 type Props = {
   children: ReactNode;
+  className?: string;
   // Reserve space so mounting the real content doesn't shift the layout (CLS).
   minHeight: number;
   // How early to mount before the block scrolls into view.
   rootMargin?: string;
-  className?: string;
 };
 
 // Defers mounting (and therefore hydration + chunk download) of a below-the-fold

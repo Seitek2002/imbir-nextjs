@@ -18,8 +18,8 @@ export const InitialAuthProvider = ({
   value,
   children,
 }: {
-  value: InitialAuth;
   children: ReactNode;
+  value: InitialAuth;
 }) => (
   <InitialAuthContext.Provider value={value}>
     {children}

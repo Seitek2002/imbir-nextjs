@@ -8,11 +8,11 @@ export const SelectField = ({
   disabled,
   onClick,
 }: {
-  label: string;
-  value?: string;
-  placeholder: string;
   disabled?: boolean;
+  label: string;
   onClick: () => void;
+  placeholder: string;
+  value?: string;
 }) => (
   <div className="space-y-1.5">
     <span className="text-sm font-medium text-overlay">{label}</span>

@@ -38,20 +38,20 @@ export type LocationValue = {
 };
 
 type Props = {
-  latitude: string;
-  longitude: string;
-  // Город и страна из формы: определяют, на чём открыть карту и в каких
-  // границах Nominatim ищет введённый адрес.
-  city?: string;
-  country?: string;
   // Адрес показывается в плашке под картой. Если передан onAddressChange,
   // выбор точки на карте перезапишет его обратным геокодингом.
   address?: string;
-  onChange: (value: LocationValue) => void;
-  onAddressChange?: (address: string) => void;
-  label?: string;
-  error?: string;
+  // Город и страна из формы: определяют, на чём открыть карту и в каких
+  // границах Nominatim ищет введённый адрес.
+  city?: string;
   className?: string;
+  country?: string;
+  error?: string;
+  label?: string;
+  latitude: string;
+  longitude: string;
+  onAddressChange?: (address: string) => void;
+  onChange: (value: LocationValue) => void;
 };
 
 // Пин рисуем divIcon'ом, а не картинкой Leaflet: дефолтные marker-icon.png
@@ -103,7 +103,7 @@ export const LocationPicker: FC<Props> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<LeafletMarker | null>(null);
-  const leafletRef = useRef<typeof import("leaflet") | null>(null);
+  const leafletRef = useRef<null | typeof import("leaflet")>(null);
   // Колбэки читаются из обработчиков Leaflet, которые навешиваются один раз при
   // инициализации карты. Через ref — чтобы не пересоздавать карту на каждый
   // рендер родителя и при этом не звать устаревший onChange.
@@ -111,7 +111,7 @@ export const LocationPicker: FC<Props> = ({
   const onAddressChangeRef = useRef(onAddressChange);
   // Точка, поставленная изнутри компонента. Нужна, чтобы эффект синхронизации
   // не дёргал карту в ответ на наше же изменение — пин уже там, где надо.
-  const selfSetRef = useRef<string | null>(null);
+  const selfSetRef = useRef<null | string>(null);
   // Ставится перед программным setQuery (после выбора подсказки, обратного
   // геокодинга и т.д.), чтобы эффект поиска не запустил повторный запрос по
   // тому же адресу и не открыл список подсказок заново.

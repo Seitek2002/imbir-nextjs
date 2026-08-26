@@ -29,7 +29,8 @@ export default async function Page({
   const currentExp = typeof params.doc_exp === "string" ? params.doc_exp : null;
   const currentPrice =
     typeof params.doc_price === "string" ? params.doc_price : null;
-  const currentSpec = typeof params.doc_spec === "string" ? params.doc_spec : null;
+  const currentSpec =
+    typeof params.doc_spec === "string" ? params.doc_spec : null;
   const selectedSpecs = currentSpec?.split(",").filter(Boolean) ?? [];
   const [priceMin, priceMax] = currentPrice
     ? currentPrice.split("-").map(Number)

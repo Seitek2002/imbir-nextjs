@@ -33,11 +33,11 @@ import { Step6Equipment } from "./Step6Equipment";
 import { Step7Completion } from "./Step7Completion";
 
 type Props = {
-  step: ClinicStep;
+  isLoading?: boolean;
+  onBack: () => void;
   onContinue: (fromStep: ClinicStep) => void;
   onSubmit: (data: ClinicFormData) => void;
-  onBack: () => void;
-  isLoading?: boolean;
+  step: ClinicStep;
 };
 
 const emptyDay: ScheduleDay = { from: "", to: "" };
@@ -107,7 +107,7 @@ export const ClinicRegistrationForm = ({
   // Почта на этом шаге необязательна (isValid её не требует) — проверяем
   // только если что-то ввели, формат не валидируем (этот шаг и раньше не
   // валидировал формат — оставляем эту часть бэку на финальном сабмите).
-  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<null | string>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   const verify = useVerifyContact({

@@ -1,65 +1,65 @@
 export type DoctorService = {
-  id: string;
-  name: string;
   description: string;
+  id: string;
   isPrimary: boolean;
+  name: string;
 };
 
 export type DoctorAppointment = {
   id: string;
-  patientName: string;
   lastVisit: string;
-  status: "upcoming" | "completed";
+  patientName: string;
+  status: "completed" | "upcoming";
 };
 
 export type DoctorReview = {
-  id: string;
-  authorName: string;
-  authorInitial: string;
   // Фото автора, если он его загрузил. Иначе рисуем authorInitial.
   authorAvatarUrl?: string;
-  rating: number;
+  authorInitial: string;
+  authorName: string;
   date: string;
-  text: string;
-  replyTime?: string;
+  id: string;
+  rating: number;
   reply?: string;
+  replyTime?: string;
+  text: string;
 };
 
 export type DoctorProfileData = {
-  fullName: string;
-  photo?: string;
-  specialty: string;
+  additionalEducation: string[];
   additionalSpecialty: string;
-  experienceYears: string;
+  birthDate: string;
+  certificates: string[];
+  city: string;
+  consultationPrice: string;
   currentPosition: string;
-  workplace: string;
-  qualification: string;
-  scientificDegree: string;
+  diplomaSpecialty: string;
+  email: string;
   // Названия из справочника (GET /api/references/equipment|conditions|
   // payment-methods/), выбранные через CheckboxGroup — не свободный текст.
   equipment: string[];
-  patientConditions: string[];
-  paymentMethods: string[];
+  experienceYears: string;
+  fullName: string;
   gender: string;
-  birthDate: string;
-  city: string;
-  languages: string;
-  phone: string;
-  email: string;
-  university: string;
   graduationYear: string;
   internship: string;
-  residency: string;
-  diplomaSpecialty: string;
-  additionalEducation: string[];
-  licenseNumber: string;
-  certificates: string[];
-  rating: number;
-  totalReviews: number;
   // Приём онлайн, цена видеоконсультации и публикация профиля в каталоге.
   // Всё три — писчие поля /api/doctor/profile/, редактируются в секции
   // «Профессиональные данные».
   isOnlineAvailable: boolean;
-  consultationPrice: string;
   isPublished: boolean;
+  languages: string;
+  licenseNumber: string;
+  patientConditions: string[];
+  paymentMethods: string[];
+  phone: string;
+  photo?: string;
+  qualification: string;
+  rating: number;
+  residency: string;
+  scientificDegree: string;
+  specialty: string;
+  totalReviews: number;
+  university: string;
+  workplace: string;
 };

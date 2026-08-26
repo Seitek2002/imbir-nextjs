@@ -182,7 +182,7 @@ const formatClinicSchedule = (
   // Группируем ПОДРЯД ИДУЩИЕ (в порядке Пн→Вс) дни с одинаковым временем в
   // один диапазон — "ПН-ПТ • 9:00-18:00" вместо пяти отдельных строк, и
   // "Ежедневно • 0:00-23:59", если время совпадает вообще у всех 7 дней.
-  const ranges: { from: string; to: string; time: string }[] = [];
+  const ranges: { from: string; time: string; to: string }[] = [];
   for (const day of week) {
     if (!day.enabled) continue;
     const last = ranges[ranges.length - 1];
@@ -273,7 +273,7 @@ const adaptReview = (r: ApiReview): MockReviewItem => ({
 export const api = {
   // Принимает либо просто город (как раньше), либо полный набор фильтров —
   // так вызовы api.getDoctors(city) на других страницах остаются рабочими.
-  getDoctors: (filters?: string | DoctorFilters, signal?: AbortSignal) => {
+  getDoctors: (filters?: DoctorFilters | string, signal?: AbortSignal) => {
     const resolved: DoctorFilters =
       typeof filters === "string" ? { city: filters } : (filters ?? {});
     return getDoctors(resolved, signal).then((r) => r.data.map(adaptDoctor));

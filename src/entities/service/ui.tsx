@@ -12,21 +12,21 @@ import { useAuthStore } from "@/shared/store";
 import { Button, ImageWithFallback } from "@/shared/ui";
 
 type Props = {
-  id?: string;
-  name: string;
   category: string;
   clinic?: string;
   clinicId?: string;
+  id?: string;
+  image?: StaticImageData | string;
+  isSaved?: boolean;
+  name: string;
+  onBook?: () => void;
+  onSave?: () => void;
+  price?: null | number | string;
   // Рейтинга может не быть (например, у услуги из избранного) — тогда строку
   // с оценкой не рисуем вовсе, а не показываем «0 (0)».
   rating?: number;
   reviews?: number;
-  price?: number | string | null;
-  image?: string | StaticImageData;
-  onBook?: () => void;
-  onSave?: () => void;
-  isSaved?: boolean;
-  variant?: "vertical" | "horizontal";
+  variant?: "horizontal" | "vertical";
 };
 
 const SaveButton: FC<{

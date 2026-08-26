@@ -89,9 +89,9 @@ export const ClinicInvitesPage: FC = () => {
   const { profile, rawProfile } = useClinicCabinet();
   const authUser = useAuthStore((s) => s.user);
   const queryClient = useQueryClient();
-  const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
+  const [selectedBranchId, setSelectedBranchId] = useState<null | string>(null);
   const [expiresAt, setExpiresAt] = useState("");
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<null | string>(null);
 
   const branchOptions = [
     { id: null, label: "Главный офис", address: profile?.fullAddress ?? "" },
@@ -137,7 +137,7 @@ export const ClinicInvitesPage: FC = () => {
     },
   });
 
-  const handleCopy = (linkId: string, branchId: number | null) => {
+  const handleCopy = (linkId: string, branchId: null | number) => {
     const params = new URLSearchParams({ invite_clinic_id: clinicId });
     if (branchId != null) params.set("invite_branch_id", String(branchId));
     const url = `${window.location.origin}/register/doctor?${params.toString()}`;
@@ -146,7 +146,7 @@ export const ClinicInvitesPage: FC = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const getBranchLabel = (branchId: number | null) => {
+  const getBranchLabel = (branchId: null | number) => {
     if (branchId == null) return profile?.name ?? "Главный офис";
     const opt = branchOptions.find((b) => b.id === String(branchId));
     return opt ? `Филиал — ${opt.address}` : `Филиал #${branchId}`;

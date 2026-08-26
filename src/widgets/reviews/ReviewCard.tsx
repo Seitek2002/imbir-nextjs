@@ -4,15 +4,15 @@ import { StarIcon } from "@/shared/assets/icons";
 import { ImageWithFallback } from "@/shared/ui";
 
 export type ReviewProps = {
-  id?: string | number;
   author: string;
-  date: string;
-  text: string;
-  rating: number;
   // Абсолютный URL фото автора. Приходит из author.avatar_url (/api/reviews/),
   // но только у тех, кто загрузил фото — остальным показываем инициал.
   avatarUrl?: string;
-  reply?: { text: string; date: string } | null;
+  date: string;
+  id?: number | string;
+  rating: number;
+  reply?: { date: string; text: string } | null;
+  text: string;
 };
 
 export const ReviewCard: FC<ReviewProps> = ({

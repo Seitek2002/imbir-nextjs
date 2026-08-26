@@ -66,7 +66,7 @@ export const getUserStatus = async (
 //
 // Ошибку не пробрасываем: футер и страницы условий обязаны отрисоваться даже
 // если бэк лежит. Вызывающий код в этом случае показывает свои значения.
-export const getSiteSettings = async (): Promise<SiteSettings | null> => {
+export const getSiteSettings = async (): Promise<null | SiteSettings> => {
   try {
     const res = await fetch(`${API_BASE_URL}/api/references/site-settings/`, {
       next: { revalidate: 60 },

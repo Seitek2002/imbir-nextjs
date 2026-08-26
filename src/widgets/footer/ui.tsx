@@ -40,7 +40,7 @@ const ColumnHeading: FC<{ children: ReactNode }> = ({ children }) => (
   </h3>
 );
 
-const FooterLink: FC<{ href: string; children: ReactNode }> = ({
+const FooterLink: FC<{ children: ReactNode; href: string }> = ({
   href,
   children,
 }) => (

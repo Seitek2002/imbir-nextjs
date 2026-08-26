@@ -6,13 +6,13 @@ import { HeartIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 type Props = {
+  onSave?: () => void;
   // Состояние приходит снаружи (из избранного на сервере). Своего состояния
   // кнопка не держит: раньше она переключалась локально и расходилась с тем,
   // что реально сохранено.
   saved?: boolean;
   savedLabel?: string;
   unsavedLabel?: string;
-  onSave?: () => void;
 };
 
 export const SaveButton: FC<Props> = ({

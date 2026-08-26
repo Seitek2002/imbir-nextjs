@@ -39,7 +39,7 @@ export const updateProfile = async (
 };
 
 export const getProfileAppointments = async (
-  status?: "upcoming" | "completed" | "cancelled",
+  status?: "cancelled" | "completed" | "upcoming",
   page = 1,
   page_size = 20,
 ): Promise<PaginatedResponse<ProfileAppointment>> => {

@@ -1,13 +1,13 @@
-export type ReviewTargetType = "doctor" | "clinic" | "service";
+export type ReviewTargetType = "clinic" | "doctor" | "service";
 
 // Backend returns author/target as objects despite Swagger typing them string.
 // avatar_url приходит относительным ("/media/users/avatars/xxx.webp") и только
 // если фото загружено — у авторов без аватара поля просто нет.
 // Абсолютный адрес собирает toMediaUrl (shared/lib/media.ts).
 export type ReviewParty = {
-  id: number;
+  avatar_url?: null | string;
   full_name: string;
-  avatar_url?: string | null;
+  id: number;
 };
 export type ReviewAuthor = ReviewParty | string;
 
@@ -17,32 +17,32 @@ export type ReviewAuthor = ReviewParty | string;
 // против {"id":270,"full_name":"..."} для врача. Раньше код читал только
 // full_name, из-за чего название клиники в отзывах не отображалось.
 export type ReviewTarget = {
-  id: number;
+  avatar_url?: null | string;
   full_name?: string;
+  id: number;
   name?: string;
-  avatar_url?: string | null;
 };
 
 export type ReviewTargetValue = ReviewTarget | string;
 
 // Ответ на отзыв от врача/клиники. null, если ответа ещё нет.
 export type ReviewReply = {
-  text: string;
   created_at: string;
+  text: string;
 } | null;
 
 export type ReviewItem = {
-  id: number;
+  appointment_id?: null | number;
   author?: ReviewAuthor;
+  created_at: string;
+  id: number;
+  rating: number;
+  reply?: ReviewReply;
   // /api/profile/reviews/ отдаёт target (на кого отзыв) вместо author.
   target?: ReviewTargetValue;
-  target_type: ReviewTargetType;
   target_id?: number;
-  appointment_id?: number | null;
-  rating: number;
+  target_type: ReviewTargetType;
   text: string;
-  reply?: ReviewReply;
-  created_at: string;
 };
 
 export type PaginatedReviewsResponse = {
@@ -58,10 +58,10 @@ export type PaginatedReviewsResponse = {
 // POST /api/reviews/ — target_id обязателен в теле (не query-параметр).
 // appointment_id опционален: привязывает отзыв к завершённому приёму.
 export type CreateReviewRequest = {
-  target_type: ReviewTargetType;
-  target_id: number;
   appointment_id?: number;
   rating: number;
+  target_id: number;
+  target_type: ReviewTargetType;
   text?: string;
 };
 

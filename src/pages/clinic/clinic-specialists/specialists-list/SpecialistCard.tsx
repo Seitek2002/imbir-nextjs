@@ -34,14 +34,14 @@ export const SpecialistRowSkeleton: FC = () => (
 );
 
 export type Specialist = {
-  id: string;
-  name: string;
-  specialty: string;
   clinic: string;
+  experience: number;
+  id: string;
+  image?: string;
+  name: string;
   rating: number;
   reviews: number;
-  experience: number;
-  image?: string;
+  specialty: string;
 };
 
 type Props = Specialist & {
@@ -49,8 +49,8 @@ type Props = Specialist & {
 };
 
 const DeleteButton: FC<{
-  onClick: (e: React.MouseEvent) => void;
   className?: string;
+  onClick: (e: React.MouseEvent) => void;
 }> = ({ onClick, className }) => (
   <button
     onClick={onClick}

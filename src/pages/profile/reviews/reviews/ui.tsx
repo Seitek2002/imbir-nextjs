@@ -18,8 +18,8 @@ import type { ReviewType, UserReview } from "./user-review/model";
 import { UserReviewCard } from "./user-review/ui";
 
 type Props = {
-  reviews: UserReview[];
   activeTab: ReviewType;
+  reviews: UserReview[];
 };
 
 // Сколько отзывов видно сразу и на сколько прирастает список по кнопке.
@@ -28,8 +28,8 @@ const PAGE_SIZE = 2;
 
 export const ProfileReviews: FC<Props> = ({ reviews, activeTab }) => {
   const queryClient = useQueryClient();
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [editTarget, setEditTarget] = useState<UserReview | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<null | string>(null);
+  const [editTarget, setEditTarget] = useState<null | UserReview>(null);
 
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [countedTab, setCountedTab] = useState(activeTab);

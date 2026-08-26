@@ -9,11 +9,11 @@ import { useScrollLock } from "@/shared/lib/useScrollLock";
 import { cn } from "@/shared/lib/utils";
 
 type Props = {
+  children: ReactNode;
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
-  children: ReactNode;
   panelClassName?: string;
+  title?: string;
 };
 
 const DURATION = 200;

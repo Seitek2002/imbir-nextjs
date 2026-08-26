@@ -9,10 +9,10 @@ import { useScrollLock } from "@/shared/lib/useScrollLock";
 import { Button } from "@/shared/ui";
 
 type Props = {
+  appointmentId?: null | number;
+  isOnline: boolean;
   isOpen: boolean;
   onClose: () => void;
-  appointmentId?: number | null;
-  isOnline: boolean;
 };
 
 const DURATION = 200;

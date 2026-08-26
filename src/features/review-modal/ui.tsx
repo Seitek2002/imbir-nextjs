@@ -8,17 +8,17 @@ import { useScrollLock } from "@/shared/lib/useScrollLock";
 import { Button, ImageWithFallback } from "@/shared/ui";
 
 type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  doctorName: string;
-  doctorSpecialty: string;
   doctorClinic: string;
   doctorImage?: string;
-  initialRating?: number;
+  doctorName: string;
+  doctorSpecialty: string;
   initialComment?: string;
+  initialRating?: number;
+  isOpen: boolean;
+  onClose: () => void;
   // Может вернуть промис — тогда модалка закроется только после успеха.
-  onSubmit: (rating: number, comment: string) => void | Promise<unknown>;
+  onSubmit: (rating: number, comment: string) => Promise<unknown> | void;
+  title?: string;
 };
 
 const DURATION = 200;

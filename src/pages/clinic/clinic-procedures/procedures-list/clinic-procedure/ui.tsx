@@ -10,19 +10,19 @@ import { hasPrice } from "@/shared/lib/price";
 import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
-  id: string;
-  name: string;
   category: string;
   clinic: string;
-  price?: number;
+  id: string;
   image?: string;
-  reviews?: number;
+  name: string;
   onDelete?: (id: string) => void;
+  price?: number;
+  reviews?: number;
 };
 
 const DeleteButton: FC<{
-  onClick: (e: React.MouseEvent) => void;
   className?: string;
+  onClick: (e: React.MouseEvent) => void;
 }> = ({ onClick, className }) => (
   <button
     onClick={onClick}

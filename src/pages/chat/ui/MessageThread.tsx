@@ -142,10 +142,10 @@ const TypingBubble = () => (
 );
 
 type Props = {
-  messages: ChatThreadMessage[];
-  isLoading: boolean;
   emptyHint: string;
-  error?: string | null;
+  error?: null | string;
+  isLoading: boolean;
+  messages: ChatThreadMessage[];
   pendingReply?: boolean;
 };
 

@@ -90,7 +90,7 @@ const SummarySkeleton: FC = () => (
   </div>
 );
 
-type Tab = "all" | "upcoming" | "completed";
+type Tab = "all" | "completed" | "upcoming";
 
 const TABS = [
   { value: "all" as const, label: "Все" },
@@ -100,7 +100,7 @@ const TABS = [
 
 const STATUS_PILL: Record<
   DoctorAppointment["status"],
-  { label: string; cls: string }
+  { cls: string; label: string }
 > = {
   pending: { label: "Ожидает", cls: "bg-amber-100 text-amber-800" },
   upcoming: { label: "Предстоящая", cls: "bg-primary-tint text-primary" },
@@ -218,7 +218,7 @@ const StatusPill: FC<{ status: DoctorAppointment["status"] }> = ({
 
 export const DoctorAppointmentsPage: FC = () => {
   const [tab, setTab] = useState<Tab>("all");
-  const [summaryId, setSummaryId] = useState<number | null>(null);
+  const [summaryId, setSummaryId] = useState<null | number>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -229,7 +229,7 @@ export const DoctorAppointmentsPage: FC = () => {
   const { mutate: changeStatus } = useMutation({
     mutationFn: (vars: {
       id: number;
-      status: "confirmed" | "completed" | "cancelled";
+      status: "cancelled" | "completed" | "confirmed";
     }) => updateAppointmentStatus(vars.id, vars.status),
     onSuccess: (_, vars) => {
       toast.success("Статус записи обновлён");

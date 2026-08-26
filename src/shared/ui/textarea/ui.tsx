@@ -4,11 +4,11 @@ import { WarningIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 type Props = {
-  label?: string;
-  labelClassName?: string;
   className?: string;
   error?: string;
   hint?: string;
+  label?: string;
+  labelClassName?: string;
 } & TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 export const Textarea: FC<Props> = ({

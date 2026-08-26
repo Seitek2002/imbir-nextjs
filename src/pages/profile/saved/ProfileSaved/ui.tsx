@@ -17,11 +17,11 @@ import { parsePrice } from "@/shared/lib/price";
 import { SavedItem, SavedType } from "../model";
 
 type Props = {
-  items: SavedItem[];
   activeTab: SavedType;
+  items: SavedItem[];
 };
 
-const toRating = (value?: string | null) => {
+const toRating = (value?: null | string) => {
   if (!value) return undefined;
   const parsed = parseFloat(value);
   return Number.isNaN(parsed) ? undefined : parsed;

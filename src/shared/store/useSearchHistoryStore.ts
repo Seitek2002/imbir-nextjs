@@ -2,10 +2,10 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface SearchHistoryState {
-  history: string[];
   addSearch: (query: string) => void;
-  removeSearch: (query: string) => void;
   clearHistory: () => void;
+  history: string[];
+  removeSearch: (query: string) => void;
 }
 
 export const useSearchHistoryStore = create<SearchHistoryState>()(

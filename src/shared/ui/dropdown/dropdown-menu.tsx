@@ -7,14 +7,14 @@ import { Button } from "@/shared/ui";
 import { useDropdownSwipe } from "./use-dropdown-swipe";
 
 type MenuProps = {
+  children: ReactNode;
   isActive: boolean;
   label?: string;
+  onClose: () => void;
+  onSearchChange: (val: string) => void;
   placeholder: string;
   searchable: boolean;
   searchQuery: string;
-  onSearchChange: (val: string) => void;
-  onClose: () => void;
-  children: ReactNode;
 };
 
 export const DropdownMenu: FC<MenuProps> = ({

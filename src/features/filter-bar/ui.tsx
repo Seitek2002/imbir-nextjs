@@ -10,15 +10,15 @@ import { useCityStore } from "@/shared/store";
 import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 
 type Props = {
-  title?: string;
-  prefix: string;
-  fields?: {
-    specialty?: boolean;
-    experience?: boolean;
-    rating?: boolean;
-    price?: boolean;
-  };
   children?: ReactNode;
+  fields?: {
+    experience?: boolean;
+    price?: boolean;
+    rating?: boolean;
+    specialty?: boolean;
+  };
+  prefix: string;
+  title?: string;
 };
 
 const RATING_OPTIONS = [
@@ -72,10 +72,10 @@ export const FilterBar: FC<Props> = ({
 
   const experienceDraftRef = useRef(experience);
   const priceDraftRef = useRef(price);
-  const experienceCommitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+  const experienceCommitTimerRef = useRef<null | ReturnType<typeof setTimeout>>(
     null,
   );
-  const priceCommitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+  const priceCommitTimerRef = useRef<null | ReturnType<typeof setTimeout>>(
     null,
   );
 
@@ -95,7 +95,7 @@ export const FilterBar: FC<Props> = ({
     [],
   );
 
-  const updateURL = (key: string, value: string | null) => {
+  const updateURL = (key: string, value: null | string) => {
     const params = new URLSearchParams(window.location.search);
     if (value) {
       params.set(`${prefix}_${key}`, value);

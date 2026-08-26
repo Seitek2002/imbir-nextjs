@@ -12,7 +12,7 @@ export const doctorKeys = {
   lists: () => [...doctorKeys.all, "list"] as const,
   list: (filters: object) => [...doctorKeys.lists(), filters] as const,
   details: () => [...doctorKeys.all, "detail"] as const,
-  detail: (id: string | number) => [...doctorKeys.details(), id] as const,
+  detail: (id: number | string) => [...doctorKeys.details(), id] as const,
 };
 
 export const clinicKeys = {
@@ -20,7 +20,7 @@ export const clinicKeys = {
   lists: () => [...clinicKeys.all, "list"] as const,
   list: (filters: object) => [...clinicKeys.lists(), filters] as const,
   details: () => [...clinicKeys.all, "detail"] as const,
-  detail: (id: string | number) => [...clinicKeys.details(), id] as const,
+  detail: (id: number | string) => [...clinicKeys.details(), id] as const,
 };
 
 export const serviceKeys = {
@@ -28,7 +28,7 @@ export const serviceKeys = {
   lists: () => [...serviceKeys.all, "list"] as const,
   list: (filters: object) => [...serviceKeys.lists(), filters] as const,
   details: () => [...serviceKeys.all, "detail"] as const,
-  detail: (id: string | number) => [...serviceKeys.details(), id] as const,
+  detail: (id: number | string) => [...serviceKeys.details(), id] as const,
 };
 
 export const searchKeys = {
@@ -38,7 +38,7 @@ export const searchKeys = {
 
 export const reviewKeys = {
   all: ["reviews"] as const,
-  byTarget: (type: string, id: string | number) =>
+  byTarget: (type: string, id: number | string) =>
     [...reviewKeys.all, type, id] as const,
 };
 

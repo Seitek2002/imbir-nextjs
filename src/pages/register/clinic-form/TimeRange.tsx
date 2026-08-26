@@ -1,9 +1,9 @@
 import type { ScheduleDay } from "../model/types";
 
 type Props = {
-  value: ScheduleDay;
-  onChange: (v: ScheduleDay) => void;
   disabled?: boolean;
+  onChange: (v: ScheduleDay) => void;
+  value: ScheduleDay;
 };
 
 export const TimeRange = ({ value, onChange, disabled }: Props) => (

@@ -10,18 +10,18 @@ export const INTERNSHIP_DEGREE = "Интернатура";
 export const RESIDENCY_DEGREE = "Ординатура";
 
 export type ApiEducationEntry = {
-  institution: string;
   degree?: string;
+  institution: string;
   year?: number;
 };
 
 export type EducationForm = {
-  university: string;
+  additionalEducation: string[];
   diplomaSpecialty: string;
   graduationYear: string;
   internship: string;
   residency: string;
-  additionalEducation: string[];
+  university: string;
 };
 
 export const EMPTY_EDUCATION_FORM: EducationForm = {

@@ -8,7 +8,7 @@ import type { MyDataTab } from "@/widgets/doctor/layout";
 import { ChevronRightIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 
-type Item = { id: MyDataTab; label: string; icon: ReactNode };
+type Item = { icon: ReactNode; id: MyDataTab; label: string };
 
 const ITEMS: Item[] = [
   {

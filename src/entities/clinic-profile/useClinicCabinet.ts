@@ -28,7 +28,7 @@ import type {
   WorkDaySchedule,
 } from "./model";
 
-type ApiScheduleDay = { from: string; to: string; enabled: boolean };
+type ApiScheduleDay = { enabled: boolean; from: string; to: string };
 type ApiSchedule = Record<string, ApiScheduleDay> | undefined;
 
 const mapDay = (day?: ApiScheduleDay): WorkDaySchedule => ({

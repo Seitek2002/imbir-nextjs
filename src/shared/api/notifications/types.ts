@@ -1,17 +1,17 @@
 export type NotificationType =
   | "appointment_reminder"
-  | "new_review"
   | "new_message"
+  | "new_review"
   | "system";
 
 export type Notification = {
-  id: number;
-  type: NotificationType;
-  title: string;
   body: string;
-  is_read: boolean;
   created_at: string;
+  id: number;
+  is_read: boolean;
   payload?: Record<string, unknown>;
+  title: string;
+  type: NotificationType;
 };
 
 export type NotificationsResponse = {

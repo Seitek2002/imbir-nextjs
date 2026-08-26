@@ -9,12 +9,12 @@ import { useAuthStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
 type Props = {
-  name: string;
   category: string;
-  price?: string | number | null;
   clinicName?: string;
   href: string;
+  name: string;
   onBook?: () => void;
+  price?: null | number | string;
 };
 
 // Уменьшенная версия ServiceCard — для мест, где нужен узнаваемый вид

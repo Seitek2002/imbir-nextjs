@@ -86,7 +86,7 @@ export const ClinicsPage: FC<Props> = ({ initialCity }) => {
     : [undefined, undefined];
 
   // 2. Город, поиск, оценка, цена и стаж уходят в реальные query-параметры API.
-  const filters: Omit<ClinicFilters, "page" | "page_size"> = {
+  const filters: Omit<ClinicFilters, "page_size" | "page"> = {
     city: selectedCity || undefined,
     search: activeQuery || undefined,
     specialization: currentSpec || undefined,

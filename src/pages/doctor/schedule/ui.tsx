@@ -28,12 +28,12 @@ const DAYS: { key: keyof WeekSchedule; label: string }[] = [
   { key: "sunday", label: "Воскресенье" },
 ];
 
-type DayState = { from: string; to: string; enabled: boolean };
+type DayState = { enabled: boolean; from: string; to: string };
 type FormState = {
   days: Record<keyof WeekSchedule, DayState>;
+  emergency24: boolean;
   lunchFrom: string;
   lunchTo: string;
-  emergency24: boolean;
 };
 
 const toFormState = (api: DoctorSchedule): FormState => ({
@@ -103,7 +103,7 @@ const toApiBody = (form: FormState): DoctorSchedule => ({
   emergency_24_7: form.emergency24,
 });
 
-const Toggle: FC<{ on: boolean; onClick: () => void; label?: string }> = ({
+const Toggle: FC<{ label?: string; on: boolean; onClick: () => void }> = ({
   on,
   onClick,
   label,

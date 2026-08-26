@@ -10,9 +10,9 @@ const Section = ({
   title,
   children,
 }: {
+  children: React.ReactNode;
   num: number;
   title: string;
-  children: React.ReactNode;
 }) => (
   <div className="mb-8">
     <h2 className="text-lg font-semibold text-foreground mb-3">

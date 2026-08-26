@@ -1,36 +1,36 @@
 import { DaySchedule, LunchBreak } from "../auth/types";
 
 export type DoctorWorkplaceSchedule = {
-  [day: string]: Pick<DaySchedule, "from" | "to" | "enabled">;
+  [day: string]: Pick<DaySchedule, "enabled" | "from" | "to">;
 };
 
 export type DoctorWorkplace = {
-  id?: number;
-  name?: string;
+  clinic_address?: string;
   clinic_id?: number;
   clinic_name?: string;
-  clinic_address?: string;
+  id?: number;
+  lunch_break?: LunchBreak;
+  name?: string;
   price?: number;
   schedule: DoctorWorkplaceSchedule | string;
-  lunch_break?: LunchBreak;
 };
 
 export type DoctorListItem = {
-  id: number;
+  city: string;
+  experience_years: number;
   full_name: string;
-  specialty: string;
-  photo: string | null;
+  id: number;
+  is_online_available: boolean;
+  photo: null | string;
   rating: number;
   reviews_count: number;
-  experience_years: number;
-  is_online_available: boolean;
-  city: string;
+  specialty: string;
   workplaces: DoctorWorkplace[];
 };
 
 export type EducationItem = {
-  institution: string;
   degree: string;
+  institution: string;
   year: number;
 };
 
@@ -40,45 +40,45 @@ export type EducationItem = {
 // не одновременно.
 export type WorkExperienceItem = {
   clinic: string;
-  position: string;
   from?: number;
-  to?: number | null;
+  position: string;
   qualification?: string;
   scientific_degree?: string;
+  to?: null | number;
 };
 
 export type DoctorDetail = DoctorListItem & {
-  languages: string[];
   about: string;
   education: EducationItem[];
-  work_experience: WorkExperienceItem[];
-  skills: string[];
+  email: null | string;
   equipment: string[];
+  languages: string[];
+  location: { lat: number; lng: number } | null;
   patient_conditions: string[];
   payment_methods: string[];
-  phone: string | null;
-  email: string | null;
-  location: { lat: number; lng: number } | null;
+  phone: null | string;
+  skills: string[];
+  work_experience: WorkExperienceItem[];
 };
 
 export type DoctorFilters = {
-  search?: string;
   city?: string;
-  specialization?: string;
-  min_price?: number;
-  max_price?: number;
-  min_rating?: number;
   is_online?: boolean;
-  payment_method?: string;
-  min_experience?: number;
   max_experience?: number;
+  max_price?: number;
+  min_experience?: number;
+  min_price?: number;
+  min_rating?: number;
   page?: number;
   page_size?: number;
+  payment_method?: string;
+  search?: string;
+  specialization?: string;
 };
 
 export type AvailableSlot = {
-  time: string; // "HH:mm"
   available: boolean;
+  time: string; // "HH:mm"
 };
 
 export type AvailableSlotsResponse = {

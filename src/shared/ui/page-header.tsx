@@ -9,9 +9,9 @@ import { HeaderBackIcon } from "@/shared/assets/icons";
 import { IconBtn } from "./icon-button";
 
 type Props = {
-  title: string;
   backTo?: string;
   onBack?: () => void;
+  title: string;
 };
 
 export const PageHeader: FC<Props> = ({ title, backTo, onBack }) => {

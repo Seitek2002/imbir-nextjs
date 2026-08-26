@@ -1,8 +1,8 @@
 // ── User-to-user chat ───────────────────────────────────────────────────────
 
 export type ChatParticipant = {
-  id: number;
   full_name: string;
+  id: number;
 };
 
 export type ChatRoomLastMessage = {
@@ -11,25 +11,25 @@ export type ChatRoomLastMessage = {
 };
 
 export type ChatRoom = {
-  id: number;
-  participants: ChatParticipant[];
-  last_message: ChatRoomLastMessage | null;
   created_at: string;
+  id: number;
+  last_message: ChatRoomLastMessage | null;
+  participants: ChatParticipant[];
   // Кол-во непрочитанных сообщений в комнате. Заполняется бэком; пока поля нет —
   // счётчик в хедере остаётся 0. См. бейдж в HeaderChatButton.
   unread_count?: number;
 };
 
 export type ChatMessage = {
-  id: number;
-  // null — системное уведомление (напр. о созданной онлайн-записи).
-  sender: ChatParticipant | null;
-  content: string;
-  created_at: string;
-  is_read: boolean;
   // Backend пока не отдаёт поле, поэтому для старого контракта оно опционально.
   // Когда появится, frontend перестанет сопоставлять запись по дате/времени.
-  appointment_id?: number | null;
+  appointment_id?: null | number;
+  content: string;
+  created_at: string;
+  id: number;
+  is_read: boolean;
+  // null — системное уведомление (напр. о созданной онлайн-записи).
+  sender: ChatParticipant | null;
 };
 
 export type CreateChatRoomRequest = {
@@ -50,27 +50,27 @@ export type OutgoingChatMessage = {
 };
 
 export type IncomingChatMessage = {
+  appointment_id?: null | number;
+  content: string;
+  created_at: string;
   id: number;
   // null — системное уведомление (напр. о созданной онлайн-записи).
   sender: ChatParticipant | null;
-  content: string;
-  created_at: string;
-  appointment_id?: number | null;
   // Обычное сообщение приходит без type (или с "message"); typing — отдельно.
   type?: "message";
 };
 
 export type ChatConsultation = {
-  id: number;
   date: string;
-  time: string;
+  doctor?: ChatParticipant | null;
+  id: number;
   is_online: boolean;
-  status: string;
   // Кто вторая сторона записи. /api/doctor/appointments/ отдаёт patient,
   // /api/profile/appointments/ — doctor. Нужно, чтобы отобрать записи именно
   // этого чата: списки возвращают ВСЕ записи пользователя, а не по собеседнику.
   patient?: ChatParticipant | null;
-  doctor?: ChatParticipant | null;
+  status: string;
+  time: string;
 };
 
 // Итог видео-консультации: расшифровка разговора и ссылка на .docx.
@@ -78,25 +78,25 @@ export type ChatConsultation = {
 export type ConsultationSummary = {
   appointmentId: number;
   date: string; // YYYY-MM-DD
-  time: string; // HH:mm
-  // Имя второй стороны — для заголовка «…разговора с пациентом Имя».
-  partnerName: string;
   // Абсолютная ссылка на .docx (пустая, если бэк отдал только текст).
   docxUrl: string;
+  // Имя второй стороны — для заголовка «…разговора с пациентом Имя».
+  partnerName: string;
   text: string;
+  time: string; // HH:mm
 };
 
 // Индикатор «печатает…» — тот же сокет, поле type различает кадр.
 export type TypingOutgoing = {
-  type: "typing";
   is_typing: boolean;
+  type: "typing";
 };
 
 export type TypingIncoming = {
+  is_typing: boolean;
   type: "typing";
   user_id: number;
   user_name: string;
-  is_typing: boolean;
 };
 
 // Любой кадр из сокета комнаты: сообщение или событие typing.
@@ -104,31 +104,31 @@ export type IncomingSocketFrame = IncomingChatMessage | TypingIncoming;
 
 // ── AI assistant chat (room 0) ──────────────────────────────────────────────
 
-export type AiChatRole = "user" | "assistant";
+export type AiChatRole = "assistant" | "user";
 
 export type AiRecommendedDoctor = {
-  id: number;
   full_name: string;
-  specialty: string;
-  photo: string | null;
-  rating: string;
+  id: number;
   is_online_available: boolean;
+  photo: null | string;
+  rating: string;
+  specialty: string;
 };
 
 export type AiRecommendedClinic = {
-  id: number;
-  name: string;
-  logo: string | null;
   city: string;
+  id: number;
+  logo: null | string;
+  name: string;
   rating: string;
 };
 
 export type AiRecommendedService = {
+  category: string;
+  clinic: { id: number; name: string } | null;
   id: number;
   name: string;
-  category: string;
   price: string;
-  clinic: { id: number; name: string } | null;
 };
 
 // Ассистент может порекомендовать врачей/клиники/услуги в подходящий момент
@@ -136,17 +136,17 @@ export type AiRecommendedService = {
 // присутствует всегда (не на каждый ответ ассистента есть рекомендации —
 // тогда все три массива просто пустые), максимум по 3 записи в каждом.
 export type AiRecommendations = {
-  doctors: AiRecommendedDoctor[];
   clinics: AiRecommendedClinic[];
+  doctors: AiRecommendedDoctor[];
   services: AiRecommendedService[];
 };
 
 export type AiChatMessage = {
-  id: number;
-  role: AiChatRole;
   content: string;
-  recommendations: AiRecommendations;
   created_at: string;
+  id: number;
+  recommendations: AiRecommendations;
+  role: AiChatRole;
 };
 
 export type SendAiMessageRequest = {

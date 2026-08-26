@@ -34,19 +34,19 @@ const ClinicImageFallback: FC<{ name: string }> = ({ name }) => (
 );
 
 type Props = {
-  id?: string;
-  name: string;
-  rating?: number;
-  reviews?: number;
-  experience: number;
   address?: string;
+  experience: number;
+  id?: string;
   image?: StaticImageData | string;
-  onSave?: () => void;
   isSaved?: boolean;
-  variant?: "vertical" | "horizontal";
+  name: string;
+  onSave?: () => void;
   // Для карточек над сгибом (первые в списке) — грузим фото сразу,
   // без ленивой подгрузки, чтобы не задерживать LCP.
   priority?: boolean;
+  rating?: number;
+  reviews?: number;
+  variant?: "horizontal" | "vertical";
 };
 
 export const ClinicCard: FC<Props> = ({

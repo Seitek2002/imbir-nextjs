@@ -71,7 +71,7 @@ export const DeviceSetup = ({ onJoin }: DeviceSetupProps) => {
   const [audioDeviceId, setAudioDeviceId] = useState("");
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
-  const [deviceError, setDeviceError] = useState<string | null>(null);
+  const [deviceError, setDeviceError] = useState<null | string>(null);
 
   const handlePreviewError = useCallback((error: Error) => {
     if (error.name === "NotAllowedError") {

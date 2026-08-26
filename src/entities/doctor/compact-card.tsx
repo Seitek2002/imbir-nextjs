@@ -10,12 +10,12 @@ import { useAuthStore } from "@/shared/store";
 import { Button, ImageWithFallback } from "@/shared/ui";
 
 type Props = {
-  id: string | number;
+  id: number | string;
   name: string;
-  specialty: string;
-  photo?: string | null;
-  rating?: string | number;
   onBook?: () => void;
+  photo?: null | string;
+  rating?: number | string;
+  specialty: string;
 };
 
 // Уменьшенная версия DoctorCard — для мест, где нужен узнаваемый вид

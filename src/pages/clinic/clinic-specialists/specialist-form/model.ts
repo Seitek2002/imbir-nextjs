@@ -9,33 +9,33 @@ import type {
 // специалиста». Все они теперь реально сохраняются: бэк принимает карточку
 // врача целиком (POST /api/clinic/doctors/ и PATCH /api/clinic/doctors/{id}/).
 export type SpecialistFormState = {
-  fullName: string;
-  gender: string;
+  additionalEducation: string;
+  additionalSpecialization: string;
   birthDate: string;
   city: string;
-  languages: string;
-  phone: string;
-  email: string;
-  password: string;
-  photoPreview?: string;
-  photoFile?: File | null;
-
-  specialization: string;
-  additionalSpecialization: string;
-  experienceYears: string;
-  position: string;
-  workplace: string;
-  qualification: string;
   degree: string;
+  diplomaSpecialty: string;
+  email: string;
+  experienceYears: string;
+  fullName: string;
+  gender: string;
 
-  university: string;
   graduationYear: string;
   internship: string;
-  residency: string;
-  diplomaSpecialty: string;
-  additionalEducation: string;
-
+  languages: string;
   licenseNumber: string;
+  password: string;
+  phone: string;
+  photoFile?: File | null;
+
+  photoPreview?: string;
+  position: string;
+  qualification: string;
+  residency: string;
+  specialization: string;
+  university: string;
+
+  workplace: string;
 };
 
 export const EMPTY_SPECIALIST_FORM: SpecialistFormState = {
@@ -72,7 +72,7 @@ export const EMPTY_SPECIALIST_FORM: SpecialistFormState = {
 // предупредить, а не потерять молча.
 export const splitFullName = (
   fullName: string,
-): { firstName: string; lastName: string; droppedPatronymic?: string } => {
+): { droppedPatronymic?: string; firstName: string; lastName: string } => {
   const [lastName = "", firstName = "", patronymic] = fullName
     .trim()
     .split(/\s+/)
@@ -81,14 +81,14 @@ export const splitFullName = (
 };
 
 // "ДД.ММ.ГГГГ" → "ГГГГ-ММ-ДД"; пусто → null (бэк поле обнуляемое)
-const toApiDate = (v: string): string | null => {
+const toApiDate = (v: string): null | string => {
   const t = v.trim();
   if (!t) return null;
   const m = t.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
   return m ? `${m[3]}-${m[2]}-${m[1]}` : t;
 };
 
-const fromApiDate = (v: string | null | undefined): string => {
+const fromApiDate = (v: null | string | undefined): string => {
   const t = (v ?? "").trim();
   if (!t) return "";
   const m = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -128,7 +128,7 @@ const toApiCourses = (value: string): ClinicDoctorCourse[] =>
 // передаёт готовые массивы.
 export const toDoctorProfileBody = (
   d: SpecialistFormState,
-  specializationIds: { primary: number[]; narrow: number[] },
+  specializationIds: { narrow: number[]; primary: number[] },
 ): ClinicDoctorProfileBody => ({
   gender: d.gender || undefined,
   birth_date: toApiDate(d.birthDate),

@@ -10,8 +10,8 @@ export async function BlogSectionServer({
   variant = "default",
   prioritizeFirstCard = false,
 }: {
-  variant?: "default" | "home";
   prioritizeFirstCard?: boolean;
+  variant?: "default" | "home";
 }) {
   const [posts, categories] = await Promise.all([
     fetchBlogPosts(),

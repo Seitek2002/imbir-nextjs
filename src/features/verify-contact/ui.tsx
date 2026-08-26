@@ -11,7 +11,7 @@ import {
   type VerifyContactState,
 } from "./model";
 
-const CHANNEL_OPTIONS: { value: VerifyChannel; label: string }[] = [
+const CHANNEL_OPTIONS: { label: string; value: VerifyChannel }[] = [
   { value: "email", label: "Почта" },
   { value: "phone", label: "Телефон" },
 ];
@@ -36,10 +36,10 @@ const CheckIcon = () => (
 );
 
 type Props = {
-  state: VerifyContactState;
   // Вызывается после успешного подтверждения: мастер сразу отправляет анкету,
   // чтобы пользователь не жал «Завершить регистрацию» второй раз.
   onConfirmed?: () => void;
+  state: VerifyContactState;
 };
 
 // Блок подтверждения контакта на последнем шаге анкеты. Появляется только

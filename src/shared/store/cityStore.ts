@@ -15,7 +15,9 @@ const writeCityCookie = (city: string) => {
 };
 
 type CityStore = {
+  applyDetectedCity: (city: string) => void;
   city: string;
+  dismiss: () => void;
   // Баннер подтверждения города показан/скрыт (dismiss или подтверждение).
   isSet: boolean;
   // Город выбран пользователем ВРУЧНУЮ (через селектор или «Верно» в баннере).
@@ -23,8 +25,6 @@ type CityStore = {
   // не блокирует автоподстановку задетекченного города.
   manuallySelected: boolean;
   setCity: (city: string) => void;
-  applyDetectedCity: (city: string) => void;
-  dismiss: () => void;
 };
 
 export const useCityStore = create<CityStore>()(

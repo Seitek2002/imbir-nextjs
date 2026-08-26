@@ -39,31 +39,31 @@ import {
 } from "./shared-ui";
 
 type FormState = {
-  name: string;
-  type: string;
-  description: string;
-  country: string;
-  city: string;
-  fullAddress: string;
-  phone: string;
-  website: string;
-  latitude: string;
-  longitude: string;
-  legalName: string;
-  registrationNumber: string;
-  licenseNumber: string;
-  licenseDate: string;
-  licenseAuthority: string;
-  mainDirections: string;
-  narrowDirections: string;
   additionalServices: string;
+  city: string;
+  country: string;
+  days: Record<DayKey, DayState>;
+  description: string;
+  emergency24: boolean;
   equipment: string;
+  fullAddress: string;
+  latitude: string;
+  legalName: string;
+  licenseAuthority: string;
+  licenseDate: string;
+  licenseNumber: string;
+  longitude: string;
+  lunchEnd: string;
+  lunchStart: string;
+  mainDirections: string;
+  name: string;
+  narrowDirections: string;
   patientConditions: string;
   paymentMethods: string;
-  days: Record<DayKey, DayState>;
-  lunchStart: string;
-  lunchEnd: string;
-  emergency24: boolean;
+  phone: string;
+  registrationNumber: string;
+  type: string;
+  website: string;
 };
 
 const buildState = (p: ClinicProfile): FormState => ({
@@ -111,17 +111,17 @@ export type ClinicProfileFormHandle = {
   // (entities/clinic-profile не должен зависеть от entities/specialization).
   getPayload: () => Omit<
     UpdateClinicProfileBody,
-    "primary_specialization_ids" | "narrow_specialization_ids"
+    "narrow_specialization_ids" | "primary_specialization_ids"
   >;
-  getSpecializationNames: () => { primary: string[]; narrow: string[] };
+  getSpecializationNames: () => { narrow: string[]; primary: string[] };
 };
 
 type Props = ClinicProfile & {
   isEditing?: boolean;
-  onUploadPhoto?: (file: File) => Promise<unknown>;
-  onUploadDocument?: (file: File) => Promise<unknown>;
-  isUploadingPhoto?: boolean;
   isUploadingDocument?: boolean;
+  isUploadingPhoto?: boolean;
+  onUploadDocument?: (file: File) => Promise<unknown>;
+  onUploadPhoto?: (file: File) => Promise<unknown>;
 };
 
 export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
@@ -162,7 +162,7 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
     const [d, setD] = useState<FormState>(() => buildState(props));
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [logoPreview, setLogoPreview] = useState<string | undefined>(logo);
-    const [openPhoto, setOpenPhoto] = useState<string | null>(null);
+    const [openPhoto, setOpenPhoto] = useState<null | string>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
     const photoInputRef = useRef<HTMLInputElement>(null);
     const documentInputRef = useRef<HTMLInputElement>(null);

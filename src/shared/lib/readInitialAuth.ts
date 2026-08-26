@@ -31,6 +31,6 @@ export const readInitialAuth = async (): Promise<InitialAuth> => {
   const cookieStore = await cookies();
   return {
     isAuthed: cookieStore.get("is_authed")?.value === "1",
-    role: cookieStore.get("role")?.value as UserRole | undefined,
+    role: cookieStore.get("role")?.value as undefined | UserRole,
   };
 };

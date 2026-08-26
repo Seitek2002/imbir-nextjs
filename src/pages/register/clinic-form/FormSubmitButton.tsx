@@ -1,8 +1,8 @@
 import { Button } from "@/shared/ui";
 
 type Props = {
-  label: string;
   disabled?: boolean;
+  label: string;
   loading?: boolean;
   // Шаг назад по мастеру — используется на всех шагах (на первом уводит к
   // выбору роли), это единственный способ вернуться назад на мобильном:

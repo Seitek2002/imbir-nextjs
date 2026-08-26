@@ -11,11 +11,11 @@ const MINUTES = Array.from({ length: 60 }, (_, i) =>
 );
 
 type Props = {
-  value?: string; // "HH:MM" или ""
-  onChange: (value: string) => void;
-  disabled?: boolean;
-  placeholder?: string;
   className?: string;
+  disabled?: boolean;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  value?: string; // "HH:MM" или ""
 };
 
 // Кастомный выбор времени вместо нативного <input type="time"> — две колонки
@@ -39,7 +39,7 @@ export const TimeField: FC<Props> = ({
   // При открытии подкручиваем колонки к выбранным значениям.
   useEffect(() => {
     if (!open) return;
-    const scrollTo = (wrap: HTMLDivElement | null, selector: string | null) => {
+    const scrollTo = (wrap: HTMLDivElement | null, selector: null | string) => {
       if (!wrap || !selector) return;
       const el = wrap.querySelector<HTMLElement>(selector);
       if (el) wrap.scrollTop = el.offsetTop - wrap.clientHeight / 2 + 16;

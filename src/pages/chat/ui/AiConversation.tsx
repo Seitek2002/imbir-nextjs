@@ -9,8 +9,8 @@ import { MessageComposer } from "./MessageComposer";
 import { MessageThread } from "./MessageThread";
 
 type Props = {
-  onBack: () => void;
   initialMessage?: string;
+  onBack: () => void;
   onInitialSent?: () => void;
 };
 

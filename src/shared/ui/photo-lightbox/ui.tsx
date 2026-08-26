@@ -10,10 +10,10 @@ import { useMounted } from "@/shared/lib/useMounted";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 type Props = {
-  // null — лайтбокс закрыт.
-  src: string | null;
   alt?: string;
   onClose: () => void;
+  // null — лайтбокс закрыт.
+  src: null | string;
 };
 
 // Полноразмерный просмотр одной фотографии поверх остального контента —

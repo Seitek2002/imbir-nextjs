@@ -3,7 +3,7 @@
 // починено на стороне бэка, приводим схему сами: иначе такие ссылки либо
 // требуют http-исключения в remotePatterns (next.config.ts), либо — в обход
 // next/image — блокируются браузером как mixed content.
-export const toHttps = (url: string | null | undefined): string | undefined => {
+export const toHttps = (url: null | string | undefined): string | undefined => {
   if (!url) return undefined;
   return url.replace(
     /^http:\/\/imbir\.sino0on\.ru/,
@@ -21,7 +21,7 @@ const API_ORIGIN = (
 // "/media/users/avatars/xxx.webp". Относительный путь браузер разрешил бы
 // относительно origin фронтенда и получил бы 404, поэтому дописываем хост API.
 export const toMediaUrl = (
-  url: string | null | undefined,
+  url: null | string | undefined,
 ): string | undefined => {
   if (!url) return undefined;
   if (/^(https?:)?\/\//.test(url) || url.startsWith("data:"))

@@ -6,12 +6,12 @@ import Link from "next/link";
 import { SpecializationIllustration } from "@/entities/specialization";
 
 type Props = {
-  title: string;
+  href?: string;
   // Иллюстрация есть не у каждой специализации из справочника — для остальных
   // SpecializationIllustration рисует нейтральный значок.
   image?: StaticImageData | string;
-  href?: string;
   onClick?: () => void;
+  title: string;
 };
 
 export const CategoryCard: FC<Props> = ({ title, image, href, onClick }) => {

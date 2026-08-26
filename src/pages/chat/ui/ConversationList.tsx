@@ -7,12 +7,12 @@ import type { Conversation } from "../model/types";
 import { ConversationItem } from "./ConversationItem";
 
 type Props = {
+  activeId: null | number;
+  className?: string;
   conversations: Conversation[];
-  activeId: number | null;
-  search: string;
   onSearchChange: (value: string) => void;
   onSelect: (id: number) => void;
-  className?: string;
+  search: string;
 };
 
 export const ConversationList: FC<Props> = ({

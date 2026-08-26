@@ -26,7 +26,7 @@ export const GENDER_OPTIONS = [
 
 // Строка «label / значение» с разделителем — тот же паттерн, что в остальных
 // unified-профилях (доктор «Мои данные», клиника «Моя клиника»).
-export const FieldRow: FC<{ label: string; children: React.ReactNode }> = ({
+export const FieldRow: FC<{ children: React.ReactNode; label: string }> = ({
   label,
   children,
 }) => (
@@ -38,7 +38,7 @@ export const FieldRow: FC<{ label: string; children: React.ReactNode }> = ({
   </div>
 );
 
-export const SectionCard: FC<{ title: string; children: React.ReactNode }> = ({
+export const SectionCard: FC<{ children: React.ReactNode; title: string }> = ({
   title,
   children,
 }) => (
@@ -50,18 +50,18 @@ export const SectionCard: FC<{ title: string; children: React.ReactNode }> = ({
 
 type SectionProps = {
   d: SpecialistFormState;
-  set: <K extends keyof SpecialistFormState>(
-    key: K,
-    value: SpecialistFormState[K],
-  ) => void;
-  isEditing: boolean;
-  // Специалист создаётся впервые: показываем поле пароля и подсказку про
-  // отчество. Все остальные поля бэк принимает и при создании, и при правке.
-  isNew?: boolean;
   // Только для BasicInfoSection при создании — формат почты реально проверяет
   // бэк (уникальность), а не только клиент, но явный формат стоит подсветить
   // сразу.
   emailError?: string;
+  isEditing: boolean;
+  // Специалист создаётся впервые: показываем поле пароля и подсказку про
+  // отчество. Все остальные поля бэк принимает и при создании, и при правке.
+  isNew?: boolean;
+  set: <K extends keyof SpecialistFormState>(
+    key: K,
+    value: SpecialistFormState[K],
+  ) => void;
 };
 
 export const BasicInfoSection: FC<SectionProps> = ({
@@ -362,9 +362,9 @@ type CertificatesProps = SectionProps & {
   // Сертификаты живут отдельной ручкой (/api/clinic/doctors/{id}/documents/) и
   // грузятся сразу, мимо «Сохранить» — как и в кабинете самого врача.
   documents?: ClinicDocument[];
-  onUpload?: (file: File) => Promise<unknown>;
-  onDelete?: (id: number) => Promise<unknown>;
   isUploading?: boolean;
+  onDelete?: (id: number) => Promise<unknown>;
+  onUpload?: (file: File) => Promise<unknown>;
 };
 
 export const CertificatesSection: FC<CertificatesProps> = ({

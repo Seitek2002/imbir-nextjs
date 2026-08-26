@@ -10,8 +10,8 @@ type Tile = {
 };
 
 type Props = {
-  tiles: Tile[];
   className?: string;
+  tiles: Tile[];
 };
 
 export const StatTiles: FC<Props> = ({ tiles, className }) => (

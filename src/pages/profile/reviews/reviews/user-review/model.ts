@@ -1,26 +1,26 @@
 export type ReviewType = "clinic" | "doctor" | "service";
 
 export type UserReview = {
-  id: string;
-  type: ReviewType;
-  rating: number;
-  comment: string;
-  date: string;
-  image?: string;
-  // Ответ врача/клиники на отзыв, если есть.
-  reply?: { text: string; date: string } | null;
-
+  clinicAddress?: string;
   // Для клиник
   clinicName?: string;
-  clinicAddress?: string;
-
+  comment: string;
+  date: string;
+  doctorClinic?: string;
   // Для врачей
   doctorName?: string;
   doctorSpecialty?: string;
-  doctorClinic?: string;
 
+  id: string;
+  image?: string;
+
+  rating: number;
+  // Ответ врача/клиники на отзыв, если есть.
+  reply?: { date: string; text: string } | null;
+  serviceCategory?: string;
+
+  serviceClinic?: string;
   // Для услуг
   serviceName?: string;
-  serviceCategory?: string;
-  serviceClinic?: string;
+  type: ReviewType;
 };

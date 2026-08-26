@@ -15,13 +15,13 @@ import { colors } from "@/shared/config";
 import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
-  posts: BlogPost[];
   categories: BlogCategory[];
-  variant?: "default" | "home";
+  posts: BlogPost[];
   // On the dedicated /blog page the grid is near the top, so eager-load the
   // first card (its image is the mobile LCP). Off by default (e.g. on home,
   // where the section sits far below the fold).
   prioritizeFirstCard?: boolean;
+  variant?: "default" | "home";
 };
 
 export const BlogSection: FC<Props> = ({
@@ -237,10 +237,10 @@ const HomePostMeta: FC<{ post: BlogPost }> = ({ post }) => (
 );
 
 const HomePostImage: FC<{
-  post: BlogPost;
   className: string;
-  sizes: string;
+  post: BlogPost;
   priority?: boolean;
+  sizes: string;
 }> = ({ post, className, sizes, priority = false }) => {
   const [loaded, setLoaded] = useState(false);
 

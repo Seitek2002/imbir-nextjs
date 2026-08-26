@@ -5,13 +5,13 @@ import { ReactNode, useState } from "react";
 import Image, { ImageProps } from "next/image";
 
 type Props = Omit<ImageProps, "onError" | "src"> & {
-  // Реальные фото приходят из данных и могут отсутствовать — допускаем falsy src.
-  src: ImageProps["src"] | null | undefined;
   // Что показать, если картинка не загрузилась (битая ссылка, недоступный CDN) или src отсутствует.
   fallback: ReactNode;
   // Для вызывающих со своим skeleton-до-onLoad стейтом — иначе он остаётся
   // показанным навечно поверх fallback, если картинка так и не загрузилась.
   onError?: () => void;
+  // Реальные фото приходят из данных и могут отсутствовать — допускаем falsy src.
+  src: ImageProps["src"] | null | undefined;
 };
 
 // next/image без обработки ошибок при битом src просто оставляет пустоту.

@@ -5,17 +5,17 @@ import type { FC } from "react";
 import { Input } from "@/shared/ui/input";
 
 type Props = {
-  label?: string;
-  value: string;
-  onChange: (value: string) => void;
+  className?: string;
   error?: string;
   hint?: string;
-  placeholder?: string;
+  label?: string;
+  maxAhead?: number;
   // Нижняя граница разумного года. Верхняя — текущий год плюс запас: у
   // студентов год окончания ещё в будущем.
   min?: number;
-  maxAhead?: number;
-  className?: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  value: string;
 };
 
 const YEAR_DIGITS = 4;

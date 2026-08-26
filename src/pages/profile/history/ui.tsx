@@ -29,14 +29,14 @@ const STATUS_FILTER_LABELS = {
 } as const;
 type StatusFilterValue = keyof typeof STATUS_FILTER_LABELS;
 const STATUS_FILTER_OPTIONS = Object.values(STATUS_FILTER_LABELS);
-const labelToStatus = (label: string | null): StatusFilterValue | null =>
+const labelToStatus = (label: null | string): null | StatusFilterValue =>
   (Object.keys(STATUS_FILTER_LABELS) as StatusFilterValue[]).find(
     (key) => STATUS_FILTER_LABELS[key] === label,
   ) ?? null;
 
 type FilterButtonProps = {
-  isOpen: boolean;
   isActive: boolean;
+  isOpen: boolean;
   onClick: () => void;
 };
 
@@ -90,10 +90,10 @@ const toEntityId = (value: unknown): string => {
 // Подмножество полей врача из getDoctorById, которые нужны карточке записи
 // (специальность, рейтинг, фото, адрес клиники/места работы).
 type DoctorDetails = {
-  specialty?: string;
-  rating?: string | number;
+  clinic?: { address?: string; name?: string };
   photo?: string;
-  clinic?: { name?: string; address?: string };
+  rating?: number | string;
+  specialty?: string;
   workplaces?: Array<{ address?: string }>;
 };
 
@@ -107,13 +107,13 @@ const toServicePrice = (value: unknown): number | undefined => {
 };
 
 export const ProfileHistoryPage: FC = () => {
-  const [activeTab, setActiveTab] = useState<"upcoming" | "completed">(
+  const [activeTab, setActiveTab] = useState<"completed" | "upcoming">(
     "upcoming",
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [statusFilterLabel, setStatusFilterLabel] = useState<string | null>(
+  const [statusFilterLabel, setStatusFilterLabel] = useState<null | string>(
     null,
   );
   const statusFilter = labelToStatus(statusFilterLabel);
@@ -143,7 +143,7 @@ export const ProfileHistoryPage: FC = () => {
     return () => document.removeEventListener("mousedown", close);
   }, [filterOpen]);
 
-  const handleTabChange = (tab: "upcoming" | "completed") => {
+  const handleTabChange = (tab: "completed" | "upcoming") => {
     setActiveTab(tab);
     setStatusFilterLabel(null);
     setFilterOpen(false);

@@ -4,12 +4,12 @@ import { FC, InputHTMLAttributes, useEffect, useRef } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
-type CheckboxSize = "small" | "large";
+type CheckboxSize = "large" | "small";
 
 type Props = {
-  size?: CheckboxSize;
-  label?: string;
   indeterminate?: boolean;
+  label?: string;
+  size?: CheckboxSize;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "size">;
 
 export const Checkbox: FC<Props> = ({

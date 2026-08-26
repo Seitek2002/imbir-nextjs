@@ -5,14 +5,14 @@ export type BlogCategory = {
 };
 
 export type BlogPost = {
-  id: number;
-  slug: string;
-  title: string;
-  description: string;
   category: BlogCategory;
   date: string;
-  image: string | null;
+  description: string;
+  id: number;
+  image: null | string;
   is_featured: boolean;
+  slug: string;
+  title: string;
 };
 
 export type BlogPostDetail = BlogPost & {
@@ -21,7 +21,7 @@ export type BlogPostDetail = BlogPost & {
 
 export type BlogFilters = {
   category?: string;
-  search?: string;
   page?: number;
   page_size?: number;
+  search?: string;
 };

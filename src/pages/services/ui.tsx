@@ -69,7 +69,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
     priceParts?.[1] ?? MAX_PRICE,
   ];
 
-  const updateURL = (key: string, value: string | null) => {
+  const updateURL = (key: string, value: null | string) => {
     const params = new URLSearchParams(urlSearchParams.toString());
     if (value) {
       params.set(`${PREFIX}_${key}`, value);
@@ -90,7 +90,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
 
   // Категория, клиника, оценка и цена — реальные query-параметры
   // /api/services/ (проверено прямыми запросами).
-  const filters: Omit<ServiceFilters, "page" | "page_size"> = {
+  const filters: Omit<ServiceFilters, "page_size" | "page"> = {
     category: currentCategory ?? undefined,
     clinic_id: currentClinic ?? undefined,
     min_rating:

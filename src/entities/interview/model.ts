@@ -1,14 +1,14 @@
 import { type PublicInterview, getInterviews } from "@/shared/api";
 
 export type Interview = {
-  id: string;
-  title: string;
   authorName: string;
   authorRole: string;
+  doctorId: string;
+  id: string;
   // У врача может не быть фото — тогда карточка идёт без обложки.
   thumbnail?: string;
+  title: string;
   youtubeUrl: string;
-  doctorId: string;
 };
 
 const adaptInterview = (api: PublicInterview): Interview => ({

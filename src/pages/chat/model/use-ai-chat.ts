@@ -16,12 +16,12 @@ const toThreadMessage = (message: AiChatMessage): ChatThreadMessage => ({
 });
 
 type UseAiChatResult = {
-  messages: ChatThreadMessage[];
+  clearHistory: () => Promise<void>;
+  error: null | string;
   isLoadingHistory: boolean;
   isSending: boolean;
-  error: string | null;
+  messages: ChatThreadMessage[];
   sendMessage: (content: string) => Promise<void>;
-  clearHistory: () => Promise<void>;
 };
 
 // Drives the AI assistant ("room 0"). Plain request/response over HTTP — no
@@ -36,7 +36,7 @@ export const useAiChat = (
   // Starts loading on mount; setState stays inside the async callbacks below.
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<null | string>(null);
   const autoSentRef = useRef(false);
 
   useEffect(() => {

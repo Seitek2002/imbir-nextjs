@@ -28,9 +28,9 @@ const DEFAULT_PATIENT_CONDITIONS = [
 
 const OptionGroup: FC<{
   label: string;
+  onChange: (value: string[]) => void;
   options: string[];
   value: string[];
-  onChange: (value: string[]) => void;
 }> = ({ label, options, value, onChange }) => (
   <div className="flex flex-col gap-1.5">
     <span className="text-sm font-medium text-secondary">{label}</span>
@@ -54,7 +54,7 @@ const OptionGroup: FC<{
   </div>
 );
 
-const BulletList: FC<{ label: string; items: string[] }> = ({
+const BulletList: FC<{ items: string[]; label: string }> = ({
   label,
   items,
 }) => (

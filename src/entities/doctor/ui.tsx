@@ -14,18 +14,18 @@ import { Button, ImageWithFallback, SaveButton } from "@/shared/ui";
 import { DoctorPhoto } from "./photo";
 
 type Props = {
-  id?: string | number;
-  name: string;
-  specialty: string;
-  workplaces: Workplace[];
-  rating?: number;
-  reviews?: number;
   experience: number;
+  id?: number | string;
   image?: StaticImageData | string;
+  isSaved?: boolean;
+  name: string;
   onBook?: () => void;
   onSave?: () => void;
-  isSaved?: boolean;
-  variant?: "vertical" | "horizontal";
+  rating?: number;
+  reviews?: number;
+  specialty: string;
+  variant?: "horizontal" | "vertical";
+  workplaces: Workplace[];
 };
 
 export const DoctorCard: FC<Props> = ({

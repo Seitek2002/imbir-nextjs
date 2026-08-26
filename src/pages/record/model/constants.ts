@@ -17,7 +17,7 @@ const MONTHS_GENITIVE = [
 
 const SELECTION_LABELS: Record<
   MobileSelectionStage,
-  { title: string; searchPlaceholder: string }
+  { searchPlaceholder: string; title: string }
 > = {
   clinic: { title: "Выберите клинику", searchPlaceholder: "Поиск клиники" },
   doctor: {

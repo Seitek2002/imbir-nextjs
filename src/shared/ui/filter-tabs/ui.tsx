@@ -3,16 +3,16 @@
 import { ReactNode } from "react";
 
 type Tab<T extends string> = {
+  icon: ReactNode;
   id: T;
   label: string;
-  icon: ReactNode;
 };
 
 type Props<T extends string> = {
+  className?: string;
+  onChange: (value: T) => void;
   tabs: Tab<T>[];
   value: T;
-  onChange: (value: T) => void;
-  className?: string;
 };
 
 export function FilterTabBar<T extends string>({

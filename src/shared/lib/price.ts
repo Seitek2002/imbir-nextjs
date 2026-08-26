@@ -14,5 +14,5 @@ export const parsePrice = (value: unknown): number | undefined => {
 
 // Цена «есть», если она пришла числом или непустой строкой — 0 считаем
 // валидной ценой, а null/undefined/"" — отсутствием данных.
-export const hasPrice = (value: number | string | null | undefined): boolean =>
+export const hasPrice = (value: null | number | string | undefined): boolean =>
   typeof value === "number" ? Number.isFinite(value) : !!value?.trim();

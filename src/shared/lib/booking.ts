@@ -5,8 +5,8 @@ import type { AvailableSlot } from "@/shared/api";
 // друг у друга (нарушение FSD).
 
 export type TimeSlot = {
-  value: string;
   disabled?: boolean;
+  value: string;
 };
 
 // Группа временных слотов (Утро/Обед/Вечер) — доменная форма данных.

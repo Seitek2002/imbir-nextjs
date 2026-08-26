@@ -23,17 +23,17 @@ const STATUS_LABELS: Record<AppointmentStatus, string> = {
 };
 
 export const SummaryCard: FC<{
+  // Появляются после успешного оформления — включают реальную проверку статуса.
+  appointmentId?: null | number;
   doctor: Doctor;
-  service: Service;
+  initialStatus?: AppointmentStatus | null;
   // Формат больше не выбирается: приёмы только онлайн. Но гостю бэк
   // онлайн-запись не даёт (400), поэтому у него запись остаётся офлайновой —
   // подписываем как есть, а не как хотелось бы.
   isOnline: boolean;
   selectedDate: Date | null;
-  selectedTime: string | null;
-  // Появляются после успешного оформления — включают реальную проверку статуса.
-  appointmentId?: number | null;
-  initialStatus?: AppointmentStatus | null;
+  selectedTime: null | string;
+  service: Service;
 }> = ({
   doctor,
   service,

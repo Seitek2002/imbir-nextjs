@@ -18,11 +18,11 @@ const ThumbnailFallback = () => (
 );
 
 type Props = {
-  title: string;
   authorName: string;
   authorRole: string;
   // У врача может не быть загруженного фото.
   thumbnail?: StaticImageData | string;
+  title: string;
   youtubeUrl: string;
 };
 

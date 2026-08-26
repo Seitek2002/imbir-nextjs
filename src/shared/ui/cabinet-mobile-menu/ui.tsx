@@ -10,25 +10,25 @@ import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 export type CabinetMenuItem = {
   href: string;
-  label: string;
   icon: ReactNode;
+  label: string;
 };
 
 type Props = {
-  // Заголовок экрана (по умолчанию «Мой профиль»).
-  title?: string;
-  // В клиническом кабинете заголовок — отдельная белая верхняя карточка.
-  headerVariant?: "plain" | "card";
   // Содержимое аватар-круга: <img>/<Image> или буква-инициал.
   avatar: ReactNode;
-  name: string;
-  // Строка под именем (рейтинг, специальность и т.п.).
-  subtitle?: ReactNode;
-  items: CabinetMenuItem[];
   // Блок между карточкой профиля и меню (напр. плитки статистики у врача).
   beforeMenu?: ReactNode;
   // Блок под кнопкой выхода (напр. карточка статуса у пациента).
   footer?: ReactNode;
+  // В клиническом кабинете заголовок — отдельная белая верхняя карточка.
+  headerVariant?: "card" | "plain";
+  items: CabinetMenuItem[];
+  name: string;
+  // Строка под именем (рейтинг, специальность и т.п.).
+  subtitle?: ReactNode;
+  // Заголовок экрана (по умолчанию «Мой профиль»).
+  title?: string;
 };
 
 const Chevron = () => (
