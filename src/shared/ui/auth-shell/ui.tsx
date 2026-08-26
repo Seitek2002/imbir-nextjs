@@ -26,7 +26,15 @@ export const AuthShell = ({ header, footer, children }: Props) => (
             <Image
               src="/assets/auth-bg.png"
               fill
-              sizes="640px"
+              // Медиа-условие, а не голое "640px": панель скрыта до md, но
+              // <img> внутри display:none браузер всё равно грузит — без
+              // условия мобильный тянул бы десктопный вариант, которого не
+              // увидит. С ним берётся самый мелкий кандидат из srcset.
+              sizes="(max-width: 767px) 1px, 640px"
+              // Это LCP-элемент страниц входа и регистрации (виден сразу, без
+              // скролла). Без priority next/image ставит loading="lazy", и
+              // браузер откладывает загрузку — Next ругается об этом в консоли.
+              priority
               alt="Imbir"
               className="object-contain"
             />
