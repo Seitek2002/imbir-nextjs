@@ -154,7 +154,7 @@ export const DoctorSidebar: FC<Props> = ({
   };
 
   return (
-    <aside className="w-88 shrink-0 hidden lg:block">
+    <aside className="w-88 shrink-0 hidden lg:block top-0 sticky h-fit">
       {/* Profile Card — белая рамка с отступом 4px, внутри градиентная подложка */}
       <Link
         href="/doctor-profile"
