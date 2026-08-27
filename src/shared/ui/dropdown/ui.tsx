@@ -20,6 +20,7 @@ export const Dropdown: FC<DropdownProps> = ({
   isMulti = false,
   searchable = false,
   showSelectAll = false,
+  selectAllMode = "clear",
   value,
   onChange,
   className,
@@ -69,6 +70,12 @@ export const Dropdown: FC<DropdownProps> = ({
       if (window.innerWidth >= 768) closeDropdown();
     }
   };
+
+  // Отмечены ли все пункты — нужно только режиму "select".
+  const allOptionsSelected =
+    options.length > 0 &&
+    Array.isArray(value) &&
+    value.length === options.length;
 
   const filteredOptions = useMemo(() => {
     if (!searchQuery) return options;
@@ -123,9 +130,17 @@ export const Dropdown: FC<DropdownProps> = ({
                 <div
                   className="p-4 md:px-3 md:py-2.5 flex items-center justify-between border-b border-border-soft md:border-none md:hover:bg-background cursor-pointer transition-colors"
                   onClick={() =>
-                    // «Все» означает отсутствие фильтра, а не выбор каждой
-                    // специализации: так не отправляем огромный список в API.
-                    (onChange as (val: string[]) => void)?.([])
+                    (onChange as (val: string[]) => void)?.(
+                      selectAllMode === "select"
+                        ? // Форма: «Все» — это реально выбранные пункты, потому что их
+                          // надо сохранить. Повторный клик работает как «снять всё».
+                          allOptionsSelected
+                          ? []
+                          : options.map((opt) => opt.value)
+                        : // Фильтр: «Все» означает отсутствие фильтра, а не выбор каждой
+                          // специализации: так не отправляем огромный список в API.
+                          [],
+                    )
                   }
                 >
                   <span className="text-foreground text-base md:text-sm flex-1">
@@ -133,7 +148,11 @@ export const Dropdown: FC<DropdownProps> = ({
                   </span>
                   <div className="pointer-events-none">
                     <Checkbox
-                      checked={Array.isArray(value) && value.length === 0}
+                      checked={
+                        selectAllMode === "select"
+                          ? allOptionsSelected
+                          : Array.isArray(value) && value.length === 0
+                      }
                       readOnly
                     />
                   </div>
