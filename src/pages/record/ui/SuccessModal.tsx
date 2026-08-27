@@ -78,6 +78,7 @@ export const SuccessModal: FC<Props> = ({
 
         <Button
           variant={isOnline && appointmentId != null ? "outline" : "default"}
+          size="lg"
           className="w-full justify-center"
           onClick={handleClose}
         >
