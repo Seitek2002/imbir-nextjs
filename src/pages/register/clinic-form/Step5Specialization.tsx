@@ -31,6 +31,8 @@ export const Step5Specialization = ({ data, onChange }: Props) => {
         options={specializationOptions}
         isMulti
         searchable
+        showSelectAll
+        selectAllMode="select"
         value={data.mainDirections}
         onChange={(v) => onChange("mainDirections", v)}
       />
@@ -40,6 +42,8 @@ export const Step5Specialization = ({ data, onChange }: Props) => {
         options={specializationOptions}
         isMulti
         searchable
+        showSelectAll
+        selectAllMode="select"
         value={data.narrowDirections}
         onChange={(v) => onChange("narrowDirections", v)}
       />

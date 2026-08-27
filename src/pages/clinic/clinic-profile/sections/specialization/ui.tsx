@@ -5,43 +5,49 @@ import toast from "react-hot-toast";
 
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
-import { FieldRow, csv, useClinicCabinet } from "@/entities/clinic-profile";
+import { FieldRow, useClinicCabinet } from "@/entities/clinic-profile";
 import {
   resolveSpecializationIds,
+  useSpecializationOptions,
   useSpecializations,
 } from "@/entities/specialization";
 
-import { Textarea } from "@/shared/ui";
+import { Dropdown, Textarea } from "@/shared/ui";
 
 export const ClinicSpecializationPage: FC = () => {
   const { profile, isLoading, isSaving, saveProfile } = useClinicCabinet();
   const [isEditing, setIsEditing] = useState(false);
 
-  const [mainDirections, setMainDirections] = useState("");
-  const [narrowDirections, setNarrowDirections] = useState("");
+  const [mainDirections, setMainDirections] = useState<string[]>([]);
+  const [narrowDirections, setNarrowDirections] = useState<string[]>([]);
   const [additionalServices, setAdditionalServices] = useState("");
 
-  // Поле — свободный текст, а бэк на запись принимает только id справочника
-  // (см. resolveSpecializationIds). Название, которого нет в справочнике
-  // (опечатка, устаревшее значение), не находит id и было бы молча потеряно —
-  // предупреждаем об этом тостом вместо тихой потери данных.
+  // Бэк на запись принимает только id справочника (см. resolveSpecializationIds),
+  // поэтому направления выбираются из списка, а не вводятся текстом. Тост про
+  // ненайденные названия оставлен страховкой: если у клиники сохранено значение,
+  // которого уже нет в справочнике, оно должно быть замечено, а не исчезнуть.
   const { data: specializationList = [] } = useSpecializations();
+  const { options: specializationOptions, isLoading: isSpecsLoading } =
+    useSpecializationOptions();
+  const specializationPlaceholder = isSpecsLoading
+    ? "Загружаем список..."
+    : "Выберите из списка";
 
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
     setSynced(profile);
-    setMainDirections(profile.mainDirections.join(", "));
-    setNarrowDirections(profile.narrowDirections.join(", "));
+    setMainDirections(profile.mainDirections);
+    setNarrowDirections(profile.narrowDirections);
     setAdditionalServices(profile.additionalServices.join(", "));
   }
 
   const handleSave = async () => {
     const primary = resolveSpecializationIds(
-      csv(mainDirections),
+      mainDirections,
       specializationList,
     );
     const narrow = resolveSpecializationIds(
-      csv(narrowDirections),
+      narrowDirections,
       specializationList,
     );
     const unmatched = [...primary.unmatched, ...narrow.unmatched];
@@ -83,19 +89,27 @@ export const ClinicSpecializationPage: FC = () => {
       <div className="bg-white rounded-3xl border border-border p-5">
         {isEditing ? (
           <div className="flex flex-col gap-6">
-            <Textarea
+            <Dropdown
               label="Основные направления"
+              placeholder={specializationPlaceholder}
+              options={specializationOptions}
+              isMulti
+              searchable
+              showSelectAll
+              selectAllMode="select"
               value={mainDirections}
-              onChange={(e) => setMainDirections(e.target.value)}
-              rows={3}
-              placeholder="Терапия, Кардиология, Педиатрия..."
+              onChange={setMainDirections}
             />
-            <Textarea
+            <Dropdown
               label="Узкие направления"
+              placeholder={specializationPlaceholder}
+              options={specializationOptions}
+              isMulti
+              searchable
+              showSelectAll
+              selectAllMode="select"
               value={narrowDirections}
-              onChange={(e) => setNarrowDirections(e.target.value)}
-              rows={3}
-              placeholder="Эндокринолог, Невролог, Офтальмолог..."
+              onChange={setNarrowDirections}
             />
             <Textarea
               label="Дополнительные услуги"

@@ -14,6 +14,7 @@ import {
 } from "@/entities/clinic-profile";
 import {
   resolveSpecializationIds,
+  useSpecializationOptions,
   useSpecializations,
 } from "@/entities/specialization";
 
@@ -164,10 +165,16 @@ export const ClinicProfilePage: FC = () => {
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const formRef = useRef<ClinicProfileFormHandle>(null);
 
-  // Форма отдаёт названия специализаций свободным текстом; бэк на запись
-  // принимает только id справочника — резолвим здесь же, перед отправкой
+  // Форма отдаёт названия специализаций; бэк на запись принимает только id
+  // справочника — резолвим здесь же, перед отправкой
   // (см. ClinicProfileFormHandle.getSpecializationNames).
   const { data: specializationList = [] } = useSpecializations();
+  // Тот же справочник, но готовыми options — форме он нужен для выпадающих
+  // списков направлений. Запрос общий, так что второго похода на сервер нет.
+  const {
+    options: specializationOptions,
+    isLoading: isSpecializationsLoading,
+  } = useSpecializationOptions();
 
   const handleSave = async () => {
     // Берём реально введённые значения из формы (включая логотип-файл)
@@ -260,6 +267,8 @@ export const ClinicProfilePage: FC = () => {
             onUploadDocument={uploadDocument}
             isUploadingPhoto={isUploadingPhoto}
             isUploadingDocument={isUploadingDocument}
+            specializationOptions={specializationOptions}
+            isSpecializationsLoading={isSpecializationsLoading}
           />
         )}
       </div>

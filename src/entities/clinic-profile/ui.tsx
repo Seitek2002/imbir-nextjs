@@ -13,12 +13,14 @@ import {
   Button,
   Checkbox,
   DateField,
+  Dropdown,
   ImageWithFallback,
   Input,
   PhoneInput,
   PhotoLightbox,
   Textarea,
 } from "@/shared/ui";
+import type { DropdownOption } from "@/shared/ui/dropdown";
 
 import type { ClinicProfile } from "./model";
 import {
@@ -55,9 +57,9 @@ type FormState = {
   longitude: string;
   lunchEnd: string;
   lunchStart: string;
-  mainDirections: string;
+  mainDirections: string[];
   name: string;
-  narrowDirections: string;
+  narrowDirections: string[];
   patientConditions: string;
   paymentMethods: string;
   phone: string;
@@ -82,8 +84,8 @@ const buildState = (p: ClinicProfile): FormState => ({
   licenseNumber: p.licenseNumber ?? "",
   licenseDate: fromApiDate(p.licenseDate),
   licenseAuthority: p.licenseAuthority ?? "",
-  mainDirections: p.mainDirections.join(", "),
-  narrowDirections: p.narrowDirections.join(", "),
+  mainDirections: p.mainDirections,
+  narrowDirections: p.narrowDirections,
   additionalServices: p.additionalServices.join(", "),
   equipment: p.equipment.join(", "),
   patientConditions: p.patientConditions.join(", "),
@@ -118,10 +120,15 @@ export type ClinicProfileFormHandle = {
 
 type Props = ClinicProfile & {
   isEditing?: boolean;
+  isSpecializationsLoading?: boolean;
   isUploadingDocument?: boolean;
   isUploadingPhoto?: boolean;
   onUploadDocument?: (file: File) => Promise<unknown>;
   onUploadPhoto?: (file: File) => Promise<unknown>;
+  // Справочник специализаций — пропсом, а не хуком внутри: entities в
+  // этом проекте не импортируют друг друга (та же причина, по которой резолвинг
+  // названий в id живёт на странице, см. ClinicProfileFormHandle выше).
+  specializationOptions?: DropdownOption[];
 };
 
 export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
@@ -157,7 +164,13 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
       onUploadDocument,
       isUploadingPhoto = false,
       isUploadingDocument = false,
+      specializationOptions = [],
+      isSpecializationsLoading = false,
     } = props;
+
+    const specializationPlaceholder = isSpecializationsLoading
+      ? "Загружаем список..."
+      : "Выберите из списка";
 
     const [d, setD] = useState<FormState>(() => buildState(props));
     const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -179,8 +192,8 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
 
     useImperativeHandle(ref, () => ({
       getSpecializationNames: () => ({
-        primary: csv(d.mainDirections),
-        narrow: csv(d.narrowDirections),
+        primary: d.mainDirections,
+        narrow: d.narrowDirections,
       }),
       getPayload: () => ({
         name: d.name,
@@ -710,19 +723,31 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         <SectionCard title="Специализация и услуги">
           {isEditing ? (
             <div className="flex flex-col gap-6">
-              <Textarea
+              {/* Список, а не текст через запятую — как при регистрации клиники
+                  (register/clinic-form/Step5Specialization). Бэк на запись принимает
+                  только id справочника, и со свободным текстом любая опечатка
+                  просто не находила id. Теперь ввести несуществующее нельзя. */}
+              <Dropdown
                 label="Основные направления"
+                placeholder={specializationPlaceholder}
+                options={specializationOptions}
+                isMulti
+                searchable
+                showSelectAll
+                selectAllMode="select"
                 value={d.mainDirections}
-                onChange={(e) => set("mainDirections", e.target.value)}
-                rows={2}
-                hint="Введите через запятую"
+                onChange={(v) => set("mainDirections", v)}
               />
-              <Textarea
+              <Dropdown
                 label="Узкие направления"
+                placeholder={specializationPlaceholder}
+                options={specializationOptions}
+                isMulti
+                searchable
+                showSelectAll
+                selectAllMode="select"
                 value={d.narrowDirections}
-                onChange={(e) => set("narrowDirections", e.target.value)}
-                rows={2}
-                hint="Введите через запятую"
+                onChange={(v) => set("narrowDirections", v)}
               />
               <Textarea
                 label="Дополнительные услуги"
