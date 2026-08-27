@@ -24,6 +24,10 @@ export const ROUTES = {
   // Динамические страницы (передаем ID)
   CLINIC_DETAILS: (id: number | string) => `/clinics/${id}`,
   SPECIALIST_DETAILS: (id: number | string) => `/specialists/${id}`,
+  // Отдельная страница всех отзывов: блок на карточке показывает только
+  // первую страницу (20 штук), дальше — только здесь.
+  CLINIC_REVIEWS: (id: number | string) => `/clinics/${id}/reviews`,
+  SPECIALIST_REVIEWS: (id: number | string) => `/specialists/${id}/reviews`,
   BLOG_ARTICLE: (slug: string) => `/blog/${slug}`,
 
   // Страницы с Query-параметрами (Search)

@@ -12,10 +12,14 @@ import {
 export const getReviews = async (
   targetType: ReviewTargetType,
   targetId: number | string,
+  // Сервер отдаёт по 20 штук (StandardPagination). Блок отзывов на странице
+  // врача берёт первую страницу и не передаёт ничего, отдельная страница всех
+  // отзывов листает.
+  params?: { page?: number; page_size?: number },
 ): Promise<PaginatedResponse<ReviewItem>> => {
   const { data } = await apiClient.get<PaginatedResponse<ReviewItem>>(
     "/api/reviews/",
-    { params: { target_type: targetType, target_id: targetId } },
+    { params: { target_type: targetType, target_id: targetId, ...params } },
   );
   return data;
 };

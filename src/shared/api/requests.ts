@@ -323,6 +323,19 @@ export const api = {
   getReviews: () =>
     getReviews("doctor", 0).then((r) => r.data.map(adaptReview)),
 
+  // С пагинацией — для страницы всех отзывов. Отдаёт те же адаптированные
+  // элементы, что и getReviewsByDoctor, но сохраняет pagination — без неё
+  // не понять, есть ли следующая страница.
+  getReviewsPaginated: (
+    targetType: "clinic" | "doctor",
+    targetId: number | string,
+    params: { page?: number; page_size?: number },
+  ) =>
+    getReviews(targetType, targetId, params).then((r) => ({
+      data: r.data.map(adaptReview),
+      pagination: r.pagination,
+    })),
+
   createAppointment: _createAppointment,
 
   getReviewsByDoctor: (doctorId: string) =>

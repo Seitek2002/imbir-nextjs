@@ -459,6 +459,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             onSubmitReview={isAuthed ? submitReview : undefined}
             isSubmitting={isSubmitting}
             onDeleteReview={isAuthed ? removeReview : undefined}
+            allReviewsHref={ROUTES.SPECIALIST_REVIEWS(id)}
           />
         )}
 

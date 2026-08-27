@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 
 import Link from "next/link";
 
@@ -44,6 +44,9 @@ export type ReviewItem = {
 };
 
 type Props = {
+  // Адрес страницы со всеми отзывами. Здесь видна только первая страница
+  // (сервер отдаёт по 20), остальное — там.
+  allReviewsHref?: string;
   averageRating: number;
   doctorClinic?: string;
   doctorImage?: string;
@@ -65,14 +68,13 @@ export const ReviewsSection: FC<Props> = ({
   onSubmitReview,
   onReviewClick,
   onDeleteReview,
+  allReviewsHref,
   isSubmitting,
   doctorName = "Специалист",
   doctorSpecialty = "",
   doctorClinic = "",
   doctorImage,
 }) => {
-  // Источник истины — проп (данные из query); локально держим только форму.
-  const reviews = initialReviews;
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [newReviewText, setNewReviewText] = useState("");
   const [newReviewRating, setNewReviewRating] = useState(0);
@@ -80,6 +82,26 @@ export const ReviewsSection: FC<Props> = ({
   // Свой отзыв определяем по id пользователя, а не по имени: тёзки реальны,
   // и показать чужую кнопку удаления было бы хуже, чем не показать свою.
   const currentUserId = useAuthStore((state) => state.user?.id);
+
+  // Свой отзыв — первым. Сортируем здесь, а не на бэке: /api/reviews/ отдаётся
+  // и анонимам, и порядок, зависящий от того, кто спрашивает, сделал бы ответ
+  // некэшируемым ради одной записи. Остальные остаются в порядке сервера
+  // (новые сверху).
+  //
+  // Ограничение: сервер отдаёт по 20 отзывов, и мы грузим только первую
+  // страницу. Если у врача отзывов больше и свой оказался на второй,
+  // поднять его отсюда нечем — его просто нет в данных.
+  const reviews = useMemo(() => {
+    if (currentUserId === undefined) return initialReviews;
+
+    const mine = initialReviews.filter((r) => r.authorId === currentUserId);
+    if (mine.length === 0) return initialReviews;
+
+    return [
+      ...mine,
+      ...initialReviews.filter((r) => r.authorId !== currentUserId),
+    ];
+  }, [initialReviews, currentUserId]);
   const [pendingDeleteId, setPendingDeleteId] = useState<null | number>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -118,12 +140,17 @@ export const ReviewsSection: FC<Props> = ({
     <div className="mt-10 md:mt-20 mb-10 md:mb-20 md:px-0 bg-white rounded-[20px] p-4 mx-2">
       <div className="flex items-center justify-between mb-6 md:mb-8">
         <h2 className="text-2xl font-semibold text-foreground">Отзывы</h2>
-        <Link
-          href="#"
-          className="md:hidden text-primary text-sm font-medium hover:underline"
-        >
-          Все
-        </Link>
+        {/* Раньше была заглушка href="#" и только на мобильном. Показываем на
+            всех ширинах: десктопный пользователь точно так же не видит отзывы
+            дальше двадцатого. */}
+        {allReviewsHref && reviews.length > 0 && (
+          <Link
+            href={allReviewsHref}
+            className="text-primary text-sm font-medium hover:underline"
+          >
+            Все
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-10">

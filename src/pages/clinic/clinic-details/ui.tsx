@@ -479,6 +479,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
             onSubmitReview={isAuthed ? submitReview : undefined}
             isSubmitting={isSubmitting}
             onDeleteReview={isAuthed ? removeReview : undefined}
+            allReviewsHref={ROUTES.CLINIC_REVIEWS(id)}
           />
         )}
       </div>
