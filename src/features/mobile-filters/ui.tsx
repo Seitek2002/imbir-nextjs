@@ -131,17 +131,18 @@ export const MobileFiltersModal: FC<Props> = ({
       <PageHeader title="Фильтр" />
 
       <div className="flex-1 overflow-y-auto mt-2 px-2 pb-10 space-y-3">
-        {/* БЛОК: УСЛУГА (категория) */}
+        {/* БЛОК: КАТЕГОРИЯ УСЛУГИ */}
         {fields?.category && (
           <div className="bg-white p-4 rounded-2xl">
             <span className="block text-sm font-medium text-foreground mb-2">
-              Услуга
+              Категория услуги
             </span>
             <Dropdown
               options={[{ value: "", label: "Все" }, ...categoryOptions]}
               value={category}
               onChange={(val) => setCategory(val as string)}
               placeholder="Все"
+              searchable
               className="w-full"
             />
           </div>

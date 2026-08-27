@@ -291,10 +291,15 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
           </div>
 
           <div className="grid grid-cols-4 gap-5 items-start">
+            {/* Не «Услуга»: на странице с заголовком «Услуги» такая подпись
+                читалась как «выберите конкретную услугу», хотя в списке
+                категории из /references/service-categories/. Так же подписаны поля
+                в формах создания услуги и процедуры. */}
             <Dropdown
-              label="Услуга"
+              label="Категория услуги"
               placeholder="Все"
               options={categoryOptions}
+              searchable
               value={currentCategory ?? ""}
               onChange={(val) => updateURL("spec", val || null)}
             />
