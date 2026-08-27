@@ -119,12 +119,12 @@ export type ClinicProfileFormHandle = {
 };
 
 type Props = ClinicProfile & {
+  equipmentOptions?: DropdownOption[];
   isEditing?: boolean;
+  isReferenceDataLoading?: boolean;
   isSpecializationsLoading?: boolean;
   isUploadingDocument?: boolean;
   isUploadingPhoto?: boolean;
-  equipmentOptions?: DropdownOption[];
-  isReferenceDataLoading?: boolean;
   onUploadDocument?: (file: File) => Promise<unknown>;
   onUploadPhoto?: (file: File) => Promise<unknown>;
   patientConditionOptions?: DropdownOption[];
