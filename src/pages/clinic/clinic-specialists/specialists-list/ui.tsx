@@ -52,7 +52,20 @@ export const SpecialistsList: FC<Props> = ({
     return () => document.removeEventListener("mousedown", close);
   }, [filterOpen]);
 
-  const specialties = Array.from(new Set(specialists.map((s) => s.specialty)));
+  // Старые/не до конца заполненные карточки врача приходят с specialty: "".
+  // Пустая строка раньше превращалась в безымянную кнопку фильтра.
+  const specialties = Array.from(
+    new Set(
+      specialists
+        .map((specialist) => specialist.specialty.trim())
+        .filter(Boolean),
+    ),
+  );
+  const specialtyEmptyMessage = isLoading
+    ? "Загружаем специализации..."
+    : specialists.length === 0
+      ? "У клиники пока нет специалистов. Добавьте первого, и его специализация появится здесь."
+      : "У специалистов не указана специализация. Откройте карточку специалиста и заполните её — тогда она появится в фильтре.";
 
   const filteredItems = specialists.filter((item) => {
     const matchesSearch = item.name
@@ -101,6 +114,7 @@ export const SpecialistsList: FC<Props> = ({
             options={specialties}
             selected={selectedSpecialty}
             onSelect={setSelectedSpecialty}
+            emptyMessage={specialtyEmptyMessage}
           />
         </div>
       )}

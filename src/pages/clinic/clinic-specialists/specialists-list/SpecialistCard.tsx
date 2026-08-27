@@ -80,6 +80,7 @@ export const SpecialistCard: FC<Props> = ({
   onDelete,
 }) => {
   const [loaded, setLoaded] = useState(false);
+  const specialtyLabel = specialty || "Специализация не указана";
 
   return (
     <div className="bg-white rounded-3xl border border-border-soft p-2 relative">
@@ -124,7 +125,7 @@ export const SpecialistCard: FC<Props> = ({
             {name}
           </h3>
           <p className="text-sm text-muted truncate mb-2">
-            {specialty} <span className="text-primary">• {clinic}</span>
+            {specialtyLabel} <span className="text-primary">• {clinic}</span>
           </p>
 
           <div className="flex items-center gap-1 text-sm flex-wrap">
@@ -151,52 +152,58 @@ export const SpecialistRow: FC<Props> = ({
   experience,
   image,
   onDelete,
-}) => (
-  <Link
-    href={`/clinic-profile/specialists/${id}`}
-    className="flex items-center gap-3 bg-white rounded-2xl border border-border-soft p-3"
-  >
-    <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-primary-tint shrink-0">
-      {image ? (
-        <ImageWithFallback
-          src={image}
-          alt={name}
-          fill
-          sizes="56px"
-          className="object-cover object-top"
-          fallback={
-            <div className="w-full h-full flex items-center justify-center">
-              <UserCircleIcon className="size-8 text-dim" />
-            </div>
-          }
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <UserCircleIcon className="size-8 text-dim" />
-        </div>
-      )}
-    </div>
-    <div className="flex-1 min-w-0">
-      <h3 className="font-semibold text-sm text-foreground truncate">{name}</h3>
-      <p className="text-xs text-muted truncate mt-0.5">
-        {specialty} <span className="text-primary">• {clinic}</span>
-      </p>
-      <div className="flex items-center gap-1 text-xs mt-1 flex-wrap">
-        <StarIcon className="w-3.5 h-3.5 text-primary" />
-        <span className="font-medium text-primary">{rating}</span>
-        <span className="text-muted">
-          ({reviews}) • {experience} лет опыта
-        </span>
+}) => {
+  const specialtyLabel = specialty || "Специализация не указана";
+
+  return (
+    <Link
+      href={`/clinic-profile/specialists/${id}`}
+      className="flex items-center gap-3 bg-white rounded-2xl border border-border-soft p-3"
+    >
+      <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-primary-tint shrink-0">
+        {image ? (
+          <ImageWithFallback
+            src={image}
+            alt={name}
+            fill
+            sizes="56px"
+            className="object-cover object-top"
+            fallback={
+              <div className="w-full h-full flex items-center justify-center">
+                <UserCircleIcon className="size-8 text-dim" />
+              </div>
+            }
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <UserCircleIcon className="size-8 text-dim" />
+          </div>
+        )}
       </div>
-    </div>
-    {onDelete && (
-      <DeleteButton
-        onClick={(e) => {
-          e.preventDefault();
-          onDelete(id);
-        }}
-        className="w-8 h-8"
-      />
-    )}
-  </Link>
-);
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold text-sm text-foreground truncate">
+          {name}
+        </h3>
+        <p className="text-xs text-muted truncate mt-0.5">
+          {specialtyLabel} <span className="text-primary">• {clinic}</span>
+        </p>
+        <div className="flex items-center gap-1 text-xs mt-1 flex-wrap">
+          <StarIcon className="w-3.5 h-3.5 text-primary" />
+          <span className="font-medium text-primary">{rating}</span>
+          <span className="text-muted">
+            ({reviews}) • {experience} лет опыта
+          </span>
+        </div>
+      </div>
+      {onDelete && (
+        <DeleteButton
+          onClick={(e) => {
+            e.preventDefault();
+            onDelete(id);
+          }}
+          className="w-8 h-8"
+        />
+      )}
+    </Link>
+  );
+};

@@ -49,6 +49,11 @@ export const ProceduresList: FC<Props> = ({
   }, [filterOpen]);
 
   const categories = Array.from(new Set(procedures.map((i) => i.category)));
+  const categoryEmptyMessage = isLoading
+    ? "Загружаем категории..."
+    : procedures.length === 0
+      ? "У клиники пока нет процедур. Добавьте первую — её категория появится здесь."
+      : "У процедур не указаны категории.";
 
   const filteredItems = procedures.filter((item) => {
     const matchesSearch = item.name
@@ -108,6 +113,7 @@ export const ProceduresList: FC<Props> = ({
             options={categories}
             selected={selectedCategory}
             onSelect={setSelectedCategory}
+            emptyMessage={categoryEmptyMessage}
           />
         </div>
       )}
