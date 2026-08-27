@@ -63,3 +63,24 @@ export const useUrlSearchParams = () => {
 
   return useMemo(() => new URLSearchParams(search), [search]);
 };
+
+// Ключи фильтров в адресе. Список один на всех: раньше он был переписан в
+// FilterBar и на странице услуг по отдельности, и «Сбросить фильтры» в двух
+// местах чистило разные наборы.
+const FILTER_KEYS = ["spec", "exp", "rating", "price", "clinic"] as const;
+
+/** Копия параметров без фильтров этого раздела. */
+export const clearFilterParams = (
+  prefix: string,
+  params: URLSearchParams,
+): URLSearchParams => {
+  const next = new URLSearchParams(params.toString());
+  FILTER_KEYS.forEach((key) => next.delete(`${prefix}_${key}`));
+  return next;
+};
+
+/** Задан ли хоть один фильтр — по нему решаем, предлагать ли сброс. */
+export const hasFilterParams = (
+  prefix: string,
+  params: URLSearchParams,
+): boolean => FILTER_KEYS.some((key) => params.has(`${prefix}_${key}`));

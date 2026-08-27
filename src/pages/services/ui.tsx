@@ -19,14 +19,24 @@ import { useFavoriteToggle } from "@/features/favorite-toggle";
 import { FiltersTrigger, MobileFiltersModal } from "@/features/mobile-filters";
 import { UrlSearchInput } from "@/features/search-by-query";
 
-import { ServiceCard, useServiceCategories } from "@/entities/service";
+import {
+  ServiceCard,
+  ServiceSkeleton,
+  useServiceCategories,
+} from "@/entities/service";
 
 import { ServiceFilters, api, serviceKeys } from "@/shared/api";
-import { RemoveIcon } from "@/shared/assets/icons";
+import { ChatIcon, RemoveIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
+import {
+  clearFilterParams,
+  hasFilterParams,
+  replaceUrlState,
+  useUrlSearchParams,
+} from "@/shared/lib/url-state";
 import { cn } from "@/shared/lib/utils";
 import { useCityStore } from "@/shared/store";
-import { Button, Dropdown, RangeSlider } from "@/shared/ui";
+import { Button, Dropdown, EmptyState, RangeSlider } from "@/shared/ui";
 
 const MAX_PRICE = 10000;
 // Постраничная подгрузка: 8 услуг за раз, дальше — по кнопке «Показать ещё»
@@ -48,6 +58,36 @@ const PREFIX = "svc";
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
+};
+
+// Один на оба макета. Кнопка сброса появляется только когда фильтры
+// действительно заданы: предлагать «сбросить» при пустом адресе бессмысленно.
+const CatalogEmptyState = () => {
+  const params = useUrlSearchParams();
+  const filtered = hasFilterParams(PREFIX, params);
+
+  return (
+    <EmptyState
+      icon={<ChatIcon className="size-6" />}
+      title={filtered ? "Услуги не найдены" : "Здесь пока пусто"}
+      description={
+        filtered
+          ? "Под выбранные условия ничего не подошло. Попробуйте расширить диапазон цены или снять категорию."
+          : "Список пополняется. Загляните позже или посмотрите другие разделы."
+      }
+      action={
+        filtered ? (
+          <Button
+            size="md"
+            variant="outline"
+            onClick={() => replaceUrlState(clearFilterParams(PREFIX, params))}
+          >
+            Сбросить фильтры
+          </Button>
+        ) : undefined
+      }
+    />
+  );
 };
 
 export const ServicesPage: FC<Props> = ({ searchParams }) => {
@@ -209,11 +249,9 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
             )}
           >
             {isLoading ? (
-              <p className="text-center text-muted py-10">Загрузка...</p>
+              <ServiceSkeleton count={4} variant="horizontal" />
             ) : filteredServices.length === 0 ? (
-              <p className="text-center text-muted py-10">
-                По вашим параметрам услуги не найдены
-              </p>
+              <CatalogEmptyState />
             ) : (
               filteredServices.map((s) => (
                 <ServiceCard
@@ -356,13 +394,9 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
             )}
           >
             {isLoading ? (
-              <p className="text-center text-muted py-20 text-lg">
-                Загрузка...
-              </p>
+              <ServiceSkeleton count={8} />
             ) : filteredServices.length === 0 ? (
-              <p className="text-center text-muted py-20 text-lg">
-                По вашим параметрам услуги не найдены
-              </p>
+              <CatalogEmptyState />
             ) : (
               <div className="grid grid-cols-4 gap-5 items-stretch">
                 {filteredServices.map((s) => (

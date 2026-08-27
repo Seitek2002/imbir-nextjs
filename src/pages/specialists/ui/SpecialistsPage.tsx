@@ -19,16 +19,53 @@ import { UrlSearchInput } from "@/features/search-by-query";
 import { DoctorCard, DoctorSkeleton } from "@/entities/doctor";
 
 import { DoctorFilters, api, doctorKeys } from "@/shared/api";
+import { UserCircleIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
-import { useUrlSearchParams } from "@/shared/lib/url-state";
+import {
+  clearFilterParams,
+  hasFilterParams,
+  replaceUrlState,
+  useUrlSearchParams,
+} from "@/shared/lib/url-state";
 import { useCityStore } from "@/shared/store";
-import { Button } from "@/shared/ui";
+import { Button, EmptyState } from "@/shared/ui";
 
 // Постраничная подгрузка: 8 врачей за раз, дальше — по кнопке «Показать ещё»
 // (как на /clinics). specialization принимает несколько значений через
 // запятую (проверено живыми запросами) — мультиселект уходит на бэк целиком,
 // без клиентской доводки.
 const PAGE_SIZE = 8;
+
+// Один на оба макета — мобильный список и десктопная сетка раньше каждый
+// рисовали свою строку текста. Кнопка сброса появляется только когда фильтры
+// действительно заданы: предлагать «сбросить» при пустом адресе бессмысленно.
+const CatalogEmptyState = () => {
+  const params = useUrlSearchParams();
+  const filtered = hasFilterParams("doc", params);
+
+  return (
+    <EmptyState
+      icon={<UserCircleIcon className="size-6" />}
+      title={filtered ? "Врачи не найдены" : "Здесь пока пусто"}
+      description={
+        filtered
+          ? "Под выбранные условия никто не подошёл. Попробуйте расширить диапазон цены или убрать ограничение по стажу."
+          : "Список пополняется. Загляните позже или посмотрите другие разделы."
+      }
+      action={
+        filtered ? (
+          <Button
+            size="md"
+            variant="outline"
+            onClick={() => replaceUrlState(clearFilterParams("doc", params))}
+          >
+            Сбросить фильтры
+          </Button>
+        ) : undefined
+      }
+    />
+  );
+};
 
 type Props = {
   // City the server prefetched doctors for (from the city cookie).
@@ -149,9 +186,7 @@ export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
             {isLoading ? (
               <DoctorSkeleton count={4} variant="horizontal" />
             ) : doctors.length === 0 ? (
-              <p className="text-center text-muted py-10">
-                По вашим параметрам врачи не найдены
-              </p>
+              <CatalogEmptyState />
             ) : (
               doctors.map((doc) => (
                 <DoctorCard
@@ -231,9 +266,7 @@ export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
             {isLoading ? (
               <DoctorSkeleton count={8} variant="vertical" />
             ) : doctors.length === 0 ? (
-              <p className="text-center text-muted py-20 text-lg">
-                По вашим параметрам врачи не найдены
-              </p>
+              <CatalogEmptyState />
             ) : (
               <div className="grid grid-cols-4 gap-5 items-stretch">
                 {doctors.map((doc) => (
