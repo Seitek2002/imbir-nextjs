@@ -2,10 +2,9 @@
 
 import { FC, useCallback, useState } from "react";
 
-import { StarBoldIcon, StarOutlineIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
-import { Button, ImageWithFallback } from "@/shared/ui";
+import { ImageWithFallback, ReviewForm } from "@/shared/ui";
 
 type Props = {
   doctorClinic: string;
@@ -35,10 +34,7 @@ export const ReviewModal: FC<Props> = ({
   initialComment = "",
   onSubmit,
 }) => {
-  const [rating, setRating] = useState(initialRating);
-  const [comment, setComment] = useState(initialComment);
   const [isClosing, setIsClosing] = useState(false);
-  const [isSending, setIsSending] = useState(false);
 
   useScrollLock(isOpen);
 
@@ -53,25 +49,6 @@ export const ReviewModal: FC<Props> = ({
   if (!isOpen && !isClosing) return null;
 
   const state = isClosing ? "closed" : "open";
-
-  const handleSubmit = async () => {
-    if (rating === 0 || isSending) return;
-    setIsSending(true);
-    try {
-      await onSubmit(rating, comment);
-      // Сбрасываем и закрываем ТОЛЬКО после успеха. Раньше модалка закрывалась
-      // сразу, и при ошибке (протухший токен, обрыв сети) написанный отзыв
-      // пропадал — оставался только красный тост.
-      setRating(0);
-      setComment("");
-      handleClose();
-    } catch {
-      // Сообщение показывает вызывающий (onError мутации) — модалку оставляем
-      // открытой с введённым текстом, чтобы можно было повторить отправку.
-    } finally {
-      setIsSending(false);
-    }
-  };
 
   const body = (
     <div className="p-5 space-y-4">
@@ -106,51 +83,12 @@ export const ReviewModal: FC<Props> = ({
         </div>
       </div>
 
-      {/* Rating */}
-      <div>
-        <label className="block text-foreground font-medium text-base mb-3">
-          Оцените специалиста
-        </label>
-        <div className="flex items-center gap-2 p-4 bg-surface rounded-2xl justify-center">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => setRating(star)}
-              className="transition-transform hover:scale-110"
-            >
-              {star <= rating ? (
-                <StarBoldIcon className="w-10 h-10 text-primary" />
-              ) : (
-                <StarOutlineIcon className="w-10 h-10 text-border" />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Comment */}
-      <div>
-        <label className="block text-foreground font-medium text-base mb-3">
-          Поделитесь своим мнением о специалисте
-        </label>
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Введите текст"
-          rows={5}
-          className="w-full p-4 rounded-2xl border border-border text-foreground placeholder:text-dim focus:outline-none focus:border-primary resize-none transition-colors"
-        />
-      </div>
-
-      <Button
-        size="lg"
-        className="w-full"
-        onClick={handleSubmit}
-        disabled={rating === 0 || isSending}
-        loading={isSending}
-      >
-        Отправить
-      </Button>
+      <ReviewForm
+        initialRating={initialRating}
+        initialComment={initialComment}
+        onSubmit={onSubmit}
+        onSubmitted={handleClose}
+      />
     </div>
   );
 

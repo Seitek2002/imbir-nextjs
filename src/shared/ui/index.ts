@@ -33,3 +33,4 @@ export type { CabinetMenuItem } from "./cabinet-mobile-menu";
 export { Markdown } from "./markdown";
 export { NavBadge } from "./nav-badge";
 export { AnimatedNumber } from "./animated-number";
+export { ReviewForm } from "./review-form";
