@@ -7,12 +7,17 @@ export const authKeys = {
   me: () => [...authKeys.all, "me"] as const,
 };
 
+// id в detail() везде приводится к строке — со страницы он приходит строкой
+// из адреса, а из данных числом. Если читать по одному типу, а сбрасывать по
+// другому, react-query считает это разными запросами и экран остаётся со старыми
+// данными — так уже терялся свежий отзыв в списке.
 export const doctorKeys = {
   all: ["doctors"] as const,
   lists: () => [...doctorKeys.all, "list"] as const,
   list: (filters: object) => [...doctorKeys.lists(), filters] as const,
   details: () => [...doctorKeys.all, "detail"] as const,
-  detail: (id: number | string) => [...doctorKeys.details(), id] as const,
+  detail: (id: number | string) =>
+    [...doctorKeys.details(), String(id)] as const,
 };
 
 export const clinicKeys = {
@@ -20,7 +25,8 @@ export const clinicKeys = {
   lists: () => [...clinicKeys.all, "list"] as const,
   list: (filters: object) => [...clinicKeys.lists(), filters] as const,
   details: () => [...clinicKeys.all, "detail"] as const,
-  detail: (id: number | string) => [...clinicKeys.details(), id] as const,
+  detail: (id: number | string) =>
+    [...clinicKeys.details(), String(id)] as const,
 };
 
 export const serviceKeys = {
@@ -28,7 +34,8 @@ export const serviceKeys = {
   lists: () => [...serviceKeys.all, "list"] as const,
   list: (filters: object) => [...serviceKeys.lists(), filters] as const,
   details: () => [...serviceKeys.all, "detail"] as const,
-  detail: (id: number | string) => [...serviceKeys.details(), id] as const,
+  detail: (id: number | string) =>
+    [...serviceKeys.details(), String(id)] as const,
 };
 
 export const searchKeys = {
@@ -38,8 +45,12 @@ export const searchKeys = {
 
 export const reviewKeys = {
   all: ["reviews"] as const,
+  // id приводится к строке намеренно. Со страницы он приходит из адреса
+  // строкой, а в тело запроса уходит числом — и если читать список по ключу
+  // со строкой, а сбрасывать по ключу с числом, react-query считает это разными
+  // запросами: отзыв уходит на сервер, а список на экране не меняется.
   byTarget: (type: string, id: number | string) =>
-    [...reviewKeys.all, type, id] as const,
+    [...reviewKeys.all, type, String(id)] as const,
 };
 
 export const appointmentKeys = {
