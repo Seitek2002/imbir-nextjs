@@ -13,13 +13,7 @@ import {
   doctorCabinetKeys,
   getDoctorPatients,
 } from "@/shared/api";
-
-// "2026-04-30" → "30.04.2026".
-const fmtDate = (iso: string): string => {
-  const parts = iso?.split("-");
-  if (parts?.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
-  return iso || "—";
-};
+import { fmtDate } from "@/shared/lib/datetime";
 
 // Диагноз в списке пациентов бэк пока не отдаёт — показываем прочерк.
 const diagnosisOf = (p: DoctorPatient): string =>
@@ -107,7 +101,7 @@ export const DoctorPatientsPage: FC = () => {
                       {p.full_name}
                     </td>
                     <td className={`${td} text-foreground`}>
-                      {fmtDate(p.last_visit)}
+                      {fmtDate(p.last_visit, "—")}
                     </td>
                     <td className={`${td} text-foreground`}>
                       {diagnosisOf(p)}

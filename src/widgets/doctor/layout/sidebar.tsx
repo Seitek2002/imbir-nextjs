@@ -6,8 +6,9 @@ import Link from "next/link";
 
 import { LogoutIcon, StarIcon } from "@/shared/assets/icons";
 import { useLogout } from "@/shared/lib/useLogout";
+import { usePendingDoctorAppointments } from "@/shared/lib/usePendingAppointments";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
-import { ImageWithFallback } from "@/shared/ui";
+import { ImageWithFallback, NavBadge } from "@/shared/ui";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 type Props = {
@@ -22,6 +23,8 @@ type MenuItem = {
   href: string;
   icon: ReactNode;
   label: string;
+  // По этому адресу рядом с подписью показываем число записей, ждущих подтверждения.
+  showPending?: boolean;
 };
 
 const MENU_ITEMS: MenuItem[] = [
@@ -51,6 +54,7 @@ const MENU_ITEMS: MenuItem[] = [
   {
     href: "/doctor-profile/appointments",
     label: "Записи",
+    showPending: true,
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
         <path
@@ -139,6 +143,7 @@ export const DoctorSidebar: FC<Props> = ({
   rating,
 }) => {
   const { navRef, indicator, pathname } = useSidebarIndicator();
+  const pendingCount = usePendingDoctorAppointments();
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const handleLogout = useLogout();
@@ -223,6 +228,7 @@ export const DoctorSidebar: FC<Props> = ({
               >
                 {item.label}
               </span>
+              {item.showPending && <NavBadge count={pendingCount} />}
             </Link>
           );
         })}

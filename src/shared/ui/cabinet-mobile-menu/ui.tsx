@@ -7,8 +7,11 @@ import Link from "next/link";
 import { LogoutIcon } from "@/shared/assets/icons";
 import { useLogout } from "@/shared/lib/useLogout";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
+import { NavBadge } from "@/shared/ui/nav-badge";
 
 export type CabinetMenuItem = {
+  // Сколько записей ждёт реакции в этом разделе. 0 или undefined — бейджа нет.
+  badge?: number;
   href: string;
   icon: ReactNode;
   label: string;
@@ -123,6 +126,7 @@ export const CabinetMobileMenu: FC<Props> = ({
                 <span className="flex-1 font-medium text-base text-foreground">
                   {item.label}
                 </span>
+                <NavBadge count={item.badge ?? 0} />
                 <Chevron />
               </Link>
             ))}

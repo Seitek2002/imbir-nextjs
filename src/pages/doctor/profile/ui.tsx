@@ -6,6 +6,7 @@ import { useDoctorCabinet } from "@/widgets/doctor/layout";
 
 import { StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { usePendingDoctorAppointments } from "@/shared/lib/usePendingAppointments";
 import { CabinetMobileMenu, ImageWithFallback } from "@/shared/ui";
 
 const MENU_ITEMS = [
@@ -121,6 +122,7 @@ const MENU_ITEMS = [
 // адрес разворачивается в двухколоночный кабинет с сайдбаром.
 export const DoctorProfileMobileHub: FC = () => {
   const { profile: d } = useDoctorCabinet();
+  const pendingCount = usePendingDoctorAppointments();
 
   // Пока профиль грузится, показываем меню с пустой карточкой: пункты и
   // выход доступны сразу, а не после ответа сервера.
@@ -152,7 +154,13 @@ export const DoctorProfileMobileHub: FC = () => {
           </div>
         ) : undefined
       }
-      items={MENU_ITEMS}
+      // Счётчик вешается на «Записи» здесь, а не в MENU_ITEMS: список — модульная
+      // константа, а число приходит из запроса.
+      items={MENU_ITEMS.map((item) =>
+        item.href === "/doctor-profile/appointments"
+          ? { ...item, badge: pendingCount }
+          : item,
+      )}
     />
   );
 };

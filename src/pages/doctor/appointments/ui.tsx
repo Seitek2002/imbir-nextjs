@@ -17,12 +17,18 @@ import {
   updateAppointmentStatus,
   updateAppointmentSummary,
 } from "@/shared/api";
+import { fmtDate, fmtTime } from "@/shared/lib/datetime";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { Button, Modal, Textarea } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 const TH = "px-6 py-4 text-muted text-sm font-normal whitespace-nowrap";
 const TD = "px-6 py-4 whitespace-nowrap";
+// Полоса слева у новой записи — именно тень, а не border: у таблицы
+// border-collapse, и рамка крайней ячейки схлопывается с краем таблицы и не
+// отрисовывается (проверено: вычисленный стиль был правильный, пикселей не было).
+// Тень рисуется внутри ячейки и не занимает места, так что колонки не съезжают.
+const TD_NEW = "shadow-[inset_4px_0_0_0_var(--color-info)]";
 
 // Заглушка повторяет саму таблицу записей — та же шапка и колонки, чтобы при
 // появлении данных ничего не прыгало.
@@ -102,24 +108,15 @@ const STATUS_PILL: Record<
   DoctorAppointment["status"],
   { cls: string; label: string }
 > = {
-  pending: { label: "Ожидает", cls: "bg-amber-100 text-amber-800" },
+  // Синий закреплён за «ждёт реакции» и больше ни за чем: раньше им была
+  // помечена подтверждённая запись — то есть ровно та, с которой делать уже ничего не надо.
+  pending: { label: "Новая", cls: "bg-info-tint text-info" },
   upcoming: { label: "Предстоящая", cls: "bg-primary-tint text-primary" },
-  confirmed: { label: "Подтверждена", cls: "bg-blue-100 text-blue-700" },
-  scheduled: { label: "Подтверждена", cls: "bg-blue-100 text-blue-700" },
+  confirmed: { label: "Подтверждена", cls: "bg-primary-tint text-primary" },
+  scheduled: { label: "Подтверждена", cls: "bg-primary-tint text-primary" },
   completed: { label: "Завершенная", cls: "bg-[#E3F5EC] text-[#2FA968]" },
   cancelled: { label: "Отменена", cls: "bg-surface text-muted" },
 };
-
-// "2026-05-06" → "06.05.2026".
-const fmtDate = (iso: string): string => {
-  const parts = iso?.split("-");
-  if (parts?.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
-  return iso;
-};
-
-// "10:00:00" → "10:00".
-const fmtTime = (time: string): string =>
-  time?.length >= 5 ? time.slice(0, 5) : time;
 
 const EMPTY_SUMMARY: DoctorAppointmentSummary = {
   diagnosis: "",
@@ -300,14 +297,24 @@ export const DoctorAppointmentsPage: FC = () => {
                     a.status === "scheduled" ||
                     a.status === "upcoming";
 
+                  // Новая запись — та, что ещё ждёт подтверждения врача.
+                  const isNew = a.status === "pending";
+
                   return (
                     <tr
                       key={a.id}
-                      className="border-b border-border last:border-0 hover:bg-surface transition-colors"
+                      className={`border-b border-border last:border-0 transition-colors ${
+                        isNew ? "bg-info-tint" : "hover:bg-surface"
+                      }`}
                     >
                       <td
                         onClick={() => setSummaryId(a.id)}
-                        className={`${TD} text-foreground font-medium cursor-pointer`}
+                        className={`${TD} text-foreground font-medium cursor-pointer ${
+                          // Полоса слева вместо рамки вокруг строки: у таблицы
+                          // border-collapse, и рамка на <tr> схлопывается с разделителями
+                          // ячеек. На первой ячейке она рисуется предсказуемо.
+                          isNew ? TD_NEW : ""
+                        }`}
                       >
                         {a.patient.full_name}
                       </td>
