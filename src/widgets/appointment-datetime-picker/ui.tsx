@@ -5,7 +5,7 @@ import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets/icons";
 import type { TimeGroup } from "@/shared/lib/booking";
 import { cn } from "@/shared/lib/utils";
-import { IconBtn } from "@/shared/ui";
+import { IconBtn, Spinner } from "@/shared/ui";
 
 // Переключателя «Онлайн / Оффлайн» здесь больше нет: приёмы на платформе
 // только онлайн. Раньше он предлагал офлайн у всех врачей подряд, хотя место
@@ -21,6 +21,19 @@ type Props = {
   selectedTime: null | string;
   timeGroups?: TimeGroup[];
 };
+
+// Сообщение над слотами. При загрузке рядом с текстом крутится спиннер:
+// без него строка не отличалась от «Нет свободного времени» и прочих тупиковых
+// состояний — непонятно, ждать или менять дату. Вывод один на оба макета.
+const SlotsMessage: FC<{ isLoading?: boolean; text: string }> = ({
+  text,
+  isLoading,
+}) => (
+  <p className="flex items-center justify-center gap-2 text-sm text-muted text-center py-2">
+    {isLoading && <Spinner className="size-4 text-primary shrink-0" />}
+    {text}
+  </p>
+);
 
 const WEEK_DAYS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
 
@@ -247,9 +260,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
         {/* Time slots mobile */}
         <div className="border border-border-soft rounded-2xl p-3 space-y-3">
           {slotsMessage && (
-            <p className="text-sm text-muted text-center py-2">
-              {slotsMessage}
-            </p>
+            <SlotsMessage text={slotsMessage} isLoading={isLoadingSlots} />
           )}
           {timeGroups.map((group) => (
             <div key={group.label}>
@@ -330,9 +341,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
 
         <div className="border border-border-soft rounded-2xl p-3 space-y-3">
           {slotsMessage && (
-            <p className="text-sm text-muted text-center py-2">
-              {slotsMessage}
-            </p>
+            <SlotsMessage text={slotsMessage} isLoading={isLoadingSlots} />
           )}
           {timeGroups.map((group) => (
             <div key={group.label}>
