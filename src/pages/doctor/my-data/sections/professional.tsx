@@ -54,7 +54,7 @@ const optionsWithSelected = (options: string[], selected: string[]) =>
   }));
 
 type D = {
-  additionalSpecialty: string;
+  additionalSpecialty: string[];
   consultationPrice: string;
   currentPosition: string;
   equipment: string[];
@@ -65,15 +65,15 @@ type D = {
   paymentMethods: string[];
   qualification: string;
   scientificDegree: string;
-  specialty: string;
+  specialty: string[];
   workplace: string;
 };
 
 const { fieldList, formGrid } = formStyles;
 
 const EMPTY: D = {
-  specialty: "",
-  additionalSpecialty: "",
+  specialty: [],
+  additionalSpecialty: [],
   experienceYears: "",
   currentPosition: "",
   workplace: "",
@@ -173,11 +173,11 @@ export const DoctorProfessionalInfoSection: FC = () => {
     // API принимает на запись только id (см. resolveSpecializationIds) —
     // Dropdown хранит название, поэтому резолвим перед отправкой.
     const { ids: primaryIds } = resolveSpecializationIds(
-      d.specialty ? [d.specialty] : [],
+      d.specialty,
       specializationList,
     );
     const { ids: narrowIds } = resolveSpecializationIds(
-      d.additionalSpecialty ? [d.additionalSpecialty] : [],
+      d.additionalSpecialty,
       specializationList,
     );
 
@@ -270,6 +270,7 @@ export const DoctorProfessionalInfoSection: FC = () => {
                 label="Специализация"
                 placeholder={specializationPlaceholder}
                 options={specializationOptions}
+                isMulti
                 searchable
                 value={d.specialty}
                 onChange={(v) => set("specialty", v)}
@@ -284,6 +285,7 @@ export const DoctorProfessionalInfoSection: FC = () => {
                 label="Дополнительная специализация"
                 placeholder={specializationPlaceholder}
                 options={specializationOptions}
+                isMulti
                 searchable
                 value={d.additionalSpecialty}
                 onChange={(v) => set("additionalSpecialty", v)}

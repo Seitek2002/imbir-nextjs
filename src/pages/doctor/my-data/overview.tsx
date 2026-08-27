@@ -141,7 +141,7 @@ const PencilIcon = () => (
 // списка «Мои данные» (DoctorMyDataList), макет этого не касается.
 type D = {
   additionalEducation: AdditionalEducationEntry[];
-  additionalSpecialty: string;
+  additionalSpecialty: string[];
   birthDate: string;
   city: string;
   consultationPrice: string;
@@ -164,7 +164,7 @@ type D = {
   qualification: string;
   residency: string;
   scientificDegree: string;
-  specialty: string;
+  specialty: string[];
   university: string;
   workplace: string;
 };
@@ -177,8 +177,8 @@ const EMPTY: D = {
   languages: "",
   phone: "",
   email: "",
-  specialty: "",
-  additionalSpecialty: "",
+  specialty: [],
+  additionalSpecialty: [],
   experienceYears: "",
   currentPosition: "",
   workplace: "",
@@ -358,11 +358,11 @@ export const DoctorMyDataOverview: FC = () => {
         : workExperience;
 
     const { ids: primaryIds } = resolveSpecializationIds(
-      d.specialty ? [d.specialty] : [],
+      d.specialty,
       specializationList,
     );
     const { ids: narrowIds } = resolveSpecializationIds(
-      d.additionalSpecialty ? [d.additionalSpecialty] : [],
+      d.additionalSpecialty,
       specializationList,
     );
 
@@ -633,6 +633,7 @@ export const DoctorMyDataOverview: FC = () => {
                 label="Специализация"
                 placeholder={specializationPlaceholder}
                 options={specializationOptions}
+                isMulti
                 searchable
                 value={d.specialty}
                 onChange={(v) => set("specialty", v)}
@@ -647,6 +648,7 @@ export const DoctorMyDataOverview: FC = () => {
                 label="Дополнительная специализация"
                 placeholder={specializationPlaceholder}
                 options={specializationOptions}
+                isMulti
                 searchable
                 value={d.additionalSpecialty}
                 onChange={(v) => set("additionalSpecialty", v)}

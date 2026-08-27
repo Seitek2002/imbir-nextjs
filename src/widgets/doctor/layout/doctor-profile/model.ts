@@ -27,7 +27,11 @@ export type DoctorReview = {
 
 export type DoctorProfileData = {
   additionalEducation: { name: string; year: string }[];
-  additionalSpecialty: string;
+  // Множественные: в базе это ManyToMany (primary_specializations /
+  // narrow_specializations), и у клиники форма давно умеет выбирать несколько.
+  // У врача до этого бралась только первая — остальные не показывались и
+  // терялись при первом же сохранении профиля.
+  additionalSpecialty: string[];
   birthDate: string;
   certificates: string[];
   city: string;
@@ -58,7 +62,7 @@ export type DoctorProfileData = {
   rating: number;
   residency: string;
   scientificDegree: string;
-  specialty: string;
+  specialty: string[];
   totalReviews: number;
   university: string;
   workplace: string;

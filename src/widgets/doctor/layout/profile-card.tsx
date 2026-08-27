@@ -50,9 +50,9 @@ export const DoctorProfilePreviewCard: FC = () => {
           {profile.fullName}
         </h4>
         <p className="text-muted text-sm mt-1.5">
-          {profile.specialty}
-          {profile.additionalSpecialty
-            ? ` · ${profile.additionalSpecialty}`
+          {profile.specialty.join(", ")}
+          {profile.additionalSpecialty.length > 0
+            ? ` · ${profile.additionalSpecialty.join(", ")}`
             : ""}
         </p>
         <div className="flex items-center gap-1.5 mt-3">

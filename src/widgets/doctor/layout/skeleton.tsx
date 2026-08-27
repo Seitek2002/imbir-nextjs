@@ -27,7 +27,7 @@ export const DoctorPageLayoutSkeleton: FC<Props> = ({ children }) => {
             <DoctorSidebar
               fullName={profile?.fullName ?? ""}
               photo={profile?.photo}
-              specialty={profile?.specialty ?? ""}
+              specialty={profile?.specialty.join(", ") ?? ""}
               rating={profile?.rating ?? 0}
             />
           </div>

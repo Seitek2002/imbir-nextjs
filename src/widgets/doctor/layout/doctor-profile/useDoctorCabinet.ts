@@ -99,9 +99,11 @@ export const mapApiToProfile = (
   return {
     fullName:
       a.full_name ?? `${a.first_name ?? ""} ${a.last_name ?? ""}`.trim(),
-    specialty: translateSpecialty(a.primary_specializations?.[0]?.name ?? ""),
-    additionalSpecialty: translateSpecialty(
-      a.narrow_specializations?.[0]?.name ?? "",
+    specialty: (a.primary_specializations ?? []).map((item) =>
+      translateSpecialty(item.name),
+    ),
+    additionalSpecialty: (a.narrow_specializations ?? []).map((item) =>
+      translateSpecialty(item.name),
     ),
     experienceYears: String(a.experience_years ?? 0),
     // Новые плоские поля не смешиваются с историей работы. Fallback оставлен
