@@ -10,16 +10,13 @@ import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 import { ReviewCard } from "@/widgets/reviews";
 
-import { useDeleteReview, useSubmitReview } from "@/features/submit-review";
-
 import {
-  api,
-  clinicKeys,
-  doctorKeys,
-  getMyReviews,
-  profileKeys,
-  reviewKeys,
-} from "@/shared/api";
+  useDeleteReview,
+  useHasMyReview,
+  useSubmitReview,
+} from "@/features/submit-review";
+
+import { api, clinicKeys, doctorKeys, reviewKeys } from "@/shared/api";
 import { ChatIcon, HeaderBackIcon, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
@@ -137,24 +134,7 @@ export const AllReviewsPage: FC<Props> = ({
     return [...mine, ...loaded.filter((r) => r.authorId !== currentUserId)];
   }, [loaded, currentUserId]);
 
-  // Есть ли уже мой отзыв на эту цель. Спрашиваем отдельно, а не ищем в
-  // загруженных страницах: бэк всё равно откажет дублю, но человек успел бы
-  // написать текст впустую.
-  const { data: myReviews } = useQuery({
-    queryKey: profileKeys.reviews(),
-    queryFn: getMyReviews,
-    enabled: isAuthed,
-  });
-
-  const alreadyReviewed = Boolean(
-    myReviews?.data.some(
-      (r) =>
-        r.target_type === targetType &&
-        typeof r.target === "object" &&
-        r.target !== null &&
-        String(r.target.id) === String(targetId),
-    ),
-  );
+  const alreadyReviewed = useHasMyReview(targetType, targetId);
 
   const { submitReview } = useSubmitReview(targetType, targetId);
   const { removeReview } = useDeleteReview(targetType, targetId);

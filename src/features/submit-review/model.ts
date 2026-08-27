@@ -2,7 +2,7 @@
 
 import toast from "react-hot-toast";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   type ReviewTargetType,
@@ -10,12 +10,14 @@ import {
   createReview,
   deleteReview,
   doctorKeys,
+  getMyReviews,
   profileKeys,
   reviewKeys,
   serviceKeys,
 } from "@/shared/api";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { useInvalidateUserStatus } from "@/shared/lib/useReference";
+import { useAuthStore } from "@/shared/store";
 
 // Сама карточка цели: в ней живёт rating, который бэк пересчитывает сам
 // (reviews/serializers.py: _update_rating). Сбрасываем весь префикс all, а не
@@ -127,4 +129,37 @@ export const useDeleteReview = (
   });
 
   return { isDeleting: isPending, removeReview: mutateAsync };
+};
+
+/**
+ * Оставлял ли текущий пользователь отзыв на эту цель.
+ *
+ * Спрашиваем отдельно, а не ищем в загруженном списке: на карточке врача
+ * видна только первая страница отзывов, и свой мог туда не попасть.
+ *
+ * Бэк теперь отклоняет второй отзыв («Вы уже оставили отзыв этому врачу»),
+ * поэтому без этой проверки человек напишет текст и только потом узнает, что
+ * отправить его нельзя.
+ */
+export const useHasMyReview = (
+  targetType: ReviewTargetType,
+  targetId: number | string,
+): boolean => {
+  const isAuthed = useAuthStore((state) => Boolean(state.accessToken));
+
+  const { data } = useQuery({
+    queryKey: profileKeys.reviews(),
+    queryFn: getMyReviews,
+    enabled: isAuthed,
+  });
+
+  return Boolean(
+    data?.data.some(
+      (review) =>
+        review.target_type === targetType &&
+        typeof review.target === "object" &&
+        review.target !== null &&
+        String(review.target.id) === String(targetId),
+    ),
+  );
 };

@@ -47,6 +47,10 @@ type Props = {
   // Адрес страницы со всеми отзывами. Здесь видна только первая страница
   // (сервер отдаёт по 20), остальное — там.
   allReviewsHref?: string;
+  // Пользователь уже писал отзыв на эту цель — форму не показываем. Бэк
+  // второй отзыв отклонит, и без этого человек узнавал бы об этом уже после
+  // того, как написал текст.
+  alreadyReviewed?: boolean;
   averageRating: number;
   doctorClinic?: string;
   doctorImage?: string;
@@ -69,6 +73,7 @@ export const ReviewsSection: FC<Props> = ({
   onReviewClick,
   onDeleteReview,
   allReviewsHref,
+  alreadyReviewed = false,
   isSubmitting,
   doctorName = "Специалист",
   doctorSpecialty = "",
@@ -185,7 +190,7 @@ export const ReviewsSection: FC<Props> = ({
             </div>
           </div>
 
-          {(onSubmitReview || onReviewClick) && (
+          {!alreadyReviewed && (onSubmitReview || onReviewClick) && (
             <Button
               variant="outline"
               className="md:hidden w-full justify-center bg-white"
@@ -199,8 +204,19 @@ export const ReviewsSection: FC<Props> = ({
             </Button>
           )}
 
-          {/* Форма — только если подключена отправка на бэк */}
-          {onSubmitReview && (
+          {alreadyReviewed && (
+            <div className="hidden md:block bg-white border border-border-soft border-dashed rounded-2xl p-4 text-center">
+              <p className="text-foreground font-medium">
+                Вы уже оставили отзыв
+              </p>
+              <p className="text-muted text-sm mt-1">
+                Он открывает список. Удалите его, чтобы написать заново.
+              </p>
+            </div>
+          )}
+
+          {/* Форма — только если подключена отправка и отзыва ещё нет */}
+          {!alreadyReviewed && onSubmitReview && (
             <div className="hidden md:flex flex-col bg-white border border-border-soft rounded-2xl p-4">
               <h3 className="font-medium text-[20px] text-foreground mb-6">
                 Оставьте свой отзыв
