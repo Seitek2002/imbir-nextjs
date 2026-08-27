@@ -70,8 +70,8 @@ export default async function Page({
       initialPageParam: 1,
     }),
     queryClient.prefetchQuery({
-      queryKey: referenceKeys.specializations(),
-      queryFn: getSpecializations,
+      queryKey: referenceKeys.specializations("doctor"),
+      queryFn: () => getSpecializations("doctor"),
     }),
   ]);
 

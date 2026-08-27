@@ -166,6 +166,7 @@ export const DoctorsMainList: FC = () => {
           <FilterBar
             prefix="doc"
             title="Специалисты"
+            specializationScope="doctor"
             fields={{
               specialty: true,
               experience: true,

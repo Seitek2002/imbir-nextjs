@@ -1,3 +1,5 @@
+import type { SpecializationScope } from "./references/types";
+
 // Centralized query key factory.
 // Usage: doctorKeys.list({ city: "Бишкек" }), doctorKeys.detail("1")
 // Enables precise invalidation: queryClient.invalidateQueries({ queryKey: doctorKeys.all })
@@ -108,7 +110,10 @@ export const blogKeys = {
 export const referenceKeys = {
   all: ["references"] as const,
   cities: () => [...referenceKeys.all, "cities"] as const,
-  specializations: () => [...referenceKeys.all, "specializations"] as const,
+  specializations: (scope: SpecializationScope = "all") =>
+    scope === "all"
+      ? ([...referenceKeys.all, "specializations"] as const)
+      : ([...referenceKeys.all, "specializations", scope] as const),
   clinicTypes: () => [...referenceKeys.all, "clinicTypes"] as const,
   languages: () => [...referenceKeys.all, "languages"] as const,
   equipment: () => [...referenceKeys.all, "equipment"] as const,

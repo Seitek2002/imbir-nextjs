@@ -181,7 +181,7 @@ export const ClinicProfilePage: FC = () => {
   const {
     options: specializationOptions,
     isLoading: isSpecializationsLoading,
-  } = useSpecializationOptions();
+  } = useSpecializationOptions("clinic");
   const { data: equipmentValues = [], isLoading: isEquipmentLoading } =
     useQuery({
       queryKey: referenceKeys.equipment(),

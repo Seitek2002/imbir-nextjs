@@ -127,6 +127,7 @@ export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
       <MobileFiltersModal
         isOpen={isFiltersModalOpen}
         prefix="doc"
+        specializationScope="doctor"
         fields={{
           specialty: true,
           experience: true,
@@ -216,6 +217,7 @@ export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
 
           <FilterBar
             prefix="doc"
+            specializationScope="doctor"
             title="Специалисты"
             fields={{
               specialty: true,

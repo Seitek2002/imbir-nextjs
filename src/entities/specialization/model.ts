@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import {
   type SpecializationItem,
+  type SpecializationScope,
   getSpecializations,
   referenceKeys,
 } from "@/shared/api";
@@ -67,10 +68,13 @@ export const getSpecializationImage = (
 // остаться на месте, а не потеряться молча из-за того, что мы её отфильтровали
 // из списка для резолвинга. Фильтруем мусор только там, где он показывается
 // пользователю — в useSpecializationOptions/useSpecializationTiles.
-export const useSpecializations = (enabled = true) =>
+export const useSpecializations = (
+  scope: SpecializationScope = "all",
+  enabled = true,
+) =>
   useQuery({
-    queryKey: referenceKeys.specializations(),
-    queryFn: getSpecializations,
+    queryKey: referenceKeys.specializations(scope),
+    queryFn: () => getSpecializations(scope),
     enabled,
     staleTime: 60 * 60 * 1000,
   });
@@ -82,8 +86,11 @@ export const useSpecializations = (enabled = true) =>
 // на запись только primary_specialization_ids/narrow_specialization_ids
 // (числа), хотя на чтение отдаёт primary_specializations/narrow_specializations
 // объектами {id, name, photo}.
-export const useSpecializationOptions = (enabled = true) => {
-  const { data = [], isLoading } = useSpecializations(enabled);
+export const useSpecializationOptions = (
+  scope: SpecializationScope = "all",
+  enabled = true,
+) => {
+  const { data = [], isLoading } = useSpecializations(scope, enabled);
 
   return {
     options: data

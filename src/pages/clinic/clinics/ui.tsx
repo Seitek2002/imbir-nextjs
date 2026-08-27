@@ -150,6 +150,7 @@ export const ClinicsPage: FC<Props> = ({ initialCity }) => {
       <MobileFiltersModal
         isOpen={isFiltersModalOpen}
         prefix="clinic"
+        specializationScope="clinic"
         fields={clinicFilters}
       />
 
@@ -231,7 +232,12 @@ export const ClinicsPage: FC<Props> = ({ initialCity }) => {
             )}
           </div>
 
-          <FilterBar title="Клиники" prefix="clinic" fields={clinicFilters} />
+          <FilterBar
+            title="Клиники"
+            prefix="clinic"
+            specializationScope="clinic"
+            fields={clinicFilters}
+          />
 
           <div className="mt-2">
             {isLoading ? (

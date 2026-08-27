@@ -133,6 +133,7 @@ export const ClinicsMainList: FC = () => {
           <FilterBar
             title="Клиники"
             prefix="clinic"
+            specializationScope="clinic"
             fields={{
               specialty: true,
               experience: false,

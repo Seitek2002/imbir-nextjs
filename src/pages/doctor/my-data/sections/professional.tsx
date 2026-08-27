@@ -133,7 +133,7 @@ export const DoctorProfessionalInfoSection: FC = () => {
   // нему же ищут фильтры врачей), а сохраняется профиль по id — резолвим
   // название обратно в id перед отправкой (см. resolveSpecializationIds).
   const { options: specializationOptions, isLoading: isSpecsLoading } =
-    useSpecializationOptions();
+    useSpecializationOptions("doctor");
   const { data: specializationList = [] } = useSpecializations();
   const specializationPlaceholder = isSpecsLoading
     ? "Загружаем список..."

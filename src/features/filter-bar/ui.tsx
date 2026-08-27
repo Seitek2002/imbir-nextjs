@@ -4,6 +4,7 @@ import { FC, ReactNode, useEffect, useRef } from "react";
 
 import { useSpecializationOptions } from "@/entities/specialization";
 
+import type { SpecializationScope } from "@/shared/api";
 import { RemoveIcon } from "@/shared/assets/icons";
 import { replaceUrlState, useUrlSearchParams } from "@/shared/lib/url-state";
 import { useCityStore } from "@/shared/store";
@@ -18,6 +19,7 @@ type Props = {
     specialty?: boolean;
   };
   prefix: string;
+  specializationScope?: SpecializationScope;
   title?: string;
 };
 
@@ -41,6 +43,7 @@ export const FilterBar: FC<Props> = ({
     rating: true,
     price: true,
   },
+  specializationScope = "all",
   children,
 }) => {
   const searchParams = useUrlSearchParams();
@@ -48,6 +51,7 @@ export const FilterBar: FC<Props> = ({
   // Общий хук на весь app — справочник почти не меняется, кешируется под
   // одним ключом (FilterBar/MobileFiltersModal/формы регистрации).
   const { options: specialtyOptions } = useSpecializationOptions(
+    specializationScope,
     !!fields.specialty,
   );
 

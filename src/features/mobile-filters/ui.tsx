@@ -4,6 +4,7 @@ import { FC, useState } from "react";
 
 import { useSpecializationOptions } from "@/entities/specialization";
 
+import type { SpecializationScope } from "@/shared/api";
 import { StarIcon } from "@/shared/assets/icons";
 import { replaceUrlState, useUrlSearchParams } from "@/shared/lib/url-state";
 import { Button, Dropdown, PageHeader, Radio, RangeSlider } from "@/shared/ui";
@@ -23,6 +24,7 @@ type Props = {
   };
   isOpen: boolean;
   prefix: string;
+  specializationScope?: SpecializationScope;
 };
 
 const RATINGS = ["5.0", "4.0", "3.0", "2.0", "1.0"];
@@ -35,11 +37,13 @@ export const MobileFiltersModal: FC<Props> = ({
   fields,
   categoryOptions = [],
   clinicOptions = [],
+  specializationScope = "all",
 }) => {
   const searchParams = useUrlSearchParams();
 
   // Тот же общий хук, что и в десктопном FilterBar — один кеш на всё приложение.
   const { options: specialtyOptions } = useSpecializationOptions(
+    specializationScope,
     !!fields?.specialty,
   );
 

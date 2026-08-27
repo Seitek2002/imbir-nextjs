@@ -7,6 +7,7 @@ import {
   SiteSettingsResponse,
   SpecializationItem,
   SpecializationListResponse,
+  SpecializationScope,
   UserAccountStatus,
   UserAccountStatusResponse,
 } from "./types";
@@ -29,9 +30,12 @@ export const getCities = () => fetchReference("/api/references/cities/");
 
 // Единственный справочник, отдающий объекты, а не строки — с id и photo
 // (бэк подвёз миграцию значений и картинки после нашей просьбы).
-export const getSpecializations = async (): Promise<SpecializationItem[]> => {
+export const getSpecializations = async (
+  scope: SpecializationScope = "all",
+): Promise<SpecializationItem[]> => {
+  const query = scope === "all" ? "" : `?type=${scope}`;
   const { data } = await apiClient.get<SpecializationListResponse>(
-    "/api/references/specializations/",
+    `/api/references/specializations/${query}`,
   );
   return data.data;
 };

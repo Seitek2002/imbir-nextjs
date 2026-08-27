@@ -13,6 +13,9 @@ export type SpecializationItem = {
   photo?: null | string;
 };
 
+// Backend supports a combined reference as well as role-specific lists.
+export type SpecializationScope = "all" | "clinic" | "doctor";
+
 export type SpecializationListResponse = {
   data: SpecializationItem[];
 };

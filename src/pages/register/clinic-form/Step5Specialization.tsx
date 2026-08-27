@@ -18,7 +18,7 @@ export const Step5Specialization = ({ data, onChange }: Props) => {
   // перед отправкой (см. handleSubmitClinic), поэтому опечатка или устаревшее
   // значение больше не могут молча потеряться, как было со свободным текстом.
   const { options: specializationOptions, isLoading: isSpecsLoading } =
-    useSpecializationOptions();
+    useSpecializationOptions("clinic");
   const specializationPlaceholder = isSpecsLoading
     ? "Загружаем список..."
     : "Выберите из списка";

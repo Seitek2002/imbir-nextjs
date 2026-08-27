@@ -165,6 +165,7 @@ export const SearchPage: FC = () => {
       <MobileFiltersModal
         isOpen={isFiltersModalOpen}
         prefix="doc"
+        specializationScope="doctor"
         fields={{
           specialty: true,
           experience: true,
@@ -305,6 +306,7 @@ export const SearchPage: FC = () => {
                       <div>
                         <FilterBar
                           prefix="doc"
+                          specializationScope="doctor"
                           fields={{
                             specialty: true,
                             experience: true,

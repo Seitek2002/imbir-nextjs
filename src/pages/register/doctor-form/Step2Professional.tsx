@@ -16,7 +16,7 @@ type Props = {
 export const Step2Professional = ({ data, onChange, inviteClinic }: Props) => {
   // Список специализаций — из справочника бэка: значение уходит в
   // primary_specializations как есть, и по нему же врача потом находят фильтры.
-  const { options, isLoading } = useSpecializationOptions();
+  const { options, isLoading } = useSpecializationOptions("doctor");
   const placeholder = isLoading ? "Загружаем список..." : "Выберите из списка";
 
   return (

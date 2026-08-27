@@ -69,8 +69,8 @@ export default async function Page({
       queryFn: () => api.getServices({ search: activeQuery, page_size: 20 }),
     }),
     queryClient.prefetchQuery({
-      queryKey: referenceKeys.specializations(),
-      queryFn: getSpecializations,
+      queryKey: referenceKeys.specializations("doctor"),
+      queryFn: () => getSpecializations("doctor"),
     }),
   ]);
 

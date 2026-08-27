@@ -16,6 +16,7 @@ import {
   PhoneInput,
   Textarea,
 } from "@/shared/ui";
+import type { DropdownOption } from "@/shared/ui/dropdown";
 
 import type { SpecialistFormState } from "./model";
 
@@ -23,6 +24,20 @@ export const GENDER_OPTIONS = [
   { label: "Мужской", value: "male" },
   { label: "Женский", value: "female" },
 ];
+
+const withSelectedSpecialization = (
+  options: DropdownOption[],
+  selected: string,
+): DropdownOption[] => {
+  if (!selected || options.some((option) => option.value === selected)) {
+    return options;
+  }
+
+  // Не прячем уже сохранённое значение, если оно больше не входит в scope
+  // опубликованных врачей. Иначе открытие и сохранение карточки могло бы его
+  // молча удалить.
+  return [...options, { label: selected, value: selected }];
+};
 
 // Строка «label / значение» с разделителем — тот же паттерн, что в остальных
 // unified-профилях (доктор «Мои данные», клиника «Моя клиника»).
@@ -228,7 +243,7 @@ export const ProfessionalSection: FC<SectionProps> = ({
   // Специализация — из справочника бэка, а не свободный текст: по этому же
   // значению врача потом ищут фильтры, опечатка выкидывала бы его из выдачи.
   const { options: specializationOptions, isLoading: isSpecsLoading } =
-    useSpecializationOptions();
+    useSpecializationOptions("doctor");
   const specializationPlaceholder = isSpecsLoading
     ? "Загружаем список..."
     : "Выберите из списка";
@@ -253,7 +268,10 @@ export const ProfessionalSection: FC<SectionProps> = ({
       <Dropdown
         label="Специализация"
         placeholder={specializationPlaceholder}
-        options={specializationOptions}
+        options={withSelectedSpecialization(
+          specializationOptions,
+          d.specialization,
+        )}
         searchable
         value={d.specialization}
         onChange={(v) => set("specialization", v)}
@@ -261,7 +279,10 @@ export const ProfessionalSection: FC<SectionProps> = ({
       <Dropdown
         label="Дополнительная специализация"
         placeholder={specializationPlaceholder}
-        options={specializationOptions}
+        options={withSelectedSpecialization(
+          specializationOptions,
+          d.additionalSpecialization,
+        )}
         searchable
         value={d.additionalSpecialization}
         onChange={(v) => set("additionalSpecialization", v)}

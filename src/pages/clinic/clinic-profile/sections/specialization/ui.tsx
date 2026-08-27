@@ -28,7 +28,7 @@ export const ClinicSpecializationPage: FC = () => {
   // которого уже нет в справочнике, оно должно быть замечено, а не исчезнуть.
   const { data: specializationList = [] } = useSpecializations();
   const { options: specializationOptions, isLoading: isSpecsLoading } =
-    useSpecializationOptions();
+    useSpecializationOptions("clinic");
   const specializationPlaceholder = isSpecsLoading
     ? "Загружаем список..."
     : "Выберите из списка";

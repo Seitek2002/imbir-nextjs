@@ -277,7 +277,7 @@ export const DoctorMyDataOverview: FC = () => {
     setD((prev) => ({ ...prev, [k]: v }));
 
   const { options: specializationOptions, isLoading: isSpecsLoading } =
-    useSpecializationOptions();
+    useSpecializationOptions("doctor");
   const { data: specializationList = [] } = useSpecializations();
   const specializationPlaceholder = isSpecsLoading
     ? "Загружаем список..."
