@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { logoutFn } from "@/shared/api";
 import { useAuthStore } from "@/shared/store";
 
@@ -10,9 +12,13 @@ import { useAuthStore } from "@/shared/store";
 // refresh token is always invalidated server-side.
 export const useLogout = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   return async () => {
     const { refreshToken, logout } = useAuthStore.getState();
+    // Профильные ключи общие для всех ролей, поэтому не даём данным текущего
+    // пользователя пережить выход и попасть в следующий аккаунт.
+    queryClient.clear();
     if (refreshToken) {
       try {
         await logoutFn(refreshToken);

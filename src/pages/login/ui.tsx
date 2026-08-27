@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { loginFn } from "@/shared/api";
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
@@ -33,6 +35,7 @@ const getRoleRedirect = (role: string): string => {
 
 export const LoginPage = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const {
     setTokens,
     setUser,
@@ -71,6 +74,10 @@ export const LoginPage = () => {
       const identifier =
         loginBy === "email" ? email : `${dialCode}${phoneLocal}`;
       const res = await loginFn({ email: identifier, password });
+      // Ключи профильных запросов не содержат id пользователя. Без очистки
+      // React Query считал данные прошлого аккаунта свежими и показывал их
+      // после нового входа до ручной перезагрузки страницы.
+      queryClient.clear();
       setRememberMeStore(rememberMe);
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
