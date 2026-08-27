@@ -47,7 +47,7 @@ type FormState = {
   days: Record<DayKey, DayState>;
   description: string;
   emergency24: boolean;
-  equipment: string;
+  equipment: string[];
   fullAddress: string;
   latitude: string;
   legalName: string;
@@ -60,7 +60,7 @@ type FormState = {
   mainDirections: string[];
   name: string;
   narrowDirections: string[];
-  patientConditions: string;
+  patientConditions: string[];
   paymentMethods: string;
   phone: string;
   registrationNumber: string;
@@ -87,8 +87,8 @@ const buildState = (p: ClinicProfile): FormState => ({
   mainDirections: p.mainDirections,
   narrowDirections: p.narrowDirections,
   additionalServices: p.additionalServices.join(", "),
-  equipment: p.equipment.join(", "),
-  patientConditions: p.patientConditions.join(", "),
+  equipment: p.equipment,
+  patientConditions: p.patientConditions,
   paymentMethods: p.paymentMethods.join(", "),
   days: {
     mon: toDay(p.workSchedule.mon),
@@ -123,8 +123,11 @@ type Props = ClinicProfile & {
   isSpecializationsLoading?: boolean;
   isUploadingDocument?: boolean;
   isUploadingPhoto?: boolean;
+  equipmentOptions?: DropdownOption[];
+  isReferenceDataLoading?: boolean;
   onUploadDocument?: (file: File) => Promise<unknown>;
   onUploadPhoto?: (file: File) => Promise<unknown>;
+  patientConditionOptions?: DropdownOption[];
   // Справочник специализаций — пропсом, а не хуком внутри: entities в
   // этом проекте не импортируют друг друга (та же причина, по которой резолвинг
   // названий в id живёт на странице, см. ClinicProfileFormHandle выше).
@@ -166,11 +169,33 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
       isUploadingDocument = false,
       specializationOptions = [],
       isSpecializationsLoading = false,
+      equipmentOptions = [],
+      patientConditionOptions = [],
+      isReferenceDataLoading = false,
     } = props;
 
     const specializationPlaceholder = isSpecializationsLoading
       ? "Загружаем список..."
       : "Выберите из списка";
+    const referencePlaceholder = isReferenceDataLoading
+      ? "Загружаем список..."
+      : "Выберите из списка";
+
+    // Новые варианты приходят из API. Уже сохранённые значения оставляем в
+    // списке, чтобы их случайно не потерять, если профиль пока не опубликован
+    // и поэтому не попал в выдачу справочника.
+    const optionsWithSelected = (
+      options: DropdownOption[],
+      selected: string[],
+    ): DropdownOption[] => {
+      const known = new Set(options.map((option) => option.value));
+      return [
+        ...options,
+        ...selected
+          .filter((value) => !known.has(value))
+          .map((value) => ({ label: value, value })),
+      ];
+    };
 
     const [d, setD] = useState<FormState>(() => buildState(props));
     const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -212,8 +237,8 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         license_date: toApiDate(d.licenseDate),
         license_authority: d.licenseAuthority || undefined,
         additional_services: d.additionalServices,
-        equipment: csv(d.equipment),
-        patient_conditions: csv(d.patientConditions),
+        equipment: d.equipment,
+        patient_conditions: d.patientConditions,
         // Поля «Способы оплаты» в форме больше нет — оплата у всех только
         // онлайн. Но значение читаем из профиля и отправляем обратно как
         // есть: PUT затирает всё, чего нет в теле, и без этой строки первое
@@ -776,19 +801,28 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         <SectionCard title="Оборудование и условия">
           {isEditing ? (
             <div className="flex flex-col gap-6">
-              <Textarea
+              <Dropdown
                 label="Оборудование"
+                placeholder={referencePlaceholder}
+                options={optionsWithSelected(equipmentOptions, d.equipment)}
                 value={d.equipment}
-                onChange={(e) => set("equipment", e.target.value)}
-                rows={2}
-                hint="Введите через запятую"
+                onChange={(value) => set("equipment", value)}
+                isMulti
+                searchable
+                type="checkbox"
               />
-              <Textarea
+              <Dropdown
                 label="Условия для пациентов"
+                placeholder={referencePlaceholder}
+                options={optionsWithSelected(
+                  patientConditionOptions,
+                  d.patientConditions,
+                )}
                 value={d.patientConditions}
-                onChange={(e) => set("patientConditions", e.target.value)}
-                rows={2}
-                hint="Введите через запятую"
+                onChange={(value) => set("patientConditions", value)}
+                isMulti
+                searchable
+                type="checkbox"
               />
             </div>
           ) : (

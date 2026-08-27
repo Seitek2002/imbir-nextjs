@@ -22,6 +22,9 @@ import {
   type ClinicProfileBranch,
   clinicCabinetKeys,
   getClinicStats,
+  getConditions,
+  getEquipment,
+  referenceKeys,
   updateClinicBranch,
 } from "@/shared/api";
 import { CheckIcon } from "@/shared/assets/icons";
@@ -179,6 +182,26 @@ export const ClinicProfilePage: FC = () => {
     options: specializationOptions,
     isLoading: isSpecializationsLoading,
   } = useSpecializationOptions();
+  const { data: equipmentValues = [], isLoading: isEquipmentLoading } =
+    useQuery({
+      queryKey: referenceKeys.equipment(),
+      queryFn: getEquipment,
+      staleTime: 60 * 60 * 1000,
+    });
+  const { data: patientConditionValues = [], isLoading: isConditionsLoading } =
+    useQuery({
+      queryKey: referenceKeys.conditions(),
+      queryFn: getConditions,
+      staleTime: 60 * 60 * 1000,
+    });
+  const equipmentOptions = equipmentValues.map((value) => ({
+    label: value,
+    value,
+  }));
+  const patientConditionOptions = patientConditionValues.map((value) => ({
+    label: value,
+    value,
+  }));
 
   const handleSave = async () => {
     // Берём реально введённые значения из формы (включая логотип-файл)
@@ -273,6 +296,9 @@ export const ClinicProfilePage: FC = () => {
             isUploadingDocument={isUploadingDocument}
             specializationOptions={specializationOptions}
             isSpecializationsLoading={isSpecializationsLoading}
+            equipmentOptions={equipmentOptions}
+            patientConditionOptions={patientConditionOptions}
+            isReferenceDataLoading={isEquipmentLoading || isConditionsLoading}
           />
         )}
       </div>

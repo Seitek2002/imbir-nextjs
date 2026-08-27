@@ -2,57 +2,28 @@
 
 import { FC, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
 import { getConditions, getEquipment, referenceKeys } from "@/shared/api";
-import { useReferenceValues } from "@/shared/lib/useReference";
-import { Checkbox } from "@/shared/ui";
+import { Dropdown } from "@/shared/ui";
+import type { DropdownOption } from "@/shared/ui/dropdown";
 
-const DEFAULT_EQUIPMENT = [
-  "УЗИ",
-  "КТ/МРТ",
-  "Операционная",
-  "Рентген",
-  "Лаборатория",
-  "Реанимация",
-];
-const DEFAULT_PATIENT_CONDITIONS = [
-  "Парковка",
-  "Детская зона",
-  "Онлайн-консультация",
-  "Доступ для инвалидов",
-  "Аптека",
-];
-
-const OptionGroup: FC<{
-  label: string;
-  onChange: (value: string[]) => void;
-  options: string[];
-  value: string[];
-}> = ({ label, options, value, onChange }) => (
-  <div className="flex flex-col gap-1.5">
-    <span className="text-sm font-medium text-secondary">{label}</span>
-    <div className="divide-y divide-border rounded-xl border border-border">
-      {options.map((option) => (
-        <div key={option} className="px-4 py-3">
-          <Checkbox
-            label={option}
-            checked={value.includes(option)}
-            onChange={(event) =>
-              onChange(
-                event.target.checked
-                  ? [...value, option]
-                  : value.filter((item) => item !== option),
-              )
-            }
-          />
-        </div>
-      ))}
-    </div>
-  </div>
-);
+const withSelected = (
+  options: string[],
+  selected: string[],
+): DropdownOption[] => {
+  const known = new Set(options);
+  return [
+    ...options.map((value) => ({ label: value, value })),
+    ...selected
+      .filter((value) => !known.has(value))
+      .map((value) => ({ label: value, value })),
+  ];
+};
 
 const BulletList: FC<{ items: string[]; label: string }> = ({
   label,
@@ -85,16 +56,22 @@ export const ClinicEquipmentPage: FC = () => {
   // этого сохранение раздела молча стёрло бы данные у существующих клиник.
   const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
 
-  const { values: equipmentOptions } = useReferenceValues(
-    referenceKeys.equipment(),
-    getEquipment,
-    DEFAULT_EQUIPMENT,
-  );
-  const { values: patientConditionOptions } = useReferenceValues(
-    referenceKeys.conditions(),
-    getConditions,
-    DEFAULT_PATIENT_CONDITIONS,
-  );
+  const { data: equipmentOptions = [], isLoading: isEquipmentLoading } =
+    useQuery({
+      queryKey: referenceKeys.equipment(),
+      queryFn: getEquipment,
+      staleTime: 60 * 60 * 1000,
+    });
+  const { data: patientConditionOptions = [], isLoading: isConditionsLoading } =
+    useQuery({
+      queryKey: referenceKeys.conditions(),
+      queryFn: getConditions,
+      staleTime: 60 * 60 * 1000,
+    });
+  const placeholder =
+    isEquipmentLoading || isConditionsLoading
+      ? "Загружаем список..."
+      : "Выберите из списка";
 
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
@@ -137,17 +114,25 @@ export const ClinicEquipmentPage: FC = () => {
       <div className="bg-white rounded-3xl border border-border p-5">
         {isEditing ? (
           <div className="flex flex-col gap-6">
-            <OptionGroup
+            <Dropdown
               label="Оборудование"
-              options={equipmentOptions}
+              placeholder={placeholder}
+              options={withSelected(equipmentOptions, equipment)}
               value={equipment}
               onChange={setEquipment}
+              isMulti
+              searchable
+              type="checkbox"
             />
-            <OptionGroup
+            <Dropdown
               label="Условия для пациентов"
-              options={patientConditionOptions}
+              placeholder={placeholder}
+              options={withSelected(patientConditionOptions, patientConditions)}
               value={patientConditions}
               onChange={setPatientConditions}
+              isMulti
+              searchable
+              type="checkbox"
             />
           </div>
         ) : (
