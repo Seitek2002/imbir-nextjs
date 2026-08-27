@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getSearchSuggestions, searchKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { ImageWithFallback } from "@/shared/ui";
+import { Spinner } from "@/shared/ui";
 
 type RowProps = {
   href: string;
@@ -63,25 +64,7 @@ export const SearchSuggestions: FC<{
   if (isLoading) {
     return (
       <div className="flex justify-center py-6">
-        <svg
-          className="animate-spin size-6 text-primary"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-          />
-        </svg>
+        <Spinner className="size-6 text-primary" />
       </div>
     );
   }

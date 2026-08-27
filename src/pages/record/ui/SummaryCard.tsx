@@ -10,6 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { getAppointmentById } from "@/shared/api";
 import type { AppointmentStatus } from "@/shared/api";
 import { Button } from "@/shared/ui";
+import { Spinner } from "@/shared/ui";
 
 import { formatDateLabel, formatPrice } from "../model/lib";
 import type { Doctor, Service } from "../model/types";
@@ -60,25 +61,7 @@ export const SummaryCard: FC<{
     <aside className="relative border border-border-soft rounded-3xl bg-white p-5 lg:sticky lg:top-6 flex flex-col gap-4 shadow-sm w-full lg:w-100">
       {isChecking && (
         <div className="absolute inset-0 z-10 bg-white/70 rounded-3xl flex items-center justify-center">
-          <svg
-            className="animate-spin size-10 text-primary"
-            viewBox="0 0 24 24"
-            fill="none"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-            />
-          </svg>
+          <Spinner className="size-10 text-primary" />
         </div>
       )}
 

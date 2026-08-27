@@ -1,5 +1,6 @@
 import { cn } from "@/shared/lib/utils";
 import { Button, Input, Textarea } from "@/shared/ui";
+import { Spinner } from "@/shared/ui";
 
 import { isPhoneValid, normalizeLocalPhone } from "../model/lib";
 import type { RecordForm } from "../model/use-record-form";
@@ -135,25 +136,7 @@ export const Step3PatientForm = ({ form }: { form: RecordForm }) => {
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2">
-              <svg
-                className="animate-spin size-4"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                />
-              </svg>
+              <Spinner className="size-4" />
               Отправка...
             </span>
           ) : (

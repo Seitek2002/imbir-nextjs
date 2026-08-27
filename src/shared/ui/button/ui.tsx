@@ -2,6 +2,8 @@ import { ButtonHTMLAttributes, ComponentType, FC, SVGProps } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
+import { Spinner } from "../spinner";
+
 type IconType = ComponentType<SVGProps<SVGSVGElement>>;
 
 type Variant = "default" | "outline" | "text";
@@ -69,21 +71,7 @@ export const Button: FC<Props> = ({
       disabled={props.disabled || loading}
     >
       {loading ? (
-        <svg className="animate-spin size-4" viewBox="0 0 24 24" fill="none">
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-          />
-        </svg>
+        <Spinner className="size-4" />
       ) : (
         IconLeft && <IconLeft className="size-5" />
       )}

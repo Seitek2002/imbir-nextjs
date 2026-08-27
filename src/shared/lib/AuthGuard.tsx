@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "@/shared/store";
+import { Spinner } from "@/shared/ui";
 
 // Гейт для защищённых разделов (профиль пациента/врача/клиники): пока стор
 // не гидратировался — ничего не рендерим; после гидратации, если токена нет —
@@ -67,26 +68,7 @@ export const AuthGuard = ({ children }: { children: ReactNode }) => {
 
 const AuthGuardFallback = () => (
   <div className="flex flex-1 flex-col items-center justify-center gap-4 py-24 min-h-[60vh]">
-    <svg
-      className="animate-spin size-9 text-primary"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-    >
-      <circle
-        className="opacity-20"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="3"
-      />
-      <path
-        className="opacity-90"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"
-      />
-    </svg>
+    <Spinner className="size-9 text-primary" />
     <p className="text-muted text-sm">Данные в обработке</p>
   </div>
 );

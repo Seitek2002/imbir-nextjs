@@ -6,6 +6,8 @@ import { createPortal } from "react-dom";
 import { useMounted } from "@/shared/lib/useMounted";
 import { useScrollLock } from "@/shared/lib/useScrollLock";
 
+import { Spinner } from "../spinner";
+
 type Props = {
   cancelLabel?: string;
   closeOnCancel?: boolean;
@@ -30,28 +32,6 @@ type Props = {
 };
 
 const DURATION = 200;
-
-const Spinner = () => (
-  <svg
-    className="animate-spin size-8 text-foreground"
-    viewBox="0 0 24 24"
-    fill="none"
-  >
-    <circle
-      className="opacity-25"
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="currentColor"
-      strokeWidth="4"
-    />
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-    />
-  </svg>
-);
 
 export const ConfirmDialog: FC<Props> = ({
   isOpen,
@@ -155,7 +135,7 @@ export const ConfirmDialog: FC<Props> = ({
 
         {isLoading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-t-3xl bg-white/70 backdrop-blur-[1px]">
-            <Spinner />
+            <Spinner className="size-8 text-foreground" />
           </div>
         )}
       </div>
@@ -200,7 +180,7 @@ export const ConfirmDialog: FC<Props> = ({
 
         {isLoading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/70 backdrop-blur-[1px]">
-            <Spinner />
+            <Spinner className="size-8 text-foreground" />
           </div>
         )}
       </div>
