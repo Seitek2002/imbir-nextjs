@@ -14,7 +14,11 @@ import { ReviewsSection } from "@/widgets/reviews";
 import { VideosSwiper } from "@/widgets/videos-swiper";
 
 import { useFavoriteToggle } from "@/features/favorite-toggle";
-import { useDeleteReview, useSubmitReview } from "@/features/submit-review";
+import {
+  useDeleteReview,
+  useHasMyReview,
+  useSubmitReview,
+} from "@/features/submit-review";
 
 import { fetchDoctorInterviews } from "@/entities/interview";
 
@@ -33,9 +37,17 @@ import {
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
-import { AnimatedNumber, Button, ContactInfoModal, IconBtn } from "@/shared/ui";
+import {
+  AnimatedNumber,
+  Button,
+  ContactInfoModal,
+  EmptyState,
+  IconBtn,
+} from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
+
+import { SpecialistDetailsSkeleton } from "./skeleton";
 
 type Props = {
   id: string;
@@ -101,6 +113,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
 
   const { isSubmitting, submitReview } = useSubmitReview("doctor", id);
   const { removeReview } = useDeleteReview("doctor", id);
+  const alreadyReviewed = useHasMyReview("doctor", id);
 
   // 3. ПОЛУЧАЕМ ИНТЕРВЬЮ ЭТОГО ВРАЧА
   const { data: doctorInterviews = [] } = useQuery({
@@ -110,26 +123,36 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
 
   if (isDoctorError || (!isDoctorLoading && !doctor)) {
     return (
-      <div className="min-h-screen flex items-center justify-center flex-col gap-4">
-        <p className="text-xl font-semibold text-foreground">
-          Специалист не найден
-        </p>
-        <button
-          className="text-primary underline text-sm"
-          onClick={() => router.push(ROUTES.SPECIALISTS)}
-        >
-          Вернуться к списку специалистов
-        </button>
-      </div>
+      <main className="min-h-screen bg-background flex flex-col">
+        <div className="hidden md:block">
+          <Header />
+        </div>
+        <div className="md:hidden">
+          <Header title="Специалист" backTo={ROUTES.SPECIALISTS} />
+        </div>
+
+        <div className="flex-1 w-full max-w-2xl mx-auto px-4 py-10 flex items-center">
+          <EmptyState
+            className="w-full"
+            icon={<UserCircleIcon className="size-6" />}
+            title="Специалист не найден"
+            description="Возможно, анкету удалили или ссылка устарела. Посмотрите других специалистов — возможно, кто-то из них подойдёт."
+            action={
+              <Button size="md" onClick={() => router.push(ROUTES.SPECIALISTS)}>
+                К списку специалистов
+              </Button>
+            }
+          />
+        </div>
+      </main>
     );
   }
 
+  // Тот же скелет, что у маршрута (app/specialists/[id]/loading.tsx).
+  // Раньше здесь был текст «Загрузка специалиста...», и при переходе со
+  // списка он подменял собой уже отрисованный каркас.
   if (isDoctorLoading || !doctor) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Загрузка специалиста...
-      </div>
-    );
+    return <SpecialistDetailsSkeleton />;
   }
 
   // Детальные поля бэк заполняет не для каждого врача. Ничего не выдумываем:
@@ -459,6 +482,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             onSubmitReview={isAuthed ? submitReview : undefined}
             isSubmitting={isSubmitting}
             onDeleteReview={isAuthed ? removeReview : undefined}
+            alreadyReviewed={alreadyReviewed}
             allReviewsHref={ROUTES.SPECIALIST_REVIEWS(id)}
           />
         )}

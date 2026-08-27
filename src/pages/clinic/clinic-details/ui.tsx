@@ -13,7 +13,11 @@ import { Header } from "@/widgets/header";
 import { ReviewsSection } from "@/widgets/reviews";
 
 import { useFavoriteToggle } from "@/features/favorite-toggle";
-import { useDeleteReview, useSubmitReview } from "@/features/submit-review";
+import {
+  useDeleteReview,
+  useHasMyReview,
+  useSubmitReview,
+} from "@/features/submit-review";
 
 import { DoctorCard } from "@/entities/doctor";
 import { ServiceCard } from "@/entities/service";
@@ -33,9 +37,17 @@ import {
 import { ROUTES } from "@/shared/config";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { AnimatedNumber, Button, ContactInfoModal, IconBtn } from "@/shared/ui";
+import {
+  AnimatedNumber,
+  Button,
+  ContactInfoModal,
+  EmptyState,
+  IconBtn,
+} from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
+
+import { ClinicDetailsSkeleton } from "./skeleton";
 
 type Props = {
   id: string;
@@ -92,30 +104,40 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
 
   const { isSubmitting, submitReview } = useSubmitReview("clinic", id);
   const { removeReview } = useDeleteReview("clinic", id);
+  const alreadyReviewed = useHasMyReview("clinic", id);
 
   if (isClinicError || (!isClinicLoading && !clinic)) {
     return (
-      <div className="min-h-screen flex items-center justify-center flex-col gap-4">
-        <p className="text-xl font-semibold text-foreground">
-          Клиника не найдена
-        </p>
-        <Button
-          variant="text"
-          className="text-primary underline"
-          onClick={() => router.push(ROUTES.CLINICS)}
-        >
-          Вернуться к списку клиник
-        </Button>
-      </div>
+      <main className="min-h-screen bg-background flex flex-col">
+        <div className="hidden md:block">
+          <Header />
+        </div>
+        <div className="md:hidden">
+          <Header title="Клиника" backTo={ROUTES.CLINICS} />
+        </div>
+
+        <div className="flex-1 w-full max-w-2xl mx-auto px-4 py-10 flex items-center">
+          <EmptyState
+            className="w-full"
+            icon={<GeoIcon className="size-6" />}
+            title="Клиника не найдена"
+            description="Возможно, карточку удалили или ссылка устарела. Посмотрите другие клиники — возможно, какая-то из них подойдёт."
+            action={
+              <Button size="md" onClick={() => router.push(ROUTES.CLINICS)}>
+                К списку клиник
+              </Button>
+            }
+          />
+        </div>
+      </main>
     );
   }
 
+  // Тот же скелет, что у маршрута (app/clinics/[id]/loading.tsx). Раньше здесь
+  // был текст «Загрузка клиники...», и при переходе со списка он подменял собой
+  // уже отрисованный каркас.
   if (isClinicLoading || !clinic) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Загрузка клиники...
-      </div>
-    );
+    return <ClinicDetailsSkeleton />;
   }
 
   // --- ФОЛЛБЭКИ ТЕКСТОВ ---
@@ -479,6 +501,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
             onSubmitReview={isAuthed ? submitReview : undefined}
             isSubmitting={isSubmitting}
             onDeleteReview={isAuthed ? removeReview : undefined}
+            alreadyReviewed={alreadyReviewed}
             allReviewsHref={ROUTES.CLINIC_REVIEWS(id)}
           />
         )}
