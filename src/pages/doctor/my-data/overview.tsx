@@ -246,6 +246,9 @@ export const DoctorMyDataOverview: FC = () => {
   const [d, setD] = useState<D>(EMPTY);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | undefined>();
+  const [processPhoto, setProcessPhoto] = useState<boolean>();
+  const [showPhotoProcessingConfirm, setShowPhotoProcessingConfirm] =
+    useState(false);
   const photoRef = useRef<HTMLInputElement>(null);
   const certRef = useRef<HTMLInputElement>(null);
 
@@ -290,8 +293,11 @@ export const DoctorMyDataOverview: FC = () => {
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
     setPendingPhoto(file);
+    setProcessPhoto(undefined);
+    setShowPhotoProcessingConfirm(true);
     const reader = new FileReader();
     reader.onloadend = () => setPhotoPreview(reader.result as string);
     reader.readAsDataURL(file);
@@ -337,51 +343,57 @@ export const DoctorMyDataOverview: FC = () => {
     // Бэк требует first_name + last_name (full_name он игнорирует и падает 400)
     const parts = d.fullName.trim().split(/\s+/);
 
-    await saveProfile({
-      first_name: parts[0] ?? "",
-      last_name: parts.slice(1).join(" ") || (parts[0] ?? ""),
-      gender: d.gender || undefined,
-      birth_date: toApiDate(d.birthDate),
-      city: d.city,
-      languages: d.languages
-        .split(",")
-        .map((l) => l.trim())
-        .filter(Boolean),
-      phone: d.phone || undefined,
-      ...(pendingPhoto ? { photo: pendingPhoto } : {}),
-      primary_specialization_ids: primaryIds,
-      narrow_specialization_ids: narrowIds,
-      experience_years: parseInt(d.experienceYears) || 0,
-      position: d.currentPosition.trim(),
-      qualification_category: d.qualification.trim(),
-      academic_degree: d.scientificDegree.trim(),
-      work_experience: nextWorkExperience,
-      equipment: d.equipment,
-      patient_conditions: d.patientConditions,
-      // Поля «Способы оплаты» в интерфейсе больше нет — оплата у всех только
-      // онлайн, как уже сделано у клиники. Значение читаем из профиля и
-      // отправляем обратно как есть: ручка только PUT, и терять чужие данные
-      // из-за убранного с экрана поля нельзя.
-      payment_methods: d.paymentMethods,
-      is_online_available: d.isOnlineAvailable,
-      // Бэк ждёт decimal-строку. Пустое поле отправляем как "0.00", иначе
-      // цена не сбрасывается: пустую строку сериализатор отклоняет.
-      consultation_price: d.consultationPrice.trim()
-        ? `${parseFloat(d.consultationPrice.replace(",", ".")) || 0}`
-        : "0.00",
-      is_published: d.isPublished,
-      education: toApiEducation({
-        university: d.university,
-        diplomaSpecialty: d.diplomaSpecialty,
-        graduationYear: d.graduationYear,
-        internship: d.internship,
-        residency: d.residency,
-        additionalEducation: [],
-      }),
-      additional_education: toApiAdditionalEducation(d.additionalEducation),
-      license_number: d.licenseNumber,
-    });
+    await saveProfile(
+      {
+        first_name: parts[0] ?? "",
+        last_name: parts.slice(1).join(" ") || (parts[0] ?? ""),
+        gender: d.gender || undefined,
+        birth_date: toApiDate(d.birthDate),
+        city: d.city,
+        languages: d.languages
+          .split(",")
+          .map((l) => l.trim())
+          .filter(Boolean),
+        phone: d.phone || undefined,
+        ...(pendingPhoto ? { photo: pendingPhoto } : {}),
+        primary_specialization_ids: primaryIds,
+        narrow_specialization_ids: narrowIds,
+        experience_years: parseInt(d.experienceYears) || 0,
+        position: d.currentPosition.trim(),
+        qualification_category: d.qualification.trim(),
+        academic_degree: d.scientificDegree.trim(),
+        work_experience: nextWorkExperience,
+        equipment: d.equipment,
+        patient_conditions: d.patientConditions,
+        // Поля «Способы оплаты» в интерфейсе больше нет — оплата у всех только
+        // онлайн, как уже сделано у клиники. Значение читаем из профиля и
+        // отправляем обратно как есть: ручка только PUT, и терять чужие данные
+        // из-за убранного с экрана поля нельзя.
+        payment_methods: d.paymentMethods,
+        is_online_available: d.isOnlineAvailable,
+        // Бэк ждёт decimal-строку. Пустое поле отправляем как "0.00", иначе
+        // цена не сбрасывается: пустую строку сериализатор отклоняет.
+        consultation_price: d.consultationPrice.trim()
+          ? `${parseFloat(d.consultationPrice.replace(",", ".")) || 0}`
+          : "0.00",
+        is_published: d.isPublished,
+        education: toApiEducation({
+          university: d.university,
+          diplomaSpecialty: d.diplomaSpecialty,
+          graduationYear: d.graduationYear,
+          internship: d.internship,
+          residency: d.residency,
+          additionalEducation: [],
+        }),
+        additional_education: toApiAdditionalEducation(d.additionalEducation),
+        license_number: d.licenseNumber,
+      },
+      {
+        processPhoto: pendingPhoto ? (processPhoto ?? false) : undefined,
+      },
+    );
     setPendingPhoto(null);
+    setProcessPhoto(undefined);
     setIsEditing(false);
     setShowSaveConfirm(false);
   };
@@ -392,6 +404,8 @@ export const DoctorMyDataOverview: FC = () => {
       setPhotoPreview(profile.photo);
     }
     setPendingPhoto(null);
+    setProcessPhoto(undefined);
+    setShowPhotoProcessingConfirm(false);
     setIsEditing(false);
   };
 
@@ -1064,6 +1078,24 @@ export const DoctorMyDataOverview: FC = () => {
           </div>
         </div>
       </SectionCard>
+
+      <ConfirmDialog
+        isOpen={showPhotoProcessingConfirm}
+        onClose={() => {
+          setProcessPhoto(false);
+          setShowPhotoProcessingConfirm(false);
+        }}
+        onConfirm={() => {
+          setProcessPhoto(true);
+          setShowPhotoProcessingConfirm(false);
+        }}
+        icon={<CheckIcon className="w-7 h-7 text-primary" />}
+        title="Обработать фото с помощью ИИ?"
+        description="ИИ улучшит качество и подготовит фото для профиля врача."
+        cancelLabel="Без обработки"
+        confirmLabel="Обработать ИИ"
+        closeOnConfirm={false}
+      />
 
       <ConfirmDialog
         isOpen={showSaveConfirm}

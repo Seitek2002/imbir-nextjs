@@ -92,6 +92,7 @@ const sendMaybeMultipart = async <T>(
   path: string,
   method: "PATCH" | "POST" | "PUT",
   body: Record<string, unknown>,
+  params?: Record<string, boolean>,
 ): Promise<T> => {
   const hasFile = Object.values(body).some((v) => v instanceof File);
 
@@ -105,6 +106,7 @@ const sendMaybeMultipart = async <T>(
       url: path,
       method,
       data: form,
+      params,
       // Файлы не укладываются в общие 15 секунд на медленном канале.
       timeout: FILE_UPLOAD_TIMEOUT_MS,
     });
@@ -115,14 +117,23 @@ const sendMaybeMultipart = async <T>(
     url: path,
     method,
     data: body,
+    params,
   });
   return data;
 };
 
 export const updateDoctorProfile = async (
   body: UpdateDoctorProfileBody,
+  options?: { processPhoto?: boolean },
 ): Promise<DoctorPrivateProfile> =>
-  sendMaybeMultipart<DoctorPrivateProfile>("/api/doctor/profile/", "PUT", body);
+  sendMaybeMultipart<DoctorPrivateProfile>(
+    "/api/doctor/profile/",
+    "PUT",
+    body,
+    options?.processPhoto === undefined
+      ? undefined
+      : { process_photo: options.processPhoto },
+  );
 
 // Ответ плоский ({schedule, lunch_break, emergency_24_7}), без обёртки data —
 // проверено живым запросом.

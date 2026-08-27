@@ -50,6 +50,9 @@ export const DoctorBasicInfoSection: FC = () => {
   });
   const photoRef = useRef<HTMLInputElement>(null);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
+  const [processPhoto, setProcessPhoto] = useState<boolean>();
+  const [showPhotoProcessingConfirm, setShowPhotoProcessingConfirm] =
+    useState(false);
 
   // Синхронизация формы с профилем прямо в рендере («adjust state during
   // render» вместо setState в эффекте).
@@ -78,8 +81,11 @@ export const DoctorBasicInfoSection: FC = () => {
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
     setPendingPhoto(file);
+    setProcessPhoto(undefined);
+    setShowPhotoProcessingConfirm(true);
     const reader = new FileReader();
     reader.onloadend = () => set("photo", reader.result as string);
     reader.readAsDataURL(file);
@@ -96,20 +102,26 @@ export const DoctorBasicInfoSection: FC = () => {
   const handleSave = async () => {
     // Бэк требует first_name + last_name (full_name он игнорирует и падает 400)
     const parts = d.fullName.trim().split(/\s+/);
-    await saveProfile({
-      first_name: parts[0] ?? "",
-      last_name: parts.slice(1).join(" ") || (parts[0] ?? ""),
-      gender: d.gender || undefined,
-      birth_date: toApiDate(d.birthDate),
-      city: d.city,
-      languages: d.languages
-        .split(",")
-        .map((l) => l.trim())
-        .filter(Boolean),
-      phone: d.phone || undefined,
-      ...(pendingPhoto ? { photo: pendingPhoto } : {}),
-    });
+    await saveProfile(
+      {
+        first_name: parts[0] ?? "",
+        last_name: parts.slice(1).join(" ") || (parts[0] ?? ""),
+        gender: d.gender || undefined,
+        birth_date: toApiDate(d.birthDate),
+        city: d.city,
+        languages: d.languages
+          .split(",")
+          .map((l) => l.trim())
+          .filter(Boolean),
+        phone: d.phone || undefined,
+        ...(pendingPhoto ? { photo: pendingPhoto } : {}),
+      },
+      {
+        processPhoto: pendingPhoto ? (processPhoto ?? false) : undefined,
+      },
+    );
     setPendingPhoto(null);
+    setProcessPhoto(undefined);
     setIsEditing(false);
     setShowSaveConfirm(false);
   };
@@ -128,6 +140,8 @@ export const DoctorBasicInfoSection: FC = () => {
       });
     }
     setPendingPhoto(null);
+    setProcessPhoto(undefined);
+    setShowPhotoProcessingConfirm(false);
     setIsEditing(false);
   };
 
@@ -345,6 +359,24 @@ export const DoctorBasicInfoSection: FC = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showPhotoProcessingConfirm}
+        onClose={() => {
+          setProcessPhoto(false);
+          setShowPhotoProcessingConfirm(false);
+        }}
+        onConfirm={() => {
+          setProcessPhoto(true);
+          setShowPhotoProcessingConfirm(false);
+        }}
+        icon={<CheckIcon className="w-7 h-7 text-primary" />}
+        title="Обработать фото с помощью ИИ?"
+        description="ИИ улучшит качество и подготовит фото для профиля врача."
+        cancelLabel="Без обработки"
+        confirmLabel="Обработать ИИ"
+        closeOnConfirm={false}
+      />
 
       <ConfirmDialog
         isOpen={showSaveConfirm}

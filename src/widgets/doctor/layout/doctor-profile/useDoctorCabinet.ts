@@ -186,41 +186,59 @@ export const useDoctorCabinet = () => {
     onError: () => toast.error("Не удалось удалить файл"),
   });
 
-  const { mutateAsync: saveProfile, isPending: isSaving } = useMutation({
-    mutationFn: (body: UpdateDoctorProfileBody) => {
-      // Бэк требует first_name+last_name на КАЖДОМ PUT профиля. Под-страницы
-      // (проф. данные, документы, образование) их не шлют → был 400.
-      // Подставляем из текущего профиля, если явно не заданы.
-      const raw = data as unknown as {
-        first_name?: string;
-        last_name?: string;
-        narrow_specializations?: SpecializationItem[];
-        primary_specializations?: SpecializationItem[];
-      } | null;
-      // Бэк очищает primary/narrow_specialization_ids, если поле не передано
-      // (проверено живым запросом). Из-за этого сохранение любой другой
-      // вкладки — образования, документов, расписания — стирало
-      // специализации врача. Досылаем текущие, если вкладка их не меняет.
-      return updateDoctorProfile({
-        first_name: raw?.first_name,
-        last_name: raw?.last_name,
-        primary_specialization_ids: raw?.primary_specializations?.map(
-          (s) => s.id,
-        ),
-        narrow_specialization_ids: raw?.narrow_specializations?.map(
-          (s) => s.id,
-        ),
-        ...body,
-      });
+  const { mutateAsync: saveProfileMutation, isPending: isSaving } = useMutation(
+    {
+      mutationFn: ({
+        body,
+        processPhoto,
+      }: {
+        body: UpdateDoctorProfileBody;
+        processPhoto?: boolean;
+      }) => {
+        // Бэк требует first_name+last_name на КАЖДОМ PUT профиля. Под-страницы
+        // (проф. данные, документы, образование) их не шлют → был 400.
+        // Подставляем из текущего профиля, если явно не заданы.
+        const raw = data as unknown as {
+          first_name?: string;
+          last_name?: string;
+          narrow_specializations?: SpecializationItem[];
+          primary_specializations?: SpecializationItem[];
+        } | null;
+        // Бэк очищает primary/narrow_specialization_ids, если поле не передано
+        // (проверено живым запросом). Из-за этого сохранение любой другой
+        // вкладки — образования, документов, расписания — стирало
+        // специализации врача. Досылаем текущие, если вкладка их не меняет.
+        return updateDoctorProfile(
+          {
+            first_name: raw?.first_name,
+            last_name: raw?.last_name,
+            primary_specialization_ids: raw?.primary_specializations?.map(
+              (s) => s.id,
+            ),
+            narrow_specialization_ids: raw?.narrow_specializations?.map(
+              (s) => s.id,
+            ),
+            ...body,
+          },
+          { processPhoto },
+        );
+      },
+      onSuccess: (updated) => {
+        queryClient.setQueryData(doctorCabinetKeys.profile(), updated);
+        toast.success("Данные сохранены");
+      },
+      onError: () => {
+        toast.error("Не удалось сохранить. Попробуйте снова");
+      },
     },
-    onSuccess: (updated) => {
-      queryClient.setQueryData(doctorCabinetKeys.profile(), updated);
-      toast.success("Данные сохранены");
-    },
-    onError: () => {
-      toast.error("Не удалось сохранить. Попробуйте снова");
-    },
-  });
+  );
+
+  // `process_photo` относится только к новому файлу аватара. Оставляем
+  // привычный первый аргумент для всех существующих разделов кабинета.
+  const saveProfile = (
+    body: UpdateDoctorProfileBody,
+    options?: { processPhoto?: boolean },
+  ) => saveProfileMutation({ body, processPhoto: options?.processPhoto });
 
   // Секции кабинета синхронизируют локальную форму при изменении ссылки на
   // profile. Без мемоизации новый объект создавался на каждом рендере, из-за
