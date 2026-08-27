@@ -28,7 +28,7 @@ export const getDoctorProfile = async (): Promise<DoctorPrivateProfile> => {
 export type UpdateDoctorProfileBody = {
   about?: string;
   academic_degree?: string;
-  additional_education?: { name: string; year?: number | null }[];
+  additional_education?: { name: string; year?: null | number }[];
   additional_services?: string;
   address?: string;
   birth_date?: null | string;
@@ -41,8 +41,6 @@ export type UpdateDoctorProfileBody = {
   experience_years?: number;
   first_name?: string;
   gender?: string;
-  position?: string;
-  qualification_category?: string;
   // Схема DoctorOwnProfileRequest принимает эти три поля на запись (проверено
   // живым PUT). Без них врач, зарегистрировавшийся сам, не мог ни включить
   // онлайн-приём, ни опубликоваться — оставался невидимым в каталоге до
@@ -60,9 +58,11 @@ export type UpdateDoctorProfileBody = {
   payment_methods?: string[];
   phone?: string;
   photo?: File | null | string;
+  position?: string;
   // Бэк принимает на запись только id (проверено живым запросом: массив
   // названий строк молча очищает специализации врача, без ошибки).
   primary_specialization_ids?: number[];
+  qualification_category?: string;
   reg_number?: string;
   skills?: string[];
   website?: string;

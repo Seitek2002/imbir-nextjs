@@ -18,12 +18,12 @@ export type ApiEducationEntry = {
 export type AdditionalEducationEntry = { name: string; year: string };
 export type ApiAdditionalEducationEntry = {
   name?: string;
-  year?: number | null;
+  year?: null | number;
 };
 
 export const toApiAdditionalEducation = (
   entries: AdditionalEducationEntry[],
-): { name: string; year: number | null }[] =>
+): { name: string; year: null | number }[] =>
   entries
     .map(({ name, year }) => ({
       name: name.trim(),

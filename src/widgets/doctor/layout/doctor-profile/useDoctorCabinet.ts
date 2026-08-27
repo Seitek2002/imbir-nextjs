@@ -53,7 +53,7 @@ export const mapApiToProfile = (
   // от устаревшего типа DoctorPrivateProfile — читаем через каст.
   const a = api as unknown as {
     academic_degree?: string;
-    additional_education?: { name?: string; year?: number | null }[];
+    additional_education?: { name?: string; year?: null | number }[];
     additional_services?: string;
     birth_date?: null | string;
     city?: string;
@@ -75,10 +75,10 @@ export const mapApiToProfile = (
     payment_methods?: string[];
     phone?: string;
     photo?: null | string;
+    position?: string;
     // Бэк отдаёт объекты {id, name, photo}, не строки (проверено живым
     // запросом) — читаем .name, а не значение целиком.
     primary_specializations?: SpecializationItem[];
-    position?: string;
     qualification_category?: string;
     rating?: number | string;
     reviews_count?: number;
