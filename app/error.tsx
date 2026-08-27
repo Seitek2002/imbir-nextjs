@@ -13,7 +13,6 @@ import { Button } from "@/shared/ui";
 // ещё раз.
 export default function GlobalError({
   error,
-  reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
@@ -46,7 +45,12 @@ export default function GlobalError({
             variant="outline"
             size="md"
             className="flex-1 justify-center"
-            onClick={reset}
+            // Здесь был reset() из Next — он просто перерисовывает то же самое
+            // поддерево тем же кодом и с тем же кэшем. Если ошибка не разовая
+            // (а она почти всегда не разовая), рендер падает снова и экран не
+            // меняется — кнопка выглядит мёртвой. Полная перезагрузка сбрасывает
+            // и состояние клиента, и кэш роутера, поэтому шанс уйти с экрана реальный.
+            onClick={() => window.location.reload()}
           >
             Попробовать снова
           </Button>
