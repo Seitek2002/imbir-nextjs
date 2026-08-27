@@ -17,12 +17,7 @@ import {
   useSpecializations,
 } from "@/entities/specialization";
 
-import {
-  getConditions,
-  getEquipment,
-  getPaymentMethods,
-  referenceKeys,
-} from "@/shared/api";
+import { getConditions, getEquipment, referenceKeys } from "@/shared/api";
 import { CheckIcon } from "@/shared/assets/icons";
 import { useReferenceValues } from "@/shared/lib/useReference";
 import {
@@ -51,8 +46,6 @@ const DEFAULT_PATIENT_CONDITIONS = [
   "Доступ для инвалидов",
   "Аптека",
 ];
-const DEFAULT_PAYMENT_METHODS = ["Наличные", "Карта", "Онлайн"];
-
 type D = {
   additionalSpecialty: string;
   consultationPrice: string;
@@ -151,11 +144,6 @@ export const DoctorProfessionalInfoSection: FC = () => {
     getConditions,
     DEFAULT_PATIENT_CONDITIONS,
   );
-  const { values: paymentMethodOptions } = useReferenceValues(
-    referenceKeys.paymentMethods(),
-    getPaymentMethods,
-    DEFAULT_PAYMENT_METHODS,
-  );
 
   const handleSave = async () => {
     // Плоские профессиональные поля не трогают историю работ. Для старого
@@ -196,6 +184,10 @@ export const DoctorProfessionalInfoSection: FC = () => {
       work_experience: nextWorkExperience,
       equipment: d.equipment,
       patient_conditions: d.patientConditions,
+      // Поля «Способы оплаты» в интерфейсе больше нет — оплата у всех только
+      // онлайн, как уже сделано у клиники. Значение читаем из профиля и
+      // отправляем обратно как есть: ручка только PUT, и терять чужие данные
+      // из-за убранного с экрана поля нельзя.
       payment_methods: d.paymentMethods,
       is_online_available: d.isOnlineAvailable,
       // Бэк ждёт decimal-строку. Пустое поле отправляем как "0.00", иначе
@@ -386,18 +378,6 @@ export const DoctorProfessionalInfoSection: FC = () => {
               />
             ) : (
               <FieldView label="Условия приёма" value={d.patientConditions} />
-            )}
-          </div>
-          <div className="lg:col-span-2">
-            {isEditing ? (
-              <CheckboxGroup
-                label="Способы оплаты"
-                options={paymentMethodOptions}
-                value={d.paymentMethods}
-                onChange={(v) => set("paymentMethods", v)}
-              />
-            ) : (
-              <FieldView label="Способы оплаты" value={d.paymentMethods} />
             )}
           </div>
         </div>
