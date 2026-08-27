@@ -8,6 +8,7 @@ import { useScrollLock } from "@/shared/lib/useScrollLock";
 
 type Props = {
   cancelLabel?: string;
+  closeOnCancel?: boolean;
   // true (по умолчанию, как сейчас у всех вызовов) — модалка закрывается сама
   // сразу после клика на confirm. Для async-подтверждения с isLoading родитель
   // сам решает, когда закрыть (меняя isOpen после ответа) — передайте false.
@@ -20,6 +21,7 @@ type Props = {
   // сабмит или закрытие посреди запроса.
   isLoading?: boolean;
   isOpen: boolean;
+  onCancel?: () => void;
   onClose: () => void;
   onConfirm: () => void;
   title: string;
@@ -62,7 +64,9 @@ export const ConfirmDialog: FC<Props> = ({
   cancelLabel = "Отмена",
   variant = "default",
   isLoading = false,
+  onCancel,
   closeOnConfirm = true,
+  closeOnCancel = true,
 }) => {
   const isDanger = variant === "danger";
   const iconWrapClass = isDanger
@@ -82,6 +86,12 @@ export const ConfirmDialog: FC<Props> = ({
       onClose();
     }, DURATION);
   }, [onClose, isLoading]);
+
+  const handleCancel = () => {
+    if (isLoading) return;
+    onCancel?.();
+    if (closeOnCancel) handleClose();
+  };
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -127,7 +137,7 @@ export const ConfirmDialog: FC<Props> = ({
         </div>
         <div className="flex gap-3 w-full mt-2">
           <button
-            onClick={handleClose}
+            onClick={handleCancel}
             className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium text-base hover:bg-background transition-colors active:scale-95"
           >
             {cancelLabel}
@@ -172,7 +182,7 @@ export const ConfirmDialog: FC<Props> = ({
         </div>
         <div className="flex gap-3 w-full mt-2">
           <button
-            onClick={handleClose}
+            onClick={handleCancel}
             className="flex-1 py-3.5 rounded-full border border-border-soft text-foreground font-medium text-base hover:bg-background transition-colors active:scale-95"
           >
             {cancelLabel}
