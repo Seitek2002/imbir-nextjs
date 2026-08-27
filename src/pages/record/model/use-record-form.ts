@@ -320,7 +320,8 @@ export const useRecordForm = () => {
       : [],
     name: d.full_name,
     specialty: d.specialty,
-    rating: d.rating,
+    // С бэка rating приходит строкой ("5.00").
+    rating: Number(d.rating) || 0,
     reviews: 0,
     experience: d.experience_years,
     image: d.photo ?? "",

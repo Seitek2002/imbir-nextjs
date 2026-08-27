@@ -8,6 +8,7 @@ import Link from "next/link";
 import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { Workplace } from "@/shared/dummies";
+import { formatRating } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import { Button, ImageWithFallback, SaveButton } from "@/shared/ui";
 
@@ -110,7 +111,9 @@ export const DoctorCard: FC<Props> = ({
             <div className="flex items-center gap-1 mt-1.5 text-[14px] flex-wrap">
               <StarIcon className="size-4 text-[#FF7C63]" />
               {rating !== undefined && (
-                <span className="font-medium text-[#FF7C63]">{rating}</span>
+                <span className="font-medium text-[#FF7C63]">
+                  {formatRating(rating)}
+                </span>
               )}
               {reviews !== undefined && (
                 <span className="text-secondary">({reviews})</span>
@@ -180,7 +183,9 @@ export const DoctorCard: FC<Props> = ({
           <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">
             <StarIcon className="size-3.5 text-[#FF7C63]" />
             {rating !== undefined && (
-              <span className="font-medium text-[#FF7C63]">{rating}</span>
+              <span className="font-medium text-[#FF7C63]">
+                {formatRating(rating)}
+              </span>
             )}
             {reviews !== undefined && (
               <span className="text-secondary">({reviews})</span>

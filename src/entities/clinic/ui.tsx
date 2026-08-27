@@ -9,6 +9,7 @@ import Link from "next/link";
 import { GeoIcon, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { useInView } from "@/shared/lib/useInView";
+import { formatRating } from "@/shared/lib/utils";
 import { SaveButton } from "@/shared/ui";
 
 const getInitials = (name: string) =>
@@ -112,7 +113,9 @@ export const ClinicCard: FC<Props> = ({
             <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">
               <StarIcon className="size-3.5 text-[#FFA18D]" />
               {rating !== undefined && (
-                <span className="font-medium text-[#FFA18D]">{rating}</span>
+                <span className="font-medium text-[#FFA18D]">
+                  {formatRating(rating)}
+                </span>
               )}
               {reviews !== undefined && (
                 <span className="text-secondary">({reviews})</span>
@@ -183,7 +186,9 @@ export const ClinicCard: FC<Props> = ({
           <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">
             <StarIcon className="size-3.5 text-[#FFA18D]" />
             {rating !== undefined && (
-              <span className="font-medium text-[#FFA18D]">{rating}</span>
+              <span className="font-medium text-[#FFA18D]">
+                {formatRating(rating)}
+              </span>
             )}
             {reviews !== undefined && (
               <span className="text-secondary">({reviews})</span>

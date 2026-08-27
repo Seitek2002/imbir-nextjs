@@ -8,6 +8,7 @@ import Link from "next/link";
 import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { hasPrice } from "@/shared/lib/price";
+import { formatRating } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import { Button, ImageWithFallback } from "@/shared/ui";
 
@@ -126,7 +127,9 @@ export const ServiceCard: FC<Props> = ({
           {rating !== undefined && (
             <div className="flex items-center gap-1 mb-2 text-xs">
               <StarIcon className="w-3.5 h-3.5 text-primary" />
-              <span className="text-primary font-medium">{rating}</span>
+              <span className="text-primary font-medium">
+                {formatRating(rating)}
+              </span>
               {reviews !== undefined && (
                 <span className="text-secondary">({reviews})</span>
               )}
@@ -201,7 +204,9 @@ export const ServiceCard: FC<Props> = ({
         {rating !== undefined && (
           <div className="flex items-center gap-1 mb-4 text-sm">
             <StarIcon className="w-3.5 h-3.5 text-primary" />
-            <span className="text-primary font-medium">{rating}</span>
+            <span className="text-primary font-medium">
+              {formatRating(rating)}
+            </span>
             {reviews !== undefined && (
               <span className="text-secondary">({reviews})</span>
             )}

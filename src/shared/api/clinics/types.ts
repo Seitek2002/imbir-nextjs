@@ -20,7 +20,10 @@ export type ClinicDoctor = {
   full_name: string;
   id: number;
   photo: null | string;
-  rating: number;
+  // Строка, а не число: DecimalField в DRF сериализуется как "5.00" — проверено
+  // живым запросом. Раньше здесь стоял number, и каждый потребитель узнавал об этом
+  // сам и только в браузере.
+  rating: string;
   specialty: string;
 };
 
@@ -36,7 +39,10 @@ export type ClinicListItem = {
   // Объекты {id, name, photo}, не строки — бэк вернул этот эндпоинт к
   // справочнику специализаций (проверено живым запросом).
   primary_specializations?: SpecializationItem[];
-  rating: number;
+  // Строка, а не число: DecimalField в DRF сериализуется как "5.00" — проверено
+  // живым запросом. Раньше здесь стоял number, и каждый потребитель узнавал об этом
+  // сам и только в браузере.
+  rating: string;
   reviews_count: number;
 };
 

@@ -22,7 +22,10 @@ export type DoctorListItem = {
   id: number;
   is_online_available: boolean;
   photo: null | string;
-  rating: number;
+  // Строка, а не число: DecimalField в DRF сериализуется как "5.00" — проверено
+  // живым запросом. Раньше здесь стоял number, и каждый потребитель узнавал об этом
+  // сам и только в браузере.
+  rating: string;
   reviews_count: number;
   specialty: string;
   workplaces: DoctorWorkplace[];

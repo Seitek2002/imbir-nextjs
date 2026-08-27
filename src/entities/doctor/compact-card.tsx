@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
+import { formatRating } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import { Button, ImageWithFallback } from "@/shared/ui";
 
@@ -66,7 +67,9 @@ export const DoctorCompactCard: FC<Props> = ({
         {rating !== undefined && (
           <div className="flex items-center gap-1 mt-1 text-[11px]">
             <StarIcon className="size-3 text-[#FF7C63]" />
-            <span className="font-medium text-[#FF7C63]">{rating}</span>
+            <span className="font-medium text-[#FF7C63]">
+              {formatRating(rating)}
+            </span>
           </div>
         )}
       </div>

@@ -9,9 +9,12 @@ export type ServiceListItem = {
   id: number;
   name: string;
   photo?: null | string;
+  // price — Decimal, поэтому строка ("100.00"). А вот rating и reviews_count у услуг
+  // считаются агрегатом и приходят числами — в отличие от врача и клиники, где
+  // rating строка. Расхождение на стороне бэка, здесь просто описано как есть.
   price: null | string;
-  rating?: null | string;
-  reviews_count?: null | string;
+  rating?: null | number;
+  reviews_count?: null | number;
 };
 
 // GET /api/services/{id}/ — проверено живым запросом, отличается от списка:

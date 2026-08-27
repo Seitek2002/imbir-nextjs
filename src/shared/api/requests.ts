@@ -59,7 +59,9 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
   specialty: d.specialty,
   experience: d.experience_years,
   isOnlineAvailable: d.is_online_available,
-  rating: d.rating,
+  // С бэка rating приходит строкой ("5.00") — приводим здесь, чтобы
+  // ниже по коду он был числом и его можно было сравнивать и считать.
+  rating: Number(d.rating) || 0,
   reviews: d.reviews_count,
   image: toHttps(d.photo),
   workplaces: d.workplaces.map((w) => ({
@@ -138,7 +140,8 @@ const adaptClinic = (c: ApiClinic): MockClinicListItem => ({
   id: String(c.id),
   name: c.name,
   experience: c.experience_years ?? 0,
-  rating: c.rating,
+  // То же самое, что у врача: с бэка это строка.
+  rating: Number(c.rating) || 0,
   reviews: c.reviews_count,
   address: c.address ?? "",
   city: c.city,
@@ -237,8 +240,11 @@ const adaptService = (s: ApiService): MockServiceItem => ({
   image: toMediaUrl(s.photo) ?? "",
   schedule: emptySchedule,
   doctorIds: [],
-  rating: s.rating ? parseFloat(s.rating) || 0 : 0,
-  reviews: s.reviews_count ? parseInt(s.reviews_count) || 0 : 0,
+  // У услуги эти два поля приходят числами, а не строками — разбор через
+  // parseFloat/parseInt здесь лишний. Number() заодно переживёт, если бэк
+  // когда-нибудь перейдёт на строки, как у врача.
+  rating: Number(s.rating) || 0,
+  reviews: Number(s.reviews_count) || 0,
 });
 
 const resolveAuthor = (author: ApiReview["author"]): string => {
