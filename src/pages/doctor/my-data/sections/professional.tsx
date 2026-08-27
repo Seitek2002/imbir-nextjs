@@ -3,7 +3,6 @@
 import { FC, useState } from "react";
 
 import {
-  CheckboxGroup,
   DoctorPageLayout,
   type DoctorProfileData,
   useMyDataTabs,
@@ -46,6 +45,14 @@ const DEFAULT_PATIENT_CONDITIONS = [
   "Доступ для инвалидов",
   "Аптека",
 ];
+
+// Сохраняем в dropdown выбранные старые значения, если их ещё нет в справочнике.
+const optionsWithSelected = (options: string[], selected: string[]) =>
+  Array.from(new Set([...options, ...selected])).map((value) => ({
+    label: value,
+    value,
+  }));
+
 type D = {
   additionalSpecialty: string;
   consultationPrice: string;
@@ -358,9 +365,13 @@ export const DoctorProfessionalInfoSection: FC = () => {
           </div>
           <div className="lg:col-span-2">
             {isEditing ? (
-              <CheckboxGroup
+              <Dropdown
                 label="Оборудование"
-                options={equipmentOptions}
+                placeholder="Выберите оборудование"
+                options={optionsWithSelected(equipmentOptions, d.equipment)}
+                isMulti
+                searchable
+                type="checkbox"
                 value={d.equipment}
                 onChange={(v) => set("equipment", v)}
               />
@@ -370,9 +381,16 @@ export const DoctorProfessionalInfoSection: FC = () => {
           </div>
           <div className="lg:col-span-2">
             {isEditing ? (
-              <CheckboxGroup
+              <Dropdown
                 label="Условия приёма"
-                options={conditionOptions}
+                placeholder="Выберите условия"
+                options={optionsWithSelected(
+                  conditionOptions,
+                  d.patientConditions,
+                )}
+                isMulti
+                searchable
+                type="checkbox"
                 value={d.patientConditions}
                 onChange={(v) => set("patientConditions", v)}
               />

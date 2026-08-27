@@ -3,7 +3,6 @@
 import { FC, useRef, useState } from "react";
 
 import {
-  CheckboxGroup,
   FieldView,
   SectionCard,
   formStyles,
@@ -60,6 +59,13 @@ const GENDER_OPTIONS = [
   { label: "Мужской", value: "male" },
   { label: "Женский", value: "female" },
 ];
+
+// Сохраняем в dropdown выбранные старые значения, если их ещё нет в справочнике.
+const optionsWithSelected = (options: string[], selected: string[]) =>
+  Array.from(new Set([...options, ...selected])).map((value) => ({
+    label: value,
+    value,
+  }));
 
 // "ГГГГ-ММ-ДД" → "ДД.ММ.ГГГГ"; уже-ДД.ММ.ГГГГ/пусто отдаём как есть
 const fromApiDate = (v: string): string => {
@@ -722,9 +728,13 @@ export const DoctorMyDataOverview: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <CheckboxGroup
+              <Dropdown
                 label="Оборудование"
-                options={equipmentOptions}
+                placeholder="Выберите оборудование"
+                options={optionsWithSelected(equipmentOptions, d.equipment)}
+                isMulti
+                searchable
+                type="checkbox"
                 value={d.equipment}
                 onChange={(v) => set("equipment", v)}
               />
@@ -734,9 +744,16 @@ export const DoctorMyDataOverview: FC = () => {
           </div>
           <div>
             {isEditing ? (
-              <CheckboxGroup
+              <Dropdown
                 label="Условия приёма"
-                options={conditionOptions}
+                placeholder="Выберите условия"
+                options={optionsWithSelected(
+                  conditionOptions,
+                  d.patientConditions,
+                )}
+                isMulti
+                searchable
+                type="checkbox"
                 value={d.patientConditions}
                 onChange={(v) => set("patientConditions", v)}
               />
