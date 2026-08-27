@@ -1,13 +1,12 @@
 "use client";
 
 import { FC, useState } from "react";
-import toast from "react-hot-toast";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
@@ -15,11 +14,12 @@ import { ReviewsSection } from "@/widgets/reviews";
 import { VideosSwiper } from "@/widgets/videos-swiper";
 
 import { useFavoriteToggle } from "@/features/favorite-toggle";
+import { useSubmitReview } from "@/features/submit-review";
 
 import { fetchDoctorInterviews } from "@/entities/interview";
 
 // ИМПОРТЫ API
-import { api, createReview, profileKeys } from "@/shared/api";
+import { api, doctorKeys, reviewKeys } from "@/shared/api";
 import {
   EmailIcon,
   GeoIcon,
@@ -32,8 +32,6 @@ import {
   UserCircleIcon,
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
-import { extractErrorMessage } from "@/shared/lib/errors";
-import { useInvalidateUserStatus } from "@/shared/lib/useReference";
 import { useAuthStore } from "@/shared/store";
 import { Button, ContactInfoModal, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
@@ -84,14 +82,12 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
     isLoading: isDoctorLoading,
     isError: isDoctorError,
   } = useQuery({
-    queryKey: ["doctor", id],
+    queryKey: doctorKeys.detail(id),
     queryFn: () => api.getDoctorById(id),
     initialData: initialDoctor,
   });
 
   // 2. ПОЛУЧАЕМ ОТЗЫВЫ ЭТОГО ВРАЧА
-  const queryClient = useQueryClient();
-  const invalidateUserStatus = useInvalidateUserStatus();
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "doctor";
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
@@ -99,31 +95,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
   const isFavorite = isSaved(Number(id));
 
   const { data: reviews = [] } = useQuery({
-    queryKey: ["reviews", "doctor", id],
+    queryKey: reviewKeys.byTarget("doctor", id),
     queryFn: () => api.getReviewsByDoctor(id),
   });
 
-  const createReviewMutation = useMutation({
-    mutationFn: (vars: { rating: number; text: string }) =>
-      createReview({
-        target_type: "doctor",
-        target_id: Number(id),
-        rating: vars.rating,
-        text: vars.text,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reviews", "doctor", id] });
-      // Свой отзыв попадает и в «Мои отзывы», и в проценты статуса — без
-      // сброса кэша они обновлялись только после перезагрузки страницы.
-      queryClient.invalidateQueries({ queryKey: profileKeys.reviews() });
-      invalidateUserStatus();
-      toast.success("Спасибо за отзыв!");
-    },
-    onError: (err: unknown) => {
-      const data = (err as { response?: { data?: unknown } })?.response?.data;
-      toast.error(extractErrorMessage(data, "Не удалось отправить отзыв"));
-    },
-  });
+  const { isSubmitting, submitReview } = useSubmitReview("doctor", id);
 
   // 3. ПОЛУЧАЕМ ИНТЕРВЬЮ ЭТОГО ВРАЧА
   const { data: doctorInterviews = [] } = useQuery({
@@ -475,15 +451,8 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             onReviewClick={
               !isAuthed ? () => router.push(ROUTES.LOGIN) : undefined
             }
-            onSubmitReview={
-              // mutateAsync, а не mutate: форма отзыва должна очиститься
-              // только после успешной отправки (см. ReviewsSection).
-              isAuthed
-                ? (rating, text) =>
-                    createReviewMutation.mutateAsync({ rating, text })
-                : undefined
-            }
-            isSubmitting={createReviewMutation.isPending}
+            onSubmitReview={isAuthed ? submitReview : undefined}
+            isSubmitting={isSubmitting}
           />
         )}
 

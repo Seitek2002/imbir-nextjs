@@ -1,25 +1,25 @@
 "use client";
 
 import { FC, useState } from "react";
-import toast from "react-hot-toast";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 import { ReviewsSection } from "@/widgets/reviews";
 
 import { useFavoriteToggle } from "@/features/favorite-toggle";
+import { useSubmitReview } from "@/features/submit-review";
 
 import { DoctorCard } from "@/entities/doctor";
 import { ServiceCard } from "@/entities/service";
 
 // ИМПОРТЫ API
-import { api, createReview, profileKeys } from "@/shared/api";
+import { api, clinicKeys, reviewKeys } from "@/shared/api";
 import {
   EmailIcon,
   GeoIcon,
@@ -31,8 +31,6 @@ import {
   PhoneIcon,
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
-import { extractErrorMessage } from "@/shared/lib/errors";
-import { useInvalidateUserStatus } from "@/shared/lib/useReference";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import { Button, ContactInfoModal, IconBtn } from "@/shared/ui";
@@ -66,7 +64,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
     isLoading: isClinicLoading,
     isError: isClinicError,
   } = useQuery({
-    queryKey: ["clinic", id],
+    queryKey: clinicKeys.detail(id),
     queryFn: () => api.getClinicById(id),
     initialData: initialClinic,
   });
@@ -86,35 +84,13 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
     },
   });
 
-  const queryClient = useQueryClient();
-  const invalidateUserStatus = useInvalidateUserStatus();
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
   const { data: reviews = [] } = useQuery({
-    queryKey: ["reviews", "clinic", id],
+    queryKey: reviewKeys.byTarget("clinic", id),
     queryFn: () => api.getReviewsByClinic(id),
   });
 
-  const createReviewMutation = useMutation({
-    mutationFn: (vars: { rating: number; text: string }) =>
-      createReview({
-        target_type: "clinic",
-        target_id: Number(id),
-        rating: vars.rating,
-        text: vars.text,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reviews", "clinic", id] });
-      // Свой отзыв попадает и в «Мои отзывы», и в проценты статуса — без
-      // сброса кэша они обновлялись только после перезагрузки страницы.
-      queryClient.invalidateQueries({ queryKey: profileKeys.reviews() });
-      invalidateUserStatus();
-      toast.success("Спасибо за отзыв!");
-    },
-    onError: (err: unknown) => {
-      const data = (err as { response?: { data?: unknown } })?.response?.data;
-      toast.error(extractErrorMessage(data, "Не удалось отправить отзыв"));
-    },
-  });
+  const { isSubmitting, submitReview } = useSubmitReview("clinic", id);
 
   if (isClinicError || (!isClinicLoading && !clinic)) {
     return (
@@ -495,15 +471,8 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
           <ReviewsSection
             initialReviews={reviews}
             averageRating={clinic.rating}
-            onSubmitReview={
-              // mutateAsync, а не mutate: форма отзыва должна очиститься
-              // только после успешной отправки (см. ReviewsSection).
-              isAuthed
-                ? (rating, text) =>
-                    createReviewMutation.mutateAsync({ rating, text })
-                : undefined
-            }
-            isSubmitting={createReviewMutation.isPending}
+            onSubmitReview={isAuthed ? submitReview : undefined}
+            isSubmitting={isSubmitting}
           />
         )}
       </div>

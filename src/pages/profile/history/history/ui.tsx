@@ -6,16 +6,11 @@ import toast from "react-hot-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { ReviewModal } from "@/features/review-modal";
+import { useInvalidateAfterReview } from "@/features/submit-review";
 
-import {
-  cancelAppointment,
-  createReview,
-  profileKeys,
-  reviewKeys,
-} from "@/shared/api";
+import { cancelAppointment, createReview, profileKeys } from "@/shared/api";
 import { WarningIcon } from "@/shared/assets/icons";
 import { extractErrorMessage } from "@/shared/lib/errors";
-import { useInvalidateUserStatus } from "@/shared/lib/useReference";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 import type { Appointment, AppointmentStatus } from "./AppointmentCard/model";
@@ -71,7 +66,7 @@ export const ProfileHistory: FC<Props> = ({
   });
 
   const queryClient = useQueryClient();
-  const invalidateUserStatus = useInvalidateUserStatus();
+  const invalidateAfterReview = useInvalidateAfterReview();
   const { mutateAsync: cancel, isPending: isCancelling } = useMutation({
     mutationFn: (id: string) => cancelAppointment(Number(id)),
     onSuccess: () => {
@@ -129,11 +124,11 @@ export const ProfileHistory: FC<Props> = ({
         rating: vars.rating,
         text: vars.comment,
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: reviewKeys.all });
-      // Новый отзыв меняет и список «Мои отзывы», и проценты в статусе.
-      queryClient.invalidateQueries({ queryKey: profileKeys.reviews() });
-      invalidateUserStatus();
+    onSuccess: (_review, vars) => {
+      // Та же тройка сбросов, что на страницах врача и клиники
+      // (features/submit-review). Раньше здесь сбрасывался весь reviewKeys.all;
+      // теперь только список того врача, кому оставили отзыв.
+      invalidateAfterReview("doctor", Number(vars.appointment.doctorId));
       toast.success("Отзыв сохранён");
       setReviewModalOpen(false);
       setSelectedAppointment(null);

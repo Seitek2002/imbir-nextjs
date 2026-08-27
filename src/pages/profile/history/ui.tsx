@@ -7,6 +7,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
 
 import {
+  doctorKeys,
   getDoctorById,
   getProfileAppointments,
   profileKeys,
@@ -173,7 +174,7 @@ export const ProfileHistoryPage: FC = () => {
 
   const doctorQueries = useQueries({
     queries: doctorIds.map((id) => ({
-      queryKey: ["doctor", id],
+      queryKey: doctorKeys.detail(id),
       queryFn: () => getDoctorById(id),
     })),
   });
