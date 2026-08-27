@@ -25,7 +25,10 @@ export const Step2Professional = ({ data, onChange, inviteClinic }: Props) => {
         label="Специализация"
         placeholder={placeholder}
         options={options}
+        isMulti
         searchable
+        showSelectAll
+        selectAllMode="select"
         value={data.specialization}
         onChange={(v) => onChange("specialization", v)}
       />
@@ -33,7 +36,10 @@ export const Step2Professional = ({ data, onChange, inviteClinic }: Props) => {
         label="Дополнительная специализация"
         placeholder={placeholder}
         options={options}
+        isMulti
         searchable
+        showSelectAll
+        selectAllMode="select"
         value={data.additionalSpecialization}
         onChange={(v) => onChange("additionalSpecialization", v)}
       />

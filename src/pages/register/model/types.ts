@@ -63,7 +63,10 @@ export type DoctorStep = 1 | 2 | 3 | 4;
 export type DoctorFormData = {
   academicDegree: string;
   additionalEducation: string;
-  additionalSpecialization: string;
+  // Множественные: в базе это ManyToMany, и в кабинете врач уже может выбрать
+  // несколько. Регистрация оставалась единственным местом, где разрешалась
+  // только одна.
+  additionalSpecialization: string[];
   birthDate: string;
   category: string;
   certificates: File[];
@@ -88,7 +91,7 @@ export type DoctorFormData = {
   position: string;
 
   residency: string;
-  specialization: string;
+  specialization: string[];
 
   university: string;
   workplace: string;

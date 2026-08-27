@@ -507,11 +507,11 @@ export const RegisterPage = () => {
     try {
       const emptyDay = { from: null, to: null, enabled: false };
       const primarySpecializations = resolveSpecializationIds(
-        data.specialization ? [data.specialization] : [],
+        data.specialization,
         specializationList,
       );
       const narrowSpecializations = resolveSpecializationIds(
-        data.additionalSpecialization ? [data.additionalSpecialization] : [],
+        data.additionalSpecialization,
         specializationList,
       );
 
