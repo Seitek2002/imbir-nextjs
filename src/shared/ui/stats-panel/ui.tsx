@@ -1,14 +1,17 @@
-﻿import { FC } from "react";
+﻿import { FC, ReactNode } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
+// Значения — ReactNode, как у StatTiles: так вызывающий сам решает, ставить ли
+// AnimatedNumber, и может добавить подпись вроде «лет» рядом с числом, а не внутри
+// него: анимированное число рисуется через counter() и суффиксы внутрь не принимает.
 type Props = {
   className?: string;
-  experience: number | string;
+  experience: ReactNode;
   experienceLabel?: string;
-  rating: number | string;
+  rating: ReactNode;
   ratingLabel?: string;
-  reviews: number | string;
+  reviews: ReactNode;
   reviewsLabel?: string;
 };
 

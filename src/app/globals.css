@@ -182,3 +182,67 @@ input[type="number"]::-webkit-inner-spin-button {
   opacity: 0;
   transform: translateY(-10px);
 }
+
+/* ── Анимированные числа ─────────────────────────────────────────────────── */
+/* Число доезжает до значения плавно, без единого таймера в JS: интерполирует
+   его сам браузер. Работает так — @property делает кастомное свойство
+   анимируемым (обычные CSS-переменные не интерполируются), transition гонит
+   --an-value к новому значению, а counter() рисует результат.
+
+   Целую и дробную часть приходится держать отдельными счётчиками: counter()
+   умеет только целые числа. Отсюда же и «- 0.5»: тип <integer> округляет к
+   ближайшему, а нам нужно отбрасывание дробной части. */
+@property --an-value {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: false;
+}
+@property --an-int {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+@property --an-frac {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+
+.animated-number {
+  /* tabular-nums обязателен: без него ширина цифр пляшет на каждом кадре и
+     дёргается вся строка. */
+  font-variant-numeric: tabular-nums;
+  transition: --an-value var(--an-duration, 900ms)
+    cubic-bezier(0.22, 1, 0.36, 1);
+  --an-int: max(var(--an-value) - 0.5, 0);
+  --an-frac: max(
+    (var(--an-value) - var(--an-int)) * var(--an-scale, 1) - 0.5,
+    0
+  );
+  counter-reset: an-int var(--an-int) an-frac var(--an-frac);
+}
+
+.animated-number::before {
+  content: counter(an-int);
+}
+
+.animated-number[data-decimals="1"]::before {
+  content: counter(an-int) "." counter(an-frac);
+}
+
+/* decimal-leading-zero добивает до двух знаков: 4.05, а не 4.5. */
+.animated-number[data-decimals="2"]::before {
+  content: counter(an-int) "." counter(an-frac, decimal-leading-zero);
+}
+
+/* Первый кадр выставляет значение без анимации, иначе браузеру нечего
+   интерполировать и число просто появляется готовым. */
+.animated-number[data-static="true"] {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-number {
+    transition: none;
+  }
+}

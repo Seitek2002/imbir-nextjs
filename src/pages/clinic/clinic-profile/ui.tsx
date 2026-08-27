@@ -26,6 +26,7 @@ import {
 } from "@/shared/api";
 import { CheckIcon } from "@/shared/assets/icons";
 import {
+  AnimatedNumber,
   Button,
   CancelEditButton,
   ConfirmDialog,
@@ -51,7 +52,10 @@ const ClinicStatsTiles: FC = () => {
     { label: "Врачей", value: stats.doctors_count },
     { label: "Пациентов", value: stats.patients_total },
     { label: "Отзывов", value: stats.reviews_count },
-  ];
+  ].map(({ label, value }) => ({
+    label,
+    value: <AnimatedNumber value={value} />,
+  }));
 
   return <StatTiles tiles={tiles} className="md:grid-cols-3 mb-6" />;
 };
