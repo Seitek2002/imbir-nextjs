@@ -237,10 +237,14 @@ export const ClinicNewProcedurePage: FC = () => {
           error={nameError ? "Обязательное поле" : undefined}
         />
 
+        {/* Подпись именно «Категория услуги»: здесь справочник
+            /references/service-categories/, а не специализации врачей. Одинаковая
+            подпись над двумя разными списками читалась как рассинхрон данных. */}
         <Dropdown
-          label="Специализация"
+          label="Категория услуги"
           placeholder="Выберите из списка"
           options={categoryOptions}
+          searchable
           value={category}
           onChange={setCategory}
         />

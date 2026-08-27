@@ -379,9 +379,10 @@ export const ClinicProcedureDetailPage: FC = () => {
                 placeholder="Введите название"
               />
               <Dropdown
-                label="Специализация"
+                label="Категория услуги"
                 placeholder="Выберите из списка"
                 options={categoryOptions}
+                searchable
                 value={category}
                 onChange={setCategory}
               />

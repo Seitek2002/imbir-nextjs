@@ -167,7 +167,7 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
           placeholder="Введите название"
         />
         <Dropdown
-          label="Специализация"
+          label="Категория услуги"
           placeholder={
             isCategoriesLoading ? "Загружаем список..." : "Выберите из списка"
           }
