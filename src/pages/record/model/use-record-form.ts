@@ -333,10 +333,17 @@ export const useRecordForm = () => {
     doctorIds: [],
     title: s.name,
     category: s.category,
-    price: typeof s.price === "string" ? parseFloat(s.price) || 0 : 0,
-    rating: 0,
-    reviews: 0,
-    image: "",
+    // Всё ниже раньше было заглушками (image: "", rating: 0, reviews: 0),
+    // хотя /api/services/ отдаёт все три поля. В модалке выбора услуги это
+    // выглядело как серый квадрат вместо фото и вечные «0 (0)» у рейтинга.
+    //
+    // Number(), а не parseFloat под условием typeof: бэк отдаёт price
+    // строкой ("100.00"), а rating числом (4.0) — при прежней проверке любое
+    // число молча превращалось в 0.
+    price: Number(s.price) || 0,
+    rating: Number(s.rating) || 0,
+    reviews: Number(s.reviews_count) || 0,
+    image: s.photo ?? "",
   }));
 
   useEffect(() => {
