@@ -62,6 +62,7 @@ export const ClinicProceduresPage: FC = () => {
     category: s.category,
     clinic: profile?.name ?? "",
     price: parsePrice(s.price),
+    image: s.photo ?? undefined,
   }));
 
   return (

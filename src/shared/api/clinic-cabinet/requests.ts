@@ -1,4 +1,4 @@
-import { toHttps } from "@/shared/lib/media";
+import { toHttps, toMediaUrl } from "@/shared/lib/media";
 
 import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
 import type { DoctorAppointment } from "../doctor-cabinet/types";
@@ -282,7 +282,13 @@ export const getClinicServices = async (): Promise<
   const { data } = await apiClient.get<
     PaginatedResponse<ClinicServiceListItem>
   >("/api/clinic/services/", { params: { page_size: CABINET_PAGE_SIZE } });
-  return data;
+  return {
+    ...data,
+    data: data.data.map((service) => ({
+      ...service,
+      photo: toMediaUrl(service.photo) ?? null,
+    })),
+  };
 };
 
 // Полная карточка процедуры. Раньше ручки не было и страница редактирования

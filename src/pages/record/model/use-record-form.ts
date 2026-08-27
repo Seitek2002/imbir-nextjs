@@ -27,7 +27,7 @@ import type {
 } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
-import { toHttps } from "@/shared/lib/media";
+import { toHttps, toMediaUrl } from "@/shared/lib/media";
 import { useAuthStore, useCityStore } from "@/shared/store";
 
 import { SELECTION_LABELS } from "./constants";
@@ -343,7 +343,7 @@ export const useRecordForm = () => {
     price: Number(s.price) || 0,
     rating: Number(s.rating) || 0,
     reviews: Number(s.reviews_count) || 0,
-    image: s.photo ?? "",
+    image: toMediaUrl(s.photo) ?? "",
   }));
 
   useEffect(() => {
