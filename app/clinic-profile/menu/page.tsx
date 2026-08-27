@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
 import { StarIcon } from "@/shared/assets/icons";
+import { usePendingClinicAppointments } from "@/shared/lib/usePendingAppointments";
 import { CabinetMenuItem, CabinetMobileMenu } from "@/shared/ui";
 
 const MENU_ITEMS: CabinetMenuItem[] = [
@@ -60,22 +61,79 @@ const MENU_ITEMS: CabinetMenuItem[] = [
       </svg>
     ),
   },
+  {
+    href: "/clinic-profile/appointments",
+    label: "Записи",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path
+          d="M10 5V10L13.3333 11.6667M17.5 10C17.5 14.1421 14.1421 17.5 10 17.5C5.85786 17.5 2.5 14.1421 2.5 10C2.5 5.85786 5.85786 2.5 10 2.5C14.1421 2.5 17.5 5.85786 17.5 10Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    href: "/clinic-profile/reviews",
+    label: "Отзывы",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path
+          d="M10 1.66667L12.575 6.88334L18.3333 7.72501L14.1667 11.7833L15.15 17.5167L10 14.8083L4.85 17.5167L5.83333 11.7833L1.66667 7.72501L7.425 6.88334L10 1.66667Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    href: "/clinic-profile/invites",
+    label: "Пригласить врача",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path
+          d="M13.3333 17.5V15.8333C13.3333 14.9493 12.9821 14.1014 12.357 13.4763C11.7319 12.8512 10.884 12.5 10 12.5H4.16667C3.28261 12.5 2.43477 12.8512 1.80964 13.4763C1.18452 14.1014 0.833332 14.9493 0.833332 15.8333V17.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle
+          cx="7.08333"
+          cy="7.08333"
+          r="3.33333"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M15.8333 6.66667V11.6667M13.3333 9.16667H18.3333"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
 ];
 
 export default function ClinicProfileMenuPage() {
-  const { profile, isLoading } = useClinicCabinet();
+  // isLoading намеренно не берём: раньше вся страница подменялась текстом
+  // «Загрузка...», и меню с выходом из профиля было недоступно до ответа
+  // сервера. Пункты статичны — показываем их сразу, как в кабинете врача.
+  const { profile } = useClinicCabinet();
+  const pendingCount = usePendingClinicAppointments();
 
   const clinicName = profile?.name ?? "";
   const clinicLogo = profile?.logo;
   const rating = profile?.rating ?? 0;
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center text-muted">
-        Загрузка...
-      </div>
-    );
-  }
 
   return (
     <CabinetMobileMenu
@@ -104,7 +162,11 @@ export default function ClinicProfileMenuPage() {
           </div>
         ) : undefined
       }
-      items={MENU_ITEMS}
+      items={MENU_ITEMS.map((item) =>
+        item.href === "/clinic-profile/appointments"
+          ? { ...item, badge: pendingCount }
+          : item,
+      )}
     />
   );
 }

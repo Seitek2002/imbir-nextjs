@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
 import { clinicCabinetKeys, getClinicAppointments } from "@/shared/api";
+import { fmtDate, fmtTime } from "@/shared/lib/datetime";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 type Tab = "all" | "cancelled" | "completed" | "upcoming";
@@ -20,11 +21,33 @@ const TABS = [
 
 const STATUS_LABEL: Record<string, string> = {
   upcoming: "Предстоит",
-  pending: "Ожидает",
+  pending: "Новая",
   confirmed: "Подтверждена",
   completed: "Завершён",
   cancelled: "Отменён",
 };
+
+// Сетка одна на шапку, строки и скелет — иначе колонки расходятся.
+// border-l есть у каждой строки, просто обычно прозрачная: иначе у выделенной
+// строки колонки съезжают на 4px относительно соседних.
+const ROW = "grid grid-cols-[1.4fr_1.6fr_1fr_0.8fr] gap-4 px-5 border-l-4";
+
+// Скелет повторяет строку списка, чтобы при появлении данных ничего не прыгало.
+const AppointmentsSkeleton: FC = () => (
+  <>
+    {Array.from({ length: 5 }).map((_, i) => (
+      <div
+        key={i}
+        className={`${ROW} border-l-transparent py-4 border-b border-border last:border-0 items-center`}
+      >
+        <div className="h-4 w-36 rounded-md skeleton" />
+        <div className="h-4 w-44 rounded-md skeleton" />
+        <div className="h-4 w-28 rounded-md skeleton" />
+        <div className="h-4 w-24 rounded-md skeleton" />
+      </div>
+    ))}
+  </>
+);
 
 export const ClinicAppointmentsPage: FC = () => {
   const [tab, setTab] = useState<Tab>("all");
@@ -43,52 +66,69 @@ export const ClinicAppointmentsPage: FC = () => {
       </div>
 
       <div className="bg-white rounded-3xl border border-border overflow-hidden">
-        <div className="grid grid-cols-4 px-5 py-3 border-b border-border">
-          <span className="text-muted text-sm font-medium">Пациент</span>
-          <span className="text-muted text-sm font-medium">Услуга</span>
-          <span className="text-muted text-sm font-medium">Дата / Время</span>
-          <span className="text-muted text-sm font-medium">Статус</span>
-        </div>
-
-        {isLoading ? (
-          <div className="px-5 py-12 text-center text-muted text-sm">
-            Загрузка...
-          </div>
-        ) : appointments.length === 0 ? (
-          <div className="px-5 py-12 text-center text-muted text-sm">
-            Нет записей
-          </div>
-        ) : (
-          appointments.map((a, i) => (
+        {/* Четырёхколоночная сетка не влезает в телефон: без min-w имена и услуги
+            сжимались в нечитаемый столбик. Скроллим горизонтально, как в кабинете врача. */}
+        <div className="overflow-x-auto">
+          <div className="min-w-160">
             <div
-              key={a.id}
-              className={`grid grid-cols-4 px-5 py-4 ${
-                i !== appointments.length - 1 ? "border-b border-border" : ""
-              }`}
+              className={`${ROW} border-l-transparent py-3 border-b border-border`}
             >
-              <span className="text-foreground text-sm font-medium">
-                {a.patient.full_name}
+              <span className="text-muted text-sm font-medium">Пациент</span>
+              <span className="text-muted text-sm font-medium">Услуга</span>
+              <span className="text-muted text-sm font-medium">
+                Дата / Время
               </span>
-              <span className="text-muted text-sm">
-                {a.service?.name ?? "—"}
-              </span>
-              <span className="text-muted text-sm">
-                {a.date} {a.time}
-              </span>
-              <span
-                className={`text-sm font-medium ${
-                  a.status === "upcoming"
-                    ? "text-primary"
-                    : a.status === "completed"
-                      ? "text-green-600"
-                      : "text-muted"
-                }`}
-              >
-                {STATUS_LABEL[a.status] ?? a.status}
-              </span>
+              <span className="text-muted text-sm font-medium">Статус</span>
             </div>
-          ))
-        )}
+
+            {isLoading ? (
+              <AppointmentsSkeleton />
+            ) : appointments.length === 0 ? (
+              <div className="px-5 py-12 text-center text-muted text-sm">
+                Нет записей
+              </div>
+            ) : (
+              appointments.map((a, i) => {
+                // Новая запись — та, что ещё ждёт подтверждения клиники.
+                const isNew = a.status === "pending";
+
+                return (
+                  <div
+                    key={a.id}
+                    className={`${ROW} py-4 items-center ${
+                      i !== appointments.length - 1
+                        ? "border-b border-border"
+                        : ""
+                    } ${isNew ? "bg-info-tint border-l-info" : "border-l-transparent"}`}
+                  >
+                    <span className="text-foreground text-sm font-medium">
+                      {a.patient.full_name}
+                    </span>
+                    <span className="text-muted text-sm">
+                      {a.service?.name ?? "—"}
+                    </span>
+                    <span className="text-muted text-sm whitespace-nowrap">
+                      {fmtDate(a.date)} {fmtTime(a.time)}
+                    </span>
+                    <span
+                      className={`text-sm font-medium ${
+                        isNew
+                          ? "text-info"
+                          : a.status === "upcoming"
+                            ? "text-primary"
+                            : a.status === "completed"
+                              ? "text-green-600"
+                              : "text-muted"
+                      }`}
+                    >
+                      {STATUS_LABEL[a.status] ?? a.status}
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
     </ClinicPageLayout>
   );
