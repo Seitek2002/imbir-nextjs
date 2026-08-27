@@ -13,7 +13,7 @@ import { Header } from "@/widgets/header";
 import { ReviewsSection } from "@/widgets/reviews";
 
 import { useFavoriteToggle } from "@/features/favorite-toggle";
-import { useSubmitReview } from "@/features/submit-review";
+import { useDeleteReview, useSubmitReview } from "@/features/submit-review";
 
 import { DoctorCard } from "@/entities/doctor";
 import { ServiceCard } from "@/entities/service";
@@ -33,7 +33,7 @@ import {
 import { ROUTES } from "@/shared/config";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { Button, ContactInfoModal, IconBtn } from "@/shared/ui";
+import { AnimatedNumber, Button, ContactInfoModal, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
 
@@ -91,6 +91,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
   });
 
   const { isSubmitting, submitReview } = useSubmitReview("clinic", id);
+  const { removeReview } = useDeleteReview("clinic", id);
 
   if (isClinicError || (!isClinicLoading && !clinic)) {
     return (
@@ -299,10 +300,14 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
               </div>
 
               <StatsPanel
-                rating={clinic.rating}
-                experience={`${clinic.experience} лет`}
+                rating={<AnimatedNumber value={clinic.rating} decimals={2} />}
+                experience={
+                  <>
+                    <AnimatedNumber value={clinic.experience} /> лет
+                  </>
+                }
                 experienceLabel="Опыт"
-                reviews={clinic.reviews}
+                reviews={<AnimatedNumber value={clinic.reviews} />}
               />
             </div>
 
@@ -473,6 +478,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
             averageRating={clinic.rating}
             onSubmitReview={isAuthed ? submitReview : undefined}
             isSubmitting={isSubmitting}
+            onDeleteReview={isAuthed ? removeReview : undefined}
           />
         )}
       </div>

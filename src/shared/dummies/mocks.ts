@@ -7,6 +7,10 @@ import { StaticImageData } from "next/image";
 export type ReviewItem = {
   appointmentId?: string;
   author: string;
+  // id пользователя-автора. По нему страница понимает, что отзыв свой и его
+  // можно удалить: имён для этого недостаточно — они повторяются. Необязательный:
+  // в части ответов author приходит просто строкой, без id.
+  authorId?: number;
   // Имя совпадает с пропом ReviewCard (@/widgets/reviews) — объект отдаётся
   // туда как есть, и при расхождении имён аватар молча терялся бы.
   avatarUrl?: string;

@@ -14,7 +14,7 @@ import { ReviewsSection } from "@/widgets/reviews";
 import { VideosSwiper } from "@/widgets/videos-swiper";
 
 import { useFavoriteToggle } from "@/features/favorite-toggle";
-import { useSubmitReview } from "@/features/submit-review";
+import { useDeleteReview, useSubmitReview } from "@/features/submit-review";
 
 import { fetchDoctorInterviews } from "@/entities/interview";
 
@@ -33,7 +33,7 @@ import {
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
-import { Button, ContactInfoModal, IconBtn } from "@/shared/ui";
+import { AnimatedNumber, Button, ContactInfoModal, IconBtn } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
 
@@ -100,6 +100,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
   });
 
   const { isSubmitting, submitReview } = useSubmitReview("doctor", id);
+  const { removeReview } = useDeleteReview("doctor", id);
 
   // 3. ПОЛУЧАЕМ ИНТЕРВЬЮ ЭТОГО ВРАЧА
   const { data: doctorInterviews = [] } = useQuery({
@@ -284,10 +285,14 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
               </div>
 
               <StatsPanel
-                rating={doctor.rating}
-                experience={`${doctor.experience} лет`}
+                rating={<AnimatedNumber value={doctor.rating} decimals={2} />}
+                experience={
+                  <>
+                    <AnimatedNumber value={doctor.experience} /> лет
+                  </>
+                }
                 experienceLabel="Стаж"
-                reviews={doctor.reviews} // Заменил reviewsCount на reviews (по нашему API)
+                reviews={<AnimatedNumber value={doctor.reviews} />}
               />
             </div>
 
@@ -453,6 +458,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             }
             onSubmitReview={isAuthed ? submitReview : undefined}
             isSubmitting={isSubmitting}
+            onDeleteReview={isAuthed ? removeReview : undefined}
           />
         )}
 

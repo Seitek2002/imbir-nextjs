@@ -6,9 +6,11 @@ import Link from "next/link";
 
 import { ReviewModal } from "@/features/review-modal";
 
-import { ChatIcon, StarIcon } from "@/shared/assets/icons";
+import { ChatIcon, StarIcon, TrashIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
-import { Button } from "@/shared/ui";
+import { useAuthStore } from "@/shared/store";
+import { AnimatedNumber, Button } from "@/shared/ui";
+import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
 import { ReviewCard } from "./ReviewCard";
 
@@ -31,6 +33,8 @@ const EmptyReviews: FC = () => (
 // Тип для отдельного отзыва
 export type ReviewItem = {
   author: string;
+  // id автора — по нему понимаем, что отзыв свой.
+  authorId?: number;
   avatarUrl?: string;
   date: string;
   id: number | string;
@@ -47,6 +51,8 @@ type Props = {
   doctorSpecialty?: string;
   initialReviews: ReviewItem[];
   isSubmitting?: boolean;
+  // Удаление своего отзыва. Не передано — кнопки нет ни у кого.
+  onDeleteReview?: (reviewId: number) => Promise<unknown> | void;
   onReviewClick?: () => void;
   // Отправка отзыва на бэк. Если не передана — форма не показывается.
   // Может вернуть промис — тогда форма очистится только после успеха.
@@ -58,6 +64,7 @@ export const ReviewsSection: FC<Props> = ({
   averageRating,
   onSubmitReview,
   onReviewClick,
+  onDeleteReview,
   isSubmitting,
   doctorName = "Специалист",
   doctorSpecialty = "",
@@ -69,6 +76,26 @@ export const ReviewsSection: FC<Props> = ({
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [newReviewText, setNewReviewText] = useState("");
   const [newReviewRating, setNewReviewRating] = useState(0);
+
+  // Свой отзыв определяем по id пользователя, а не по имени: тёзки реальны,
+  // и показать чужую кнопку удаления было бы хуже, чем не показать свою.
+  const currentUserId = useAuthStore((state) => state.user?.id);
+  const [pendingDeleteId, setPendingDeleteId] = useState<null | number>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteConfirm = async () => {
+    if (pendingDeleteId === null || !onDeleteReview) return;
+    setIsDeleting(true);
+    try {
+      await onDeleteReview(pendingDeleteId);
+      setPendingDeleteId(null);
+    } catch {
+      // Сообщение показывает onError мутации; модалку оставляем открытой,
+      // чтобы можно было повторить.
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleAddReview = async () => {
     if (!newReviewText.trim() || newReviewRating === 0 || !onSubmitReview)
@@ -108,9 +135,11 @@ export const ReviewsSection: FC<Props> = ({
                 <div className="bg-[#FFA18D] p-2.5 rounded-xl size-10 flex items-center justify-center">
                   <StarIcon className="size-5 text-white" />
                 </div>
-                <span className="text-[24px] font-semibold text-foreground">
-                  {averageRating}
-                </span>
+                <AnimatedNumber
+                  value={averageRating}
+                  decimals={2}
+                  className="text-[24px] font-semibold text-foreground"
+                />
               </div>
               <span className="text-muted">Средняя оценка</span>
             </div>
@@ -120,9 +149,10 @@ export const ReviewsSection: FC<Props> = ({
                 <div className="bg-[#FFA18D] p-2.5 rounded-xl size-10 flex items-center justify-center">
                   <ChatIcon className="size-5 text-white" />
                 </div>
-                <span className="text-[24px] font-semibold text-foreground">
-                  {reviews.length}
-                </span>
+                <AnimatedNumber
+                  value={reviews.length}
+                  className="text-[24px] font-semibold text-foreground"
+                />
               </div>
               <span className="text-muted">Всего отзывов</span>
             </div>
@@ -203,11 +233,31 @@ export const ReviewsSection: FC<Props> = ({
                 rating={review.rating}
                 avatarUrl={review.avatarUrl}
                 reply={review.reply}
+                onDelete={
+                  onDeleteReview &&
+                  currentUserId !== undefined &&
+                  review.authorId === currentUserId
+                    ? () => setPendingDeleteId(Number(review.id))
+                    : undefined
+                }
               />
             ))
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={pendingDeleteId !== null}
+        onClose={() => setPendingDeleteId(null)}
+        onConfirm={handleDeleteConfirm}
+        isLoading={isDeleting}
+        closeOnConfirm={false}
+        icon={<TrashIcon className="w-7 h-7 text-primary" />}
+        title="Удалить отзыв?"
+        description="Отзыв исчезнет со страницы, а средняя оценка пересчитается. Вернуть его нельзя."
+        confirmLabel="Удалить"
+        cancelLabel="Отмена"
+      />
 
       {onSubmitReview && (
         <ReviewModal

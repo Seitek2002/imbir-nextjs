@@ -1,1 +1,5 @@
-export { useInvalidateAfterReview, useSubmitReview } from "./model";
+export {
+  useDeleteReview,
+  useInvalidateAfterReview,
+  useSubmitReview,
+} from "./model";

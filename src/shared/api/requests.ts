@@ -256,9 +256,14 @@ const resolveAuthorAvatar = (
   return toMediaUrl(author.avatar_url);
 };
 
+// author бывает строкой — тогда id нет и удалить свой отзыв через интерфейс не выйдет.
+const resolveAuthorId = (author: ApiReview["author"]): number | undefined =>
+  author && typeof author === "object" ? author.id : undefined;
+
 const adaptReview = (r: ApiReview): MockReviewItem => ({
   id: String(r.id),
   author: resolveAuthor(r.author),
+  authorId: resolveAuthorId(r.author),
   avatarUrl: resolveAuthorAvatar(r.author),
   date: r.created_at.slice(0, 10),
   text: r.text ?? "",

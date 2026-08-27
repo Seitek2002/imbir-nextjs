@@ -8,6 +8,7 @@ import {
   type ReviewTargetType,
   clinicKeys,
   createReview,
+  deleteReview,
   doctorKeys,
   profileKeys,
   reviewKeys,
@@ -95,4 +96,35 @@ export const useSubmitReview = (
     submitReview: (rating: number, text: string) =>
       mutateAsync({ rating, text }),
   };
+};
+
+/**
+ * Удаление своего отзыва со страницы врача или клиники.
+ *
+ * Чужой отзыв удалить нельзя и через API: DELETE /api/reviews/{id}/ требует
+ * IsAuthor (reviews/views.py:78). Проверка в интерфейсе нужна только чтобы не
+ * показывать кнопку, которая всё равно вернёт 403.
+ *
+ * Сброс кэша тот же, что после создания: бэк при удалении точно так же
+ * пересчитывает rating и reviews_count (reviews/views.py: perform_destroy).
+ */
+export const useDeleteReview = (
+  targetType: ReviewTargetType,
+  targetId: number | string,
+) => {
+  const invalidateAfterReview = useInvalidateAfterReview();
+
+  const { isPending, mutateAsync } = useMutation({
+    mutationFn: (reviewId: number) => deleteReview(reviewId),
+    onSuccess: () => {
+      invalidateAfterReview(targetType, targetId);
+      toast.success("Отзыв удалён");
+    },
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось удалить отзыв"));
+    },
+  });
+
+  return { isDeleting: isPending, removeReview: mutateAsync };
 };

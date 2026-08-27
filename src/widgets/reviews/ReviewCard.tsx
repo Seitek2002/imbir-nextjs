@@ -1,6 +1,6 @@
 ﻿import { FC } from "react";
 
-import { StarIcon } from "@/shared/assets/icons";
+import { StarIcon, TrashIcon } from "@/shared/assets/icons";
 import { ImageWithFallback } from "@/shared/ui";
 
 export type ReviewProps = {
@@ -10,6 +10,8 @@ export type ReviewProps = {
   avatarUrl?: string;
   date: string;
   id?: number | string;
+  // Передаётся только для своего отзыва — чужой удалить всё равно не даст бэк.
+  onDelete?: () => void;
   rating: number;
   reply?: { date: string; text: string } | null;
   text: string;
@@ -22,6 +24,7 @@ export const ReviewCard: FC<ReviewProps> = ({
   rating,
   avatarUrl,
   reply,
+  onDelete,
 }) => {
   return (
     <div className="bg-white border border-border-soft rounded-[20px] flex flex-col min-w-0">
@@ -71,15 +74,29 @@ export const ReviewCard: FC<ReviewProps> = ({
           </div>
         </div>
 
-        {/* Звезды в оранжевой плашке */}
-        <div className="flex items-center bg-[#FFA18D] py-1.5 px-2.5 rounded-full gap-0.5">
-          {/* Отрисовка 5 звезд. Если рейтинг меньше 5, остальные будут полупрозрачными */}
-          {[...Array(5)].map((_, i) => (
-            <StarIcon
-              key={i}
-              className={`size-3.5 ${i < rating ? "text-white" : "text-white/50"}`}
-            />
-          ))}
+        <div className="flex items-center gap-2 shrink-0">
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              aria-label="Удалить мой отзыв"
+              title="Удалить мой отзыв"
+              className="size-8 rounded-full flex items-center justify-center text-muted hover:text-primary hover:bg-primary-tint transition-colors cursor-pointer"
+            >
+              <TrashIcon className="size-4" />
+            </button>
+          )}
+
+          {/* Звезды в оранжевой плашке */}
+          <div className="flex items-center bg-[#FFA18D] py-1.5 px-2.5 rounded-full gap-0.5">
+            {/* Отрисовка 5 звезд. Если рейтинг меньше 5, остальные будут полупрозрачными */}
+            {[...Array(5)].map((_, i) => (
+              <StarIcon
+                key={i}
+                className={`size-3.5 ${i < rating ? "text-white" : "text-white/50"}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
