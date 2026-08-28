@@ -498,10 +498,18 @@ export const useRecordForm = () => {
 
   const isStep2Complete = Boolean(selectedDate) && Boolean(selectedTime);
 
+  // У врача может не быть ни одного места приёма (зарегистрировался сам, без
+  // клиники) — тогда поле «Клиника» не рисуется вовсе. Флаг живёт здесь, а не
+  // в Step1Selection, чтобы валидация и разметка не разошлись: требовать
+  // клинику, когда поля нет, значило бы завести человека в тупик.
+  const isClinicFieldHidden =
+    !selectedClinicId && !!selectedDoctorId && workplaceOptions.length === 0;
+
   const applyClinicSelection = (clinicId: string) => {
     if (clinicId === selectedClinicId) return;
 
     setSelectedClinicId(clinicId);
+    setErrors((prev) => ({ ...prev, clinic: undefined, submit: undefined }));
     // Врачи берутся из выбранной клиники (свой список, грузится отдельно),
     // поэтому прежний врач ей может не соответствовать — сбрасываем, чтобы
     // пользователь выбрал специалиста заново из списка этой клиники.
@@ -552,10 +560,12 @@ export const useRecordForm = () => {
   // тому же врачу, просто уточняется, в каком из его мест работы.
   const applyWorkplaceSelection = (clinicId: string) => {
     setSelectedClinicId(clinicId);
+    setErrors((prev) => ({ ...prev, clinic: undefined, submit: undefined }));
   };
 
   const selectService = (serviceId: string) => {
     setSelectedServiceId(serviceId);
+    setErrors((prev) => ({ ...prev, service: undefined, submit: undefined }));
   };
 
   // Заход "с услуги" (страница услуг даёт только ?service=, без клиники и
@@ -815,6 +825,41 @@ export const useRecordForm = () => {
   };
 
   const validateAndSubmit = async () => {
+    // Проверяем шаги в том же порядке, в каком они идут на экране. Раньше
+    // первыми шли контакты, и человек с пустой формой сначала заполнял их,
+    // и только потом узнавал, что не выбрал врача — два круга вместо одного.
+
+    // ── Шаг 1 ────────────────────────────────────────────────────────────
+    // Временно требуем все три поля на стороне фронта: бэк принимает запись
+    // и без clinic_id/service_id, из-за чего у врача оказывались записи без
+    // указания, куда и на что человек пришёл. Собираем ошибки всех полей
+    // разом, а не по одной — иначе пользователь чинит их по очереди.
+    const step1Errors: OptionalFormErrors = {};
+    if (!isClinicFieldHidden && !selectedClinicId) {
+      step1Errors.clinic = "Выберите клинику";
+    }
+    if (!selectedDoctorId) step1Errors.doctor = "Выберите специалиста";
+    if (!selectedServiceId) step1Errors.service = "Выберите услугу";
+
+    if (Object.keys(step1Errors).length > 0) {
+      setErrors({
+        ...step1Errors,
+        submit: !selectedDoctorId
+          ? "Сначала выберите специалиста — без него календарь недоступен"
+          : "Заполните первый шаг: без него запись не оформить",
+      });
+      revealStep(1);
+      return;
+    }
+
+    // ── Шаг 2 ────────────────────────────────────────────────────────────
+    if (!isStep2Complete) {
+      setErrors({ submit: "Выберите дату и время приёма" });
+      revealStep(2);
+      return;
+    }
+
+    // ── Шаг 3 ────────────────────────────────────────────────────────────
     const nextErrors: OptionalFormErrors = {};
 
     // Для авторизованных пользователей имя/фамилия/телефон не уходят на бэк
@@ -841,25 +886,12 @@ export const useRecordForm = () => {
       return;
     }
 
-    // Без врача весь календарь заблокирован, и «Выберите дату и время»
-    // отправляло исправлять то, что исправить нельзя, — называем шаг,
-    // который действительно держит форму.
-    if (!selectedDoctorId) {
-      setErrors((prev) => ({
-        ...prev,
-        doctor: "Выберите специалиста",
-        submit: "Сначала выберите специалиста — без него календарь недоступен",
-      }));
-      revealStep(1);
-      return;
-    }
-
     const request = buildAppointmentRequest();
+    // Сюда уже не попасть: дату и время проверили выше. Оставлено как
+    // страховка от рассинхрона, если buildAppointmentRequest обзаведётся
+    // новыми обязательными полями.
     if (!request) {
-      setErrors((prev) => ({
-        ...prev,
-        submit: "Выберите дату и время приёма",
-      }));
+      setErrors({ submit: "Выберите дату и время приёма" });
       revealStep(2);
       return;
     }
@@ -957,6 +989,9 @@ export const useRecordForm = () => {
     // Места приёма выбранного врача. Нужны в Step1Selection: если их нет,
     // поле «Клиника» скрывается, иначе оно ведёт в пустую модалку.
     workplaceOptions,
+    // Тот же признак, но посчитанный один раз здесь — им пользуются и
+    // разметка, и валидация, чтобы не требовать скрытое поле.
+    isClinicFieldHidden,
     mobileSelectionStage,
     isStep2Complete,
     modalConfig,
