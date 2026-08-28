@@ -493,9 +493,6 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             doctorImage={
               typeof doctor.image === "string" ? doctor.image : undefined
             }
-            onReviewClick={
-              !isAuthed ? () => router.push(ROUTES.LOGIN) : undefined
-            }
             onSubmitReview={isAuthed ? submitReview : undefined}
             isSubmitting={isSubmitting}
             onDeleteReview={isAuthed ? removeReview : undefined}
@@ -535,9 +532,13 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
 
       {!isDoctor && (
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-border-soft z-50 flex gap-2 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
+          {/* Те же иконки, что в десктопной паре кнопок выше — на мобильном
+              их не было вовсе, и подписи укорочены («Онлайн консультация» →
+              «Онлайн»), иначе иконка с текстом не помещались в одну строку. */}
           <Button
             className="flex-1 justify-center bg-[#FFF2F0] text-primary border border-transparent"
             size="lg"
+            IconLeft={OfflineRecordIcon}
             onClick={() => setIsOfflineInfoOpen(true)}
           >
             Офлайн
@@ -546,9 +547,10 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
             <Button
               className="flex-1 justify-center"
               size="lg"
+              IconLeft={OnlineRecordIcon}
               onClick={() => router.push(`${ROUTES.RECORD}?doctor=${id}`)}
             >
-              Онлайн консультация
+              Онлайн
             </Button>
           )}
         </div>

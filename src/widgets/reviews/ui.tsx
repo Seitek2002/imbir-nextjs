@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { FC, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 
 import Link from "next/link";
 
@@ -60,8 +61,8 @@ type Props = {
   isSubmitting?: boolean;
   // Удаление своего отзыва. Не передано — кнопки нет ни у кого.
   onDeleteReview?: (reviewId: number) => Promise<unknown> | void;
-  onReviewClick?: () => void;
-  // Отправка отзыва на бэк. Если не передана — форма не показывается.
+  // Отправка отзыва на бэк. Не передана — значит гость: кнопка «Оставить
+  // свой отзыв» остаётся видна, но по клику вместо модалки просит войти.
   // Может вернуть промис — тогда форма очистится только после успеха.
   onSubmitReview?: (rating: number, text: string) => Promise<unknown> | void;
 };
@@ -70,7 +71,6 @@ export const ReviewsSection: FC<Props> = ({
   initialReviews,
   averageRating,
   onSubmitReview,
-  onReviewClick,
   onDeleteReview,
   allReviewsHref,
   alreadyReviewed = false,
@@ -190,14 +190,17 @@ export const ReviewsSection: FC<Props> = ({
             </div>
           </div>
 
-          {!alreadyReviewed && (onSubmitReview || onReviewClick) && (
+          {/* Кнопка видна и гостю: молчаливый переход на логин не
+              объяснял, зачем он произошёл — теперь гость видит тост с
+              причиной и остаётся на странице. */}
+          {!alreadyReviewed && (
             <Button
               variant="outline"
               className="md:hidden w-full justify-center bg-white"
               size="sm"
               onClick={() => {
                 if (onSubmitReview) setIsReviewModalOpen(true);
-                else onReviewClick?.();
+                else toast.error("Войдите в аккаунт, чтобы оставить отзыв");
               }}
             >
               Оставить свой отзыв
