@@ -2,10 +2,9 @@
 
 import { FC } from "react";
 
-import Image from "next/image";
-
 import { StarIcon } from "@/shared/assets/icons";
 import { pluralReviews } from "@/shared/lib/utils";
+import { ImageWithFallback } from "@/shared/ui";
 
 import { useDoctorCabinet } from "./doctor-profile/useDoctorCabinet";
 
@@ -33,19 +32,18 @@ export const DoctorProfilePreviewCard: FC = () => {
       </h3>
       <div className="flex flex-col items-center text-center">
         <div className="w-24 h-24 rounded-2xl overflow-hidden bg-linear-to-br from-primary to-[#FF8A6B] flex items-center justify-center shrink-0 mb-4">
-          {profile.photo ? (
-            <Image
-              src={profile.photo}
-              alt={profile.fullName}
-              width={96}
-              height={96}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-white text-3xl font-bold">
-              {profile.fullName.charAt(0)}
-            </span>
-          )}
+          <ImageWithFallback
+            src={profile.photo}
+            alt={profile.fullName}
+            width={96}
+            height={96}
+            className="w-full h-full object-cover"
+            fallback={
+              <span className="text-white text-3xl font-bold">
+                {profile.fullName.charAt(0)}
+              </span>
+            }
+          />
         </div>
         <h4 className="text-xl font-semibold text-foreground leading-tight">
           {profile.fullName}

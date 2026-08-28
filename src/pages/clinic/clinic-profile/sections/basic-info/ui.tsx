@@ -16,6 +16,7 @@ import {
   ImageWithFallback,
   Input,
   PhotoLightbox,
+  Spinner,
   Textarea,
 } from "@/shared/ui";
 
@@ -149,6 +150,7 @@ export const ClinicBasicInfoPage: FC = () => {
                       height={96}
                       sizes="96px"
                       unoptimized={logoPreview.startsWith("data:")}
+                      loadingVariant="spinner"
                       className="w-full h-full object-cover"
                       fallback={
                         <span className="text-white text-4xl font-bold">
@@ -216,6 +218,7 @@ export const ClinicBasicInfoPage: FC = () => {
                             width={80}
                             height={80}
                             sizes="80px"
+                            loadingVariant="spinner"
                             className="h-full w-full rounded-xl object-cover"
                             fallback={
                               <div className="h-full w-full rounded-xl bg-surface" />
@@ -239,7 +242,11 @@ export const ClinicBasicInfoPage: FC = () => {
                       className="flex size-20 items-center justify-center rounded-xl border-2 border-dashed border-border text-2xl text-primary hover:border-primary/40 disabled:opacity-50"
                       aria-label="Добавить фотографию"
                     >
-                      +
+                      {isUploadingPhoto ? (
+                        <Spinner className="text-primary" />
+                      ) : (
+                        "+"
+                      )}
                     </button>
                   </div>
                 ) : (
@@ -249,7 +256,14 @@ export const ClinicBasicInfoPage: FC = () => {
                     disabled={isUploadingPhoto}
                     className="flex min-h-20 w-full items-center justify-center gap-2 text-sm font-medium text-secondary disabled:opacity-50"
                   >
-                    {isUploadingPhoto ? "Загрузка..." : "Загрузить фотографии"}
+                    {isUploadingPhoto ? (
+                      <>
+                        <Spinner className="text-primary" />
+                        Загрузка...
+                      </>
+                    ) : (
+                      "Загрузить фотографии"
+                    )}
                   </button>
                 )}
               </div>

@@ -5,6 +5,7 @@ import { ReactNode, useState } from "react";
 import Image, { ImageProps } from "next/image";
 
 import { cn } from "@/shared/lib/utils";
+import { Spinner } from "../spinner";
 
 type Props = Omit<ImageProps, "onError" | "src"> & {
   // Что показать, если картинка не загрузилась (битая ссылка, недоступный CDN) или src отсутствует.
@@ -13,6 +14,7 @@ type Props = Omit<ImageProps, "onError" | "src"> & {
   // из уже готовых данных (превью выбранного файла через FileReader) —
   // мигать плашкой там не за чем.
   noSkeleton?: boolean;
+  loadingVariant?: "skeleton" | "spinner";
   // Для вызывающих со своим skeleton-до-onLoad стейтом — иначе он остаётся
   // показанным навечно поверх fallback, если картинка так и не загрузилась.
   onError?: () => void;
@@ -40,6 +42,7 @@ export const ImageWithFallback = ({
   noSkeleton = false,
   onError,
   onLoad,
+  loadingVariant = "skeleton",
   ...rest
 }: Props) => {
   const [errored, setErrored] = useState(false);
@@ -59,9 +62,13 @@ export const ImageWithFallback = ({
   // data:-URL — это превью только что выбранного файла, оно уже в памяти.
   // Ждать нечего, скелетон только мигнул бы на один кадр.
   const isInlineData = typeof src === "string" && src.startsWith("data:");
-  const showSkeleton = !loaded && !noSkeleton && !isInlineData;
+  const showSkeleton =
+    !loaded &&
+    loadingVariant === "skeleton" &&
+    !noSkeleton &&
+    !isInlineData;
 
-  return (
+  const image = (
     <Image
       {...rest}
       src={src}
@@ -82,4 +89,27 @@ export const ImageWithFallback = ({
       }}
     />
   );
+
+  if (
+    !loaded &&
+    loadingVariant === "spinner" &&
+    !noSkeleton &&
+    !isInlineData
+  ) {
+    return (
+      <span
+        className={
+          rest.fill ? "absolute inset-0 block" : "relative inline-block"
+        }
+        aria-busy="true"
+      >
+        <span className="absolute inset-0 z-10 flex items-center justify-center bg-[#e5e7eb]">
+          <Spinner className="text-secondary" />
+        </span>
+        {image}
+      </span>
+    );
+  }
+
+  return image;
 };

@@ -3,7 +3,6 @@
 import { FC, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
-import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -30,6 +29,7 @@ import {
   ConfirmDialog,
   Dropdown,
   IconBtn,
+  ImageWithFallback,
   Input,
   Textarea,
 } from "@/shared/ui";
@@ -219,22 +219,21 @@ export const ClinicProcedureDetailPage: FC = () => {
 
   const photo = (
     <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-primary-tint shrink-0">
-      {photoPreview ? (
-        <Image
-          src={photoPreview}
-          alt={name}
-          fill
-          sizes="112px"
-          unoptimized={photoPreview.startsWith("data:")}
-          className="object-cover"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-            <circle cx="20" cy="20" r="20" fill="#F2F4F7" />
-          </svg>
-        </div>
-      )}
+      <ImageWithFallback
+        src={photoPreview}
+        alt={name}
+        fill
+        sizes="112px"
+        unoptimized={photoPreview?.startsWith("data:")}
+        className="object-cover"
+        fallback={
+          <div className="w-full h-full flex items-center justify-center">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="20" fill="#F2F4F7" />
+            </svg>
+          </div>
+        }
+      />
       {isEditing && (
         <IconBtn
           onClick={() => photoInputRef.current?.click()}

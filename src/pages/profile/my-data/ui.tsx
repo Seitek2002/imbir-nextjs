@@ -257,6 +257,7 @@ export const ProfileMyDataPage: FC = () => {
                       alt="Фото"
                       width={112}
                       height={112}
+                      loadingVariant="spinner"
                       className="w-full h-full object-cover"
                       unoptimized={d.photo?.startsWith("data:")}
                       fallback={

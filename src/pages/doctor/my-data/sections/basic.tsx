@@ -222,6 +222,7 @@ export const DoctorBasicInfoSection: FC = () => {
                 alt={d.fullName}
                 width={112}
                 height={112}
+                loadingVariant="spinner"
                 className="w-full h-full object-cover"
                 fallback={
                   <span className="text-white text-2xl font-bold">

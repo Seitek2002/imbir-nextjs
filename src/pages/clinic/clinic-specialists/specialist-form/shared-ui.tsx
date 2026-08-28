@@ -107,6 +107,7 @@ export const BasicInfoSection: FC<SectionProps> = ({
           width={80}
           height={80}
           unoptimized={d.photoPreview.startsWith("data:")}
+          loadingVariant="spinner"
           className="w-full h-full object-cover"
           fallback={<UserCircleIcon className="size-10 text-dim" />}
         />

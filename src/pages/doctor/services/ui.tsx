@@ -282,6 +282,7 @@ const ServiceModal: FC<ServiceModalProps> = ({
                   width={80}
                   height={80}
                   unoptimized
+                  loadingVariant="spinner"
                   className="w-full h-full object-cover"
                   fallback={<ServicePhotoPlaceholder className="size-8" />}
                 />

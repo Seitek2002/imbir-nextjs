@@ -18,6 +18,7 @@ import {
   Input,
   PhoneInput,
   PhotoLightbox,
+  Spinner,
   Textarea,
 } from "@/shared/ui";
 import type { DropdownOption } from "@/shared/ui/dropdown";
@@ -327,6 +328,7 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                       height={96}
                       sizes="96px"
                       unoptimized={logoPreview?.startsWith("data:")}
+                      loadingVariant="spinner"
                       className="w-full h-full object-cover"
                       fallback={
                         <span className="text-white text-4xl font-bold">
@@ -381,6 +383,7 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                         width={96}
                         height={96}
                         sizes="96px"
+                        loadingVariant="spinner"
                         className="w-full h-full object-cover"
                         fallback={null}
                       />
@@ -402,7 +405,14 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                   disabled={!onUploadPhoto || isUploadingPhoto}
                   className="mt-3"
                 >
-                  {isUploadingPhoto ? "Загрузка..." : "Добавить фото"}
+                  {isUploadingPhoto ? (
+                    <>
+                      <Spinner className="text-primary" />
+                      Загрузка...
+                    </>
+                  ) : (
+                    "Добавить фото"
+                  )}
                 </Button>
               </div>
             </>
