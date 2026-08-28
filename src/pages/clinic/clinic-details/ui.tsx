@@ -190,7 +190,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
 
         {/* --- ОСНОВНОЙ БЛОК --- */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-10">
-          <div className="sticky top-0 h-fit w-full md:w-130 shrink-0">
+          <div className="h-fit w-full md:sticky md:top-0 md:w-130 shrink-0">
             <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 md:hidden">
               <IconBtn
                 variant="outline"
