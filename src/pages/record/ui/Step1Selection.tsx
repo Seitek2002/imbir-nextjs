@@ -9,6 +9,7 @@ import { StepTitle } from "./StepTitle";
 
 export const Step1Selection = ({ form }: { form: RecordForm }) => {
   const {
+    errors,
     mobileStep,
     selectedClinic,
     selectedDoctor,
@@ -65,6 +66,7 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
             label="Специалист"
             value={selectedDoctor?.name}
             placeholder="Выберите из списка"
+            error={errors.doctor}
             onClick={() => openModal("doctor")}
           />
 

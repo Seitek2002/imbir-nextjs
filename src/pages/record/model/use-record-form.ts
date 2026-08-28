@@ -522,6 +522,9 @@ export const useRecordForm = () => {
     if (!matchedDoctor) return false;
 
     setSelectedDoctorId(doctorId);
+    // Подсветку шага снимаем сразу, как только врач выбран, — иначе поле
+    // оставалось бы красным с уже заполненным значением.
+    setErrors((prev) => ({ ...prev, doctor: undefined, submit: undefined }));
     // Услугу сбрасываем, только если она закреплена за конкретным врачом (или
     // несколькими) и выбранного среди них нет — иначе, как и с клиникой
     // выше, стирали бы уже сделанный выбор при заходе "с услуги". Услуги без
@@ -844,6 +847,7 @@ export const useRecordForm = () => {
     if (!selectedDoctorId) {
       setErrors((prev) => ({
         ...prev,
+        doctor: "Выберите специалиста",
         submit: "Сначала выберите специалиста — без него календарь недоступен",
       }));
       revealStep(1);

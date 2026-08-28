@@ -53,6 +53,9 @@ type Service = {
 type SelectionItem = Clinic | Doctor | Service;
 
 type OptionalFormErrors = {
+  // Шаг 1: врач не выбран. Держим отдельно от submit, чтобы подсветить само
+  // поле, а не только строку внизу формы.
+  doctor?: string;
   email?: string;
   firstName?: string;
   lastName?: string;

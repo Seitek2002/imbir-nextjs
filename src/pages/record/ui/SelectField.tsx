@@ -6,9 +6,13 @@ export const SelectField = ({
   value,
   placeholder,
   disabled,
+  error,
   onClick,
 }: {
   disabled?: boolean;
+  // Подсветка как у Input: незаполненный обязательный шаг должен читаться
+  // так же, как незаполненное поле, а не только строкой внизу формы.
+  error?: string;
   label: string;
   onClick: () => void;
   placeholder: string;
@@ -21,9 +25,10 @@ export const SelectField = ({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "w-full h-11 rounded-lg border border-border-soft px-3 text-left flex items-center justify-between transition-all",
+        "w-full h-11 rounded-lg border px-3 text-left flex items-center justify-between transition-all",
         "focus-visible:outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]",
-        !disabled && "hover:border-primary/40",
+        error ? "border-red-500" : "border-border-soft",
+        !disabled && !error && "hover:border-primary/40",
         disabled && "bg-[#F7F8F9] text-[#A6ACB0] cursor-not-allowed",
       )}
     >
@@ -32,5 +37,6 @@ export const SelectField = ({
       </span>
       <DropdownArrowIcon className="size-5 text-muted" />
     </button>
+    {error && <p className="text-sm text-red-500">{error}</p>}
   </div>
 );
