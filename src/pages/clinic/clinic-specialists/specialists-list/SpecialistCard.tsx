@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { pluralYears } from "@/shared/lib/utils";
 import { ImageWithFallback } from "@/shared/ui";
 
 // Заглушки на время загрузки списка — тех же размеров, что настоящие
@@ -132,7 +133,9 @@ export const SpecialistCard: FC<Props> = ({
             <StarIcon className="w-4 h-4 text-primary" />
             <span className="font-medium text-primary">{rating}</span>
             <span className="text-muted">({reviews})</span>
-            <span className="text-muted">• {experience} лет опыта</span>
+            <span className="text-muted">
+              • {experience} {pluralYears(experience)} опыта
+            </span>
           </div>
         </div>
       </Link>
@@ -191,7 +194,7 @@ export const SpecialistRow: FC<Props> = ({
           <StarIcon className="w-3.5 h-3.5 text-primary" />
           <span className="font-medium text-primary">{rating}</span>
           <span className="text-muted">
-            ({reviews}) • {experience} лет опыта
+            ({reviews}) • {experience} {pluralYears(experience)} опыта
           </span>
         </div>
       </div>

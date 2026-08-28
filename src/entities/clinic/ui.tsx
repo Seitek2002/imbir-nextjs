@@ -9,7 +9,7 @@ import Link from "next/link";
 import { GeoIcon, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { useInView } from "@/shared/lib/useInView";
-import { formatRating } from "@/shared/lib/utils";
+import { formatRating, pluralYears } from "@/shared/lib/utils";
 import { SaveButton } from "@/shared/ui";
 
 const getInitials = (name: string) =>
@@ -121,7 +121,9 @@ export const ClinicCard: FC<Props> = ({
                 <span className="text-secondary">({reviews})</span>
               )}
               {experience > 0 && (
-                <span className="text-secondary">• {experience} лет опыта</span>
+                <span className="text-secondary">
+                  • {experience} {pluralYears(experience)} опыта
+                </span>
               )}
             </div>
           )}
@@ -194,7 +196,9 @@ export const ClinicCard: FC<Props> = ({
               <span className="text-secondary">({reviews})</span>
             )}
             {experience > 0 && (
-              <span className="text-secondary">• {experience} лет опыта</span>
+              <span className="text-secondary">
+                • {experience} {pluralYears(experience)} опыта
+              </span>
             )}
           </div>
         )}

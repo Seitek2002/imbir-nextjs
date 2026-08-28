@@ -5,6 +5,7 @@ import { FC } from "react";
 import Image from "next/image";
 
 import { StarIcon } from "@/shared/assets/icons";
+import { pluralReviews } from "@/shared/lib/utils";
 
 import { useDoctorCabinet } from "./doctor-profile/useDoctorCabinet";
 
@@ -61,7 +62,7 @@ export const DoctorProfilePreviewCard: FC = () => {
             {profile.rating}
           </span>
           <span className="text-muted text-xs">
-            ({profile.totalReviews} отзывов)
+            ({profile.totalReviews} {pluralReviews(profile.totalReviews)})
           </span>
         </div>
       </div>

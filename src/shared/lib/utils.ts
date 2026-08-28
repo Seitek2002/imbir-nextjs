@@ -21,3 +21,26 @@ export const maskDate = (raw: string): string => {
 // где у врача и клиники это строка, а у услуги — число.
 export const formatRating = (value: number | string): string =>
   (Number(value) || 0).toFixed(2);
+
+// Русские числительные: 1 год, 2 года, 5 лет. Без этого в интерфейсе
+// попадалось «1 отзывов» и «1 лет опыта» — форма слова была прибита
+// к множественному числу.
+export const plural = (
+  count: number,
+  one: string,
+  few: string,
+  many: string,
+): string => {
+  const tail = Math.abs(count) % 100;
+  const last = tail % 10;
+  // 11–14 — исключение: у них множественная форма, хотя последняя цифра 1–4.
+  if (tail > 10 && tail < 20) return many;
+  if (last === 1) return one;
+  if (last > 1 && last < 5) return few;
+  return many;
+};
+
+// Частые случаи, чтобы не повторять формы слова по всему проекту.
+export const pluralYears = (n: number) => plural(n, "год", "года", "лет");
+export const pluralReviews = (n: number) =>
+  plural(n, "отзыв", "отзыва", "отзывов");

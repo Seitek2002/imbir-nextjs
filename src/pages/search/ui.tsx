@@ -19,6 +19,7 @@ import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { hasPrice } from "@/shared/lib/price";
 import { useUrlSearchParams } from "@/shared/lib/url-state";
+import { plural } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
 
 const MobileFiltersModal = dynamic(() =>
@@ -319,7 +320,13 @@ export const SearchPage: FC = () => {
                               Врачи
                             </h2>
                             <span className="text-muted text-lg pb-1">
-                              {filteredDoctors.length} совпадений
+                              {filteredDoctors.length}{" "}
+                              {plural(
+                                filteredDoctors.length,
+                                "совпадение",
+                                "совпадения",
+                                "совпадений",
+                              )}
                             </span>
                           </div>
                         </FilterBar>
@@ -354,7 +361,13 @@ export const SearchPage: FC = () => {
                             Клиники
                           </h2>
                           <span className="text-muted text-lg pb-1">
-                            {filteredClinics.length} совпадений
+                            {filteredClinics.length}{" "}
+                            {plural(
+                              filteredClinics.length,
+                              "совпадение",
+                              "совпадения",
+                              "совпадений",
+                            )}
                           </span>
                         </div>
                         <div className="grid grid-cols-4 gap-5 items-stretch">
@@ -383,7 +396,13 @@ export const SearchPage: FC = () => {
                             Услуги
                           </h2>
                           <span className="text-muted text-lg pb-1">
-                            {filteredServices.length} совпадений
+                            {filteredServices.length}{" "}
+                            {plural(
+                              filteredServices.length,
+                              "совпадение",
+                              "совпадения",
+                              "совпадений",
+                            )}
                           </span>
                         </div>
                         <div className="grid grid-cols-3 gap-4">

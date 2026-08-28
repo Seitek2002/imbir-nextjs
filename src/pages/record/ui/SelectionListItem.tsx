@@ -1,5 +1,5 @@
 import { GeoIcon, StarIcon } from "@/shared/assets/icons";
-import { cn } from "@/shared/lib/utils";
+import { cn, pluralYears } from "@/shared/lib/utils";
 import { ImageWithFallback } from "@/shared/ui";
 
 import { formatPrice } from "../model/lib";
@@ -112,7 +112,9 @@ export const SelectionListItem = ({
           <span className="font-medium text-primary">{item.rating}</span>
           <span>({item.reviews})</span>
           {(isClinic || isDoctor) && item.experience > 0 && (
-            <span>• {item.experience} лет опыта</span>
+            <span>
+              • {item.experience} {pluralYears(item.experience)} опыта
+            </span>
           )}
         </div>
 

@@ -8,7 +8,7 @@ import Link from "next/link";
 import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import { Workplace } from "@/shared/dummies";
-import { formatRating } from "@/shared/lib/utils";
+import { formatRating, pluralYears } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import { Button, ImageWithFallback, SaveButton } from "@/shared/ui";
 
@@ -118,7 +118,9 @@ export const DoctorCard: FC<Props> = ({
               {reviews !== undefined && (
                 <span className="text-secondary">({reviews})</span>
               )}
-              <span className="text-secondary">• {experience} лет опыта</span>
+              <span className="text-secondary">
+                • {experience} {pluralYears(experience)} опыта
+              </span>
             </div>
           )}
 
@@ -190,7 +192,9 @@ export const DoctorCard: FC<Props> = ({
             {reviews !== undefined && (
               <span className="text-secondary">({reviews})</span>
             )}
-            <span className="text-secondary">• {experience} лет</span>
+            <span className="text-secondary">
+              • {experience} {pluralYears(experience)}
+            </span>
           </div>
         )}
       </div>
