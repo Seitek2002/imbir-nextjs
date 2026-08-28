@@ -9,7 +9,9 @@ import { useDropdownSwipe } from "./use-dropdown-swipe";
 type MenuProps = {
   children: ReactNode;
   isActive: boolean;
+  isMulti: boolean;
   label?: string;
+  listboxId: string;
   onClose: () => void;
   onSearchChange: (val: string) => void;
   placeholder: string;
@@ -19,6 +21,8 @@ type MenuProps = {
 
 export const DropdownMenu: FC<MenuProps> = ({
   isActive,
+  isMulti,
+  listboxId,
   label,
   placeholder,
   searchable,
@@ -76,6 +80,10 @@ export const DropdownMenu: FC<MenuProps> = ({
 
       <div
         ref={scrollRef}
+        id={listboxId}
+        role="listbox"
+        aria-multiselectable={isMulti || undefined}
+        aria-label={label || placeholder}
         className="flex-1 overflow-y-auto max-h-[55vh] md:max-h-64 border border-border-soft rounded-xl md:border-none md:rounded-none"
       >
         {children}

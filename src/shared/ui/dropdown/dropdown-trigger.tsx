@@ -1,4 +1,4 @@
-﻿import { FC } from "react";
+﻿import { FC, RefObject } from "react";
 
 import { DropdownArrowIcon, DropdownRemoveIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
@@ -6,13 +6,17 @@ import { cn } from "@/shared/lib/utils";
 import { Option } from "./types";
 
 type TriggerProps = {
+  // id подсвеченного пункта — читалка озвучивает его, пока фокус на триггере.
+  activeDescendant?: string;
   isActive: boolean;
   isMulti: boolean;
+  listboxId: string;
   onClearAll: () => void;
   onRemove: (val: string) => void;
   onToggle: () => void;
   options: Option[];
   placeholder: string;
+  ref?: RefObject<HTMLDivElement | null>;
   value?: string | string[];
 };
 
@@ -47,9 +51,12 @@ export const DropdownTrigger: FC<TriggerProps> = ({
   value,
   options,
   placeholder,
+  listboxId,
+  activeDescendant,
   onToggle,
   onRemove,
   onClearAll,
+  ref,
 }) => {
   const selected = isMulti && Array.isArray(value) ? value : [];
   // Если выбраны все значения вручную, сворачиваем их в один чип «Все».
@@ -67,23 +74,18 @@ export const DropdownTrigger: FC<TriggerProps> = ({
     // обязательным полем-списком (например «Город» в анкете врача) нельзя
     // было заполнить без мыши.
     <div
-      // role="button", а не "combobox": у combobox обязателен aria-controls с
-      // id списка, а список рендерится отдельным компонентом. Для триггера,
-      // раскрывающего меню, роли кнопки достаточно.
-      role="button"
+      ref={ref}
+      // combobox, а не button: список пунктов реальный (role="listbox"), и
+      // без этой связки читалка не сообщает, какой пункт сейчас выбран
+      // стрелками. Стрелки и Enter обрабатывает родитель — он владеет
+      // подсветкой и знает отфильтрованный список.
+      role="combobox"
       tabIndex={0}
       aria-expanded={isActive}
       aria-haspopup="listbox"
+      aria-controls={isActive ? listboxId : undefined}
+      aria-activedescendant={isActive ? activeDescendant : undefined}
       onClick={onToggle}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          // Пробел на непрокручиваемом элементе иначе листает страницу.
-          e.preventDefault();
-          onToggle();
-        } else if (e.key === "Escape" && isActive) {
-          onToggle();
-        }
-      }}
       className={cn(
         "flex items-center justify-between min-h-10.5 p-3 border rounded-lg cursor-pointer transition-all duration-200 bg-white select-none",
         "border-border-soft outline-none",
