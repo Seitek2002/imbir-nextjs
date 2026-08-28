@@ -136,12 +136,11 @@ const MENU_ITEMS: MenuItem[] = [
   },
 ];
 
-export const DoctorSidebar: FC<Props> = ({
-  fullName,
-  photo,
-  specialty,
-  rating,
-}) => {
+// specialty приходит из кабинета, но в сайдбаре не рисуется: блок под именем
+// рассчитан на две строки (имя + рейтинг), третья меняет его высоту. Проп
+// оставлен в Props — данные уже загружены, и если дизайн решит показывать
+// специализацию, менять вызовы не придётся.
+export const DoctorSidebar: FC<Props> = ({ fullName, photo, rating }) => {
   const { navRef, indicator, pathname } = useSidebarIndicator();
   const pendingCount = usePendingDoctorAppointments();
   const [logoutOpen, setLogoutOpen] = useState(false);
