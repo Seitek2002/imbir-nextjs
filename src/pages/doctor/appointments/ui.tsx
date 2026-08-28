@@ -98,6 +98,15 @@ const SummarySkeleton: FC = () => (
 
 type Tab = "all" | "completed" | "upcoming";
 
+// Пустой список объясняем в терминах выбранной вкладки: «Нет записей» под
+// фильтром «Завершённые» читалось как «пациентов нет вообще».
+const EMPTY_TEXT: Record<Tab, string> = {
+  all: "Записей пока нет. Они появятся здесь, как только пациенты запишутся к вам на приём.",
+  upcoming:
+    "Предстоящих приёмов нет. Здесь будут записи, которые ещё не состоялись.",
+  completed: "Завершённых приёмов пока нет.",
+};
+
 const TABS = [
   { value: "all" as const, label: "Все" },
   { value: "upcoming" as const, label: "Предстоящие" },
@@ -266,8 +275,11 @@ export const DoctorAppointmentsPage: FC = () => {
       {isLoading ? (
         <AppointmentsSkeleton />
       ) : appointments.length === 0 ? (
-        <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
-          Нет записей
+        <div className="bg-white rounded-3xl border border-border px-6 py-16 flex flex-col items-center gap-2 text-center">
+          <p className="text-foreground font-medium">
+            {tab === "all" ? "Записей пока нет" : "В этой вкладке пусто"}
+          </p>
+          <p className="text-muted text-sm max-w-80">{EMPTY_TEXT[tab]}</p>
         </div>
       ) : (
         <div className="bg-white rounded-3xl border border-border overflow-hidden">

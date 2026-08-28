@@ -19,6 +19,16 @@ const TABS = [
   { value: "cancelled" as const, label: "Отменённые" },
 ];
 
+// Пустой список объясняем в терминах выбранной вкладки: «Нет записей» под
+// фильтром «Отменённые» читалось как «в клинике вообще нет записей».
+const EMPTY_TEXT: Record<Tab, string> = {
+  all: "Записей пока нет. Они появятся здесь, как только пациенты запишутся на приём.",
+  upcoming:
+    "Предстоящих приёмов нет. Здесь будут записи, которые ещё не состоялись.",
+  completed: "Завершённых приёмов пока нет.",
+  cancelled: "Отменённых записей нет — и это хорошо.",
+};
+
 const STATUS_LABEL: Record<string, string> = {
   upcoming: "Предстоит",
   pending: "Новая",
@@ -84,8 +94,11 @@ export const ClinicAppointmentsPage: FC = () => {
             {isLoading ? (
               <AppointmentsSkeleton />
             ) : appointments.length === 0 ? (
-              <div className="px-5 py-12 text-center text-muted text-sm">
-                Нет записей
+              <div className="px-5 py-14 flex flex-col items-center gap-2 text-center">
+                <p className="text-foreground font-medium">
+                  {tab === "all" ? "Записей пока нет" : "В этой вкладке пусто"}
+                </p>
+                <p className="text-muted text-sm max-w-80">{EMPTY_TEXT[tab]}</p>
               </div>
             ) : (
               appointments.map((a, i) => {

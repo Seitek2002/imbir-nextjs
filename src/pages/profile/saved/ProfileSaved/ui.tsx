@@ -2,6 +2,7 @@
 
 import { FC, useEffect, useState } from "react";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useFavoriteToggle } from "@/features/favorite-toggle";
@@ -10,6 +11,7 @@ import { ClinicCard } from "@/entities/clinic";
 import { DoctorCard } from "@/entities/doctor";
 import { ServiceCard } from "@/entities/service";
 
+import { HeartIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import type { Schedule } from "@/shared/dummies";
 import { parsePrice } from "@/shared/lib/price";
@@ -19,6 +21,33 @@ import { SavedItem, SavedType } from "../model";
 type Props = {
   activeTab: SavedType;
   items: SavedItem[];
+};
+
+// Пустое избранное объясняем в терминах вкладки и даём куда пойти: раньше
+// здесь стояло голое «Список пуст», из которого не было ясно ни что пусто,
+// ни как это исправить.
+const EMPTY_COPY: Record<
+  SavedType,
+  { href: string; label: string; text: string; title: string }
+> = {
+  doctor: {
+    title: "Нет сохранённых специалистов",
+    text: "Нажмите на сердечко в карточке врача — он появится здесь, чтобы не искать заново.",
+    href: ROUTES.SPECIALISTS,
+    label: "К специалистам",
+  },
+  clinic: {
+    title: "Нет сохранённых клиник",
+    text: "Нажмите на сердечко в карточке клиники — она появится здесь, чтобы не искать заново.",
+    href: ROUTES.CLINICS,
+    label: "К клиникам",
+  },
+  service: {
+    title: "Нет сохранённых услуг",
+    text: "Нажмите на сердечко в карточке услуги — она появится здесь, чтобы не искать заново.",
+    href: ROUTES.SERVICES,
+    label: "К услугам",
+  },
 };
 
 const toRating = (value?: null | string) => {
@@ -60,9 +89,20 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
   const filteredItems = items.filter((item) => item.type === activeTab);
 
   if (filteredItems.length === 0) {
+    const empty = EMPTY_COPY[activeTab];
     return (
-      <div className="bg-white rounded-3xl p-10 text-center border border-border">
-        <p className="text-muted text-lg">Список пуст</p>
+      <div className="bg-white rounded-3xl border border-border border-dashed px-6 py-14 flex flex-col items-center gap-3 text-center">
+        <div className="size-14 rounded-2xl bg-[#FFF0EE] flex items-center justify-center text-primary">
+          <HeartIcon className="size-6" />
+        </div>
+        <p className="text-foreground font-semibold text-lg">{empty.title}</p>
+        <p className="text-muted text-sm max-w-80">{empty.text}</p>
+        <Link
+          href={empty.href}
+          className="mt-2 text-sm font-medium text-primary hover:underline"
+        >
+          {empty.label}
+        </Link>
       </div>
     );
   }

@@ -189,10 +189,19 @@ export const SearchPage: FC = () => {
                   Результаты по запросу: {activeQuery}
                 </h2>
 
+                {/* Десктопная ветка ниже уже объясняет пустой результат —
+                    на мобильном стояло голое «Ничего не найдено», из которого
+                    не было понятно, виноват запрос или фильтры. */}
                 {!hasAnyResults && (
-                  <p className="text-center text-muted py-10">
-                    Ничего не найдено
-                  </p>
+                  <div className="py-10 flex flex-col items-center gap-2 text-center">
+                    <p className="text-foreground font-medium">
+                      Ничего не найдено
+                    </p>
+                    <p className="text-muted text-sm max-w-70">
+                      По запросу «{activeQuery}» совпадений нет. Попробуйте
+                      другое слово или снимите фильтры.
+                    </p>
+                  </div>
                 )}
 
                 {/* Блок Врачей */}
