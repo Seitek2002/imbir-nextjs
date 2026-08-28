@@ -382,8 +382,11 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                 </InfoCard>
               )}
 
-              {workExperience.length > 0 && (
-                <InfoCard title="Опыт работы" expandable={false}>
+              {/* В отличие от «Образования» и «О враче», рендерим карточку и
+                  при пустом списке: маркер-чёрточка нужен только рядом с
+                  реальной записью, а на пустом месте выглядел как баг бэка. */}
+              <InfoCard title="Опыт работы" expandable={false}>
+                {workExperience.length > 0 ? (
                   <div className="flex flex-col gap-5">
                     {workExperience.map((exp, idx) => (
                       <div key={idx} className="relative pl-5">
@@ -415,8 +418,12 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                       </div>
                     ))}
                   </div>
-                </InfoCard>
-              )}
+                ) : (
+                  <p className="text-muted text-sm md:text-base">
+                    Врач пока не указал опыт работы
+                  </p>
+                )}
+              </InfoCard>
 
               {skills.length > 0 && (
                 <InfoCard title="Профессиональные навыки" expandable={false}>

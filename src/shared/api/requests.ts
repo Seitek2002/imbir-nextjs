@@ -78,30 +78,44 @@ const adaptDoctorDetail = (d: ApiDoctorDetail): MockDoctorListItem => {
   const base = adaptDoctor(d);
   const formattedWorkExperience =
     d.work_experience && d.work_experience.length > 0
-      ? d.work_experience.map((w) => {
-          // from/to не гарантированы (свободный JSON) — если их нет, показываем
-          // квалификацию/степень вместо диапазона лет, а не "undefined-...".
-          const hasRange = typeof w.from === "number";
-          let years: string | undefined;
-          let duration: string | undefined;
-          if (hasRange) {
-            const toVal = w.to || new Date().getFullYear();
-            const diff = toVal - w.from!;
-            const durationText = diff > 0 ? `${diff} лет` : "менее года";
-            years = `${w.from}-${w.to || "Наст. время"}`;
-            duration = `(${durationText})`;
-          }
-          const qualification =
-            [w.qualification, w.scientific_degree].filter(Boolean).join(", ") ||
-            undefined;
-          return {
-            years,
-            duration,
-            qualification: hasRange ? undefined : qualification,
-            place: w.clinic,
-            role: w.position,
-          };
-        })
+      ? d.work_experience
+          // Врач мог добавить строку опыта и не заполнить её — бэк всё равно
+          // присылает объект (clinic/position — пустые строки). Без фильтра
+          // карточка рисовала пустую запись: оранжевый маркер и ничего под
+          // ним, будто у бэка баг.
+          .filter(
+            (w) =>
+              w.clinic ||
+              w.position ||
+              w.from ||
+              w.qualification ||
+              w.scientific_degree,
+          )
+          .map((w) => {
+            // from/to не гарантированы (свободный JSON) — если их нет, показываем
+            // квалификацию/степень вместо диапазона лет, а не "undefined-...".
+            const hasRange = typeof w.from === "number";
+            let years: string | undefined;
+            let duration: string | undefined;
+            if (hasRange) {
+              const toVal = w.to || new Date().getFullYear();
+              const diff = toVal - w.from!;
+              const durationText = diff > 0 ? `${diff} лет` : "менее года";
+              years = `${w.from}-${w.to || "Наст. время"}`;
+              duration = `(${durationText})`;
+            }
+            const qualification =
+              [w.qualification, w.scientific_degree]
+                .filter(Boolean)
+                .join(", ") || undefined;
+            return {
+              years,
+              duration,
+              qualification: hasRange ? undefined : qualification,
+              place: w.clinic,
+              role: w.position,
+            };
+          })
       : undefined;
 
   const formattedEducation =
