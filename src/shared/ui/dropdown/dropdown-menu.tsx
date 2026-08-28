@@ -38,7 +38,9 @@ export const DropdownMenu: FC<MenuProps> = ({
       ref={sheetRef}
       {...handlers}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 flex flex-col bg-white rounded-t-3xl p-4 pb-safe",
+        // z выше модалки (z-100) и её подложки: шторка живёт в портале
+        // рядом с модалкой, а не внутри неё.
+        "fixed inset-x-0 bottom-0 z-120 flex flex-col bg-white rounded-t-3xl p-4 pb-safe",
         "transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
         "md:absolute md:inset-auto md:top-full md:mt-1 md:w-full md:p-1 md:rounded-xl md:border md:border-border-soft md:shadow-[0_4px_20px_rgba(0,0,0,0.08)] md:ease-out",
         isActive

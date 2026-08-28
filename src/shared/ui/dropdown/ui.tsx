@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { useClickAway } from "react-use";
 
 import { cn } from "@/shared/lib/utils";
@@ -18,6 +19,7 @@ import { DropdownMenu } from "./dropdown-menu";
 import { DropdownOption } from "./dropdown-option";
 import { DropdownTrigger } from "./dropdown-trigger";
 import { DropdownProps } from "./types";
+import { useIsMobile } from "./use-is-mobile";
 
 export const Dropdown: FC<DropdownProps> = ({
   label,
@@ -40,6 +42,10 @@ export const Dropdown: FC<DropdownProps> = ({
   const [highlighted, setHighlighted] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  // Отдельный ref на шторку: в портале она не потомок containerRef, и без
+  // него клик по пункту считался бы кликом «мимо».
+  const menuRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   const uid = useId();
   const listboxId = `${uid}-listbox`;
   const optionId = (index: number) => `${uid}-opt-${index}`;
@@ -58,18 +64,18 @@ export const Dropdown: FC<DropdownProps> = ({
     }, 300);
   };
 
-  useClickAway(containerRef, () => {
+  useClickAway(containerRef, (event) => {
+    if (menuRef.current?.contains(event.target as Node)) return;
     if (isMounted && isActive) closeDropdown();
   });
 
   useEffect(() => {
-    const isMobile = window.innerWidth < 768;
     if (isMounted && isMobile) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isMounted]);
+  }, [isMounted, isMobile]);
 
   const handleSelect = (val: string) => {
     if (isMulti) {
@@ -82,7 +88,7 @@ export const Dropdown: FC<DropdownProps> = ({
     } else {
       (onChange as (val: string) => void)?.(val);
 
-      if (window.innerWidth >= 768) closeDropdown();
+      if (!isMobile) closeDropdown();
     }
   };
 
@@ -203,6 +209,98 @@ export const Dropdown: FC<DropdownProps> = ({
       ?.scrollIntoView({ block: "nearest" });
   }, [highlighted]);
 
+  // Шторка уезжает в портал: внутри Modal у родителя есть transform и
+  // overflow:hidden, из-за которых fixed-элемент позиционируется от модалки
+  // и обрезается по ней — у списка городов пропадали шапка и первые пункты.
+  // На десктопе меню остаётся на месте: оно absolute относительно триггера.
+  const sheet = (
+    <div ref={menuRef}>
+      <div
+        className={cn(
+          // z выше модалки (z-100): шторка уходит в портал и становится
+          // соседом модалки в body, а не её потомком — с z-40 она
+          // отрисовывалась под ней.
+          "fixed inset-0 z-110 bg-overlay/40 backdrop-blur-[2px] md:hidden transition-opacity duration-300 ease-out",
+          isActive ? "opacity-100" : "opacity-0",
+        )}
+        onClick={closeDropdown}
+      />
+      <DropdownMenu
+        isActive={isActive}
+        isMulti={isMulti}
+        listboxId={listboxId}
+        label={label}
+        placeholder={placeholder}
+        searchable={searchable}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        onClose={closeDropdown}
+      >
+        {hasSelectAllRow && (
+          <>
+            <div
+              id={optionId(0)}
+              role="option"
+              aria-selected={
+                selectAllMode === "select"
+                  ? allOptionsSelected
+                  : Array.isArray(value) && value.length === 0
+              }
+              data-dd-index={0}
+              className={cn(
+                "p-4 md:px-3 md:py-2.5 flex items-center justify-between border-b border-border-soft md:border-none cursor-pointer transition-colors",
+                highlighted === 0
+                  ? "md:bg-background"
+                  : "md:hover:bg-background",
+              )}
+              onMouseMove={() => setHighlighted(0)}
+              onClick={handleSelectAll}
+            >
+              <span className="text-foreground text-base md:text-sm flex-1">
+                Все
+              </span>
+              <div className="pointer-events-none">
+                <Checkbox
+                  checked={
+                    selectAllMode === "select"
+                      ? allOptionsSelected
+                      : Array.isArray(value) && value.length === 0
+                  }
+                  readOnly
+                />
+              </div>
+            </div>
+            <div className="hidden md:block h-px bg-background my-1 mx-3" />
+          </>
+        )}
+
+        {filteredOptions.length > 0 ? (
+          filteredOptions.map((opt, i) => (
+            <DropdownOption
+              key={opt.value}
+              id={optionId(i + optionIndexOffset)}
+              index={i + optionIndexOffset}
+              option={opt}
+              type={type}
+              isSelected={
+                Array.isArray(value)
+                  ? value.includes(opt.value)
+                  : value === opt.value
+              }
+              isHighlighted={highlighted === i + optionIndexOffset}
+              onHover={() => setHighlighted(i + optionIndexOffset)}
+              onClick={() => handleSelect(opt.value)}
+            />
+          ))
+        ) : (
+          <div className="p-6 text-center text-sm text-muted">
+            Ничего не найдено
+          </div>
+        )}
+      </DropdownMenu>
+    </div>
+  );
+
   return (
     // Клавиши слушает контейнер, а не триггер: при открытом списке фокус
     // может стоять в поле поиска, и обработчик на триггере туда не достаёт.
@@ -232,91 +330,7 @@ export const Dropdown: FC<DropdownProps> = ({
           onClearAll={() => (onChange as (val: string[]) => void)?.([])}
         />
 
-        {isMounted && (
-          <div
-            className={cn(
-              "fixed inset-0 z-40 bg-overlay/40 backdrop-blur-[2px] md:hidden transition-opacity duration-300 ease-out",
-              isActive ? "opacity-100" : "opacity-0",
-            )}
-            onClick={closeDropdown}
-          />
-        )}
-
-        {isMounted && (
-          <DropdownMenu
-            isActive={isActive}
-            isMulti={isMulti}
-            listboxId={listboxId}
-            label={label}
-            placeholder={placeholder}
-            searchable={searchable}
-            searchQuery={searchQuery}
-            onSearchChange={handleSearchChange}
-            onClose={closeDropdown}
-          >
-            {hasSelectAllRow && (
-              <>
-                <div
-                  id={optionId(0)}
-                  role="option"
-                  aria-selected={
-                    selectAllMode === "select"
-                      ? allOptionsSelected
-                      : Array.isArray(value) && value.length === 0
-                  }
-                  data-dd-index={0}
-                  className={cn(
-                    "p-4 md:px-3 md:py-2.5 flex items-center justify-between border-b border-border-soft md:border-none cursor-pointer transition-colors",
-                    highlighted === 0
-                      ? "md:bg-background"
-                      : "md:hover:bg-background",
-                  )}
-                  onMouseMove={() => setHighlighted(0)}
-                  onClick={handleSelectAll}
-                >
-                  <span className="text-foreground text-base md:text-sm flex-1">
-                    Все
-                  </span>
-                  <div className="pointer-events-none">
-                    <Checkbox
-                      checked={
-                        selectAllMode === "select"
-                          ? allOptionsSelected
-                          : Array.isArray(value) && value.length === 0
-                      }
-                      readOnly
-                    />
-                  </div>
-                </div>
-                <div className="hidden md:block h-px bg-background my-1 mx-3" />
-              </>
-            )}
-
-            {filteredOptions.length > 0 ? (
-              filteredOptions.map((opt, i) => (
-                <DropdownOption
-                  key={opt.value}
-                  id={optionId(i + optionIndexOffset)}
-                  index={i + optionIndexOffset}
-                  option={opt}
-                  type={type}
-                  isSelected={
-                    Array.isArray(value)
-                      ? value.includes(opt.value)
-                      : value === opt.value
-                  }
-                  isHighlighted={highlighted === i + optionIndexOffset}
-                  onHover={() => setHighlighted(i + optionIndexOffset)}
-                  onClick={() => handleSelect(opt.value)}
-                />
-              ))
-            ) : (
-              <div className="p-6 text-center text-sm text-muted">
-                Ничего не найдено
-              </div>
-            )}
-          </DropdownMenu>
-        )}
+        {isMounted && (isMobile ? createPortal(sheet, document.body) : sheet)}
       </div>
 
       {hint && <span className="text-sm text-muted ml-1">{hint}</span>}
