@@ -30,6 +30,8 @@ import {
   Modal,
 } from "@/shared/ui";
 
+import { useDoctorClinics } from "./use-doctor-clinics";
+
 // Нейтральная заглушка вместо фото — в стиле остальных плейсхолдеров проекта
 // (приглушённая иконка на bg-surface), а не серый прямоугольник.
 const ServicePhotoPlaceholder: FC<{ className?: string }> = ({ className }) => (
@@ -119,6 +121,7 @@ const ServiceModal: FC<ServiceModalProps> = ({
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
+  const [clinicId, setClinicId] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | undefined>();
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -136,12 +139,18 @@ const ServiceModal: FC<ServiceModalProps> = ({
     setDescription(service?.description ?? "");
     setPrice(service?.price ?? "");
     setDuration(service?.duration != null ? String(service.duration) : "");
+    setClinicId(service?.clinic ? String(service.clinic.id) : "");
     setPhotoFile(null);
     setPhotoPreview(service?.photo ?? undefined);
   }
 
   const { options: categoryOptions, isLoading: isCategoriesLoading } =
     useServiceCategories();
+  const {
+    options: clinicOptions,
+    isRequired: isClinicRequired,
+    isLoading: isClinicsLoading,
+  } = useDoctorClinics();
 
   const reset = () => {
     setName("");
@@ -149,6 +158,7 @@ const ServiceModal: FC<ServiceModalProps> = ({
     setDescription("");
     setPrice("");
     setDuration("");
+    setClinicId("");
     setPhotoFile(null);
     setPhotoPreview(undefined);
   };
@@ -164,7 +174,8 @@ const ServiceModal: FC<ServiceModalProps> = ({
     reader.readAsDataURL(file);
   };
 
-  const canSubmit = !!name.trim() && !!category;
+  const canSubmit =
+    !!name.trim() && !!category && (!isClinicRequired || !!clinicId);
 
   const handleSubmit = () => {
     if (!canSubmit) return;
@@ -175,6 +186,10 @@ const ServiceModal: FC<ServiceModalProps> = ({
       price: price ? String(price) : undefined,
       duration: duration ? Number(duration) : undefined,
       is_active: service?.is_active ?? true,
+      // clinic_id шлём только когда врач сам выбирал клинику. При одной
+      // клинике бэк подставляет её сам, а на правке пустое поле сбросило бы
+      // уже привязанное место приёма.
+      ...(isClinicRequired && clinicId ? { clinic_id: Number(clinicId) } : {}),
       // Новый файл шлём как File. Если фото не трогали, поле не отправляем
       // вовсе: PUT со строковым URL бэк принимает за загрузку файла и
       // отвечает «Загрузите правильное изображение».
@@ -206,6 +221,21 @@ const ServiceModal: FC<ServiceModalProps> = ({
           value={category}
           onChange={setCategory}
         />
+        {/* Клинику спрашиваем, только когда мест приёма несколько: одну бэк
+            подставляет сам, при нуле услуга остаётся без клиники. Без этого
+            поля врач с двумя клиниками получал 400 и не мог создать услугу. */}
+        {isClinicRequired && (
+          <Dropdown
+            label="Клиника"
+            placeholder={
+              isClinicsLoading ? "Загружаем список..." : "Выберите из списка"
+            }
+            options={clinicOptions}
+            value={clinicId}
+            onChange={(val) => setClinicId(val as string)}
+            hint="Вы принимаете в нескольких клиниках — укажите, к какой относится услуга"
+          />
+        )}
         <Input
           label="Описание услуги"
           value={description}
@@ -297,7 +327,9 @@ const TD = "px-6 py-4 whitespace-nowrap";
 
 // Заглушка повторяет саму таблицу — та же шапка и колонки, чтобы при
 // появлении данных ничего не прыгало.
-const ServicesSkeleton: FC = () => (
+const ServicesSkeleton: FC<{ showClinic?: boolean }> = ({
+  showClinic = false,
+}) => (
   <div className="bg-white rounded-3xl border border-border overflow-hidden">
     <div className="overflow-x-auto">
       <table className="w-full min-w-160 text-left border-collapse">
@@ -306,6 +338,7 @@ const ServicesSkeleton: FC = () => (
             <th className="px-6 py-4 w-20" />
             <th className={TH}>Название</th>
             <th className={TH}>Категория</th>
+            {showClinic && <th className={TH}>Клиника</th>}
             <th className={TH}>Описание</th>
             <th className={TH}>Стоимость</th>
             <th className={TH}>Длительность</th>
@@ -324,6 +357,11 @@ const ServicesSkeleton: FC = () => (
               <td className={TD}>
                 <div className="h-4 w-28 rounded-md skeleton" />
               </td>
+              {showClinic && (
+                <td className={TD}>
+                  <div className="h-4 w-32 rounded-md skeleton" />
+                </td>
+              )}
               <td className={TD}>
                 <div className="h-4 w-48 rounded-md skeleton" />
               </td>
@@ -403,6 +441,9 @@ export const DoctorServicesPage: FC = () => {
   });
 
   const services = data?.data ?? [];
+  // Колонку и дропдаун показываем по одному правилу: только когда мест
+  // приёма несколько и привязка перестаёт быть очевидной.
+  const { isRequired: showClinicColumn } = useDoctorClinics();
 
   return (
     <>
@@ -422,7 +463,7 @@ export const DoctorServicesPage: FC = () => {
 
         <div className="pb-24 lg:pb-0">
           {isLoading ? (
-            <ServicesSkeleton />
+            <ServicesSkeleton showClinic={showClinicColumn} />
           ) : services.length === 0 ? (
             <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
               Услуг пока нет
@@ -436,6 +477,9 @@ export const DoctorServicesPage: FC = () => {
                       <th className="px-6 py-4 w-20" />
                       <th className={TH}>Название</th>
                       <th className={TH}>Категория</th>
+                      {/* Колонка только у врачей с несколькими местами приёма:
+                          у остальных во всех строках стояло бы одно и то же. */}
+                      {showClinicColumn && <th className={TH}>Клиника</th>}
                       <th className={TH}>Описание</th>
                       <th className={TH}>Стоимость</th>
                       <th className={TH}>Длительность</th>
@@ -472,6 +516,17 @@ export const DoctorServicesPage: FC = () => {
                         <td className={`${TD} text-muted`}>
                           {s.category || "—"}
                         </td>
+                        {showClinicColumn && (
+                          <td className={`${TD} text-muted`}>
+                            {s.clinic?.name ?? "—"}
+                            {s.branch && (
+                              <span className="text-dim">
+                                {" "}
+                                • {s.branch.name}
+                              </span>
+                            )}
+                          </td>
+                        )}
                         <td className="px-6 py-4 text-muted">
                           {s.description || "—"}
                         </td>

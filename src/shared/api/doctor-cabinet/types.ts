@@ -99,9 +99,18 @@ export type DoctorPatientFilters = {
   search?: string;
 };
 
+// Место приёма, к которому привязана услуга. Бэк проставляет его сам, когда
+// у врача одна клиника, и требует clinic_id, когда их несколько.
+export type DoctorServicePlace = {
+  id: number;
+  name: string;
+};
+
 // Соответствует схеме DoctorServiceRead / DoctorServiceWriteRequest.
 export type DoctorServiceItem = {
+  branch: DoctorServicePlace | null;
   category: string;
+  clinic: DoctorServicePlace | null;
   created_at?: string;
   description?: string;
   duration?: null | number;
@@ -113,7 +122,14 @@ export type DoctorServiceItem = {
 };
 
 export type DoctorServiceBody = {
+  // Филиал выбранной клиники. Бэк проверяет, что он принадлежит именно ей.
+  branch_id?: null | number;
   category: string; // обязательное поле на бэке
+  // Обязателен, только когда врач привязан больше чем к одной клинике: иначе
+  // бэк отвечает 400. При одной клинике подставляется сам, при нуле остаётся
+  // пустым. На PUT клинику трогаем, только если поле пришло явно — правка
+  // цены или фото не должна её сбрасывать.
+  clinic_id?: null | number;
   description?: string;
   duration?: number;
   is_active?: boolean;
