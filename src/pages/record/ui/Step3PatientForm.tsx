@@ -28,6 +28,7 @@ export const Step3PatientForm = ({ form }: { form: RecordForm }) => {
 
   return (
     <section
+      id="record-step-3"
       className={cn(
         "p-4 lg:p-6 lg:border-t lg:border-border-soft",
         mobileStep !== 3 && "hidden",
@@ -49,7 +50,7 @@ export const Step3PatientForm = ({ form }: { form: RecordForm }) => {
         />
 
         <Input
-          label="Введите фамилию"
+          label="Фамилия"
           placeholder="Введите вашу фамилию"
           value={lastName}
           onChange={(event) => {

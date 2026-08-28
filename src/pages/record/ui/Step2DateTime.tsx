@@ -26,6 +26,7 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
 
   return (
     <section
+      id="record-step-2"
       className={cn(
         "p-4 lg:p-6 lg:border-t lg:border-border-soft",
         mobileStep !== 2 && "hidden",

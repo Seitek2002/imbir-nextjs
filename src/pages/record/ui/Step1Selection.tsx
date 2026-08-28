@@ -37,6 +37,8 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
 
   return (
     <section
+      // Якорь для прокрутки к шагу, который не даёт отправить форму.
+      id="record-step-1"
       className={cn("p-4 lg:p-6", mobileStep !== 1 && "hidden", "lg:block")}
     >
       <div className="hidden lg:block">

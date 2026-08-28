@@ -796,6 +796,21 @@ export const useRecordForm = () => {
     return request;
   };
 
+  // Показывает шаг, на котором застряла форма. На десктопе все три секции
+  // видны сразу и ошибка внизу оказывалась в 700px от того, что надо
+  // исправить; на мобильном нужный шаг вообще мог быть не открыт.
+  const revealStep = (step: MobileStep) => {
+    setMobileStep(step);
+    if (typeof document === "undefined") return;
+    // Секция уже в DOM (на десктопе — всегда), но на мобильном её показывает
+    // setMobileStep выше, поэтому ждём кадр после перерисовки.
+    requestAnimationFrame(() => {
+      document
+        .getElementById(`record-step-${step}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
   const validateAndSubmit = async () => {
     const nextErrors: OptionalFormErrors = {};
 
@@ -818,7 +833,22 @@ export const useRecordForm = () => {
     }
 
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
+    if (Object.keys(nextErrors).length > 0) {
+      revealStep(3);
+      return;
+    }
+
+    // Без врача весь календарь заблокирован, и «Выберите дату и время»
+    // отправляло исправлять то, что исправить нельзя, — называем шаг,
+    // который действительно держит форму.
+    if (!selectedDoctorId) {
+      setErrors((prev) => ({
+        ...prev,
+        submit: "Сначала выберите специалиста — без него календарь недоступен",
+      }));
+      revealStep(1);
+      return;
+    }
 
     const request = buildAppointmentRequest();
     if (!request) {
@@ -826,6 +856,7 @@ export const useRecordForm = () => {
         ...prev,
         submit: "Выберите дату и время приёма",
       }));
+      revealStep(2);
       return;
     }
 
