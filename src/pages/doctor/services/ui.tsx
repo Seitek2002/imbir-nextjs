@@ -275,7 +275,7 @@ const ServicesSkeleton: FC = () => (
           <tr className="border-b border-border">
             <th className="px-6 py-4 w-20" />
             <th className={TH}>Название</th>
-            <th className={TH}>Специализация</th>
+            <th className={TH}>Категория</th>
             <th className={TH}>Описание</th>
             <th className={TH}>Стоимость</th>
             <th className={TH}>Длительность</th>
@@ -384,7 +384,7 @@ export const DoctorServicesPage: FC = () => {
                     <tr className="border-b border-border">
                       <th className="px-6 py-4 w-20" />
                       <th className={TH}>Название</th>
-                      <th className={TH}>Специализация</th>
+                      <th className={TH}>Категория</th>
                       <th className={TH}>Описание</th>
                       <th className={TH}>Стоимость</th>
                       <th className={TH}>Длительность</th>
