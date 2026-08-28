@@ -159,7 +159,7 @@ export const ClinicsPage: FC<Props> = ({ initialCity }) => {
   // 3. Все фильтры обрабатываются API, поэтому клиентской доводки не нужно.
   const filteredClinics = clinics;
 
-  const { isSaved, toggle } = useFavoriteToggle("clinic");
+  const { isSaved, isPending, toggle } = useFavoriteToggle("clinic");
 
   // Цена и стаж включены: бэк научился по ним фильтровать (min_price/max_price,
   // min_experience/max_experience — проверено живыми запросами).
@@ -218,6 +218,7 @@ export const ClinicsPage: FC<Props> = ({ initialCity }) => {
                   // 3-й клиники в дефолтном порядке — она грузилась лениво.
                   priority={index < 4}
                   isSaved={isSaved(Number(clinic.id))}
+                  isPending={isPending(Number(clinic.id))}
                   onSave={() => toggle(Number(clinic.id))}
                 />
               ))
@@ -287,6 +288,7 @@ export const ClinicsPage: FC<Props> = ({ initialCity }) => {
                     {...clinic}
                     priority={index < 4}
                     isSaved={isSaved(Number(clinic.id))}
+                    isPending={isPending(Number(clinic.id))}
                     onSave={() => toggle(Number(clinic.id))}
                   />
                 ))}

@@ -191,7 +191,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
     price: true as const,
   };
 
-  const { isSaved, toggle } = useFavoriteToggle("service");
+  const { isSaved, isPending, toggle } = useFavoriteToggle("service");
 
   // Категории — из реальных услуг, справочника у бэка нет
   const { options: categoryOptions } = useServiceCategories();
@@ -268,6 +268,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                   priority={index === 0}
                   variant="horizontal"
                   isSaved={isSaved(Number(s.id))}
+                  isPending={isPending(Number(s.id))}
                   onSave={() => toggle(Number(s.id))}
                 />
               ))
@@ -414,6 +415,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                     image={s.image}
                     priority={index === 0}
                     isSaved={isSaved(Number(s.id))}
+                    isPending={isPending(Number(s.id))}
                     onSave={() => toggle(Number(s.id))}
                   />
                 ))}

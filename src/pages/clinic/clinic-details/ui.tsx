@@ -43,6 +43,7 @@ import {
   ContactInfoModal,
   EmptyState,
   IconBtn,
+  Spinner,
 } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
@@ -62,8 +63,9 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
   const router = useRouter();
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [isOfflineInfoOpen, setIsOfflineInfoOpen] = useState(false);
-  const { isSaved, toggle } = useFavoriteToggle("clinic");
+  const { isSaved, isPending, toggle } = useFavoriteToggle("clinic");
   const isFavorite = isSaved(Number(id));
+  const isFavoritePending = isPending(Number(id));
   // Услуги и врачи в секциях ниже — свои target_type в /api/profile/favorites/,
   // поэтому хука клиники им недостаточно. Без этих двух карточки рендерились
   // без isSaved/onSave и сердечко на них просто ничего не делало.
@@ -202,18 +204,23 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
                 variant="outline"
                 size="sm"
                 className="bg-white/80 backdrop-blur"
+                disabled={isFavoritePending}
                 aria-label={
                   isFavorite ? "Убрать из сохранённых" : "Сохранить клинику"
                 }
                 onClick={() => toggle(Number(id))}
               >
-                <HeartIcon
-                  className={
-                    isFavorite
-                      ? "size-5 [&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]"
-                      : "size-5 text-[#FFA18D]"
-                  }
-                />
+                {isFavoritePending ? (
+                  <Spinner className="size-5 text-[#FFA18D]" />
+                ) : (
+                  <HeartIcon
+                    className={
+                      isFavorite
+                        ? "size-5 [&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]"
+                        : "size-5 text-[#FFA18D]"
+                    }
+                  />
+                )}
               </IconBtn>
             </div>
 
@@ -306,18 +313,23 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
                 <IconBtn
                   variant="outline"
                   size="md"
+                  disabled={isFavoritePending}
                   aria-label={
                     isFavorite ? "Убрать из сохранённых" : "Сохранить клинику"
                   }
                   onClick={() => toggle(Number(id))}
                 >
-                  <HeartIcon
-                    className={
-                      isFavorite
-                        ? "size-5 [&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]"
-                        : "size-5"
-                    }
-                  />
+                  {isFavoritePending ? (
+                    <Spinner className="size-5 text-[#FFA18D]" />
+                  ) : (
+                    <HeartIcon
+                      className={
+                        isFavorite
+                          ? "size-5 [&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]"
+                          : "size-5"
+                      }
+                    />
+                  )}
                 </IconBtn>
               </div>
 
@@ -459,6 +471,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
                   image={service.image}
                   variant="vertical"
                   isSaved={serviceFavorites.isSaved(Number(service.id))}
+                  isPending={serviceFavorites.isPending(Number(service.id))}
                   onSave={() => serviceFavorites.toggle(Number(service.id))}
                 />
               ))}
@@ -481,6 +494,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
                   {...doc}
                   variant="vertical"
                   isSaved={doctorFavorites.isSaved(Number(doc.id))}
+                  isPending={doctorFavorites.isPending(Number(doc.id))}
                   onSave={() => doctorFavorites.toggle(Number(doc.id))}
                   onBook={() =>
                     router.push(

@@ -10,7 +10,7 @@ import { ROUTES } from "@/shared/config";
 import { hasPrice } from "@/shared/lib/price";
 import { formatRating } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
-import { Button, ImageWithFallback } from "@/shared/ui";
+import { Button, ImageWithFallback, Spinner } from "@/shared/ui";
 
 type Props = {
   category: string;
@@ -18,6 +18,9 @@ type Props = {
   clinicId?: string;
   id?: string;
   image?: StaticImageData | string;
+  // Запрос по этой карточке уже летит — показываем спиннер вместо сердца и
+  // гасим клики, чтобы повторный тап не ушёл ещё одним запросом.
+  isPending?: boolean;
   isSaved?: boolean;
   name: string;
   onBook?: () => void;
@@ -33,9 +36,10 @@ type Props = {
 };
 
 const SaveButton: FC<{
+  isPending?: boolean;
   isSaved: boolean;
   onSave?: () => void;
-}> = ({ isSaved, onSave }) => {
+}> = ({ isSaved, isPending = false, onSave }) => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -45,10 +49,14 @@ const SaveButton: FC<{
   return (
     <button
       onClick={handleClick}
-      className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-surface transition-colors shadow-sm shrink-0"
+      disabled={isPending}
+      aria-busy={isPending || undefined}
+      className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-surface transition-colors shadow-sm shrink-0 disabled:opacity-70 disabled:pointer-events-none"
       aria-label={isSaved ? "Удалить из избранного" : "Добавить в избранное"}
     >
-      {isSaved ? (
+      {isPending ? (
+        <Spinner className="w-5 h-5 text-primary" />
+      ) : isSaved ? (
         <HeartIcon2 className="w-6 h-6 text-primary" />
       ) : (
         <HeartIcon className="w-6 h-6 text-primary" />
@@ -70,6 +78,7 @@ export const ServiceCard: FC<Props> = ({
   onBook,
   onSave,
   isSaved = false,
+  isPending = false,
   priority = false,
   variant = "vertical",
 }) => {
@@ -161,7 +170,11 @@ export const ServiceCard: FC<Props> = ({
                   Записаться
                 </Button>
               )}
-              <SaveButton isSaved={isSaved} onSave={onSave} />
+              <SaveButton
+                isSaved={isSaved}
+                isPending={isPending}
+                onSave={onSave}
+              />
             </div>
           </div>
         </div>
@@ -191,7 +204,7 @@ export const ServiceCard: FC<Props> = ({
           }
         />
         <div className="absolute top-4 right-4 z-10">
-          <SaveButton isSaved={isSaved} onSave={onSave} />
+          <SaveButton isSaved={isSaved} isPending={isPending} onSave={onSave} />
         </div>
       </div>
 

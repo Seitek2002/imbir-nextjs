@@ -43,6 +43,7 @@ import {
   ContactInfoModal,
   EmptyState,
   IconBtn,
+  Spinner,
 } from "@/shared/ui";
 import { InfoCard } from "@/shared/ui/info-card";
 import { StatsPanel } from "@/shared/ui/stats-panel";
@@ -103,8 +104,9 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "doctor";
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
-  const { isSaved, toggle } = useFavoriteToggle("doctor");
+  const { isSaved, isPending, toggle } = useFavoriteToggle("doctor");
   const isFavorite = isSaved(Number(id));
+  const isFavoritePending = isPending(Number(id));
 
   const { data: reviews = [] } = useQuery({
     queryKey: reviewKeys.byTarget("doctor", id),
@@ -207,18 +209,23 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                 variant="outline"
                 size="sm"
                 className="bg-white/80 backdrop-blur"
+                disabled={isFavoritePending}
                 aria-label={
                   isFavorite ? "Убрать из сохранённых" : "Сохранить врача"
                 }
                 onClick={() => toggle(Number(id))}
               >
-                <HeartIcon
-                  className={
-                    isFavorite
-                      ? "size-5 [&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]"
-                      : "size-5 text-[#FFA18D]"
-                  }
-                />
+                {isFavoritePending ? (
+                  <Spinner className="size-5 text-[#FFA18D]" />
+                ) : (
+                  <HeartIcon
+                    className={
+                      isFavorite
+                        ? "size-5 [&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]"
+                        : "size-5 text-[#FFA18D]"
+                    }
+                  />
+                )}
               </IconBtn>
             </div>
 
@@ -292,18 +299,23 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                 <IconBtn
                   variant="outline"
                   size="md"
+                  disabled={isFavoritePending}
                   aria-label={
                     isFavorite ? "Убрать из сохранённых" : "Сохранить врача"
                   }
                   onClick={() => toggle(Number(id))}
                 >
-                  <HeartIcon
-                    className={
-                      isFavorite
-                        ? "size-5 [&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]"
-                        : "size-5"
-                    }
-                  />
+                  {isFavoritePending ? (
+                    <Spinner className="size-5 text-[#FFA18D]" />
+                  ) : (
+                    <HeartIcon
+                      className={
+                        isFavorite
+                          ? "size-5 [&_path]:fill-[#FFA18D] [&_path]:stroke-[#FFA18D]"
+                          : "size-5"
+                      }
+                    />
+                  )}
                 </IconBtn>
               </div>
 

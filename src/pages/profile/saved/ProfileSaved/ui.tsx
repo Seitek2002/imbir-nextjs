@@ -135,6 +135,7 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
           rating={toRating(rating)}
           image={photo ?? undefined}
           isSaved
+          isPending={doctors.isPending(id)}
           onSave={() => doctors.toggle(id)}
           variant={variant}
           onBook={() => router.push(ROUTES.RECORD_FOR_DOCTOR(id))}
@@ -154,6 +155,7 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
           experience={0}
           image={logo ?? undefined}
           isSaved
+          isPending={clinics.isPending(id)}
           onSave={() => clinics.toggle(id)}
           variant={variant}
         />
@@ -171,6 +173,7 @@ export const ProfileSaved: FC<Props> = ({ items, activeTab }) => {
         clinicId={clinic ? String(clinic.id) : undefined}
         price={parsePrice(price)}
         isSaved
+        isPending={services.isPending(id)}
         onSave={() => services.toggle(id)}
         variant={variant}
       />

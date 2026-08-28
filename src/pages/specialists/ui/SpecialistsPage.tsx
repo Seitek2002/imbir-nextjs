@@ -145,7 +145,7 @@ export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
 
   const doctors = data?.pages.flatMap((page) => page.data) ?? [];
 
-  const { isSaved, toggle } = useFavoriteToggle("doctor");
+  const { isSaved, isPending, toggle } = useFavoriteToggle("doctor");
 
   return (
     <main className="min-h-screen bg-background md:bg-white flex flex-col">
@@ -195,6 +195,7 @@ export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
                   variant="horizontal"
                   priority={index === 0}
                   isSaved={isSaved(Number(doc.id))}
+                  isPending={isPending(Number(doc.id))}
                   onSave={() => toggle(Number(doc.id))}
                   onBook={() =>
                     router.push(
@@ -276,6 +277,7 @@ export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
                     {...doc}
                     priority={index === 0}
                     isSaved={isSaved(Number(doc.id))}
+                    isPending={isPending(Number(doc.id))}
                     onSave={() => toggle(Number(doc.id))}
                     onBook={() =>
                       router.push(

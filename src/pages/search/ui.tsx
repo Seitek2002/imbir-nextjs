@@ -216,6 +216,7 @@ export const SearchPage: FC = () => {
                           key={`mob-doc-${doc.id}`}
                           {...doc}
                           isSaved={doctorFavorites.isSaved(Number(doc.id))}
+                          isPending={doctorFavorites.isPending(Number(doc.id))}
                           onSave={() => doctorFavorites.toggle(Number(doc.id))}
                           variant="horizontal"
                           onBook={() =>
@@ -243,6 +244,9 @@ export const SearchPage: FC = () => {
                           key={`mob-clinic-${clinic.id}`}
                           {...clinic}
                           isSaved={clinicFavorites.isSaved(Number(clinic.id))}
+                          isPending={clinicFavorites.isPending(
+                            Number(clinic.id),
+                          )}
                           onSave={() =>
                             clinicFavorites.toggle(Number(clinic.id))
                           }
@@ -345,6 +349,9 @@ export const SearchPage: FC = () => {
                               key={`desk-doc-${doc.id}`}
                               {...doc}
                               isSaved={doctorFavorites.isSaved(Number(doc.id))}
+                              isPending={doctorFavorites.isPending(
+                                Number(doc.id),
+                              )}
                               onSave={() =>
                                 doctorFavorites.toggle(Number(doc.id))
                               }
@@ -385,6 +392,9 @@ export const SearchPage: FC = () => {
                               key={`desk-clinic-${clinic.id}`}
                               {...clinic}
                               isSaved={clinicFavorites.isSaved(
+                                Number(clinic.id),
+                              )}
+                              isPending={clinicFavorites.isPending(
                                 Number(clinic.id),
                               )}
                               onSave={() =>

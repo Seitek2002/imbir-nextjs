@@ -30,7 +30,7 @@ const DoctorsListContent = () => {
   const router = useRouter();
   // Избранное было подключено только на /specialists — на главной сердечко
   // рисовалось в состоянии «не сохранено» и клик ни к чему не вёл.
-  const { isSaved, toggle } = useFavoriteToggle("doctor");
+  const { isSaved, isPending, toggle } = useFavoriteToggle("doctor");
   // Именно useUrlSearchParams, а не useSearchParams из next/navigation:
   // FilterBar меняет адрес нативным history.replaceState (чтобы не гонять
   // серверную навигацию на каждый чих) и оповещает подписчиков своим
@@ -105,6 +105,7 @@ const DoctorsListContent = () => {
               key={`mobile-doc-${doc.id}`}
               {...doc}
               isSaved={isSaved(Number(doc.id))}
+              isPending={isPending(Number(doc.id))}
               onSave={() => toggle(Number(doc.id))}
               variant="horizontal"
               onBook={() =>
@@ -130,6 +131,7 @@ const DoctorsListContent = () => {
               key={`desktop-doc-${doc.id}`}
               {...doc}
               isSaved={isSaved(Number(doc.id))}
+              isPending={isPending(Number(doc.id))}
               onSave={() => toggle(Number(doc.id))}
               variant="vertical"
               onBook={() =>

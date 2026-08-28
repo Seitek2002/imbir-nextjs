@@ -39,6 +39,7 @@ type Props = {
   experience: number;
   id?: string;
   image?: StaticImageData | string;
+  isPending?: boolean;
   isSaved?: boolean;
   name: string;
   onSave?: () => void;
@@ -60,6 +61,7 @@ export const ClinicCard: FC<Props> = ({
   image,
   onSave,
   isSaved = false,
+  isPending = false,
   variant = "vertical",
   priority = false,
 }) => {
@@ -136,6 +138,7 @@ export const ClinicCard: FC<Props> = ({
           <div className="flex justify-end mt-2" onClick={stopProp}>
             <SaveButton
               saved={isSaved}
+              pending={isPending}
               onSave={onSave}
               unsavedLabel="Сохранить клинику"
             />
@@ -176,6 +179,7 @@ export const ClinicCard: FC<Props> = ({
         <div className="absolute top-2 right-2" onClick={stopProp}>
           <SaveButton
             saved={isSaved}
+            pending={isPending}
             onSave={onSave}
             unsavedLabel="Сохранить клинику"
           />

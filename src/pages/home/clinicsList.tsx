@@ -21,7 +21,7 @@ const ClinicsListContent = () => {
   const searchParams = useUrlSearchParams();
   // Избранное клиник: без этого сердечко на главной не закрашивалось
   // и клик по нему ничего не сохранял (на /clinics подключено давно).
-  const { isSaved, toggle } = useFavoriteToggle("clinic");
+  const { isSaved, isPending, toggle } = useFavoriteToggle("clinic");
 
   const currentRating = searchParams.get("clinic_rating");
   const currentSpec = searchParams.get("clinic_spec");
@@ -81,6 +81,7 @@ const ClinicsListContent = () => {
             address={clinic.address}
             image={clinic.image}
             isSaved={isSaved(Number(clinic.id))}
+            isPending={isPending(Number(clinic.id))}
             onSave={() => toggle(Number(clinic.id))}
             variant="horizontal"
           />
@@ -105,6 +106,7 @@ const ClinicsListContent = () => {
             address={clinic.address}
             image={clinic.image}
             isSaved={isSaved(Number(clinic.id))}
+            isPending={isPending(Number(clinic.id))}
             onSave={() => toggle(Number(clinic.id))}
             variant="vertical"
           />
