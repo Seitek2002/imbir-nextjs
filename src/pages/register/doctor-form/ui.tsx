@@ -9,6 +9,7 @@ import {
 } from "@/features/verify-contact";
 
 import { checkEmailAvailabilityFn } from "@/shared/api";
+import { DEFAULT_COUNTRY } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import {
   PASSWORD_REQUIREMENTS_ERROR,
@@ -46,6 +47,7 @@ export const DoctorRegistrationForm = ({
     fullName: "",
     gender: "",
     birthDate: "",
+    country: DEFAULT_COUNTRY,
     city: "",
     languages: [],
     phoneDialCode: "+996",
@@ -101,6 +103,7 @@ export const DoctorRegistrationForm = ({
     data.fullName &&
     data.gender &&
     data.birthDate &&
+    data.country &&
     data.city &&
     data.phone.length === getPhoneLength(data.phoneDialCode) &&
     data.email

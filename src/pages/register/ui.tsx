@@ -535,7 +535,11 @@ export const RegisterPage = () => {
           email: data.email,
         },
         step2: {
-          country: "kg",
+          // Раньше здесь было захардкоженное "kg" — врач страну не выбирал.
+          // Отправляем то же название, что и клиника («Кыргызстан»): на бэке
+          // это обычная строка без справочника, и два разных формата в одном
+          // поле развели бы данные.
+          country: data.country,
           city: data.city,
           address: "",
           phone: doctorPhone,
@@ -628,7 +632,7 @@ export const RegisterPage = () => {
           birth_date: data.birthDate ? toApiDate(data.birthDate) : undefined,
           city: data.city,
           languages: data.languages,
-          country: "kg",
+          country: data.country,
           address: "",
           legal_name: data.fullName,
           primary_specialization_ids: primarySpecializations.ids,

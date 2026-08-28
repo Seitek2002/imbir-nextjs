@@ -3,7 +3,7 @@
 import { useRef } from "react";
 
 import { getCities, getLanguages, referenceKeys } from "@/shared/api";
-import { CITIES, colors } from "@/shared/config";
+import { CITIES_BY_COUNTRY, DEFAULT_COUNTRY, colors } from "@/shared/config";
 import { MAX_IMAGE_MB, isFileSizeAllowed } from "@/shared/lib/files";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import { cn } from "@/shared/lib/utils";
@@ -42,12 +42,19 @@ type Props = {
 export const Step1BasicInfo = ({ data, onChange, emailError }: Props) => {
   const photoInputRef = useRef<HTMLInputElement>(null);
 
+  // Пока только Кыргызстан — тем же составом, что у клиники
+  // (register/clinic-form/Step2Location): поддержка просила не давать
+  // выбрать чужую страну по ошибке. Само поле нужно, потому что раньше
+  // страна уходила захардкоженной, хотя город врач выбирал.
+  const countryOptions = [{ label: DEFAULT_COUNTRY, value: DEFAULT_COUNTRY }];
+
   // Город и языки — из справочников бэка, поверх локальных наборов по
-  // умолчанию: на бэк уходит выбранная строка, а не код.
+  // умолчанию: на бэк уходит выбранная строка, а не код. Локальный набор
+  // зависит от страны, чтобы при её смене не остался город из прежней.
   const { options: cityOptions } = useReferenceOptions(
     referenceKeys.cities(),
     getCities,
-    CITIES,
+    CITIES_BY_COUNTRY[data.country] ?? [],
   );
   const { options: languageOptions } = useReferenceOptions(
     referenceKeys.languages(),
@@ -115,6 +122,19 @@ export const Step1BasicInfo = ({ data, onChange, emailError }: Props) => {
         onChange={(v) => onChange("birthDate", v)}
         min="01.01.1920"
         maxToday
+      />
+
+      <Dropdown
+        label="Страна"
+        placeholder="Выберите из списка"
+        options={countryOptions}
+        searchable
+        value={data.country}
+        onChange={(v) => {
+          onChange("country", v);
+          // Города свои у каждой страны — прежний выбор к новой не относится.
+          if (v !== data.country) onChange("city", "");
+        }}
       />
 
       <Dropdown

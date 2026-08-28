@@ -72,6 +72,9 @@ export type DoctorFormData = {
   certificates: File[];
   city: string;
   confirmPassword: string;
+  // Страна отправлялась захардкоженной "kg" — выбрать её было негде, хотя
+  // город выбирался. У клиники поле есть с самого начала (Step2Location).
+  country: string;
   diplomaSpecialization: string;
 
   email: string;
