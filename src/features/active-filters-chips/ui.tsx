@@ -56,9 +56,9 @@ export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
           <span className="text-sm text-foreground font-medium">{spec}</span>
           <button
             onClick={() => removeFilter("spec", spec)}
-            className="text-muted hover:text-primary transition-colors"
+            className="size-5 shrink-0 inline-flex items-center justify-center text-muted hover:text-primary transition-colors"
           >
-            <RemoveIcon className="size-4" />
+            <RemoveIcon className="size-5" />
           </button>
         </div>
       ))}
@@ -70,9 +70,9 @@ export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
           <span className="text-sm text-foreground font-medium">{rating}</span>
           <button
             onClick={() => removeFilter("rating")}
-            className="text-muted hover:text-primary transition-colors"
+            className="size-5 shrink-0 inline-flex items-center justify-center text-muted hover:text-primary transition-colors"
           >
-            <RemoveIcon className="size-4" />
+            <RemoveIcon className="size-5" />
           </button>
         </div>
       )}
@@ -85,9 +85,9 @@ export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
           </span>
           <button
             onClick={() => removeFilter("exp")}
-            className="text-muted hover:text-primary transition-colors"
+            className="size-5 shrink-0 inline-flex items-center justify-center text-muted hover:text-primary transition-colors"
           >
-            <RemoveIcon className="size-4" />
+            <RemoveIcon className="size-5" />
           </button>
         </div>
       )}
@@ -100,9 +100,9 @@ export const ActiveFiltersChips: FC<Props> = ({ prefix }) => {
           </span>
           <button
             onClick={() => removeFilter("price")}
-            className="text-muted hover:text-primary transition-colors"
+            className="size-5 shrink-0 inline-flex items-center justify-center text-muted hover:text-primary transition-colors"
           >
-            <RemoveIcon className="size-4" />
+            <RemoveIcon className="size-5" />
           </button>
         </div>
       )}

@@ -59,7 +59,7 @@ export const DropdownMenu: FC<MenuProps> = ({
           onClick={onClose}
           className="flex items-center justify-center size-8 border border-border-soft bg-background/50 rounded-full text-foreground active:bg-border-soft transition-colors"
         >
-          <DropdownRemoveIcon className="size-3.5" />
+          <DropdownRemoveIcon className="size-5" />
         </button>
       </div>
 

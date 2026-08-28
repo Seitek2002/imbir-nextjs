@@ -38,9 +38,9 @@ const Chip: FC<{ onDelete: () => void; text: string }> = ({
         e.stopPropagation();
         onDelete();
       }}
-      className="shrink-0 hover:text-primary transition-colors"
+      className="size-6 shrink-0 inline-flex items-center justify-center hover:text-primary transition-colors"
     >
-      <DropdownRemoveIcon className="size-3.5" />
+      <DropdownRemoveIcon className="size-4" />
     </button>
   </span>
 );
