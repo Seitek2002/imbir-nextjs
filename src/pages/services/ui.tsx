@@ -253,7 +253,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
             ) : filteredServices.length === 0 ? (
               <CatalogEmptyState />
             ) : (
-              filteredServices.map((s) => (
+              filteredServices.map((s, index) => (
                 <ServiceCard
                   key={s.id}
                   id={s.id}
@@ -265,6 +265,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                   reviews={s.reviews}
                   price={s.price}
                   image={s.image}
+                  priority={index === 0}
                   variant="horizontal"
                   isSaved={isSaved(Number(s.id))}
                   onSave={() => toggle(Number(s.id))}
@@ -399,7 +400,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
               <CatalogEmptyState />
             ) : (
               <div className="grid grid-cols-4 gap-5 items-stretch">
-                {filteredServices.map((s) => (
+                {filteredServices.map((s, index) => (
                   <ServiceCard
                     key={s.id}
                     id={s.id}
@@ -411,6 +412,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                     reviews={s.reviews}
                     price={s.price}
                     image={s.image}
+                    priority={index === 0}
                     isSaved={isSaved(Number(s.id))}
                     onSave={() => toggle(Number(s.id))}
                   />

@@ -11,12 +11,16 @@ type Props = {
   fallbackSize?: string;
   image?: StaticImageData | string;
   name: string;
+  // Первая карточка списка — она же LCP-элемент страницы. Ленивая загрузка
+  // откладывала её до конца гидратации, и LCP уезжал на секунду.
+  priority?: boolean;
   sizes?: string;
 };
 
 export const DoctorPhoto: FC<Props> = ({
   image,
   name,
+  priority = false,
   sizes = "220px",
   fallbackSize = "size-16",
 }) => {
@@ -31,6 +35,7 @@ export const DoctorPhoto: FC<Props> = ({
             src={image}
             alt={name}
             fill
+            priority={priority}
             sizes={sizes}
             className="object-cover object-top"
             onLoad={() => setLoaded(true)}

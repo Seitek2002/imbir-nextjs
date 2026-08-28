@@ -188,11 +188,12 @@ export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
             ) : doctors.length === 0 ? (
               <CatalogEmptyState />
             ) : (
-              doctors.map((doc) => (
+              doctors.map((doc, index) => (
                 <DoctorCard
                   key={`mob-${doc.id}`}
                   {...doc}
                   variant="horizontal"
+                  priority={index === 0}
                   isSaved={isSaved(Number(doc.id))}
                   onSave={() => toggle(Number(doc.id))}
                   onBook={() =>
@@ -269,10 +270,11 @@ export const SpecialistsPage: FC<Props> = ({ initialCity }) => {
               <CatalogEmptyState />
             ) : (
               <div className="grid grid-cols-4 gap-5 items-stretch">
-                {doctors.map((doc) => (
+                {doctors.map((doc, index) => (
                   <DoctorCard
                     key={`desk-${doc.id}`}
                     {...doc}
+                    priority={index === 0}
                     isSaved={isSaved(Number(doc.id))}
                     onSave={() => toggle(Number(doc.id))}
                     onBook={() =>

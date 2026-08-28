@@ -22,6 +22,8 @@ type Props = {
   name: string;
   onBook?: () => void;
   onSave?: () => void;
+  // Ставим на первую карточку списка, чтобы её фото не грузилось лениво.
+  priority?: boolean;
   rating?: number;
   reviews?: number;
   specialty: string;
@@ -41,6 +43,7 @@ export const DoctorCard: FC<Props> = ({
   onBook,
   onSave,
   isSaved = false,
+  priority = false,
   variant = "vertical",
 }) => {
   const [loaded, setLoaded] = useState(false);
@@ -72,6 +75,7 @@ export const DoctorCard: FC<Props> = ({
                 src={image}
                 alt={name}
                 fill
+                priority={priority}
                 sizes="120px"
                 className="object-cover object-top scale-110"
                 onLoad={() => setLoaded(true)}
@@ -157,7 +161,7 @@ export const DoctorCard: FC<Props> = ({
       className="bg-white rounded-3xl border border-border-soft p-2 w-full h-full flex flex-col relative cursor-pointer hover:border-primary/40 transition-colors"
     >
       <div className="relative aspect-square w-full">
-        <DoctorPhoto image={image} name={name} />
+        <DoctorPhoto image={image} name={name} priority={priority} />
         <div className="absolute top-2 right-2 z-10" onClick={stopProp}>
           <SaveButton
             saved={isSaved}

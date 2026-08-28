@@ -30,7 +30,7 @@ export default async function VideosPage() {
 
         {interviews.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {interviews.map((interview) => (
+            {interviews.map((interview, index) => (
               <VideoCard
                 key={interview.id}
                 title={interview.title}
@@ -38,6 +38,7 @@ export default async function VideosPage() {
                 authorRole={interview.authorRole}
                 thumbnail={interview.thumbnail}
                 youtubeUrl={interview.youtubeUrl}
+                priority={index === 0}
               />
             ))}
           </div>

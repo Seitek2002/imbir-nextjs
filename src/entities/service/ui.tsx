@@ -23,6 +23,8 @@ type Props = {
   onBook?: () => void;
   onSave?: () => void;
   price?: null | number | string;
+  // Ставим на первую карточку списка — её фото и есть LCP-элемент страницы.
+  priority?: boolean;
   // Рейтинга может не быть (например, у услуги из избранного) — тогда строку
   // с оценкой не рисуем вовсе, а не показываем «0 (0)».
   rating?: number;
@@ -68,6 +70,7 @@ export const ServiceCard: FC<Props> = ({
   onBook,
   onSave,
   isSaved = false,
+  priority = false,
   variant = "vertical",
 }) => {
   // Клиники может не быть в данных (напр. в избранном) — не подписываем
@@ -102,6 +105,7 @@ export const ServiceCard: FC<Props> = ({
             src={image}
             alt={name}
             fill
+            priority={priority}
             sizes="112px"
             className="object-cover"
             fallback={
@@ -175,6 +179,7 @@ export const ServiceCard: FC<Props> = ({
           src={image}
           alt={name}
           fill
+          priority={priority}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover"
           fallback={

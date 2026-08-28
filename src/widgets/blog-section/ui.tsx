@@ -92,6 +92,9 @@ export const BlogSection: FC<Props> = ({
               src={featured.image}
               alt={featured.title}
               fill
+              // Обложка featured-поста — LCP-элемент страницы блога, и
+              // грузилась лениво.
+              priority
               sizes="50vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               onLoad={() => setFeaturedLoaded(true)}
@@ -164,6 +167,7 @@ export const BlogSection: FC<Props> = ({
               src={featured.image}
               alt={featured.title}
               fill
+              priority
               sizes="100vw"
               className="object-cover object-top"
               onLoad={() => setFeaturedLoaded(true)}

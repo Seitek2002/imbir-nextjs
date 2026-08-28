@@ -20,6 +20,8 @@ const ThumbnailFallback = () => (
 type Props = {
   authorName: string;
   authorRole: string;
+  // Ставим на первую карточку списка — её превью и есть LCP-элемент.
+  priority?: boolean;
   // У врача может не быть загруженного фото.
   thumbnail?: StaticImageData | string;
   title: string;
@@ -32,6 +34,7 @@ export const VideoCard: FC<Props> = ({
   authorRole,
   thumbnail,
   youtubeUrl,
+  priority = false,
 }) => {
   const [loaded, setLoaded] = useState(false);
 
@@ -48,6 +51,7 @@ export const VideoCard: FC<Props> = ({
           src={thumbnail}
           alt={title}
           fill
+          priority={priority}
           sizes="(max-width: 768px) 100vw, 440px"
           className="object-cover"
           onLoad={() => setLoaded(true)}
