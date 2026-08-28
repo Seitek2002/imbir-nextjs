@@ -136,7 +136,11 @@ export const ServiceCard: FC<Props> = ({
             </div>
           )}
 
-          <div className="mt-auto flex items-center justify-between gap-3">
+          {/* flex-wrap обязателен: на 375px цена и пара «Записаться» + сердце
+              не помещаются в одну строку рядом с картинкой 112px, и кнопка
+              избранного вылезала за край карточки, растягивая всю страницу
+              по горизонтали. */}
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
             {showPrice && (
               <span className="text-foreground font-bold text-base whitespace-nowrap">
                 {price} с
