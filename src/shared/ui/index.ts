@@ -1,5 +1,5 @@
 export { Button } from "./button";
-export { CancelEditButton } from "./cancel-edit-button";
+export { CancelEditButton, CancelEditIconButton } from "./cancel-edit-button";
 export { IconBtn } from "./icon-button";
 export { Dropdown } from "./dropdown";
 export { RangeSlider } from "./range-slider";

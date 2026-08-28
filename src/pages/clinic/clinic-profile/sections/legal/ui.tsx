@@ -35,15 +35,26 @@ export const ClinicLegalPage: FC = () => {
   const [licenseDate, setLicenseDate] = useState("");
   const [licenseAuthority, setLicenseAuthority] = useState("");
 
+  // Заполнение формы данными с бэка вынесено из синхронизации: той же
+  // функцией возвращаем поля в исходный вид, когда правку отменяют.
+  const fillFrom = (source: NonNullable<typeof profile>) => {
+    setLegalName(source.legalName ?? "");
+    setRegistrationNumber(source.registrationNumber ?? "");
+    setLicenseNumber(source.licenseNumber ?? "");
+    setLicenseDate(fromApiDate(source.licenseDate));
+    setLicenseAuthority(source.licenseAuthority ?? "");
+  };
+
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
     setSynced(profile);
-    setLegalName(profile.legalName ?? "");
-    setRegistrationNumber(profile.registrationNumber ?? "");
-    setLicenseNumber(profile.licenseNumber ?? "");
-    setLicenseDate(fromApiDate(profile.licenseDate));
-    setLicenseAuthority(profile.licenseAuthority ?? "");
+    fillFrom(profile);
   }
+
+  const handleCancel = () => {
+    if (profile) fillFrom(profile);
+    setIsEditing(false);
+  };
 
   const handleSave = async () => {
     await saveProfile({
@@ -84,6 +95,7 @@ export const ClinicLegalPage: FC = () => {
       title="Юридическая информация"
       isEditing={isEditing}
       isSaving={isSaving}
+      onCancel={handleCancel}
       onEditToggle={() => (isEditing ? handleSave() : setIsEditing(true))}
     >
       <div className="bg-white rounded-3xl border border-border p-5">

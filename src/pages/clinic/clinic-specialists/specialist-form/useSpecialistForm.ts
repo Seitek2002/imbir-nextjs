@@ -29,5 +29,8 @@ export const useSpecialistForm = (initial?: Partial<SpecialistFormState>) => {
     value: SpecialistFormState[K],
   ) => setD((prev) => ({ ...prev, [key]: value }));
 
-  return { d, set };
+  // Возврат к последнему, что пришло с бэка, — для кнопки отмены в шапке.
+  const reset = () => setD({ ...EMPTY_SPECIALIST_FORM, ...initial });
+
+  return { d, set, reset };
 };

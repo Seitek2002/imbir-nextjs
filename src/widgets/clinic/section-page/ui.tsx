@@ -5,12 +5,16 @@ import { FC, ReactNode, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets/icons";
-import { ConfirmDialog, IconBtn } from "@/shared/ui";
+import { CancelEditIconButton, ConfirmDialog, IconBtn } from "@/shared/ui";
 
 type Props = {
   children: ReactNode;
   isEditing: boolean;
   isSaving?: boolean;
+  // Выход из редактирования без сохранения: секция возвращает поля к тому,
+  // что пришло с бэка. Без него единственным выходом была стрелка «назад»,
+  // которая уводила со страницы вместе с правками.
+  onCancel?: () => void;
   onEditToggle: () => void;
   title: string;
 };
@@ -24,6 +28,7 @@ export const ClinicSectionPage: FC<Props> = ({
   children,
   isEditing,
   onEditToggle,
+  onCancel,
   isSaving,
 }) => {
   const router = useRouter();
@@ -51,6 +56,17 @@ export const ClinicSectionPage: FC<Props> = ({
     setWasSaving(isSavingNow);
   }
 
+  // В режиме правки «назад» тоже отменяет, а не уходит со страницы: иначе
+  // рядом стояли бы два выхода с разным смыслом. Так же ведут себя разделы
+  // «Мои данные» у врача.
+  const handleBack = () => {
+    if (isEditing && onCancel) {
+      onCancel();
+      return;
+    }
+    router.back();
+  };
+
   const handleHeaderAction = () => {
     if (isEditing) {
       setShowSaveConfirm(true);
@@ -62,9 +78,11 @@ export const ClinicSectionPage: FC<Props> = ({
   return (
     <div className="w-full min-h-screen bg-[#FAFAFA]">
       <div className="bg-white px-4 pt-1 pb-4">
-        <div className="grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center min-h-10">
+        {/* Правая колонка auto, а не фиксированные 2.5rem: в режиме правки в
+            неё встают две кнопки вместо одной. */}
+        <div className="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center min-h-10">
           <IconBtn
-            onClick={() => router.back()}
+            onClick={handleBack}
             variant="outline"
             size="sm"
             className="justify-self-start"
@@ -77,20 +95,24 @@ export const ClinicSectionPage: FC<Props> = ({
             {title}
           </h1>
 
-          <IconBtn
-            onClick={handleHeaderAction}
-            disabled={isSaving}
-            variant="text"
-            size="sm"
-            className="justify-self-end"
-            aria-label={isEditing ? "Сохранить" : "Редактировать"}
-          >
-            {isEditing ? (
-              <CheckIcon className="size-4" />
-            ) : (
-              <EditIcon className="size-4" />
+          <div className="flex items-center gap-1 justify-self-end">
+            {isEditing && onCancel && (
+              <CancelEditIconButton onClick={onCancel} disabled={isSaving} />
             )}
-          </IconBtn>
+            <IconBtn
+              onClick={handleHeaderAction}
+              disabled={isSaving}
+              variant="text"
+              size="sm"
+              aria-label={isEditing ? "Сохранить" : "Редактировать"}
+            >
+              {isEditing ? (
+                <CheckIcon className="size-4" />
+              ) : (
+                <EditIcon className="size-4" />
+              )}
+            </IconBtn>
+          </div>
         </div>
       </div>
 

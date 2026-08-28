@@ -26,10 +26,15 @@ export const ClinicSpecialistCertificatesPage: FC = () => {
   } = useSpecialistDetail(params.id);
   const [isEditing, setIsEditing] = useState(false);
 
-  const { d, set } = useSpecialistForm(initialForm);
+  const { d, set, reset } = useSpecialistForm(initialForm);
 
   // Кнопка в шапке переключает просмотр/правку; при выходе из правки
   // отправляем карточку целиком (PATCH принимает частичное тело).
+  const handleCancel = () => {
+    reset();
+    setIsEditing(false);
+  };
+
   const handleToggle = async () => {
     if (!isEditing) return setIsEditing(true);
     try {
@@ -58,6 +63,7 @@ export const ClinicSpecialistCertificatesPage: FC = () => {
     <ClinicSectionPage
       title="Сертификаты и документы"
       isEditing={isEditing}
+      onCancel={handleCancel}
       onEditToggle={handleToggle}
     >
       <div className="bg-white rounded-3xl border border-border p-5">

@@ -13,6 +13,7 @@ import { useAuthStore } from "@/shared/store";
 import {
   Button,
   CancelEditButton,
+  CancelEditIconButton,
   ConfirmDialog,
   IconBtn,
   ImageWithFallback,
@@ -161,21 +162,30 @@ export const ProfileMyDataPage: FC = () => {
 
   const title = isEditing ? "Редактировать" : "Настройки профиля";
 
+  // Крестик рядом с галочкой — та же пара, что на десктопе («Отмена» +
+  // «Сохранить»). Раньше на телефоне выйти из правки можно было только
+  // стрелкой «назад», и о том, что она отменяет, догадаться было нельзя.
   const mobileRight = (
-    <IconBtn
-      onClick={
-        isEditing ? () => setShowSaveConfirm(true) : () => setIsEditing(true)
-      }
-      disabled={isSaving}
-      variant="text"
-      size="sm"
-    >
-      {isEditing ? (
-        <CheckIcon className="w-5 h-5 [&_path]:stroke-primary" />
-      ) : (
-        <EditIcon className="w-5 h-5 [&_path]:stroke-muted" />
+    <div className="flex items-center gap-1">
+      {isEditing && (
+        <CancelEditIconButton onClick={handleCancel} disabled={isSaving} />
       )}
-    </IconBtn>
+      <IconBtn
+        onClick={
+          isEditing ? () => setShowSaveConfirm(true) : () => setIsEditing(true)
+        }
+        disabled={isSaving}
+        variant="text"
+        size="sm"
+        aria-label={isEditing ? "Сохранить" : "Редактировать"}
+      >
+        {isEditing ? (
+          <CheckIcon className="w-5 h-5 [&_path]:stroke-primary" />
+        ) : (
+          <EditIcon className="w-5 h-5 [&_path]:stroke-muted" />
+        )}
+      </IconBtn>
+    </div>
   );
 
   return (

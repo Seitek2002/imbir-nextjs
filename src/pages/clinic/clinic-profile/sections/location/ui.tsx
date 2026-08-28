@@ -40,17 +40,28 @@ export const ClinicLocationPage: FC = () => {
     CITIES_BY_COUNTRY[country] ?? [],
   );
 
+  // Заполнение формы данными с бэка вынесено из синхронизации: той же
+  // функцией возвращаем поля в исходный вид, когда правку отменяют.
+  const fillFrom = (source: NonNullable<typeof profile>) => {
+    setCountry(source.country ?? "");
+    setCity(source.city ?? "");
+    setFullAddress(source.fullAddress ?? "");
+    setPhone(source.phone ?? "");
+    setWebsite(source.website ?? "");
+    setLatitude(source.latitude ?? "");
+    setLongitude(source.longitude ?? "");
+  };
+
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
     setSynced(profile);
-    setCountry(profile.country ?? "");
-    setCity(profile.city ?? "");
-    setFullAddress(profile.fullAddress ?? "");
-    setPhone(profile.phone ?? "");
-    setWebsite(profile.website ?? "");
-    setLatitude(profile.latitude ?? "");
-    setLongitude(profile.longitude ?? "");
+    fillFrom(profile);
   }
+
+  const handleCancel = () => {
+    if (profile) fillFrom(profile);
+    setIsEditing(false);
+  };
 
   const handleSave = async () => {
     await saveProfile({
@@ -84,6 +95,7 @@ export const ClinicLocationPage: FC = () => {
       title="Локация и контакты"
       isEditing={isEditing}
       isSaving={isSaving}
+      onCancel={handleCancel}
       onEditToggle={() => (isEditing ? handleSave() : setIsEditing(true))}
     >
       <div className="bg-white rounded-3xl border border-border p-5">

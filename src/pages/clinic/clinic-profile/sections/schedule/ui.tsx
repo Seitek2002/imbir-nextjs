@@ -25,22 +25,33 @@ export const ClinicSchedulePage: FC = () => {
   const [lunchEnd, setLunchEnd] = useState("");
   const [emergency24, setEmergency24] = useState(false);
 
+  // Заполнение формы данными с бэка вынесено из синхронизации: той же
+  // функцией возвращаем поля в исходный вид, когда правку отменяют.
+  const fillFrom = (source: NonNullable<typeof profile>) => {
+    setDays({
+      mon: toDay(source.workSchedule.mon),
+      tue: toDay(source.workSchedule.tue),
+      wed: toDay(source.workSchedule.wed),
+      thu: toDay(source.workSchedule.thu),
+      fri: toDay(source.workSchedule.fri),
+      sat: toDay(source.workSchedule.sat),
+      sun: toDay(source.workSchedule.sun),
+    });
+    setLunchStart(source.workSchedule.lunchStart ?? "");
+    setLunchEnd(source.workSchedule.lunchEnd ?? "");
+    setEmergency24(source.workSchedule.emergency24 ?? false);
+  };
+
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
     setSynced(profile);
-    setDays({
-      mon: toDay(profile.workSchedule.mon),
-      tue: toDay(profile.workSchedule.tue),
-      wed: toDay(profile.workSchedule.wed),
-      thu: toDay(profile.workSchedule.thu),
-      fri: toDay(profile.workSchedule.fri),
-      sat: toDay(profile.workSchedule.sat),
-      sun: toDay(profile.workSchedule.sun),
-    });
-    setLunchStart(profile.workSchedule.lunchStart ?? "");
-    setLunchEnd(profile.workSchedule.lunchEnd ?? "");
-    setEmergency24(profile.workSchedule.emergency24 ?? false);
+    fillFrom(profile);
   }
+
+  const handleCancel = () => {
+    if (profile) fillFrom(profile);
+    setIsEditing(false);
+  };
 
   const setDay = (key: DayKey, patch: Partial<DayState>) =>
     setDays((prev) =>
@@ -90,6 +101,7 @@ export const ClinicSchedulePage: FC = () => {
       title="Расписание"
       isEditing={isEditing}
       isSaving={isSaving}
+      onCancel={handleCancel}
       onEditToggle={() => (isEditing ? handleSave() : setIsEditing(true))}
     >
       <div className="bg-white rounded-3xl border border-border p-5">

@@ -110,6 +110,7 @@ export const DoctorDocumentsSection: FC = () => {
     <DoctorPageLayout
       title={title}
       editAction={isEditing ? "save" : "edit"}
+      onCancel={handleCancel}
       onEditToggle={
         isEditing ? () => setShowSaveConfirm(true) : () => setIsEditing(true)
       }

@@ -33,13 +33,24 @@ export const ClinicSpecializationPage: FC = () => {
     ? "Загружаем список..."
     : "Выберите из списка";
 
+  // Заполнение формы данными с бэка вынесено из синхронизации: той же
+  // функцией возвращаем поля в исходный вид, когда правку отменяют.
+  const fillFrom = (source: NonNullable<typeof profile>) => {
+    setMainDirections(source.mainDirections);
+    setNarrowDirections(source.narrowDirections);
+    setAdditionalServices(source.additionalServices.join(", "));
+  };
+
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
     setSynced(profile);
-    setMainDirections(profile.mainDirections);
-    setNarrowDirections(profile.narrowDirections);
-    setAdditionalServices(profile.additionalServices.join(", "));
+    fillFrom(profile);
   }
+
+  const handleCancel = () => {
+    if (profile) fillFrom(profile);
+    setIsEditing(false);
+  };
 
   const handleSave = async () => {
     const primary = resolveSpecializationIds(
@@ -84,6 +95,7 @@ export const ClinicSpecializationPage: FC = () => {
       title="Специализация и услуги"
       isEditing={isEditing}
       isSaving={isSaving}
+      onCancel={handleCancel}
       onEditToggle={() => (isEditing ? handleSave() : setIsEditing(true))}
     >
       <div className="bg-white rounded-3xl border border-border p-5">

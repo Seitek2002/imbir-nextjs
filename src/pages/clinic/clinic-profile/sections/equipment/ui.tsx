@@ -73,13 +73,24 @@ export const ClinicEquipmentPage: FC = () => {
       ? "Загружаем список..."
       : "Выберите из списка";
 
+  // Заполнение формы данными с бэка вынесено из синхронизации: той же
+  // функцией возвращаем поля в исходный вид, когда правку отменяют.
+  const fillFrom = (source: NonNullable<typeof profile>) => {
+    setEquipment(source.equipment);
+    setPatientConditions(source.patientConditions);
+    setPaymentMethods(source.paymentMethods);
+  };
+
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
     setSynced(profile);
-    setEquipment(profile.equipment);
-    setPatientConditions(profile.patientConditions);
-    setPaymentMethods(profile.paymentMethods);
+    fillFrom(profile);
   }
+
+  const handleCancel = () => {
+    if (profile) fillFrom(profile);
+    setIsEditing(false);
+  };
 
   const handleSave = async () => {
     await saveProfile({
@@ -109,6 +120,7 @@ export const ClinicEquipmentPage: FC = () => {
       title="Оборудование и условия"
       isEditing={isEditing}
       isSaving={isSaving}
+      onCancel={handleCancel}
       onEditToggle={() => (isEditing ? handleSave() : setIsEditing(true))}
     >
       <div className="bg-white rounded-3xl border border-border p-5">

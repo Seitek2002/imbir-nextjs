@@ -5,7 +5,7 @@ import { FC, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import { CheckIcon, EditIcon, HeaderBackIcon } from "@/shared/assets/icons";
-import { IconBtn } from "@/shared/ui";
+import { CancelEditIconButton, IconBtn } from "@/shared/ui";
 
 type Props = {
   children: ReactNode;
@@ -23,6 +23,13 @@ type Props = {
    * «Моих данных» — к списку разделов), а не уйти из кабинета.
    */
   onBack?: () => void;
+  /**
+   * onCancel — выход из правки без сохранения. Рисует крестик слева от
+   * галочки: раньше на телефоне отменить можно было только стрелкой «назад»,
+   * и о том, что она отменяет, а не уводит со страницы, догадаться было
+   * нельзя. На десктопе для этого есть отдельная кнопка «Отмена».
+   */
+  onCancel?: () => void;
   onEditToggle?: () => void;
   title: string;
 };
@@ -32,6 +39,7 @@ export const DoctorPageLayout: FC<Props> = ({
   children,
   editAction,
   onEditToggle,
+  onCancel,
   headerRight,
   onBack,
 }) => {
@@ -40,19 +48,24 @@ export const DoctorPageLayout: FC<Props> = ({
   const rightSlot =
     headerRight ??
     (editAction ? (
-      <IconBtn
-        onClick={onEditToggle}
-        variant="text"
-        size="sm"
-        className={editAction === "save" ? "text-primary" : "text-muted"}
-        aria-label={editAction === "save" ? "Сохранить" : "Редактировать"}
-      >
-        {editAction === "save" ? (
-          <CheckIcon className="w-5 h-5" />
-        ) : (
-          <EditIcon className="w-5 h-5" />
+      <div className="flex items-center gap-1">
+        {editAction === "save" && onCancel && (
+          <CancelEditIconButton onClick={onCancel} />
         )}
-      </IconBtn>
+        <IconBtn
+          onClick={onEditToggle}
+          variant="text"
+          size="sm"
+          className={editAction === "save" ? "text-primary" : "text-muted"}
+          aria-label={editAction === "save" ? "Сохранить" : "Редактировать"}
+        >
+          {editAction === "save" ? (
+            <CheckIcon className="w-5 h-5" />
+          ) : (
+            <EditIcon className="w-5 h-5" />
+          )}
+        </IconBtn>
+      </div>
     ) : (
       <div className="w-10" />
     ));

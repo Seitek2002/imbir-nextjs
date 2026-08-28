@@ -47,14 +47,28 @@ export const ClinicBasicInfoPage: FC = () => {
     DEFAULT_CLINIC_TYPES,
   );
 
+  // Заполнение формы данными с бэка вынесено из синхронизации: той же
+  // функцией возвращаем поля в исходный вид, когда правку отменяют.
+  const fillFrom = (source: NonNullable<typeof profile>) => {
+    setName(source.name ?? "");
+    setType(source.type ?? "");
+    setDescription(source.description ?? "");
+    setLogoPreview(source.logo);
+  };
+
   const [synced, setSynced] = useState<typeof profile>(null);
   if (profile && profile !== synced) {
     setSynced(profile);
-    setName(profile.name ?? "");
-    setType(profile.type ?? "");
-    setDescription(profile.description ?? "");
-    setLogoPreview(profile.logo);
+    fillFrom(profile);
   }
+
+  const handleCancel = () => {
+    if (profile) fillFrom(profile);
+    // Выбранный, но не сохранённый файл логотипа: fillFrom вернёт превью на
+    // серверное, а сам File остался бы и ушёл при следующем сохранении.
+    setLogoFile(null);
+    setIsEditing(false);
+  };
 
   const handleLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -102,6 +116,7 @@ export const ClinicBasicInfoPage: FC = () => {
       title="Основная информация"
       isEditing={isEditing}
       isSaving={isSaving}
+      onCancel={handleCancel}
       onEditToggle={() => (isEditing ? handleSave() : setIsEditing(true))}
     >
       <div className="bg-white rounded-3xl border border-border p-5">
