@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useState } from "react";
+import { FC } from "react";
 
 import { StaticImageData } from "next/image";
 
@@ -36,8 +36,6 @@ export const VideoCard: FC<Props> = ({
   youtubeUrl,
   priority = false,
 }) => {
-  const [loaded, setLoaded] = useState(false);
-
   return (
     <a
       href={youtubeUrl}
@@ -46,7 +44,6 @@ export const VideoCard: FC<Props> = ({
       className="bg-white rounded-3xl border border-[#D8DCE0] p-2 flex flex-col w-full h-auto md:h-89.25 shrink-0 hover:shadow-[0_6px_20px_rgba(0,0,0,0.05)] transition-shadow duration-300"
     >
       <div className="relative w-full aspect-video md:aspect-auto md:h-55 shrink-0 overflow-hidden rounded-2xl bg-background">
-        {!loaded && <div className="absolute inset-0 skeleton" />}
         <ImageWithFallback
           src={thumbnail}
           alt={title}
@@ -54,8 +51,6 @@ export const VideoCard: FC<Props> = ({
           priority={priority}
           sizes="(max-width: 768px) 100vw, 440px"
           className="object-cover"
-          onLoad={() => setLoaded(true)}
-          onError={() => setLoaded(true)}
           fallback={<ThumbnailFallback />}
         />
         <div className="absolute inset-0 flex items-center justify-center">

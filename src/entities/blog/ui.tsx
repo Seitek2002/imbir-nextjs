@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useState } from "react";
+import { FC } from "react";
 
 import Link from "next/link";
 
@@ -31,15 +31,12 @@ export const BlogCard: FC<Props> = ({
   href = "#",
   priority = false,
 }) => {
-  const [loaded, setLoaded] = useState(false);
-
   return (
     <Link
       href={href}
       className="bg-white rounded-3xl overflow-hidden flex flex-col p-2 group w-full border border-border-soft"
     >
       <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
-        {!loaded && <div className="absolute inset-0 rounded-2xl skeleton" />}
         <ImageWithFallback
           src={image}
           alt={title}
@@ -47,8 +44,6 @@ export const BlogCard: FC<Props> = ({
           priority={priority}
           sizes="(max-width: 768px) 100vw, 440px"
           className="object-cover transition-transform duration-300 group-hover:scale-105"
-          onLoad={() => setLoaded(true)}
-          onError={() => setLoaded(true)}
           fallback={<BlogImageFallback />}
         />
       </div>

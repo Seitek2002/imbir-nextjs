@@ -31,7 +31,6 @@ export const BlogSection: FC<Props> = ({
   prioritizeFirstCard = false,
 }) => {
   const [activeCategory, setActiveCategory] = useState("all");
-  const [featuredLoaded, setFeaturedLoaded] = useState(false);
 
   const featuredLinkClassName =
     "inline-flex w-fit items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white transition-all active:bg-primary-dark hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]";
@@ -87,7 +86,6 @@ export const BlogSection: FC<Props> = ({
             href={featured.href}
             className="relative w-167.5 shrink-0 h-105 rounded-3xl overflow-hidden border border-border-soft group block"
           >
-            {!featuredLoaded && <div className="absolute inset-0 skeleton" />}
             <ImageWithFallback
               src={featured.image}
               alt={featured.title}
@@ -97,8 +95,6 @@ export const BlogSection: FC<Props> = ({
               priority
               sizes="50vw"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              onLoad={() => setFeaturedLoaded(true)}
-              onError={() => setFeaturedLoaded(true)}
               fallback={<BlogImageFallback />}
             />
           </Link>
@@ -162,7 +158,6 @@ export const BlogSection: FC<Props> = ({
             href={featured.href}
             className="relative w-full h-52 rounded-3xl overflow-hidden border border-border-soft block"
           >
-            {!featuredLoaded && <div className="absolute inset-0 skeleton" />}
             <ImageWithFallback
               src={featured.image}
               alt={featured.title}
@@ -170,8 +165,6 @@ export const BlogSection: FC<Props> = ({
               priority
               sizes="100vw"
               className="object-cover object-top"
-              onLoad={() => setFeaturedLoaded(true)}
-              onError={() => setFeaturedLoaded(true)}
               fallback={<BlogImageFallback />}
             />
           </Link>
@@ -245,26 +238,19 @@ const HomePostImage: FC<{
   post: BlogPost;
   priority?: boolean;
   sizes: string;
-}> = ({ post, className, sizes, priority = false }) => {
-  const [loaded, setLoaded] = useState(false);
-
-  return (
-    <div className={`relative overflow-hidden ${className}`}>
-      {!loaded && <div className="absolute inset-0 skeleton" />}
-      <ImageWithFallback
-        src={post.image}
-        alt={post.title}
-        fill
-        priority={priority}
-        sizes={sizes}
-        className="object-cover"
-        onLoad={() => setLoaded(true)}
-        onError={() => setLoaded(true)}
-        fallback={<BlogImageFallback />}
-      />
-    </div>
-  );
-};
+}> = ({ post, className, sizes, priority = false }) => (
+  <div className={`relative overflow-hidden ${className}`}>
+    <ImageWithFallback
+      src={post.image}
+      alt={post.title}
+      fill
+      priority={priority}
+      sizes={sizes}
+      className="object-cover"
+      fallback={<BlogImageFallback />}
+    />
+  </div>
+);
 
 const HomeFeaturedCard: FC<{ post: BlogPost }> = ({ post }) => (
   <Link

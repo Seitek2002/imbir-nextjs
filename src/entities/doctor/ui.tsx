@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC } from "react";
 
 import { StaticImageData } from "next/image";
 import Link from "next/link";
@@ -48,7 +48,6 @@ export const DoctorCard: FC<Props> = ({
   priority = false,
   variant = "vertical",
 }) => {
-  const [loaded, setLoaded] = useState(false);
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "doctor";
 
@@ -71,24 +70,19 @@ export const DoctorCard: FC<Props> = ({
       >
         <div className="relative w-30 min-w-30 self-stretch rounded-2xl overflow-hidden bg-primary-tint">
           {image ? (
-            <>
-              {!loaded && <div className="absolute inset-0 skeleton" />}
-              <ImageWithFallback
-                src={image}
-                alt={name}
-                fill
-                priority={priority}
-                sizes="120px"
-                className="object-cover object-top scale-110"
-                onLoad={() => setLoaded(true)}
-                onError={() => setLoaded(true)}
-                fallback={
-                  <div className="w-full h-full flex items-center justify-center">
-                    <UserCircleIcon className="size-10 text-dim" />
-                  </div>
-                }
-              />
-            </>
+            <ImageWithFallback
+              src={image}
+              alt={name}
+              fill
+              priority={priority}
+              sizes="120px"
+              className="object-cover object-top scale-110"
+              fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <UserCircleIcon className="size-10 text-dim" />
+                </div>
+              }
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <UserCircleIcon className="size-10 text-dim" />
