@@ -445,6 +445,7 @@ export const DoctorMyDataOverview: FC = () => {
           <div className="flex items-center gap-3">
             <CancelEditButton onClick={handleCancel} disabled={isSaving} />
             <Button
+              size="sm"
               onClick={() => setShowSaveConfirm(true)}
               disabled={isSaving}
             >

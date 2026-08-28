@@ -265,6 +265,7 @@ export const ClinicProfilePage: FC = () => {
             <div className="flex items-center gap-3">
               <CancelEditButton onClick={() => setIsEditing(false)} />
               <Button
+                size="sm"
                 onClick={() => setShowSaveConfirm(true)}
                 disabled={isSaving}
               >
