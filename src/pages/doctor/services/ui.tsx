@@ -16,7 +16,9 @@ import {
   deleteDoctorService,
   doctorCabinetKeys,
   getDoctorServices,
+  updateDoctorService,
 } from "@/shared/api";
+import { EditIcon } from "@/shared/assets/icons";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import {
   Button,
@@ -91,23 +93,27 @@ const AddIcon: FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-type AddServiceModalProps = {
+type ServiceModalProps = {
   isLoading?: boolean;
   isOpen: boolean;
-  onAdd: (service: DoctorServiceBody) => void;
   onClose: () => void;
+  onSubmit: (service: DoctorServiceBody) => void;
+  // Заполнена — модалка работает на редактирование, пуста — на добавление.
+  service?: DoctorServiceItem | null;
 };
 
-// Боттом-шит добавления услуги (общий Modal: снизу на телефоне, по центру на
-// десктопе). Специализацию выбираем из справочника: раньше поля не было и в
-// category молча уезжало название услуги — из-за этого справочник
+// Боттом-шит услуги (общий Modal: снизу на телефоне, по центру на десктопе).
+// Специализацию выбираем из справочника: раньше поля не было и в category
+// молча уезжало название услуги — из-за этого справочник
 // /references/service-categories/ засорялся названиями вроде «Расшифровка ЭКГ».
-const AddServiceModal: FC<AddServiceModalProps> = ({
+const ServiceModal: FC<ServiceModalProps> = ({
   isOpen,
   onClose,
-  onAdd,
+  onSubmit,
+  service,
   isLoading,
 }) => {
+  const isEdit = Boolean(service);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
@@ -116,6 +122,23 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | undefined>();
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // Подставляем услугу при открытии — правкой стейта на рендере, а не
+  // эффектом (react-hooks/set-state-in-effect). Ключ — id услуги, поэтому
+  // повторное открытие той же карточки не затирает несохранённые правки,
+  // а переключение на другую услугу перезаполняет форму.
+  const formKey = isOpen ? (service?.id ?? "new") : null;
+  const [prevKey, setPrevKey] = useState<null | number | string>(null);
+  if (formKey !== prevKey) {
+    setPrevKey(formKey);
+    setName(service?.name ?? "");
+    setCategory(service?.category ?? "");
+    setDescription(service?.description ?? "");
+    setPrice(service?.price ?? "");
+    setDuration(service?.duration != null ? String(service.duration) : "");
+    setPhotoFile(null);
+    setPhotoPreview(service?.photo ?? undefined);
+  }
 
   const { options: categoryOptions, isLoading: isCategoriesLoading } =
     useServiceCategories();
@@ -145,20 +168,27 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    onAdd({
+    onSubmit({
       name: name.trim(),
       category,
       description: description || undefined,
       price: price ? String(price) : undefined,
       duration: duration ? Number(duration) : undefined,
-      is_active: true,
+      is_active: service?.is_active ?? true,
+      // Новый файл шлём как File. Если фото не трогали, поле не отправляем
+      // вовсе: PUT со строковым URL бэк принимает за загрузку файла и
+      // отвечает «Загрузите правильное изображение».
       ...(photoFile ? { photo: photoFile } : {}),
     });
-    reset();
+    if (!isEdit) reset();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Добавить услугу">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEdit ? "Редактировать услугу" : "Добавить услугу"}
+    >
       <div className="space-y-4">
         <Input
           label="Название услуги"
@@ -254,7 +284,7 @@ const AddServiceModal: FC<AddServiceModalProps> = ({
             onClick={handleSubmit}
             disabled={!canSubmit || isLoading}
           >
-            {isLoading ? "Сохранение..." : "Добавить"}
+            {isLoading ? "Сохранение..." : isEdit ? "Сохранить" : "Добавить"}
           </Button>
         </div>
       </div>
@@ -316,9 +346,16 @@ const ServicesSkeleton: FC = () => (
 
 export const DoctorServicesPage: FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
+  // Услуга, открытая на редактирование. null — модалка добавления.
+  const [editTarget, setEditTarget] = useState<DoctorServiceItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DoctorServiceItem | null>(
     null,
   );
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setEditTarget(null);
+  };
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -339,6 +376,20 @@ export const DoctorServicesPage: FC = () => {
     onError: (err: unknown) => {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
       toast.error(extractErrorMessage(data, "Не удалось добавить услугу"));
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ body, id }: { body: DoctorServiceBody; id: number }) =>
+      updateDoctorService(id, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.services() });
+      toast.success("Услуга обновлена");
+      closeModal();
+    },
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось сохранить услугу"));
     },
   });
 
@@ -431,15 +482,29 @@ export const DoctorServicesPage: FC = () => {
                           {s.duration != null ? `${s.duration} мин` : "—"}
                         </td>
                         <td className="px-6 py-4">
-                          <IconBtn
-                            onClick={() => setDeleteTarget(s)}
-                            variant="text"
-                            size="xs"
-                            className="text-dim hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                            aria-label="Удалить"
-                          >
-                            <TrashIcon />
-                          </IconBtn>
+                          <div className="flex items-center gap-1">
+                            <IconBtn
+                              onClick={() => {
+                                setEditTarget(s);
+                                setModalOpen(true);
+                              }}
+                              variant="text"
+                              size="xs"
+                              className="text-dim hover:text-primary opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                              aria-label="Редактировать"
+                            >
+                              <EditIcon />
+                            </IconBtn>
+                            <IconBtn
+                              onClick={() => setDeleteTarget(s)}
+                              variant="text"
+                              size="xs"
+                              className="text-dim hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                              aria-label="Удалить"
+                            >
+                              <TrashIcon />
+                            </IconBtn>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -463,11 +528,16 @@ export const DoctorServicesPage: FC = () => {
         </Button>
       </div>
 
-      <AddServiceModal
+      <ServiceModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onAdd={addMutation.mutate}
-        isLoading={addMutation.isPending}
+        onClose={closeModal}
+        service={editTarget}
+        onSubmit={(body) =>
+          editTarget
+            ? updateMutation.mutate({ id: editTarget.id, body })
+            : addMutation.mutate(body)
+        }
+        isLoading={addMutation.isPending || updateMutation.isPending}
       />
 
       <ConfirmDialog

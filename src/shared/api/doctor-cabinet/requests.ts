@@ -221,6 +221,18 @@ export const addDoctorService = async (
   // photo может быть File — тогда уходит multipart'ом.
   sendMaybeMultipart<DoctorServiceItem>("/api/doctor/services/", "POST", body);
 
+// Только PUT: PATCH у этого ресурса в схеме нет, поэтому тело собираем
+// целиком, а не из изменённых полей.
+export const updateDoctorService = async (
+  id: number,
+  body: DoctorServiceBody,
+): Promise<DoctorServiceItem> =>
+  sendMaybeMultipart<DoctorServiceItem>(
+    `/api/doctor/services/${id}/`,
+    "PUT",
+    body,
+  );
+
 export const deleteDoctorService = async (id: number): Promise<void> => {
   await apiClient.delete(`/api/doctor/services/${id}/`);
 };
