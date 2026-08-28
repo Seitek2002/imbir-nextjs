@@ -119,6 +119,36 @@ input[type="number"]::-webkit-inner-spin-button {
   animation: skeleton-wave 1.4s ease-in-out infinite;
 }
 
+/* Тот же скелетон, но для самой картинки, а не для плашки под ней.
+   .skeleton здесь не годится: он рисует блик через ::after, а у <img>
+   псевдоэлементов нет — это заменяемый элемент. Поэтому блик делаем
+   фоном самого элемента: пока картинка не отрисовалась, её фон виден.
+
+   Плюс такого варианта — не нужна ни обёртка, ни позиционированный
+   родитель: работает одинаково и для fill, и для фиксированных width/height
+   (в проекте 26 и 21 вызов соответственно). */
+@keyframes img-skeleton-wave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.img-skeleton {
+  background-color: #e5e7eb;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: img-skeleton-wave 1.4s ease-in-out infinite;
+}
+
 /* :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -263,5 +293,9 @@ input[type="number"]::-webkit-inner-spin-button {
 @media (prefers-reduced-motion: reduce) {
   .animated-number {
     transition: none;
+  }
+
+  .img-skeleton {
+    animation: none;
   }
 }

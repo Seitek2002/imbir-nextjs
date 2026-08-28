@@ -29,10 +29,12 @@ export const PhotoLightbox: FC<Props> = ({ src, alt = "", onClose }) => {
   // грузилась под другой размер) — без индикатора при клике какое-то время
   // просто ничего не происходит.
   const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
   const [prevSrc, setPrevSrc] = useState(src);
   if (src !== prevSrc) {
     setPrevSrc(src);
     setLoaded(false);
+    setErrored(false);
   }
 
   useEffect(() => {
@@ -64,19 +66,28 @@ export const PhotoLightbox: FC<Props> = ({ src, alt = "", onClose }) => {
         className="relative h-[85vh] w-[90vw] max-w-4xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {!loaded && (
+        {!loaded && !errored && (
           <div className="absolute inset-0 flex items-center justify-center">
             <Spinner className="size-10 text-white" />
           </div>
         )}
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          sizes="90vw"
-          className="object-contain"
-          onLoad={() => setLoaded(true)}
-        />
+        {/* Без этой ветки спиннер крутился вечно: onError не обрабатывался,
+            loaded так и оставался false, а картинки за ним всё равно нет. */}
+        {errored ? (
+          <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-white/80">
+            Не удалось загрузить фотографию
+          </div>
+        ) : (
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes="90vw"
+            className="object-contain"
+            onLoad={() => setLoaded(true)}
+            onError={() => setErrored(true)}
+          />
+        )}
       </div>
     </div>,
     document.body,
