@@ -284,14 +284,14 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
 
           <div className="flex-1 flex flex-col rounded-t-3xl md:rounded-none -mt-6 md:mt-0 relative z-10 p-2 md:p-0">
             <div className="bg-white rounded-[20px] p-4 border border-border-soft">
-              <div className="flex justify-center md:justify-between items-start mb-6">
+              <div className="flex justify-between items-start mb-6">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h1 className="text-2xl md:text-3xl font-semibold text-foreground leading-tight">
                       {clinic.name}
                     </h1>
                   </div>
-                  <p className="text-muted text-center lg:text-left text-base mb-4">
+                  <p className="text-muted text-base mb-4">
                     Многопрофильная клиника
                   </p>
 
