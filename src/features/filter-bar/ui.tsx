@@ -6,7 +6,12 @@ import { useSpecializationOptions } from "@/entities/specialization";
 
 import type { SpecializationScope } from "@/shared/api";
 import { RemoveIcon } from "@/shared/assets/icons";
-import { replaceUrlState, useUrlSearchParams } from "@/shared/lib/url-state";
+import {
+  clearFilterParams,
+  hasFilterParams,
+  replaceUrlState,
+  useUrlSearchParams,
+} from "@/shared/lib/url-state";
 import { useCityStore } from "@/shared/store";
 import { Button, Dropdown, RangeSlider } from "@/shared/ui";
 
@@ -154,6 +159,10 @@ export const FilterBar: FC<Props> = ({
     updateURL("price", `${next[0]}-${next[1]}`);
   };
 
+  // Список ключей — общий с каталогами, иначе «Сбросить» в двух местах
+  // чистило бы разные наборы (см. clearFilterParams).
+  const hasActiveFilters = hasFilterParams(prefix, searchParams);
+
   const handleReset = () => {
     if (experienceCommitTimerRef.current)
       clearTimeout(experienceCommitTimerRef.current);
@@ -161,12 +170,7 @@ export const FilterBar: FC<Props> = ({
     experienceCommitTimerRef.current = null;
     priceCommitTimerRef.current = null;
 
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete(`${prefix}_spec`);
-    params.delete(`${prefix}_exp`);
-    params.delete(`${prefix}_rating`);
-    params.delete(`${prefix}_price`);
-    replaceUrlState(params);
+    replaceUrlState(clearFilterParams(prefix, searchParams));
   };
 
   const city = useCityStore((s) => s.city);
@@ -244,16 +248,20 @@ export const FilterBar: FC<Props> = ({
           )}
         </div>
 
-        <div className="flex justify-end mt-6">
-          <Button
-            IconLeft={RemoveIcon}
-            variant="text"
-            size="sm"
-            onClick={handleReset}
-          >
-            Сбросить фильтры
-          </Button>
-        </div>
+        {/* Кнопка появляется, только когда есть что сбрасывать: на чистой
+            странице она предлагала отменить то, чего никто не делал. */}
+        {hasActiveFilters && (
+          <div className="flex justify-end mt-6">
+            <Button
+              IconLeft={RemoveIcon}
+              variant="text"
+              size="sm"
+              onClick={handleReset}
+            >
+              Сбросить фильтры
+            </Button>
+          </div>
+        )}
       </div>
     </>
   );

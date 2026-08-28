@@ -129,7 +129,14 @@ export const MobileFiltersModal: FC<Props> = ({
   };
 
   return (
+    // Панель уезжает трансформом, а не display:none — иначе не было бы
+    // анимации. Но её содержимое при этом оставалось в порядке табуляции:
+    // Tab на любой странице каталога уходил в невидимые дропдаун, слайдеры
+    // и кнопки «Сбросить»/«Применить». inert выключает и фокус, и читалку,
+    // не мешая анимации.
     <div
+      inert={!isOpen}
+      aria-hidden={!isOpen}
       className={`fixed inset-0 z-50 bg-background flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? "translate-y-0" : "translate-y-full"}`}
     >
       <PageHeader title="Фильтр" />

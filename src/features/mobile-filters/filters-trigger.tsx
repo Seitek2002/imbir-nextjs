@@ -20,7 +20,14 @@ export const FiltersTrigger: FC = () => {
   };
 
   return (
-    <IconBtn variant="outline" size="sm" onClick={handleOpen}>
+    // Кнопка только с иконкой — без aria-label читалка объявляла её просто
+    // «кнопка», и понять, что она открывает фильтры, было нельзя.
+    <IconBtn
+      variant="outline"
+      size="sm"
+      onClick={handleOpen}
+      aria-label="Открыть фильтры"
+    >
       <FilterSample />
     </IconBtn>
   );
