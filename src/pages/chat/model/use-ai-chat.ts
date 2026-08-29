@@ -76,7 +76,12 @@ export const useAiChat = (
 
     try {
       const reply = await sendAiMessage({ message: text });
-      setMessages((prev) => [...prev, toThreadMessage(reply)]);
+      // isFresh — только здесь: этот ответ пришёл на глазах у пользователя,
+      // и лента проявит его анимацией. История такой пометки не получает.
+      setMessages((prev) => [
+        ...prev,
+        { ...toThreadMessage(reply), isFresh: true },
+      ]);
     } catch {
       setError("ИИ-помощник недоступен. Попробуйте позже.");
     } finally {

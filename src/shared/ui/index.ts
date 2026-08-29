@@ -3,6 +3,7 @@ export { CancelEditButton, CancelEditIconButton } from "./cancel-edit-button";
 export { IconBtn } from "./icon-button";
 export { Dropdown } from "./dropdown";
 export { RangeSlider } from "./range-slider";
+export { ScrambleText } from "./scramble-text";
 export { SegmentedControl } from "./segmented-control";
 export { ViewModeToggle, useListView } from "./view-mode-toggle";
 export { Textarea } from "./textarea";

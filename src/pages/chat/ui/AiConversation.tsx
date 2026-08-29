@@ -39,6 +39,9 @@ export const AiConversation: FC<Props> = ({
       />
       <MessageThread
         messages={messages}
+        // Ответы ассистента проявляются прокруткой букв. В переписке с живым
+        // человеком этого нет: там расшифровка читалась бы как помеха.
+        animateIncoming
         isLoading={isLoadingHistory}
         error={error}
         pendingReply={isSending}

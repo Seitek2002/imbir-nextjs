@@ -5,6 +5,7 @@ import { FC, Fragment, useEffect, useRef } from "react";
 import Link from "next/link";
 
 import { cn } from "@/shared/lib/utils";
+import { ScrambleText } from "@/shared/ui";
 
 import { formatMessageTime } from "../model/lib";
 import type { ChatThreadMessage } from "../model/types";
@@ -29,7 +30,12 @@ const ReadReceipt: FC<{ isRead?: boolean }> = ({ isRead }) => (
   </span>
 );
 
-const MessageBubble: FC<{ message: ChatThreadMessage }> = ({ message }) => (
+const MessageBubble: FC<{
+  message: ChatThreadMessage;
+  // Проявлять текст прокруткой букв. Включается только для новых ответов
+  // ассистента — история и свои сообщения появляются сразу.
+  scramble?: boolean;
+}> = ({ message, scramble = false }) => (
   <div
     className={cn(
       "flex flex-col max-w-[75%] md:max-w-[65%]",
@@ -44,7 +50,7 @@ const MessageBubble: FC<{ message: ChatThreadMessage }> = ({ message }) => (
           : "bg-[#EEF1F4] text-foreground rounded-2xl rounded-bl-sm",
       )}
     >
-      {message.content}
+      {scramble ? <ScrambleText text={message.content} /> : message.content}
     </div>
     <div
       className={cn(
@@ -142,6 +148,10 @@ const TypingBubble = () => (
 );
 
 type Props = {
+  // Проявлять новые входящие сообщения прокруткой букв. Включено у чата с
+  // ассистентом; в переписке с живым человеком расшифровка выглядела бы как
+  // помеха, а не как эффект.
+  animateIncoming?: boolean;
   emptyHint: string;
   error?: null | string;
   isLoading: boolean;
@@ -154,6 +164,7 @@ export const MessageThread: FC<Props> = ({
   isLoading,
   emptyHint,
   error,
+  animateIncoming = false,
   pendingReply = false,
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -187,7 +198,10 @@ export const MessageThread: FC<Props> = ({
           <SystemNotice key={message.id} message={message} />
         ) : (
           <Fragment key={message.id}>
-            <MessageBubble message={message} />
+            <MessageBubble
+              message={message}
+              scramble={animateIncoming && !message.isMine && !!message.isFresh}
+            />
             {!message.isMine && message.recommendations && (
               <RecommendationCards recommendations={message.recommendations} />
             )}
