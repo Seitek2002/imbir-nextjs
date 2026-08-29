@@ -63,11 +63,15 @@ export type ClinicPrivateProfile = {
 
 export type ClinicDoctorItem = {
   appointments_total: number;
+  // Стаж и число отзывов бэк начал отдавать после нашей просьбы, но в тип их
+  // не добавляли — и список специалистов рисовал захардкоженные нули.
+  experience_years: number;
   full_name: string;
   id: number;
   is_active: boolean;
   photo: null | string;
   rating: number;
+  reviews_count: number;
   specialty: string;
 };
 

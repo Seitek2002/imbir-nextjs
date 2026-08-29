@@ -60,8 +60,8 @@ export const ClinicSpecialistsPage: FC = () => {
     specialty: d.specialty,
     clinic: profile?.name ?? "",
     rating: d.rating,
-    reviews: 0,
-    experience: 0,
+    reviews: d.reviews_count,
+    experience: d.experience_years,
     image: d.photo ?? undefined,
   }));
 

@@ -122,11 +122,17 @@ export const SpecialistCard: FC<Props> = ({
           </p>
 
           <div className="flex items-center gap-1 text-sm flex-wrap">
-            <StarIcon className="w-4 h-4 text-primary" />
-            <span className="font-medium text-primary">{rating}</span>
-            <span className="text-muted">({reviews})</span>
+            {/* Без отзывов рейтинга не существует: «0.00 (0)» читается как
+                самая низкая оценка, а не как «ещё не оценивали». */}
+            {reviews > 0 && (
+              <>
+                <StarIcon className="w-4 h-4 text-primary" />
+                <span className="font-medium text-primary">{rating}</span>
+                <span className="text-muted">({reviews}) •</span>
+              </>
+            )}
             <span className="text-muted">
-              • {experience} {pluralYears(experience)} опыта
+              {experience} {pluralYears(experience)} опыта
             </span>
           </div>
         </div>
@@ -183,10 +189,15 @@ export const SpecialistRow: FC<Props> = ({
           {specialtyLabel} <span className="text-primary">• {clinic}</span>
         </p>
         <div className="flex items-center gap-1 text-xs mt-1 flex-wrap">
-          <StarIcon className="w-3.5 h-3.5 text-primary" />
-          <span className="font-medium text-primary">{rating}</span>
+          {reviews > 0 && (
+            <>
+              <StarIcon className="w-3.5 h-3.5 text-primary" />
+              <span className="font-medium text-primary">{rating}</span>
+              <span className="text-muted">({reviews}) •</span>
+            </>
+          )}
           <span className="text-muted">
-            ({reviews}) • {experience} {pluralYears(experience)} опыта
+            {experience} {pluralYears(experience)} опыта
           </span>
         </div>
       </div>
