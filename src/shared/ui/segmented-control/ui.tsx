@@ -41,7 +41,12 @@ export const SegmentedControl = <T extends string>({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
-            className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors duration-300 rounded-full outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.45)] ${
+            // px-1 + truncate + мельче шрифт на узком экране: сегмент делит
+            // ширину поровну, и четыре вкладки записей клиники («Все»,
+            // «Предстоящие», «Завершённые», «Отменённые») на 390px не
+            // помещались — подписи налезали друг на друга и читались как одно
+            // слово. Ужимаем текст, а не ломаем сетку.
+            className={`relative z-10 min-w-0 flex-1 truncate px-0 sm:px-1 py-2 text-xs sm:text-sm font-medium transition-colors duration-300 rounded-full outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.45)] ${
               isSelected
                 ? "text-foreground"
                 : "text-secondary hover:text-foreground"
