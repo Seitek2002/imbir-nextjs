@@ -5,6 +5,7 @@ import { ReactNode, useState } from "react";
 import Image, { ImageProps } from "next/image";
 
 import { cn } from "@/shared/lib/utils";
+
 import { Spinner } from "../spinner";
 
 type Props = Omit<ImageProps, "onError" | "src"> & {
@@ -13,8 +14,8 @@ type Props = Omit<ImageProps, "onError" | "src"> & {
   // Отключить скелетон на время загрузки. Нужно там, где картинка появляется
   // из уже готовых данных (превью выбранного файла через FileReader) —
   // мигать плашкой там не за чем.
-  noSkeleton?: boolean;
   loadingVariant?: "skeleton" | "spinner";
+  noSkeleton?: boolean;
   // Для вызывающих со своим skeleton-до-onLoad стейтом — иначе он остаётся
   // показанным навечно поверх fallback, если картинка так и не загрузилась.
   onError?: () => void;
@@ -63,10 +64,7 @@ export const ImageWithFallback = ({
   // Ждать нечего, скелетон только мигнул бы на один кадр.
   const isInlineData = typeof src === "string" && src.startsWith("data:");
   const showSkeleton =
-    !loaded &&
-    loadingVariant === "skeleton" &&
-    !noSkeleton &&
-    !isInlineData;
+    !loaded && loadingVariant === "skeleton" && !noSkeleton && !isInlineData;
 
   const image = (
     <Image
@@ -90,12 +88,7 @@ export const ImageWithFallback = ({
     />
   );
 
-  if (
-    !loaded &&
-    loadingVariant === "spinner" &&
-    !noSkeleton &&
-    !isInlineData
-  ) {
+  if (!loaded && loadingVariant === "spinner" && !noSkeleton && !isInlineData) {
     return (
       <span
         className={

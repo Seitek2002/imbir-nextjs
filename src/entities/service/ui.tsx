@@ -87,6 +87,9 @@ export const ServiceCard: FC<Props> = ({
   const displayClinic = clinic || clinicId;
   // Цену прячем целиком, если бэк её не отдал — «0 с» читалось бы как «бесплатно»
   const showPrice = hasPrice(price);
+  // Ровно та же логика для оценки: «0.00 (0)» у новой услуги читается как
+  // плохая оценка, хотя её просто ещё никто не оценивал.
+  const hasRating = reviews !== undefined && reviews > 0;
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "doctor";
   const href = id ? `${ROUTES.RECORD}?service=${id}` : ROUTES.RECORD;
@@ -137,15 +140,13 @@ export const ServiceCard: FC<Props> = ({
             )}
           </p>
 
-          {rating !== undefined && (
+          {hasRating && (
             <div className="flex items-center gap-1 mb-2 text-xs">
               <StarIcon className="w-3.5 h-3.5 text-primary" />
               <span className="text-primary font-medium">
-                {formatRating(rating)}
+                {formatRating(rating ?? 0)}
               </span>
-              {reviews !== undefined && (
-                <span className="text-secondary">({reviews})</span>
-              )}
+              <span className="text-secondary">({reviews})</span>
             </div>
           )}
 
@@ -223,15 +224,13 @@ export const ServiceCard: FC<Props> = ({
           </p>
         )}
 
-        {rating !== undefined && (
+        {hasRating && (
           <div className="flex items-center gap-1 mb-4 text-sm">
             <StarIcon className="w-3.5 h-3.5 text-primary" />
             <span className="text-primary font-medium">
-              {formatRating(rating)}
+              {formatRating(rating ?? 0)}
             </span>
-            {reviews !== undefined && (
-              <span className="text-secondary">({reviews})</span>
-            )}
+            <span className="text-secondary">({reviews})</span>
           </div>
         )}
 

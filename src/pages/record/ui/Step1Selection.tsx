@@ -104,8 +104,12 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
               />
             ))
           ) : (
-            <p className="text-sm text-muted text-center py-6">
-              Ничего не найдено
+            // Пустой список и неудачный поиск — разные ситуации: в первой
+            // искать нечего, во второй стоит поменять запрос.
+            <p className="text-sm text-muted text-center py-6 px-4">
+              {mobileStep1Config.items.length === 0
+                ? mobileStep1Config.emptyText
+                : "Ничего не найдено — попробуйте изменить запрос"}
             </p>
           )}
         </div>

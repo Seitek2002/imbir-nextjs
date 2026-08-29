@@ -102,23 +102,46 @@ export const SelectionListItem = ({
           </p>
         )}
 
-        <div
-          className={cn(
-            "flex items-center gap-1 mt-1 text-secondary",
-            compact ? "text-xs" : "text-sm",
-          )}
-        >
-          <StarIcon className="size-4 text-primary" />
-          <span className="font-medium text-primary">{item.rating}</span>
-          <span>({item.reviews})</span>
-          {(isClinic || isDoctor) && item.experience > 0 && (
-            <span>
-              • {item.experience} {pluralYears(item.experience)} опыта
-            </span>
-          )}
-        </div>
+        {/* Без отзывов рейтинг ничего не значит: у новой клиники рисовалось
+            «0 (0)», что читается как «оценили на ноль», а не «оценок ещё
+            нет». Так же скрывают пустые данные карточки каталога. */}
+        {item.reviews > 0 && (
+          <div
+            className={cn(
+              "flex items-center gap-1 mt-1 text-secondary",
+              compact ? "text-xs" : "text-sm",
+            )}
+          >
+            <StarIcon className="size-4 text-primary" />
+            <span className="font-medium text-primary">{item.rating}</span>
+            <span>({item.reviews})</span>
+            {(isClinic || isDoctor) && item.experience > 0 && (
+              <span>
+                • {item.experience} {pluralYears(item.experience)} опыта
+              </span>
+            )}
+          </div>
+        )}
 
-        {isClinic && (
+        {/* Стаж показываем и без отзывов — он от них не зависит. */}
+        {item.reviews === 0 &&
+          (isClinic || isDoctor) &&
+          item.experience > 0 && (
+            <div
+              className={cn(
+                "flex items-center gap-1 mt-1 text-secondary",
+                compact ? "text-xs" : "text-sm",
+              )}
+            >
+              <span>
+                {item.experience} {pluralYears(item.experience)} опыта
+              </span>
+            </div>
+          )}
+
+        {/* Адрес есть не у всех клиник — без проверки оставалась одинокая
+            иконка-булавка без текста. */}
+        {isClinic && item.address && (
           <div
             className={cn(
               "flex items-center gap-1 mt-1 text-secondary",

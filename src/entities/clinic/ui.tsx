@@ -74,6 +74,10 @@ export const ClinicCard: FC<Props> = ({
   const { ref: imgRef, inView } = useInView<HTMLDivElement>();
   const shouldMount = priority || inView;
 
+  // Рейтинг без единого отзыва — это не «ноль звёзд», а «ещё не оценивали».
+  // У новой клиники рисовалось «0.00 (0)», что читается как плохая оценка.
+  const hasRating = reviews !== undefined && reviews > 0;
+
   const href = id ? ROUTES.CLINIC_DETAILS(id) : "/";
   const stopProp = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -111,20 +115,21 @@ export const ClinicCard: FC<Props> = ({
           <p className="font-semibold text-sm text-foreground truncate">
             {name}
           </p>
-          {(rating !== undefined || reviews !== undefined) && (
+          {(hasRating || experience > 0) && (
             <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">
-              <StarIcon className="size-3.5 text-[#FFA18D]" />
-              {rating !== undefined && (
-                <span className="font-medium text-[#FFA18D]">
-                  {formatRating(rating)}
-                </span>
-              )}
-              {reviews !== undefined && (
-                <span className="text-secondary">({reviews})</span>
+              {hasRating && (
+                <>
+                  <StarIcon className="size-3.5 text-[#FFA18D]" />
+                  <span className="font-medium text-[#FFA18D]">
+                    {formatRating(rating ?? 0)}
+                  </span>
+                  <span className="text-secondary">({reviews})</span>
+                </>
               )}
               {experience > 0 && (
                 <span className="text-secondary">
-                  • {experience} {pluralYears(experience)} опыта
+                  {hasRating && "• "}
+                  {experience} {pluralYears(experience)} опыта
                 </span>
               )}
             </div>
@@ -188,20 +193,21 @@ export const ClinicCard: FC<Props> = ({
 
       <div className="p-3">
         <p className="font-semibold text-sm text-foreground truncate">{name}</p>
-        {(rating !== undefined || reviews !== undefined) && (
+        {(hasRating || experience > 0) && (
           <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">
-            <StarIcon className="size-3.5 text-[#FFA18D]" />
-            {rating !== undefined && (
-              <span className="font-medium text-[#FFA18D]">
-                {formatRating(rating)}
-              </span>
-            )}
-            {reviews !== undefined && (
-              <span className="text-secondary">({reviews})</span>
+            {hasRating && (
+              <>
+                <StarIcon className="size-3.5 text-[#FFA18D]" />
+                <span className="font-medium text-[#FFA18D]">
+                  {formatRating(rating ?? 0)}
+                </span>
+                <span className="text-secondary">({reviews})</span>
+              </>
             )}
             {experience > 0 && (
               <span className="text-secondary">
-                • {experience} {pluralYears(experience)} опыта
+                {hasRating && "• "}
+                {experience} {pluralYears(experience)} опыта
               </span>
             )}
           </div>
