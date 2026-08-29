@@ -308,3 +308,20 @@ input[type="number"]::-webkit-inner-spin-button {
     animation: none;
   }
 }
+
+/* Баннер подтверждения города — fixed, места в потоке он не занимает и на
+   самом низу страницы накрывает последние элементы формы: на
+   /clinic-profile/procedures/new два поля обеденного перерыва было не
+   достать вообще, пока город не подтверждён. Класс вешает сам баннер,
+   пока видим: запас снизу живёт ровно столько же. */
+body.has-city-banner {
+  padding-bottom: 6rem;
+}
+
+@media (max-width: 767px) {
+  /* На телефоне баннер приподнят на 6rem над нижней полосой —
+     запас нужен на эти 6rem плюс саму его высоту. */
+  body.has-city-banner {
+    padding-bottom: calc(11rem + env(safe-area-inset-bottom, 0px));
+  }
+}

@@ -59,7 +59,19 @@ export const CityConfirmBanner = () => {
 
   // Баннер не нужен, если города нет, он уже подтверждён/скрыт, или выбран
   // вручную (напр. восстановлен из localStorage у вернувшегося пользователя).
-  if (closed || !detectedCity || isSet || manuallySelected) return null;
+  const isVisible = !(closed || !detectedCity || isSet || manuallySelected);
+
+  // Баннер лежит fixed и места в потоке не занимает, поэтому на самом низу
+  // страницы он молча накрывал последние поля формы — на добавлении процедуры
+  // так было не достать оба поля обеденного перерыва. Пока баннер висит,
+  // добавляем странице запас снизу (правило в globals.css).
+  useEffect(() => {
+    if (!isVisible) return;
+    document.body.classList.add("has-city-banner");
+    return () => document.body.classList.remove("has-city-banner");
+  }, [isVisible]);
+
+  if (!isVisible) return null;
 
   const handleConfirm = () => {
     setCity(detectedCity);
