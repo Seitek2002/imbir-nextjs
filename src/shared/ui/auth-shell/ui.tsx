@@ -2,10 +2,16 @@ import { ReactNode } from "react";
 
 import Image from "next/image";
 
+import { cn } from "@/shared/lib/utils";
+
 type Props = {
   // Содержимое правой карточки (форма конкретной страницы).
   children: ReactNode;
   footer: ReactNode;
+  // Дочерняя страница рисует на мобильном закреплённую панель снизу —
+  // резервируем под неё место в конце страницы, иначе она перекрывает
+  // последний блок (у нас это футер).
+  hasFixedBottomBar?: boolean;
   // Хедер и футер приходят пропсами (это виджеты — shared их не импортирует),
   // а их поведение всё равно различается на входе/регистрации.
   header: ReactNode;
@@ -14,8 +20,23 @@ type Props = {
 // Общая оболочка страниц авторизации (вход/регистрация): декоративная картинка
 // слева + карточка формы справа. Раньше эта разметка (в т.ч. картинка) дублировалась
 // в login/ui.tsx и register/ui.tsx.
-export const AuthShell = ({ header, footer, children }: Props) => (
-  <main className="min-h-screen bg-background flex flex-col">
+export const AuthShell = ({
+  header,
+  footer,
+  children,
+  hasFixedBottomBar = false,
+}: Props) => (
+  // Отступ снизу — на всей странице, а не внутри формы. Мастер регистрации
+  // держит на мобильном закреплённую панель с кнопками, и раньше распорку под
+  // неё ставила сама FormSubmitButton. Но после формы идёт ещё футер: распорка
+  // оказывалась пустой дырой между формой и футером, а панель всё равно
+  // перекрывала низ футера.
+  <main
+    className={cn(
+      "min-h-screen bg-background flex flex-col",
+      hasFixedBottomBar && "pb-40 md:pb-0",
+    )}
+  >
     {header}
 
     <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">

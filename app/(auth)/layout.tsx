@@ -40,6 +40,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     <AuthShell
       header={<Header backTo={ROUTES.HOME}>{AuthTabs}</Header>}
       footer={<Footer />}
+      // Только мастер регистрации держит на мобильном закреплённую панель
+      // с кнопками — вход обходится обычной кнопкой в потоке.
+      hasFixedBottomBar={authMode === "register"}
     >
       <div className="hidden md:block">{AuthTabs}</div>
       {children}
