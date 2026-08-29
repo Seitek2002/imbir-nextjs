@@ -3,7 +3,8 @@
 import { useRef } from "react";
 
 import { getCities, getLanguages, referenceKeys } from "@/shared/api";
-import { CITIES_BY_COUNTRY, DEFAULT_COUNTRY, colors } from "@/shared/config";
+import { UploadCloudIcon } from "@/shared/assets/icons";
+import { CITIES_BY_COUNTRY, DEFAULT_COUNTRY } from "@/shared/config";
 import { MAX_IMAGE_MB, isFileSizeAllowed } from "@/shared/lib/files";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import { cn } from "@/shared/lib/utils";
@@ -11,24 +12,6 @@ import { DateField, Dropdown, Input, PhoneInput } from "@/shared/ui";
 
 import { DEFAULT_LANGUAGES } from "../model/constants";
 import type { DoctorFormData } from "../model/types";
-
-const UploadIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <path
-      d="M22 18v3a1 1 0 01-1 1H7a1 1 0 01-1-1v-3"
-      stroke={colors.primary}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M14 6v12M10 10l4-4 4 4"
-      stroke={colors.primary}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 type Props = {
   data: DoctorFormData;
@@ -222,7 +205,7 @@ export const Step1BasicInfo = ({ data, onChange, emailError }: Props) => {
             onClick={() => photoInputRef.current?.click()}
             className="flex items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary/40 transition-colors w-full"
           >
-            <UploadIcon />
+            <UploadCloudIcon className="size-7 text-primary" />
             <span className="text-sm font-medium text-overlay">
               Загрузить фото
             </span>

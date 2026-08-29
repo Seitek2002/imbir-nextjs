@@ -3,30 +3,13 @@
 import { useRef } from "react";
 
 import { getClinicTypes, referenceKeys } from "@/shared/api";
-import { DEFAULT_CLINIC_TYPES, colors } from "@/shared/config";
+import { UploadCloudIcon } from "@/shared/assets/icons";
+import { DEFAULT_CLINIC_TYPES } from "@/shared/config";
 import { useReferenceOptions } from "@/shared/lib/useReference";
 import { Dropdown, Input, Textarea } from "@/shared/ui";
 
 import type { ClinicFormData } from "../model/types";
 import { PhotoThumb } from "./PhotoThumb";
-
-const UploadIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <path
-      d="M22 18v3a1 1 0 01-1 1H7a1 1 0 01-1-1v-3"
-      stroke={colors.primary}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M14 6v12M10 10l4-4 4 4"
-      stroke={colors.primary}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 type Props = {
   data: ClinicFormData;
@@ -101,7 +84,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
             onClick={() => logoInputRef.current?.click()}
             className="flex items-center justify-center gap-2 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary/40 transition-colors w-full"
           >
-            <UploadIcon />
+            <UploadCloudIcon className="size-7 text-primary" />
             <span className="text-sm font-medium text-overlay">
               Загрузить логотип
             </span>
@@ -170,7 +153,7 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
               onClick={() => photosInputRef.current?.click()}
               className="w-full min-h-[72px] flex items-center justify-center gap-2"
             >
-              <UploadIcon />
+              <UploadCloudIcon className="size-7 text-primary" />
               <span className="text-sm font-medium text-overlay">
                 Загрузить фото
               </span>

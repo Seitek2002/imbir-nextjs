@@ -2,31 +2,13 @@
 
 import { type ReactNode, useRef, useState } from "react";
 
-import { EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
+import { EyeIcon, EyeOffIcon, UploadCloudIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { MAX_DOCUMENT_MB, filterAllowedFiles } from "@/shared/lib/files";
 import { Input } from "@/shared/ui";
 
 import type { DoctorFormData } from "../model/types";
 import { FileThumb } from "./FileThumb";
-
-const UploadIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <path
-      d="M22 18v3a1 1 0 01-1 1H7a1 1 0 01-1-1v-3"
-      stroke={colors.primary}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M14 6v12M10 10l4-4 4 4"
-      stroke={colors.primary}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 const InfoIcon = () => (
   <svg
@@ -118,7 +100,7 @@ export const Step4Certificates = ({
               onClick={() => certInputRef.current?.click()}
               className="w-full min-h-[80px] flex items-center justify-center gap-2"
             >
-              <UploadIcon />
+              <UploadCloudIcon className="size-7 text-primary" />
               <span className="text-sm font-medium text-overlay">
                 Загрузить документы
               </span>

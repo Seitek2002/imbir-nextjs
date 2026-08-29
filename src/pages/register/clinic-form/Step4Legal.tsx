@@ -2,29 +2,11 @@
 
 import { useRef } from "react";
 
-import { colors } from "@/shared/config";
+import { UploadCloudIcon } from "@/shared/assets/icons";
 import { DateField, Input } from "@/shared/ui";
 
 import type { ClinicFormData } from "../model/types";
 import { PhotoThumb } from "./PhotoThumb";
-
-const UploadIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <path
-      d="M22 18v3a1 1 0 01-1 1H7a1 1 0 01-1-1v-3"
-      stroke={colors.primary}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M14 6v12M10 10l4-4 4 4"
-      stroke={colors.primary}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 type Props = {
   data: ClinicFormData;
@@ -122,7 +104,7 @@ export const Step4Legal = ({ data, onChange }: Props) => {
               onClick={() => docsInputRef.current?.click()}
               className="w-full min-h-[80px] flex items-center justify-center gap-2"
             >
-              <UploadIcon />
+              <UploadCloudIcon className="size-7 text-primary" />
               <span className="text-sm font-medium text-overlay">
                 Загрузить документы
               </span>
