@@ -4,7 +4,7 @@ import { FC, ReactNode, useState } from "react";
 
 import Link from "next/link";
 
-import { LogoutIcon, StarIcon } from "@/shared/assets/icons";
+import { ClockIcon, LogoutIcon, StarIcon } from "@/shared/assets/icons";
 import { useLogout } from "@/shared/lib/useLogout";
 import { usePendingClinicAppointments } from "@/shared/lib/usePendingAppointments";
 import { useSidebarIndicator } from "@/shared/lib/useSidebarIndicator";
@@ -84,17 +84,7 @@ const MENU_ITEMS: MenuItem[] = [
     href: "/clinic-profile/appointments",
     label: "Записи",
     showPending: true,
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M10 5V10L13.3333 11.6667M17.5 10C17.5 14.1421 14.1421 17.5 10 17.5C5.85786 17.5 2.5 14.1421 2.5 10C2.5 5.85786 5.85786 2.5 10 2.5C14.1421 2.5 17.5 5.85786 17.5 10Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
+    icon: <ClockIcon className="size-5" />,
   },
   {
     href: "/clinic-profile/reviews",

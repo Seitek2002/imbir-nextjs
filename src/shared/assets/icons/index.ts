@@ -13,19 +13,24 @@ import PlayIcon from "./cards/play.svg";
 import ThunderIcon from "./cards/thunder.svg";
 import CalendarIcon from "./common/calendar.svg";
 import CheckIcon from "./common/check.svg";
+import ChevronLeftIcon from "./common/chevron-left.svg";
 import ChevronRightIcon from "./common/chevron-right.svg";
 import ClinicBuildingIcon from "./common/clinic-building.svg";
+import ClockIcon from "./common/clock.svg";
+import CloseIcon from "./common/close.svg";
 import DoctorPersonIcon from "./common/doctor-person.svg";
 import DocumentTextIcon from "./common/document-text.svg";
 import DownloadIcon from "./common/download.svg";
 import EditIcon from "./common/edit.svg";
 import MedicalServiceIcon from "./common/medical-service.svg";
+import PlusIcon from "./common/plus.svg";
 import ServiceRadialIcon from "./common/service-radial.svg";
 import StarBoldIcon from "./common/star-bold.svg";
 import StarOutlineIcon from "./common/star-outline.svg";
 import StarIcon from "./common/star.svg";
 import SuccessCheckIcon from "./common/success-check.svg";
 import TrashIcon from "./common/trash.svg";
+import UploadCloudIcon from "./common/upload-cloud.svg";
 import UserCircleIcon from "./common/user-circle.svg";
 import VideoCallIcon from "./common/video-call.svg";
 import OfflineRecordIcon from "./details/offline-record.svg";
@@ -64,6 +69,11 @@ import SearchRemoveHistory from "./search/remove-history.svg";
 export {
   EditIcon,
   CheckIcon,
+  ChevronLeftIcon,
+  ClockIcon,
+  CloseIcon,
+  PlusIcon,
+  UploadCloudIcon,
   ChevronRightIcon,
   ClinicBuildingIcon,
   DoctorPersonIcon,

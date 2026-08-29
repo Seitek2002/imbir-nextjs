@@ -4,8 +4,7 @@ import { FC, useState } from "react";
 
 import Link from "next/link";
 
-import { StarIcon, UserCircleIcon } from "@/shared/assets/icons";
-import { colors } from "@/shared/config";
+import { CloseIcon, StarIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { pluralYears } from "@/shared/lib/utils";
 import { ImageWithFallback } from "@/shared/ui";
 
@@ -58,14 +57,7 @@ const DeleteButton: FC<{
     className={`z-10 rounded-full bg-white border border-border flex items-center justify-center hover:bg-primary-tint hover:border-primary transition-colors shrink-0 ${className ?? ""}`}
     aria-label="Удалить"
   >
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M12 4L4 12M4 4L12 12"
-        stroke={colors.secondary}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
+    <CloseIcon className="size-4 text-secondary" />
   </button>
 );
 

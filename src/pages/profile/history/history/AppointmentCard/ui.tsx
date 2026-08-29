@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import {
   CalendarIcon,
+  CloseIcon,
   GeoIcon,
   MedicalServiceIcon,
   ReviewsIcon,
@@ -56,17 +57,6 @@ const ClockIcon: FC<{ className?: string }> = ({ className }) => (
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const CloseIcon: FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} viewBox="0 0 16 16" fill="none">
-    <path
-      d="M12 4L4 12M4 4L12 12"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
     />
   </svg>
 );

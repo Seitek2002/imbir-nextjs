@@ -21,7 +21,7 @@ import {
 } from "@/entities/specialization";
 
 import { getConditions, getEquipment, referenceKeys } from "@/shared/api";
-import { CheckIcon } from "@/shared/assets/icons";
+import { CheckIcon, CloseIcon } from "@/shared/assets/icons";
 import { MAX_DOCUMENT_MB, isFileSizeAllowed } from "@/shared/lib/files";
 import { useReferenceValues } from "@/shared/lib/useReference";
 import {
@@ -97,23 +97,6 @@ const PlusIcon: FC<{ className?: string }> = ({ className }) => (
   >
     <path
       d="M7 2V12M2 7H12"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const CloseIcon: FC<{ className?: string }> = ({ className }) => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    className={className}
-  >
-    <path
-      d="M12 4L4 12M4 4L12 12"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"

@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import { useClinicCabinet } from "@/entities/clinic-profile";
 
-import { StarIcon } from "@/shared/assets/icons";
+import { ClockIcon, StarIcon } from "@/shared/assets/icons";
 import { usePendingClinicAppointments } from "@/shared/lib/usePendingAppointments";
 import { CabinetMenuItem, CabinetMobileMenu } from "@/shared/ui";
 
@@ -65,15 +65,7 @@ const MENU_ITEMS: CabinetMenuItem[] = [
     href: "/clinic-profile/appointments",
     label: "Записи",
     icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path
-          d="M10 5V10L13.3333 11.6667M17.5 10C17.5 14.1421 14.1421 17.5 10 17.5C5.85786 17.5 2.5 14.1421 2.5 10C2.5 5.85786 5.85786 2.5 10 2.5C14.1421 2.5 17.5 5.85786 17.5 10Z"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <ClockIcon className="size-5" />
     ),
   },
   {

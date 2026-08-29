@@ -3,6 +3,7 @@
 import { FC, useEffect, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 
+import { ClockIcon } from "@/shared/assets/icons";
 import { cn } from "@/shared/lib/utils";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
@@ -74,16 +75,9 @@ export const TimeField: FC<Props> = ({
         >
           {value || placeholder}
         </span>
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-          <path
-            d="M10 5V10L13.3333 11.6667M17.5 10C17.5 14.1421 14.1421 17.5 10 17.5C5.85786 17.5 2.5 14.1421 2.5 10C2.5 5.85786 5.85786 2.5 10 2.5C14.1421 2.5 17.5 5.85786 17.5 10Z"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={open ? "text-primary" : "text-muted"}
-          />
-        </svg>
+        <ClockIcon
+          className={cn("size-4", open ? "text-primary" : "text-muted")}
+        />
       </button>
 
       {open && !disabled && (
