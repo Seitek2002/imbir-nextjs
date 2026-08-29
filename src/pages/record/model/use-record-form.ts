@@ -103,10 +103,17 @@ export const useRecordForm = () => {
     },
   });
 
-  // Все приёмы на платформе онлайн, но бэк не разрешает онлайн-запись без
-  // аккаунта («Онлайн-запись доступна только авторизованным пользователям»,
-  // 400), поэтому гостевая запись уходит с is_online: false.
+  // Бэк не разрешает онлайн-запись без аккаунта («Онлайн-запись доступна
+  // только авторизованным пользователям», 400), поэтому гостевая запись
+  // уходит с is_online: false.
   const isAuthenticated = useAuthStore((state) => Boolean(state.accessToken));
+
+  // Приём онлайн — только если пользователь пришёл по кнопке «Онлайн-запись»
+  // на карточке врача (она есть лишь у тех, кто is_online_available) и вошёл
+  // в аккаунт. Раньше признак брался из одной авторизации, и запись к врачу
+  // без онлайн-приёма падала с «Этот врач не проводит онлайн-консультации» —
+  // записаться к нему было нельзя вообще.
+  const isOnlineBooking = isAuthenticated && urlParams.get("mode") === "online";
 
   const { data: profile } = useQuery({
     queryKey: ["record-profile"],
@@ -790,7 +797,7 @@ export const useRecordForm = () => {
     const request: CreateAppointmentRequest = {
       date: toApiDate(selectedDate),
       time: toApiTime(selectedTime),
-      is_online: isAuthenticated,
+      is_online: isOnlineBooking,
     };
 
     if (selectedDoctorId) request.doctor_id = Number(selectedDoctorId);
@@ -976,6 +983,7 @@ export const useRecordForm = () => {
     handleSuccessClose,
     appointmentResult,
     isAuthenticated,
+    isOnlineBooking,
     clinicMap,
     hasMoreClinics: Boolean(hasMoreClinics),
     isFetchingMoreClinics,
