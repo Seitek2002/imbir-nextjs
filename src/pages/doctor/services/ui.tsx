@@ -20,6 +20,7 @@ import {
 } from "@/shared/api";
 import { EditIcon } from "@/shared/assets/icons";
 import { extractErrorMessage } from "@/shared/lib/errors";
+import { parsePrice } from "@/shared/lib/price";
 import {
   Button,
   ConfirmDialog,
@@ -331,7 +332,7 @@ const TD = "px-6 py-4 whitespace-nowrap";
 const ServicesSkeleton: FC<{ showClinic?: boolean }> = ({
   showClinic = false,
 }) => (
-  <div className="bg-white rounded-3xl border border-border overflow-hidden">
+  <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
     <div className="overflow-x-auto">
       <table className="w-full min-w-160 text-left border-collapse">
         <thead>
@@ -380,6 +381,106 @@ const ServicesSkeleton: FC<{ showClinic?: boolean }> = ({
         </tbody>
       </table>
     </div>
+  </div>
+);
+
+// Мобильная карточка услуги. На узком экране таблица показывала только
+// название: категория, цена, длительность и кнопки редактирования уходили за
+// правый край, и добраться до них можно было лишь горизонтальным скроллом.
+// У клиники такой список карточками уже был, у врача — нет.
+const ServiceCard: FC<{
+  onDelete: () => void;
+  onEdit: () => void;
+  service: DoctorServiceItem;
+  showClinic: boolean;
+}> = ({ onDelete, onEdit, service, showClinic }) => {
+  const price = parsePrice(service.price);
+
+  return (
+    <div className="flex items-start gap-3 bg-white rounded-2xl border border-border p-3">
+      <div className="size-14 rounded-xl overflow-hidden bg-surface flex items-center justify-center shrink-0">
+        {service.photo ? (
+          <ImageWithFallback
+            src={service.photo}
+            alt={service.name}
+            width={56}
+            height={56}
+            className="w-full h-full object-cover"
+            fallback={<ServicePhotoPlaceholder className="size-7" />}
+          />
+        ) : (
+          <ServicePhotoPlaceholder className="size-7" />
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-sm font-medium text-foreground">
+            {service.name}
+          </h3>
+          {price !== undefined && (
+            <span className="text-sm font-semibold text-foreground shrink-0">
+              {price} сом
+            </span>
+          )}
+        </div>
+
+        <p className="text-xs text-muted mt-0.5">
+          {service.category || "Без категории"}
+          {service.duration != null && ` • ${service.duration} мин`}
+          {showClinic && service.clinic?.name && (
+            <span className="text-primary"> • {service.clinic.name}</span>
+          )}
+        </p>
+
+        {service.description && (
+          <p className="text-xs text-muted mt-1 line-clamp-2">
+            {service.description}
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1 shrink-0">
+        <IconBtn
+          onClick={onEdit}
+          variant="text"
+          size="xs"
+          className="text-dim hover:text-primary"
+          aria-label="Редактировать"
+        >
+          <EditIcon />
+        </IconBtn>
+        <IconBtn
+          onClick={onDelete}
+          variant="text"
+          size="xs"
+          className="text-dim hover:text-red-500"
+          aria-label="Удалить"
+        >
+          <TrashIcon />
+        </IconBtn>
+      </div>
+    </div>
+  );
+};
+
+// Заглушка мобильного списка — те же карточки, чтобы при загрузке данных
+// ничего не прыгало.
+const ServicesMobileSkeleton: FC = () => (
+  <div className="md:hidden flex flex-col gap-3">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <div
+        key={i}
+        className="flex items-start gap-3 bg-white rounded-2xl border border-border p-3"
+      >
+        <div className="size-14 rounded-xl skeleton shrink-0" />
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="h-4 w-32 rounded-md skeleton" />
+          <div className="h-3 w-24 rounded-md skeleton" />
+          <div className="h-3 w-full rounded-md skeleton" />
+        </div>
+      </div>
+    ))}
   </div>
 );
 
@@ -464,110 +565,135 @@ export const DoctorServicesPage: FC = () => {
 
         <div className="pb-24 lg:pb-0">
           {isLoading ? (
-            <ServicesSkeleton showClinic={showClinicColumn} />
+            <>
+              <ServicesMobileSkeleton />
+              <ServicesSkeleton showClinic={showClinicColumn} />
+            </>
           ) : services.length === 0 ? (
             <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
               Услуг пока нет
             </div>
           ) : (
-            <div className="bg-white rounded-3xl border border-border overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-160 text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="px-6 py-4 w-20" />
-                      <th className={TH}>Название</th>
-                      <th className={TH}>Категория</th>
-                      {/* Колонка только у врачей с несколькими местами приёма:
-                          у остальных во всех строках стояло бы одно и то же. */}
-                      {showClinicColumn && <th className={TH}>Клиника</th>}
-                      <th className={TH}>Описание</th>
-                      <th className={TH}>Стоимость</th>
-                      <th className={TH}>Длительность</th>
-                      <th className="px-6 py-4 w-12" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {services.map((s) => (
-                      <tr
-                        key={s.id}
-                        className="group border-b border-border last:border-0"
-                      >
-                        <td className={TD}>
-                          <div className="size-12 rounded-xl overflow-hidden bg-surface flex items-center justify-center">
-                            {s.photo ? (
-                              <ImageWithFallback
-                                src={s.photo}
-                                alt={s.name}
-                                width={48}
-                                height={48}
-                                className="w-full h-full object-cover"
-                                fallback={
-                                  <ServicePhotoPlaceholder className="size-6" />
-                                }
-                              />
-                            ) : (
-                              <ServicePhotoPlaceholder className="size-6" />
-                            )}
-                          </div>
-                        </td>
-                        <td className={`${TD} text-foreground font-medium`}>
-                          {s.name}
-                        </td>
-                        <td className={`${TD} text-muted`}>
-                          {s.category || "—"}
-                        </td>
-                        {showClinicColumn && (
-                          <td className={`${TD} text-muted`}>
-                            {s.clinic?.name ?? "—"}
-                            {s.branch && (
-                              <span className="text-dim">
-                                {" "}
-                                • {s.branch.name}
-                              </span>
-                            )}
-                          </td>
-                        )}
-                        <td className="px-6 py-4 text-muted">
-                          {s.description || "—"}
-                        </td>
-                        <td className={`${TD} text-foreground`}>
-                          {s.price != null ? `${s.price} сом` : "—"}
-                        </td>
-                        <td className={`${TD} text-foreground`}>
-                          {s.duration != null ? `${s.duration} мин` : "—"}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-1">
-                            <IconBtn
-                              onClick={() => {
-                                setEditTarget(s);
-                                setModalOpen(true);
-                              }}
-                              variant="text"
-                              size="xs"
-                              className="text-dim hover:text-primary opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                              aria-label="Редактировать"
-                            >
-                              <EditIcon />
-                            </IconBtn>
-                            <IconBtn
-                              onClick={() => setDeleteTarget(s)}
-                              variant="text"
-                              size="xs"
-                              className="text-dim hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100"
-                              aria-label="Удалить"
-                            >
-                              <TrashIcon />
-                            </IconBtn>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <>
+              <div className="md:hidden flex flex-col gap-3">
+                {services.map((s) => (
+                  <ServiceCard
+                    key={s.id}
+                    service={s}
+                    showClinic={showClinicColumn}
+                    onEdit={() => {
+                      setEditTarget(s);
+                      setModalOpen(true);
+                    }}
+                    onDelete={() => setDeleteTarget(s)}
+                  />
+                ))}
               </div>
-            </div>
+
+              <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-160 text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="px-6 py-4 w-20" />
+                        <th className={TH}>Название</th>
+                        <th className={TH}>Категория</th>
+                        {/* Колонка только у врачей с несколькими местами приёма:
+                          у остальных во всех строках стояло бы одно и то же. */}
+                        {showClinicColumn && <th className={TH}>Клиника</th>}
+                        <th className={TH}>Описание</th>
+                        <th className={TH}>Стоимость</th>
+                        <th className={TH}>Длительность</th>
+                        <th className="px-6 py-4 w-12" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {services.map((s) => (
+                        <tr
+                          key={s.id}
+                          className="group border-b border-border last:border-0"
+                        >
+                          <td className={TD}>
+                            <div className="size-12 rounded-xl overflow-hidden bg-surface flex items-center justify-center">
+                              {s.photo ? (
+                                <ImageWithFallback
+                                  src={s.photo}
+                                  alt={s.name}
+                                  width={48}
+                                  height={48}
+                                  className="w-full h-full object-cover"
+                                  fallback={
+                                    <ServicePhotoPlaceholder className="size-6" />
+                                  }
+                                />
+                              ) : (
+                                <ServicePhotoPlaceholder className="size-6" />
+                              )}
+                            </div>
+                          </td>
+                          <td className={`${TD} text-foreground font-medium`}>
+                            {s.name}
+                          </td>
+                          <td className={`${TD} text-muted`}>
+                            {s.category || "—"}
+                          </td>
+                          {showClinicColumn && (
+                            <td className={`${TD} text-muted`}>
+                              {s.clinic?.name ?? "—"}
+                              {s.branch && (
+                                <span className="text-dim">
+                                  {" "}
+                                  • {s.branch.name}
+                                </span>
+                              )}
+                            </td>
+                          )}
+                          <td className="px-6 py-4 text-muted">
+                            {s.description || "—"}
+                          </td>
+                          <td className={`${TD} text-foreground`}>
+                            {/* Бэк отдаёт цену строкой с копейками («1200.00») — прогоняем
+                                через parsePrice, иначе в таблице висят нули,
+                                которых нет в карточках. */}
+                            {parsePrice(s.price) !== undefined
+                              ? `${parsePrice(s.price)} сом`
+                              : "—"}
+                          </td>
+                          <td className={`${TD} text-foreground`}>
+                            {s.duration != null ? `${s.duration} мин` : "—"}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-1">
+                              <IconBtn
+                                onClick={() => {
+                                  setEditTarget(s);
+                                  setModalOpen(true);
+                                }}
+                                variant="text"
+                                size="xs"
+                                className="text-dim hover:text-primary opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                                aria-label="Редактировать"
+                              >
+                                <EditIcon />
+                              </IconBtn>
+                              <IconBtn
+                                onClick={() => setDeleteTarget(s)}
+                                variant="text"
+                                size="xs"
+                                className="text-dim hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                                aria-label="Удалить"
+                              >
+                                <TrashIcon />
+                              </IconBtn>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </DoctorPageLayout>

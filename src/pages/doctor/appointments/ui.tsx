@@ -32,8 +32,96 @@ const TD_NEW = "shadow-[inset_4px_0_0_0_var(--color-info)]";
 
 // Заглушка повторяет саму таблицу записей — та же шапка и колонки, чтобы при
 // появлении данных ничего не прыгало.
+// Мобильная карточка записи. Таблица на 390px показывала только имя
+// пациента: дата, время, услуга, статус и кнопки действий уходили за правый
+// край — подтвердить или отменить приём с телефона было нельзя, не найдя
+// горизонтальный скролл внутри блока.
+const AppointmentCard: FC<{
+  appointment: DoctorAppointment;
+  onChangeStatus: (
+    id: number,
+    status: "cancelled" | "completed" | "confirmed",
+  ) => void;
+  onOpenSummary: (id: number) => void;
+}> = ({ appointment: a, onChangeStatus, onOpenSummary }) => {
+  const isNew = a.status === "pending";
+  const isOpen =
+    a.status === "pending" ||
+    a.status === "confirmed" ||
+    a.status === "scheduled" ||
+    a.status === "upcoming";
+
+  return (
+    <div
+      className={`bg-white rounded-2xl border p-3 ${
+        isNew ? "border-info" : "border-border"
+      }`}
+    >
+      <button
+        type="button"
+        onClick={() => onOpenSummary(a.id)}
+        className="w-full text-left"
+      >
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm font-medium text-foreground">
+            {a.patient.full_name}
+          </p>
+          <StatusPill status={a.status} />
+        </div>
+        <p className="text-xs text-muted mt-1">
+          {fmtDate(a.date)} • {fmtTime(a.time)}
+        </p>
+        <p className="text-xs text-muted mt-0.5">{a.service?.name ?? "—"}</p>
+      </button>
+
+      {isOpen && (
+        <div className="flex flex-wrap items-center gap-1.5 mt-3">
+          {isNew && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs px-2.5 h-8 border-primary text-primary"
+              onClick={() => onChangeStatus(a.id, "confirmed")}
+            >
+              Подтвердить
+            </Button>
+          )}
+          <Button
+            size="sm"
+            className="text-xs px-2.5 h-8 bg-[#2FA968] hover:bg-[#258753]"
+            onClick={() => onChangeStatus(a.id, "completed")}
+          >
+            Завершить
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs px-2.5 h-8 border-red-200 text-red-500 hover:bg-red-50"
+            onClick={() => onChangeStatus(a.id, "cancelled")}
+          >
+            Отменить
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Заглушка мобильного списка — те же карточки, чтобы ничего не прыгало.
+const AppointmentsMobileSkeleton: FC = () => (
+  <div className="md:hidden flex flex-col gap-3">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <div key={i} className="bg-white rounded-2xl border border-border p-3">
+        <div className="h-4 w-40 rounded-md skeleton" />
+        <div className="h-3 w-28 rounded-md skeleton mt-2" />
+        <div className="h-3 w-24 rounded-md skeleton mt-2" />
+      </div>
+    ))}
+  </div>
+);
+
 const AppointmentsSkeleton: FC = () => (
-  <div className="bg-white rounded-3xl border border-border overflow-hidden">
+  <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
     <div className="overflow-x-auto">
       <table className="w-full min-w-160 text-left border-collapse">
         <thead>
@@ -273,7 +361,10 @@ export const DoctorAppointmentsPage: FC = () => {
       </div>
 
       {isLoading ? (
-        <AppointmentsSkeleton />
+        <>
+          <AppointmentsMobileSkeleton />
+          <AppointmentsSkeleton />
+        </>
       ) : appointments.length === 0 ? (
         <div className="bg-white rounded-3xl border border-border px-6 py-16 flex flex-col items-center gap-2 text-center">
           <p className="text-foreground font-medium">
@@ -282,124 +373,146 @@ export const DoctorAppointmentsPage: FC = () => {
           <p className="text-muted text-sm max-w-80">{EMPTY_TEXT[tab]}</p>
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-160 text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className={TH}>Пациент</th>
-                  <th className={TH}>Дата</th>
-                  <th className={TH}>Время</th>
-                  <th className={TH}>Тип</th>
-                  <th className={TH}>Статус</th>
-                  <th className={TH}>Действия</th>
-                </tr>
-              </thead>
-              <tbody>
-                {appointments.map((a) => {
-                  const canConfirm = a.status === "pending";
-                  const canComplete =
-                    a.status === "pending" ||
-                    a.status === "confirmed" ||
-                    a.status === "scheduled" ||
-                    a.status === "upcoming";
-                  const canCancel =
-                    a.status === "pending" ||
-                    a.status === "confirmed" ||
-                    a.status === "scheduled" ||
-                    a.status === "upcoming";
+        <>
+          <div className="md:hidden flex flex-col gap-3">
+            {appointments.map((a) => (
+              <AppointmentCard
+                key={a.id}
+                appointment={a}
+                onChangeStatus={(id, status) => changeStatus({ id, status })}
+                onOpenSummary={setSummaryId}
+              />
+            ))}
+          </div>
 
-                  // Новая запись — та, что ещё ждёт подтверждения врача.
-                  const isNew = a.status === "pending";
+          <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-160 text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className={TH}>Пациент</th>
+                    <th className={TH}>Дата</th>
+                    <th className={TH}>Время</th>
+                    <th className={TH}>Тип</th>
+                    <th className={TH}>Статус</th>
+                    <th className={TH}>Действия</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {appointments.map((a) => {
+                    const canConfirm = a.status === "pending";
+                    const canComplete =
+                      a.status === "pending" ||
+                      a.status === "confirmed" ||
+                      a.status === "scheduled" ||
+                      a.status === "upcoming";
+                    const canCancel =
+                      a.status === "pending" ||
+                      a.status === "confirmed" ||
+                      a.status === "scheduled" ||
+                      a.status === "upcoming";
 
-                  return (
-                    <tr
-                      key={a.id}
-                      className={`border-b border-border last:border-0 transition-colors ${
-                        isNew ? "bg-info-tint" : "hover:bg-surface"
-                      }`}
-                    >
-                      <td
-                        onClick={() => setSummaryId(a.id)}
-                        className={`${TD} text-foreground font-medium cursor-pointer ${
-                          // Полоса слева вместо рамки вокруг строки: у таблицы
-                          // border-collapse, и рамка на <tr> схлопывается с разделителями
-                          // ячеек. На первой ячейке она рисуется предсказуемо.
-                          isNew ? TD_NEW : ""
+                    // Новая запись — та, что ещё ждёт подтверждения врача.
+                    const isNew = a.status === "pending";
+
+                    return (
+                      <tr
+                        key={a.id}
+                        className={`border-b border-border last:border-0 transition-colors ${
+                          isNew ? "bg-info-tint" : "hover:bg-surface"
                         }`}
                       >
-                        {a.patient.full_name}
-                      </td>
-                      <td
-                        onClick={() => setSummaryId(a.id)}
-                        className={`${TD} text-foreground cursor-pointer`}
-                      >
-                        {fmtDate(a.date)}
-                      </td>
-                      <td
-                        onClick={() => setSummaryId(a.id)}
-                        className={`${TD} text-foreground cursor-pointer`}
-                      >
-                        {fmtTime(a.time)}
-                      </td>
-                      <td
-                        onClick={() => setSummaryId(a.id)}
-                        className={`${TD} text-foreground cursor-pointer`}
-                      >
-                        {a.service?.name ?? "—"}
-                      </td>
-                      <td className={TD}>
-                        <StatusPill status={a.status} />
-                      </td>
-                      <td className={TD}>
-                        <div className="flex items-center gap-1.5">
-                          {canConfirm && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-xs px-2.5 h-8 border-primary text-primary"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                changeStatus({ id: a.id, status: "confirmed" });
-                              }}
-                            >
-                              Подтвердить
-                            </Button>
-                          )}
-                          {canComplete && (
-                            <Button
-                              size="sm"
-                              className="text-xs px-2.5 h-8 bg-[#2FA968] hover:bg-[#258753]"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                changeStatus({ id: a.id, status: "completed" });
-                              }}
-                            >
-                              Завершить
-                            </Button>
-                          )}
-                          {canCancel && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-xs px-2.5 h-8 border-red-200 text-red-500 hover:bg-red-50"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                changeStatus({ id: a.id, status: "cancelled" });
-                              }}
-                            >
-                              Отменить
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <td
+                          onClick={() => setSummaryId(a.id)}
+                          className={`${TD} text-foreground font-medium cursor-pointer ${
+                            // Полоса слева вместо рамки вокруг строки: у таблицы
+                            // border-collapse, и рамка на <tr> схлопывается с разделителями
+                            // ячеек. На первой ячейке она рисуется предсказуемо.
+                            isNew ? TD_NEW : ""
+                          }`}
+                        >
+                          {a.patient.full_name}
+                        </td>
+                        <td
+                          onClick={() => setSummaryId(a.id)}
+                          className={`${TD} text-foreground cursor-pointer`}
+                        >
+                          {fmtDate(a.date)}
+                        </td>
+                        <td
+                          onClick={() => setSummaryId(a.id)}
+                          className={`${TD} text-foreground cursor-pointer`}
+                        >
+                          {fmtTime(a.time)}
+                        </td>
+                        <td
+                          onClick={() => setSummaryId(a.id)}
+                          className={`${TD} text-foreground cursor-pointer`}
+                        >
+                          {a.service?.name ?? "—"}
+                        </td>
+                        <td className={TD}>
+                          <StatusPill status={a.status} />
+                        </td>
+                        <td className={TD}>
+                          <div className="flex items-center gap-1.5">
+                            {canConfirm && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs px-2.5 h-8 border-primary text-primary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  changeStatus({
+                                    id: a.id,
+                                    status: "confirmed",
+                                  });
+                                }}
+                              >
+                                Подтвердить
+                              </Button>
+                            )}
+                            {canComplete && (
+                              <Button
+                                size="sm"
+                                className="text-xs px-2.5 h-8 bg-[#2FA968] hover:bg-[#258753]"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  changeStatus({
+                                    id: a.id,
+                                    status: "completed",
+                                  });
+                                }}
+                              >
+                                Завершить
+                              </Button>
+                            )}
+                            {canCancel && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs px-2.5 h-8 border-red-200 text-red-500 hover:bg-red-50"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  changeStatus({
+                                    id: a.id,
+                                    status: "cancelled",
+                                  });
+                                }}
+                              >
+                                Отменить
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       <Modal

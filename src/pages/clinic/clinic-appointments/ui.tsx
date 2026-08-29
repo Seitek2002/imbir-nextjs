@@ -6,7 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
-import { clinicCabinetKeys, getClinicAppointments } from "@/shared/api";
+import {
+  type DoctorAppointment,
+  clinicCabinetKeys,
+  getClinicAppointments,
+} from "@/shared/api";
 import { fmtDate, fmtTime } from "@/shared/lib/datetime";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
@@ -59,6 +63,62 @@ const AppointmentsSkeleton: FC = () => (
   </>
 );
 
+// Цвет статуса нужен и в таблице, и в мобильной карточке — держим в одном месте.
+const statusColor = (status: string): string =>
+  status === "pending"
+    ? "text-info"
+    : status === "upcoming"
+      ? "text-primary"
+      : status === "completed"
+        ? "text-green-600"
+        : "text-muted";
+
+// Мобильная карточка записи. Раньше здесь скроллилась вбок та же
+// четырёхколоночная сетка, что и на десктопе: на 390px было видно имя
+// пациента и половину услуги, а статус — ради которого в список и заходят —
+// оставался за краем экрана.
+const AppointmentCard: FC<{ appointment: DoctorAppointment }> = ({
+  appointment: a,
+}) => {
+  const isNew = a.status === "pending";
+
+  return (
+    <div
+      className={`rounded-2xl border p-3 ${
+        isNew ? "border-info bg-info-tint" : "border-border bg-white"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm font-medium text-foreground">
+          {a.patient.full_name}
+        </p>
+        <span
+          className={`text-xs font-medium shrink-0 ${statusColor(a.status)}`}
+        >
+          {STATUS_LABEL[a.status] ?? a.status}
+        </span>
+      </div>
+      <p className="text-xs text-muted mt-1">{a.service?.name ?? "—"}</p>
+      <p className="text-xs text-muted mt-0.5">
+        {fmtDate(a.date)} {fmtTime(a.time)}
+      </p>
+    </div>
+  );
+};
+
+// Заглушка мобильного списка — те же карточки, чтобы ничего не прыгало.
+const AppointmentsMobileSkeleton: FC = () => (
+  <div className="flex flex-col gap-3">
+    {Array.from({ length: 4 }).map((_, i) => (
+      <div key={i} className="bg-white rounded-2xl border border-border p-3">
+        <div className="h-4 w-40 rounded-md skeleton" />
+        <div className="h-3 w-32 rounded-md skeleton mt-2" />
+        <div className="h-3 w-24 rounded-md skeleton mt-2" />
+      </div>
+    ))}
+  </div>
+);
+
 export const ClinicAppointmentsPage: FC = () => {
   const [tab, setTab] = useState<Tab>("all");
 
@@ -75,9 +135,27 @@ export const ClinicAppointmentsPage: FC = () => {
         <SegmentedControl options={TABS} value={tab} onChange={setTab} />
       </div>
 
-      <div className="bg-white rounded-3xl border border-border overflow-hidden">
-        {/* Четырёхколоночная сетка не влезает в телефон: без min-w имена и услуги
-            сжимались в нечитаемый столбик. Скроллим горизонтально, как в кабинете врача. */}
+      {/* Мобайл: карточки. Десктопная сетка ниже скрыта до md. */}
+      <div className="md:hidden flex flex-col gap-3">
+        {isLoading ? (
+          <AppointmentsMobileSkeleton />
+        ) : appointments.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-border px-5 py-14 flex flex-col items-center gap-2 text-center">
+            <p className="text-foreground font-medium">
+              {tab === "all" ? "Записей пока нет" : "В этой вкладке пусто"}
+            </p>
+            <p className="text-muted text-sm max-w-80">{EMPTY_TEXT[tab]}</p>
+          </div>
+        ) : (
+          appointments.map((a) => (
+            <AppointmentCard key={a.id} appointment={a} />
+          ))
+        )}
+      </div>
+
+      <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+        {/* Четырёхколоночная сетка не влезает в телефон — на мобильных её
+            заменяют карточки выше, а здесь она нужна от планшета и шире. */}
         <div className="overflow-x-auto">
           <div className="min-w-160">
             <div
@@ -124,15 +202,7 @@ export const ClinicAppointmentsPage: FC = () => {
                       {fmtDate(a.date)} {fmtTime(a.time)}
                     </span>
                     <span
-                      className={`text-sm font-medium ${
-                        isNew
-                          ? "text-info"
-                          : a.status === "upcoming"
-                            ? "text-primary"
-                            : a.status === "completed"
-                              ? "text-green-600"
-                              : "text-muted"
-                      }`}
+                      className={`text-sm font-medium ${statusColor(a.status)}`}
                     >
                       {STATUS_LABEL[a.status] ?? a.status}
                     </span>
