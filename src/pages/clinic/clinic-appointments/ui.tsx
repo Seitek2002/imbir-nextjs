@@ -12,6 +12,8 @@ import {
   getClinicAppointments,
 } from "@/shared/api";
 import { fmtDate, fmtTime } from "@/shared/lib/datetime";
+import { cn } from "@/shared/lib/utils";
+import { ViewModeToggle, useListView } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 type Tab = "all" | "cancelled" | "completed" | "upcoming";
@@ -128,15 +130,29 @@ export const ClinicAppointmentsPage: FC = () => {
   });
 
   const appointments = data?.data ?? [];
+  const {
+    mode: viewMode,
+    setMode: setViewMode,
+    cardsClassName,
+    tableClassName,
+  } = useListView();
 
   return (
     <ClinicPageLayout title="Записи">
-      <div className="mb-4">
-        <SegmentedControl options={TABS} value={tab} onChange={setTab} />
+      {/* На узком экране переключатель уезжает под вкладки: сегмент делит
+          ширину поровну между четырьмя вкладками, и рядом с ним подписи
+          слипались. */}
+      <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-center">
+        <div className="md:flex-1 md:min-w-0">
+          <SegmentedControl options={TABS} value={tab} onChange={setTab} />
+        </div>
+        <div className="flex justify-end">
+          <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+        </div>
       </div>
 
-      {/* Мобайл: карточки. Десктопная сетка ниже скрыта до md. */}
-      <div className="md:hidden flex flex-col gap-3">
+      {/* Карточки: по умолчанию до md, дальше — по выбору пользователя. */}
+      <div className={cn("flex flex-col gap-3", cardsClassName)}>
         {isLoading ? (
           <AppointmentsMobileSkeleton />
         ) : appointments.length === 0 ? (
@@ -153,9 +169,14 @@ export const ClinicAppointmentsPage: FC = () => {
         )}
       </div>
 
-      <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
-        {/* Четырёхколоночная сетка не влезает в телефон — на мобильных её
-            заменяют карточки выше, а здесь она нужна от планшета и шире. */}
+      <div
+        className={cn(
+          "bg-white rounded-3xl border border-border overflow-hidden",
+          tableClassName,
+        )}
+      >
+        {/* Четырёхколоночная сетка не влезает в телефон — по умолчанию её
+            заменяют карточки выше, но пользователь может выбрать и её. */}
         <div className="overflow-x-auto">
           <div className="min-w-160">
             <div
@@ -171,13 +192,6 @@ export const ClinicAppointmentsPage: FC = () => {
 
             {isLoading ? (
               <AppointmentsSkeleton />
-            ) : appointments.length === 0 ? (
-              <div className="px-5 py-14 flex flex-col items-center gap-2 text-center">
-                <p className="text-foreground font-medium">
-                  {tab === "all" ? "Записей пока нет" : "В этой вкладке пусто"}
-                </p>
-                <p className="text-muted text-sm max-w-80">{EMPTY_TEXT[tab]}</p>
-              </div>
             ) : (
               appointments.map((a, i) => {
                 // Новая запись — та, что ещё ждёт подтверждения клиники.
@@ -212,6 +226,17 @@ export const ClinicAppointmentsPage: FC = () => {
             )}
           </div>
         </div>
+
+        {/* Пустое состояние — снаружи сетки шириной 640px: внутри неё текст
+            центрировался по этим 640px и на телефоне обрезался справа. */}
+        {!isLoading && appointments.length === 0 && (
+          <div className="px-5 py-14 flex flex-col items-center gap-2 text-center">
+            <p className="text-foreground font-medium">
+              {tab === "all" ? "Записей пока нет" : "В этой вкладке пусто"}
+            </p>
+            <p className="text-muted text-sm max-w-80">{EMPTY_TEXT[tab]}</p>
+          </div>
+        )}
       </div>
     </ClinicPageLayout>
   );

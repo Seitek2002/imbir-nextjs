@@ -19,7 +19,14 @@ import {
 } from "@/shared/api";
 import { fmtDate, fmtTime } from "@/shared/lib/datetime";
 import { extractErrorMessage } from "@/shared/lib/errors";
-import { Button, Modal, Textarea } from "@/shared/ui";
+import { cn } from "@/shared/lib/utils";
+import {
+  Button,
+  Modal,
+  Textarea,
+  ViewModeToggle,
+  useListView,
+} from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 const TH = "px-6 py-4 text-muted text-sm font-normal whitespace-nowrap";
@@ -108,8 +115,10 @@ const AppointmentCard: FC<{
 };
 
 // Заглушка мобильного списка — те же карточки, чтобы ничего не прыгало.
-const AppointmentsMobileSkeleton: FC = () => (
-  <div className="md:hidden flex flex-col gap-3">
+const AppointmentsMobileSkeleton: FC<{ className?: string }> = ({
+  className,
+}) => (
+  <div className={cn("flex flex-col gap-3", className)}>
     {Array.from({ length: 3 }).map((_, i) => (
       <div key={i} className="bg-white rounded-2xl border border-border p-3">
         <div className="h-4 w-40 rounded-md skeleton" />
@@ -120,8 +129,13 @@ const AppointmentsMobileSkeleton: FC = () => (
   </div>
 );
 
-const AppointmentsSkeleton: FC = () => (
-  <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+const AppointmentsSkeleton: FC<{ className?: string }> = ({ className }) => (
+  <div
+    className={cn(
+      "bg-white rounded-3xl border border-border overflow-hidden",
+      className,
+    )}
+  >
     <div className="overflow-x-auto">
       <table className="w-full min-w-160 text-left border-collapse">
         <thead>
@@ -344,26 +358,42 @@ export const DoctorAppointmentsPage: FC = () => {
   });
 
   const appointments = data?.data ?? [];
+  const {
+    mode: viewMode,
+    setMode: setViewMode,
+    cardsClassName,
+    tableClassName,
+  } = useListView();
 
   return (
     <DoctorPageLayout title="Записи">
-      {/* Десктоп: заголовок + сегмент-переключатель в одну строку */}
-      <div className="hidden lg:flex items-center justify-between mb-6">
+      {/* Десктоп: заголовок + фильтр по статусу + вид списка в одну строку */}
+      <div className="hidden lg:flex items-center justify-between gap-3 mb-6">
         <h2 className="text-[32px] font-semibold text-foreground">Записи</h2>
-        <div className="w-90 shrink-0">
-          <SegmentedControl options={TABS} value={tab} onChange={setTab} />
+        <div className="flex items-center gap-3">
+          <div className="w-90 shrink-0">
+            <SegmentedControl options={TABS} value={tab} onChange={setTab} />
+          </div>
+          <ViewModeToggle mode={viewMode} onChange={setViewMode} />
         </div>
       </div>
 
-      {/* Мобайл: сегмент под шапкой страницы */}
-      <div className="lg:hidden mb-4">
-        <SegmentedControl options={TABS} value={tab} onChange={setTab} />
+      {/* Мобайл: сегмент под шапкой страницы, вид списка — под ним. В одну
+          строку они не помещаются: сегмент делит ширину поровну между тремя
+          вкладками, и на 390px «Предстоящие» с «Завершенными» слипались. */}
+      <div className="lg:hidden flex flex-col gap-3 mb-4 sm:flex-row sm:items-center">
+        <div className="sm:flex-1 sm:min-w-0">
+          <SegmentedControl options={TABS} value={tab} onChange={setTab} />
+        </div>
+        <div className="flex justify-end">
+          <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+        </div>
       </div>
 
       {isLoading ? (
         <>
-          <AppointmentsMobileSkeleton />
-          <AppointmentsSkeleton />
+          <AppointmentsMobileSkeleton className={cardsClassName} />
+          <AppointmentsSkeleton className={tableClassName} />
         </>
       ) : appointments.length === 0 ? (
         <div className="bg-white rounded-3xl border border-border px-6 py-16 flex flex-col items-center gap-2 text-center">
@@ -374,7 +404,7 @@ export const DoctorAppointmentsPage: FC = () => {
         </div>
       ) : (
         <>
-          <div className="md:hidden flex flex-col gap-3">
+          <div className={cn("flex flex-col gap-3", cardsClassName)}>
             {appointments.map((a) => (
               <AppointmentCard
                 key={a.id}
@@ -385,7 +415,12 @@ export const DoctorAppointmentsPage: FC = () => {
             ))}
           </div>
 
-          <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+          <div
+            className={cn(
+              "bg-white rounded-3xl border border-border overflow-hidden",
+              tableClassName,
+            )}
+          >
             <div className="overflow-x-auto">
               <table className="w-full min-w-160 text-left border-collapse">
                 <thead>

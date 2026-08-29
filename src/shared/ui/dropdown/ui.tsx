@@ -12,6 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import { useClickAway } from "react-use";
 
+import { useIsMobile } from "@/shared/lib/useIsMobile";
 import { cn } from "@/shared/lib/utils";
 import { Checkbox } from "@/shared/ui";
 
@@ -19,7 +20,6 @@ import { DropdownMenu } from "./dropdown-menu";
 import { DropdownOption } from "./dropdown-option";
 import { DropdownTrigger } from "./dropdown-trigger";
 import { DropdownProps } from "./types";
-import { useIsMobile } from "./use-is-mobile";
 
 export const Dropdown: FC<DropdownProps> = ({
   label,

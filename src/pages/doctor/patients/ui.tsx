@@ -14,6 +14,8 @@ import {
   getDoctorPatients,
 } from "@/shared/api";
 import { fmtDate } from "@/shared/lib/datetime";
+import { cn } from "@/shared/lib/utils";
+import { ViewModeToggle, useListView } from "@/shared/ui";
 
 // Диагноз в списке пациентов бэк пока не отдаёт — показываем прочерк.
 const diagnosisOf = (p: DoctorPatient): string =>
@@ -53,8 +55,8 @@ const PatientCard: FC<{ patient: DoctorPatient }> = ({ patient }) => (
 );
 
 // Заглушка мобильного списка — те же карточки, чтобы ничего не прыгало.
-const PatientsMobileSkeleton: FC = () => (
-  <div className="md:hidden flex flex-col gap-3">
+const PatientsMobileSkeleton: FC<{ className?: string }> = ({ className }) => (
+  <div className={cn("flex flex-col gap-3", className)}>
     {Array.from({ length: 3 }).map((_, i) => (
       <div key={i} className="bg-white rounded-2xl border border-border p-3">
         <div className="h-4 w-40 rounded-md skeleton" />
@@ -65,8 +67,13 @@ const PatientsMobileSkeleton: FC = () => (
   </div>
 );
 
-const PatientsSkeleton: FC = () => (
-  <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+const PatientsSkeleton: FC<{ className?: string }> = ({ className }) => (
+  <div
+    className={cn(
+      "bg-white rounded-3xl border border-border overflow-hidden",
+      className,
+    )}
+  >
     <div className="overflow-x-auto">
       <table className="w-full min-w-160 text-left border-collapse">
         <thead>
@@ -107,17 +114,32 @@ export const DoctorPatientsPage: FC = () => {
   });
 
   const patients = data?.data ?? [];
+  const {
+    mode: viewMode,
+    setMode: setViewMode,
+    cardsClassName,
+    tableClassName,
+  } = useListView();
 
   return (
     <DoctorPageLayout title="Пациенты">
-      <h2 className="text-[32px] font-semibold text-foreground mb-6 hidden lg:block">
-        Пациенты
-      </h2>
+      {/* Заголовок только на десктопе — на телефоне он в шапке макета.
+          Переключатель вида нужен на всех ширинах. */}
+      <div className="flex items-center gap-3 mb-4 lg:mb-6">
+        <h2 className="hidden lg:block text-[32px] font-semibold text-foreground">
+          Пациенты
+        </h2>
+        <ViewModeToggle
+          mode={viewMode}
+          onChange={setViewMode}
+          className="ml-auto"
+        />
+      </div>
 
       {isLoading ? (
         <>
-          <PatientsMobileSkeleton />
-          <PatientsSkeleton />
+          <PatientsMobileSkeleton className={cardsClassName} />
+          <PatientsSkeleton className={tableClassName} />
         </>
       ) : patients.length === 0 ? (
         <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
@@ -125,13 +147,18 @@ export const DoctorPatientsPage: FC = () => {
         </div>
       ) : (
         <>
-          <div className="md:hidden flex flex-col gap-3">
+          <div className={cn("flex flex-col gap-3", cardsClassName)}>
             {patients.map((p) => (
               <PatientCard key={p.id} patient={p} />
             ))}
           </div>
 
-          <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+          <div
+            className={cn(
+              "bg-white rounded-3xl border border-border overflow-hidden",
+              tableClassName,
+            )}
+          >
             <div className="overflow-x-auto">
               <table className="w-full min-w-160 text-left border-collapse">
                 <thead>

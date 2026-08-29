@@ -21,6 +21,7 @@ import {
 import { EditIcon } from "@/shared/assets/icons";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { parsePrice } from "@/shared/lib/price";
+import { cn } from "@/shared/lib/utils";
 import {
   Button,
   ConfirmDialog,
@@ -29,6 +30,8 @@ import {
   ImageWithFallback,
   Input,
   Modal,
+  ViewModeToggle,
+  useListView,
 } from "@/shared/ui";
 
 import { useDoctorClinics } from "./use-doctor-clinics";
@@ -329,10 +332,16 @@ const TD = "px-6 py-4 whitespace-nowrap";
 
 // Заглушка повторяет саму таблицу — та же шапка и колонки, чтобы при
 // появлении данных ничего не прыгало.
-const ServicesSkeleton: FC<{ showClinic?: boolean }> = ({
+const ServicesSkeleton: FC<{ className?: string; showClinic?: boolean }> = ({
+  className,
   showClinic = false,
 }) => (
-  <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+  <div
+    className={cn(
+      "bg-white rounded-3xl border border-border overflow-hidden",
+      className,
+    )}
+  >
     <div className="overflow-x-auto">
       <table className="w-full min-w-160 text-left border-collapse">
         <thead>
@@ -466,8 +475,8 @@ const ServiceCard: FC<{
 
 // Заглушка мобильного списка — те же карточки, чтобы при загрузке данных
 // ничего не прыгало.
-const ServicesMobileSkeleton: FC = () => (
-  <div className="md:hidden flex flex-col gap-3">
+const ServicesMobileSkeleton: FC<{ className?: string }> = ({ className }) => (
+  <div className={cn("flex flex-col gap-3", className)}>
     {Array.from({ length: 3 }).map((_, i) => (
       <div
         key={i}
@@ -546,28 +555,46 @@ export const DoctorServicesPage: FC = () => {
   // Колонку и дропдаун показываем по одному правилу: только когда мест
   // приёма несколько и привязка перестаёт быть очевидной.
   const { isRequired: showClinicColumn } = useDoctorClinics();
+  const {
+    mode: viewMode,
+    setMode: setViewMode,
+    cardsClassName,
+    tableClassName,
+  } = useListView();
 
   return (
     <>
       <DoctorPageLayout title="Услуги">
-        {/* Десктоп: заголовок + кнопка добавления */}
-        <div className="hidden lg:flex items-center justify-between mb-6">
-          <h2 className="text-[32px] font-semibold text-foreground">Услуги</h2>
-          <Button
-            variant="outline"
-            size="sm"
-            IconLeft={AddIcon}
-            onClick={() => setModalOpen(true)}
-          >
-            Добавить услугу
-          </Button>
+        {/* Заголовок и кнопка добавления — только на десктопе: на телефоне
+            заголовок в шапке макета, а кнопка закреплена снизу. Переключатель
+            вида нужен на всех ширинах, поэтому строка одна на всех. */}
+        <div className="flex items-center gap-3 mb-4 lg:mb-6">
+          <h2 className="hidden lg:block text-[32px] font-semibold text-foreground">
+            Услуги
+          </h2>
+          <div className="flex items-center gap-3 ml-auto">
+            <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+            <div className="hidden lg:block">
+              <Button
+                variant="outline"
+                size="sm"
+                IconLeft={AddIcon}
+                onClick={() => setModalOpen(true)}
+              >
+                Добавить услугу
+              </Button>
+            </div>
+          </div>
         </div>
 
         <div className="pb-24 lg:pb-0">
           {isLoading ? (
             <>
-              <ServicesMobileSkeleton />
-              <ServicesSkeleton showClinic={showClinicColumn} />
+              <ServicesMobileSkeleton className={cardsClassName} />
+              <ServicesSkeleton
+                className={tableClassName}
+                showClinic={showClinicColumn}
+              />
             </>
           ) : services.length === 0 ? (
             <div className="bg-white rounded-3xl border border-border px-6 py-16 text-center text-muted text-sm">
@@ -575,7 +602,7 @@ export const DoctorServicesPage: FC = () => {
             </div>
           ) : (
             <>
-              <div className="md:hidden flex flex-col gap-3">
+              <div className={cn("flex flex-col gap-3", cardsClassName)}>
                 {services.map((s) => (
                   <ServiceCard
                     key={s.id}
@@ -590,7 +617,12 @@ export const DoctorServicesPage: FC = () => {
                 ))}
               </div>
 
-              <div className="hidden md:block bg-white rounded-3xl border border-border overflow-hidden">
+              <div
+                className={cn(
+                  "bg-white rounded-3xl border border-border overflow-hidden",
+                  tableClassName,
+                )}
+              >
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-160 text-left border-collapse">
                     <thead>

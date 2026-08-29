@@ -33,6 +33,8 @@ import TrashIcon from "./common/trash.svg";
 import UploadCloudIcon from "./common/upload-cloud.svg";
 import UserCircleIcon from "./common/user-circle.svg";
 import VideoCallIcon from "./common/video-call.svg";
+import ViewCardsIcon from "./common/view-cards.svg";
+import ViewTableIcon from "./common/view-table.svg";
 import OfflineRecordIcon from "./details/offline-record.svg";
 import OnlineRecordIcon from "./details/online-record.svg";
 import PhoneIcon from "./details/phone.svg";
@@ -126,6 +128,8 @@ export {
   StarOutlineIcon,
   SuccessCheckIcon,
   UserCircleIcon,
+  ViewCardsIcon,
+  ViewTableIcon,
   VideoCallIcon,
   HistoryIcon,
   LogoutIcon,

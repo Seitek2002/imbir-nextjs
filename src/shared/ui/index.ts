@@ -4,6 +4,7 @@ export { IconBtn } from "./icon-button";
 export { Dropdown } from "./dropdown";
 export { RangeSlider } from "./range-slider";
 export { SegmentedControl } from "./segmented-control";
+export { ViewModeToggle, useListView } from "./view-mode-toggle";
 export { Textarea } from "./textarea";
 export { InfoCard } from "./info-card";
 export { StatsPanel } from "./stats-panel";
