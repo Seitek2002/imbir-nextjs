@@ -457,8 +457,10 @@ export const DoctorReviewsPage: FC = () => {
               <div className="bg-[#FFA18D] rounded-xl size-11 flex items-center justify-center shrink-0">
                 <StarIcon className="size-5 text-white" />
               </div>
+              {/* Пока отзывов нет, средней оценки не существует — ноль
+                  выглядел как реальная плохая оценка в собственном кабинете врача. */}
               <span className="text-[28px] font-semibold text-foreground">
-                {profile?.rating ?? "—"}
+                {profile?.totalReviews ? profile.rating : "—"}
               </span>
             </div>
             <span className="text-muted block mt-3">Средняя оценка</span>

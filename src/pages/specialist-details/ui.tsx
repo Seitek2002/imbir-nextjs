@@ -317,8 +317,17 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                 </IconBtn>
               </div>
 
+              {/* Без отзывов рейтинга нет — «0.00» читается как самая низкая
+                  оценка, а не как «ещё не оценивали». В карточках списков
+                  рейтинг в этом случае уже скрыт. */}
               <StatsPanel
-                rating={<AnimatedNumber value={doctor.rating} decimals={2} />}
+                rating={
+                  doctor.reviews > 0 ? (
+                    <AnimatedNumber value={doctor.rating} decimals={2} />
+                  ) : (
+                    "—"
+                  )
+                }
                 experience={
                   <>
                     <AnimatedNumber value={doctor.experience} /> лет

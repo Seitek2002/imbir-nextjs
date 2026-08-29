@@ -167,11 +167,19 @@ export const ReviewsSection: FC<Props> = ({
                 <div className="bg-[#FFA18D] p-2.5 rounded-xl size-10 flex items-center justify-center">
                   <StarIcon className="size-5 text-white" />
                 </div>
-                <AnimatedNumber
-                  value={averageRating}
-                  decimals={2}
-                  className="text-[24px] font-semibold text-foreground"
-                />
+                {/* При нуле отзывов средней оценки не существует: «0.00»
+                    читалось как самая низкая оценка. */}
+                {reviews.length > 0 ? (
+                  <AnimatedNumber
+                    value={averageRating}
+                    decimals={2}
+                    className="text-[24px] font-semibold text-foreground"
+                  />
+                ) : (
+                  <span className="text-[24px] font-semibold text-foreground">
+                    —
+                  </span>
+                )}
               </div>
               <span className="text-muted">Средняя оценка</span>
             </div>
