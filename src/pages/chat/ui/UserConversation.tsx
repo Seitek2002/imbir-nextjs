@@ -1,7 +1,10 @@
 "use client";
 
 import { FC, useState } from "react";
+import toast from "react-hot-toast";
 
+import { uploadFile } from "@/shared/api";
+import { toMediaUrl } from "@/shared/lib/media";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 
@@ -62,6 +65,26 @@ export const UserConversation: FC<Props> = ({
   const canSeeSummaries =
     !!partnerId && (role === "doctor" || role === "patient");
 
+  const sendFiles = async (files: File[]): Promise<File[]> => {
+    const failedFiles: File[] = [];
+
+    for (const file of files) {
+      try {
+        const { url } = await uploadFile(file);
+        const fileUrl = toMediaUrl(url) ?? url;
+        sendMessage(`📎 ${file.name}\n${fileUrl}`);
+      } catch {
+        failedFiles.push(file);
+      }
+    }
+
+    if (failedFiles.length > 0) {
+      toast.error("Не удалось отправить некоторые файлы");
+    }
+
+    return failedFiles;
+  };
+
   return (
     <>
       <ChatHeader
@@ -98,6 +121,7 @@ export const UserConversation: FC<Props> = ({
       />
       <MessageComposer
         onSend={sendMessage}
+        onSendFiles={sendFiles}
         onTyping={sendTyping}
         disabled={!isOpen}
       />
