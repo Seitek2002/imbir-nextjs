@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -103,6 +103,21 @@ const toApiBody = (form: FormState): DoctorSchedule => ({
   emergency_24_7: form.emergency24,
 });
 
+const setEmergencySchedule = (form: FormState, enabled: boolean): FormState => {
+  if (!enabled) return { ...form, emergency24: false };
+
+  return {
+    ...form,
+    emergency24: true,
+    days: Object.fromEntries(
+      DAYS.map(({ key }) => [
+        key,
+        { enabled: true, from: "00:00", to: "23:59" },
+      ]),
+    ) as FormState["days"],
+  };
+};
+
 const Toggle: FC<{ label?: string; on: boolean; onClick: () => void }> = ({
   on,
   onClick,
@@ -132,6 +147,7 @@ export const DoctorSchedulePage: FC = () => {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const previousDaysRef = useRef<FormState["days"] | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: doctorCabinetKeys.schedule(),
@@ -167,6 +183,24 @@ export const DoctorSchedulePage: FC = () => {
           }
         : prev,
     );
+
+  const handleEmergencyToggle = () => {
+    if (!form) return;
+
+    if (!form.emergency24) {
+      previousDaysRef.current = form.days;
+      setForm(setEmergencySchedule(form, true));
+      return;
+    }
+
+    const previousDays = previousDaysRef.current;
+    previousDaysRef.current = null;
+    setForm({
+      ...form,
+      emergency24: false,
+      ...(previousDays ? { days: previousDays } : {}),
+    });
+  };
 
   // Проверяем до открытия диалога: подтверждать сохранение, которое всё равно
   // не пройдёт проверку, — лишний шаг.
@@ -264,9 +298,7 @@ export const DoctorSchedulePage: FC = () => {
           </span>
           <Toggle
             on={form.emergency24}
-            onClick={() =>
-              setForm((p) => (p ? { ...p, emergency24: !p.emergency24 } : p))
-            }
+            onClick={handleEmergencyToggle}
             label="Приём 24/7"
           />
         </div>
