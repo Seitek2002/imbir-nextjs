@@ -204,7 +204,14 @@ const MessageBubble: FC<{
         )}
       >
         {message.isDeleted ? (
-          <span className="italic text-muted">Сообщение удалено</span>
+          <span
+            className={cn(
+              "italic",
+              message.isMine ? "text-white" : "text-muted",
+            )}
+          >
+            Сообщение удалено
+          </span>
         ) : attachment ? (
           <AttachmentContent
             attachment={attachment}
