@@ -227,7 +227,17 @@ export const useDoctorCabinet = () => {
       },
       onSuccess: (updated) => {
         queryClient.setQueryData(doctorCabinetKeys.profile(), updated);
-        toast.success("Данные сохранены");
+        if (updated.photo_ai_processing === "failed") {
+          toast.error(
+            "ИИ не смог обработать фото — сохранён оригинальный вариант.",
+          );
+        } else if (updated.photo_ai_processing === "disabled") {
+          toast.error(
+            "ИИ-обработка сейчас недоступна — сохранён оригинальный вариант.",
+          );
+        } else {
+          toast.success("Данные сохранены");
+        }
       },
       onError: () => {
         toast.error("Не удалось сохранить. Попробуйте снова");

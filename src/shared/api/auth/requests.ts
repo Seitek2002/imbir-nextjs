@@ -198,8 +198,8 @@ export const registerDoctorFn = async (
   body: RegisterDoctorRequest,
 ): Promise<AuthResponse> => {
   // API объявляет шаги строковыми полями: каждый объект шага нужно передавать
-  // как JSON-строку. Файлы в этот endpoint не входят и загружаются из кабинета
-  // после регистрации.
+  // как JSON-строку. Если врач выбрал фото, весь запрос переводим в multipart,
+  // чтобы отправить файл и process_photo top-level полями.
   const payload = {
     ...body,
     step1: JSON.stringify({ ...body.step1, photo: undefined }),
@@ -210,9 +210,15 @@ export const registerDoctorFn = async (
     step6: JSON.stringify(body.step6),
     step7: JSON.stringify(body.step7),
   };
+  const requestBody = body.photo
+    ? toFormData(payload as unknown as Record<string, unknown>)
+    : payload;
   const { data } = await apiClient.post<AuthResponse>(
     "/api/auth/register/doctor/",
-    payload,
+    requestBody,
+    body.photo
+      ? { headers: { "Content-Type": "multipart/form-data" } }
+      : undefined,
   );
   return data;
 };

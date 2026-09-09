@@ -91,6 +91,7 @@ export type DoctorFormData = {
   // См. комментарий у ClinicFormData.phoneDialCode.
   phoneDialCode: string;
   photo: File | null;
+  processPhoto: boolean;
   position: string;
 
   residency: string;

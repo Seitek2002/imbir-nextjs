@@ -11,6 +11,9 @@ export type LoginRequest = {
 
 export type AuthResponse = {
   access: string;
+  // Бэк возвращает это поле только если запрошена AI-обработка фото и она
+  // отключена в настройках или завершилась ошибкой.
+  photo_ai_processing?: "disabled" | "failed";
   refresh: string;
   user: AuthUser;
 };
@@ -155,6 +158,9 @@ export type RegisterDoctorRequest = {
   invite_branch_id?: number;
   invite_clinic_id?: number;
   password: string;
+  // Фото и флаг обработки идут top-level multipart-полями, а не внутри step1.
+  photo?: File | null;
+  process_photo?: boolean;
   step1: {
     birth_date: string;
     city: string;

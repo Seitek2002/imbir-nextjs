@@ -519,12 +519,11 @@ export const RegisterPage = () => {
         invite_clinic_id: inviteClinic?.clinicId,
         invite_branch_id: inviteClinic?.branchId ?? undefined,
         password: data.password,
-        // Фото сюда не кладём: как и logo/photos/documents у клиники, файл
-        // внутри JSON-строки шага превращается в "{}" (JSON.stringify не
-        // умеет сериализовать File). Бэк ждёт фото отдельным top-level
-        // multipart-полем на этом же запросе, но раз реальная загрузка уже
-        // идёт отдельным updateDoctorProfile({photo}) сразу после регистрации
-        // (см. ниже), оставляем как есть — без него это поле ничего не делало.
+        // Бэк принимает фото и флаг AI-обработки top-level multipart-полями.
+        // Внутри step1 файл не передаём: JSON.stringify(File) превращает его
+        // в пустой объект.
+        photo: data.photo,
+        process_photo: data.processPhoto,
         step1: {
           full_name: data.fullName,
           gender: data.gender as "female" | "male",
@@ -584,6 +583,16 @@ export const RegisterPage = () => {
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
 
+      if (res.photo_ai_processing === "failed") {
+        toast.error(
+          "ИИ не смог обработать фото — сохранён оригинальный вариант.",
+        );
+      } else if (res.photo_ai_processing === "disabled") {
+        toast.error(
+          "ИИ-обработка сейчас недоступна — сохранён оригинальный вариант.",
+        );
+      }
+
       // Регистрационный endpoint сохраняет только часть профиля врача. Поля,
       // которые уже поддерживает профильный API, переносим сразу после
       // создания аккаунта, не заставляя врача повторно заполнять кабинет.
@@ -619,10 +628,8 @@ export const RegisterPage = () => {
           );
         }
 
-        // Текстовые поля отправляем БЕЗ фото и отдельным запросом. Раньше всё
-        // шло одним PUT вместе с файлом: любой обрыв загрузки (аватар с
-        // телефона легко весит десятки мегабайт) уносил с собой
-        // специализации, стаж, образование и опыт работы.
+        // Текстовые поля отправляем отдельным запросом после регистрации.
+        // Фото уже обработано/сохранено регистрационным endpoint-ом.
         const profileFields = {
           // first_name и last_name обязательны для каждого PUT профиля.
           first_name: firstName,
@@ -653,22 +660,14 @@ export const RegisterPage = () => {
 
         await updateDoctorProfile(profileFields);
 
-        // Файлы — после текста и каждый своим запросом, чтобы упавшая
-        // загрузка не тянула за собой остальные. Сертификаты идут в
-        // /api/doctor/documents/: профильный endpoint их не принимает, и
-        // раньше они не отправлялись вообще.
-        const fileResults = await Promise.allSettled([
-          // Тот же набор полей плюс фото: PUT профиля очищает
-          // primary_specialization_ids, если поле не передано, поэтому запрос
-          // «только фото» стирал специализации, выставленные выше.
-          ...(data.photo
-            ? [updateDoctorProfile({ ...profileFields, photo: data.photo })]
-            : []),
-          ...data.certificates.map(uploadDoctorDocument),
-        ]);
+        // Сертификаты идут отдельными запросами в /api/doctor/documents/:
+        // профильный endpoint их не принимает.
+        const fileResults = await Promise.allSettled(
+          data.certificates.map(uploadDoctorDocument),
+        );
         if (fileResults.some((r) => r.status === "rejected")) {
           toast.error(
-            "Аккаунт создан, но фото или сертификаты не загрузились. Добавьте их в кабинете врача.",
+            "Аккаунт создан, но сертификаты не загрузились. Добавьте их в кабинете врача.",
           );
         }
       } catch {

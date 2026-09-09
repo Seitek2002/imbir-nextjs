@@ -14,6 +14,9 @@ export type DoctorPrivateProfile = DoctorDetail & {
   appointments_total: number;
   is_published: boolean;
   legal: LegalInfo;
+  // Возвращается только после запроса с process_photo=true, если AI-обработка
+  // отключена в настройках или завершилась ошибкой.
+  photo_ai_processing?: "disabled" | "failed";
   profile_views: number;
 };
 

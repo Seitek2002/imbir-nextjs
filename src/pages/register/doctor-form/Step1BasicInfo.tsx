@@ -182,7 +182,10 @@ export const Step1BasicInfo = ({ data, onChange, emailError }: Props) => {
               />
               <button
                 type="button"
-                onClick={() => onChange("photo", null)}
+                onClick={() => {
+                  onChange("photo", null);
+                  onChange("processPhoto", false);
+                }}
                 className="absolute top-0 right-0 w-1/2 aspect-square bg-black/60 flex items-center justify-center text-white leading-none"
               >
                 ×
@@ -210,6 +213,29 @@ export const Step1BasicInfo = ({ data, onChange, emailError }: Props) => {
               Загрузить фото
             </span>
           </button>
+        )}
+
+        {data.photo && (
+          <div className="flex flex-col gap-1.5">
+            <button
+              type="button"
+              onClick={() => onChange("processPhoto", !data.processPhoto)}
+              className={cn(
+                "w-full py-3 rounded-xl border-2 text-sm font-medium transition-colors",
+                data.processPhoto
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-primary text-primary hover:bg-primary/5",
+              )}
+            >
+              {data.processPhoto
+                ? "Оставить оригинал"
+                : "Обработать фото через ИИ"}
+            </button>
+            <p className="text-xs text-muted">
+              Нажмите кнопку, чтобы при создании аккаунта ИИ добавил белый
+              медицинский халат и нейтральный фон.
+            </p>
+          </div>
         )}
       </div>
     </div>

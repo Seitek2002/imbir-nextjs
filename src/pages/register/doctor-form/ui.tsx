@@ -54,6 +54,7 @@ export const DoctorRegistrationForm = ({
     phone: "",
     email: "",
     photo: null,
+    processPhoto: false,
     specialization: [],
     additionalSpecialization: [],
     experience: "0",
