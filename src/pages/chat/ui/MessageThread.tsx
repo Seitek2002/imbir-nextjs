@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, Fragment, useEffect, useRef } from "react";
+import { FC, Fragment, useEffect, useRef, useState } from "react";
 
 import Link from "next/link";
 
@@ -61,16 +61,17 @@ const FileIcon: FC<{ isMine: boolean; name: string }> = ({ isMine, name }) => (
 const AttachmentContent: FC<{
   attachment: Attachment;
   isMine: boolean;
-}> = ({ attachment, isMine }) => {
+  onImageClick: () => void;
+}> = ({ attachment, isMine, onImageClick }) => {
   const image = isImageAttachment(attachment);
   const linkClass = isMine ? "text-white" : "text-foreground";
 
   return image ? (
-    <a
-      href={attachment.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block overflow-hidden rounded-xl"
+    <button
+      type="button"
+      onClick={onImageClick}
+      className="block w-full overflow-hidden rounded-xl text-left"
+      aria-label={`Открыть изображение ${attachment.name}`}
     >
       <img
         src={attachment.url}
@@ -86,7 +87,7 @@ const AttachmentContent: FC<{
       >
         {attachment.name}
       </span>
-    </a>
+    </button>
   ) : (
     <a
       href={attachment.url}
@@ -102,7 +103,7 @@ const AttachmentContent: FC<{
         <span className="block truncate text-sm font-medium underline underline-offset-2">
           {attachment.name}
         </span>
-        <span className="block text-xs opacity-70">Открыть файл</span>
+        <span className="block text-xs opacity-70">Скачать файл</span>
       </span>
     </a>
   );
@@ -134,6 +135,8 @@ const MessageBubble: FC<{
   scramble?: boolean;
 }> = ({ message, scramble = false }) => {
   const attachment = parseAttachment(message.content);
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+  const isImage = attachment ? isImageAttachment(attachment) : false;
 
   return (
     <div
@@ -152,13 +155,40 @@ const MessageBubble: FC<{
         )}
       >
         {attachment ? (
-          <AttachmentContent attachment={attachment} isMine={message.isMine} />
+          <AttachmentContent
+            attachment={attachment}
+            isMine={message.isMine}
+            onImageClick={() => setIsImagePreviewOpen(true)}
+          />
         ) : scramble ? (
           <ScrambleText text={message.content} />
         ) : (
           <MessageContent content={message.content} />
         )}
       </div>
+      {isImagePreviewOpen && attachment && isImage && (
+        <div
+          role="dialog"
+          aria-label={attachment.name}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setIsImagePreviewOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setIsImagePreviewOpen(false)}
+            className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-full bg-white/15 text-2xl text-white"
+            aria-label="Закрыть изображение"
+          >
+            ×
+          </button>
+          <img
+            src={attachment.url}
+            alt={attachment.name}
+            className="max-h-[90vh] max-w-[95vw] object-contain"
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
+      )}
       <div
         className={cn(
           "flex items-center gap-1 mt-1",
