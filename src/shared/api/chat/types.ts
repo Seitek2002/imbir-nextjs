@@ -26,7 +26,9 @@ export type ChatMessage = {
   appointment_id?: null | number;
   content: string;
   created_at: string;
+  edited_at: null | string;
   id: number;
+  is_deleted: boolean;
   is_read: boolean;
   // null — системное уведомление (напр. о созданной онлайн-записи).
   sender: ChatParticipant | null;
@@ -53,11 +55,26 @@ export type IncomingChatMessage = {
   appointment_id?: null | number;
   content: string;
   created_at: string;
+  edited_at?: null | string;
   id: number;
+  is_deleted?: boolean;
+  is_read?: boolean;
   // null — системное уведомление (напр. о созданной онлайн-записи).
   sender: ChatParticipant | null;
   // Обычное сообщение приходит без type (или с "message"); typing — отдельно.
   type?: "message";
+};
+
+export type IncomingEditedMessage = {
+  content: string;
+  edited_at: string;
+  id: number;
+  type: "message_edited";
+};
+
+export type IncomingDeletedMessages = {
+  message_ids: number[];
+  type: "messages_deleted";
 };
 
 export type ChatConsultation = {
@@ -100,7 +117,11 @@ export type TypingIncoming = {
 };
 
 // Любой кадр из сокета комнаты: сообщение или событие typing.
-export type IncomingSocketFrame = IncomingChatMessage | TypingIncoming;
+export type IncomingSocketFrame =
+  | IncomingChatMessage
+  | IncomingDeletedMessages
+  | IncomingEditedMessage
+  | TypingIncoming;
 
 // ── AI assistant chat (room 0) ──────────────────────────────────────────────
 

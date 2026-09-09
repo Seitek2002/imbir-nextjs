@@ -86,7 +86,7 @@ const AttachmentContent: FC<{
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "flex items-center gap-2 rounded-xl p-2",
+        "flex items-center gap-2 rounded-xl p-2 no-underline",
         isMine ? "bg-white/15 text-white" : "bg-white text-foreground",
       )}
     >
@@ -125,18 +125,75 @@ const MessageBubble: FC<{
   // Проявлять текст прокруткой букв. Включается только для новых ответов
   // ассистента — история и свои сообщения появляются сразу.
   scramble?: boolean;
-}> = ({ message, scramble = false }) => {
+  isSelected?: boolean;
+  selectionMode?: boolean;
+  onContextMenu?: (event: React.MouseEvent, message: ChatThreadMessage) => void;
+  onLongPress?: (message: ChatThreadMessage) => void;
+  onSelect?: (message: ChatThreadMessage) => void;
+}> = ({
+  message,
+  scramble = false,
+  isSelected = false,
+  selectionMode = false,
+  onContextMenu,
+  onLongPress,
+  onSelect,
+}) => {
   const attachment = parseAttachment(message.content);
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+  const longPressTimerRef = useRef<null | ReturnType<typeof setTimeout>>(null);
   const isImage = attachment ? isImageAttachment(attachment) : false;
+  const canInteract = message.isMine && !message.isDeleted;
+
+  const clearLongPress = () => {
+    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
+  };
+
+  const handleTouchStart = () => {
+    if (!canInteract || !onLongPress) return;
+    clearLongPress();
+    longPressTimerRef.current = setTimeout(() => {
+      onLongPress(message);
+      longPressTimerRef.current = null;
+    }, 550);
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!selectionMode || !canInteract || !onSelect) return;
+    event.preventDefault();
+    event.stopPropagation();
+    onSelect(message);
+  };
 
   return (
     <div
+      onClick={handleClick}
+      onContextMenu={(event) => {
+        if (canInteract) onContextMenu?.(event, message);
+      }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={clearLongPress}
+      onTouchMove={clearLongPress}
       className={cn(
-        "flex flex-col max-w-[75%] md:max-w-[65%]",
+        "relative flex flex-col max-w-[75%] md:max-w-[65%]",
         message.isMine ? "self-end" : "self-start",
+        isSelected && "rounded-2xl ring-2 ring-primary ring-offset-2",
       )}
     >
+      {selectionMode && canInteract && (
+        <span
+          className={cn(
+            "absolute -left-6 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full border",
+            isSelected
+              ? "border-primary bg-primary text-white"
+              : "border-border-soft bg-white text-transparent",
+          )}
+          aria-hidden="true"
+        >
+          ✓
+        </span>
+      )}
       <div
         className={cn(
           "text-sm leading-normal whitespace-pre-wrap break-words",
@@ -146,7 +203,9 @@ const MessageBubble: FC<{
             : "bg-[#EEF1F4] text-foreground rounded-2xl rounded-bl-sm",
         )}
       >
-        {attachment ? (
+        {message.isDeleted ? (
+          <span className="italic text-muted">Сообщение удалено</span>
+        ) : attachment ? (
           <AttachmentContent
             attachment={attachment}
             isMine={message.isMine}
@@ -190,6 +249,9 @@ const MessageBubble: FC<{
         <span className="text-[11px] text-muted">
           {formatMessageTime(message.createdAt)}
         </span>
+        {message.editedAt && !message.isDeleted && (
+          <span className="text-[11px] text-muted">изменено</span>
+        )}
         {message.isMine && message.isRead !== undefined && (
           <ReadReceipt isRead={message.isRead} />
         )}
@@ -286,7 +348,12 @@ type Props = {
   error?: null | string;
   isLoading: boolean;
   messages: ChatThreadMessage[];
+  onDeleteMessages?: (messageIds: number[]) => void;
+  onEditMessage?: (message: ChatThreadMessage) => void;
   pendingReply?: boolean;
+  selectedMessageIds?: number[];
+  onSelectMessage?: (message: ChatThreadMessage) => void;
+  onClearSelection?: () => void;
 };
 
 export const MessageThread: FC<Props> = ({
@@ -296,8 +363,49 @@ export const MessageThread: FC<Props> = ({
   error,
   animateIncoming = false,
   pendingReply = false,
+  onDeleteMessages,
+  onEditMessage,
+  selectedMessageIds = [],
+  onSelectMessage,
+  onClearSelection,
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [contextMessage, setContextMessage] =
+    useState<ChatThreadMessage | null>(null);
+  const contextPositionRef = useRef({ x: 0, y: 0 });
+  const selectionMode = selectedMessageIds.length > 0;
+
+  useEffect(() => {
+    if (!contextMessage) return;
+    const close = () => setContextMessage(null);
+    document.addEventListener("click", close);
+    document.addEventListener("scroll", close, true);
+    return () => {
+      document.removeEventListener("click", close);
+      document.removeEventListener("scroll", close, true);
+    };
+  }, [contextMessage]);
+
+  const handleContextMenu = (
+    event: React.MouseEvent,
+    message: ChatThreadMessage,
+  ) => {
+    if (!onDeleteMessages && !onEditMessage) return;
+    event.preventDefault();
+    setContextMessage(message);
+    contextPositionRef.current = {
+      x: Math.min(event.clientX, window.innerWidth - 190),
+      y: Math.min(event.clientY, window.innerHeight - 130),
+    };
+  };
+  const deleteFromMenu = () => {
+    if (!contextMessage || !onDeleteMessages) return;
+    const ids = selectedMessageIds.includes(contextMessage.id)
+      ? selectedMessageIds
+      : [contextMessage.id];
+    setContextMessage(null);
+    onDeleteMessages(ids);
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -312,7 +420,30 @@ export const MessageThread: FC<Props> = ({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3 scrollbar-hide bg-white">
+    <div className="relative flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3 scrollbar-hide bg-white">
+      {selectionMode && (
+        <div className="sticky top-0 z-10 -mx-2 mb-1 flex items-center justify-between rounded-xl bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
+          <span className="text-sm font-medium">
+            Выбрано: {selectedMessageIds.length}
+          </span>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => onDeleteMessages?.(selectedMessageIds)}
+              className="text-sm font-medium text-primary"
+            >
+              Удалить
+            </button>
+            <button
+              type="button"
+              onClick={onClearSelection}
+              className="text-sm text-muted"
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
       {error && (
         <div className="self-center bg-[#FFF0EE] text-primary text-xs px-4 py-1.5 rounded-full">
           {error}
@@ -331,6 +462,13 @@ export const MessageThread: FC<Props> = ({
             <MessageBubble
               message={message}
               scramble={animateIncoming && !message.isMine && !!message.isFresh}
+              isSelected={selectedMessageIds.includes(message.id)}
+              selectionMode={selectionMode}
+              onContextMenu={handleContextMenu}
+              onLongPress={(longPressedMessage) =>
+                onSelectMessage?.(longPressedMessage)
+              }
+              onSelect={onSelectMessage}
             />
             {!message.isMine && message.recommendations && (
               <RecommendationCards recommendations={message.recommendations} />
@@ -342,6 +480,50 @@ export const MessageThread: FC<Props> = ({
       {pendingReply && <TypingBubble />}
 
       <div ref={bottomRef} />
+      {contextMessage && (
+        <div
+          className="fixed z-50 min-w-44 overflow-hidden rounded-xl border border-border-soft bg-white py-1 shadow-lg"
+          style={{
+            left: contextPositionRef.current.x,
+            top: contextPositionRef.current.y,
+          }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          {onEditMessage && !parseAttachment(contextMessage.content) && (
+            <button
+              type="button"
+              onClick={() => {
+                onEditMessage(contextMessage);
+                setContextMessage(null);
+              }}
+              className="block w-full px-4 py-2 text-left text-sm hover:bg-background"
+            >
+              Редактировать
+            </button>
+          )}
+          {onSelectMessage && (
+            <button
+              type="button"
+              onClick={() => {
+                onSelectMessage(contextMessage);
+                setContextMessage(null);
+              }}
+              className="block w-full px-4 py-2 text-left text-sm hover:bg-background"
+            >
+              Выбрать
+            </button>
+          )}
+          {onDeleteMessages && (
+            <button
+              type="button"
+              onClick={deleteFromMenu}
+              className="block w-full px-4 py-2 text-left text-sm text-primary hover:bg-background"
+            >
+              Удалить
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };

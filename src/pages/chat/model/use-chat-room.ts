@@ -59,6 +59,8 @@ type UseChatRoomResult = {
   error: null | string;
   isLoadingHistory: boolean;
   messages: ChatThreadMessage[];
+  deleteMessages: (messageIds: number[]) => void;
+  editMessage: (messageId: number, content: string) => void;
   sendMessage: (content: string) => void;
   // Сырой сигнал в сокет; дебаунс — на стороне композера.
   sendTyping: (isTyping: boolean) => void;
@@ -82,6 +84,7 @@ export const useChatRoom = (
   // user_id → имя печатающего участника.
   const [typingUsers, setTypingUsers] = useState<Record<number, string>>({});
   const socketRef = useRef<null | WebSocket>(null);
+  const optimisticIdRef = useRef(0);
   const consultationsRef = useRef<ChatConsultation[]>([]);
   const queryClient = useQueryClient();
   // Таймеры авто-снятия статуса по каждому user_id (на случай потери "false").
@@ -135,9 +138,11 @@ export const useChatRoom = (
             id: message.id,
             content: message.content,
             createdAt: message.created_at,
+            editedAt: message.edited_at,
             // sender === null — системное уведомление, ничьё.
             isMine: message.sender?.id === currentUserId,
             isRead: message.is_read,
+            isDeleted: message.is_deleted,
             isSystem: message.sender === null,
             consultationId:
               message.appointment_id ??
@@ -196,10 +201,60 @@ export const useChatRoom = (
         return;
       }
 
+      if (payload.type === "message_edited") {
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === payload.id
+              ? {
+                  ...message,
+                  content: payload.content,
+                  editedAt: payload.edited_at,
+                }
+              : message,
+          ),
+        );
+        return;
+      }
+
+      if (payload.type === "messages_deleted") {
+        const deletedIds = new Set(payload.message_ids);
+        setMessages((prev) =>
+          prev.map((message) =>
+            deletedIds.has(message.id)
+              ? { ...message, content: "", isDeleted: true }
+              : message,
+          ),
+        );
+        return;
+      }
+
       const sender = payload.sender;
 
-      // The server echoes our own messages — we already render them optimistically.
-      if (sender && sender.id === currentUserId) return;
+      // Сопоставляем echo с optimistic-сообщением, чтобы сразу получить настоящий
+      // id и затем иметь возможность редактировать/удалять его без перезагрузки.
+      if (sender && sender.id === currentUserId) {
+        setMessages((prev) => {
+          const optimisticIndex = [...prev]
+            .map((message, index) => ({ message, index }))
+            .reverse()
+            .find(
+              ({ message }) =>
+                message.isMine &&
+                message.id < 0 &&
+                message.content === payload.content,
+            )?.index;
+          if (optimisticIndex === undefined) return prev;
+          const next = [...prev];
+          next[optimisticIndex] = {
+            ...next[optimisticIndex],
+            id: payload.id,
+            createdAt: payload.created_at,
+            isRead: payload.is_read,
+          };
+          return next;
+        });
+        return;
+      }
 
       // Пришло сообщение — собеседник закончил печатать, снимаем его статус.
       if (sender) {
@@ -219,6 +274,7 @@ export const useChatRoom = (
           id: payload.id,
           content: payload.content,
           createdAt: payload.created_at,
+          editedAt: payload.edited_at,
           isMine: false,
           // sender === null — системное уведомление (напр. онлайн-запись).
           isSystem: sender === null,
@@ -300,7 +356,7 @@ export const useChatRoom = (
       setMessages((prev) => [
         ...prev,
         {
-          id: Date.now(),
+          id: -++optimisticIdRef.current,
           content: text,
           createdAt,
           isMine: true,
@@ -311,11 +367,44 @@ export const useChatRoom = (
     [sendTyping, touchRoom],
   );
 
+  const editMessage = useCallback((messageId: number, content: string) => {
+    const text = content.trim();
+    const socket = socketRef.current;
+    if (!text || !socket || socket.readyState !== WebSocket.OPEN) return;
+    setMessages((prev) =>
+      prev.map((message) =>
+        message.id === messageId
+          ? { ...message, content: text, editedAt: new Date().toISOString() }
+          : message,
+      ),
+    );
+    socket.send(
+      JSON.stringify({ type: "edit", message_id: messageId, content: text }),
+    );
+  }, []);
+
+  const deleteMessages = useCallback((messageIds: number[]) => {
+    const socket = socketRef.current;
+    if (!messageIds.length || !socket || socket.readyState !== WebSocket.OPEN)
+      return;
+    const ids = new Set(messageIds);
+    setMessages((prev) =>
+      prev.map((message) =>
+        ids.has(message.id)
+          ? { ...message, content: "", isDeleted: true }
+          : message,
+      ),
+    );
+    socket.send(JSON.stringify({ type: "delete", message_ids: messageIds }));
+  }, []);
+
   return {
     messages,
     connectionState,
     isLoadingHistory,
     error: error ?? authError,
+    deleteMessages,
+    editMessage,
     sendMessage,
     typingNames: Object.values(typingUsers),
     sendTyping,

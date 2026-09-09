@@ -38,6 +38,9 @@ const TYPING_IDLE_MS = 2000;
 type Props = {
   disabled?: boolean;
   disclaimer?: React.ReactNode;
+  editingText?: null | string;
+  onCancelEdit?: () => void;
+  onEdit?: (text: string) => void;
   onSend: (text: string) => void;
   onSendFiles?: (files: File[]) => Promise<File[] | void> | File[] | void;
   // Сигнал "печатает/перестал" — троттлинг здесь, чтобы не спамить сокет.
@@ -57,6 +60,9 @@ export const MessageComposer = forwardRef(function MessageComposer(
     onTyping,
     disclaimer,
     onSendFiles,
+    editingText = null,
+    onCancelEdit,
+    onEdit,
   }: Props,
   ref: ForwardedRef<MessageComposerHandle>,
 ) {
@@ -64,6 +70,7 @@ export const MessageComposer = forwardRef(function MessageComposer(
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSendingFile, setIsSendingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isEditing = editingText !== null && !!onEdit;
 
   // Уже отправили "true" и ждём тишины, чтобы отправить "false".
   const typingActiveRef = useRef(false);
@@ -118,11 +125,22 @@ export const MessageComposer = forwardRef(function MessageComposer(
 
   useImperativeHandle(ref, () => ({ addFiles }), [addFiles]);
 
+  useEffect(() => {
+    if (editingText === null || !onEdit) return;
+    setText(editingText);
+    setSelectedFiles([]);
+  }, [editingText, onEdit]);
+
   const submit = async () => {
     const value = text.trim();
     if ((!value && selectedFiles.length === 0) || disabled || isSendingFile)
       return;
     stopTyping(); // снять статус до отправки
+    if (isEditing) {
+      onEdit(value);
+      setText("");
+      return;
+    }
     if (selectedFiles.length > 0 && onSendFiles) {
       setIsSendingFile(true);
       try {
@@ -152,6 +170,27 @@ export const MessageComposer = forwardRef(function MessageComposer(
 
   return (
     <div className="relative px-4 py-3 border-t border-border-soft bg-white">
+      {isEditing && (
+        <div className="mb-2 flex items-center justify-between rounded-xl bg-background px-3 py-2">
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-primary">Редактирование</p>
+            <p className="truncate text-xs text-muted">
+              Измените текст сообщения
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setText("");
+              onCancelEdit?.();
+            }}
+            className="ml-3 text-lg leading-none text-muted"
+            aria-label="Отменить редактирование"
+          >
+            ×
+          </button>
+        </div>
+      )}
       {selectedFiles.length > 0 && (
         <div className="mb-2 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {selectedFiles.map((file, index) => (
@@ -191,7 +230,7 @@ export const MessageComposer = forwardRef(function MessageComposer(
             disabled={disabled || isSendingFile}
             className="min-w-0 flex-1 bg-transparent py-1 text-sm text-foreground outline-none placeholder:text-muted"
           />
-          {onSendFiles && (
+          {onSendFiles && !isEditing && (
             <>
               <input
                 ref={fileInputRef}

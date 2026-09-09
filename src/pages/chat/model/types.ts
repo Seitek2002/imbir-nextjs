@@ -7,12 +7,14 @@ export type ChatThreadMessage = {
   consultationId?: number;
   content: string;
   createdAt: string;
+  editedAt?: null | string;
   id: number;
   // Сообщение пришло прямо сейчас, а не загрузилось вместе с историей. Нужно
   // ленте, чтобы проявлять анимацией только новый ответ ассистента: иначе при
   // каждом открытии чата заново «расшифровывалась» бы вся переписка.
   isFresh?: boolean;
   isMine: boolean;
+  isDeleted?: boolean;
   isRead?: boolean;
   // Системное уведомление (sender === null) — рендерится плашкой по центру.
   isSystem?: boolean;

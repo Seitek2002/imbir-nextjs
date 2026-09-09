@@ -52,6 +52,8 @@ export const UserConversation: FC<Props> = ({
     isLoadingHistory,
     error,
     sendMessage,
+    editMessage,
+    deleteMessages,
     typingNames,
     sendTyping,
   } = useChatRoom(roomId, currentUserId);
@@ -66,6 +68,39 @@ export const UserConversation: FC<Props> = ({
     !!partnerId && (role === "doctor" || role === "patient");
   const composerRef = useRef<MessageComposerHandle>(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [selectedMessageIds, setSelectedMessageIds] = useState<number[]>([]);
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+  const editingMessage = messages.find(
+    (message) => message.id === editingMessageId,
+  );
+
+  const handleSelectMessage = (message: (typeof messages)[number]) => {
+    if (!message.isMine || message.isDeleted) return;
+    setSelectedMessageIds((current) =>
+      current.includes(message.id)
+        ? current.filter((id) => id !== message.id)
+        : [...current, message.id],
+    );
+  };
+
+  const handleDeleteMessages = (messageIds: number[]) => {
+    if (!messageIds.length) return;
+    const confirmed = window.confirm(
+      messageIds.length === 1
+        ? "Удалить это сообщение?"
+        : `Удалить выбранные сообщения (${messageIds.length})?`,
+    );
+    if (!confirmed) return;
+    deleteMessages(messageIds);
+    setSelectedMessageIds([]);
+    setEditingMessageId(null);
+  };
+
+  const handleEditMessage = (message: (typeof messages)[number]) => {
+    if (!message.isMine || message.isDeleted) return;
+    setSelectedMessageIds([]);
+    setEditingMessageId(message.id);
+  };
 
   const sendFiles = async (files: File[]): Promise<File[]> => {
     const failedFiles: File[] = [];
@@ -149,6 +184,11 @@ export const UserConversation: FC<Props> = ({
         error={error}
         pendingReply={typingNames.length > 0}
         emptyHint="Сообщений пока нет. Начните общение!"
+        onDeleteMessages={handleDeleteMessages}
+        onEditMessage={handleEditMessage}
+        selectedMessageIds={selectedMessageIds}
+        onSelectMessage={handleSelectMessage}
+        onClearSelection={() => setSelectedMessageIds([])}
       />
       <MessageComposer
         ref={composerRef}
@@ -156,6 +196,12 @@ export const UserConversation: FC<Props> = ({
         onSendFiles={sendFiles}
         onTyping={sendTyping}
         disabled={!isOpen}
+        editingText={editingMessage?.content ?? null}
+        onEdit={(text) => {
+          if (editingMessageId !== null) editMessage(editingMessageId, text);
+          setEditingMessageId(null);
+        }}
+        onCancelEdit={() => setEditingMessageId(null)}
       />
 
       {canSeeSummaries && (
