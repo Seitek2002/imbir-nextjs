@@ -18,6 +18,8 @@ import {
   PhoneInput,
 } from "@/shared/ui";
 
+import { OnlineProfileSettings } from "../online-profile-settings";
+
 // "ГГГГ-ММ-ДД" → "ДД.ММ.ГГГГ"; уже-ДД.ММ.ГГГГ/пусто отдаём как есть
 const fromApiDate = (v: string): string => {
   const t = v.trim();
@@ -47,6 +49,9 @@ export const DoctorBasicInfoSection: FC = () => {
     phone: "",
     email: "",
     photo: undefined as string | undefined,
+    isOnlineAvailable: false,
+    consultationPrice: "",
+    isPublished: false,
   });
   const photoRef = useRef<HTMLInputElement>(null);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
@@ -72,6 +77,9 @@ export const DoctorBasicInfoSection: FC = () => {
       phone: profile.phone,
       email: profile.email,
       photo: profile.photo,
+      isOnlineAvailable: profile.isOnlineAvailable,
+      consultationPrice: profile.consultationPrice,
+      isPublished: profile.isPublished,
     });
   }
 
@@ -133,6 +141,11 @@ export const DoctorBasicInfoSection: FC = () => {
         .map((l) => l.trim())
         .filter(Boolean),
       phone: d.phone || undefined,
+      is_online_available: d.isOnlineAvailable,
+      consultation_price: d.consultationPrice.trim()
+        ? `${parseFloat(d.consultationPrice.replace(",", ".")) || 0}`
+        : "0.00",
+      is_published: d.isPublished,
     });
     setPendingPhoto(null);
     setIsEditing(false);
@@ -150,6 +163,9 @@ export const DoctorBasicInfoSection: FC = () => {
         phone: profile.phone,
         email: profile.email,
         photo: profile.photo,
+        isOnlineAvailable: profile.isOnlineAvailable,
+        consultationPrice: profile.consultationPrice,
+        isPublished: profile.isPublished,
       });
     }
     setPendingPhoto(null);
@@ -372,6 +388,17 @@ export const DoctorBasicInfoSection: FC = () => {
             )}
           </div>
         </div>
+
+        <OnlineProfileSettings
+          isEditing={isEditing}
+          isOnlineAvailable={d.isOnlineAvailable}
+          consultationPrice={d.consultationPrice}
+          isPublished={d.isPublished}
+          onOnlineAvailableChange={(value) => set("isOnlineAvailable", value)}
+          onConsultationPriceChange={(value) => set("consultationPrice", value)}
+          onPublishedChange={(value) => set("isPublished", value)}
+          readOnlyClassName={fieldList}
+        />
       </div>
 
       <ConfirmDialog

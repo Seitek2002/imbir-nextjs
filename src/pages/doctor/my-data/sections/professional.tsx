@@ -22,11 +22,12 @@ import { useReferenceValues } from "@/shared/lib/useReference";
 import {
   Button,
   CancelEditButton,
-  Checkbox,
   ConfirmDialog,
   Dropdown,
   Input,
 } from "@/shared/ui";
+
+import { OnlineProfileSettings } from "../online-profile-settings";
 
 // Те же дефолты, что у клиники (pages/clinic/clinic-profile/sections/
 // equipment/ui.tsx) — используются только пока справочник бэка не пришёл.
@@ -403,62 +404,16 @@ export const DoctorProfessionalInfoSection: FC = () => {
           </div>
         </div>
 
-        {/* Онлайн-приём и публикация. Отдельным блоком, а не в сетке полей:
-            от этих двух флагов зависит, увидят ли врача в каталоге и смогут
-            ли записаться на видеоконсультацию. */}
-        <div className="mt-6 pt-6 border-t border-border">
-          <h3 className="text-base font-semibold text-foreground mb-4">
-            Онлайн-приём и публикация
-          </h3>
-
-          {isEditing ? (
-            <div className="flex flex-col gap-4">
-              <Checkbox
-                size="large"
-                label="Принимаю онлайн (видеоконсультации)"
-                checked={d.isOnlineAvailable}
-                onChange={(e) => set("isOnlineAvailable", e.target.checked)}
-              />
-              <div className="max-w-xs">
-                <Input
-                  label="Стоимость консультации, сом"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={d.consultationPrice}
-                  onChange={(e) => set("consultationPrice", e.target.value)}
-                  placeholder="0"
-                  disabled={!d.isOnlineAvailable}
-                />
-              </div>
-              <Checkbox
-                size="large"
-                label="Опубликовать профиль в каталоге"
-                checked={d.isPublished}
-                onChange={(e) => set("isPublished", e.target.checked)}
-              />
-              <p className="text-muted text-sm">
-                Пока профиль не опубликован, он не показывается в поиске и на
-                него нельзя записаться.
-              </p>
-            </div>
-          ) : (
-            <div className={fieldList}>
-              <FieldView
-                label="Приём онлайн"
-                value={d.isOnlineAvailable ? "Включён" : "Отключён"}
-              />
-              <FieldView
-                label="Стоимость консультации, сом"
-                value={d.consultationPrice}
-              />
-              <FieldView
-                label="Профиль в каталоге"
-                value={d.isPublished ? "Опубликован" : "Не опубликован"}
-              />
-            </div>
-          )}
-        </div>
+        <OnlineProfileSettings
+          isEditing={isEditing}
+          isOnlineAvailable={d.isOnlineAvailable}
+          consultationPrice={d.consultationPrice}
+          isPublished={d.isPublished}
+          onOnlineAvailableChange={(value) => set("isOnlineAvailable", value)}
+          onConsultationPriceChange={(value) => set("consultationPrice", value)}
+          onPublishedChange={(value) => set("isPublished", value)}
+          readOnlyClassName={fieldList}
+        />
       </div>
 
       <ConfirmDialog
