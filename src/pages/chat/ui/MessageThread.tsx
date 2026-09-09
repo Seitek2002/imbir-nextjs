@@ -143,7 +143,7 @@ const MessageBubble: FC<{
   const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
   const longPressTimerRef = useRef<null | ReturnType<typeof setTimeout>>(null);
   const isImage = attachment ? isImageAttachment(attachment) : false;
-  const canInteract = message.isMine && !message.isDeleted;
+  const canInteract = message.id > 0 && message.isMine && !message.isDeleted;
 
   const clearLongPress = () => {
     if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
