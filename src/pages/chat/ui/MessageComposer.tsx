@@ -1,6 +1,16 @@
 "use client";
 
-import { FC, KeyboardEvent, useEffect, useRef, useState } from "react";
+import {
+  FC,
+  ForwardedRef,
+  KeyboardEvent,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 const PaperclipIcon: FC<{ className?: string }> = ({ className }) => (
   <svg
@@ -35,14 +45,21 @@ type Props = {
   placeholder?: string;
 };
 
-export const MessageComposer: FC<Props> = ({
-  onSend,
-  disabled = false,
-  placeholder = "Введите сообщение",
-  onTyping,
-  disclaimer,
-  onSendFiles,
-}) => {
+export type MessageComposerHandle = {
+  addFiles: (files: File[]) => void;
+};
+
+export const MessageComposer = forwardRef(function MessageComposer(
+  {
+    onSend,
+    disabled = false,
+    placeholder = "Введите сообщение",
+    onTyping,
+    disclaimer,
+    onSendFiles,
+  }: Props,
+  ref: ForwardedRef<MessageComposerHandle>,
+) {
   const [text, setText] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isSendingFile, setIsSendingFile] = useState(false);
@@ -78,11 +95,28 @@ export const MessageComposer: FC<Props> = ({
     idleTimerRef.current = setTimeout(stopTyping, TYPING_IDLE_MS);
   };
 
+  const addFiles = useCallback(
+    (files: File[]) => {
+      if (!files.length || disabled || isSendingFile) return;
+      setSelectedFiles((prev) => [...prev, ...files]);
+    },
+    [disabled, isSendingFile],
+  );
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     event.target.value = "";
-    if (files.length) setSelectedFiles((prev) => [...prev, ...files]);
+    addFiles(files);
   };
+
+  const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+    const files = Array.from(event.clipboardData.files);
+    if (!files.length) return;
+    event.preventDefault();
+    addFiles(files);
+  };
+
+  useImperativeHandle(ref, () => ({ addFiles }), [addFiles]);
 
   const submit = async () => {
     const value = text.trim();
@@ -117,7 +151,7 @@ export const MessageComposer: FC<Props> = ({
   useEffect(() => stopTyping, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="px-4 py-3 border-t border-border-soft bg-white">
+    <div className="relative px-4 py-3 border-t border-border-soft bg-white">
       {selectedFiles.length > 0 && (
         <div className="mb-2 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {selectedFiles.map((file, index) => (
@@ -152,6 +186,7 @@ export const MessageComposer: FC<Props> = ({
             value={text}
             onChange={(event) => handleChange(event.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             placeholder={placeholder}
             disabled={disabled || isSendingFile}
             className="min-w-0 flex-1 bg-transparent py-1 text-sm text-foreground outline-none placeholder:text-muted"
@@ -203,7 +238,7 @@ export const MessageComposer: FC<Props> = ({
       )}
     </div>
   );
-};
+});
 
 const isImageFile = (file: File) =>
   file.type.startsWith("image/") ||

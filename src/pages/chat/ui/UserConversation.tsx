@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { uploadFile } from "@/shared/api";
@@ -12,7 +12,7 @@ import type { ConnectionState } from "../model/types";
 import { useChatRoom } from "../model/use-chat-room";
 import { ChatHeader } from "./ChatHeader";
 import { ConsultationSummaryModal } from "./ConsultationSummaryModal";
-import { MessageComposer } from "./MessageComposer";
+import { MessageComposer, type MessageComposerHandle } from "./MessageComposer";
 import { MessageThread } from "./MessageThread";
 
 const CONNECTION_LABEL: Record<ConnectionState, string> = {
@@ -64,6 +64,8 @@ export const UserConversation: FC<Props> = ({
   // (см. getChatConsultations), поэтому кнопку ей не показываем.
   const canSeeSummaries =
     !!partnerId && (role === "doctor" || role === "patient");
+  const composerRef = useRef<MessageComposerHandle>(null);
+  const [isDragActive, setIsDragActive] = useState(false);
 
   const sendFiles = async (files: File[]): Promise<File[]> => {
     const failedFiles: File[] = [];
@@ -85,8 +87,37 @@ export const UserConversation: FC<Props> = ({
     return failedFiles;
   };
 
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!Array.from(event.dataTransfer.types).includes("Files")) return;
+    event.preventDefault();
+    if (isOpen) setIsDragActive(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      setIsDragActive(false);
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragActive(false);
+    if (!isOpen) return;
+    composerRef.current?.addFiles(Array.from(event.dataTransfer.files));
+  };
+
   return (
-    <>
+    <div
+      className="relative flex min-h-0 flex-1 flex-col"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {isDragActive && (
+        <div className="pointer-events-none absolute inset-2 z-10 flex items-center justify-center rounded-3xl border-2 border-dashed border-primary bg-white/95 text-sm font-medium text-primary">
+          Перетащите файл сюда
+        </div>
+      )}
       <ChatHeader
         name={name}
         isAi={false}
@@ -120,6 +151,7 @@ export const UserConversation: FC<Props> = ({
         emptyHint="Сообщений пока нет. Начните общение!"
       />
       <MessageComposer
+        ref={composerRef}
         onSend={sendMessage}
         onSendFiles={sendFiles}
         onTyping={sendTyping}
@@ -138,6 +170,6 @@ export const UserConversation: FC<Props> = ({
           onShare={role === "doctor" && isOpen ? sendMessage : undefined}
         />
       )}
-    </>
+    </div>
   );
 };
