@@ -184,14 +184,16 @@ export const DateField: FC<Props> = ({
     return cells;
   }, [monthCursor]);
 
+  const openCalendar = () => {
+    if (isOpen) return;
+    const nextMonth = selectedDate ?? new Date();
+    setMonthCursor(new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 1));
+    setIsOpen(true);
+  };
+
   const toggleCalendar = () => {
-    if (!isOpen) {
-      const nextMonth = selectedDate ?? new Date();
-      setMonthCursor(
-        new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 1),
-      );
-    }
-    setIsOpen((open) => !open);
+    if (isOpen) setIsOpen(false);
+    else openCalendar();
   };
 
   const selectDate = (date: Date) => {
@@ -205,12 +207,23 @@ export const DateField: FC<Props> = ({
   };
 
   return (
-    <div ref={calendarRef} className={cn("relative", className)}>
+    <div
+      ref={calendarRef}
+      className={cn("relative", className)}
+      onClick={(event) => {
+        // Клик по строке может приходить на label-обёртку Input, поэтому
+        // открываем календарь с контейнера. Кнопки календаря работают сами.
+        if ((event.target as HTMLElement).closest("button")) return;
+        openCalendar();
+      }}
+    >
       <Input
         label={label}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(maskDate(e.target.value))}
+        onClick={openCalendar}
+        onFocus={openCalendar}
         error={error ?? formatError}
         hint={hint}
         inputMode="numeric"
