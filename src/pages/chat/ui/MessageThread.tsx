@@ -37,11 +37,12 @@ type Attachment = {
 
 const FILE_MESSAGE_RE = /^(?:[📎🖇]\s*)?([^\n]+)\n((?:https?:\/\/|\/)[^\s]+)$/;
 const URL_RE_GLOBAL = /(https?:\/\/[^\s]+)/g;
+const ATTACHMENT_PREFIX_RE = /^[📎🖇\uFFFD]\s*/u;
 
 const parseAttachment = (content: string): Attachment | null => {
   const match = content.match(FILE_MESSAGE_RE);
   if (!match) return null;
-  return { name: match[1], url: match[2] };
+  return { name: match[1].replace(ATTACHMENT_PREFIX_RE, ""), url: match[2] };
 };
 
 const isImageAttachment = ({ name, url }: Attachment) =>
@@ -64,7 +65,6 @@ const AttachmentContent: FC<{
   onImageClick: () => void;
 }> = ({ attachment, isMine, onImageClick }) => {
   const image = isImageAttachment(attachment);
-  const linkClass = isMine ? "text-white" : "text-foreground";
 
   return image ? (
     <button
@@ -79,14 +79,6 @@ const AttachmentContent: FC<{
         loading="lazy"
         className="max-h-72 max-w-full rounded-xl object-contain"
       />
-      <span
-        className={cn(
-          "mt-1 block truncate px-1 text-xs underline underline-offset-2",
-          linkClass,
-        )}
-      >
-        {attachment.name}
-      </span>
     </button>
   ) : (
     <a
@@ -100,7 +92,7 @@ const AttachmentContent: FC<{
     >
       <FileIcon isMine={isMine} name={attachment.name} />
       <span className="min-w-0">
-        <span className="block truncate text-sm font-medium underline underline-offset-2">
+        <span className="block truncate text-sm font-medium">
           {attachment.name}
         </span>
         <span className="block text-xs opacity-70">Скачать файл</span>

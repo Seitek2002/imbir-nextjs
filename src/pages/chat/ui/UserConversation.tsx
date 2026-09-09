@@ -74,7 +74,7 @@ export const UserConversation: FC<Props> = ({
       try {
         const { url } = await uploadFile(file);
         const fileUrl = toMediaUrl(url) ?? url;
-        sendMessage(`📎 ${file.name}\n${fileUrl}`);
+        sendMessage(`${file.name}\n${fileUrl}`);
       } catch {
         failedFiles.push(file);
       }
