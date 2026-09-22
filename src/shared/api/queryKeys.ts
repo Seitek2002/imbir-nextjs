@@ -79,6 +79,8 @@ export const doctorCabinetKeys = {
   stats: () => [...doctorCabinetKeys.all, "stats"] as const,
   reviews: () => [...doctorCabinetKeys.all, "reviews"] as const,
   services: () => [...doctorCabinetKeys.all, "services"] as const,
+  invitations: (status: string, page: number) =>
+    [...doctorCabinetKeys.all, "invitations", status, page] as const,
 };
 
 export const clinicCabinetKeys = {
@@ -96,6 +98,8 @@ export const clinicCabinetKeys = {
     [...clinicCabinetKeys.all, "appointments", filters] as const,
   stats: () => [...clinicCabinetKeys.all, "stats"] as const,
   invites: () => [...clinicCabinetKeys.all, "invites"] as const,
+  doctorInvitations: (status: string, page: number) =>
+    [...clinicCabinetKeys.all, "doctor-invitations", status, page] as const,
   reviews: () => [...clinicCabinetKeys.all, "reviews"] as const,
 };
 

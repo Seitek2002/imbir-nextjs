@@ -2,6 +2,8 @@
 
 import { FC, useState } from "react";
 
+import Link from "next/link";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicPageLayout } from "@/widgets/clinic/layout";
@@ -175,6 +177,12 @@ export const ClinicInvitesPage: FC = () => {
             филиала. Без указанной даты ссылка действует бессрочно и может быть
             использована несколькими врачами.
           </p>
+          <Link
+            href="/clinic-profile/doctor-invitations"
+            className="mt-2 inline-block text-sm font-medium text-primary underline"
+          >
+            Врач уже зарегистрирован? Отправить персональное приглашение
+          </Link>
         </div>
       </div>
 

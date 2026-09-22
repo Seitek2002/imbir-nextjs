@@ -1,5 +1,8 @@
 export type NotificationType =
   | "appointment_reminder"
+  | "clinic_invite_accepted"
+  | "clinic_invite_declined"
+  | "clinic_invite_received"
   | "new_message"
   | "new_review"
   | "system";

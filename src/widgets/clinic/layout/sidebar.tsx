@@ -103,7 +103,7 @@ const MENU_ITEMS: MenuItem[] = [
   },
   {
     href: "/clinic-profile/invites",
-    label: "Пригласить врача",
+    label: "Ссылка для регистрации",
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
         <path
@@ -124,6 +124,21 @@ const MENU_ITEMS: MenuItem[] = [
         />
         <path
           d="M15.8333 6.66667V11.6667M13.3333 9.16667H18.3333"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    href: "/clinic-profile/doctor-invitations",
+    label: "Приглашения врачам",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path
+          d="M3 5h14v10H3zM3 6l7 5 7-5"
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"

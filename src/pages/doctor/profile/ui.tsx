@@ -104,6 +104,21 @@ const MENU_ITEMS = [
       </svg>
     ),
   },
+  {
+    href: "/doctor-profile/invitations",
+    label: "Приглашения",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path
+          d="M3 5h14v10H3zM3 6l7 5 7-5"
+          stroke={colors.primary}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
 ];
 
 // Мобильный хаб кабинета врача — карточка профиля, меню разделов и выход,

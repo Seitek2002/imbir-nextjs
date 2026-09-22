@@ -39,6 +39,9 @@ export * from "./doctor-cabinet/requests";
 export * from "./clinic-cabinet/types";
 export * from "./clinic-cabinet/requests";
 
+export * from "./doctor-invitations/types";
+export * from "./doctor-invitations/requests";
+
 // Blog
 export * from "./blog/types";
 export * from "./blog/requests";

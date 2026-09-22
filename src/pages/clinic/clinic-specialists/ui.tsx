@@ -72,13 +72,21 @@ export const ClinicSpecialistsPage: FC = () => {
           <h2 className="text-[32px] font-semibold text-foreground">
             Мои специалисты
           </h2>
-          <Link
-            href="/clinic-profile/specialists/new"
-            className="flex items-center gap-2 pl-4 pr-5 py-2.5 rounded-full border border-border bg-white text-foreground font-medium hover:border-primary hover:text-primary transition-colors whitespace-nowrap"
-          >
-            <AddIcon />
-            Добавить специалиста
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/clinic-profile/doctor-invitations"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-border bg-white text-foreground font-medium hover:border-primary hover:text-primary transition-colors whitespace-nowrap"
+            >
+              Пригласить врача
+            </Link>
+            <Link
+              href="/clinic-profile/specialists/new"
+              className="flex items-center gap-2 pl-4 pr-5 py-2.5 rounded-full border border-border bg-white text-foreground font-medium hover:border-primary hover:text-primary transition-colors whitespace-nowrap"
+            >
+              <AddIcon />
+              Добавить специалиста
+            </Link>
+          </div>
         </div>
 
         <div className="pb-24 md:pb-0">
@@ -93,7 +101,13 @@ export const ClinicSpecialistsPage: FC = () => {
       </ClinicPageLayout>
 
       {/* Мобайл: кнопка добавления закреплена снизу */}
-      <div className="md:hidden fixed inset-x-0 bottom-0 p-4 bg-[#FAFAFA] z-30">
+      <div className="md:hidden fixed inset-x-0 bottom-0 p-4 bg-[#FAFAFA] z-30 flex flex-col gap-2">
+        <Link
+          href="/clinic-profile/doctor-invitations"
+          className="w-full py-3 rounded-full border border-primary bg-white text-primary font-medium flex items-center justify-center"
+        >
+          Пригласить врача
+        </Link>
         <Link
           href="/clinic-profile/specialists/new"
           className="w-full py-3.5 rounded-full bg-primary text-white font-medium hover:bg-primary-dark transition-colors active:scale-95 flex items-center justify-center gap-2"

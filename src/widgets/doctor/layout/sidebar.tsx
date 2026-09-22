@@ -124,6 +124,21 @@ const MENU_ITEMS: MenuItem[] = [
       </svg>
     ),
   },
+  {
+    href: "/doctor-profile/invitations",
+    label: "Приглашения",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path
+          d="M3 5h14v10H3zM3 6l7 5 7-5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
 ];
 
 // specialty приходит из кабинета, но в сайдбаре не рисуется: блок под именем
