@@ -30,3 +30,29 @@ export const extractErrorMessage = (
   }
   return fallback;
 };
+
+// Потеря ответа не доказывает, что сервер не создал аккаунт. Не предлагаем
+// слепо повторять POST: сначала пользователь может проверить вход.
+export const getRegistrationErrorMessage = (error: unknown): string => {
+  const failure = error as {
+    code?: string;
+    response?: { data?: unknown; status?: number };
+  } | null;
+  const checkLogin =
+    "Аккаунт мог быть создан: сначала попробуйте войти. Если аккаунта нет — повторите регистрацию.";
+
+  if (failure?.code === "ECONNABORTED" || failure?.code === "ETIMEDOUT") {
+    return `Истекло время ожидания ответа. ${checkLogin}`;
+  }
+  if (!failure?.response) {
+    return `Прервано соединение с сервером. Проверьте интернет. ${checkLogin}`;
+  }
+  // На 5xx иногда приходит HTML от nginx/Django вместо ответа API.
+  if ((failure.response.status ?? 0) >= 500)
+    return `Сервер не подтвердил регистрацию. ${checkLogin}`;
+  const message = extractErrorMessage(failure.response.data, "").trim();
+  return (
+    message ||
+    `Сервер не подтвердил регистрацию. Проверьте связь. ${checkLogin}`
+  );
+};

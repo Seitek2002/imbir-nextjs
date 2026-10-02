@@ -11,6 +11,7 @@
     "cap:sync": "cap sync android",
     "cap:open:android": "cap open android",
     "lint": "eslint",
+    "test:registration": "node --test tests/doctor-registration.test.cjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,scss,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,scss,css}\"",
     "prepare": "husky"

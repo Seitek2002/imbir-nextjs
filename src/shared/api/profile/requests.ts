@@ -1,4 +1,4 @@
-import { apiClient } from "../client";
+import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
 import { PaginatedResponse } from "../types";
 import {
   ClientProfile,
@@ -30,6 +30,9 @@ export const updateProfile = async (
     form.append("avatar_upload", avatar_upload);
     const { data } = await apiClient.put<ClientProfile>("/api/profile/", form, {
       headers: { "Content-Type": "multipart/form-data" },
+      // Общие 15 с рассчитаны на JSON: снимок с телефона по мобильной сети в
+      // них не укладывается, и запрос обрывался на загрузке.
+      timeout: FILE_UPLOAD_TIMEOUT_MS,
     });
     return data;
   }

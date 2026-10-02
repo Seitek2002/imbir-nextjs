@@ -14,12 +14,12 @@ import {
 } from "@/entities/specialization";
 
 import {
+  type RegisterDoctorRequest,
   checkEmailAvailabilityFn,
   doctorCabinetKeys,
   getDoctorProfile,
   registerClientFn,
   registerClinicFn,
-  registerDoctorFn,
   registerPhoneConfirmFn,
   registerPhoneRequestFn,
   updateClinicProfile,
@@ -37,7 +37,10 @@ import {
 } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { isEmailValid } from "@/shared/lib/booking";
-import { extractErrorMessage } from "@/shared/lib/errors";
+import {
+  extractErrorMessage,
+  getRegistrationErrorMessage,
+} from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import {
@@ -60,6 +63,7 @@ import {
   DoctorStep,
   InviteClinic,
 } from "./doctor-form";
+import { registerDoctorWithRecovery } from "./model/recover-registration";
 
 // --- Role icons ---
 
@@ -520,7 +524,7 @@ export const RegisterPage = () => {
         specializationList,
       );
 
-      const res = await registerDoctorFn({
+      const registerRequest: RegisterDoctorRequest = {
         invite_clinic_id: inviteClinic?.clinicId,
         invite_branch_id: inviteClinic?.branchId ?? undefined,
         password: data.password,
@@ -583,6 +587,12 @@ export const RegisterPage = () => {
           agree_data_processing: true,
           agree_publishing: true,
         },
+      };
+      // Ответ на регистрацию мог потеряться (таймаут, обрыв) при уже созданном
+      // аккаунте: тогда обёртка сама входит теми же данными — см. модуль.
+      const res = await registerDoctorWithRecovery(registerRequest, {
+        email: data.email,
+        password: data.password,
       });
       setRememberMe(true);
       setTokens({ access: res.access, refresh: res.refresh });
@@ -655,43 +665,61 @@ export const RegisterPage = () => {
         };
 
         await updateDoctorProfile(profileFields);
-
-        // Сертификаты идут отдельными запросами в /api/doctor/documents/:
-        // профильный endpoint их не принимает.
-        const fileResults = await Promise.allSettled(
-          data.certificates.map(uploadDoctorDocument),
-        );
-        if (fileResults.some((r) => r.status === "rejected")) {
-          toast.error(
-            "Аккаунт создан, но сертификаты не загрузились. Добавьте их в кабинете врача.",
-          );
-        }
       } catch {
         toast.error(
           "Аккаунт создан, но часть данных не сохранилась. Заполните их в кабинете врача.",
         );
       }
 
+      // Аккаунт уже создан. Медленные файлы не должны держать врача на
+      // регистрации; даже при сбое текстового PUT пробуем сохранить документы.
+      const pendingUploads: Promise<unknown>[] = [];
+      if (data.certificates.length > 0) {
+        const certificatesUpload = Promise.allSettled(
+          data.certificates.map(uploadDoctorDocument),
+        ).then((results) => {
+          if (results.some((result) => result.status === "rejected")) {
+            toast.error(
+              "Аккаунт создан, но сертификаты не загрузились. Добавьте их в кабинете врача.",
+            );
+          }
+          void queryClient.invalidateQueries({
+            queryKey: doctorCabinetKeys.profile(),
+          });
+        });
+        pendingUploads.push(certificatesUpload);
+      }
+
       if (data.photo) {
         const enteredName = splitFullName(data.fullName);
         // Не ждём: с ИИ-обработкой это около минуты, держать врача на
         // экране регистрации столько незачем — аккаунт уже создан.
-        void uploadDoctorPhoto(data.photo, data.processPhoto, {
-          first_name: enteredName.firstName || res.user.first_name,
-          last_name: enteredName.lastName || res.user.last_name,
-          primary_specialization_ids: primarySpecializations.ids,
-          narrow_specialization_ids: narrowSpecializations.ids,
-        });
+        pendingUploads.push(
+          uploadDoctorPhoto(data.photo, data.processPhoto, {
+            first_name: enteredName.firstName || res.user.first_name,
+            last_name: enteredName.lastName || res.user.last_name,
+            primary_specialization_ids: primarySpecializations.ids,
+            narrow_specialization_ids: narrowSpecializations.ids,
+          }),
+        );
+      }
+
+      if (pendingUploads.length > 0) {
+        const uploadToast = toast.loading(
+          "Аккаунт создан. Файлы загружаются — не закрывайте вкладку.",
+        );
+        void Promise.allSettled(pendingUploads).then(() =>
+          toast.dismiss(uploadToast),
+        );
       }
 
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
       router.push(getRoleRedirect(res.user.role));
     } catch (err: unknown) {
-      const errData = (err as { response?: { data?: unknown } })?.response
-        ?.data;
-      toast.error(
-        extractErrorMessage(errData, "Ошибка регистрации. Попробуйте снова"),
-      );
+      toast.error(getRegistrationErrorMessage(err), {
+        duration: 10_000,
+        id: "doctor-registration-error",
+      });
     } finally {
       setIsLoadingDoctor(false);
     }
