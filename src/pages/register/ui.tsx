@@ -5,6 +5,8 @@ import toast from "react-hot-toast";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { toApiEducation } from "@/entities/doctor-education";
 import {
   resolveSpecializationIds,
@@ -13,6 +15,8 @@ import {
 
 import {
   checkEmailAvailabilityFn,
+  doctorCabinetKeys,
+  getDoctorProfile,
   registerClientFn,
   registerClinicFn,
   registerDoctorFn,
@@ -192,6 +196,7 @@ const splitFullName = (fullName: string) => {
 
 export const RegisterPage = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams() ?? new URLSearchParams();
   const { setTokens, setUser, setRememberMe } = useAuthStore();
   const hasInviteParams =
@@ -519,11 +524,11 @@ export const RegisterPage = () => {
         invite_clinic_id: inviteClinic?.clinicId,
         invite_branch_id: inviteClinic?.branchId ?? undefined,
         password: data.password,
-        // Бэк принимает фото и флаг AI-обработки top-level multipart-полями.
-        // Внутри step1 файл не передаём: JSON.stringify(File) превращает его
-        // в пустой объект.
-        photo: data.photo,
-        process_photo: data.processPhoto,
+        // Фото в регистрацию не кладём — оно уходит отдельным запросом после
+        // неё, см. uploadDoctorPhoto. С ИИ-обработкой сервер держал запрос
+        // около минуты, а общий таймаут клиента — 15 секунд: регистрация
+        // падала с «Ошибка регистрации», и врач с фото не мог
+        // зарегистрироваться вообще.
         step1: {
           full_name: data.fullName,
           gender: data.gender as "female" | "male",
@@ -583,16 +588,6 @@ export const RegisterPage = () => {
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
 
-      if (res.photo_ai_processing === "failed") {
-        toast.error(
-          "ИИ не смог обработать фото — сохранён оригинальный вариант.",
-        );
-      } else if (res.photo_ai_processing === "disabled") {
-        toast.error(
-          "ИИ-обработка сейчас недоступна — сохранён оригинальный вариант.",
-        );
-      }
-
       // Регистрационный endpoint сохраняет только часть профиля врача. Поля,
       // которые уже поддерживает профильный API, переносим сразу после
       // создания аккаунта, не заставляя врача повторно заполнять кабинет.
@@ -628,8 +623,9 @@ export const RegisterPage = () => {
           );
         }
 
-        // Текстовые поля отправляем отдельным запросом после регистрации.
-        // Фото уже обработано/сохранено регистрационным endpoint-ом.
+        // Текстовые поля отправляем отдельным быстрым запросом, без фото:
+        // упади вместе с ним загрузка файла — потерялись бы специализации,
+        // стаж и образование.
         const profileFields = {
           // first_name и last_name обязательны для каждого PUT профиля.
           first_name: firstName,
@@ -676,6 +672,18 @@ export const RegisterPage = () => {
         );
       }
 
+      if (data.photo) {
+        const enteredName = splitFullName(data.fullName);
+        // Не ждём: с ИИ-обработкой это около минуты, держать врача на
+        // экране регистрации столько незачем — аккаунт уже создан.
+        void uploadDoctorPhoto(data.photo, data.processPhoto, {
+          first_name: enteredName.firstName || res.user.first_name,
+          last_name: enteredName.lastName || res.user.last_name,
+          primary_specialization_ids: primarySpecializations.ids,
+          narrow_specialization_ids: narrowSpecializations.ids,
+        });
+      }
+
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
       router.push(getRoleRedirect(res.user.role));
     } catch (err: unknown) {
@@ -686,6 +694,71 @@ export const RegisterPage = () => {
       );
     } finally {
       setIsLoadingDoctor(false);
+    }
+  };
+
+  // Фото врача — отдельным запросом после регистрации, в фоне.
+  //
+  // ИИ-обработка (белый халат и фон) занимает на сервере около минуты, а
+  // nginx обрывает ответ на ~50–60-й секунде. Работу сервер при этом доводит
+  // до конца: сначала сохраняет оригинал, потом подменяет его обработанным
+  // снимком — проверено живой регистрацией, через минуту в профиле лежит
+  // *_coat.png. Поэтому обрыв здесь — «ещё в работе», а не ошибка.
+  //
+  // Статус обрыва в браузере не увидеть: ответ nginx об ошибке приходит без
+  // CORS-заголовков (API на другом домене), и axios получает сетевую ошибку
+  // без response — 504 так и не долетает. Поэтому судим по результату: если
+  // после ошибки фото уже в профиле, файл дошёл. Если нет — не догрузился.
+  //
+  // В теле — имя, фамилия и специализации: без них PUT профиля отвечает 400
+  // или стирает специализации, только что сохранённые текстовым запросом.
+  const uploadDoctorPhoto = async (
+    photo: File,
+    processPhoto: boolean,
+    base: {
+      first_name: string;
+      last_name: string;
+      narrow_specialization_ids: number[];
+      primary_specialization_ids: number[];
+    },
+  ) => {
+    const refreshProfile = () =>
+      queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.profile() });
+
+    try {
+      const updated = await updateDoctorProfile(
+        { ...base, photo },
+        { processPhoto },
+      );
+      if (updated.photo_ai_processing === "failed") {
+        toast.error(
+          "ИИ не смог обработать фото — сохранён оригинальный вариант.",
+        );
+      } else if (updated.photo_ai_processing === "disabled") {
+        toast.error(
+          "ИИ-обработка сейчас недоступна — сохранён оригинальный вариант.",
+        );
+      }
+      refreshProfile();
+    } catch {
+      const arrived = await getDoctorProfile()
+        .then((profile) => Boolean(profile.photo))
+        .catch(() => false);
+
+      if (!arrived) {
+        toast.error(
+          "Аккаунт создан, но фото не загрузилось. Добавьте его в кабинете врача.",
+        );
+        return;
+      }
+
+      refreshProfile();
+      if (processPhoto) {
+        toast("Фото ещё обрабатывается — обновится в профиле через минуту.");
+        // Обработанный снимок подменит оригинал уже после обрыва: перечитаем
+        // профиль чуть позже, чтобы он появился без перезагрузки страницы.
+        setTimeout(refreshProfile, 30_000);
+      }
     }
   };
 

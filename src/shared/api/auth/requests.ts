@@ -1,6 +1,6 @@
 import type { AuthUser } from "@/shared/store/authStore";
 
-import { apiClient } from "../client";
+import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
 import {
   AuthResponse,
   DoctorInviteValidationResponse,
@@ -216,8 +216,15 @@ export const registerDoctorFn = async (
   const { data } = await apiClient.post<AuthResponse>(
     "/api/auth/register/doctor/",
     requestBody,
+    // С файлом — увеличенный таймаут, как у всех загрузок: в общие 15 секунд
+    // не укладывается даже загрузка фото по мобильной сети, не то что
+    // ИИ-обработка. Страница регистрации фото сюда сейчас не передаёт —
+    // оно уходит отдельным запросом после, — но ветка остаётся рабочей.
     body.photo
-      ? { headers: { "Content-Type": "multipart/form-data" } }
+      ? {
+          headers: { "Content-Type": "multipart/form-data" },
+          timeout: FILE_UPLOAD_TIMEOUT_MS,
+        }
       : undefined,
   );
   return data;
