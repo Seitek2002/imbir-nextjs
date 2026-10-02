@@ -35,8 +35,9 @@ function load(file, dependencies = {}, globals = {}) {
   return exports;
 }
 
-// Execute the actual page handler, not a reimplementation of the workflow.
-function pageHandler(api = {}) {
+// Достаёт из страницы настоящую функцию (по имени объявления) и исполняет её в
+// контексте с подставленными зависимостями — без пересказа логики в тесте.
+function extractPageFunction(name, context) {
   const source = read("src/pages/register/ui.tsx");
   const ast = ts.createSourceFile(
     "ui.tsx",
@@ -47,15 +48,23 @@ function pageHandler(api = {}) {
   );
   let declaration;
   function visit(node) {
-    if (
-      ts.isVariableDeclaration(node) &&
-      node.name.getText(ast) === "handleSubmitDoctor"
-    )
+    if (ts.isVariableDeclaration(node) && node.name.getText(ast) === name)
       declaration = node;
     ts.forEachChild(node, visit);
   }
   visit(ast);
-  assert.ok(declaration);
+  assert.ok(declaration, `${name} not found in the page`);
+  vm.runInNewContext(
+    compile(
+      `const ${declaration.getText(ast)}; globalThis.extracted = ${name};`,
+    ),
+    context,
+  );
+  return context.extracted;
+}
+
+// Execute the actual page handler, not a reimplementation of the workflow.
+function pageHandler(api = {}) {
   const events = [];
   const delays = [];
   const loginAttempts = [];
@@ -129,13 +138,53 @@ function pageHandler(api = {}) {
     doctorCabinetKeys: { profile: () => ["profile"] },
     ...load("src/shared/lib/errors.ts"),
   };
-  vm.runInNewContext(
-    compile(
-      `const ${declaration.getText(ast)}; globalThis.submit = handleSubmitDoctor;`,
-    ),
-    context,
+  const submit = extractPageFunction("handleSubmitDoctor", context);
+  return { submit, events, delays, loginAttempts };
+}
+
+// uploadDoctorPhoto страницы с настоящим scheduleProcessedPhotoRefresh из API;
+// таймер подменён: задержки записываются, колбэк выполняется сразу.
+function photoUploader(api = {}) {
+  const events = [];
+  const delays = [];
+  const { scheduleProcessedPhotoRefresh } = load(
+    "src/shared/api/doctor-cabinet/requests.ts",
+    { "../client": { FILE_UPLOAD_TIMEOUT_MS: 120000, apiClient: {} } },
+    {
+      setTimeout: (callback, ms) => {
+        delays.push(ms);
+        callback();
+      },
+    },
   );
-  return { submit: context.submit, events, delays, loginAttempts };
+  const toast = Object.assign((message) => events.push(["toast", message]), {
+    error: (message) => events.push(["error", message]),
+  });
+  const upload = extractPageFunction("uploadDoctorPhoto", {
+    toast,
+    scheduleProcessedPhotoRefresh,
+    updateDoctorProfile: async (...args) => {
+      events.push(["upload", ...args]);
+      if (api.uploadError) throw api.uploadError;
+      return api.updated ?? {};
+    },
+    getDoctorProfile: async () => api.profileAfterError ?? { photo: null },
+    queryClient: {
+      invalidateQueries: () => {
+        events.push(["refresh"]);
+        return Promise.resolve();
+      },
+    },
+    doctorCabinetKeys: { profile: () => ["profile"] },
+  });
+  const run = (processPhoto = true) =>
+    upload(new File(["synthetic"], "photo.png"), processPhoto, {
+      first_name: "QA",
+      last_name: "Doctor",
+      narrow_specialization_ids: [],
+      primary_specialization_ids: [7],
+    });
+  return { run, events, delays };
 }
 
 const registeredDoctor = {
@@ -529,4 +578,84 @@ test("registration errors distinguish validation from an unknown network outcome
     }),
     /войти/i,
   );
+});
+
+test("background AI photo processing: the profile is re-read at 60 and 120 seconds", () => {
+  const delays = [];
+  let refreshed = 0;
+  const { AI_PHOTO_REFRESH_DELAYS_MS, scheduleProcessedPhotoRefresh } = load(
+    "src/shared/api/doctor-cabinet/requests.ts",
+    { "../client": { FILE_UPLOAD_TIMEOUT_MS: 120000, apiClient: {} } },
+    {
+      setTimeout: (callback, ms) => {
+        delays.push(ms);
+        callback();
+      },
+    },
+  );
+  scheduleProcessedPhotoRefresh(() => refreshed++);
+  assert.deepEqual([...AI_PHOTO_REFRESH_DELAYS_MS], [60000, 120000]);
+  assert.deepEqual([...delays], [60000, 120000]);
+  assert.equal(refreshed, 2);
+});
+
+test("queued AI photo after registration tells the doctor and refreshes the profile later", async () => {
+  const { run, events, delays } = photoUploader({
+    updated: { photo_ai_processing: "queued" },
+  });
+  await run();
+  assert.match(events.find(([n]) => n === "toast")[1], /обрабатывается/);
+  // сразу и ещё два раза, когда обработка обычно заканчивается
+  assert.equal(events.filter(([n]) => n === "refresh").length, 3);
+  assert.deepEqual([...delays], [60000, 120000]);
+  assert.equal(
+    events.some(([n]) => n === "error"),
+    false,
+  );
+  const [, , options] = events.find(([n]) => n === "upload");
+  assert.deepEqual(JSON.parse(JSON.stringify(options)), { processPhoto: true });
+});
+
+test("photo without AI is refreshed once and shows nothing", async () => {
+  const { run, events, delays } = photoUploader({ updated: {} });
+  await run(false);
+  assert.equal(events.filter(([n]) => n === "refresh").length, 1);
+  assert.deepEqual([...delays], []);
+  assert.equal(
+    events.some(([n]) => n === "toast" || n === "error"),
+    false,
+  );
+});
+
+test("disabled AI keeps the original and says so, without delayed refreshes", async () => {
+  const { run, events, delays } = photoUploader({
+    updated: { photo_ai_processing: "disabled" },
+  });
+  await run();
+  assert.match(events.find(([n]) => n === "error")[1], /недоступна/);
+  assert.deepEqual([...delays], []);
+});
+
+test("lost reply after the photo arrived: processing is assumed and the profile re-read later", async () => {
+  const { run, events, delays } = photoUploader({
+    uploadError: { code: "ERR_NETWORK" },
+    profileAfterError: { photo: "https://api.test/media/doctors/photos/p.png" },
+  });
+  await run();
+  assert.match(events.find(([n]) => n === "toast")[1], /обрабатывается/);
+  assert.deepEqual([...delays], [60000, 120000]);
+  assert.equal(
+    events.some(([n]) => n === "error"),
+    false,
+  );
+});
+
+test("photo that never arrived is reported and nothing is scheduled", async () => {
+  const { run, events, delays } = photoUploader({
+    uploadError: { code: "ERR_NETWORK" },
+    profileAfterError: { photo: null },
+  });
+  await run();
+  assert.match(events.find(([n]) => n === "error")[1], /фото не загрузилось/);
+  assert.deepEqual([...delays], []);
 });

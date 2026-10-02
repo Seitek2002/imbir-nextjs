@@ -135,6 +135,16 @@ export const updateDoctorProfile = async (
       : { process_photo: options.processPhoto },
   );
 
+// ИИ-обработка фото идёт на сервере в фоне, около минуты: ответ на PUT приходит
+// сразу с исходным фото и photo_ai_processing: "queued", а обработанный снимок
+// подменяет его позже. Перечитываем профиль, когда результат обычно уже готов,
+// чтобы новое фото появилось без перезагрузки страницы.
+export const AI_PHOTO_REFRESH_DELAYS_MS = [60_000, 120_000];
+
+export const scheduleProcessedPhotoRefresh = (refresh: () => unknown) => {
+  for (const delay of AI_PHOTO_REFRESH_DELAYS_MS) setTimeout(refresh, delay);
+};
+
 // Ответ плоский ({schedule, lunch_break, emergency_24_7}), без обёртки data —
 // проверено живым запросом.
 export const getDoctorSchedule = async (): Promise<DoctorSchedule> => {

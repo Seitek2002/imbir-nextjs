@@ -11,9 +11,9 @@ export type LoginRequest = {
 
 export type AuthResponse = {
   access: string;
-  // Бэк возвращает это поле только если запрошена AI-обработка фото и она
-  // отключена в настройках или завершилась ошибкой.
-  photo_ai_processing?: "disabled" | "failed";
+  // Бэк возвращает это поле только если с фото запрошена AI-обработка:
+  // "queued" (идёт в фоне), "disabled" (выключена) или "failed".
+  photo_ai_processing?: "disabled" | "failed" | "queued";
   refresh: string;
   user: AuthUser;
 };

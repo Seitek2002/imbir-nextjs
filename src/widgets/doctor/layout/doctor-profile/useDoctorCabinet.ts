@@ -20,6 +20,7 @@ import {
   doctorCabinetKeys,
   getDoctorDocuments,
   getDoctorProfile,
+  scheduleProcessedPhotoRefresh,
   updateDoctorProfile,
   uploadDoctorDocument,
 } from "@/shared/api";
@@ -234,6 +235,16 @@ export const useDoctorCabinet = () => {
         } else if (updated.photo_ai_processing === "disabled") {
           toast.error(
             "ИИ-обработка сейчас недоступна — сохранён оригинальный вариант.",
+          );
+        } else if (updated.photo_ai_processing === "queued") {
+          // ИИ работает на сервере в фоне — новое фото подтянем сами.
+          toast.success(
+            "Данные сохранены. Фото обрабатывается — обновится примерно через минуту.",
+          );
+          scheduleProcessedPhotoRefresh(() =>
+            queryClient.invalidateQueries({
+              queryKey: doctorCabinetKeys.profile(),
+            }),
           );
         } else {
           toast.success("Данные сохранены");

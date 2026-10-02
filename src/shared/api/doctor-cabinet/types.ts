@@ -14,9 +14,10 @@ export type DoctorPrivateProfile = DoctorDetail & {
   appointments_total: number;
   is_published: boolean;
   legal: LegalInfo;
-  // Возвращается только после запроса с process_photo=true, если AI-обработка
-  // отключена в настройках или завершилась ошибкой.
-  photo_ai_processing?: "disabled" | "failed";
+  // Возвращается только после запроса с process_photo=true и новым фото:
+  // "queued" — обработка идёт в фоне (см. scheduleProcessedPhotoRefresh),
+  // "disabled" — выключена в настройках, "failed" — очередь недоступна.
+  photo_ai_processing?: "disabled" | "failed" | "queued";
   profile_views: number;
 };
 
