@@ -14,7 +14,7 @@ export type SpecializationItem = {
 };
 
 // Backend supports a combined reference as well as role-specific lists.
-export type SpecializationScope = "all" | "clinic" | "doctor";
+export type SpecializationScope = "all" | "clinic" | "doctor" | "reference";
 
 export type SpecializationListResponse = {
   data: SpecializationItem[];

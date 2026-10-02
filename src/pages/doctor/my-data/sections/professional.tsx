@@ -12,7 +12,7 @@ import { FieldView, formStyles } from "@/widgets/doctor/layout";
 
 import {
   resolveSpecializationIds,
-  useSpecializationOptions,
+  useDoctorSpecializationOptions,
   useSpecializations,
 } from "@/entities/specialization";
 
@@ -134,8 +134,8 @@ export const DoctorProfessionalInfoSection: FC = () => {
   // нему же ищут фильтры врачей), а сохраняется профиль по id — резолвим
   // название обратно в id перед отправкой (см. resolveSpecializationIds).
   const { options: specializationOptions, isLoading: isSpecsLoading } =
-    useSpecializationOptions("doctor");
-  const { data: specializationList = [] } = useSpecializations();
+    useDoctorSpecializationOptions();
+  const { data: specializationList = [] } = useSpecializations("reference");
   const specializationPlaceholder = isSpecsLoading
     ? "Загружаем список..."
     : "Выберите";

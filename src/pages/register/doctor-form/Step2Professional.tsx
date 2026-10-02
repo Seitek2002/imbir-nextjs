@@ -1,4 +1,4 @@
-import { useSpecializationOptions } from "@/entities/specialization";
+import { useDoctorSpecializationOptions } from "@/entities/specialization";
 
 import { Dropdown, Input } from "@/shared/ui";
 
@@ -16,7 +16,7 @@ type Props = {
 export const Step2Professional = ({ data, onChange, inviteClinic }: Props) => {
   // Список специализаций — из справочника бэка: значение уходит в
   // primary_specializations как есть, и по нему же врача потом находят фильтры.
-  const { options, isLoading } = useSpecializationOptions("doctor");
+  const { options, isLoading } = useDoctorSpecializationOptions();
   const placeholder = isLoading ? "Загружаем список..." : "Выберите из списка";
 
   return (

@@ -2,7 +2,7 @@
 
 import { FC, useRef } from "react";
 
-import { useSpecializationOptions } from "@/entities/specialization";
+import { useDoctorSpecializationOptions } from "@/entities/specialization";
 
 import type { ClinicDocument } from "@/shared/api";
 import { UserCircleIcon } from "@/shared/assets/icons";
@@ -244,7 +244,7 @@ export const ProfessionalSection: FC<SectionProps> = ({
   // Специализация — из справочника бэка, а не свободный текст: по этому же
   // значению врача потом ищут фильтры, опечатка выкидывала бы его из выдачи.
   const { options: specializationOptions, isLoading: isSpecsLoading } =
-    useSpecializationOptions("doctor");
+    useDoctorSpecializationOptions();
   const specializationPlaceholder = isSpecsLoading
     ? "Загружаем список..."
     : "Выберите из списка";

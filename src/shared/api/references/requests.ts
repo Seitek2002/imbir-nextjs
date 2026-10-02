@@ -33,7 +33,12 @@ export const getCities = () => fetchReference("/api/references/cities/");
 export const getSpecializations = async (
   scope: SpecializationScope = "all",
 ): Promise<SpecializationItem[]> => {
-  const query = scope === "all" ? "" : `?type=${scope}`;
+  const query =
+    scope === "reference"
+      ? "?include_unused=true"
+      : scope === "all"
+        ? ""
+        : `?type=${scope}`;
   const { data } = await apiClient.get<SpecializationListResponse>(
     `/api/references/specializations/${query}`,
   );

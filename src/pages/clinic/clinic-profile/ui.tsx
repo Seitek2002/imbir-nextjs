@@ -175,13 +175,13 @@ export const ClinicProfilePage: FC = () => {
   // Форма отдаёт названия специализаций; бэк на запись принимает только id
   // справочника — резолвим здесь же, перед отправкой
   // (см. ClinicProfileFormHandle.getSpecializationNames).
-  const { data: specializationList = [] } = useSpecializations();
+  const { data: specializationList = [] } = useSpecializations("reference");
   // Тот же справочник, но готовыми options — форме он нужен для выпадающих
   // списков направлений. Запрос общий, так что второго похода на сервер нет.
   const {
     options: specializationOptions,
     isLoading: isSpecializationsLoading,
-  } = useSpecializationOptions("clinic");
+  } = useSpecializationOptions("reference");
   const { data: equipmentValues = [], isLoading: isEquipmentLoading } =
     useQuery({
       queryKey: referenceKeys.equipment(),

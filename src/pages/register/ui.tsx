@@ -216,7 +216,7 @@ export const RegisterPage = () => {
   // Dropdown/текстовые поля специализации хранят название (см.
   // useSpecializationOptions), а бэк на запись принимает только id — резолвим
   // перед отправкой, как и в профилях врача/клиники.
-  const { data: specializationList = [] } = useSpecializations();
+  const { data: specializationList = [] } = useSpecializations("reference");
 
   useEffect(() => {
     const clinicIdParam =
@@ -572,8 +572,8 @@ export const RegisterPage = () => {
             data.certificates.length > 0 ? data.certificates : undefined,
         },
         step5: {
-          primary_specialization_ids: primarySpecializations.ids,
-          narrow_specialization_ids: narrowSpecializations.ids,
+          primary_specializations: primarySpecializations.ids,
+          narrow_specializations: narrowSpecializations.ids,
           additional_services: data.position || undefined,
         },
         step6: { equipment: [], patient_conditions: [], payment_methods: [] },

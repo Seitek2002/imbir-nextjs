@@ -26,9 +26,9 @@ export const ClinicSpecializationPage: FC = () => {
   // поэтому направления выбираются из списка, а не вводятся текстом. Тост про
   // ненайденные названия оставлен страховкой: если у клиники сохранено значение,
   // которого уже нет в справочнике, оно должно быть замечено, а не исчезнуть.
-  const { data: specializationList = [] } = useSpecializations();
+  const { data: specializationList = [] } = useSpecializations("reference");
   const { options: specializationOptions, isLoading: isSpecsLoading } =
-    useSpecializationOptions("clinic");
+    useSpecializationOptions("reference");
   const specializationPlaceholder = isSpecsLoading
     ? "Загружаем список..."
     : "Выберите из списка";

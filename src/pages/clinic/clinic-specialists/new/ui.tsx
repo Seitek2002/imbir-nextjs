@@ -46,7 +46,7 @@ export const ClinicNewSpecialistPage: FC = () => {
   const { firstName, lastName, droppedPatronymic } = splitFullName(d.fullName);
 
   // Dropdown хранит название специализации, а бэк принимает только id.
-  const { data: specializationList = [] } = useSpecializations();
+  const { data: specializationList = [] } = useSpecializations("reference");
   const resolveSpecs = () => {
     const primary = resolveSpecializationIds(
       d.specialization ? [d.specialization] : [],

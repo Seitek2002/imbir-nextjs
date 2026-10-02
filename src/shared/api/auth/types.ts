@@ -194,8 +194,8 @@ export type RegisterDoctorRequest = {
   };
   step5: {
     additional_services?: string;
-    narrow_specialization_ids: number[];
-    primary_specialization_ids: number[];
+    narrow_specializations: number[];
+    primary_specializations: number[];
   };
   step6: {
     equipment: string[];

@@ -100,6 +100,38 @@ export const useSpecializationOptions = (
   };
 };
 
+// Display doctor titles without creating duplicate reference IDs for the same
+// direction. The value remains the API name used by resolveSpecializationIds.
+const DOCTOR_LABELS: Record<string, string> = {
+  кардиология: "Кардиолог",
+  эндокринология: "Эндокринолог",
+  ревматология: "Ревматолог",
+  "диагностика и лечение ревматических заболеваний": "Ревматолог",
+  "травматология и ортопедия": "Ортопед",
+  гастроэнтерология: "Гастроэнтеролог",
+  флеболог: "Флеболог",
+  урология: "Уролог",
+  маммология: "Маммолог",
+  фиброскан: "Фиброскан",
+  оториноларингология: "Лор",
+  офтальмология: "Окулист",
+  "врач-офтальмолог высшей квалификационной категории": "Окулист",
+  хирургия: "Хирург",
+  дерматология: "Дерматолог",
+  гепатолог: "Гепатолог",
+};
+
+export const useDoctorSpecializationOptions = () => {
+  const { options, isLoading } = useSpecializationOptions("reference");
+  return {
+    options: options.map((option) => ({
+      ...option,
+      label: DOCTOR_LABELS[option.value.trim().toLowerCase()] ?? option.label,
+    })),
+    isLoading,
+  };
+};
+
 // "Терапия, Кардиология" + справочник → {ids: [9, 1], unmatched: []}.
 // Нужно там, где специализации редактируются свободным текстом (клиника), а не
 // строго через Dropdown (врач) — там опечатка или устаревшее название не

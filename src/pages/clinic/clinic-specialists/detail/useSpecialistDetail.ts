@@ -61,7 +61,7 @@ export const useSpecialistDetail = (id: string) => {
   // Для сохранения резолвим полный справочник: scope=doctor используется для
   // UI, но старое значение карточки может временно отсутствовать среди
   // опубликованных врачей.
-  const { data: specializationList = [] } = useSpecializations();
+  const { data: specializationList = [] } = useSpecializations("reference");
 
   const invalidateCard = () => {
     queryClient.invalidateQueries({

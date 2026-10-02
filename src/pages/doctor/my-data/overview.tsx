@@ -16,7 +16,7 @@ import {
 } from "@/entities/doctor-education";
 import {
   resolveSpecializationIds,
-  useSpecializationOptions,
+  useDoctorSpecializationOptions,
   useSpecializations,
 } from "@/entities/specialization";
 
@@ -261,8 +261,8 @@ export const DoctorMyDataOverview: FC = () => {
     setD((prev) => ({ ...prev, [k]: v }));
 
   const { options: specializationOptions, isLoading: isSpecsLoading } =
-    useSpecializationOptions("doctor");
-  const { data: specializationList = [] } = useSpecializations();
+    useDoctorSpecializationOptions();
+  const { data: specializationList = [] } = useSpecializations("reference");
   const specializationPlaceholder = isSpecsLoading
     ? "Загружаем список..."
     : "Выберите";
