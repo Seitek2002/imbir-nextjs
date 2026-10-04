@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useState, useSyncExternalStore } from "react";
 import toast from "react-hot-toast";
 
 import Link from "next/link";
@@ -11,7 +11,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { loginFn } from "@/shared/api";
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
-import { useUrlSearchParams } from "@/shared/lib/url-state";
 import { useAuthStore } from "@/shared/store";
 import { Button, Checkbox, type Country, Input, PhoneInput } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
@@ -23,6 +22,23 @@ const ROLE_REDIRECT: Record<string, string> = {
   doctor: "/doctor-profile",
   clinic: "/clinic-profile",
 };
+
+// Адрес за время жизни формы не меняется: с ?expired=1 сюда приходят полной
+// перезагрузкой (см. handleSessionExpired в shared/api/client.ts), поэтому
+// подписываться не на что.
+const noopSubscribe = () => () => {};
+
+// Намеренно не useSearchParams / useUrlSearchParams: на статически собранной
+// странице они выключают серверный рендер всего компонента, и в HTML вместо
+// формы входа уезжал скелетон — форма появлялась только после загрузки и
+// выполнения всего JS. Здесь на сервере отдаём false, а браузер дочитывает
+// флаг из адреса сразу после гидратации.
+const useSessionExpiredFlag = (): boolean =>
+  useSyncExternalStore(
+    noopSubscribe,
+    () => new URLSearchParams(window.location.search).get("expired") === "1",
+    () => false,
+  );
 
 const getRoleRedirect = (role: string): string => {
   const isMobile =
@@ -43,7 +59,7 @@ export const LoginPage = () => {
   } = useAuthStore();
 
   // Перехватчик 401 уводит сюда с ?expired=1, когда сессию продлить не вышло.
-  const isExpired = useUrlSearchParams().get("expired") === "1";
+  const isExpired = useSessionExpiredFlag();
 
   const [loginBy, setLoginBy] = useState<LoginBy>("email");
   const [email, setEmail] = useState("");

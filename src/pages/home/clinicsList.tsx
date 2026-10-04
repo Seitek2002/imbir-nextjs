@@ -148,7 +148,8 @@ export const ClinicsMainList: FC = () => {
 
       <div className="flex items-center justify-between lg:hidden">
         <h2 className="text-[18px] font-medium text-foreground">Клиники</h2>
-        <Link href="/clinics">
+        {/* prefetch — см. комментарий у ссылки на каталог в hero.tsx. */}
+        <Link href="/clinics" prefetch>
           <Button
             variant="text"
             size="md"

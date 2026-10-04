@@ -119,13 +119,21 @@ export const fetchBlogCategories = async (): Promise<BlogCategory[]> => {
   }
 };
 
+// null — только когда статьи действительно нет (бэк ответил 404). Остальные
+// сбои (таймаут, 5xx, сеть) пробрасываем: страница статьи кешируется (ISR), и
+// «не нашлась» из-за секундной недоступности бэка закешировалось бы как
+// настоящая 404 на всё время жизни кеша. Проброшенная ошибка в кеш не
+// попадает — Next продолжает отдавать прошлую удачную версию страницы.
 export const fetchBlogArticle = async (
   slug: string,
 ): Promise<BlogArticle | null> => {
   try {
     return adaptArticle(await getBlogPost(slug));
-  } catch {
-    return null;
+  } catch (error) {
+    const status = (error as { response?: { status?: number } })?.response
+      ?.status;
+    if (status === 404) return null;
+    throw error;
   }
 };
 

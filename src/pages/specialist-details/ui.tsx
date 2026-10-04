@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -58,6 +58,10 @@ type Props = {
   // отрисованного skeleton'а из loading.tsx, даже если данные пришли почти
   // мгновенно.
   initialDoctor?: Awaited<ReturnType<typeof api.getDoctorById>>;
+  // Когда сервер получил initialDoctor. Страница отдаётся из кеша (ISR) и
+  // может пролежать там дольше, чем данные остаются свежими; без этой отметки
+  // React Query считал бы их полученными только что и не обновлял.
+  initialDoctorUpdatedAt?: number;
 };
 
 // Заглушка вместо фото врача. Инициал в фирменном градиентном круге — тот же
@@ -83,7 +87,11 @@ const DoctorPhotoFallback: FC<{ name: string }> = ({ name }) => {
   );
 };
 
-export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
+export const SpecialistDetailsPage: FC<Props> = ({
+  id,
+  initialDoctor,
+  initialDoctorUpdatedAt,
+}) => {
   const router = useRouter();
   const [isOfflineInfoOpen, setIsOfflineInfoOpen] = useState(false);
   const [photoLoaded, setPhotoLoaded] = useState(false);
@@ -98,6 +106,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
     queryKey: doctorKeys.detail(id),
     queryFn: () => api.getDoctorById(id),
     initialData: initialDoctor,
+    initialDataUpdatedAt: initialDoctorUpdatedAt,
   });
 
   // 2. ПОЛУЧАЕМ ОТЗЫВЫ ЭТОГО ВРАЧА
@@ -107,6 +116,26 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
   const { isSaved, isPending, toggle } = useFavoriteToggle("doctor");
   const isFavorite = isSaved(Number(id));
   const isFavoritePending = isPending(Number(id));
+
+  // Запись — главное действие на этой странице, а /record с её формой — самый
+  // тяжёлый экран сайта. Без префетча (кнопки записи — это router.push, а не
+  // Link, и Next сам их не подгружает) после тапа «Онлайн» браузер сначала
+  // скачивал код и данные страницы записи, и только потом показывал её:
+  // около 0.7 с на телефоне, и всё это время кнопка выглядела «мёртвой».
+  // Адреса те же, что у кнопок ниже: мобильной и десктопной.
+  const mobileRecordHref = `${ROUTES.RECORD}?doctor=${id}`;
+  const desktopRecordHref = doctor
+    ? ROUTES.RECORD_FOR_DOCTOR(id, {
+        workplaces: doctor.workplaces,
+        mode: "online",
+      })
+    : null;
+  const canBookOnline = !isDoctor && Boolean(doctor?.isOnlineAvailable);
+  useEffect(() => {
+    if (!canBookOnline) return;
+    router.prefetch(mobileRecordHref);
+    if (desktopRecordHref) router.prefetch(desktopRecordHref);
+  }, [canBookOnline, mobileRecordHref, desktopRecordHref, router]);
 
   const { data: reviews = [] } = useQuery({
     queryKey: reviewKeys.byTarget("doctor", id),
@@ -248,10 +277,16 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
                     // не начинает грузить фото, пока JS до него не дойдёт.
                     // Подтверждено Lighthouse: ~1.3с чистой задержки на LCP.
                     priority
+                    fetchPriority="high"
                     sizes="(min-width: 768px) 400px, 100vw"
-                    className={`object-cover object-top transition-opacity duration-300 ${
-                      photoLoaded ? "opacity-100" : "opacity-0"
-                    }`}
+                    // Фото видно сразу, а не только после onLoad. Раньше оно
+                    // было прозрачным, пока не отработает setPhotoLoaded, то
+                    // есть пока не загрузится и не выполнится весь JS: браузер
+                    // давно скачал картинку, но показывал её на секунду-полторы
+                    // позже (на телефоне именно эта картинка — LCP). Шиммер
+                    // выше лежит под фото и просто закрывается им по мере
+                    // загрузки.
+                    className="object-cover object-top"
                     onLoad={() => setPhotoLoaded(true)}
                     // Битая ссылка — показываем ту же заглушку, что и при
                     // отсутствии фото, а не сломанную картинку поверх шиммера.
@@ -557,7 +592,7 @@ export const SpecialistDetailsPage: FC<Props> = ({ id, initialDoctor }) => {
               className="flex-1 justify-center"
               size="lg"
               IconLeft={OnlineRecordIcon}
-              onClick={() => router.push(`${ROUTES.RECORD}?doctor=${id}`)}
+              onClick={() => router.push(mobileRecordHref)}
             >
               Онлайн
             </Button>

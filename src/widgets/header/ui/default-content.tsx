@@ -1,6 +1,7 @@
 "use client";
 import { FC, Suspense, useState } from "react";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { GlobalSearch } from "@/features/global-search";
@@ -18,7 +19,14 @@ import { Button, IconBtn } from "@/shared/ui";
 
 import { useAuthDisplay } from "../lib/useAuthDisplay";
 import { HeaderChatButton } from "./chat-button";
-import { CitySelectorModal } from "./city-selector";
+
+// Модалка выбора города тянет за собой Modal и Dropdown со всеми их
+// зависимостями, а открывают её редко. Шапка стоит на каждой странице,
+// поэтому модалку грузим отдельным чанком при первом открытии.
+const CitySelectorModal = dynamic(
+  () => import("./city-selector").then((mod) => mod.CitySelectorModal),
+  { ssr: false },
+);
 
 const ROLE_ROUTE: Record<string, string> = {
   patient: "/profile",
@@ -30,6 +38,14 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
   searchable,
 }) => {
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
+  // Монтируем модалку только после первого открытия (до этого её чанк даже
+  // не запрашивается) и дальше уже не размонтируем — как и раньше, она сама
+  // решает, что показывать, по isOpen.
+  const [cityModalRequested, setCityModalRequested] = useState(false);
+  const openCityModal = () => {
+    setCityModalRequested(true);
+    setIsCityModalOpen(true);
+  };
   const city = useCityStore((state) => state.city);
   const { isAuthed, role } = useAuthDisplay();
   const isDoctor = role === "doctor";
@@ -55,7 +71,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
                 IconRight={GeoBtnArrowIcon}
                 variant="outline"
                 size="sm"
-                onClick={() => setIsCityModalOpen(true)}
+                onClick={openCityModal}
               >
                 {city}
               </Button>
@@ -76,7 +92,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
               IconRight={GeoBtnArrowIcon}
               variant="outline"
               size="sm"
-              onClick={() => setIsCityModalOpen(true)}
+              onClick={openCityModal}
             >
               {city}
             </Button>
@@ -108,6 +124,9 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
           <div className="w-full flex items-center justify-center mt-4 md:hidden">
             <Link
               href={ROUTES.SEARCH()}
+              // Тот же адрес, что у вкладки «Поиск» в нижней панели, — см.
+              // комментарий про prefetch в widgets/mobile-bottom-nav.
+              prefetch
               className="flex items-center w-full gap-2 border border-border px-3 py-2 rounded-full transition-transform active:scale-95"
             >
               <SearchIcon className="size-5" />
@@ -118,10 +137,12 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
       </div>
 
       {/* РЕНДЕРИМ МОДАЛКУ */}
-      <CitySelectorModal
-        isOpen={isCityModalOpen}
-        onClose={() => setIsCityModalOpen(false)}
-      />
+      {cityModalRequested && (
+        <CitySelectorModal
+          isOpen={isCityModalOpen}
+          onClose={() => setIsCityModalOpen(false)}
+        />
+      )}
     </>
   );
 };

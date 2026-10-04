@@ -2,18 +2,23 @@
 
 import { FC, Suspense } from "react";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useQuery } from "@tanstack/react-query";
 
+import { Footer } from "@/widgets/footer";
 import { Header } from "@/widgets/header";
 
 import { ActiveFiltersChips } from "@/features/active-filters-chips";
 import { useFavoriteToggle } from "@/features/favorite-toggle";
-import { FiltersTrigger } from "@/features/mobile-filters";
+import { FilterBar } from "@/features/filter-bar";
+import { CategoriesGrid, RecentSearches } from "@/features/global-search";
+import { FiltersTrigger, MobileFiltersModal } from "@/features/mobile-filters";
 import { UrlSearchInput } from "@/features/search-by-query";
+
+import { ClinicCard } from "@/entities/clinic";
+import { DoctorCard } from "@/entities/doctor";
 
 import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
@@ -22,28 +27,14 @@ import { useUrlSearchParams } from "@/shared/lib/url-state";
 import { plural } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
 
-const MobileFiltersModal = dynamic(() =>
-  import("@/features/mobile-filters").then((mod) => mod.MobileFiltersModal),
-);
-const Footer = dynamic(() =>
-  import("@/widgets/footer").then((mod) => mod.Footer),
-);
-const CategoriesGrid = dynamic(() =>
-  import("@/features/global-search").then((mod) => mod.CategoriesGrid),
-);
-const RecentSearches = dynamic(() =>
-  import("@/features/global-search").then((mod) => mod.RecentSearches),
-);
-const FilterBar = dynamic(() =>
-  import("@/features/filter-bar").then((mod) => mod.FilterBar),
-);
-const DoctorCard = dynamic(() =>
-  import("@/entities/doctor").then((mod) => mod.DoctorCard),
-);
-// <-- ДОБАВЛЯЕМ ИМПОРТ КАРТОЧКИ КЛИНИКИ
-const ClinicCard = dynamic(() =>
-  import("@/entities/clinic").then((mod) => mod.ClinicCard),
-);
+// Раньше блоки страницы (модалка фильтров, история, категории, футер,
+// карточки выдачи) подключались через dynamic(). Здесь он только вредил: у
+// него нет своей Suspense-границы, поэтому при переходе на /search вся
+// страница ждала под скелетоном, пока чанки по одному, друг за другом, не
+// доедут — три лишних круга по сети (около секунды на 4G) до первого кадра
+// вкладки, и ещё столько же перед показом выдачи. Обычным импортом всё это
+// попадает в чанк самой страницы, а его Next забирает заранее вместе с
+// префетчем ссылки.
 
 export const SearchPage: FC = () => {
   const router = useRouter();

@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -57,15 +57,28 @@ type Props = {
   // показывает текст "Загрузка клиники..." поверх уже отрисованного skeleton
   // из loading.tsx, даже если данные пришли почти мгновенно.
   initialClinic?: Awaited<ReturnType<typeof api.getClinicById>>;
+  // Когда сервер получил initialClinic — см. тот же проп на странице врача.
+  initialClinicUpdatedAt?: number;
 };
 
-export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
+export const ClinicDetailsPage: FC<Props> = ({
+  id,
+  initialClinic,
+  initialClinicUpdatedAt,
+}) => {
   const router = useRouter();
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [isOfflineInfoOpen, setIsOfflineInfoOpen] = useState(false);
   const { isSaved, isPending, toggle } = useFavoriteToggle("clinic");
   const isFavorite = isSaved(Number(id));
   const isFavoritePending = isPending(Number(id));
+
+  // Заранее подгружаем страницу записи — см. тот же приём и объяснение на
+  // странице врача (pages/specialist-details).
+  const recordHref = `${ROUTES.RECORD}?clinic=${id}`;
+  useEffect(() => {
+    router.prefetch(recordHref);
+  }, [recordHref, router]);
   // Услуги и врачи в секциях ниже — свои target_type в /api/profile/favorites/,
   // поэтому хука клиники им недостаточно. Без этих двух карточки рендерились
   // без isSaved/onSave и сердечко на них просто ничего не делало.
@@ -81,6 +94,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
     queryKey: clinicKeys.detail(id),
     queryFn: () => api.getClinicById(id),
     initialData: initialClinic,
+    initialDataUpdatedAt: initialClinicUpdatedAt,
   });
 
   const { data: services = [] } = useQuery({
@@ -239,6 +253,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
                       sizes="calc(100vw - 32px)"
                       className="object-cover"
                       priority={idx === 0}
+                      fetchPriority={idx === 0 ? "high" : undefined}
                     />
                   </div>
                 ))}
@@ -252,6 +267,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
                     sizes="(min-width: 768px) 1320px, 100vw"
                     className="object-cover"
                     priority
+                    fetchPriority="high"
                   />
                 </div>
               </div>
@@ -369,7 +385,7 @@ export const ClinicDetailsPage: FC<Props> = ({ id, initialClinic }) => {
               <Button
                 size="md"
                 className="flex-1 justify-center"
-                onClick={() => router.push(`${ROUTES.RECORD}?clinic=${id}`)}
+                onClick={() => router.push(recordHref)}
               >
                 <span className="flex gap-2.5">
                   <OnlineRecordIcon className="size-6" />

@@ -7,6 +7,8 @@ import {
 import { ServicesPage } from "@/pages/services";
 
 import { ServiceFilters, api, serviceKeys } from "@/shared/api";
+import { cachedPublicRead, seedInfiniteQuery } from "@/shared/api/server-cache";
+import { UrlSearchParamsProvider } from "@/shared/lib/url-state";
 
 // Должно совпадать с PAGE_SIZE в ServicesPage.tsx, иначе ключ запроса тут
 // разойдётся с клиентским и SSR-префетч не подхватится (либо, что хуже,
@@ -16,6 +18,14 @@ const PAGE_SIZE = 8;
 const MAX_PRICE = 10000;
 // Должно совпадать с PREFIX в ServicesPage.tsx.
 const PREFIX = "svc";
+
+// См. app/specialists/page.tsx: первая страница без фильтров — из серверного
+// кеша, всё остальное — прямым запросом.
+const readServicesFirstPage = cachedPublicRead(
+  "catalog-services-first-page",
+  () => api.getServicesPaginated({ page: 1, page_size: PAGE_SIZE }),
+  60,
+);
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -65,17 +75,32 @@ const Services = async ({ searchParams }: Props) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  await queryClient.prefetchInfiniteQuery({
-    queryKey: serviceKeys.list(filters),
-    queryFn: () =>
-      api.getServicesPaginated({ ...filters, page: 1, page_size: PAGE_SIZE }),
-    initialPageParam: 1,
-  });
+  const isDefaultView = Object.values(filters).every(
+    (value) => value === undefined,
+  );
+  if (isDefaultView) {
+    await seedInfiniteQuery(
+      queryClient,
+      serviceKeys.list(filters),
+      readServicesFirstPage(),
+    );
+  } else {
+    await queryClient.prefetchInfiniteQuery({
+      queryKey: serviceKeys.list(filters),
+      queryFn: () =>
+        api.getServicesPaginated({ ...filters, page: 1, page_size: PAGE_SIZE }),
+      initialPageParam: 1,
+    });
+  }
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <ServicesPage searchParams={resolvedSearchParams} />
-    </HydrationBoundary>
+    // См. app/specialists/page.tsx: без провайдера серверный HTML собрался бы
+    // без фильтров из адреса.
+    <UrlSearchParamsProvider>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <ServicesPage searchParams={resolvedSearchParams} />
+      </HydrationBoundary>
+    </UrlSearchParamsProvider>
   );
 };
 

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Onest } from "next/font/google";
 
-import "@livekit/components-styles";
-
 import "@/app/globals.css";
 import { Providers } from "@/app/providers";
 

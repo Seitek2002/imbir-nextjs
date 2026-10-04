@@ -18,13 +18,15 @@ import { useUrlSearchParams } from "@/shared/lib/url-state";
 import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
+import { HOME_DOCTORS_COUNT } from "./config";
+
 // Карусель на Главной раньше грузила только дефолтную (небольшую) страницу
 // врачей и фильтровала её целиком на клиенте — из-за этого фильтры FilterBar
 // могли молча не находить реальные совпадения, если они были за пределами
 // первой страницы. Теперь город/онлайн/оценка/цена/стаж/специализация (в т.ч.
 // несколько через запятую) уходят в API реальными параметрами — как на
 // /specialists, поэтому достаточно запросить ровно то, что показываем.
-const VISIBLE_COUNT = 8;
+const VISIBLE_COUNT = HOME_DOCTORS_COUNT;
 
 const DoctorsListContent = () => {
   const router = useRouter();
@@ -181,7 +183,8 @@ export const DoctorsMainList: FC = () => {
 
       <div className="flex items-center justify-between lg:hidden">
         <h2 className="text-[18px] font-medium text-foreground">Специалисты</h2>
-        <Link href="/specialists">
+        {/* prefetch — см. комментарий у такой же ссылки в hero.tsx. */}
+        <Link href="/specialists" prefetch>
           <Button
             variant="text"
             size="md"

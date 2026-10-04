@@ -8,16 +8,27 @@ import {
 
 import { ClinicsPage } from "@/pages/clinic/clinics";
 
+import { ClinicFilters, api, clinicKeys, referenceKeys } from "@/shared/api";
 import {
-  ClinicFilters,
-  api,
-  clinicKeys,
-  getSpecializations,
-  referenceKeys,
-} from "@/shared/api";
+  cachedPublicRead,
+  isKnownCity,
+  readSpecializations,
+  seedInfiniteQuery,
+  seedQuery,
+} from "@/shared/api/server-cache";
+import { UrlSearchParamsProvider } from "@/shared/lib/url-state";
 import { CITY_COOKIE, DEFAULT_CITY } from "@/shared/store";
 
 const PAGE_SIZE = 8;
+
+// См. app/specialists/page.tsx: первая страница без фильтров — из серверного
+// кеша, всё остальное — прямым запросом.
+const readClinicsFirstPage = cachedPublicRead(
+  "catalog-clinics-first-page",
+  (city: string) =>
+    api.getClinicsPaginated({ city, page: 1, page_size: PAGE_SIZE }),
+  60,
+);
 
 export default async function Page({
   searchParams,
@@ -61,22 +72,40 @@ export default async function Page({
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+  const isDefaultView = Object.entries(filters).every(
+    ([key, value]) => key === "city" || value === undefined,
+  );
   await Promise.all([
-    queryClient.prefetchInfiniteQuery({
-      queryKey: clinicKeys.list(filters),
-      queryFn: () =>
-        api.getClinicsPaginated({ ...filters, page: 1, page_size: PAGE_SIZE }),
-      initialPageParam: 1,
-    }),
-    queryClient.prefetchQuery({
-      queryKey: referenceKeys.specializations("clinic"),
-      queryFn: () => getSpecializations("clinic"),
-    }),
+    isDefaultView && isKnownCity(city)
+      ? seedInfiniteQuery(
+          queryClient,
+          clinicKeys.list(filters),
+          readClinicsFirstPage(city),
+        )
+      : queryClient.prefetchInfiniteQuery({
+          queryKey: clinicKeys.list(filters),
+          queryFn: () =>
+            api.getClinicsPaginated({
+              ...filters,
+              page: 1,
+              page_size: PAGE_SIZE,
+            }),
+          initialPageParam: 1,
+        }),
+    seedQuery(
+      queryClient,
+      referenceKeys.specializations("clinic"),
+      readSpecializations("clinic"),
+    ),
   ]);
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <ClinicsPage initialCity={city} />
-    </HydrationBoundary>
+    // См. app/specialists/page.tsx: без провайдера серверный HTML собрался бы
+    // без фильтров из адреса.
+    <UrlSearchParamsProvider>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <ClinicsPage initialCity={city} />
+      </HydrationBoundary>
+    </UrlSearchParamsProvider>
   );
 }

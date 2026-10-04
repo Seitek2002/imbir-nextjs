@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Toaster } from "react-hot-toast";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -12,6 +12,7 @@ import { MobileBottomNav } from "@/widgets/mobile-bottom-nav";
 import { CityConfirmBanner } from "@/features/city-confirm";
 
 import { SessionExpiredError } from "@/shared/api";
+import { UrlStateBridge } from "@/shared/lib/url-state";
 import { useTapHaptics } from "@/shared/lib/useTapHaptics";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -48,6 +49,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
           чтобы ссылка на виджет была видна внутри src (иначе steiger, сканируя
           только src, считает слайс неиспользуемым). */}
       <MobileBottomNav />
+      {/* Свой Suspense обязателен — см. комментарий к UrlStateBridge. */}
+      <Suspense fallback={null}>
+        <UrlStateBridge />
+      </Suspense>
       <CityConfirmBanner />
       <Toaster position="bottom-right" />
       <ReactQueryDevtools initialIsOpen={false} />

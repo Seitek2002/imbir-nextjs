@@ -8,16 +8,29 @@ import {
 
 import { SpecialistsPage } from "@/pages/specialists";
 
+import { DoctorFilters, api, doctorKeys, referenceKeys } from "@/shared/api";
 import {
-  DoctorFilters,
-  api,
-  doctorKeys,
-  getSpecializations,
-  referenceKeys,
-} from "@/shared/api";
+  cachedPublicRead,
+  isKnownCity,
+  readSpecializations,
+  seedInfiniteQuery,
+  seedQuery,
+} from "@/shared/api/server-cache";
+import { UrlSearchParamsProvider } from "@/shared/lib/url-state";
 import { CITY_COOKIE, DEFAULT_CITY } from "@/shared/store";
 
 const PAGE_SIZE = 8;
+
+// Первая страница каталога без фильтров одинакова для всех посетителей из
+// одного города — её держим в серверном кеше, чтобы переход в каталог не ждал
+// бэк (подробности в shared/api/server-cache.ts). Запрос с фильтрами или
+// поиском в кеш не идёт: сочетаний слишком много.
+const readDoctorsFirstPage = cachedPublicRead(
+  "catalog-doctors-first-page",
+  (city: string) =>
+    api.getDoctorsPaginated({ city, page: 1, page_size: PAGE_SIZE }),
+  60,
+);
 
 export default async function Page({
   searchParams,
@@ -62,22 +75,41 @@ export default async function Page({
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+  // Фильтров нет, если заполнен только город.
+  const isDefaultView = Object.entries(filters).every(
+    ([key, value]) => key === "city" || value === undefined,
+  );
   await Promise.all([
-    queryClient.prefetchInfiniteQuery({
-      queryKey: doctorKeys.list(filters),
-      queryFn: () =>
-        api.getDoctorsPaginated({ ...filters, page: 1, page_size: PAGE_SIZE }),
-      initialPageParam: 1,
-    }),
-    queryClient.prefetchQuery({
-      queryKey: referenceKeys.specializations("doctor"),
-      queryFn: () => getSpecializations("doctor"),
-    }),
+    isDefaultView && isKnownCity(city)
+      ? seedInfiniteQuery(
+          queryClient,
+          doctorKeys.list(filters),
+          readDoctorsFirstPage(city),
+        )
+      : queryClient.prefetchInfiniteQuery({
+          queryKey: doctorKeys.list(filters),
+          queryFn: () =>
+            api.getDoctorsPaginated({
+              ...filters,
+              page: 1,
+              page_size: PAGE_SIZE,
+            }),
+          initialPageParam: 1,
+        }),
+    seedQuery(
+      queryClient,
+      referenceKeys.specializations("doctor"),
+      readSpecializations("doctor"),
+    ),
   ]);
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <SpecialistsPage initialCity={city} />
-    </HydrationBoundary>
+    // Фильтры страницы живут в адресе, и серверный HTML обязан собраться с
+    // теми же параметрами, по которым выше сделан префетч.
+    <UrlSearchParamsProvider>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <SpecialistsPage initialCity={city} />
+      </HydrationBoundary>
+    </UrlSearchParamsProvider>
   );
 }

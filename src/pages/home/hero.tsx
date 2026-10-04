@@ -36,6 +36,10 @@ export const Hero: FC = () => {
         src={HeroBg}
         alt=""
         priority
+        // В Next 16 priority только добавляет preload, а приоритет загрузки
+        // больше не поднимает — без этого LCP-картинка стоит в общей очереди
+        // со шрифтами и скриптами.
+        fetchPriority="high"
         // Decorative full-bleed background (opacity 75) — cap the candidate so
         // mobile doesn't fetch/decode a 3840px image, and drop quality since the
         // detail is invisible under the overlay. This is the LCP element.
@@ -58,7 +62,16 @@ export const Hero: FC = () => {
             ожидания
           </p>
 
-          <Link href="/specialists" className="w-full md:w-auto mb-6 md:mb-16">
+          {/* prefetch: главный переход с Главной. Каталог — динамический
+              маршрут, и по умолчанию Next заранее грузит только его скелетон.
+              Первая страница каталога без фильтров лежит в серверном кеше
+              (shared/api/server-cache.ts), поэтому забрать её заранее целиком
+              бэку ничего не стоит, а переход становится мгновенным. */}
+          <Link
+            href="/specialists"
+            prefetch
+            className="w-full md:w-auto mb-6 md:mb-16"
+          >
             <Button size="md" className="w-full justify-center">
               Выбрать специалиста / услугу
             </Button>

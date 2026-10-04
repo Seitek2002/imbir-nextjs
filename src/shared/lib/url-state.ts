@@ -1,6 +1,14 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import {
+  type ReactNode,
+  createContext,
+  createElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 
 import { useSearchParams } from "next/navigation";
 
@@ -46,14 +54,67 @@ export const pushUrlState = (params: URLSearchParams) => {
   window.dispatchEvent(new Event(URL_STATE_EVENT));
 };
 
+// Строка запроса, с которой страницу отрендерил сервер. Пустая строка — либо
+// параметров нет, либо страница статическая и сервер их не знает в принципе.
+const ServerSearchContext = createContext("");
+
+/**
+ * Сообщает потребителям useUrlSearchParams, с какими параметрами адреса
+ * страницу рендерит сервер. Ставится в app/<маршрут>/page.tsx у страниц,
+ * которые читают searchParams на сервере (каталоги, поиск): иначе серверный
+ * HTML собрался бы без фильтров и разошёлся с префетчем данных.
+ *
+ * Статическим страницам (главная) провайдер не нужен и вреден:
+ * useSearchParams на них выключает серверный рендер всего поддерева до
+ * ближайшего Suspense — в HTML вместо контента уезжает скелетон.
+ */
+export const UrlSearchParamsProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const search = useSearchParams()?.toString() ?? "";
+
+  return createElement(
+    ServerSearchContext.Provider,
+    { value: search },
+    children,
+  );
+};
+
+/**
+ * Переводит навигацию роутера Next в то же событие, которым оповещают
+ * replaceUrlState/pushUrlState. Нужен там, где потребитель useUrlSearchParams
+ * переживает переход — например, с «/specialists?doc_rating=5.0» на
+ * «/specialists» по ссылке в шапке. Адрес в этот момент меняет сам Next, причём
+ * уже после рендера: без моста список оставался отфильтрованным при пустом
+ * адресе и сброшенных фильтрах.
+ *
+ * Монтируется один раз на всё приложение (app/providers.tsx) и обязательно
+ * внутри своего <Suspense>: на статических страницах useSearchParams
+ * выключает серверный рендер — пусть выключает только этот пустой компонент.
+ */
+export const UrlStateBridge = () => {
+  const search = useSearchParams()?.toString() ?? "";
+
+  useEffect(() => {
+    window.dispatchEvent(new Event(URL_STATE_EVENT));
+  }, [search]);
+
+  return null;
+};
+
 /**
  * Next's useSearchParams is not guaranteed to update after a native
  * history.replaceState call. This hook keeps the fast, navigation-free URL
  * update while making every filter consumer react immediately.
+ *
+ * Сам useSearchParams здесь не вызывается намеренно — см. комментарий к
+ * UrlSearchParamsProvider. Серверное значение приходит из контекста, а за
+ * изменениями адреса следит подписка: свои события плюс UrlStateBridge.
  */
 export const useUrlSearchParams = () => {
-  const nextSearchParams = useSearchParams();
-  const serverSearch = nextSearchParams?.toString() ?? "";
+  const serverSearch = useContext(ServerSearchContext);
 
   const search = useSyncExternalStore(
     subscribe,

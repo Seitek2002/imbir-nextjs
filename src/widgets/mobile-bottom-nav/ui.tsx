@@ -72,7 +72,18 @@ export const MobileBottomNav: FC = () => {
 
   const items = [
     { href: "/", label: "Home", Icon: HomeIcon },
-    { href: "/search", label: "Поиск", Icon: SearchTabIcon },
+    {
+      href: "/search",
+      label: "Поиск",
+      Icon: SearchTabIcon,
+      // /search читает адрес на сервере, поэтому для Next это динамический
+      // маршрут, и по умолчанию заранее подгружается только его скелетон —
+      // сама страница запрашивалась уже после тапа, и вкладка открывалась
+      // с задержкой около секунды. Без поискового запроса серверу ждать
+      // нечего (в API он не ходит), так что страницу можно забрать заранее
+      // целиком: вкладка открывается сразу.
+      prefetch: true,
+    },
     { href: "/chat", label: "Чат", Icon: ChatTabIcon },
     {
       href: profileHref,

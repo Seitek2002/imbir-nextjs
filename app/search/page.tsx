@@ -13,6 +13,7 @@ import {
   getSpecializations,
   referenceKeys,
 } from "@/shared/api";
+import { UrlSearchParamsProvider } from "@/shared/lib/url-state";
 
 export default async function Page({
   searchParams,
@@ -22,7 +23,15 @@ export default async function Page({
   const params = await searchParams;
   const activeQuery = typeof params.q === "string" ? params.q : "";
 
-  if (!activeQuery) return <SearchPage />;
+  // Провайдер нужен в обеих ветках: страница поиска читает запрос и фильтры
+  // из адреса (см. app/specialists/page.tsx).
+  if (!activeQuery) {
+    return (
+      <UrlSearchParamsProvider>
+        <SearchPage />
+      </UrlSearchParamsProvider>
+    );
+  }
 
   const currentRating =
     typeof params.doc_rating === "string" ? params.doc_rating : null;
@@ -75,8 +84,10 @@ export default async function Page({
   ]);
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <SearchPage />
-    </HydrationBoundary>
+    <UrlSearchParamsProvider>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <SearchPage />
+      </HydrationBoundary>
+    </UrlSearchParamsProvider>
   );
 }

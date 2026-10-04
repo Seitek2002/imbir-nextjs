@@ -19,6 +19,7 @@ export const ArticleImage = ({ src, alt }: Props) => (
       // Обложка статьи — самый крупный элемент первого экрана, next/image
       // грузил её лениво и она же оказывалась LCP.
       priority
+      fetchPriority="high"
       sizes="(max-width: 768px) 100vw, 900px"
       className="object-cover"
       fallback={<BlogImageFallback />}
