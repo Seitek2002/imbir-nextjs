@@ -135,27 +135,28 @@ input[type="number"]::-webkit-inner-spin-button {
 
    Плюс такого варианта — не нужна ни обёртка, ни позиционированный
    родитель: работает одинаково и для fill, и для фиксированных width/height
-   (в проекте 26 и 21 вызов соответственно). */
-@keyframes img-skeleton-wave {
-  0% {
-    background-position: -200% 0;
-  }
+   (в проекте 26 и 21 вызов соответственно).
+
+   Анимируется только opacity, а не бегущий блик через background-position,
+   как было раньше. Фон браузер умеет менять лишь перерисовкой, поэтому блик
+   перерисовывал каждую загружающуюся картинку на каждом кадре: на главной,
+   пока догружались фото, это съедало до четверти главного потока телефона
+   (1.3–2.6 с отрисовки за загрузку против 0.15–0.25 с без анимации, замер
+   4 октября 2026). Прозрачность анимирует видеокарта, без перерисовки.
+   Не возвращай сюда анимацию фона, градиента или размеров. */
+@keyframes img-skeleton-pulse {
+  0%,
   100% {
-    background-position: 200% 0;
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
   }
 }
 
 .img-skeleton {
   background-color: #e5e7eb;
-  background-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.6) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  background-repeat: no-repeat;
-  animation: img-skeleton-wave 1.4s ease-in-out infinite;
+  animation: img-skeleton-pulse 1.4s ease-in-out infinite;
 }
 
 /* :root {
