@@ -100,6 +100,14 @@ export const useRecordForm = () => {
       queryClient.invalidateQueries({
         queryKey: [...profileKeys.all, "appointments"],
       });
+      // Только что занятый слот должен сразу стать недоступным. Без этого
+      // повторный заход в запись (SPA-переход, тот же QueryClient) брал слоты
+      // из кеша и показывал этот слот активным — бэк отклонял его лишь на
+      // отправке формы.
+      queryClient.invalidateQueries({ queryKey: ["record-available-slots"] });
+      queryClient.invalidateQueries({
+        queryKey: ["reschedule-available-slots"],
+      });
     },
   });
 
@@ -268,6 +276,12 @@ export const useRecordForm = () => {
         selectedServiceId,
       ),
     enabled: Boolean(selectedDoctorId) && Boolean(selectedDateStr),
+    // Слоты занимают другие пациенты прямо сейчас — глобальные staleTime 60 с
+    // и refetchOnWindowFocus: false (providers.tsx) здесь не годятся: вернувшись
+    // в браузер из другого приложения (обычный сценарий на телефоне), человек
+    // видел занятое время активным.
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   const timeGroups = useMemo(

@@ -57,6 +57,10 @@ export const RescheduleModal: FC<Props> = ({
     queryFn: () =>
       getDoctorAvailableSlots(doctorId, selectedDateStr as string, serviceId),
     enabled: Boolean(doctorId) && Boolean(selectedDateStr),
+    // Как и в форме записи: слоты меняются в реальном времени, кеш на минуту
+    // показывал занятое время свободным.
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   const timeGroups = useMemo(
@@ -74,6 +78,11 @@ export const RescheduleModal: FC<Props> = ({
       toast.success("Запись перенесена");
       queryClient.invalidateQueries({
         queryKey: [...profileKeys.all, "appointments"],
+      });
+      // Перенос освобождает старый слот и занимает новый.
+      queryClient.invalidateQueries({ queryKey: ["record-available-slots"] });
+      queryClient.invalidateQueries({
+        queryKey: ["reschedule-available-slots"],
       });
       handleClose();
     },
