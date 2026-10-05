@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, Fragment, useEffect, useRef, useState } from "react";
+import { FC, Fragment, memo, useEffect, useRef, useState } from "react";
 
 import Link from "next/link";
 
@@ -120,7 +120,7 @@ const MessageContent: FC<{ content: string }> = ({ content }) => {
   );
 };
 
-const MessageBubble: FC<{
+const MessageBubbleView: FC<{
   message: ChatThreadMessage;
   // Проявлять текст прокруткой букв. Включается только для новых ответов
   // ассистента — история и свои сообщения появляются сразу.
@@ -267,6 +267,13 @@ const MessageBubble: FC<{
   );
 };
 
+// На каждое новое сообщение лента перестраивается целиком; без memo заново
+// рисовался каждый пузырь истории — на переписке в 300 сообщений ~120 мс на
+// одно входящее при процессоре телефона (CPU ×4), на 2000 — больше 200 мс.
+// Объекты сообщений в состоянии не пересоздаются, поэтому старые пузыри
+// пропускаются, пока к ним не пришли новые пропсы.
+const MessageBubble = memo(MessageBubbleView);
+
 // Первая ссылка в тексте уведомления — обычно приглашение в видеовстречу.
 const URL_RE = /(https?:\/\/\S+)/;
 
@@ -377,14 +384,20 @@ export const MessageThread: FC<Props> = ({
   onClearSelection,
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
-  const [contextMessage, setContextMessage] =
-    useState<ChatThreadMessage | null>(null);
-  const contextPositionRef = useRef({ x: 0, y: 0 });
+  // Позиция меню хранится в состоянии, а не в ref: чтение ref во время
+  // рендера отключает React Compiler для всего компонента, и тогда
+  // обработчики пересоздаются на каждый рендер — memo пузырей не работает.
+  const [contextMenu, setContextMenu] = useState<null | {
+    message: ChatThreadMessage;
+    x: number;
+    y: number;
+  }>(null);
+  const contextMessage = contextMenu?.message ?? null;
   const selectionMode = selectedMessageIds.length > 0;
 
   useEffect(() => {
     if (!contextMessage) return;
-    const close = () => setContextMessage(null);
+    const close = () => setContextMenu(null);
     document.addEventListener("click", close);
     document.addEventListener("scroll", close, true);
     return () => {
@@ -399,18 +412,18 @@ export const MessageThread: FC<Props> = ({
   ) => {
     if (!onDeleteMessages && !onEditMessage) return;
     event.preventDefault();
-    setContextMessage(message);
-    contextPositionRef.current = {
+    setContextMenu({
+      message,
       x: Math.min(event.clientX, window.innerWidth - 190),
       y: Math.min(event.clientY, window.innerHeight - 130),
-    };
+    });
   };
   const deleteFromMenu = () => {
     if (!contextMessage || !onDeleteMessages) return;
     const ids = selectedMessageIds.includes(contextMessage.id)
       ? selectedMessageIds
       : [contextMessage.id];
-    setContextMessage(null);
+    setContextMenu(null);
     onDeleteMessages(ids);
   };
 
@@ -472,9 +485,7 @@ export const MessageThread: FC<Props> = ({
               isSelected={selectedMessageIds.includes(message.id)}
               selectionMode={selectionMode}
               onContextMenu={handleContextMenu}
-              onLongPress={(longPressedMessage) =>
-                onSelectMessage?.(longPressedMessage)
-              }
+              onLongPress={onSelectMessage}
               onSelect={onSelectMessage}
             />
             {!message.isMine && message.recommendations && (
@@ -491,8 +502,8 @@ export const MessageThread: FC<Props> = ({
         <div
           className="fixed z-50 min-w-44 overflow-hidden rounded-xl border border-border-soft bg-white py-1 shadow-lg"
           style={{
-            left: contextPositionRef.current.x,
-            top: contextPositionRef.current.y,
+            left: contextMenu?.x,
+            top: contextMenu?.y,
           }}
           onClick={(event) => event.stopPropagation()}
         >
@@ -501,7 +512,7 @@ export const MessageThread: FC<Props> = ({
               type="button"
               onClick={() => {
                 onEditMessage(contextMessage);
-                setContextMessage(null);
+                setContextMenu(null);
               }}
               className="block w-full px-4 py-2 text-left text-sm hover:bg-background"
             >
@@ -513,7 +524,7 @@ export const MessageThread: FC<Props> = ({
               type="button"
               onClick={() => {
                 onSelectMessage(contextMessage);
-                setContextMessage(null);
+                setContextMenu(null);
               }}
               className="block w-full px-4 py-2 text-left text-sm hover:bg-background"
             >

@@ -30,6 +30,14 @@ const typingLabel = (names: string[]): null | string => {
   return `${names[0]}, ${names[1]} и ещё ${names.length - 2} печатают…`;
 };
 
+// Вне компонента: React Compiler не поддерживает `??` внутри try и из-за
+// этой строки пропускал весь UserConversation. Тогда обработчики ленты
+// пересоздавались на каждое сообщение и заново рисовалась вся переписка.
+const uploadChatFile = async (file: File): Promise<string> => {
+  const { url } = await uploadFile(file);
+  return toMediaUrl(url) ?? url;
+};
+
 type Props = {
   currentUserId: number;
   name: string;
@@ -107,8 +115,7 @@ export const UserConversation: FC<Props> = ({
 
     for (const file of files) {
       try {
-        const { url } = await uploadFile(file);
-        const fileUrl = toMediaUrl(url) ?? url;
+        const fileUrl = await uploadChatFile(file);
         sendMessage(`${file.name}\n${fileUrl}`);
       } catch {
         failedFiles.push(file);
