@@ -47,6 +47,7 @@ export const Step4Legal = ({ data, onChange }: Props) => {
         value={data.licenseDate}
         onChange={(v) => onChange("licenseDate", v)}
         maxToday
+        calendar={false}
       />
       <Input
         label="Орган, выдавший лицензию"

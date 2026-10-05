@@ -15,7 +15,7 @@ import {
   PASSWORD_REQUIREMENTS_ERROR,
   isStrongPassword,
 } from "@/shared/lib/password";
-import { getPhoneLength } from "@/shared/ui";
+import { getPhoneLength, isCompleteDate } from "@/shared/ui";
 
 import { STEP_TITLES, TOTAL_STEPS } from "../model/constants";
 import type { DoctorFormData, DoctorStep, InviteClinic } from "../model/types";
@@ -103,7 +103,7 @@ export const DoctorRegistrationForm = ({
   const isStep1Valid = !!(
     data.fullName &&
     data.gender &&
-    data.birthDate &&
+    isCompleteDate(data.birthDate) &&
     data.country &&
     data.city &&
     data.phone.length === getPhoneLength(data.phoneDialCode) &&

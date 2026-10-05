@@ -14,7 +14,7 @@ import {
   PASSWORD_REQUIREMENTS_ERROR,
   isStrongPassword,
 } from "@/shared/lib/password";
-import { getPhoneLength } from "@/shared/ui";
+import { getPhoneLength, isCompleteDate } from "@/shared/ui";
 
 import {
   CLINIC_PAYMENT_METHODS,
@@ -147,11 +147,14 @@ export const ClinicRegistrationForm = ({
       ? !!data.clinicName
       : step === 2
         ? data.phone.length === getPhoneLength(data.phoneDialCode)
-        : step === 7
-          ? allAgreed &&
-            !!data.password &&
-            data.password === data.confirmPassword
-          : true;
+        : step === 4
+          ? // Дата лицензии необязательна, но начатая должна быть полной.
+            !data.licenseDate || isCompleteDate(data.licenseDate)
+          : step === 7
+            ? allAgreed &&
+              !!data.password &&
+              data.password === data.confirmPassword
+            : true;
 
   // Один обработчик и на клик по кнопке, и на Enter из любого поля шага.
   // Промежуточные шаги ведут к следующему, последний — сабмитит всю форму.

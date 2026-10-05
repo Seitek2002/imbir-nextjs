@@ -97,14 +97,15 @@ export const Step1BasicInfo = ({ data, onChange, emailError }: Props) => {
         </div>
       </div>
 
-      {/* Точки расставляются сами, календарь — по иконке. Верхняя граница
-          сегодня: дата рождения в будущем бессмысленна. */}
+      {/* Точки расставляются сами. Без календаря: на телефоне он открывался
+          вместе с клавиатурой и тормозил её появление. */}
       <DateField
         label="Дата рождения"
         value={data.birthDate}
         onChange={(v) => onChange("birthDate", v)}
         min="01.01.1920"
         maxToday
+        calendar={false}
       />
 
       <Dropdown

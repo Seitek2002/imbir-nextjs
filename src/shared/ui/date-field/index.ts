@@ -1,2 +1,2 @@
-export { DateField } from "./ui";
+export { DateField, isCompleteDate } from "./ui";
 export { YearField } from "./year";

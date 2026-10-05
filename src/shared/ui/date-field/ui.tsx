@@ -8,6 +8,11 @@ import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/input";
 
 type Props = {
+  // false — только ввод с клавиатуры, без всплывающего календаря и иконки.
+  // На телефоне календарь открывался одновременно с клавиатурой: оба
+  // перерисовывали экран, клавиатура выезжала с задержкой и тут же
+  // закрывала календарь собой.
+  calendar?: boolean;
   className?: string;
   error?: string;
   hint?: string;
@@ -66,6 +71,11 @@ const isRealDate = (ddmmyyyy: string): boolean => {
   );
 };
 
+// Дата набрана целиком и существует. Для проверки шагов анкеты: без
+// календаря «12.03» иначе проходило бы дальше и падало только на бэке.
+export const isCompleteDate = (value: string): boolean =>
+  value.replace(/\D/g, "").length === 8 && isRealDate(value);
+
 const MONTHS = [
   "Январь",
   "Февраль",
@@ -103,6 +113,7 @@ const isSameDay = (a: Date, b: Date) =>
   a.getDate() === b.getDate();
 
 export const DateField: FC<Props> = ({
+  calendar = true,
   label,
   value,
   onChange,
@@ -185,7 +196,7 @@ export const DateField: FC<Props> = ({
   }, [monthCursor]);
 
   const openCalendar = () => {
-    if (isOpen) return;
+    if (!calendar || isOpen) return;
     const nextMonth = selectedDate ?? new Date();
     setMonthCursor(new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 1));
     setIsOpen(true);
@@ -228,9 +239,9 @@ export const DateField: FC<Props> = ({
         hint={hint}
         inputMode="numeric"
         autoComplete="off"
-        IconRight={CalendarIcon}
-        onIconRightClick={toggleCalendar}
-        iconRightLabel="Открыть календарь"
+        IconRight={calendar ? CalendarIcon : undefined}
+        onIconRightClick={calendar ? toggleCalendar : undefined}
+        iconRightLabel={calendar ? "Открыть календарь" : undefined}
       />
       {isOpen && (
         <div
