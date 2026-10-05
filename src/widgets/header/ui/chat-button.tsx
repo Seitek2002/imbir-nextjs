@@ -15,8 +15,9 @@ import { useAuthDisplay } from "../lib/useAuthDisplay";
 
 // Иконка чата в хедере с бейджем непрочитанных. Заменяет отдельный колокольчик
 // уведомлений: число приходящих сообщений теперь показывается прямо на чате.
-// Источник — отдельный лёгкий эндпоинт GET /api/chat/rooms/unread-count/;
-// опрашиваем раз в минуту. retry: false — пока бэк не задеплоил эндпоинт, 404
+// Источник — отдельный лёгкий эндпоинт GET /api/chat/rooms/unread-count/.
+// Опрос и звук нового сообщения живут в features/chat-notifications: там один
+// таймер на всё приложение, а здесь только читаем кеш. retry: false — пока бэк не задеплоил эндпоинт, 404
 // не должен спамить ретраями; при ошибке data=undefined → бейдж скрыт (0).
 export const HeaderChatButton: FC = () => {
   const { isAuthed } = useAuthDisplay();
@@ -25,7 +26,6 @@ export const HeaderChatButton: FC = () => {
     queryKey: chatKeys.unreadCount(),
     queryFn: getChatUnreadCount,
     enabled: isAuthed,
-    refetchInterval: 60_000,
     retry: false,
   });
 

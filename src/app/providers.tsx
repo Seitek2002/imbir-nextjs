@@ -9,6 +9,7 @@ import type { AxiosError } from "axios";
 
 import { MobileBottomNav } from "@/widgets/mobile-bottom-nav";
 
+import { ChatMessageSoundWatcher } from "@/features/chat-notifications";
 import { CityConfirmBanner } from "@/features/city-confirm";
 
 import { SessionExpiredError } from "@/shared/api";
@@ -54,6 +55,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <UrlStateBridge />
       </Suspense>
       <CityConfirmBanner />
+      <ChatMessageSoundWatcher />
       <Toaster position="bottom-right" />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

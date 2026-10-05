@@ -7,6 +7,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
 
+import { NotificationSoundSettings } from "@/features/notification-sounds";
+
 import { getProfile, profileKeys, updateProfile } from "@/shared/api";
 import { CheckIcon, EditIcon } from "@/shared/assets/icons";
 import { useAuthStore } from "@/shared/store";
@@ -356,6 +358,10 @@ export const ProfileMyDataPage: FC = () => {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="px-4 pb-8 md:p-0 md:mt-8">
+        <NotificationSoundSettings kinds={["chat"]} />
       </div>
 
       <ConfirmDialog

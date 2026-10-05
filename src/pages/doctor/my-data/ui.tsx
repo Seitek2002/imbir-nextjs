@@ -10,6 +10,8 @@ import {
   useMyDataTabs,
 } from "@/widgets/doctor/layout";
 
+import { NotificationSoundSettings } from "@/features/notification-sounds";
+
 import { DoctorMyDataList } from "./list";
 import { DoctorMyDataOverview } from "./overview";
 import { DoctorBasicInfoSection } from "./sections/basic";
@@ -45,10 +47,22 @@ const MyDataScreen: FC = () => {
   return (
     <>
       <div className="lg:hidden">
-        {active === null ? <DoctorMyDataList /> : <ActiveSection />}
+        {active === null ? (
+          <>
+            <DoctorMyDataList />
+            <div className="px-4 pb-8 mt-6">
+              <NotificationSoundSettings kinds={["appointment", "chat"]} />
+            </div>
+          </>
+        ) : (
+          <ActiveSection />
+        )}
       </div>
       <div className="hidden lg:block">
         <DoctorMyDataOverview />
+        <div className="mt-8">
+          <NotificationSoundSettings kinds={["appointment", "chat"]} />
+        </div>
       </div>
     </>
   );

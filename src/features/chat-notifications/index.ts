@@ -1,0 +1,1 @@
+export { ChatMessageSoundWatcher } from "./ui";

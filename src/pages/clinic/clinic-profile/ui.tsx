@@ -7,6 +7,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ClinicPageLayout } from "@/widgets/clinic/layout";
 
+import { NotificationSoundSettings } from "@/features/notification-sounds";
+
 import {
   ClinicProfileForm,
   type ClinicProfileFormHandle,
@@ -306,6 +308,10 @@ export const ClinicProfilePage: FC = () => {
 
       <div className="md:hidden">
         <ClinicProfileHub />
+      </div>
+
+      <div className="mt-8 px-4 md:px-0">
+        <NotificationSoundSettings kinds={["appointment", "chat"]} />
       </div>
 
       <ConfirmDialog
