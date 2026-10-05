@@ -25,7 +25,6 @@ import { ServiceCard } from "@/entities/service";
 // ИМПОРТЫ API
 import { api, clinicKeys, reviewKeys } from "@/shared/api";
 import {
-  EmailIcon,
   GeoIcon,
   HeaderBackIcon,
   HeartIcon,
@@ -161,8 +160,6 @@ export const ClinicDetailsPage: FC<Props> = ({
     clinic.description ||
     "Современная медицинская помощь, опытные врачи и индивидуальный подход к каждому пациенту.";
   const scheduleText = clinic.schedule || "ПН-ПТ • 08:00-17:00";
-  const phoneText = clinic.phone || "+996 700 123 456";
-  const emailText = clinic.email || "info@clinic.kg";
 
   // --- ИСПРАВЛЕНИЕ ОШИБКИ С КАРТИНКАМИ ---
   // Создаем дефолтную картинку-заглушку на случай, если с сервера вообще ничего не пришло
@@ -397,43 +394,6 @@ export const ClinicDetailsPage: FC<Props> = ({
             <div className="flex flex-col gap-2 md:gap-10 md:border-none pt-8 md:pt-0">
               <InfoCard title="О клинике" expandable lines={3}>
                 {aboutText}
-              </InfoCard>
-
-              <InfoCard title="Контакты" expandable={false}>
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-primary">
-                      <HistoryIcon className="size-5" />
-                    </span>
-                    <span className="text-muted text-sm md:text-base">
-                      {scheduleText}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-primary">
-                      <GeoIcon className="size-5" />
-                    </span>
-                    <span className="text-muted text-sm md:text-base">
-                      {clinic.address}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-primary">
-                      <PhoneIcon className="size-5" />
-                    </span>
-                    <span className="text-muted text-sm md:text-base">
-                      {phoneText}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-primary">
-                      <EmailIcon className="size-5" />
-                    </span>
-                    <span className="text-muted text-sm md:text-base">
-                      {emailText}
-                    </span>
-                  </div>
-                </div>
               </InfoCard>
             </div>
           </div>

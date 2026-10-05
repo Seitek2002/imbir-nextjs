@@ -25,14 +25,11 @@ import { fetchDoctorInterviews } from "@/entities/interview";
 // ИМПОРТЫ API
 import { api, doctorKeys, reviewKeys } from "@/shared/api";
 import {
-  EmailIcon,
   GeoIcon,
   HeaderBackIcon,
   HeartIcon,
-  HistoryIcon,
   OfflineRecordIcon,
   OnlineRecordIcon,
-  PhoneIcon,
   UserCircleIcon,
 } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
@@ -193,10 +190,6 @@ export const SpecialistDetailsPage: FC<Props> = ({
   const about = doctor.about;
   const workExperience = doctor.workExperience ?? [];
   const skills = doctor.skills ?? [];
-  const scheduleText = doctor.contacts?.schedule;
-  const phoneText = doctor.contacts?.phone;
-  const emailText = doctor.contacts?.email;
-  const hasContacts = !!(scheduleText || phoneText || emailText);
 
   return (
     <main className="min-h-screen bg-background md:bg-white flex flex-col relative pb-20 md:pb-0">
@@ -483,43 +476,6 @@ export const SpecialistDetailsPage: FC<Props> = ({
                       </li>
                     ))}
                   </ul>
-                </InfoCard>
-              )}
-
-              {hasContacts && (
-                <InfoCard title="Контакты" expandable={false}>
-                  <div className="flex flex-col gap-4">
-                    {scheduleText && (
-                      <div className="flex items-center gap-3">
-                        <span className="text-primary">
-                          <HistoryIcon className="size-5" />
-                        </span>
-                        <span className="text-muted text-sm md:text-base">
-                          {scheduleText}
-                        </span>
-                      </div>
-                    )}
-                    {phoneText && (
-                      <div className="flex items-center gap-3">
-                        <span className="text-primary">
-                          <PhoneIcon className="size-5" />
-                        </span>
-                        <span className="text-muted text-sm md:text-base">
-                          {phoneText}
-                        </span>
-                      </div>
-                    )}
-                    {emailText && (
-                      <div className="flex items-center gap-3">
-                        <span className="text-primary">
-                          <EmailIcon className="size-5" />
-                        </span>
-                        <span className="text-muted text-sm md:text-base">
-                          {emailText}
-                        </span>
-                      </div>
-                    )}
-                  </div>
                 </InfoCard>
               )}
             </div>
