@@ -165,6 +165,9 @@ export const BasicInfoSection: FC<SectionProps> = ({
         onChange={(v) => set("birthDate", v)}
         min="01.01.1920"
         maxToday
+        // При заведении врача — как в регистрации: без календаря, только
+        // ввод (на телефоне календарь тормозил появление клавиатуры).
+        calendar={!isNew}
       />
 
       <Input
