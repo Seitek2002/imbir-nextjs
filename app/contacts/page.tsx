@@ -3,13 +3,17 @@ import { Header } from "@/widgets/header";
 
 import { LocationMap } from "@/entities/clinic-profile";
 
+import { getSiteSettings } from "@/shared/api";
 import { COMPANY, ROUTES } from "@/shared/config";
 
-const BRANCH_ADDRESS = "ул. Мидина Алыбаева, 10";
-// Координаты нужны именно для пина: без них keyless-embed показывает только
-// район по текстовому запросу, без метки филиала (см. LocationMap).
-const BRANCH_LAT = "42.866893";
-const BRANCH_LNG = "74.559023";
+// Пин на карте — офис ОсОО «МедиПроф», ул. Абдумомунова, 244 (координаты
+// дома из OpenStreetMap). Без координат keyless-embed показывает только район
+// по текстовому запросу, без метки (см. LocationMap). Если адрес в настройках
+// сайта поменяют на другой, пин по этим координатам будет неверным — тогда
+// карта строится по тексту адреса.
+const OFFICE_ADDRESS = "г. Бишкек, ул. Абдумомунова, 244";
+const OFFICE_LAT = "42.8798875";
+const OFFICE_LNG = "74.5941185";
 
 // Реквизиты юрлица: строки «название — значение», значение может быть
 // многострочным (банк, телефоны).
@@ -55,7 +59,16 @@ const ContactCard = ({
   </div>
 );
 
-export default function ContactsPage() {
+// Телефон, почта и адрес — из «Настроек сайта» в админке (как в футере),
+// чтобы их меняли без деплоя; пустые поля закрывают реквизиты юрлица.
+export default async function ContactsPage() {
+  const settings = await getSiteSettings();
+  const phone = settings?.contact_phone || COMPANY.phones[0];
+  const phones = Array.from(new Set([phone, ...COMPANY.phones]));
+  const email = settings?.contact_email || COMPANY.email;
+  const address = settings?.address || OFFICE_ADDRESS;
+  const isOfficeAddress = address === OFFICE_ADDRESS;
+
   return (
     <main className="min-h-screen bg-background flex flex-col">
       <Header title="Контакты" backTo={ROUTES.HOME} />
@@ -78,21 +91,9 @@ export default function ContactsPage() {
 
         {/* Contacts grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <ContactCard
-            icon="📞"
-            title="Телефон"
-            lines={["+996 (312) 55-00-11", "+996 (700) 55-00-11"]}
-          />
-          <ContactCard
-            icon="✉️"
-            title="Email"
-            lines={["info@imbir.kg", "support@imbir.kg"]}
-          />
-          <ContactCard
-            icon="📍"
-            title="Адрес"
-            lines={["г. Бишкек", BRANCH_ADDRESS]}
-          />
+          <ContactCard icon="📞" title="Телефон" lines={phones} />
+          <ContactCard icon="✉️" title="Email" lines={[email]} />
+          <ContactCard icon="📍" title="Адрес" lines={[address]} />
           <ContactCard
             icon="🕐"
             title="Режим работы"
@@ -103,9 +104,9 @@ export default function ContactsPage() {
         {/* Карта */}
         <div className="mb-4">
           <LocationMap
-            latitude={BRANCH_LAT}
-            longitude={BRANCH_LNG}
-            address={`${BRANCH_ADDRESS}, г. Бишкек`}
+            latitude={isOfficeAddress ? OFFICE_LAT : undefined}
+            longitude={isOfficeAddress ? OFFICE_LNG : undefined}
+            address={address}
           />
         </div>
 
@@ -114,8 +115,9 @@ export default function ContactsPage() {
             Как нас найти
           </h2>
           <p className="text-secondary text-sm">
-            Офис находится в жилмассиве «Пишпек», Ленинский район Бишкека. Есть
-            парковка для клиентов.
+            {isOfficeAddress
+              ? `Офис ${COMPANY.shortName}: ${address}, Первомайский район.`
+              : `Офис ${COMPANY.shortName}: ${address}.`}
           </p>
         </div>
 
@@ -130,13 +132,13 @@ export default function ContactsPage() {
                 <span className="size-8 rounded-xl bg-[#FEF3F0] flex items-center justify-center text-base">
                   📞
                 </span>
-                <span>+996 (700) 55-00-99</span>
+                <span>{phone}</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="size-8 rounded-xl bg-[#FEF3F0] flex items-center justify-center text-base">
                   ✉️
                 </span>
-                <span>help@imbir.kg</span>
+                <span>{email}</span>
               </div>
               <p className="text-xs text-muted mt-1">
                 Техподдержка работает: Пн–Пт с 09:00 до 20:00

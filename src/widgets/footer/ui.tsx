@@ -66,9 +66,9 @@ const FooterText: FC<{ children: ReactNode }> = ({ children }) => (
 // FALLBACK не декоративный: в админке поля пока пустые, и без него блок
 // «Свяжитесь с нами» оказался бы пустым.
 const FALLBACK = {
-  email: "info@imbir.kg",
-  phone: "+996 (312) 55-00-11",
-  address: "г. Бишкек, ул. Мидина Алыбаева, 10",
+  email: COMPANY.email,
+  phone: COMPANY.phones[0],
+  address: "г. Бишкек, ул. Абдумомунова, 244",
 };
 
 export const Footer: FC = () => {
