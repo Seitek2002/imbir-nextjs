@@ -163,14 +163,73 @@ export const updateDoctorSchedule = async (
   return data;
 };
 
+// Новые записи — первыми: по времени создания, при равенстве — по id.
+const createdAt = (appointment: DoctorAppointment) => {
+  const time = Date.parse(appointment.created_at ?? "");
+  return Number.isNaN(time) ? 0 : time;
+};
+const newestFirst = (a: DoctorAppointment, b: DoctorAppointment) =>
+  createdAt(b) - createdAt(a) || b.id - a.id;
+
+// Сколько страниц максимум дочитываем — страховка от бесконечного цикла,
+// если бэк вернёт кривую пагинацию. 20 × 100 = 2000 записей.
+const MAX_APPOINTMENT_PAGES = 20;
+
+// Бэк отдаёт записи врача по дате приёма от старых к новым и параметры
+// сортировки пока игнорирует, а страница кабинета показывает одну страницу
+// по 20 — новые записи уходили вниз или вовсе на следующие страницы.
+// Поэтому:
+//  - просим ordering=-created_at: когда бэк его поддержит, порядок придёт
+//    готовым, а сортировка ниже станет пустой формальностью — код менять
+//    не придётся;
+//  - дочитываем все страницы (page_size 100 — потолок бэка; если он
+//    оставит свои 20, цикл пройдёт по total_pages);
+//  - сортируем один раз при получении ответа, а не на каждом рендере.
+// Явно запрошенную страницу (filters.page) отдаём как есть, только по порядку.
 export const getDoctorAppointments = async (
   filters: DoctorAppointmentFilters = {},
 ): Promise<PaginatedResponse<DoctorAppointment>> => {
-  const { data } = await apiClient.get<PaginatedResponse<DoctorAppointment>>(
-    "/api/doctor/appointments/",
-    { params: filters },
+  const params = { ordering: "-created_at", page_size: 100, ...filters };
+  const fetchPage = async (page: number) =>
+    (
+      await apiClient.get<PaginatedResponse<DoctorAppointment>>(
+        "/api/doctor/appointments/",
+        { params: { ...params, page } },
+      )
+    ).data;
+
+  const first = await fetchPage(filters.page ?? 1);
+  if (filters.page) {
+    return { ...first, data: [...first.data].sort(newestFirst) };
+  }
+
+  const totalPages = Math.min(
+    first.pagination?.total_pages ?? 1,
+    MAX_APPOINTMENT_PAGES,
   );
-  return data;
+  const rest = await Promise.all(
+    Array.from({ length: Math.max(0, totalPages - 1) }, (_, i) =>
+      fetchPage(i + 2),
+    ),
+  );
+  // Запись могла сдвинуться между страницами за время запросов — убираем
+  // повторы по id.
+  const seen = new Set<number>();
+  const all = [first, ...rest]
+    .flatMap((page) => page.data)
+    .filter((item) => !seen.has(item.id) && seen.add(item.id))
+    .sort(newestFirst);
+
+  return {
+    data: all,
+    pagination: {
+      ...first.pagination,
+      page: 1,
+      page_size: all.length,
+      total: first.pagination?.total ?? all.length,
+      total_pages: 1,
+    },
+  };
 };
 
 export const getDoctorPatients = async (
