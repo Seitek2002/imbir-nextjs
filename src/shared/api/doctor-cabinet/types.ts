@@ -42,6 +42,8 @@ export type DoctorAppointmentPatient = {
 };
 
 export type DoctorAppointment = {
+  // Когда запись создана (ISO). По нему новые записи идут первыми.
+  created_at?: string;
   date: string;
   id: number;
   notes?: string;
@@ -93,6 +95,7 @@ export type DoctorAppointmentSummary = {
 export type DoctorAppointmentFilters = {
   date_from?: string;
   date_to?: string;
+  ordering?: string;
   page?: number;
   page_size?: number;
   status?: "all" | "cancelled" | "completed" | "upcoming";
