@@ -1,5 +1,5 @@
 import type { SpecializationItem } from "../references/types";
-import type { ServiceListItem } from "../services/types";
+import type { ServiceCategoryRef, ServiceListItem } from "../services/types";
 
 export type ClinicProfileBranch = {
   address: string;
@@ -110,6 +110,8 @@ export type ClinicServiceBody = {
   photo?: File | null | string;
   price?: null | string;
   schedule?: null | Record<string, ClinicScheduleDay>;
+  // Запись справочника категорий; null снимает категорию.
+  service_category_id?: null | number;
 };
 
 // Врач в ответе услуги (POST/PUT/GET возвращают услугу с doctors[]).
@@ -151,6 +153,7 @@ export type ClinicServiceDetail = {
   photo: null | string;
   price: null | string;
   schedule: null | Record<string, ClinicScheduleDay>;
+  service_category?: null | ServiceCategoryRef;
 };
 
 // Запись образования врача. Интернатура/ординатура/специализация по диплому

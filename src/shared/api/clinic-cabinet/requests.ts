@@ -3,6 +3,7 @@ import { toHttps, toMediaUrl } from "@/shared/lib/media";
 import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
 import type { DoctorAppointment } from "../doctor-cabinet/types";
 import type { PaginatedReviewsResponse } from "../reviews/types";
+import { withCategoryTitle } from "../services/requests";
 import { PaginatedResponse } from "../types";
 import {
   ClinicAppointmentFilters,
@@ -285,7 +286,7 @@ export const getClinicServices = async (): Promise<
   return {
     ...data,
     data: data.data.map((service) => ({
-      ...service,
+      ...withCategoryTitle(service),
       photo: toMediaUrl(service.photo) ?? null,
     })),
   };
@@ -299,7 +300,7 @@ export const getClinicService = async (
   const { data } = await apiClient.get<ClinicServiceDetail>(
     `/api/clinic/services/${id}/`,
   );
-  return { ...data, photo: toHttps(data.photo) ?? null };
+  return { ...withCategoryTitle(data), photo: toHttps(data.photo) ?? null };
 };
 
 export const addClinicService = async (

@@ -1,5 +1,6 @@
 import { LunchBreak, WeekSchedule } from "../auth/types";
 import { DoctorDetail } from "../doctors/types";
+import type { ServiceCategoryRef } from "../services/types";
 
 export type LegalInfo = {
   company_name: string;
@@ -113,6 +114,7 @@ export type DoctorServicePlace = {
 // Соответствует схеме DoctorServiceRead / DoctorServiceWriteRequest.
 export type DoctorServiceItem = {
   branch: DoctorServicePlace | null;
+  // Подменяется на service_category.title в getDoctorServices.
   category: string;
   clinic: DoctorServicePlace | null;
   created_at?: string;
@@ -123,12 +125,14 @@ export type DoctorServiceItem = {
   name: string;
   photo?: null | string;
   price: null | string;
+  service_category?: null | ServiceCategoryRef;
 };
 
 export type DoctorServiceBody = {
   // Филиал выбранной клиники. Бэк проверяет, что он принадлежит именно ей.
   branch_id?: null | number;
-  category: string; // обязательное поле на бэке
+  // Обязательное на бэке до выкатки справочника — шлём название и дальше.
+  category: string;
   // Обязателен, только когда врач привязан больше чем к одной клинике: иначе
   // бэк отвечает 400. При одной клинике подставляется сам, при нуле остаётся
   // пустым. На PUT клинику трогаем, только если поле пришло явно — правка
@@ -141,4 +145,6 @@ export type DoctorServiceBody = {
   // File уходит multipart'ом, строка — URL уже загруженной картинки.
   photo?: File | null | string;
   price?: string;
+  // Запись справочника категорий; null снимает категорию.
+  service_category_id?: null | number;
 };

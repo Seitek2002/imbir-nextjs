@@ -63,8 +63,9 @@ export const ClinicNewProcedurePage: FC = () => {
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState(false);
   const [category, setCategory] = useState("");
-  // Категории — из справочника бэка (/api/references/service-categories/)
-  const { options: categoryOptions } = useServiceCategories();
+  // Категории — из справочника /api/service-categories/ (см. useServiceCategories)
+  const { optionsWith: categoryOptionsWith, resolveCategoryId } =
+    useServiceCategories();
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [currency, setCurrency] = useState("KGS");
@@ -124,6 +125,7 @@ export const ClinicNewProcedurePage: FC = () => {
     addMutation.mutate({
       name: name.trim(),
       category,
+      service_category_id: resolveCategoryId(category),
       description: description.trim() || undefined,
       price: price.trim() || undefined,
       duration: duration ? Number(duration) : undefined,
@@ -248,7 +250,7 @@ export const ClinicNewProcedurePage: FC = () => {
         <Dropdown
           label="Категория услуги"
           placeholder="Выберите из списка"
-          options={categoryOptions}
+          options={categoryOptionsWith(category)}
           searchable
           value={category}
           onChange={setCategory}

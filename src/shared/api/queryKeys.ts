@@ -125,6 +125,9 @@ export const referenceKeys = {
   paymentMethods: () => [...referenceKeys.all, "paymentMethods"] as const,
   countryCodes: () => [...referenceKeys.all, "countryCodes"] as const,
   serviceCategories: () => [...referenceKeys.all, "serviceCategories"] as const,
+  // Новый справочник категорий (id + title), не путать со списком строк выше.
+  serviceCategoryList: () =>
+    [...referenceKeys.all, "serviceCategoryList"] as const,
   // Префикс без id — по нему сбрасывается кэш статуса после изменения отзывов.
   userStatuses: () => [...referenceKeys.all, "userStatus"] as const,
   userStatus: (userId: number) =>

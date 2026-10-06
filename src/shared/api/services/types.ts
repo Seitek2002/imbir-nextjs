@@ -1,4 +1,13 @@
+// Запись справочника категорий (GET /api/service-categories/).
+export type ServiceCategoryRef = {
+  id: number;
+  title: string;
+};
+
 export type ServiceListItem = {
+  // Старое текстовое поле. Пока бэк хранит его рядом со справочником, а
+  // фронт подставляет сюда service_category.title, если он есть (см.
+  // withCategoryTitle) — поэтому все списки и карточки читают только category.
   category: string;
   clinic?: {
     id: number;
@@ -15,6 +24,7 @@ export type ServiceListItem = {
   price: null | string;
   rating?: null | number;
   reviews_count?: null | number;
+  service_category?: null | ServiceCategoryRef;
 };
 
 // GET /api/services/{id}/ — проверено живым запросом, отличается от списка:

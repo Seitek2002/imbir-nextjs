@@ -148,8 +148,11 @@ const ServiceModal: FC<ServiceModalProps> = ({
     setPhotoPreview(service?.photo ?? undefined);
   }
 
-  const { options: categoryOptions, isLoading: isCategoriesLoading } =
-    useServiceCategories();
+  const {
+    optionsWith: categoryOptionsWith,
+    resolveCategoryId,
+    isLoading: isCategoriesLoading,
+  } = useServiceCategories();
   const {
     options: clinicOptions,
     isRequired: isClinicRequired,
@@ -185,7 +188,9 @@ const ServiceModal: FC<ServiceModalProps> = ({
     if (!canSubmit) return;
     onSubmit({
       name: name.trim(),
+      // Название — в старое обязательное поле, id — в новый справочник.
       category,
+      service_category_id: resolveCategoryId(category),
       description: description || undefined,
       price: price ? String(price) : undefined,
       duration: duration ? Number(duration) : undefined,
@@ -220,7 +225,7 @@ const ServiceModal: FC<ServiceModalProps> = ({
           placeholder={
             isCategoriesLoading ? "Загружаем список..." : "Выберите из списка"
           }
-          options={categoryOptions}
+          options={categoryOptionsWith(category)}
           searchable
           value={category}
           onChange={setCategory}

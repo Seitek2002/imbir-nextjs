@@ -1,5 +1,6 @@
 import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
 import type { PaginatedReviewsResponse } from "../reviews/types";
+import { withCategoryTitle } from "../services/requests";
 import { PaginatedResponse } from "../types";
 import {
   DoctorAppointment,
@@ -222,7 +223,7 @@ export const getDoctorServices = async (): Promise<{
   const { data } = await apiClient.get<{ data: DoctorServiceItem[] }>(
     "/api/doctor/services/",
   );
-  return data;
+  return { ...data, data: data.data.map(withCategoryTitle) };
 };
 
 export const addDoctorService = async (

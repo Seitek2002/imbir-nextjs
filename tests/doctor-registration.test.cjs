@@ -16,6 +16,9 @@ const compile = (source) =>
     },
   }).outputText;
 
+// doctor-cabinet/requests берёт из services только нормализацию категории.
+const servicesStub = { withCategoryTitle: (service) => service };
+
 function load(file, dependencies = {}, globals = {}) {
   const exports = {};
   vm.runInNewContext(
@@ -149,7 +152,10 @@ function photoUploader(api = {}) {
   const delays = [];
   const { scheduleProcessedPhotoRefresh } = load(
     "src/shared/api/doctor-cabinet/requests.ts",
-    { "../client": { FILE_UPLOAD_TIMEOUT_MS: 120000, apiClient: {} } },
+    {
+      "../client": { FILE_UPLOAD_TIMEOUT_MS: 120000, apiClient: {} },
+      "../services/requests": servicesStub,
+    },
     {
       setTimeout: (callback, ms) => {
         delays.push(ms);
@@ -247,6 +253,7 @@ test("photo and certificate requests use the longer upload timeout", async () =>
   const { updateDoctorProfile, uploadDoctorDocument } = load(
     "src/shared/api/doctor-cabinet/requests.ts",
     {
+      "../services/requests": servicesStub,
       "../client": {
         FILE_UPLOAD_TIMEOUT_MS: 120000,
         apiClient: {
@@ -590,7 +597,10 @@ test("background AI photo processing: the profile is re-read at 60 and 120 secon
   let refreshed = 0;
   const { AI_PHOTO_REFRESH_DELAYS_MS, scheduleProcessedPhotoRefresh } = load(
     "src/shared/api/doctor-cabinet/requests.ts",
-    { "../client": { FILE_UPLOAD_TIMEOUT_MS: 120000, apiClient: {} } },
+    {
+      "../client": { FILE_UPLOAD_TIMEOUT_MS: 120000, apiClient: {} },
+      "../services/requests": servicesStub,
+    },
     {
       setTimeout: (callback, ms) => {
         delays.push(ms);

@@ -72,8 +72,9 @@ export const ClinicProcedureDetailPage: FC = () => {
   // проведения и график (появились после доработки).
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
-  // Категории — из справочника бэка (/api/references/service-categories/)
-  const { options: categoryOptions } = useServiceCategories();
+  // Категории — из справочника /api/service-categories/ (см. useServiceCategories)
+  const { optionsWith: categoryOptionsWith, resolveCategoryId } =
+    useServiceCategories();
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [currency, setCurrency] = useState("KGS");
@@ -131,6 +132,7 @@ export const ClinicProcedureDetailPage: FC = () => {
       updateClinicService(serviceId, {
         name: name.trim(),
         category,
+        service_category_id: resolveCategoryId(category),
         description: description.trim(),
         price: price.trim() || undefined,
         duration: duration ? Number(duration) : undefined,
@@ -380,7 +382,7 @@ export const ClinicProcedureDetailPage: FC = () => {
               <Dropdown
                 label="Категория услуги"
                 placeholder="Выберите из списка"
-                options={categoryOptions}
+                options={categoryOptionsWith(category)}
                 searchable
                 value={category}
                 onChange={setCategory}
