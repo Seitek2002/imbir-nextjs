@@ -11,7 +11,7 @@ import {
   Logo,
   TwitterIcon,
 } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config";
+import { COMPANY, ROUTES } from "@/shared/config";
 import { useSiteSettings } from "@/shared/lib/siteSettingsContext";
 
 // --- Вспомогательные микро-компоненты для чистоты кода ---
@@ -126,10 +126,13 @@ export const Footer: FC = () => {
           </div>
         </div>
 
-        {/* Нижняя часть: Копирайт */}
-        <div className="flex justify-center items-center md:mt-10 pt-6 md:pt-0 border-t border-border-soft/50 md:border-none">
+        {/* Нижняя часть: Копирайт и юрлицо (полные реквизиты — на «Контактах») */}
+        <div className="flex flex-col justify-center items-center gap-1 md:mt-10 pt-6 md:pt-0 border-t border-border-soft/50 md:border-none">
           <p className="text-foreground text-sm text-center">
             © 2026 Imbir. Все права защищены
+          </p>
+          <p className="text-secondary text-xs text-center">
+            {COMPANY.shortName} · ИНН {COMPANY.inn} · {COMPANY.legalAddress}
           </p>
         </div>
       </div>

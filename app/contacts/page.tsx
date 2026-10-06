@@ -3,13 +3,31 @@ import { Header } from "@/widgets/header";
 
 import { LocationMap } from "@/entities/clinic-profile";
 
-import { ROUTES } from "@/shared/config";
+import { COMPANY, ROUTES } from "@/shared/config";
 
 const BRANCH_ADDRESS = "ул. Мидина Алыбаева, 10";
 // Координаты нужны именно для пина: без них keyless-embed показывает только
 // район по текстовому запросу, без метки филиала (см. LocationMap).
 const BRANCH_LAT = "42.866893";
 const BRANCH_LNG = "74.559023";
+
+// Реквизиты юрлица: строки «название — значение», значение может быть
+// многострочным (банк, телефоны).
+const REQUISITES: { label: string; value: string }[] = [
+  { label: "Наименование", value: COMPANY.fullName },
+  { label: "ИНН", value: COMPANY.inn },
+  { label: "ОКПО", value: COMPANY.okpo },
+  { label: "Рег. № в Соцфонде", value: COMPANY.socialFundNumber },
+  { label: "УГНС", value: COMPANY.taxOffice },
+  {
+    label: "Расчётный счёт",
+    value: `${COMPANY.bank}\nБИК ${COMPANY.bik}\n№ ${COMPANY.account}`,
+  },
+  { label: "Юридический адрес", value: COMPANY.legalAddress },
+  { label: "Телефоны", value: COMPANY.phones.join("\n") },
+  { label: "Электронная почта", value: COMPANY.email },
+  { label: "Генеральный директор", value: COMPANY.director },
+];
 
 const ContactCard = ({
   icon,
@@ -150,6 +168,27 @@ export default function ContactsPage() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Реквизиты юрлица — нужны операторам для согласования имени
+            отправителя SMS (см. shared/config/company). */}
+        <div className="bg-white rounded-3xl p-6 border border-border mt-3">
+          <h2 className="text-foreground font-semibold text-lg mb-4">
+            Реквизиты
+          </h2>
+          <dl className="grid md:grid-cols-2 gap-x-8">
+            {REQUISITES.map(({ label, value }) => (
+              <div
+                key={label}
+                className="py-3 border-b border-background flex flex-col gap-0.5"
+              >
+                <dt className="text-xs text-muted">{label}</dt>
+                <dd className="text-sm text-foreground font-medium whitespace-pre-line wrap-break-word">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </div>
 

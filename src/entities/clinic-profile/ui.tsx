@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import type { UpdateClinicProfileBody } from "@/shared/api";
+import { DEFAULT_COUNTRY } from "@/shared/config";
 import {
   Button,
   Checkbox,
@@ -475,10 +476,16 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         <SectionCard title="Локация и контакты">
           {isEditing ? (
             <div className="flex flex-col gap-6">
-              <Input
+              {/* Временно только Кыргызстан — на время согласования имени
+                  отправителя SMS у операторов (как в разделе «Локация» и в
+                  регистрации). Уже сохранённую другую страну не прячем. */}
+              <Dropdown
                 label="Страна"
+                options={Array.from(
+                  new Set([DEFAULT_COUNTRY, ...(d.country ? [d.country] : [])]),
+                ).map((name) => ({ label: name, value: name }))}
                 value={d.country}
-                onChange={(e) => set("country", e.target.value)}
+                onChange={(v) => set("country", v as string)}
               />
               <Input
                 label="Город"
