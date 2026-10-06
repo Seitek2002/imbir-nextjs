@@ -193,8 +193,9 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
 
   const { isSaved, isPending, toggle } = useFavoriteToggle("service");
 
-  // Категории — из реальных услуг, справочника у бэка нет
-  const { options: categoryOptions } = useServiceCategories();
+  // Только категории, у которых есть услуги: полный набор из формы создания
+  // дал бы в фильтре варианты с пустой выдачей.
+  const { usedOptions: categoryOptions } = useServiceCategories();
 
   // Клиники для фильтра: значением уходит id, его и принимает clinic_id.
   const { data: clinics = [] } = useQuery({
