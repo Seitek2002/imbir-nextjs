@@ -1,5 +1,6 @@
 ﻿import { FC, ReactNode } from "react";
 
+import { cn } from "@/shared/lib/utils";
 import { Checkbox } from "@/shared/ui";
 
 type CheckboxGroupProps = {
@@ -69,10 +70,12 @@ export const SectionCard: FC<{ children: ReactNode; title: string }> = ({
 
 type FieldViewProps = {
   label: string;
+  // Сохранить переносы строк из многострочного текста («О себе»).
+  multiline?: boolean;
   value: string | string[];
 };
 
-export const FieldView: FC<FieldViewProps> = ({ label, value }) => {
+export const FieldView: FC<FieldViewProps> = ({ label, value, multiline }) => {
   const values = Array.isArray(value) ? value : [value];
 
   return (
@@ -83,7 +86,13 @@ export const FieldView: FC<FieldViewProps> = ({ label, value }) => {
           <p className="text-foreground font-medium text-base">—</p>
         ) : (
           values.map((v, i) => (
-            <p key={i} className="text-foreground font-medium text-base">
+            <p
+              key={i}
+              className={cn(
+                "text-foreground font-medium text-base",
+                multiline && "whitespace-pre-line wrap-break-word",
+              )}
+            >
               {v || "—"}
             </p>
           ))

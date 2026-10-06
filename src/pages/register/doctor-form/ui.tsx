@@ -62,6 +62,7 @@ export const DoctorRegistrationForm = ({
     workplace: inviteClinic?.clinicName ?? "",
     category: "",
     academicDegree: "",
+    about: "",
     university: "",
     graduationYear: "",
     internship: "",

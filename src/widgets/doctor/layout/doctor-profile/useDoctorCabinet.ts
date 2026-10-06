@@ -53,6 +53,7 @@ export const mapApiToProfile = (
   // Реальный ответ /api/doctor/profile/ (плоский DoctorOwnProfile) отличается
   // от устаревшего типа DoctorPrivateProfile — читаем через каст.
   const a = api as unknown as {
+    about?: null | string;
     academic_degree?: string;
     additional_education?: { name?: string; year?: null | number }[];
     additional_services?: string;
@@ -100,6 +101,7 @@ export const mapApiToProfile = (
   return {
     fullName:
       a.full_name ?? `${a.first_name ?? ""} ${a.last_name ?? ""}`.trim(),
+    about: a.about ?? "",
     specialty: (a.primary_specializations ?? []).map((item) =>
       translateSpecialty(item.name),
     ),
@@ -202,6 +204,7 @@ export const useDoctorCabinet = () => {
         // (проф. данные, документы, образование) их не шлют → был 400.
         // Подставляем из текущего профиля, если явно не заданы.
         const raw = data as unknown as {
+          about?: null | string;
           first_name?: string;
           last_name?: string;
           narrow_specializations?: SpecializationItem[];
@@ -221,6 +224,10 @@ export const useDoctorCabinet = () => {
             narrow_specialization_ids: raw?.narrow_specializations?.map(
               (s) => s.id,
             ),
+            // Поле новое, и как бэк обходится с ним при отсутствии в PUT, не
+            // проверено. Досылаем текущий текст, чтобы сохранение другой
+            // вкладки точно его не стёрло.
+            about: raw?.about ?? undefined,
             ...body,
           },
           { processPhoto },

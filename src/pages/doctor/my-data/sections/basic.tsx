@@ -16,6 +16,7 @@ import {
   ImageWithFallback,
   Input,
   PhoneInput,
+  Textarea,
 } from "@/shared/ui";
 
 import { OnlineProfileSettings } from "../online-profile-settings";
@@ -48,6 +49,7 @@ export const DoctorBasicInfoSection: FC = () => {
     languages: "",
     phone: "",
     email: "",
+    about: "",
     photo: undefined as string | undefined,
     isOnlineAvailable: false,
     consultationPrice: "",
@@ -76,6 +78,7 @@ export const DoctorBasicInfoSection: FC = () => {
       languages: profile.languages,
       phone: profile.phone,
       email: profile.email,
+      about: profile.about,
       photo: profile.photo,
       isOnlineAvailable: profile.isOnlineAvailable,
       consultationPrice: profile.consultationPrice,
@@ -141,6 +144,7 @@ export const DoctorBasicInfoSection: FC = () => {
         .map((l) => l.trim())
         .filter(Boolean),
       phone: d.phone || undefined,
+      about: d.about.trim(),
       is_online_available: d.isOnlineAvailable,
       consultation_price: d.consultationPrice.trim()
         ? `${parseFloat(d.consultationPrice.replace(",", ".")) || 0}`
@@ -162,6 +166,7 @@ export const DoctorBasicInfoSection: FC = () => {
         languages: profile.languages,
         phone: profile.phone,
         email: profile.email,
+        about: profile.about,
         photo: profile.photo,
         isOnlineAvailable: profile.isOnlineAvailable,
         consultationPrice: profile.consultationPrice,
@@ -385,6 +390,19 @@ export const DoctorBasicInfoSection: FC = () => {
               />
             ) : (
               <FieldView label="Почта" value={d.email} />
+            )}
+          </div>
+          <div className="lg:col-span-2">
+            {isEditing ? (
+              <Textarea
+                label="О себе"
+                value={d.about}
+                onChange={(e) => set("about", e.target.value)}
+                placeholder="Расскажите пациентам о своём опыте, подходе к лечению и о том, с чем вы помогаете"
+                hint="Этот текст пациенты видят на вашей странице"
+              />
+            ) : (
+              <FieldView label="О себе" value={d.about} multiline />
             )}
           </div>
         </div>

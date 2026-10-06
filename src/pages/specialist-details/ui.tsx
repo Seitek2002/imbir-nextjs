@@ -413,13 +413,17 @@ export const SpecialistDetailsPage: FC<Props> = ({
                   </div>
                 </InfoCard>
               )}
+              {/* Текст врач пишет сам (регистрация, «Мои данные»), отсюда и
+                  «О себе». pre-line — чтобы не слипались его абзацы. */}
               {about && (
-                <InfoCard title="О враче" expandable lines={3}>
-                  {about}
+                <InfoCard title="О себе" expandable lines={3}>
+                  <span className="whitespace-pre-line wrap-break-word">
+                    {about}
+                  </span>
                 </InfoCard>
               )}
 
-              {/* В отличие от «Образования» и «О враче», рендерим карточку и
+              {/* В отличие от «Образования» и «О себе», рендерим карточку и
                   при пустом списке: маркер-чёрточка нужен только рядом с
                   реальной записью, а на пустом месте выглядел как баг бэка. */}
               <InfoCard title="Опыт работы" expandable={false}>

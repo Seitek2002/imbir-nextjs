@@ -663,6 +663,7 @@ export const RegisterPage = () => {
           ],
           education,
           license_number: data.licenseNumber,
+          about: data.about.trim() || undefined,
         };
 
         await updateDoctorProfile(profileFields);

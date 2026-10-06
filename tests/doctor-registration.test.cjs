@@ -208,6 +208,7 @@ const form = () => ({
   certificates: [],
   password: "Synthetic123!",
   experience: "2",
+  about: "  Принимаю взрослых.\nВторой абзац.  ",
   photo: null,
 });
 
@@ -404,15 +405,19 @@ for (const [name, registrationError] of lostReplies) {
 
 test("recovered registration still saves profile fields and starts the photo upload", async () => {
   let profileSaved = 0;
+  let profileBody;
   const { submit, events } = pageHandler({
     registrationError: { code: "ECONNABORTED" },
     login: async () => registeredDoctor,
-    profile: async () => {
+    profile: async (body) => {
       profileSaved++;
+      profileBody = body;
     },
   });
   await submit({ ...form(), photo: new File(["synthetic"], "photo.png") });
   assert.equal(profileSaved, 1);
+  // «О себе» из анкеты уходит в профиль, без лишних пробелов по краям.
+  assert.equal(profileBody.about, "Принимаю взрослых.\nВторой абзац.");
   assert.ok(events.some(([n]) => n === "photo"));
   assert.ok(events.some(([n]) => n === "redirect"));
 });

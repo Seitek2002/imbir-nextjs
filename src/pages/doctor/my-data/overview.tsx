@@ -34,6 +34,7 @@ import {
   ImageWithFallback,
   Input,
   PhoneInput,
+  Textarea,
 } from "@/shared/ui";
 
 import { OnlineProfileSettings } from "./online-profile-settings";
@@ -124,6 +125,7 @@ const PencilIcon = () => (
 // экраны остаются отдельными: там разделы открываются по одному с экрана-
 // списка «Мои данные» (DoctorMyDataList), макет этого не касается.
 type D = {
+  about: string;
   additionalEducation: AdditionalEducationEntry[];
   additionalSpecialty: string[];
   birthDate: string;
@@ -161,6 +163,7 @@ const EMPTY: D = {
   languages: "",
   phone: "",
   email: "",
+  about: "",
   specialty: [],
   additionalSpecialty: [],
   experienceYears: "",
@@ -196,6 +199,7 @@ const fromProfile = (
   languages: p.languages,
   phone: p.phone,
   email: p.email,
+  about: p.about,
   specialty: p.specialty,
   additionalSpecialty: p.additionalSpecialty,
   experienceYears: p.experienceYears,
@@ -364,6 +368,7 @@ export const DoctorMyDataOverview: FC = () => {
         .map((l) => l.trim())
         .filter(Boolean),
       phone: d.phone || undefined,
+      about: d.about.trim(),
       primary_specialization_ids: primaryIds,
       narrow_specialization_ids: narrowIds,
       experience_years: parseInt(d.experienceYears) || 0,
@@ -557,6 +562,19 @@ export const DoctorMyDataOverview: FC = () => {
               />
             ) : (
               <FieldView label="Почта" value={d.email} />
+            )}
+          </div>
+          <div>
+            {isEditing ? (
+              <Textarea
+                label="О себе"
+                value={d.about}
+                onChange={(e) => set("about", e.target.value)}
+                placeholder="Расскажите пациентам о своём опыте, подходе к лечению и о том, с чем вы помогаете"
+                hint="Этот текст пациенты видят на вашей странице"
+              />
+            ) : (
+              <FieldView label="О себе" value={d.about} multiline />
             )}
           </div>
 

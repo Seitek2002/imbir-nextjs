@@ -1,6 +1,6 @@
 import { useDoctorSpecializationOptions } from "@/entities/specialization";
 
-import { Dropdown, Input } from "@/shared/ui";
+import { Dropdown, Input, Textarea } from "@/shared/ui";
 
 import type { DoctorFormData, InviteClinic } from "../model/types";
 
@@ -128,6 +128,14 @@ export const Step2Professional = ({ data, onChange, inviteClinic }: Props) => {
         placeholder="Введите научную степень"
         value={data.academicDegree}
         onChange={(e) => onChange("academicDegree", e.target.value)}
+      />
+      <Textarea
+        label="О себе"
+        autoComplete="off"
+        placeholder="Расскажите пациентам о своём опыте, подходе к лечению и о том, с чем вы помогаете"
+        hint="Необязательно. Текст увидят пациенты на вашей странице"
+        value={data.about}
+        onChange={(e) => onChange("about", e.target.value)}
       />
     </div>
   );

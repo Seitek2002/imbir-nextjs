@@ -61,6 +61,8 @@ export type ClinicFormData = {
 export type DoctorStep = 1 | 2 | 3 | 4;
 
 export type DoctorFormData = {
+  // «О себе» — свободный текст врача для его публичной страницы.
+  about: string;
   academicDegree: string;
   additionalEducation: string;
   // Множественные: в базе это ManyToMany, и в кабинете врач уже может выбрать

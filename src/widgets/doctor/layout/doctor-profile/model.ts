@@ -26,6 +26,8 @@ export type DoctorReview = {
 };
 
 export type DoctorProfileData = {
+  // «О себе» — показывается пациентам на публичной странице врача.
+  about: string;
   additionalEducation: { name: string; year: string }[];
   // Множественные: в базе это ManyToMany (primary_specializations /
   // narrow_specializations), и у клиники форма давно умеет выбирать несколько.
