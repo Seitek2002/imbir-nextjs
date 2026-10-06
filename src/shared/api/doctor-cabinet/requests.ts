@@ -175,10 +175,10 @@ const newestFirst = (a: DoctorAppointment, b: DoctorAppointment) =>
 // если бэк вернёт кривую пагинацию. 20 × 100 = 2000 записей.
 const MAX_APPOINTMENT_PAGES = 20;
 
-// Бэк отдаёт записи врача по дате приёма от старых к новым и параметры
-// сортировки пока игнорирует, а страница кабинета показывает одну страницу
-// по 20 — новые записи уходили вниз или вовсе на следующие страницы.
-// Поэтому:
+// Список записей кабинета, новые — первыми. Бэк отдаёт записи врача по дате
+// приёма от старых к новым, клиники — по дате приёма от поздних к ранним,
+// параметры сортировки оба пока игнорируют и режут по 20 на страницу:
+// новая запись уходила вниз или вовсе на следующие страницы. Поэтому:
 //  - просим ordering=-created_at: когда бэк его поддержит, порядок придёт
 //    готовым, а сортировка ниже станет пустой формальностью — код менять
 //    не придётся;
@@ -186,16 +186,17 @@ const MAX_APPOINTMENT_PAGES = 20;
 //    оставит свои 20, цикл пройдёт по total_pages);
 //  - сортируем один раз при получении ответа, а не на каждом рендере.
 // Явно запрошенную страницу (filters.page) отдаём как есть, только по порядку.
-export const getDoctorAppointments = async (
-  filters: DoctorAppointmentFilters = {},
+// Не для счётчиков: им нужен pagination.total одной страницы, а не все записи.
+export const fetchAppointmentsNewestFirst = async (
+  url: string,
+  filters: { page?: number; page_size?: number } = {},
 ): Promise<PaginatedResponse<DoctorAppointment>> => {
   const params = { ordering: "-created_at", page_size: 100, ...filters };
   const fetchPage = async (page: number) =>
     (
-      await apiClient.get<PaginatedResponse<DoctorAppointment>>(
-        "/api/doctor/appointments/",
-        { params: { ...params, page } },
-      )
+      await apiClient.get<PaginatedResponse<DoctorAppointment>>(url, {
+        params: { ...params, page },
+      })
     ).data;
 
   const first = await fetchPage(filters.page ?? 1);
@@ -231,6 +232,9 @@ export const getDoctorAppointments = async (
     },
   };
 };
+
+export const getDoctorAppointments = (filters: DoctorAppointmentFilters = {}) =>
+  fetchAppointmentsNewestFirst("/api/doctor/appointments/", filters);
 
 export const getDoctorPatients = async (
   filters: DoctorPatientFilters = {},

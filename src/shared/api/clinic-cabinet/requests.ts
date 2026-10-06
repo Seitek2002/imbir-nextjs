@@ -1,6 +1,7 @@
 import { toHttps, toMediaUrl } from "@/shared/lib/media";
 
 import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
+import { fetchAppointmentsNewestFirst } from "../doctor-cabinet/requests";
 import type { DoctorAppointment } from "../doctor-cabinet/types";
 import type { PaginatedReviewsResponse } from "../reviews/types";
 import { withCategoryTitle } from "../services/requests";
@@ -336,6 +337,13 @@ export const getClinicAppointments = async (
   );
   return data;
 };
+
+// Для списка в кабинете: все страницы, новые записи первыми (см.
+// fetchAppointmentsNewestFirst). getClinicAppointments выше остаётся для
+// счётчика ожидающих — ему нужна одна страница с pagination.total.
+export const getClinicAppointmentsNewestFirst = (
+  filters: ClinicAppointmentFilters = {},
+) => fetchAppointmentsNewestFirst("/api/clinic/appointments/", filters);
 
 // Ответ плоский (без обёртки data) — проверено живым запросом.
 export const getClinicStats = async (): Promise<ClinicStats> => {

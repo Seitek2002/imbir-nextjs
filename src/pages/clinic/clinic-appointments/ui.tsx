@@ -9,7 +9,7 @@ import { ClinicPageLayout } from "@/widgets/clinic/layout";
 import {
   type DoctorAppointment,
   clinicCabinetKeys,
-  getClinicAppointments,
+  getClinicAppointmentsNewestFirst,
 } from "@/shared/api";
 import { fmtDate, fmtTime } from "@/shared/lib/datetime";
 import { cn } from "@/shared/lib/utils";
@@ -126,7 +126,8 @@ export const ClinicAppointmentsPage: FC = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: clinicCabinetKeys.appointments({ status: tab }),
-    queryFn: () => getClinicAppointments(tab === "all" ? {} : { status: tab }),
+    queryFn: () =>
+      getClinicAppointmentsNewestFirst(tab === "all" ? {} : { status: tab }),
   });
 
   const appointments = data?.data ?? [];
