@@ -260,6 +260,13 @@ export const ProfessionalSection: FC<SectionProps> = ({
         <FieldRow label="Текущая должность">{d.position}</FieldRow>
         <FieldRow label="Категория/Квалификация">{d.qualification}</FieldRow>
         <FieldRow label="Научная степень">{d.degree}</FieldRow>
+        <FieldRow label="О себе">
+          {d.about && (
+            <span className="whitespace-pre-line wrap-break-word">
+              {d.about}
+            </span>
+          )}
+        </FieldRow>
       </div>
     );
   }
@@ -313,6 +320,13 @@ export const ProfessionalSection: FC<SectionProps> = ({
         value={d.degree}
         onChange={(e) => set("degree", e.target.value)}
         placeholder="Введите научную степень"
+      />
+      <Textarea
+        label="О себе"
+        value={d.about}
+        onChange={(e) => set("about", e.target.value)}
+        placeholder="Опыт, подход к лечению, с чем врач помогает"
+        hint="Текст увидят пациенты на странице врача"
       />
     </div>
   );

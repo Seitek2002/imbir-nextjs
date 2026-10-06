@@ -162,6 +162,8 @@ export type RegisterDoctorRequest = {
   photo?: File | null;
   process_photo?: boolean;
   step1: {
+    // «О себе», необязательно — бэк сохраняет его в профиль врача.
+    about?: string;
     birth_date: string;
     city: string;
     email: string;

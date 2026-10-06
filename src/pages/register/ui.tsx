@@ -536,6 +536,7 @@ export const RegisterPage = () => {
         // зарегистрироваться вообще.
         step1: {
           full_name: data.fullName,
+          about: data.about.trim() || undefined,
           gender: data.gender as "female" | "male",
           birth_date: toApiDate(data.birthDate),
           city: data.city,

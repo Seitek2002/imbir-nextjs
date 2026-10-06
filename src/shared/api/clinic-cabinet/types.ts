@@ -173,6 +173,8 @@ export type ClinicDoctorCourse = {
 // график приёма и цена консультации сюда НЕ входят — их меняет только сам
 // врач через /api/doctor/profile/, бэк их здесь не примет.
 export type ClinicDoctorProfileBody = {
+  // «О себе» — текст для публичной страницы врача.
+  about?: string;
   academic_degree?: string;
   additional_education?: ClinicDoctorCourse[];
   birth_date?: null | string;

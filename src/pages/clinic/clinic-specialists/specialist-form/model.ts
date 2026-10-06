@@ -9,6 +9,7 @@ import type {
 // специалиста». Все они теперь реально сохраняются: бэк принимает карточку
 // врача целиком (POST /api/clinic/doctors/ и PATCH /api/clinic/doctors/{id}/).
 export type SpecialistFormState = {
+  about: string;
   additionalEducation: string;
   additionalSpecialization: string;
   birthDate: string;
@@ -63,6 +64,7 @@ export const EMPTY_SPECIALIST_FORM: SpecialistFormState = {
   diplomaSpecialty: "",
   additionalEducation: "",
   licenseNumber: "",
+  about: "",
 };
 
 // Макет вводит ФИО одним полем в порядке "Фамилия Имя Отчество" (см. пример
@@ -144,6 +146,7 @@ export const toDoctorProfileBody = (
   education: toApiEducation(d),
   additional_education: toApiCourses(d.additionalEducation),
   license_number: d.licenseNumber.trim(),
+  about: d.about.trim(),
 });
 
 // Ответ бэка → форма.
@@ -183,5 +186,6 @@ export const fromDoctorProfile = (
       .filter(Boolean)
       .join("\n"),
     licenseNumber: p.license_number ?? "",
+    about: p.about ?? "",
   };
 };
