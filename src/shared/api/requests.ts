@@ -251,6 +251,7 @@ const adaptService = (s: ApiService): MockServiceItem => ({
   name: s.name,
   category: s.category,
   price: parsePrice(s.price),
+  duration: s.duration,
   image: toMediaUrl(s.photo) ?? "",
   schedule: emptySchedule,
   doctorIds: [],

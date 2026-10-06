@@ -42,6 +42,8 @@ type Service = {
   // неотличимо друг от друга.
   clinicName?: string;
   doctorIds: string[];
+  // Минуты; null — не указана (бэк тогда считает запись 30-минутной).
+  duration: null | number;
   id: string;
   image: StaticImageData | string;
   price: number;

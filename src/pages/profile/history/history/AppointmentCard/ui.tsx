@@ -13,6 +13,7 @@ import {
   StarIcon,
   VideoCallIcon,
 } from "@/shared/assets/icons";
+import { formatTimeRange } from "@/shared/lib/duration";
 import { Button, ImageWithFallback } from "@/shared/ui";
 
 import {
@@ -195,7 +196,12 @@ export const AppointmentCard: FC<Props> = ({
             </div>
             <div className="flex items-center gap-2.5">
               <ClockIcon className="w-5 h-5 shrink-0 text-primary" />
-              <span>{formatTime(appointment.time)}</span>
+              <span>
+                {formatTimeRange(
+                  formatTime(appointment.time),
+                  appointment.serviceDuration,
+                )}
+              </span>
             </div>
             {appointment.address && (
               <div className="flex items-start gap-2.5">
@@ -280,7 +286,10 @@ export const AppointmentCard: FC<Props> = ({
                 <CalendarIcon className="w-4 h-4 shrink-0 [&_path]:stroke-secondary" />
                 <span>
                   {formatDateHuman(appointment.date)} •{" "}
-                  {formatTime(appointment.time)}
+                  {formatTimeRange(
+                    formatTime(appointment.time),
+                    appointment.serviceDuration,
+                  )}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 min-w-0">

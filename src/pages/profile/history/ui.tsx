@@ -107,6 +107,14 @@ const toServicePrice = (value: unknown): number | undefined => {
   return undefined;
 };
 
+const toServiceDuration = (value: unknown): null | number => {
+  if (value && typeof value === "object") {
+    const duration = (value as Record<string, unknown>).duration;
+    if (typeof duration === "number") return duration;
+  }
+  return null;
+};
+
 export const ProfileHistoryPage: FC = () => {
   const [activeTab, setActiveTab] = useState<"completed" | "upcoming">(
     "upcoming",
@@ -210,6 +218,7 @@ export const ProfileHistoryPage: FC = () => {
       id: String(a.id),
       doctorId: docId,
       serviceId: toEntityId(a.service),
+      serviceDuration: toServiceDuration(a.service),
       doctorName: toDisplayName(a.doctor),
       doctorSpecialty: doctorDetails?.specialty || "",
       doctorClinic:

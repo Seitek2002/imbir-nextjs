@@ -453,6 +453,7 @@ export const ClinicDetailsPage: FC<Props> = ({
                   rating={service.rating}
                   reviews={service.reviews}
                   price={service.price}
+                  duration={service.duration}
                   image={service.image}
                   variant="vertical"
                   isSaved={serviceFavorites.isSaved(Number(service.id))}

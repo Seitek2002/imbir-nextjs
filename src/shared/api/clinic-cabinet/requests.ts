@@ -314,6 +314,16 @@ export const addClinicService = async (
     body,
   );
 
+// Длительность очищают null'ом. В JSON он так и уходит, а multipart (когда
+// вместе меняют фото) null-поля пропускает — бэк оставил бы старое значение.
+// Пустую строку DRF для такого поля читает как null.
+const withClearedDuration = (
+  body: ClinicServiceBody,
+): Record<string, unknown> =>
+  body.duration === null && body.photo instanceof File
+    ? { ...body, duration: "" }
+    : body;
+
 export const updateClinicService = async (
   id: number,
   body: ClinicServiceBody,
@@ -321,7 +331,7 @@ export const updateClinicService = async (
   sendMaybeMultipart<ClinicServiceListItem>(
     `/api/clinic/services/${id}/`,
     "PUT",
-    body,
+    withClearedDuration(body),
   );
 
 export const deleteClinicService = async (id: number): Promise<void> => {

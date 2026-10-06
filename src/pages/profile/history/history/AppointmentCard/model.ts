@@ -20,6 +20,8 @@ export type Appointment = {
   // Цена фиксируется при записи, но бэк может её не отдать — тогда прячем
   price?: number;
   service: string;
+  // Минуты; есть — показываем «17:30–18:30» вместо одного начала.
+  serviceDuration?: null | number;
   serviceId?: null | number | string;
   status: AppointmentStatus;
   time: string;

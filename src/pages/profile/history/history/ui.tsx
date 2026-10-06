@@ -196,6 +196,7 @@ export const ProfileHistory: FC<Props> = ({
           appointmentId={rescheduleTarget.id}
           doctorId={rescheduleTarget.doctorId}
           serviceId={rescheduleTarget.serviceId}
+          serviceDuration={rescheduleTarget.serviceDuration}
         />
       )}
 

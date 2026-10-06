@@ -7,6 +7,7 @@ import Link from "next/link";
 
 import { HeartIcon, HeartIcon2, StarIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
+import { formatDuration, hasDuration } from "@/shared/lib/duration";
 import { hasPrice } from "@/shared/lib/price";
 import { formatRating } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
@@ -16,6 +17,8 @@ type Props = {
   category: string;
   clinic?: string;
   clinicId?: string;
+  // Минуты; не указана — строку не рисуем.
+  duration?: null | number;
   id?: string;
   image?: StaticImageData | string;
   // Запрос по этой карточке уже летит — показываем спиннер вместо сердца и
@@ -71,6 +74,7 @@ export const ServiceCard: FC<Props> = ({
   category,
   clinic,
   clinicId,
+  duration,
   rating,
   reviews,
   price,
@@ -87,6 +91,7 @@ export const ServiceCard: FC<Props> = ({
   const displayClinic = clinic || clinicId;
   // Цену прячем целиком, если бэк её не отдал — «0 с» читалось бы как «бесплатно»
   const showPrice = hasPrice(price);
+  const showDuration = hasDuration(duration);
   // Ровно та же логика для оценки: «0.00 (0)» у новой услуги читается как
   // плохая оценка, хотя её просто ещё никто не оценивал.
   const hasRating = reviews !== undefined && reviews > 0;
@@ -155,9 +160,18 @@ export const ServiceCard: FC<Props> = ({
               избранного вылезала за край карточки, растягивая всю страницу
               по горизонтали. */}
           <div className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-            {showPrice && (
-              <span className="text-foreground font-bold text-base whitespace-nowrap">
-                {price} с
+            {(showPrice || showDuration) && (
+              <span className="flex items-baseline gap-2 whitespace-nowrap">
+                {showPrice && (
+                  <span className="text-foreground font-bold text-base">
+                    {price} с
+                  </span>
+                )}
+                {showDuration && (
+                  <span className="text-muted text-xs">
+                    {formatDuration(duration)}
+                  </span>
+                )}
               </span>
             )}
             <div className="flex items-center gap-2 ml-auto">
@@ -235,9 +249,18 @@ export const ServiceCard: FC<Props> = ({
         )}
 
         <div className="mt-auto pt-3 flex items-center justify-between gap-3 border-t border-border-soft">
-          {showPrice && (
-            <span className="text-foreground font-bold text-lg whitespace-nowrap">
-              {price} с
+          {(showPrice || showDuration) && (
+            <span className="flex items-baseline gap-2 whitespace-nowrap">
+              {showPrice && (
+                <span className="text-foreground font-bold text-lg">
+                  {price} с
+                </span>
+              )}
+              {showDuration && (
+                <span className="text-muted text-sm">
+                  {formatDuration(duration)}
+                </span>
+              )}
             </span>
           )}
           {!isDoctor && (

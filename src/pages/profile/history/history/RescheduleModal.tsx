@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -13,6 +13,11 @@ import {
   rescheduleAppointment,
 } from "@/shared/api";
 import { groupAvailableSlots, toApiDate } from "@/shared/lib/booking";
+import {
+  formatDuration,
+  formatTimeRange,
+  hasDuration,
+} from "@/shared/lib/duration";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { Button, Modal } from "@/shared/ui";
 
@@ -21,6 +26,8 @@ type Props = {
   doctorId: string;
   isOpen: boolean;
   onClose: () => void;
+  // Минуты услуги записи — для подсказки «Приём: 15:00–16:00».
+  serviceDuration?: null | number;
   serviceId?: null | number | string;
   // Формат консультации не меняется при переносе — нужен только чтобы пикер
   // отрисовался в правильном режиме (сам переключатель скрыт).
@@ -34,6 +41,7 @@ export const RescheduleModal: FC<Props> = ({
   onClose,
   appointmentId,
   doctorId,
+  serviceDuration,
   serviceId,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -45,6 +53,7 @@ export const RescheduleModal: FC<Props> = ({
   // Свободные слоты того же врача — тот же источник, что и в форме записи.
   const {
     data: slotsData,
+    isFetching: isFetchingSlots,
     isLoading: isLoadingSlots,
     refetch: refetchSlots,
   } = useQuery({
@@ -53,9 +62,15 @@ export const RescheduleModal: FC<Props> = ({
       doctorId,
       selectedDateStr,
       serviceId,
+      appointmentId,
     ],
     queryFn: () =>
-      getDoctorAvailableSlots(doctorId, selectedDateStr as string, serviceId),
+      getDoctorAvailableSlots(
+        doctorId,
+        selectedDateStr as string,
+        serviceId,
+        appointmentId,
+      ),
     enabled: Boolean(doctorId) && Boolean(selectedDateStr),
     // Как и в форме записи: слоты меняются в реальном времени, кеш на минуту
     // показывал занятое время свободным.
@@ -67,6 +82,26 @@ export const RescheduleModal: FC<Props> = ({
     () => groupAvailableSlots(slotsData?.slots ?? []),
     [slotsData],
   );
+
+  // Как в форме записи: время, которое по свежим слотам больше не свободно,
+  // снимаем сразу, а не после отказа бэка.
+  const [checkedSlots, setCheckedSlots] = useState(slotsData);
+  const [slotNotice, setSlotNotice] = useState<null | string>(null);
+  if (!isFetchingSlots && slotsData !== checkedSlots) {
+    setCheckedSlots(slotsData);
+    const isStillFree = slotsData?.slots.some(
+      (s) => s.time === selectedTime && s.available,
+    );
+    if (selectedTime && slotsData && !isStillFree) {
+      setSelectedTime(null);
+      setSlotNotice(`Время ${selectedTime} уже недоступно — выберите другое`);
+    }
+  }
+  if (selectedTime && slotNotice) setSlotNotice(null);
+  useEffect(() => {
+    if (slotNotice) toast.error(slotNotice, { id: "reschedule-slot-reset" });
+    else toast.dismiss("reschedule-slot-reset");
+  }, [slotNotice]);
 
   const { mutate: submit, isPending } = useMutation({
     mutationFn: () =>
@@ -89,13 +124,12 @@ export const RescheduleModal: FC<Props> = ({
     onError: (err: unknown) => {
       const errData = (err as { response?: { data?: Record<string, unknown> } })
         ?.response?.data;
-      if (
-        errData?.time &&
-        Array.isArray(errData.time) &&
-        errData.time.length > 0
-      ) {
+      const timeErrors = errData?.time;
+      if (Array.isArray(timeErrors) && timeErrors.length > 0) {
         setSelectedTime(null);
-        toast.error("Это время только что заняли. Выберите другой слот.");
+        // Бэк объясняет причину сам: занято другим пациентом, не помещается
+        // в рабочий день или задевает перерыв врача.
+        toast.error(String(timeErrors[0]));
         refetchSlots();
         return;
       }
@@ -124,6 +158,18 @@ export const RescheduleModal: FC<Props> = ({
       panelClassName="max-w-3xl"
     >
       <div className="flex flex-col gap-4">
+        {hasDuration(serviceDuration) && (
+          <p className="text-xs text-muted">
+            Приём длится {formatDuration(serviceDuration)} — свободным показано
+            только время, когда он целиком помещается в график врача.
+            {selectedTime && (
+              <>
+                {" "}
+                Новое время: {formatTimeRange(selectedTime, serviceDuration)}.
+              </>
+            )}
+          </p>
+        )}
         <AppointmentDateTimePicker
           selectedDate={selectedDate}
           onDateChange={(date) => {

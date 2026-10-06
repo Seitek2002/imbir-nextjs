@@ -19,6 +19,12 @@ import {
   updateDoctorService,
 } from "@/shared/api";
 import { EditIcon } from "@/shared/assets/icons";
+import {
+  DURATION_INPUT_ERROR,
+  formatDuration,
+  hasDuration,
+  parseDurationInput,
+} from "@/shared/lib/duration";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { parsePrice } from "@/shared/lib/price";
 import { cn } from "@/shared/lib/utils";
@@ -181,8 +187,17 @@ const ServiceModal: FC<ServiceModalProps> = ({
     reader.readAsDataURL(file);
   };
 
+  // undefined — в поле не целое число минут от 1 до суток. Пустое поле — null:
+  // так длительность и очищается на правке (раньше пустое значение просто не
+  // отправлялось, и старое оставалось).
+  const parsedDuration = parseDurationInput(duration);
+  const isDurationValid = parsedDuration !== undefined;
+
   const canSubmit =
-    !!name.trim() && !!category && (!isClinicRequired || !!clinicId);
+    !!name.trim() &&
+    !!category &&
+    (!isClinicRequired || !!clinicId) &&
+    isDurationValid;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
@@ -193,7 +208,7 @@ const ServiceModal: FC<ServiceModalProps> = ({
       service_category_id: resolveCategoryId(category),
       description: description || undefined,
       price: price ? String(price) : undefined,
-      duration: duration ? Number(duration) : undefined,
+      duration: parsedDuration,
       is_active: service?.is_active ?? true,
       // clinic_id шлём только когда врач сам выбирал клинику. При одной
       // клинике бэк подставляет её сам, а на правке пустое поле сбросило бы
@@ -265,10 +280,13 @@ const ServiceModal: FC<ServiceModalProps> = ({
           <Input
             label="Длительность, мин"
             type="number"
-            min="0"
+            min="1"
+            step="1"
+            inputMode="numeric"
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
-            placeholder="0"
+            placeholder="Например, 30"
+            error={isDurationValid ? undefined : DURATION_INPUT_ERROR}
           />
         </div>
         <div>
@@ -441,7 +459,8 @@ const ServiceCard: FC<{
 
         <p className="text-xs text-muted mt-0.5">
           {service.category || "Без категории"}
-          {service.duration != null && ` • ${service.duration} мин`}
+          {hasDuration(service.duration) &&
+            ` • ${formatDuration(service.duration)}`}
           {showClinic && service.clinic?.name && (
             <span className="text-primary"> • {service.clinic.name}</span>
           )}
@@ -697,7 +716,9 @@ export const DoctorServicesPage: FC = () => {
                               : "—"}
                           </td>
                           <td className={`${TD} text-foreground`}>
-                            {s.duration != null ? `${s.duration} мин` : "—"}
+                            {hasDuration(s.duration)
+                              ? formatDuration(s.duration)
+                              : "—"}
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-1">

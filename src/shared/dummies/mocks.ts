@@ -129,6 +129,8 @@ export type ServiceItem = {
   clinicId: string;
   clinicName: string;
   doctorIds: string[];
+  // Минуты; null/нет — не указана.
+  duration?: null | number;
   id: string;
   image: string;
   name: string;

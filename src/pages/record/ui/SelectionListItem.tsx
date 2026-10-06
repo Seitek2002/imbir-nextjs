@@ -1,4 +1,5 @@
 import { GeoIcon, StarIcon } from "@/shared/assets/icons";
+import { formatDuration, hasDuration } from "@/shared/lib/duration";
 import { cn, pluralYears } from "@/shared/lib/utils";
 import { ImageWithFallback } from "@/shared/ui";
 
@@ -96,6 +97,9 @@ export const SelectionListItem = ({
             )}
           >
             {item.category}
+            {hasDuration(item.duration) && (
+              <span> • {formatDuration(item.duration)}</span>
+            )}
             {item.clinicName && (
               <span className="text-primary"> • {item.clinicName}</span>
             )}

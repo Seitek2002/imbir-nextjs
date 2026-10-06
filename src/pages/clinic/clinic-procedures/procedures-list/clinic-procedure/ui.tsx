@@ -6,12 +6,14 @@ import Link from "next/link";
 
 import { CloseIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
+import { formatDuration, hasDuration } from "@/shared/lib/duration";
 import { hasPrice } from "@/shared/lib/price";
 import { ImageWithFallback } from "@/shared/ui";
 
 type Props = {
   category: string;
   clinic: string;
+  duration?: null | number;
   id: string;
   image?: string;
   name: string;
@@ -78,6 +80,7 @@ export const ProcedureCard: FC<Props> = ({
   name,
   category,
   clinic,
+  duration,
   price,
   image,
   reviews,
@@ -128,7 +131,9 @@ export const ProcedureCard: FC<Props> = ({
             {name}
           </h3>
           <p className="text-sm text-muted truncate mb-2">
-            {category} <span className="text-primary">• {clinic}</span>
+            {category}
+            {hasDuration(duration) && ` • ${formatDuration(duration)}`}{" "}
+            <span className="text-primary">• {clinic}</span>
           </p>
 
           <div className="flex items-center justify-between">
@@ -158,6 +163,7 @@ export const ProcedureRow: FC<Props> = ({
   name,
   category,
   clinic,
+  duration,
   price,
   image,
   reviews,
@@ -199,7 +205,9 @@ export const ProcedureRow: FC<Props> = ({
         )}
       </div>
       <p className="text-xs text-muted truncate mt-0.5">
-        {category} <span className="text-primary">• {clinic}</span>
+        {category}
+        {hasDuration(duration) && ` • ${formatDuration(duration)}`}{" "}
+        <span className="text-primary">• {clinic}</span>
       </p>
       {!!reviews && (
         <div className="flex items-center gap-1 text-xs mt-1">

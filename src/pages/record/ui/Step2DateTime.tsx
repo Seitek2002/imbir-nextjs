@@ -3,6 +3,11 @@ import Link from "next/link";
 import { AppointmentDateTimePicker } from "@/widgets/appointment-datetime-picker";
 
 import { ROUTES } from "@/shared/config";
+import {
+  formatDuration,
+  formatTimeRange,
+  hasDuration,
+} from "@/shared/lib/duration";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui";
 
@@ -14,6 +19,8 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
     mobileStep,
     isAuthenticated,
     selectedDoctorId,
+    selectedService,
+    slotNotice,
     selectedDate,
     setSelectedDate,
     selectedTime,
@@ -48,6 +55,29 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
             авторизации
           </Link>
           . Без входа запись оформится без ссылки на консультацию.
+        </p>
+      )}
+
+      {/* Без этой строки серые слоты посреди свободного дня выглядели
+          ошибкой: длинная услуга не помещается перед перерывом или концом
+          дня, хотя короткая туда бы встала. На мобильном это единственное
+          место, где видно длительность и время окончания. */}
+      {selectedService && hasDuration(selectedService.duration) && (
+        <p className="text-xs text-muted mb-3">
+          Услуга длится {formatDuration(selectedService.duration)} — свободным
+          показано только время, когда она целиком помещается в график врача.
+          {selectedTime && (
+            <>
+              {" "}
+              Приём: {formatTimeRange(selectedTime, selectedService.duration)}.
+            </>
+          )}
+        </p>
+      )}
+
+      {slotNotice && (
+        <p role="alert" className="text-sm text-red-500 mb-3">
+          {slotNotice}
         </p>
       )}
 

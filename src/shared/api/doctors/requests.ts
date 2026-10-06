@@ -25,14 +25,26 @@ export const getDoctorById = async (
   return data;
 };
 
+// excludeAppointmentId — при переносе: своя же запись не должна занимать
+// время, на которое её двигают. Бэк учитывает его, только если спрашивает
+// пациент или врач этой записи.
 export const getDoctorAvailableSlots = async (
   id: number | string,
   date: string,
   service_id?: null | number | string,
+  excludeAppointmentId?: null | number | string,
 ): Promise<AvailableSlotsResponse> => {
   const { data } = await apiClient.get<AvailableSlotsResponse>(
     `/api/doctors/${id}/available-slots/`,
-    { params: { date, ...(service_id ? { service_id } : {}) } },
+    {
+      params: {
+        date,
+        ...(service_id ? { service_id } : {}),
+        ...(excludeAppointmentId
+          ? { exclude_appointment_id: excludeAppointmentId }
+          : {}),
+      },
+    },
   );
   return data;
 };

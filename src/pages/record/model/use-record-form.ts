@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -26,6 +27,7 @@ import type {
   CreateAppointmentRequest,
 } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { formatDuration, hasDuration } from "@/shared/lib/duration";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { toHttps, toMediaUrl } from "@/shared/lib/media";
 import { useAuthStore, useCityStore } from "@/shared/store";
@@ -260,6 +262,7 @@ export const useRecordForm = () => {
 
   const {
     data: slotsData,
+    isFetching: isFetchingSlots,
     isLoading: isLoadingSlots,
     refetch: refetchSlots,
   } = useQuery({
@@ -289,11 +292,10 @@ export const useRecordForm = () => {
     [slotsData],
   );
 
-  // Слоты запрашиваются только по врачу и дате (см. getDoctorAvailableSlots),
-  // от услуги они не зависят — поэтому в зависимостях её быть не должно.
-  // С ней выбор услуги ПОСЛЕ времени молча обнулял слот: кнопка оставалась
-  // активной, запрос не уходил, а сообщение «Выберите дату и время» выглядело
-  // как заголовок шага, и пользователь упирался в тупик.
+  // Смена врача или даты обнуляет время безусловно. Смену услуги сюда не
+  // добавляем: слоты от неё зависят (бэк учитывает её длительность), но
+  // время, которое подходит и новой услуге, сбрасывать незачем — неподходящее
+  // снимает эффект ниже, когда придут свежие слоты.
   useEffect(() => {
     setSelectedTime(null);
   }, [selectedDoctorId, selectedDateStr]);
@@ -363,6 +365,7 @@ export const useRecordForm = () => {
     // строкой ("100.00"), а rating числом (4.0) — при прежней проверке любое
     // число молча превращалось в 0.
     price: Number(s.price) || 0,
+    duration: s.duration ?? null,
     rating: Number(s.rating) || 0,
     reviews: Number(s.reviews_count) || 0,
     image: toMediaUrl(s.photo) ?? "",
@@ -461,6 +464,35 @@ export const useRecordForm = () => {
     () => SERVICES.find((service) => service.id === selectedServiceId) ?? null,
     [SERVICES, selectedServiceId],
   );
+  const selectedServiceDuration = selectedService?.duration ?? null;
+
+  // Выбранное время пропало из свободных: сменили услугу на более длинную
+  // (теперь она не помещается до конца дня или задевает перерыв врача) или
+  // слот за это время занял кто-то другой. Раньше выбор оставался в форме —
+  // в сетке время серело, но уходило на бэк. Проверяем каждый свежий ответ
+  // (не кеш — ждём конца isFetching) прямо во время рендера, как React
+  // советует для производного состояния, и объясняем, почему время снято.
+  const [checkedSlots, setCheckedSlots] = useState(slotsData);
+  const [slotNotice, setSlotNotice] = useState<null | string>(null);
+  if (!isFetchingSlots && slotsData !== checkedSlots) {
+    setCheckedSlots(slotsData);
+    const isStillFree = slotsData?.slots.some(
+      (s) => s.time === selectedTime && s.available,
+    );
+    if (selectedTime && slotsData && !isStillFree) {
+      setSelectedTime(null);
+      setSlotNotice(
+        hasDuration(selectedServiceDuration)
+          ? `Услуга длится ${formatDuration(selectedServiceDuration)} — с ${selectedTime} она не помещается в свободное время врача. Выберите другое время`
+          : `Время ${selectedTime} уже занято — выберите другое`,
+      );
+    }
+  }
+  if (selectedTime && slotNotice) setSlotNotice(null);
+  useEffect(() => {
+    if (slotNotice) toast.error(slotNotice, { id: "record-slot-reset" });
+    else toast.dismiss("record-slot-reset");
+  }, [slotNotice]);
 
   // Клиника выбрана → список врачей из GET /api/clinics/{id}/;
   // иначе — все врачи города. Если вдобавок уже выбрана услуга, закреплённая
@@ -926,16 +958,14 @@ export const useRecordForm = () => {
       const errData = (err as { response?: { data?: Record<string, unknown> } })
         ?.response?.data;
 
-      // Если бэк вернул 400 на пересечение времени (например {"time": ["Врач уже занят..."]})
-      if (
-        errData?.time &&
-        Array.isArray(errData.time) &&
-        errData.time.length > 0
-      ) {
+      // 400 по времени: занято другим пациентом, услуга не помещается в
+      // рабочий день или задевает перерыв врача — причину бэк пишет сам.
+      const timeErrors = errData?.time;
+      if (Array.isArray(timeErrors) && timeErrors.length > 0) {
         setSelectedTime(null);
         setErrors((prev) => ({
           ...prev,
-          submit: "Это время только что заняли. Выберите другой слот.",
+          submit: String(timeErrors[0]),
         }));
         refetchSlots();
         return;
@@ -1008,6 +1038,7 @@ export const useRecordForm = () => {
     selectedDoctorId,
     selectedService,
     selectedServiceId,
+    slotNotice,
     // Места приёма выбранного врача. Нужны в Step1Selection: если их нет,
     // поле «Клиника» скрывается, иначе оно ведёт в пустую модалку.
     workplaceOptions,

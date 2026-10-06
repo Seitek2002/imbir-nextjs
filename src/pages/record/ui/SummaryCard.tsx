@@ -9,6 +9,11 @@ import { useMutation } from "@tanstack/react-query";
 
 import { getAppointmentById } from "@/shared/api";
 import type { AppointmentStatus } from "@/shared/api";
+import {
+  formatDuration,
+  formatTimeRange,
+  hasDuration,
+} from "@/shared/lib/duration";
 import { Button } from "@/shared/ui";
 import { Spinner } from "@/shared/ui";
 
@@ -97,6 +102,11 @@ export const SummaryCard: FC<{
           <span className="font-semibold text-foreground leading-snug">
             {service.title}
           </span>
+          {hasDuration(service.duration) && (
+            <span className="text-secondary text-xs">
+              Длительность: {formatDuration(service.duration)}
+            </span>
+          )}
         </div>
 
         <div className="flex flex-col gap-1">
@@ -110,7 +120,7 @@ export const SummaryCard: FC<{
           <span className="text-secondary text-xs">Дата и время</span>
           <span className="font-semibold text-primary">
             {selectedDate && selectedTime
-              ? `${formatDateLabel(selectedDate)} в ${selectedTime}`
+              ? `${formatDateLabel(selectedDate)} в ${formatTimeRange(selectedTime, service.duration)}`
               : "Не выбраны"}
           </span>
         </div>

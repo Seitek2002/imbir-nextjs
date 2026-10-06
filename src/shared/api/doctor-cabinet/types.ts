@@ -142,7 +142,8 @@ export type DoctorServiceBody = {
   // цены или фото не должна её сбрасывать.
   clinic_id?: null | number;
   description?: string;
-  duration?: number;
+  // null очищает длительность (пустое поле в форме).
+  duration?: null | number;
   is_active?: boolean;
   name: string;
   // File уходит multipart'ом, строка — URL уже загруженной картинки.

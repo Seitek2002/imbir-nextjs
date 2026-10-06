@@ -23,6 +23,10 @@ import {
 } from "@/shared/api";
 import { EditIcon } from "@/shared/assets/icons";
 import {
+  DURATION_INPUT_ERROR,
+  parseDurationInput,
+} from "@/shared/lib/duration";
+import {
   Button,
   Dropdown,
   IconBtn,
@@ -109,6 +113,9 @@ export const ClinicNewProcedurePage: FC = () => {
     },
   });
 
+  // undefined — в поле не целое число минут от 1 до суток; пусто — null.
+  const parsedDuration = parseDurationInput(duration);
+
   const handleSave = () => {
     if (!name.trim()) {
       setNameError(true);
@@ -122,13 +129,17 @@ export const ClinicNewProcedurePage: FC = () => {
       toast.error("Выберите специализацию");
       return;
     }
+    if (parsedDuration === undefined) {
+      toast.error(DURATION_INPUT_ERROR);
+      return;
+    }
     addMutation.mutate({
       name: name.trim(),
       category,
       service_category_id: resolveCategoryId(category),
       description: description.trim() || undefined,
       price: price.trim() || undefined,
-      duration: duration ? Number(duration) : undefined,
+      duration: parsedDuration,
       is_active: true,
       // Врачи клиники, которым назначается услуга. Бэк принимает только id
       // врачей, привязанных к этой клинике (иначе 400), и сам проставляет
@@ -276,9 +287,15 @@ export const ClinicNewProcedurePage: FC = () => {
         <Input
           label="Длительность, мин"
           type="number"
+          min="1"
+          step="1"
+          inputMode="numeric"
           value={duration}
           onChange={(e) => setDuration(e.target.value)}
-          placeholder="0"
+          placeholder="Например, 30"
+          error={
+            parsedDuration === undefined ? DURATION_INPUT_ERROR : undefined
+          }
         />
         <Textarea
           label="Описание"

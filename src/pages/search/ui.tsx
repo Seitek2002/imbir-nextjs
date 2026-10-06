@@ -22,6 +22,7 @@ import { DoctorCard } from "@/entities/doctor";
 
 import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { formatDuration, hasDuration } from "@/shared/lib/duration";
 import { hasPrice } from "@/shared/lib/price";
 import { useUrlSearchParams } from "@/shared/lib/url-state";
 import { plural } from "@/shared/lib/utils";
@@ -266,6 +267,8 @@ export const SearchPage: FC = () => {
                             </p>
                             <p className="text-xs text-muted">
                               {service.category}
+                              {hasDuration(service.duration) &&
+                                ` • ${formatDuration(service.duration)}`}
                             </p>
                           </div>
                           {hasPrice(service.price) && (
@@ -426,6 +429,8 @@ export const SearchPage: FC = () => {
                               </h4>
                               <p className="text-xs text-muted mb-4">
                                 {service.category}
+                                {hasDuration(service.duration) &&
+                                  ` • ${formatDuration(service.duration)}`}
                               </p>
                               <div className="flex items-center justify-between mt-auto">
                                 {hasPrice(service.price) && (

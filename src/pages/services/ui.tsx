@@ -265,6 +265,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                   rating={s.rating}
                   reviews={s.reviews}
                   price={s.price}
+                  duration={s.duration}
                   image={s.image}
                   priority={index === 0}
                   variant="horizontal"
@@ -413,6 +414,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
                     rating={s.rating}
                     reviews={s.reviews}
                     price={s.price}
+                    duration={s.duration}
                     image={s.image}
                     priority={index === 0}
                     isSaved={isSaved(Number(s.id))}

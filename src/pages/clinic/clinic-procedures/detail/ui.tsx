@@ -25,6 +25,12 @@ import {
 } from "@/shared/api";
 import { EditIcon, TrashIcon } from "@/shared/assets/icons";
 import {
+  DURATION_INPUT_ERROR,
+  formatDuration,
+  hasDuration,
+  parseDurationInput,
+} from "@/shared/lib/duration";
+import {
   Button,
   ConfirmDialog,
   Dropdown,
@@ -135,7 +141,8 @@ export const ClinicProcedureDetailPage: FC = () => {
         service_category_id: resolveCategoryId(category),
         description: description.trim(),
         price: price.trim() || undefined,
-        duration: duration ? Number(duration) : undefined,
+        // null очищает длительность — раньше пустое поле не отправлялось.
+        duration: parsedDuration,
         is_active: true,
         // При PUT бэк заменяет старые связи врач↔услуга на переданные.
         doctor_ids: specialistIds.map(Number),
@@ -166,6 +173,9 @@ export const ClinicProcedureDetailPage: FC = () => {
     },
   });
 
+  // undefined — в поле не целое число минут от 1 до суток; пусто — null.
+  const parsedDuration = parseDurationInput(duration);
+
   // Бэк требует name и category (пустые → 400 «Это поле не может быть
   // пустым» без указания поля). Проверяем до запроса и называем поле явно.
   const handleSave = () => {
@@ -175,6 +185,10 @@ export const ClinicProcedureDetailPage: FC = () => {
     }
     if (!category) {
       toast.error("Выберите специализацию");
+      return;
+    }
+    if (parsedDuration === undefined) {
+      toast.error(DURATION_INPUT_ERROR);
       return;
     }
     saveMutation.mutate();
@@ -409,6 +423,23 @@ export const ClinicProcedureDetailPage: FC = () => {
                   onChange={setCurrency}
                 />
               </div>
+              {/* Поле было только при создании: изменить длительность
+                  процедуры после этого было негде. */}
+              <Input
+                label="Длительность, мин"
+                type="number"
+                min="1"
+                step="1"
+                inputMode="numeric"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                placeholder="Например, 30"
+                error={
+                  parsedDuration === undefined
+                    ? DURATION_INPUT_ERROR
+                    : undefined
+                }
+              />
               {/* Филиал вместо свободного текста: бэк хранит branch_id, а
                   название с адресом берёт из самого филиала. */}
               <Dropdown
@@ -427,6 +458,11 @@ export const ClinicProcedureDetailPage: FC = () => {
             <>
               <FieldRow label="Стоимость">
                 {service.price ? `${service.price} с` : "—"}
+              </FieldRow>
+              <FieldRow label="Длительность">
+                {hasDuration(service.duration)
+                  ? formatDuration(service.duration)
+                  : "—"}
               </FieldRow>
               <FieldRow label="Описание">{service.description || "—"}</FieldRow>
               <FieldRow label="Филиал">{service.branch?.name}</FieldRow>
