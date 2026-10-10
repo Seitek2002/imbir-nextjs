@@ -39,6 +39,18 @@ const MAX_EXP = 50;
 const MAX_PRICE = 5000;
 const RANGE_COMMIT_DELAY = 250;
 
+// Значение диапазона для адреса. Правый край ползунка — это «и дороже», а не
+// жёсткий максимум: раньше «0-5000» отсекало всех, у кого цена выше 5000.
+// null — весь диапазон (фильтра нет), "500" — от 500 без верхней границы
+// (страницы разбирают это как min без max), "500-3000" — оба края.
+const formatRange = (
+  [min, max]: [number, number],
+  limit: number,
+): null | string => {
+  if (max >= limit) return min > 0 ? String(min) : null;
+  return `${min}-${max}`;
+};
+
 export const FilterBar: FC<Props> = ({
   title = "Фильтры",
   prefix,
@@ -127,7 +139,7 @@ export const FilterBar: FC<Props> = ({
     if (experienceCommitTimerRef.current)
       clearTimeout(experienceCommitTimerRef.current);
     experienceCommitTimerRef.current = setTimeout(
-      () => updateURL("exp", `${val[0]}-${val[1]}`),
+      () => updateURL("exp", formatRange(val, MAX_EXP)),
       RANGE_COMMIT_DELAY,
     );
   };
@@ -136,7 +148,7 @@ export const FilterBar: FC<Props> = ({
     priceDraftRef.current = val;
     if (priceCommitTimerRef.current) clearTimeout(priceCommitTimerRef.current);
     priceCommitTimerRef.current = setTimeout(
-      () => updateURL("price", `${val[0]}-${val[1]}`),
+      () => updateURL("price", formatRange(val, MAX_PRICE)),
       RANGE_COMMIT_DELAY,
     );
   };
@@ -147,7 +159,7 @@ export const FilterBar: FC<Props> = ({
       experienceCommitTimerRef.current = null;
     }
     const next = val ?? experienceDraftRef.current;
-    updateURL("exp", `${next[0]}-${next[1]}`);
+    updateURL("exp", formatRange(next, MAX_EXP));
   };
 
   const commitPrice = (val?: [number, number]) => {
@@ -156,7 +168,7 @@ export const FilterBar: FC<Props> = ({
       priceCommitTimerRef.current = null;
     }
     const next = val ?? priceDraftRef.current;
-    updateURL("price", `${next[0]}-${next[1]}`);
+    updateURL("price", formatRange(next, MAX_PRICE));
   };
 
   // Список ключей — общий с каталогами, иначе «Сбросить» в двух местах

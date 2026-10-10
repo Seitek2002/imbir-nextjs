@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, Suspense } from "react";
+import { FC, Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,8 +24,14 @@ import { DoctorFilters, api, doctorKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { formatDuration, hasDuration } from "@/shared/lib/duration";
 import { hasPrice } from "@/shared/lib/price";
-import { useUrlSearchParams } from "@/shared/lib/url-state";
-import { plural } from "@/shared/lib/utils";
+import {
+  clearFilterParams,
+  hasFilterParams,
+  replaceUrlState,
+  useUrlSearchParams,
+} from "@/shared/lib/url-state";
+import { cn, plural } from "@/shared/lib/utils";
+import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
 // Раньше блоки страницы (модалка фильтров, история, категории, футер,
@@ -37,9 +43,32 @@ import { Button } from "@/shared/ui";
 // попадает в чанк самой страницы, а его Next забирает заранее вместе с
 // префетчем ссылки.
 
-export const SearchPage: FC = () => {
+type Props = {
+  // Город, под который сервер сделал префетч (из cookie, см.
+  // app/search/page.tsx).
+  initialCity: string;
+};
+
+export const SearchPage: FC<Props> = ({ initialCity }) => {
   const router = useRouter();
   const urlSearchParams = useUrlSearchParams();
+
+  // Выдача — по выбранному пользователем городу. Без явного city бэк брал
+  // город по IP запроса, а при серверном префетче это IP Netlify. Как на
+  // /clinics: до гидрации стора — город из cookie, под который был префетч,
+  // иначе ключи запросов разойдутся с серверными.
+  const storeCity = useCityStore((s) => s.city);
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    if (useCityStore.persist.hasHydrated()) {
+      // См. ClinicsPage: гидрация могла закончиться до маунта.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsHydrated(true);
+      return;
+    }
+    return useCityStore.persist.onFinishHydration(() => setIsHydrated(true));
+  }, []);
+  const city = (isHydrated ? storeCity : initialCity) || undefined;
   // 1. Читаем параметры
   const activeQuery = urlSearchParams.get("q") ?? "";
   const isFiltersModalOpen = urlSearchParams.get("modal") === "filters";
@@ -61,6 +90,7 @@ export const SearchPage: FC = () => {
     : [];
 
   const doctorFilters: DoctorFilters = {
+    city,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)
@@ -90,15 +120,17 @@ export const SearchPage: FC = () => {
 
   const search = activeQuery || undefined;
   const { data: clinics = [], isLoading: isClinicsLoading } = useQuery({
-    queryKey: ["search-clinics", activeQuery],
-    queryFn: ({ signal }) => api.getClinics({ search, page_size: 12 }, signal),
+    queryKey: ["search-clinics", activeQuery, city],
+    queryFn: ({ signal }) =>
+      api.getClinics({ search, city, page_size: 12 }, signal),
     enabled: Boolean(activeQuery),
     retry: false,
   });
 
   const { data: services = [], isLoading: isServicesLoading } = useQuery({
-    queryKey: ["search-services", activeQuery],
-    queryFn: ({ signal }) => api.getServices({ search, page_size: 20 }, signal),
+    queryKey: ["search-services", activeQuery, city],
+    queryFn: ({ signal }) =>
+      api.getServices({ search, city, page_size: 20 }, signal),
     enabled: Boolean(activeQuery),
     retry: false,
   });
@@ -135,6 +167,14 @@ export const SearchPage: FC = () => {
     filteredClinics.length > 0 ||
     filteredServices.length > 0;
 
+  // Фильтры врачей заданы. Если по ним 0 врачей, на десктопе раньше пропадал
+  // весь блок «Врачи» вместе с FilterBar, а чипы и кнопка фильтров живут в
+  // шапке только на мобильном — снять фильтр было негде (а «Назад» уводит со
+  // страницы: фильтры пишутся через replaceState).
+  const hasDoctorFilters = hasFilterParams("doc", urlSearchParams);
+  const resetDoctorFilters = () =>
+    replaceUrlState(clearFilterParams("doc", urlSearchParams));
+
   return (
     <main className="min-h-screen bg-background md:bg-white flex flex-col pb-16 lg:pb-0">
       <Header title="Поиск" backTo={ROUTES.HOME}>
@@ -168,6 +208,40 @@ export const SearchPage: FC = () => {
       />
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
+        {/* Десктопное поле запроса — одно на все состояния и вне ветки
+            загрузки. Раньше при непустом запросе его не было вовсе (поменять
+            слово можно было лишь новым поиском из шапки), а поле внутри
+            выдачи размонтировалось бы на «Выполняем поиск...» сразу после
+            ввода (q пишется с задержкой) — и терялись фокус и набор. */}
+        <div
+          className={cn(
+            "hidden md:block px-10",
+            activeQuery ? "pt-6" : "pt-16 max-w-200 mx-auto w-full",
+          )}
+        >
+          {activeQuery && (
+            <div className="text-sm text-secondary mb-6 flex items-center gap-2">
+              <Link
+                href={ROUTES.HOME}
+                className="hover:text-primary transition-colors"
+              >
+                Главная
+              </Link>
+              <span>•</span>
+              <span className="text-primary">По запросу «{activeQuery}»</span>
+            </div>
+          )}
+          <div className="mb-8 max-w-200 drop-shadow-sm rounded-full">
+            <Suspense
+              fallback={
+                <div className="h-13 w-full bg-gray-100 rounded-full" />
+              }
+            >
+              <UrlSearchInput />
+            </Suspense>
+          </div>
+        </div>
+
         {activeQuery ? (
           isLoading ? (
             <div className="flex justify-center items-center py-20 text-muted">
@@ -193,6 +267,16 @@ export const SearchPage: FC = () => {
                       По запросу «{activeQuery}» совпадений нет. Попробуйте
                       другое слово или снимите фильтры.
                     </p>
+                    {hasDoctorFilters && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={resetDoctorFilters}
+                      >
+                        Сбросить фильтры
+                      </Button>
+                    )}
                   </div>
                 )}
 
@@ -284,21 +368,8 @@ export const SearchPage: FC = () => {
               </div>
 
               {/* === ДЕСКТОПНАЯ ВЕРСИЯ РЕЗУЛЬТАТОВ === */}
-              <div className="hidden md:block px-10 py-6">
-                <div className="text-sm text-secondary mb-6 flex items-center gap-2">
-                  <Link
-                    href={ROUTES.HOME}
-                    className="hover:text-primary transition-colors"
-                  >
-                    Главная
-                  </Link>
-                  <span>•</span>
-                  <span className="text-primary">
-                    По запросу «{activeQuery}»
-                  </span>
-                </div>
-
-                {!hasAnyResults ? (
+              <div className="hidden md:block px-10 pb-6">
+                {!hasAnyResults && !hasDoctorFilters ? (
                   <div className="text-center py-20">
                     <h1 className="text-[40px] font-semibold text-foreground leading-none mb-4">
                       По запросу «{activeQuery}»
@@ -309,8 +380,10 @@ export const SearchPage: FC = () => {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-14">
-                    {/* Секция Врачей с фильтрами */}
-                    {filteredDoctors.length > 0 && (
+                    {/* Секция Врачей с фильтрами. При заданных фильтрах
+                        остаётся и с нулём врачей — иначе вместе с ней
+                        пропадала бы и кнопка «Сбросить фильтры». */}
+                    {(filteredDoctors.length > 0 || hasDoctorFilters) && (
                       <div>
                         <FilterBar
                           prefix="doc"
@@ -360,6 +433,20 @@ export const SearchPage: FC = () => {
                             />
                           ))}
                         </div>
+                        {filteredDoctors.length === 0 && (
+                          <div className="py-10 flex flex-col items-center gap-4 text-center">
+                            <p className="text-muted text-lg">
+                              С такими фильтрами врачи не найдены
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="md"
+                              onClick={resetDoctorFilters}
+                            >
+                              Сбросить фильтры
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -458,17 +545,7 @@ export const SearchPage: FC = () => {
           )
         ) : (
           /* ЕСЛИ ЗАПРОС ПУСТОЙ - ПОКАЗЫВАЕМ ИСТОРИЮ И КАТЕГОРИИ */
-          <div className="px-4 md:px-10 pt-6 md:pt-16 max-w-200 mx-auto w-full">
-            <div className="hidden md:block mb-8 drop-shadow-sm rounded-full">
-              <Suspense
-                fallback={
-                  <div className="h-13 w-full bg-gray-100 rounded-full" />
-                }
-              >
-                <UrlSearchInput />
-              </Suspense>
-            </div>
-
+          <div className="px-4 md:px-10 pt-6 md:pt-0 max-w-200 mx-auto w-full">
             <div className="bg-white md:bg-transparent rounded-3xl md:rounded-none overflow-hidden md:flex md:flex-col md:gap-6">
               <RecentSearches />
               <CategoriesGrid />

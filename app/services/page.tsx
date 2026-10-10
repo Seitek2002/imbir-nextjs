@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+
 import {
   HydrationBoundary,
   QueryClient,
@@ -7,8 +9,13 @@ import {
 import { ServicesPage } from "@/pages/services";
 
 import { ServiceFilters, api, serviceKeys } from "@/shared/api";
-import { cachedPublicRead, seedInfiniteQuery } from "@/shared/api/server-cache";
+import {
+  cachedPublicRead,
+  isKnownCity,
+  seedInfiniteQuery,
+} from "@/shared/api/server-cache";
 import { UrlSearchParamsProvider } from "@/shared/lib/url-state";
+import { CITY_COOKIE, DEFAULT_CITY } from "@/shared/store";
 
 // Должно совпадать с PAGE_SIZE в ServicesPage.tsx, иначе ключ запроса тут
 // разойдётся с клиентским и SSR-префетч не подхватится (либо, что хуже,
@@ -23,7 +30,8 @@ const PREFIX = "svc";
 // кеша, всё остальное — прямым запросом.
 const readServicesFirstPage = cachedPublicRead(
   "catalog-services-first-page",
-  () => api.getServicesPaginated({ page: 1, page_size: PAGE_SIZE }),
+  (city: string) =>
+    api.getServicesPaginated({ city, page: 1, page_size: PAGE_SIZE }),
   60,
 );
 
@@ -32,7 +40,13 @@ type Props = {
 };
 
 const Services = async ({ searchParams }: Props) => {
+  const cookieStore = await cookies();
+  const rawCity = cookieStore.get(CITY_COOKIE)?.value;
+  const city = rawCity ? decodeURIComponent(rawCity) : DEFAULT_CITY;
+
   const resolvedSearchParams = await searchParams;
+  const activeQuery =
+    typeof resolvedSearchParams?.q === "string" ? resolvedSearchParams.q : "";
 
   // Должно ЗНАЧЕНИЕ В ЗНАЧЕНИЕ совпадать с тем, как ServicesPage строит свой
   // `filters` из useSearchParams() — иначе ключ запроса тут не совпадёт с
@@ -62,6 +76,8 @@ const Services = async ({ searchParams }: Props) => {
   const currentRating = typeof rawRating === "string" ? rawRating : null;
 
   const filters: Omit<ServiceFilters, "page_size" | "page"> = {
+    city,
+    search: activeQuery || undefined,
     category: currentCategory ?? undefined,
     clinic_id: currentClinic ?? undefined,
     min_rating:
@@ -69,20 +85,22 @@ const Services = async ({ searchParams }: Props) => {
         ? parseFloat(currentRating)
         : undefined,
     min_price: priceParts ? priceRange[0] : undefined,
-    max_price: priceParts ? priceRange[1] : undefined,
+    // Правый край ползунка — «и дороже», max_price не шлём (как на клиенте).
+    max_price:
+      priceParts && priceRange[1] < MAX_PRICE ? priceRange[1] : undefined,
   };
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  const isDefaultView = Object.values(filters).every(
-    (value) => value === undefined,
+  const isDefaultView = Object.entries(filters).every(
+    ([key, value]) => key === "city" || value === undefined,
   );
-  if (isDefaultView) {
+  if (isDefaultView && isKnownCity(city)) {
     await seedInfiniteQuery(
       queryClient,
       serviceKeys.list(filters),
-      readServicesFirstPage(),
+      readServicesFirstPage(city),
     );
   } else {
     await queryClient.prefetchInfiniteQuery({
@@ -98,7 +116,7 @@ const Services = async ({ searchParams }: Props) => {
     // без фильтров из адреса.
     <UrlSearchParamsProvider>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <ServicesPage searchParams={resolvedSearchParams} />
+        <ServicesPage initialCity={city} />
       </HydrationBoundary>
     </UrlSearchParamsProvider>
   );

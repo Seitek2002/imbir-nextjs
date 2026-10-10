@@ -23,13 +23,28 @@ type Props = {
     specialty?: boolean;
   };
   isOpen: boolean;
+  // Правый край ползунка цены — должен совпадать с десктопным фильтром
+  // страницы (у услуг 10000, у врачей и клиник 5000).
+  maxPrice?: number;
   prefix: string;
   specializationScope?: SpecializationScope;
 };
 
 const RATINGS = ["5.0", "4.0", "3.0", "2.0", "1.0"];
-const MAX_PRICE = 5000;
+const DEFAULT_MAX_PRICE = 5000;
 const MAX_EXP = 50;
+
+// Как в десктопном FilterBar: null — весь диапазон (фильтра нет), "500" — от
+// 500 без верхней границы (правый край — «и дороже»), "500-3000" — оба края.
+// Раньше «Применить» всегда писало 0-5000 и 0-50 — и выдача теряла врачей без
+// цены и всех, кто дороже 5000, хотя пользователь ползунки не трогал.
+const formatRange = (
+  [min, max]: [number, number],
+  limit: number,
+): null | string => {
+  if (max >= limit) return min > 0 ? String(min) : null;
+  return `${min}-${max}`;
+};
 
 export const MobileFiltersModal: FC<Props> = ({
   isOpen,
@@ -37,6 +52,7 @@ export const MobileFiltersModal: FC<Props> = ({
   fields,
   categoryOptions = [],
   clinicOptions = [],
+  maxPrice = DEFAULT_MAX_PRICE,
   specializationScope = "all",
 }) => {
   const searchParams = useUrlSearchParams();
@@ -59,7 +75,7 @@ export const MobileFiltersModal: FC<Props> = ({
     .map(Number);
   const [price, setPrice] = useState<[number, number]>([
     initialPrice?.[0] ?? 0,
-    initialPrice?.[1] ?? MAX_PRICE,
+    initialPrice?.[1] ?? maxPrice,
   ]);
 
   const [rating, setRating] = useState<null | string>(
@@ -83,9 +99,12 @@ export const MobileFiltersModal: FC<Props> = ({
 
     params.delete("modal");
 
-    if (fields?.experience)
-      params.set(`${prefix}_exp`, `${experience[0]}-${experience[1]}`);
-    if (fields?.price) params.set(`${prefix}_price`, `${price[0]}-${price[1]}`);
+    const setRange = (key: string, value: null | string) => {
+      if (value) params.set(`${prefix}_${key}`, value);
+      else params.delete(`${prefix}_${key}`);
+    };
+    if (fields?.experience) setRange("exp", formatRange(experience, MAX_EXP));
+    if (fields?.price) setRange("price", formatRange(price, maxPrice));
 
     if (fields?.rating && rating && rating !== "all") {
       params.set(`${prefix}_rating`, rating);
@@ -112,7 +131,7 @@ export const MobileFiltersModal: FC<Props> = ({
 
   const handleReset = () => {
     setExperience([0, MAX_EXP]);
-    setPrice([0, MAX_PRICE]);
+    setPrice([0, maxPrice]);
     setRating(null);
     setSpecialty([]);
     setCategory("");
@@ -246,7 +265,7 @@ export const MobileFiltersModal: FC<Props> = ({
               label="Стоимость, с"
               id={`price-mobile-${prefix}`}
               min={0}
-              max={MAX_PRICE}
+              max={maxPrice}
               step={50}
               value={price}
               onChange={setPrice}

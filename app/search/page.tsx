@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+
 import {
   HydrationBoundary,
   QueryClient,
@@ -14,12 +16,19 @@ import {
   referenceKeys,
 } from "@/shared/api";
 import { UrlSearchParamsProvider } from "@/shared/lib/url-state";
+import { CITY_COOKIE, DEFAULT_CITY } from "@/shared/store";
 
 export default async function Page({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  // Город — выбранный пользователем (cookie зеркалит стор). Без явного city
+  // бэк подставлял город по IP запроса, а здесь это IP сервера Netlify.
+  const cookieStore = await cookies();
+  const rawCity = cookieStore.get(CITY_COOKIE)?.value;
+  const city = rawCity ? decodeURIComponent(rawCity) : DEFAULT_CITY;
+
   const params = await searchParams;
   const activeQuery = typeof params.q === "string" ? params.q : "";
 
@@ -28,7 +37,7 @@ export default async function Page({
   if (!activeQuery) {
     return (
       <UrlSearchParamsProvider>
-        <SearchPage />
+        <SearchPage initialCity={city} />
       </UrlSearchParamsProvider>
     );
   }
@@ -47,7 +56,10 @@ export default async function Page({
   const [expMin, expMax] = currentExp
     ? currentExp.split("-").map(Number)
     : [undefined, undefined];
+  // Должно совпадать с doctorFilters в SearchPage, иначе ключ разойдётся с
+  // клиентским и префетч не подхватится.
   const doctorFilters: DoctorFilters = {
+    city,
     min_rating:
       currentRating && currentRating !== "all"
         ? parseFloat(currentRating)
@@ -56,7 +68,8 @@ export default async function Page({
     max_price: priceMax,
     min_experience: expMin,
     max_experience: expMax,
-    specialization: selectedSpecs.length === 1 ? selectedSpecs[0] : undefined,
+    specialization:
+      selectedSpecs.length > 0 ? selectedSpecs.join(",") : undefined,
     search: activeQuery,
     page_size: 24,
   };
@@ -70,12 +83,14 @@ export default async function Page({
       queryFn: () => api.getDoctors(doctorFilters),
     }),
     queryClient.prefetchQuery({
-      queryKey: ["search-clinics", activeQuery],
-      queryFn: () => api.getClinics({ search: activeQuery, page_size: 12 }),
+      queryKey: ["search-clinics", activeQuery, city],
+      queryFn: () =>
+        api.getClinics({ search: activeQuery, city, page_size: 12 }),
     }),
     queryClient.prefetchQuery({
-      queryKey: ["search-services", activeQuery],
-      queryFn: () => api.getServices({ search: activeQuery, page_size: 20 }),
+      queryKey: ["search-services", activeQuery, city],
+      queryFn: () =>
+        api.getServices({ search: activeQuery, city, page_size: 20 }),
     }),
     queryClient.prefetchQuery({
       queryKey: referenceKeys.specializations("doctor"),
@@ -86,7 +101,7 @@ export default async function Page({
   return (
     <UrlSearchParamsProvider>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <SearchPage />
+        <SearchPage initialCity={city} />
       </HydrationBoundary>
     </UrlSearchParamsProvider>
   );

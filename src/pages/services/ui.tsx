@@ -1,9 +1,8 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 
 import {
   keepPreviousData,
@@ -25,7 +24,13 @@ import {
   useServiceCategories,
 } from "@/entities/service";
 
-import { ServiceFilters, api, serviceKeys } from "@/shared/api";
+import {
+  ClinicFilters,
+  ServiceFilters,
+  api,
+  clinicKeys,
+  serviceKeys,
+} from "@/shared/api";
 import { ChatIcon, RemoveIcon } from "@/shared/assets/icons";
 import { ROUTES } from "@/shared/config";
 import {
@@ -38,12 +43,15 @@ import { cn } from "@/shared/lib/utils";
 import { useCityStore } from "@/shared/store";
 import { Button, Dropdown, EmptyState, RangeSlider } from "@/shared/ui";
 
+// Правый край ползунка цены — «и дороже»: на нём max_price не отправляем.
+// Должно совпадать с app/services/page.tsx.
 const MAX_PRICE = 10000;
 // Постраничная подгрузка: 8 услуг за раз, дальше — по кнопке «Показать ещё»
-// (как на /clinics и /specialists). Текстовый поиск бэк не поддерживает
-// (проверено напрямую — search ни на что не влияет), поэтому activeQuery
-// остаётся клиентским и фильтрует только уже подгруженные страницы.
+// (как на /clinics и /specialists). Текстовый поиск уходит в API (search):
+// раньше он фильтровал на клиенте только уже подгруженные 8 карточек.
 const PAGE_SIZE = 8;
+// Клиник для фильтра «Клиника» — сколько отдаёт бэк за раз (max_page_size).
+const CLINIC_OPTIONS_PAGE_SIZE = 100;
 // Оценка и клиника раньше были заглушкой «скоро»: считалось, что бэк не отдаёт
 // эти поля. Сейчас отдаёт (clinic целым объектом, rating числом) и принимает
 // clinic_id/min_rating как query-параметры — проверено прямыми запросами.
@@ -57,7 +65,15 @@ const RATING_OPTIONS = [
 const PREFIX = "svc";
 
 type Props = {
-  searchParams: { [key: string]: string | string[] | undefined };
+  // Город, под который сервер сделал префетч (из cookie, см.
+  // app/services/page.tsx).
+  initialCity: string;
+};
+
+// См. FilterBar: null — весь диапазон, "500" — от 500 без верхней границы.
+const formatPriceRange = ([min, max]: [number, number]): null | string => {
+  if (max >= MAX_PRICE) return min > 0 ? String(min) : null;
+  return `${min}-${max}`;
 };
 
 // Один на оба макета. Кнопка сброса появляется только когда фильтры
@@ -65,15 +81,20 @@ type Props = {
 const CatalogEmptyState = () => {
   const params = useUrlSearchParams();
   const filtered = hasFilterParams(PREFIX, params);
+  // Текстовый поиск теперь идёт через API — пустая выдача по запросу не
+  // значит, что раздел пуст.
+  const query = params.get("q");
 
   return (
     <EmptyState
       icon={<ChatIcon className="size-6" />}
-      title={filtered ? "Услуги не найдены" : "Здесь пока пусто"}
+      title={filtered || query ? "Услуги не найдены" : "Здесь пока пусто"}
       description={
         filtered
           ? "Под выбранные условия ничего не подошло. Попробуйте расширить диапазон цены или снять категорию."
-          : "Список пополняется. Загляните позже или посмотрите другие разделы."
+          : query
+            ? `По запросу «${query}» ничего не нашлось. Попробуйте другое слово.`
+            : "Список пополняется. Загляните позже или посмотрите другие разделы."
       }
       action={
         filtered ? (
@@ -90,12 +111,30 @@ const CatalogEmptyState = () => {
   );
 };
 
-export const ServicesPage: FC<Props> = ({ searchParams }) => {
-  const router = useRouter();
-  const urlSearchParams = useSearchParams() ?? new URLSearchParams();
+export const ServicesPage: FC<Props> = ({ initialCity }) => {
+  // useUrlSearchParams, а не useSearchParams/searchParams из next: строка
+  // поиска, кнопка и модалка фильтров меняют адрес нативным history API, и
+  // хук Next об этом не узнаёт — запрос и мобильные фильтры до списка не
+  // доходили, а router.replace с устаревшими параметрами терял введённый q.
+  const urlSearchParams = useUrlSearchParams();
 
-  const isFiltersModalOpen = searchParams?.modal === "filters";
-  const activeQuery = typeof searchParams?.q === "string" ? searchParams.q : "";
+  const isFiltersModalOpen = urlSearchParams.get("modal") === "filters";
+  const activeQuery = urlSearchParams.get("q") ?? "";
+
+  // Как на /clinics: до гидрации стора — город из cookie, под который сервер
+  // сделал префетч, иначе ключ первого запроса разойдётся с серверным.
+  const storeCity = useCityStore((s) => s.city);
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    if (useCityStore.persist.hasHydrated()) {
+      // См. ClinicsPage: гидрация могла закончиться до маунта.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsHydrated(true);
+      return;
+    }
+    return useCityStore.persist.onFinishHydration(() => setIsHydrated(true));
+  }, []);
+  const city = isHydrated ? storeCity : initialCity;
 
   const currentCategory = urlSearchParams.get(`${PREFIX}_spec`) ?? null;
   const currentClinic = urlSearchParams.get(`${PREFIX}_clinic`) ?? null;
@@ -116,21 +155,20 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
     } else {
       params.delete(`${PREFIX}_${key}`);
     }
-    router.replace(`?${params.toString()}`, { scroll: false });
+    replaceUrlState(params);
   };
 
   const handleReset = () => {
-    const params = new URLSearchParams(urlSearchParams.toString());
-    params.delete(`${PREFIX}_spec`);
-    params.delete(`${PREFIX}_price`);
-    params.delete(`${PREFIX}_clinic`);
-    params.delete(`${PREFIX}_rating`);
-    router.replace(`?${params.toString()}`, { scroll: false });
+    replaceUrlState(clearFilterParams(PREFIX, urlSearchParams));
   };
 
-  // Категория, клиника, оценка и цена — реальные query-параметры
-  // /api/services/ (проверено прямыми запросами).
+  // Город, текст, категория, клиника, оценка и цена — реальные
+  // query-параметры /api/services/. Смена любого — новый ключ, то есть
+  // загрузка с первой страницы. Порядок и значения — как в
+  // app/services/page.tsx, иначе серверный префетч не подхватится.
   const filters: Omit<ServiceFilters, "page_size" | "page"> = {
+    city: city || undefined,
+    search: activeQuery || undefined,
     category: currentCategory ?? undefined,
     clinic_id: currentClinic ?? undefined,
     min_rating:
@@ -138,7 +176,8 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
         ? parseFloat(currentRating)
         : undefined,
     min_price: priceParts ? priceRange[0] : undefined,
-    max_price: priceParts ? priceRange[1] : undefined,
+    max_price:
+      priceParts && priceRange[1] < MAX_PRICE ? priceRange[1] : undefined,
   };
 
   const {
@@ -168,21 +207,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
     placeholderData: keepPreviousData,
   });
 
-  const services = data?.pages.flatMap((page) => page.data) ?? [];
-
-  // Текстовый поиск — клиентский, фильтрует только уже подгруженные страницы
-  // (см. комментарий у PAGE_SIZE).
-  const filteredServices = services.filter((s) => {
-    if (activeQuery) {
-      const q = activeQuery.toLowerCase();
-      if (
-        !s.name.toLowerCase().includes(q) &&
-        !s.category.toLowerCase().includes(q)
-      )
-        return false;
-    }
-    return true;
-  });
+  const filteredServices = data?.pages.flatMap((page) => page.data) ?? [];
 
   const mobileFilters = {
     category: true as const,
@@ -198,17 +223,21 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
   const { usedOptions: categoryOptions } = useServiceCategories();
 
   // Клиники для фильтра: значением уходит id, его и принимает clinic_id.
+  // Только клиники выбранного города и не первые 20 (размер страницы по
+  // умолчанию), а сколько бэк отдаёт за раз.
+  const clinicFilters: ClinicFilters = {
+    city: city || undefined,
+    page_size: CLINIC_OPTIONS_PAGE_SIZE,
+  };
   const { data: clinics = [] } = useQuery({
-    queryKey: ["clinics"],
-    queryFn: () => api.getClinics(),
+    queryKey: clinicKeys.list(clinicFilters),
+    queryFn: () => api.getClinics(clinicFilters),
     staleTime: 60 * 60 * 1000,
   });
   const clinicOptions = clinics.map((clinic) => ({
     value: String(clinic.id),
     label: clinic.name,
   }));
-
-  const city = useCityStore((s) => s.city);
 
   return (
     <main className="min-h-screen bg-background md:bg-white flex flex-col">
@@ -230,6 +259,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
         fields={mobileFilters}
         categoryOptions={categoryOptions}
         clinicOptions={clinicOptions}
+        maxPrice={MAX_PRICE}
       />
 
       <div className="flex-1 w-full max-w-360 mx-auto pb-10">
@@ -375,7 +405,7 @@ export const ServicesPage: FC<Props> = ({ searchParams }) => {
               // одно перетаскивание давало до двух сотен обращений к серверу;
               // они выстраивались в очередь, и список догонял пользователя
               // через 3–5 секунд. Теперь запрос один — по отпусканию ползунка.
-              onChangeEnd={(val) => updateURL("price", `${val[0]}-${val[1]}`)}
+              onChangeEnd={(val) => updateURL("price", formatPriceRange(val))}
               className="bg-white"
             />
           </div>

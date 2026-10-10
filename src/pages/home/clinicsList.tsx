@@ -11,9 +11,14 @@ import { FilterBar } from "@/features/filter-bar";
 
 import { ClinicCard, ClinicSkeleton } from "@/entities/clinic";
 
-import { api } from "@/shared/api";
+import { ClinicFilters, api, clinicKeys } from "@/shared/api";
 import { useUrlSearchParams } from "@/shared/lib/url-state";
+import { useCityStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
+
+// Сколько клиник показывает блок — столько же, сколько раньше (первая
+// страница API по умолчанию), но теперь уже отфильтрованных бэком.
+const VISIBLE_COUNT = 20;
 
 const ClinicsListContent = () => {
   // См. комментарий в doctorsMainList: адрес меняет FilterBar нативным
@@ -26,10 +31,24 @@ const ClinicsListContent = () => {
   const currentRating = searchParams.get("clinic_rating");
   const currentSpec = searchParams.get("clinic_spec");
 
-  // --- МАГИЯ REACT QUERY ---
-  const { data: clinics = [], isLoading } = useQuery({
-    queryKey: ["clinics"],
-    queryFn: () => api.getClinics(),
+  // Как у врачей на Главной (doctorsMainList): город, оценка и специализация
+  // уходят в API. Раньше блок брал первые 20 клиник города, определённого по
+  // IP, и фильтровал их на клиенте только по основным специализациям — узкие
+  // специализации клиник из выпадающего списка ничего не находили.
+  const selectedCity = useCityStore((s) => s.city);
+  const filters: ClinicFilters = {
+    city: selectedCity || undefined,
+    specialization: currentSpec || undefined,
+    min_rating:
+      currentRating && currentRating !== "all"
+        ? parseFloat(currentRating)
+        : undefined,
+    page_size: VISIBLE_COUNT,
+  };
+
+  const { data: filteredClinics = [], isLoading } = useQuery({
+    queryKey: clinicKeys.list(filters),
+    queryFn: () => api.getClinics(filters),
   });
 
   // Если данные грузятся, показываем наши новые красивые скелетоны
@@ -45,24 +64,6 @@ const ClinicsListContent = () => {
       </div>
     );
   }
-
-  // Фильтруем данные клиник (УЖЕ ИЗ СТЕЙТА `clinics`)
-  const filteredClinics = clinics.filter((clinic) => {
-    if (currentRating && currentRating !== "all") {
-      const minRating = parseFloat(currentRating);
-      if (clinic.rating < minRating) return false;
-    }
-
-    if (currentSpec) {
-      const selectedSpecs = currentSpec.split(",");
-      const hasMatch = clinic.specialties.some((spec) =>
-        selectedSpecs.includes(spec),
-      );
-      if (!hasMatch) return false;
-    }
-
-    return true;
-  });
 
   return (
     <div className="flex flex-col gap-3 lg:mt-10">

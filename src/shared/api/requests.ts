@@ -69,7 +69,9 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
     clinicName: w.name ?? w.clinic_name ?? "",
     clinicAddress:
       (w as { address?: string }).address ?? w.clinic_address ?? "",
-    price: w.price,
+    // Своей цены у места работы бэк не отдаёт — показываем цену приёма врача
+    // (consultation_price), по ней же работает фильтр стоимости.
+    price: w.price ?? parsePrice(d.consultation_price),
     schedule: emptySchedule,
   })),
 });

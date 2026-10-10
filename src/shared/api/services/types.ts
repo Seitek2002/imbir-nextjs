@@ -46,6 +46,8 @@ export type ServiceDetail = Omit<ServiceListItem, "clinic"> & {
 
 export type ServiceFilters = {
   category?: string;
+  // Город клиники (у частной услуги — врача). Старый бэк параметр игнорирует.
+  city?: string;
   clinic_id?: number | string;
   doctor_id?: number | string;
   max_price?: number;

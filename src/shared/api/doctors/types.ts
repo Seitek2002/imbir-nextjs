@@ -17,6 +17,9 @@ export type DoctorWorkplace = {
 
 export type DoctorListItem = {
   city: string;
+  // Цена приёма ("1500.00" или null). Старый бэк поля не отдаёт — отсюда
+  // optional; по ней же работает фильтр min_price/max_price.
+  consultation_price?: null | string;
   experience_years: number;
   full_name: string;
   id: number;

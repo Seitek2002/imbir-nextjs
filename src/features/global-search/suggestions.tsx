@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getSearchSuggestions, searchKeys } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
+import { useCityStore } from "@/shared/store";
 import { ImageWithFallback } from "@/shared/ui";
 import { Spinner } from "@/shared/ui";
 
@@ -56,9 +57,11 @@ export const SearchSuggestions: FC<{
   onNavigate: () => void;
   query: string;
 }> = ({ query, onNavigate }) => {
+  // Подсказки — по выбранному городу, как и выдача /search.
+  const city = useCityStore((s) => s.city);
   const { data, isLoading, isError } = useQuery({
-    queryKey: searchKeys.suggest(query),
-    queryFn: () => getSearchSuggestions(query),
+    queryKey: [...searchKeys.suggest(query), city],
+    queryFn: () => getSearchSuggestions(query, city),
   });
 
   if (isLoading) {
