@@ -178,16 +178,20 @@ const newestFirst = (a: DoctorAppointment, b: DoctorAppointment) =>
 // если бэк вернёт кривую пагинацию. 20 × 100 = 2000 записей.
 const MAX_APPOINTMENT_PAGES = 20;
 
-// Список записей кабинета, новые — первыми. Бэк отдаёт записи врача по дате
-// приёма от старых к новым, клиники — по дате приёма от поздних к ранним,
-// параметры сортировки оба пока игнорируют и режут по 20 на страницу:
-// новая запись уходила вниз или вовсе на следующие страницы. Поэтому:
-//  - просим ordering=-created_at: когда бэк его поддержит, порядок придёт
-//    готовым, а сортировка ниже станет пустой формальностью — код менять
-//    не придётся;
-//  - дочитываем все страницы (page_size 100 — потолок бэка; если он
-//    оставит свои 20, цикл пройдёт по total_pages);
-//  - сортируем один раз при получении ответа, а не на каждом рендере.
+// Ответ списка записей. ordering — сортировка, которую бэк реально применил;
+// старый бэк параметр игнорирует и поля не отдаёт.
+type AppointmentsPage = PaginatedResponse<DoctorAppointment> & {
+  ordering?: string;
+};
+
+// Список записей кабинета, новые — первыми. Просим ordering=-created_at:
+//  - бэк, который его поддерживает, отвечает полем ordering — тогда порядок
+//    уже серверный, отдаём страницу как есть, а следующие страницы список
+//    догружает сам («Показать ещё»);
+//  - старый бэк сортировку игнорирует (врача и клинику отдаёт по дате
+//    приёма) и поля ordering нет — тогда, как раньше, дочитываем все
+//    страницы (page_size 100 — потолок бэка) и сортируем один раз при
+//    получении, иначе новая запись уходила вниз или на следующие страницы.
 // Явно запрошенную страницу (filters.page) отдаём как есть, только по порядку.
 // Не для счётчиков: им нужен pagination.total одной страницы, а не все записи.
 export const fetchAppointmentsNewestFirst = async (
@@ -197,12 +201,15 @@ export const fetchAppointmentsNewestFirst = async (
   const params = { ordering: "-created_at", page_size: 100, ...filters };
   const fetchPage = async (page: number) =>
     (
-      await apiClient.get<PaginatedResponse<DoctorAppointment>>(url, {
+      await apiClient.get<AppointmentsPage>(url, {
         params: { ...params, page },
       })
     ).data;
 
   const first = await fetchPage(filters.page ?? 1);
+  if (first.ordering === "-created_at") {
+    return first;
+  }
   if (filters.page) {
     return { ...first, data: [...first.data].sort(newestFirst) };
   }

@@ -3,7 +3,12 @@
 import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { DoctorPageLayout } from "@/widgets/doctor/layout";
 
@@ -22,6 +27,7 @@ import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import {
   Button,
+  ConfirmDialog,
   Modal,
   Textarea,
   ViewModeToggle,
@@ -117,10 +123,7 @@ const PatientNotes: FC<{ className?: string; notes?: string }> = ({
 // горизонтальный скролл внутри блока.
 const AppointmentCard: FC<{
   appointment: DoctorAppointment;
-  onChangeStatus: (
-    id: number,
-    status: "cancelled" | "completed" | "confirmed",
-  ) => void;
+  onChangeStatus: (status: AppointmentStatusAction) => void;
   onOpenSummary: (id: number) => void;
   started: boolean;
 }> = ({ appointment: a, onChangeStatus, onOpenSummary, started }) => {
@@ -167,7 +170,7 @@ const AppointmentCard: FC<{
               size="sm"
               variant="outline"
               className="text-xs px-2.5 h-8 border-primary text-primary"
-              onClick={() => onChangeStatus(a.id, "confirmed")}
+              onClick={() => onChangeStatus("confirmed")}
             >
               Подтвердить
             </Button>
@@ -176,7 +179,7 @@ const AppointmentCard: FC<{
             <Button
               size="sm"
               className="text-xs px-2.5 h-8 bg-[#2FA968] hover:bg-[#258753]"
-              onClick={() => onChangeStatus(a.id, "completed")}
+              onClick={() => onChangeStatus("completed")}
             >
               Завершить
             </Button>
@@ -185,7 +188,7 @@ const AppointmentCard: FC<{
             size="sm"
             variant="outline"
             className="text-xs px-2.5 h-8 border-red-200 text-red-500 hover:bg-red-50"
-            onClick={() => onChangeStatus(a.id, "cancelled")}
+            onClick={() => onChangeStatus("cancelled")}
           >
             Отменить
           </Button>
@@ -310,6 +313,41 @@ const STATUS_PILL: Record<
   cancelled: { label: "Отменена", cls: "bg-surface text-muted" },
 };
 
+// Список записей переопрашиваем раз в минуту, как и счётчик новых записей в
+// сайдбаре: иначе бейдж и звук сообщали о записи, которой в открытом списке нет.
+const LIST_POLL_MS = 60_000;
+
+type AppointmentStatusAction = "cancelled" | "completed" | "confirmed";
+
+// Отмена и завершение необратимы (из cancelled/completed бэк дальше не
+// переводит), и пациенту сразу уходит уведомление — поэтому перед ними
+// спрашиваем подтверждение. Маленькие кнопки стоят вплотную, и на телефоне
+// вместо «Подтвердить» легко попасть в «Отменить».
+const CONFIRM_TEXT: Record<
+  Exclude<AppointmentStatusAction, "confirmed">,
+  {
+    cancelLabel: string;
+    confirmLabel: string;
+    description: string;
+    title: string;
+  }
+> = {
+  cancelled: {
+    title: "Отменить запись?",
+    description:
+      "Пациент получит уведомление об отмене, время освободится для других. Вернуть запись будет нельзя — пациенту придётся записаться заново.",
+    confirmLabel: "Отменить запись",
+    cancelLabel: "Не отменять",
+  },
+  completed: {
+    title: "Завершить приём?",
+    description:
+      "Пациент получит уведомление о завершении приёма и просьбу оставить отзыв. Изменить статус потом будет нельзя.",
+    confirmLabel: "Завершить",
+    cancelLabel: "Отмена",
+  },
+};
+
 const EMPTY_SUMMARY: DoctorAppointmentSummary = {
   diagnosis: "",
   recommendations: "",
@@ -411,16 +449,35 @@ export const DoctorAppointmentsPage: FC = () => {
   const queryClient = useQueryClient();
   const now = useNow();
 
-  const { data, isLoading } = useQuery({
-    queryKey: doctorCabinetKeys.appointments({ status: tab }),
-    queryFn: () => getDoctorAppointments(tab === "all" ? {} : { status: tab }),
-  });
+  // Страницы по 100, новые записи первыми; дальше — «Показать ещё». Старый бэк
+  // без серверной сортировки отдаёт всё одной «страницей» (см.
+  // fetchAppointmentsNewestFirst), и кнопки догрузки тогда нет.
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: doctorCabinetKeys.appointments({ status: tab }),
+      queryFn: ({ pageParam }) =>
+        getDoctorAppointments({
+          ...(tab === "all" ? {} : { status: tab }),
+          ...(pageParam > 1 ? { page: pageParam } : {}),
+        }),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) =>
+        lastPage.pagination &&
+        lastPage.pagination.page < lastPage.pagination.total_pages
+          ? lastPage.pagination.page + 1
+          : undefined,
+      refetchInterval: LIST_POLL_MS,
+    });
+
+  // Запись, по которой ждём подтверждения отмены/завершения.
+  const [confirmAction, setConfirmAction] = useState<{
+    appointment: DoctorAppointment;
+    status: Exclude<AppointmentStatusAction, "confirmed">;
+  } | null>(null);
 
   const { mutate: changeStatus } = useMutation({
-    mutationFn: (vars: {
-      id: number;
-      status: "cancelled" | "completed" | "confirmed";
-    }) => updateAppointmentStatus(vars.id, vars.status),
+    mutationFn: (vars: { id: number; status: AppointmentStatusAction }) =>
+      updateAppointmentStatus(vars.id, vars.status),
     onSuccess: (_, vars) => {
       toast.success("Статус записи обновлён");
       queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.all });
@@ -439,7 +496,24 @@ export const DoctorAppointmentsPage: FC = () => {
     },
   });
 
-  const appointments = data?.data ?? [];
+  // Между страницами запись могла сдвинуться (пришла новая) — убираем повторы.
+  const seen = new Set<number>();
+  const appointments = (data?.pages.flatMap((page) => page.data) ?? []).filter(
+    (item) => !seen.has(item.id) && seen.add(item.id),
+  );
+
+  // «Подтвердить» — сразу, отмена и завершение — через диалог.
+  const requestStatus = (
+    appointment: DoctorAppointment,
+    status: AppointmentStatusAction,
+  ) => {
+    if (status === "confirmed") {
+      changeStatus({ id: appointment.id, status });
+    } else {
+      setConfirmAction({ appointment, status });
+    }
+  };
+
   const {
     mode: viewMode,
     setMode: setViewMode,
@@ -491,7 +565,7 @@ export const DoctorAppointmentsPage: FC = () => {
               <AppointmentCard
                 key={a.id}
                 appointment={a}
-                onChangeStatus={(id, status) => changeStatus({ id, status })}
+                onChangeStatus={(status) => requestStatus(a, status)}
                 onOpenSummary={setSummaryId}
                 started={hasStarted(a, now)}
               />
@@ -608,10 +682,7 @@ export const DoctorAppointmentsPage: FC = () => {
                                 className="text-xs px-2.5 h-8 bg-[#2FA968] hover:bg-[#258753]"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  changeStatus({
-                                    id: a.id,
-                                    status: "completed",
-                                  });
+                                  requestStatus(a, "completed");
                                 }}
                               >
                                 Завершить
@@ -624,10 +695,7 @@ export const DoctorAppointmentsPage: FC = () => {
                                 className="text-xs px-2.5 h-8 border-red-200 text-red-500 hover:bg-red-50"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  changeStatus({
-                                    id: a.id,
-                                    status: "cancelled",
-                                  });
+                                  requestStatus(a, "cancelled");
                                 }}
                               >
                                 Отменить
@@ -642,8 +710,50 @@ export const DoctorAppointmentsPage: FC = () => {
               </table>
             </div>
           </div>
+
+          {hasNextPage && (
+            <div className="flex justify-center mt-4">
+              <Button
+                variant="outline"
+                onClick={() => fetchNextPage()}
+                loading={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? "Загрузка…" : "Показать ещё"}
+              </Button>
+            </div>
+          )}
         </>
       )}
+
+      <ConfirmDialog
+        isOpen={confirmAction !== null}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={() => {
+          if (confirmAction) {
+            changeStatus({
+              id: confirmAction.appointment.id,
+              status: confirmAction.status,
+            });
+          }
+        }}
+        title={confirmAction ? CONFIRM_TEXT[confirmAction.status].title : ""}
+        description={
+          confirmAction
+            ? `${confirmAction.appointment.patient.full_name}, ${fmtDate(
+                confirmAction.appointment.date,
+              )} в ${fmtTime(confirmAction.appointment.time)}. ${
+                CONFIRM_TEXT[confirmAction.status].description
+              }`
+            : undefined
+        }
+        confirmLabel={
+          confirmAction ? CONFIRM_TEXT[confirmAction.status].confirmLabel : ""
+        }
+        cancelLabel={
+          confirmAction ? CONFIRM_TEXT[confirmAction.status].cancelLabel : ""
+        }
+        variant={confirmAction?.status === "cancelled" ? "danger" : "default"}
+      />
 
       <Modal
         isOpen={summaryId !== null}

@@ -1,3 +1,4 @@
+import type { DoctorAppointment } from "../doctor-cabinet/types";
 import type { SpecializationItem } from "../references/types";
 import type { ServiceCategoryRef, ServiceListItem } from "../services/types";
 
@@ -235,6 +236,13 @@ export type CreateClinicDoctorRequest = ClinicDoctorProfileBody & {
   last_name: string;
   password?: string;
   phone?: string;
+};
+
+// Запись в кабинете клиники (ClinicAppointmentSerializer): то же, что у врача,
+// плюс врач. Телефон врача и почту пациента бэк отдаёт не всегда (старый
+// ответ) — поля необязательные.
+export type ClinicAppointment = DoctorAppointment & {
+  doctor?: { full_name: string; id: number; phone?: string } | null;
 };
 
 export type ClinicAppointmentFilters = {

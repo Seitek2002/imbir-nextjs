@@ -1,6 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+
+import { type QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   clinicCabinetKeys,
@@ -15,6 +17,33 @@ import { useSoundOnIncrease } from "./notificationSound";
 // иначе звук нового уведомления не услышать, пока не перезагрузишь страницу.
 // Тот же интервал, что у счётчика чата в шапке.
 const POLL_MS = 60_000;
+
+// Последнее увиденное значение счётчика — общее на все места, где висит хук
+// (сайдбар и мобильное меню), чтобы списки перезапрашивались один раз.
+const lastCount: Partial<Record<"clinic" | "doctor", number>> = {};
+
+/**
+ * Счётчик вырос — пришла новая запись: перечитываем списки записей кабинета.
+ * Иначе бейдж и звук сообщали о записи, которой в открытом списке «Записи»
+ * нет до ухода со страницы или перезагрузки.
+ */
+const useRefreshListsOnIncrease = (
+  role: "clinic" | "doctor",
+  count: number | undefined,
+  listsKey: QueryKey,
+) => {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (count === undefined) return;
+    const previous = lastCount[role];
+    lastCount[role] = count;
+    if (previous === undefined || count <= previous) return;
+    queryClient.invalidateQueries({ queryKey: listsKey });
+  }, [role, count, listsKey, queryClient]);
+};
+
+const DOCTOR_LISTS_KEY = [...doctorCabinetKeys.all, "appointments"] as const;
+const CLINIC_LISTS_KEY = [...clinicCabinetKeys.all, "appointments"] as const;
 
 /**
  * Сколько записей ждёт реакции кабинета.
@@ -38,6 +67,7 @@ export const usePendingDoctorAppointments = (): number => {
 
   const count = data?.appointments.pending;
   useSoundOnIncrease("appointment", count);
+  useRefreshListsOnIncrease("doctor", count, DOCTOR_LISTS_KEY);
 
   return count ?? 0;
 };
@@ -58,6 +88,7 @@ export const usePendingClinicAppointments = (): number => {
 
   const count = data?.pagination.total;
   useSoundOnIncrease("appointment", count);
+  useRefreshListsOnIncrease("clinic", count, CLINIC_LISTS_KEY);
 
   return count ?? 0;
 };
