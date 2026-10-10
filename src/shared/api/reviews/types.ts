@@ -74,3 +74,9 @@ export type UpdateReviewRequest = {
 export type ReplyReviewRequest = {
   text: string;
 };
+
+// POST /api/reviews/{id}/complaint/ — reason обязателен.
+export type ReviewComplaintRequest = {
+  comment?: string;
+  reason: string;
+};

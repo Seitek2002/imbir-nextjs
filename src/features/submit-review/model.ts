@@ -10,7 +10,7 @@ import {
   createReview,
   deleteReview,
   doctorKeys,
-  getMyReviews,
+  getMyReviewsForTarget,
   profileKeys,
   reviewKeys,
   serviceKeys,
@@ -140,6 +140,11 @@ export const useDeleteReview = (
  * Бэк теперь отклоняет второй отзыв («Вы уже оставили отзыв этому врачу»),
  * поэтому без этой проверки человек напишет текст и только потом узнает, что
  * отправить его нельзя.
+ *
+ * Спрашиваем «мои отзывы» сразу по цели: раньше брали первую страницу всех
+ * своих отзывов (20 штук), и у пациента с большим их числом старый отзыв не
+ * находился — форма показывалась снова, отправка давала 400. Ключ лежит под
+ * profileKeys.reviews(), так что сброс после отзыва его тоже задевает.
  */
 export const useHasMyReview = (
   targetType: ReviewTargetType,
@@ -148,8 +153,8 @@ export const useHasMyReview = (
   const isAuthed = useAuthStore((state) => Boolean(state.accessToken));
 
   const { data } = useQuery({
-    queryKey: profileKeys.reviews(),
-    queryFn: getMyReviews,
+    queryKey: [...profileKeys.reviews(), targetType, String(targetId)],
+    queryFn: () => getMyReviewsForTarget(targetType, targetId),
     enabled: isAuthed,
   });
 

@@ -79,6 +79,11 @@ export const AllReviewsPage: FC<Props> = ({
   // Адрес возврата для ссылки «Войдите, чтобы оставить отзыв».
   const pathname = usePathname() ?? "";
   const currentUserId = useAuthStore((state) => state.user?.id);
+  // Врач и клиника отзывы не оставляют (бэк отклонит) — ни формы, ни
+  // «Вы уже оставили» им не показываем. Пока профиль не загрузился, роль
+  // неизвестна: считаем пациентом, как было раньше.
+  const role = useAuthStore((state) => state.user?.role);
+  const canReview = !role || role === "patient";
   const isDoctor = targetType === "doctor";
 
   // Карточка цели нужна ради имени в заголовке и средней оценки. Ключ тот же,
@@ -212,7 +217,7 @@ export const AllReviewsPage: FC<Props> = ({
               />
             </div>
 
-            {isAuthed && !alreadyReviewed && (
+            {isAuthed && canReview && !alreadyReviewed && (
               <div className="bg-white border border-border-soft rounded-2xl p-5">
                 <h2 className="font-medium text-xl text-foreground mb-5">
                   Оставьте свой отзыв
@@ -227,7 +232,7 @@ export const AllReviewsPage: FC<Props> = ({
               </div>
             )}
 
-            {isAuthed && alreadyReviewed && (
+            {isAuthed && canReview && alreadyReviewed && (
               <div className="bg-white border border-border-soft border-dashed rounded-2xl p-5 text-center">
                 <p className="text-foreground font-medium">
                   Вы уже оставили отзыв
@@ -269,8 +274,8 @@ export const AllReviewsPage: FC<Props> = ({
                   Отзывов пока нет
                 </p>
                 <p className="text-muted text-sm max-w-70">
-                  Здесь появятся отзывы после приёма. Оставьте первый — он
-                  поможет другим пациентам с выбором.
+                  Здесь появятся отзывы пациентов. Оставьте первый — он поможет
+                  другим пациентам с выбором.
                 </p>
               </div>
             ) : (

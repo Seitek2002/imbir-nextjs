@@ -1,5 +1,5 @@
 import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
-import type { PaginatedReviewsResponse } from "../reviews/types";
+import type { PaginatedReviewsResponse, ReviewItem } from "../reviews/types";
 import { withCategoryTitle } from "../services/requests";
 import { PaginatedResponse } from "../types";
 import {
@@ -246,9 +246,62 @@ export const fetchAppointmentsNewestFirst = async (
 export const getDoctorAppointments = (filters: DoctorAppointmentFilters = {}) =>
   fetchAppointmentsNewestFirst("/api/doctor/appointments/", filters);
 
+// Сколько страниц максимум дочитывает fetchAllPages: 20 × 100 = 2000 строк.
+const MAX_LIST_PAGES = 20;
+
+// Весь список кабинета одним массивом: бэк отдаёт по 20 (StandardPagination),
+// а страницы отзывов, пациентов и услуг пагинации не имеют — всё, что дальше
+// двадцатой строки, было не увидеть и не изменить (на старые отзывы нельзя
+// было ответить). Просим потолок бэка (100) и дочитываем остальные страницы.
+// Ответ — как у одной страницы, чтобы вызывающим ничего не менять.
+export const fetchAllPages = async <T extends { id: number | string }>(
+  url: string,
+  params: object = {},
+): Promise<PaginatedResponse<T>> => {
+  const fetchPage = async (page: number) =>
+    (
+      await apiClient.get<PaginatedResponse<T>>(url, {
+        params: { page_size: 100, ...params, page },
+      })
+    ).data;
+
+  const first = await fetchPage(1);
+  const totalPages = Math.min(
+    first.pagination?.total_pages ?? 1,
+    MAX_LIST_PAGES,
+  );
+  if (totalPages <= 1) return first;
+
+  const rest = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, i) => fetchPage(i + 2)),
+  );
+  // Строка могла сдвинуться между страницами за время запросов — убираем
+  // повторы по id.
+  const seen = new Set<number | string>();
+  const all = [first, ...rest]
+    .flatMap((page) => page.data)
+    .filter((item) => !seen.has(item.id) && seen.add(item.id));
+
+  return {
+    ...first,
+    data: all,
+    pagination: {
+      ...first.pagination,
+      page: 1,
+      page_size: all.length,
+      total: first.pagination?.total ?? all.length,
+      total_pages: 1,
+    },
+  };
+};
+
+// Без filters.page — все пациенты (fetchAllPages), с page — одна страница.
 export const getDoctorPatients = async (
   filters: DoctorPatientFilters = {},
 ): Promise<PaginatedResponse<DoctorPatient>> => {
+  if (filters.page === undefined) {
+    return fetchAllPages<DoctorPatient>("/api/doctor/patients/", filters);
+  }
   const { data } = await apiClient.get<PaginatedResponse<DoctorPatient>>(
     "/api/doctor/patients/",
     { params: filters },
@@ -283,19 +336,15 @@ export const getDoctorStats = async (): Promise<DoctorStats> => {
   return data;
 };
 
-export const getDoctorReviews = async (): Promise<PaginatedReviewsResponse> => {
-  const { data } = await apiClient.get<PaginatedReviewsResponse>(
-    "/api/doctor/reviews/",
-  );
-  return data;
-};
+// Все отзывы, а не первые 20 — см. fetchAllPages.
+export const getDoctorReviews = (): Promise<PaginatedReviewsResponse> =>
+  fetchAllPages<ReviewItem>("/api/doctor/reviews/");
 
+// Все услуги (с процедурами клиник), а не первые 20 — см. fetchAllPages.
 export const getDoctorServices = async (): Promise<{
   data: DoctorServiceItem[];
 }> => {
-  const { data } = await apiClient.get<{ data: DoctorServiceItem[] }>(
-    "/api/doctor/services/",
-  );
+  const data = await fetchAllPages<DoctorServiceItem>("/api/doctor/services/");
   return { ...data, data: data.data.map(withCategoryTitle) };
 };
 

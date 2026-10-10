@@ -106,12 +106,10 @@ export const ClinicReviewsPage: FC = () => {
               </p>
             )}
 
-            {review.reply ? (
-              <div className="mt-3 bg-surface rounded-2xl p-4">
-                <p className="text-xs text-muted mb-1">Ваш ответ</p>
-                <p className="text-sm text-foreground">{review.reply.text}</p>
-              </div>
-            ) : replyingId === review.id ? (
+            {/* Ответ можно и исправить: повторный POST /reply/ заменяет его
+                (как «Изменить ответ» у врача). Раньше опубликованный ответ
+                клиники оставался навсегда в том виде, как был отправлен. */}
+            {replyingId === review.id ? (
               <div className="mt-3 flex flex-col gap-2">
                 <Textarea
                   value={replyText}
@@ -137,9 +135,29 @@ export const ClinicReviewsPage: FC = () => {
                       sendReply({ id: review.id, text: replyText.trim() })
                     }
                   >
-                    {isReplying ? "Отправка..." : "Ответить"}
+                    {isReplying
+                      ? "Отправка..."
+                      : review.reply
+                        ? "Сохранить"
+                        : "Ответить"}
                   </Button>
                 </div>
+              </div>
+            ) : review.reply ? (
+              <div className="mt-3 bg-surface rounded-2xl p-4">
+                <p className="text-xs text-muted mb-1">Ваш ответ</p>
+                <p className="text-sm text-foreground">{review.reply.text}</p>
+                <Button
+                  variant="text"
+                  size="xs"
+                  className="px-0 mt-2 text-primary"
+                  onClick={() => {
+                    setReplyingId(review.id);
+                    setReplyText(review.reply?.text ?? "");
+                  }}
+                >
+                  Изменить ответ
+                </Button>
               </div>
             ) : (
               <div className="mt-3">
@@ -147,7 +165,10 @@ export const ClinicReviewsPage: FC = () => {
                   variant="text"
                   size="xs"
                   className="px-0 text-primary"
-                  onClick={() => setReplyingId(review.id)}
+                  onClick={() => {
+                    setReplyingId(review.id);
+                    setReplyText("");
+                  }}
                 >
                   Ответить
                 </Button>

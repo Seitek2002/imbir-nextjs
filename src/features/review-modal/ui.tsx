@@ -7,6 +7,8 @@ import { useScrollLock } from "@/shared/lib/useScrollLock";
 import { ImageWithFallback, ReviewForm } from "@/shared/ui";
 
 type Props = {
+  // Подписи формы; не переданы — дефолты ReviewForm (про специалиста).
+  commentLabel?: string;
   doctorClinic: string;
   doctorImage?: string;
   doctorName: string;
@@ -17,6 +19,7 @@ type Props = {
   onClose: () => void;
   // Может вернуть промис — тогда модалка закроется только после успеха.
   onSubmit: (rating: number, comment: string) => Promise<unknown> | void;
+  ratingLabel?: string;
   title?: string;
 };
 
@@ -33,6 +36,8 @@ export const ReviewModal: FC<Props> = ({
   initialRating = 0,
   initialComment = "",
   onSubmit,
+  ratingLabel,
+  commentLabel,
 }) => {
   const [isClosing, setIsClosing] = useState(false);
 
@@ -88,6 +93,8 @@ export const ReviewModal: FC<Props> = ({
         initialComment={initialComment}
         onSubmit={onSubmit}
         onSubmitted={handleClose}
+        ratingLabel={ratingLabel}
+        commentLabel={commentLabel}
       />
     </div>
   );

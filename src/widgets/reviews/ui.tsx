@@ -25,7 +25,7 @@ const EmptyReviews: FC = () => (
     </div>
     <p className="text-foreground font-medium text-base">Отзывов пока нет</p>
     <p className="text-muted text-sm max-w-70">
-      Здесь появятся отзывы после приёма. Оставьте первый — он поможет другим
+      Здесь появятся отзывы пациентов. Оставьте первый — он поможет другим
       пациентам с выбором.
     </p>
   </div>
@@ -53,6 +53,13 @@ type Props = {
   // того, как написал текст.
   alreadyReviewed?: boolean;
   averageRating: number;
+  // Может ли текущий пользователь вообще оценивать: врач и клиника — нет
+  // (бэк такой отзыв отклонит), поэтому ни формы, ни кнопки им не показываем.
+  // Раньше врач видел на своей же странице форму и ставил себе 5★.
+  canReview?: boolean;
+  // Подписи формы. По умолчанию — про специалиста; клиника передаёт свои,
+  // иначе в форме отзыва о клинике просили «Оцените специалиста».
+  commentLabel?: string;
   doctorClinic?: string;
   doctorImage?: string;
   doctorName?: string;
@@ -65,6 +72,11 @@ type Props = {
   // свой отзыв» остаётся видна, но по клику вместо модалки просит войти.
   // Может вернуть промис — тогда форма очистится только после успеха.
   onSubmitReview?: (rating: number, text: string) => Promise<unknown> | void;
+  ratingLabel?: string;
+  // Сколько отзывов всего (reviews_count цели). initialReviews — только
+  // первая страница (сервер отдаёт по 20), и её длина в «Всего отзывов»
+  // спорила с числом в шапке страницы.
+  totalCount?: number;
 };
 
 export const ReviewsSection: FC<Props> = ({
@@ -74,11 +86,15 @@ export const ReviewsSection: FC<Props> = ({
   onDeleteReview,
   allReviewsHref,
   alreadyReviewed = false,
+  canReview = true,
   isSubmitting,
   doctorName = "Специалист",
   doctorSpecialty = "",
   doctorClinic = "",
   doctorImage,
+  ratingLabel = "Оцените специалиста",
+  commentLabel,
+  totalCount,
 }) => {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [newReviewText, setNewReviewText] = useState("");
@@ -124,9 +140,10 @@ export const ReviewsSection: FC<Props> = ({
     }
   };
 
+  // Текст необязателен — как в мобильной форме и на странице всех отзывов:
+  // бэк принимает отзыв из одной оценки.
   const handleAddReview = async () => {
-    if (!newReviewText.trim() || newReviewRating === 0 || !onSubmitReview)
-      return;
+    if (newReviewRating === 0 || !onSubmitReview) return;
 
     try {
       await onSubmitReview(newReviewRating, newReviewText);
@@ -190,7 +207,7 @@ export const ReviewsSection: FC<Props> = ({
                   <ChatIcon className="size-5 text-white" />
                 </div>
                 <AnimatedNumber
-                  value={reviews.length}
+                  value={Math.max(totalCount ?? 0, reviews.length)}
                   className="text-[24px] font-semibold text-foreground"
                 />
               </div>
@@ -201,7 +218,7 @@ export const ReviewsSection: FC<Props> = ({
           {/* Кнопка видна и гостю: молчаливый переход на логин не
               объяснял, зачем он произошёл — теперь гость видит тост с
               причиной и остаётся на странице. */}
-          {!alreadyReviewed && (
+          {canReview && !alreadyReviewed && (
             <Button
               variant="outline"
               className="md:hidden w-full justify-center bg-white"
@@ -215,7 +232,7 @@ export const ReviewsSection: FC<Props> = ({
             </Button>
           )}
 
-          {alreadyReviewed && (
+          {canReview && alreadyReviewed && (
             <div className="hidden md:block bg-white border border-border-soft border-dashed rounded-2xl p-4 text-center">
               <p className="text-foreground font-medium">
                 Вы уже оставили отзыв
@@ -227,12 +244,12 @@ export const ReviewsSection: FC<Props> = ({
           )}
 
           {/* Форма — только если подключена отправка и отзыва ещё нет */}
-          {!alreadyReviewed && onSubmitReview && (
+          {canReview && !alreadyReviewed && onSubmitReview && (
             <div className="hidden md:flex flex-col bg-white border border-border-soft rounded-2xl p-4">
               <h3 className="font-medium text-[20px] text-foreground mb-6">
                 Оставьте свой отзыв
               </h3>
-              <span className="text-base mb-2">Оцените специалиста</span>
+              <span className="text-base mb-2">{ratingLabel}</span>
 
               {/* Интерактивные Звездочки */}
               <div className="flex justify-center gap-5 py-4 mb-6 border border-border rounded-xl">
@@ -260,9 +277,7 @@ export const ReviewsSection: FC<Props> = ({
                 size="md"
                 className="w-full justify-center"
                 onClick={handleAddReview}
-                disabled={
-                  !newReviewText.trim() || newReviewRating === 0 || isSubmitting
-                }
+                disabled={newReviewRating === 0 || isSubmitting}
               >
                 {isSubmitting ? "Отправка..." : "Отправить"}
               </Button>
@@ -313,7 +328,7 @@ export const ReviewsSection: FC<Props> = ({
         cancelLabel="Отмена"
       />
 
-      {onSubmitReview && (
+      {canReview && onSubmitReview && (
         <ReviewModal
           isOpen={isReviewModalOpen}
           onClose={() => setIsReviewModalOpen(false)}
@@ -321,6 +336,8 @@ export const ReviewsSection: FC<Props> = ({
           doctorSpecialty={doctorSpecialty}
           doctorClinic={doctorClinic}
           doctorImage={doctorImage}
+          ratingLabel={ratingLabel}
+          commentLabel={commentLabel}
           onSubmit={onSubmitReview}
         />
       )}

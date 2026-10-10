@@ -13,6 +13,7 @@ import {
 
 import {
   type ReviewAuthor,
+  complainAboutReview,
   doctorCabinetKeys,
   getDoctorReviews,
   replyToReview,
@@ -183,9 +184,14 @@ const COMPLAINT_REASONS = [
 type ComplaintModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  reviewId: null | number;
 };
 
-const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
+const ComplaintModal: FC<ComplaintModalProps> = ({
+  isOpen,
+  onClose,
+  reviewId,
+}) => {
   const [isClosing, setIsClosing] = useState(false);
   const [reason, setReason] = useState("");
   const [comment, setComment] = useState("");
@@ -199,6 +205,27 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
       onClose();
     }, DURATION);
   }, [onClose]);
+
+  // Раньше «Отправить» только закрывал модалку: запроса не было, жалоба
+  // терялась, а врач думал, что она на рассмотрении. Теперь бэк пересылает
+  // её администратору, и модалка закрывается только после успеха.
+  const complaintMutation = useMutation({
+    mutationFn: (vars: { comment: string; id: number; reason: string }) =>
+      complainAboutReview(vars.id, {
+        reason: vars.reason,
+        comment: vars.comment,
+      }),
+    onSuccess: () => {
+      toast.success("Жалоба отправлена администратору");
+      setReason("");
+      setComment("");
+      handleClose();
+    },
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось отправить жалобу"));
+    },
+  });
 
   if (!isOpen && !isClosing) return null;
   const state = isClosing ? "closed" : "open";
@@ -272,10 +299,15 @@ const ComplaintModal: FC<ComplaintModalProps> = ({ isOpen, onClose }) => {
             <Button
               size="lg"
               className="flex-1"
+              disabled={!reason || reviewId === null}
+              loading={complaintMutation.isPending}
               onClick={() => {
-                setReason("");
-                setComment("");
-                handleClose();
+                if (!reason || reviewId === null) return;
+                complaintMutation.mutate({
+                  id: reviewId,
+                  reason,
+                  comment: comment.trim(),
+                });
               }}
             >
               Отправить
@@ -514,6 +546,7 @@ export const DoctorReviewsPage: FC = () => {
       <ComplaintModal
         isOpen={!!complaintTarget}
         onClose={() => setComplaintTarget(null)}
+        reviewId={complaintTarget ? Number(complaintTarget.id) : null}
       />
     </>
   );

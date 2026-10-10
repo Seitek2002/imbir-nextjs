@@ -120,6 +120,10 @@ export const ClinicDetailsPage: FC<Props> = ({
   const doctors = clinic?.doctors ?? fetchedDoctors;
 
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
+  // Оценивают только пациенты и гости (гостю по клику предложат войти):
+  // клиника оценивала саму себя, врач — клинику. Бэк такие отзывы отклоняет.
+  const user = useAuthStore((s) => s.user);
+  const canReview = !user || user.role === "patient";
   const { data: reviews = [] } = useQuery({
     queryKey: reviewKeys.byTarget("clinic", id),
     queryFn: () => api.getReviewsByClinic(id),
@@ -502,10 +506,22 @@ export const ClinicDetailsPage: FC<Props> = ({
         )}
 
         {/* --- СЕКЦИЯ: ОТЗЫВЫ --- */}
-        {(reviews.length > 0 || isAuthed) && (
+        {(reviews.length > 0 || (isAuthed && canReview)) && (
           <ReviewsSection
             initialReviews={reviews}
             averageRating={clinic.rating}
+            totalCount={clinic.reviews}
+            canReview={canReview}
+            // Цель отзыва — клиника: без этого модалка показывала
+            // «Специалист» с буквой «С» и просила «Оцените специалиста».
+            doctorName={clinic.name}
+            doctorImage={
+              typeof clinic.image === "string" && clinic.image
+                ? clinic.image
+                : undefined
+            }
+            ratingLabel="Оцените клинику"
+            commentLabel="Поделитесь своим мнением о клинике"
             onSubmitReview={isAuthed ? submitReview : undefined}
             isSubmitting={isSubmitting}
             onDeleteReview={isAuthed ? removeReview : undefined}

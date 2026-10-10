@@ -1,9 +1,12 @@
 import { toHttps, toMediaUrl } from "@/shared/lib/media";
 
 import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
-import { fetchAppointmentsNewestFirst } from "../doctor-cabinet/requests";
+import {
+  fetchAllPages,
+  fetchAppointmentsNewestFirst,
+} from "../doctor-cabinet/requests";
 import type { DoctorAppointment } from "../doctor-cabinet/types";
-import type { PaginatedReviewsResponse } from "../reviews/types";
+import type { PaginatedReviewsResponse, ReviewItem } from "../reviews/types";
 import { withCategoryTitle } from "../services/requests";
 import { PaginatedResponse } from "../types";
 import {
@@ -388,12 +391,9 @@ export const getClinicStats = async (): Promise<ClinicStats> => {
   return data;
 };
 
-export const getClinicReviews = async (): Promise<PaginatedReviewsResponse> => {
-  const { data } = await apiClient.get<PaginatedReviewsResponse>(
-    "/api/clinic/reviews/",
-  );
-  return data;
-};
+// Все отзывы, а не первые 20: иначе на старые нельзя было ответить.
+export const getClinicReviews = (): Promise<PaginatedReviewsResponse> =>
+  fetchAllPages<ReviewItem>("/api/clinic/reviews/");
 
 export const getClinicInvites = async (): Promise<InviteLink[]> => {
   const { data } = await apiClient.get<InviteLink[]>("/api/clinic/invites/");

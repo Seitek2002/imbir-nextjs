@@ -112,6 +112,10 @@ export const SpecialistDetailsPage: FC<Props> = ({
   // 2. ПОЛУЧАЕМ ОТЗЫВЫ ЭТОГО ВРАЧА
   const user = useAuthStore((s) => s.user);
   const isDoctor = user?.role === "doctor";
+  // Оценивают только пациенты (и гости — им по клику предложат войти). Врач
+  // ставил себе 5★ со своей же страницы, клиника — врачу; бэк такие отзывы
+  // теперь отклоняет, а здесь мы просто не показываем им форму.
+  const canReview = !user || user.role === "patient";
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
   const { isSaved, isPending, toggle } = useFavoriteToggle("doctor");
   const isFavorite = isSaved(Number(id));
@@ -495,10 +499,12 @@ export const SpecialistDetailsPage: FC<Props> = ({
         </div>
 
         {/* Секция отзывов: форма доступна авторизованным, список — всегда */}
-        {(reviews.length > 0 || isAuthed) && (
+        {(reviews.length > 0 || (isAuthed && canReview)) && (
           <ReviewsSection
             initialReviews={reviews}
             averageRating={doctor.rating}
+            totalCount={doctor.reviews}
+            canReview={canReview}
             doctorName={doctor.name}
             doctorSpecialty={doctor.specialty}
             doctorClinic={doctor.workplaces?.[0]?.clinicName}

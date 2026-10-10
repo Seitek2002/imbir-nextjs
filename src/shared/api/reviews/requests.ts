@@ -1,8 +1,10 @@
 import { apiClient } from "../client";
+import { fetchAllPages } from "../doctor-cabinet/requests";
 import { PaginatedResponse } from "../types";
 import {
   CreateReviewRequest,
   ReplyReviewRequest,
+  ReviewComplaintRequest,
   ReviewItem,
   ReviewTargetType,
   UpdateReviewRequest,
@@ -27,11 +29,21 @@ export const getReviews = async (
 // Отзывы, оставленные текущим пациентом (в ответе target вместо author).
 // getDoctorReviews / getClinicReviews (кабинеты) живут в doctor-cabinet /
 // clinic-cabinet requests — тут не дублируем.
-export const getMyReviews = async (): Promise<
-  PaginatedResponse<ReviewItem>
-> => {
+// Весь список, а не первые 20 (см. fetchAllPages).
+export const getMyReviews = (): Promise<PaginatedResponse<ReviewItem>> =>
+  fetchAllPages<ReviewItem>("/api/profile/reviews/");
+
+// Свои отзывы на одну цель — для проверки «уже оставлял». Бэк фильтрует по
+// target_type/target_id (id пользователя врача/клиники); старый бэк параметры
+// игнорирует и отдаёт первую страницу всех отзывов — поэтому вызывающий
+// всё равно сверяет цель сам.
+export const getMyReviewsForTarget = async (
+  targetType: ReviewTargetType,
+  targetId: number | string,
+): Promise<PaginatedResponse<ReviewItem>> => {
   const { data } = await apiClient.get<PaginatedResponse<ReviewItem>>(
     "/api/profile/reviews/",
+    { params: { target_type: targetType, target_id: targetId } },
   );
   return data;
 };
@@ -65,4 +77,13 @@ export const replyToReview = async (
     body,
   );
   return data;
+};
+
+// Жалоба врача/клиники на отзыв о себе. Бэк пересылает её администратору
+// письмом; если отправить не удалось — отвечает ошибкой, а не «принято».
+export const complainAboutReview = async (
+  id: number,
+  body: ReviewComplaintRequest,
+): Promise<void> => {
+  await apiClient.post(`/api/reviews/${id}/complaint/`, body);
 };
