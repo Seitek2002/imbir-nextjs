@@ -2,7 +2,7 @@ import { FC } from "react";
 
 import { cn } from "@/shared/lib/utils";
 
-import { formatMessageTime } from "../model/lib";
+import { formatConversationTime, formatFullDateTime } from "../model/lib";
 import type { Conversation } from "../model/types";
 import { ChatAvatar } from "./ChatAvatar";
 
@@ -48,8 +48,11 @@ export const ConversationItem: FC<Props> = ({
             {conversation.name}
           </span>
           {conversation.lastMessageAt && (
-            <span className="text-xs text-muted shrink-0">
-              {formatMessageTime(conversation.lastMessageAt)}
+            <span
+              className="text-xs text-muted shrink-0"
+              title={formatFullDateTime(conversation.lastMessageAt)}
+            >
+              {formatConversationTime(conversation.lastMessageAt)}
             </span>
           )}
         </div>

@@ -4,10 +4,16 @@ import { FC, Fragment, memo, useEffect, useRef, useState } from "react";
 
 import Link from "next/link";
 
+import { toMediaUrl } from "@/shared/lib/media";
 import { cn } from "@/shared/lib/utils";
 import { ScrambleText } from "@/shared/ui";
 
-import { formatMessageTime } from "../model/lib";
+import {
+  formatDayLabel,
+  formatFullDateTime,
+  formatMessageTime,
+  getDayKey,
+} from "../model/lib";
 import type { ChatThreadMessage } from "../model/types";
 import { RecommendationCards } from "./RecommendationCards";
 
@@ -253,7 +259,10 @@ const MessageBubbleView: FC<{
           message.isMine ? "self-end" : "self-start",
         )}
       >
-        <span className="text-[11px] text-muted">
+        <span
+          className="text-[11px] text-muted"
+          title={formatFullDateTime(message.createdAt)}
+        >
           {formatMessageTime(message.createdAt)}
         </span>
         {message.editedAt && !message.isDeleted && (
@@ -277,9 +286,87 @@ const MessageBubble = memo(MessageBubbleView);
 // Первая ссылка в тексте уведомления — обычно приглашение в видеовстречу.
 const URL_RE = /(https?:\/\/\S+)/;
 
+// AI-резюме консультации бэк присылает системным сообщением
+// «Резюме консультации (сформировано автоматически): …» и, если файл собран,
+// строкой «📄 Скачать в DOCX: <url>». Без SITE_URL на бэке ссылка относительная.
+const SUMMARY_PREFIX = "Резюме консультации";
+const DOCX_URL_RE = /((?:https?:\/\/|\/)\S+?\.docx(?:[?#]\S*)?)(?=\s|$)/i;
+const DOCX_LINE_RE = /\s*(?:📄\s*)?Скачать в DOCX:\s*\S+/u;
+
+const VideoIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M23 7l-7 5 7 5V7z" />
+    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+  </svg>
+);
+
+const DownloadIcon = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <path d="M7 10l5 5 5-5" />
+    <path d="M12 15V3" />
+  </svg>
+);
+
 // Системное уведомление (sender === null): плашка по центру ленты.
-// Ссылку на видеовстречу выносим в кнопку «Присоединиться».
+// Ссылку на видеовстречу выносим в кнопку «Присоединиться», а файл
+// AI-резюме — в кнопку «Скачать резюме». Раньше ссылка на .docx тоже
+// попадала в «Присоединиться» и выглядела как приглашение в видеозвонок.
 const SystemNotice: FC<{ message: ChatThreadMessage }> = ({ message }) => {
+  const docxUrl = message.content.match(DOCX_URL_RE)?.[0] ?? null;
+  const isSummary =
+    !!docxUrl || message.content.trimStart().startsWith(SUMMARY_PREFIX);
+
+  if (isSummary) {
+    // Текст без строки со ссылкой — она вынесена в кнопку.
+    const text = docxUrl
+      ? message.content.replace(DOCX_LINE_RE, "").replace(docxUrl, "").trim()
+      : message.content;
+
+    return (
+      <div className="self-center max-w-[85%] my-1 flex flex-col items-center gap-2">
+        <div className="bg-[#EEF3FF] text-foreground text-xs leading-normal text-center px-4 py-2 rounded-xl whitespace-pre-wrap break-words">
+          {text || message.content}
+        </div>
+        {docxUrl && (
+          <a
+            href={toMediaUrl(docxUrl)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 bg-primary text-white text-xs font-medium px-4 py-2 rounded-full transition-opacity hover:opacity-90"
+          >
+            <DownloadIcon />
+            Скачать резюме
+          </a>
+        )}
+        <span
+          className="text-[11px] text-muted"
+          title={formatFullDateTime(message.createdAt)}
+        >
+          {formatMessageTime(message.createdAt)}
+        </span>
+      </div>
+    );
+  }
+
   const url = message.content.match(URL_RE)?.[0] ?? null;
   // Текст без ссылки — чтобы она не дублировалась под кнопкой.
   const text = message.content.replace(URL_RE, "").replace(/\s+$/, "").trim();
@@ -294,19 +381,7 @@ const SystemNotice: FC<{ message: ChatThreadMessage }> = ({ message }) => {
           href={`/consultation/${message.consultationId}`}
           className="inline-flex items-center gap-1.5 bg-primary text-white text-xs font-medium px-4 py-2 rounded-full transition-opacity hover:opacity-90"
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M23 7l-7 5 7 5V7z" />
-            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-          </svg>
+          <VideoIcon />
           Присоединиться
         </Link>
       ) : url ? (
@@ -316,28 +391,25 @@ const SystemNotice: FC<{ message: ChatThreadMessage }> = ({ message }) => {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 bg-primary text-white text-xs font-medium px-4 py-2 rounded-full transition-opacity hover:opacity-90"
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M23 7l-7 5 7 5V7z" />
-            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-          </svg>
+          <VideoIcon />
           Присоединиться
         </a>
       ) : null}
-      <span className="text-[11px] text-muted">
+      <span
+        className="text-[11px] text-muted"
+        title={formatFullDateTime(message.createdAt)}
+      >
         {formatMessageTime(message.createdAt)}
       </span>
     </div>
   );
 };
+
+const DaySeparator: FC<{ iso: string }> = ({ iso }) => (
+  <div className="self-center my-1 px-3 py-0.5 rounded-full bg-background text-[11px] text-muted">
+    {formatDayLabel(iso)}
+  </div>
+);
 
 const TypingBubble = () => (
   <div className="self-start bg-background rounded-2xl rounded-bl-sm px-4 py-3">
@@ -474,26 +546,42 @@ export const MessageThread: FC<Props> = ({
         <p className="text-center text-sm text-muted mt-8">{emptyHint}</p>
       )}
 
-      {messages.map((message) =>
-        message.isSystem ? (
-          <SystemNotice key={message.id} message={message} />
-        ) : (
+      {messages.map((message, index) => {
+        // У пузырей только HH:MM, поэтому сообщения разных дней делим
+        // разделителем с датой — иначе недельное выглядело сегодняшним.
+        const isNewDay =
+          index === 0 ||
+          getDayKey(messages[index - 1].createdAt) !==
+            getDayKey(message.createdAt);
+
+        return (
           <Fragment key={message.id}>
-            <MessageBubble
-              message={message}
-              scramble={animateIncoming && !message.isMine && !!message.isFresh}
-              isSelected={selectedMessageIds.includes(message.id)}
-              selectionMode={selectionMode}
-              onContextMenu={handleContextMenu}
-              onLongPress={onSelectMessage}
-              onSelect={onSelectMessage}
-            />
-            {!message.isMine && message.recommendations && (
-              <RecommendationCards recommendations={message.recommendations} />
+            {isNewDay && <DaySeparator iso={message.createdAt} />}
+            {message.isSystem ? (
+              <SystemNotice message={message} />
+            ) : (
+              <>
+                <MessageBubble
+                  message={message}
+                  scramble={
+                    animateIncoming && !message.isMine && !!message.isFresh
+                  }
+                  isSelected={selectedMessageIds.includes(message.id)}
+                  selectionMode={selectionMode}
+                  onContextMenu={handleContextMenu}
+                  onLongPress={onSelectMessage}
+                  onSelect={onSelectMessage}
+                />
+                {!message.isMine && message.recommendations && (
+                  <RecommendationCards
+                    recommendations={message.recommendations}
+                  />
+                )}
+              </>
             )}
           </Fragment>
-        ),
-      )}
+        );
+      })}
 
       {pendingReply && <TypingBubble />}
 

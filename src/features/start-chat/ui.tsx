@@ -5,9 +5,9 @@ import toast from "react-hot-toast";
 
 import { useRouter } from "next/navigation";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { createChatRoom } from "@/shared/api";
+import { type ChatRoom, chatKeys, createChatRoom } from "@/shared/api";
 import { ChatIcon } from "@/shared/assets/icons";
 import { ROUTES, loginHref } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
@@ -35,11 +35,23 @@ export const StartChatButton: FC<Props> = ({
   compact = false,
 }) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
 
   const { mutate: startChat, isPending } = useMutation({
     mutationFn: () => createChatRoom({ user_id: userId }),
-    onSuccess: (room) => router.push(`${ROUTES.CHATS}?room=${room.id}`),
+    onSuccess: (room) => {
+      // Кладём комнату в кэш списка до перехода. Иначе свежий (staleTime)
+      // кэш без новой комнаты не перезапрашивался, страница чатов не находила
+      // ?room= и показывала пустой экран до очередного опроса через 30 с.
+      queryClient.setQueryData<ChatRoom[]>(chatKeys.rooms(), (rooms) =>
+        rooms && !rooms.some((item) => item.id === room.id)
+          ? [room, ...rooms]
+          : rooms,
+      );
+      void queryClient.invalidateQueries({ queryKey: chatKeys.rooms() });
+      router.push(`${ROUTES.CHATS}?room=${room.id}`);
+    },
     onError: () => toast.error("Не удалось открыть чат. Попробуйте ещё раз"),
   });
 

@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 
 import { uploadFile } from "@/shared/api";
 import { toMediaUrl } from "@/shared/lib/media";
-import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 
 import type { ConnectionState } from "../model/types";
@@ -15,10 +14,15 @@ import { ConsultationSummaryModal } from "./ConsultationSummaryModal";
 import { MessageComposer, type MessageComposerHandle } from "./MessageComposer";
 import { MessageThread } from "./MessageThread";
 
-const CONNECTION_LABEL: Record<ConnectionState, string> = {
-  connecting: "Подключение...",
-  open: "В сети",
-  closed: "Не в сети",
+// Состояние СВОЕГО сокета этой вкладки, а не присутствие собеседника: бэк
+// присутствие не отслеживает. Раньше под именем собеседника горело «В сети»
+// при открытом своём сокете, и пациент ждал быстрого ответа от врача, который
+// не заходил неделю. Поэтому при открытом соединении подпись не выводим, а
+// проблемы со связью подписываем так, чтобы они читались как свои.
+const CONNECTION_LABEL: Record<ConnectionState, null | string> = {
+  connecting: "Подключение…",
+  open: null,
+  closed: "Нет соединения",
   error: "Ошибка соединения",
 };
 
@@ -67,6 +71,7 @@ export const UserConversation: FC<Props> = ({
   } = useChatRoom(roomId, currentUserId);
   const isOpen = connectionState === "open";
   const typing = typingLabel(typingNames);
+  const connectionLabel = CONNECTION_LABEL[connectionState];
 
   const role = useAuthStore((state) => state.user?.role);
   const [showSummaries, setShowSummaries] = useState(false);
@@ -170,19 +175,9 @@ export const UserConversation: FC<Props> = ({
         subtitle={
           typing ? (
             <span className="text-primary">{typing}</span>
-          ) : (
-            <span
-              className={cn(
-                "flex items-center gap-1",
-                isOpen ? "text-[#4CAF50]" : "text-muted",
-              )}
-            >
-              {isOpen && (
-                <span className="inline-block size-1.5 rounded-full bg-[#4CAF50]" />
-              )}
-              {CONNECTION_LABEL[connectionState]}
-            </span>
-          )
+          ) : connectionLabel ? (
+            <span className="text-muted">{connectionLabel}</span>
+          ) : undefined
         }
       />
       <MessageThread

@@ -88,6 +88,25 @@ const EmptyState = () => (
   </div>
 );
 
+const RoomNotFound: FC<{ isError: boolean; onBack: () => void }> = ({
+  isError,
+  onBack,
+}) => (
+  <div className="flex-1 flex flex-col items-center justify-center text-muted gap-3 p-8 text-center">
+    <div className="size-16 bg-background rounded-full flex items-center justify-center">
+      <ChatIcon className="size-7" />
+    </div>
+    <p className="text-sm">
+      {isError
+        ? "Не удалось загрузить чаты. Проверьте соединение и попробуйте ещё раз"
+        : "Чат не найден"}
+    </p>
+    <Button variant="outline" size="sm" onClick={onBack}>
+      К списку чатов
+    </Button>
+  </div>
+);
+
 // Одноразовые параметры входа в чат:
 //   ?ask=<текст> — симптом с главной: открыть ИИ-помощника и сразу отправить
 //   ?ai=1        — просто открыть ИИ-помощника («Перейти в чат» на главной)
@@ -130,9 +149,19 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
     }
   }, []);
 
-  const { data: rooms } = useQuery({
+  const {
+    data: rooms,
+    isError: isRoomsError,
+    isFetchedAfterMount: isRoomsFetchedAfterMount,
+  } = useQuery({
     queryKey: chatKeys.rooms(),
     queryFn: getChatRooms,
+    // Пришли по ?room= (кнопка «Написать»/«Открыть чат») — комната могла
+    // появиться только что, а кэш списка ещё свежий (staleTime) и без неё.
+    // Тогда переписка не находилась и до опроса через 30 с экран был пустым,
+    // поэтому при входе с ?room= список перезапрашиваем всегда.
+    refetchOnMount:
+      entryRoomId !== null && entryRoomId !== AI_ROOM_ID ? "always" : true,
     // Сокет у бэка — на комнату (/ws/chat/{id}/), общего «все мои переписки»
     // нет. Поэтому сообщение в НЕоткрытую комнату фронт узнать не может, и
     // без опроса такая переписка не поднималась наверх до перезагрузки
@@ -168,12 +197,24 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
 
   const activeConversation =
     conversations.find((item) => item.id === activeId) ?? null;
+  // Чат выбран, но в списке его нет: список ещё грузится или комнаты нет
+  // (чужой/неверный ?room=). Раньше на телефоне в этом случае были скрыты и
+  // шапка, и список, и переписка — белый экран без кнопки «назад».
+  const isRoomMissing = activeId !== null && activeConversation === null;
+  const isRoomLoading = isRoomMissing && !isRoomsFetchedAfterMount;
 
   return (
     <PageShell>
-      {activeId === null && (
+      {(activeId === null || isRoomMissing) && (
         <div className="md:hidden">
-          <Header title="Чаты" onBack={() => router.push(ROUTES.HOME)} />
+          <Header
+            title="Чаты"
+            onBack={
+              isRoomMissing
+                ? () => setActiveId(null)
+                : () => router.push(ROUTES.HOME)
+            }
+          />
         </div>
       )}
 
@@ -202,7 +243,7 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
           <section
             className={cn(
               "flex-1 min-h-0 bg-white flex flex-col overflow-hidden md:border md:border-border-soft md:rounded-[32px] shadow-sm",
-              activeConversation ? "flex" : "hidden md:flex",
+              activeConversation || isRoomMissing ? "flex" : "hidden md:flex",
             )}
           >
             {activeConversation?.isAi ? (
@@ -218,6 +259,15 @@ const ChatWorkspace: FC<{ currentUserId: number }> = ({ currentUserId }) => {
                 name={activeConversation.name}
                 currentUserId={currentUserId}
                 partnerId={activeConversation.partnerId}
+                onBack={() => setActiveId(null)}
+              />
+            ) : isRoomLoading ? (
+              <div className="flex-1 flex items-center justify-center text-muted text-sm">
+                Загрузка чата...
+              </div>
+            ) : isRoomMissing ? (
+              <RoomNotFound
+                isError={isRoomsError}
                 onBack={() => setActiveId(null)}
               />
             ) : (
