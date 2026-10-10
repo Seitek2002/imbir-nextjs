@@ -247,6 +247,8 @@ export type RegisterClinicRequest = {
   password: string;
   step1: {
     description: string;
+    // Стаж клиники, лет; старый бэк поле игнорирует (оно дублируется в PUT профиля)
+    experience_years?: number;
     name: string;
     type: string;
   };

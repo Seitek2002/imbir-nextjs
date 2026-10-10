@@ -61,13 +61,14 @@ export type UpdateClinicProfileBody = {
   description?: string;
   emergency_24_7?: boolean;
   equipment?: string[];
-  latitude?: string;
+  experience_years?: number;
+  latitude?: null | string;
   legal_name?: string;
   license_authority?: string;
   license_date?: null | string;
   license_number?: string;
   logo?: File | null | string;
-  longitude?: string;
+  longitude?: null | string;
   lunch_break?: { from: string; to: string };
   name?: string;
   narrow_specialization_ids?: number[];

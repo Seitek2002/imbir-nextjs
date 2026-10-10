@@ -14,6 +14,7 @@ import {
 import {
   type DoctorDocument,
   type DoctorPrivateProfile,
+  type DoctorSchedule,
   type SpecializationItem,
   type UpdateDoctorProfileBody,
   deleteDoctorDocument,
@@ -205,7 +206,9 @@ export const useDoctorCabinet = () => {
         // Подставляем из текущего профиля, если явно не заданы.
         const raw = data as unknown as {
           about?: null | string;
+          emergency_24_7?: boolean;
           first_name?: string;
+          is_online_available?: boolean;
           last_name?: string;
           narrow_specializations?: SpecializationItem[];
           primary_specializations?: SpecializationItem[];
@@ -228,6 +231,22 @@ export const useDoctorCabinet = () => {
             // проверено. Досылаем текущий текст, чтобы сохранение другой
             // вкладки точно его не стёрло.
             about: raw?.about ?? undefined,
+            // Смена фото уходит multipart-запросом, а в multipart
+            // отсутствующий BooleanField бэк читает как False —
+            // «Онлайн-консультации» и «24/7» молча выключались. Досылаем
+            // флаги только в этом случае: в JSON отсутствующее поле не
+            // меняется, а 24/7 правится на странице расписания отдельным
+            // запросом, и закэшированный профиль может хранить старое
+            // значение — поэтому сначала берём его из кэша расписания.
+            ...(body.photo instanceof File
+              ? {
+                  is_online_available: raw?.is_online_available,
+                  emergency_24_7:
+                    queryClient.getQueryData<DoctorSchedule>(
+                      doctorCabinetKeys.schedule(),
+                    )?.emergency_24_7 ?? raw?.emergency_24_7,
+                }
+              : {}),
             ...body,
           },
           { processPhoto },

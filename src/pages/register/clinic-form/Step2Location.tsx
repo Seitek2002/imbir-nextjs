@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWebsite } from "@/entities/clinic-profile";
+
 import { getCities, referenceKeys } from "@/shared/api";
 import { CITIES_BY_COUNTRY, DEFAULT_COUNTRY } from "@/shared/config";
 import { useReferenceOptions } from "@/shared/lib/useReference";
@@ -22,6 +24,21 @@ type Props = {
   ) => void;
 };
 
+const isValidWebsite = (value: string): boolean => {
+  const website = normalizeWebsite(value);
+  if (!website) return true;
+  try {
+    const { hostname, protocol } = new URL(website);
+    return (
+      /^https?:$/.test(protocol) &&
+      hostname.includes(".") &&
+      !/\s/.test(value.trim())
+    );
+  } catch {
+    return false;
+  }
+};
+
 export const Step2Location = ({ data, onChange, emailError }: Props) => {
   // Временно только Кыргызстан — по просьбе поддержки, чтобы у операторов не
   // возникало вопросов из-за случайно выбранной другой страны при
@@ -33,6 +50,12 @@ export const Step2Location = ({ data, onChange, emailError }: Props) => {
     getCities,
     CITIES_BY_COUNTRY[data.country] ?? [],
   );
+
+  // Бэк хранит сайт в URLField: адрес без точки в домене или с пробелами
+  // не сохранится. Предупреждаем сразу, а не после регистрации.
+  const websiteError = isValidWebsite(data.website)
+    ? undefined
+    : "Проверьте адрес сайта — например, imbir.kg или https://imbir.kg";
 
   const handleLocationChange = (value: LocationValue) => {
     onChange("latitude", value.latitude);
@@ -86,9 +109,16 @@ export const Step2Location = ({ data, onChange, emailError }: Props) => {
       <Input
         label="Сайт (если есть)"
         autoComplete="url"
-        placeholder="Введите ссылку на сайт"
+        inputMode="url"
+        placeholder="Например, https://imbir.kg"
         value={data.website}
         onChange={(e) => onChange("website", e.target.value)}
+        error={websiteError}
+        hint={
+          websiteError
+            ? undefined
+            : "Можно без https:// — добавим автоматически"
+        }
       />
 
       {/* Пин на карте — единственный источник latitude/longitude в форме.

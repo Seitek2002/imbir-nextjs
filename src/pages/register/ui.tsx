@@ -7,6 +7,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQueryClient } from "@tanstack/react-query";
 
+import {
+  getClinicProfileErrorMessage,
+  normalizeCoordinate,
+  normalizeWebsite,
+} from "@/entities/clinic-profile";
 import { toApiEducation } from "@/entities/doctor-education";
 import {
   resolveSpecializationIds,
@@ -801,6 +806,17 @@ export const RegisterPage = () => {
     setIsLoadingClinic(true);
     // Полный номер с кодом страны — см. ClinicFormData.phoneDialCode.
     const clinicPhone = data.phone ? `${data.phoneDialCode}${data.phone}` : "";
+    // Сайт без https:// и координаты с 14 знаками после запятой бэк в PUT
+    // профиля отклоняет (URLField, DecimalField(9, 6)) — а этим же PUT
+    // сразу после регистрации уходит логотип. Нормализуем один раз для
+    // обоих запросов.
+    const website = normalizeWebsite(data.website);
+    const latitude = normalizeCoordinate(data.latitude);
+    const longitude = normalizeCoordinate(data.longitude);
+    const experienceYears = Math.max(
+      0,
+      Math.floor(Number(data.experienceYears ?? "")) || 0,
+    );
     try {
       const toDay = (d: { from: string; to: string }) => ({
         from: d.from || null,
@@ -818,6 +834,7 @@ export const RegisterPage = () => {
           name: data.clinicName,
           type: data.clinicType,
           description: data.description,
+          experience_years: experienceYears,
         },
         step2: {
           country: data.country,
@@ -825,14 +842,14 @@ export const RegisterPage = () => {
           address: data.fullAddress,
           phone: clinicPhone,
           email: data.email,
-          website: data.website || undefined,
+          website: website || undefined,
           // Формат гео внутри step2 в схеме не раскрыт (drf-spectacular отдаёт
           // весь шаг как opaque string), поэтому полагаться на него нельзя —
           // координаты дублируются ниже в updateClinicProfile, где поля
           // latitude/longitude документированы. См. docs/QUESTIONS.md.
           location:
-            data.latitude && data.longitude
-              ? { lat: Number(data.latitude), lng: Number(data.longitude) }
+            latitude && longitude
+              ? { lat: Number(latitude), lng: Number(longitude) }
               : undefined,
         },
         step3: {
@@ -928,10 +945,11 @@ export const RegisterPage = () => {
           country: data.country,
           city: data.city,
           address: data.fullAddress,
-          latitude: data.latitude || undefined,
-          longitude: data.longitude || undefined,
+          latitude: latitude ?? undefined,
+          longitude: longitude ?? undefined,
           phone: clinicPhone,
-          website: data.website || undefined,
+          website: website || undefined,
+          experience_years: experienceYears,
           legal_name: data.legalName,
           reg_number: data.registrationNumber,
           license_number: data.licenseNumber,
@@ -959,7 +977,18 @@ export const RegisterPage = () => {
         ...data.photos.map(uploadClinicPhoto),
         ...data.documents.map(uploadClinicDocument),
       ]);
-      if (profileResult.some((result) => result.status === "rejected")) {
+      // Первым идёт PUT профиля (вместе с логотипом): если отказал он, называем
+      // поле из ответа бэка — иначе непонятно, что исправлять в кабинете.
+      const [profileUpdate, ...uploads] = profileResult;
+      if (profileUpdate.status === "rejected") {
+        const reason = getClinicProfileErrorMessage(profileUpdate.reason, "");
+        toast.error(
+          reason
+            ? `Клиника создана, но данные профиля и логотип не сохранились (${reason}). Исправьте это в кабинете.`
+            : "Клиника создана, но данные профиля и логотип не сохранились. Попробуйте ещё раз в кабинете.",
+        );
+      }
+      if (uploads.some((result) => result.status === "rejected")) {
         toast.error(
           "Клиника создана, но часть файлов или данных не сохранилась. Попробуйте загрузить их в кабинете.",
         );

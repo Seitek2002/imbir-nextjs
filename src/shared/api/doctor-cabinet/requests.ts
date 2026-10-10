@@ -38,6 +38,9 @@ export type UpdateDoctorProfileBody = {
   consultation_price?: string;
   country?: string;
   education?: unknown[];
+  // Редактируется на странице расписания; в PUT профиля досылается текущее
+  // значение, чтобы multipart без этого поля не сбрасывал его в False.
+  emergency_24_7?: boolean;
   equipment?: string[];
   experience_years?: number;
   first_name?: string;

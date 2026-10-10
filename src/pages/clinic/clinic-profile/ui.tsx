@@ -166,7 +166,10 @@ export const ClinicProfilePage: FC = () => {
     saveProfile,
     rawProfile,
     uploadPhoto,
+    deletePhoto,
+    photoItems,
     uploadDocument,
+    deleteDocument,
     isUploadingPhoto,
     isUploadingDocument,
   } = useClinicCabinet();
@@ -295,6 +298,11 @@ export const ClinicProfilePage: FC = () => {
             isEditing={isEditing}
             onUploadPhoto={uploadPhoto}
             onUploadDocument={uploadDocument}
+            // Удаление на десктопе — те же мутации, что в мобильных разделах
+            // «Основная информация» и «Юридическая информация»
+            onDeletePhoto={deletePhoto}
+            onDeleteDocument={deleteDocument}
+            photoItems={photoItems}
             isUploadingPhoto={isUploadingPhoto}
             isUploadingDocument={isUploadingDocument}
             specializationOptions={specializationOptions}

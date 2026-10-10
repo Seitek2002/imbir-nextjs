@@ -100,6 +100,17 @@ export const Step1BasicInfo = ({ data, onChange }: Props) => {
         onChange={(v) => onChange("clinicType", v)}
       />
 
+      <Input
+        label="Стаж клиники, лет (если есть)"
+        type="number"
+        inputMode="numeric"
+        min={0}
+        autoComplete="off"
+        placeholder="Например, 5"
+        value={data.experienceYears ?? ""}
+        onChange={(e) => onChange("experienceYears", e.target.value)}
+      />
+
       <Textarea
         label="Описание клиники"
         autoComplete="off"

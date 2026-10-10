@@ -23,6 +23,7 @@ import {
 import { getConditions, getEquipment, referenceKeys } from "@/shared/api";
 import { CheckIcon, CloseIcon } from "@/shared/assets/icons";
 import { MAX_DOCUMENT_MB, isFileSizeAllowed } from "@/shared/lib/files";
+import { getMediaFileName } from "@/shared/lib/media";
 import { useReferenceValues } from "@/shared/lib/useReference";
 import {
   Button,
@@ -978,8 +979,8 @@ export const DoctorMyDataOverview: FC = () => {
                     download
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label="Скачать сертификат"
-                    title="Скачать сертификат"
+                    aria-label={`Скачать сертификат ${getMediaFileName(doc.url)}`}
+                    title={`Скачать сертификат ${getMediaFileName(doc.url)}`}
                     className="block w-full h-full cursor-pointer"
                   >
                     <ImageWithFallback
@@ -989,12 +990,15 @@ export const DoctorMyDataOverview: FC = () => {
                       height={64}
                       className="w-full h-full object-cover"
                       fallback={
-                        <div className="w-full h-full flex items-center justify-center text-dim">
+                        // PDF не рендерится картинкой — под иконкой подписываем
+                        // имя файла, иначе все PDF-сертификаты одинаковые.
+                        <div className="w-full h-full flex flex-col items-center justify-center gap-0.5 px-1 text-dim">
                           <svg
                             width="20"
                             height="20"
                             viewBox="0 0 20 20"
                             fill="none"
+                            className="shrink-0"
                           >
                             <path
                               d="M4 3h9l3 3v11a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1z"
@@ -1009,6 +1013,9 @@ export const DoctorMyDataOverview: FC = () => {
                               strokeLinejoin="round"
                             />
                           </svg>
+                          <span className="w-full truncate text-center text-[9px] leading-tight">
+                            {getMediaFileName(doc.url)}
+                          </span>
                         </div>
                       }
                     />

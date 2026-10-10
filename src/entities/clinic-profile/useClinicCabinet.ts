@@ -20,7 +20,8 @@ import {
   uploadClinicDocument,
   uploadClinicPhoto,
 } from "@/shared/api";
-import { toHttps } from "@/shared/lib/media";
+import { extractErrorMessage } from "@/shared/lib/errors";
+import { getMediaFileName, toHttps } from "@/shared/lib/media";
 
 import type {
   ClinicProfile,
@@ -76,6 +77,48 @@ const parseCsv = (value?: string): string[] =>
 const EMPTY_DOCUMENTS: ClinicDocument[] = [];
 const EMPTY_PHOTOS: ClinicPhoto[] = [];
 
+// Названия полей PUT /api/clinic/profile/ — чтобы ошибка 400 говорила, какое
+// поле виновато, а не только «Не удалось сохранить».
+const CLINIC_FIELD_LABELS: Record<string, string> = {
+  address: "Адрес",
+  city: "Город",
+  clinic_type: "Тип клиники",
+  country: "Страна",
+  description: "Описание",
+  experience_years: "Стаж",
+  latitude: "Широта",
+  legal_name: "Юридическое название",
+  license_authority: "Орган, выдавший лицензию",
+  license_date: "Дата выдачи лицензии",
+  license_number: "Номер лицензии",
+  logo: "Логотип",
+  longitude: "Долгота",
+  lunch_break: "Обеденный перерыв",
+  name: "Название",
+  phone: "Телефон",
+  reg_number: "Регистрационный номер",
+  schedule: "Расписание",
+  website: "Сайт",
+};
+
+export const getClinicProfileErrorMessage = (
+  error: unknown,
+  fallback = "Не удалось сохранить. Попробуйте снова",
+): string => {
+  const data = (error as { response?: { data?: unknown } } | null)?.response
+    ?.data;
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return extractErrorMessage(data, fallback);
+  }
+  for (const [field, value] of Object.entries(data)) {
+    const message = extractErrorMessage(value, "");
+    if (!message) continue;
+    const label = CLINIC_FIELD_LABELS[field];
+    return label ? `${label}: ${message}` : message;
+  }
+  return fallback;
+};
+
 export const mapApiToClinicProfile = (
   api: ClinicPrivateProfile,
 ): ClinicProfile => ({
@@ -88,6 +131,7 @@ export const mapApiToClinicProfile = (
   photos: [],
   country: api.country || "Кыргызстан",
   city: api.city,
+  experienceYears: api.experience_years ?? 0,
   fullAddress: api.address ?? "",
   phone: api.phone ?? "",
   email: api.email ?? "",
@@ -147,8 +191,13 @@ export const useClinicCabinet = () => {
       // единого поля про специализации стирало их из профиля целиком). У
       // врача от этого уже есть защита — досылаем текущие специализации и
       // здесь, если раздел их явно не меняет.
+      //
+      // emergency_24_7 досылаем по той же причине: смена логотипа уходит
+      // multipart-запросом, а в multipart отсутствующий BooleanField бэк
+      // читает как False — экстренный приём 24/7 молча выключался.
       return updateClinicProfile({
         name: data?.name,
+        emergency_24_7: data?.emergency_24_7,
         primary_specialization_ids: data?.primary_specializations?.map(
           (s) => s.id,
         ),
@@ -162,8 +211,8 @@ export const useClinicCabinet = () => {
       queryClient.setQueryData(clinicCabinetKeys.profile(), updated);
       toast.success("Данные сохранены");
     },
-    onError: () => {
-      toast.error("Не удалось сохранить. Попробуйте снова");
+    onError: (error) => {
+      toast.error(getClinicProfileErrorMessage(error));
     },
   });
 
@@ -212,9 +261,7 @@ export const useClinicCabinet = () => {
       documentsData.map((document, index) => ({
         ...document,
         url: toHttps(document.url) ?? document.url,
-        name:
-          decodeURIComponent(document.url.split("/").pop() || "") ||
-          `Документ ${index + 1}`,
+        name: getMediaFileName(document.url) || `Документ ${index + 1}`,
       })),
     [documentsData],
   );

@@ -28,3 +28,15 @@ export const toMediaUrl = (
     return toHttps(url);
   return `${API_ORIGIN}${url.startsWith("/") ? "" : "/"}${url}`;
 };
+
+// Имя файла из media-ссылки. Документы бэк хранит как <папка>/<uuid>/<исходное
+// имя> — последний сегмент URL и есть имя, под которым файл загрузили (у
+// старых загрузок там uuid). Битая %-последовательность не должна ронять рендер.
+export const getMediaFileName = (url: null | string | undefined): string => {
+  const segment = (url ?? "").split(/[?#]/)[0].split("/").pop() || "";
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+};

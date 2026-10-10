@@ -1,7 +1,12 @@
 export { ClinicProfileForm } from "./ui";
 export type { ClinicProfileFormHandle } from "./ui";
 export type { ClinicProfile } from "./model";
-export { useClinicCabinet, mapApiToClinicProfile } from "./useClinicCabinet";
+export { normalizeCoordinate, normalizeWebsite } from "./model";
+export {
+  useClinicCabinet,
+  mapApiToClinicProfile,
+  getClinicProfileErrorMessage,
+} from "./useClinicCabinet";
 export {
   FieldRow,
   FileIcon,

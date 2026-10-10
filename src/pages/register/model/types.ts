@@ -20,6 +20,9 @@ export type ClinicFormData = {
   emergency247: boolean;
 
   equipment: string[];
+  // Стаж клиники, лет (необязательный) — по нему работает фильтр «Стаж»
+  // в каталоге клиник. Строка из поля ввода; пусто — 0.
+  experienceYears?: string;
   fullAddress: string;
   // Координаты пина с карты (shared/ui/location-picker). Строки, а не числа:
   // бэк ждёт decimal-строку, а пустая строка = «клиника точку не поставила».

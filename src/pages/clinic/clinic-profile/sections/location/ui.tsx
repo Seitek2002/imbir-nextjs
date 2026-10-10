@@ -7,6 +7,8 @@ import { ClinicSectionPage } from "@/widgets/clinic/section-page";
 import {
   FieldRow,
   LocationMap,
+  normalizeCoordinate,
+  normalizeWebsite,
   useClinicCabinet,
 } from "@/entities/clinic-profile";
 
@@ -69,9 +71,12 @@ export const ClinicLocationPage: FC = () => {
       city,
       address: fullAddress,
       phone,
-      website,
-      latitude: latitude || undefined,
-      longitude: longitude || undefined,
+      // Сайт без https:// и координаты из Google Maps (14 знаков) бэк
+      // отклоняет 400-й на всё сохранение — приводим к виду, который он
+      // примет. Пустые координаты — null, чтобы очистка действительно стирала.
+      website: normalizeWebsite(website),
+      latitude: normalizeCoordinate(latitude),
+      longitude: normalizeCoordinate(longitude),
     });
     setIsEditing(false);
   };
@@ -127,16 +132,19 @@ export const ClinicLocationPage: FC = () => {
               type="url"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
+              placeholder="https://example.kg"
             />
             <div className="grid grid-cols-2 gap-4">
               <Input
                 label="Широта"
+                inputMode="decimal"
                 value={latitude}
                 onChange={(e) => setLatitude(e.target.value)}
                 placeholder="42.8746"
               />
               <Input
                 label="Долгота"
+                inputMode="decimal"
                 value={longitude}
                 onChange={(e) => setLongitude(e.target.value)}
                 placeholder="74.5698"

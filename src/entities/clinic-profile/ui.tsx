@@ -24,7 +24,12 @@ import {
 } from "@/shared/ui";
 import type { DropdownOption } from "@/shared/ui/dropdown";
 
-import type { ClinicProfile } from "./model";
+import {
+  type ClinicPhotoItem,
+  type ClinicProfile,
+  normalizeCoordinate,
+  normalizeWebsite,
+} from "./model";
 import {
   DAY_API,
   DAY_LABELS,
@@ -50,6 +55,7 @@ type FormState = {
   description: string;
   emergency24: boolean;
   equipment: string[];
+  experienceYears: string;
   fullAddress: string;
   latitude: string;
   legalName: string;
@@ -74,6 +80,7 @@ const buildState = (p: ClinicProfile): FormState => ({
   name: p.name ?? "",
   type: p.type ?? "",
   description: p.description ?? "",
+  experienceYears: p.experienceYears ? String(p.experienceYears) : "",
   country: p.country ?? "",
   city: p.city ?? "",
   fullAddress: p.fullAddress ?? "",
@@ -106,6 +113,12 @@ const buildState = (p: ClinicProfile): FormState => ({
   emergency24: p.workSchedule.emergency24 ?? false,
 });
 
+// Стаж из поля ввода: пусто или мусор — 0 (как default на бэке)
+const parseYears = (value: string): number => {
+  const years = Math.floor(Number(value.trim()));
+  return Number.isFinite(years) && years > 0 ? years : 0;
+};
+
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export type ClinicProfileFormHandle = {
@@ -127,9 +140,14 @@ type Props = ClinicProfile & {
   isSpecializationsLoading?: boolean;
   isUploadingDocument?: boolean;
   isUploadingPhoto?: boolean;
+  // Удаление — по id с бэка; без колбэка кнопки удаления не показываются
+  onDeleteDocument?: (id: number) => Promise<unknown>;
+  onDeletePhoto?: (id: number) => Promise<unknown>;
   onUploadDocument?: (file: File) => Promise<unknown>;
   onUploadPhoto?: (file: File) => Promise<unknown>;
   patientConditionOptions?: DropdownOption[];
+  // Фото с id (photos из ClinicProfile — только URL, удалить по ним нельзя)
+  photoItems?: ClinicPhotoItem[];
   // Справочник специализаций — пропсом, а не хуком внутри: entities в
   // этом проекте не импортируют друг друга (та же причина, по которой резолвинг
   // названий в id живёт на странице, см. ClinicProfileFormHandle выше).
@@ -167,6 +185,10 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
       patientConditions,
       onUploadPhoto,
       onUploadDocument,
+      onDeletePhoto,
+      onDeleteDocument,
+      photoItems,
+      experienceYears,
       isUploadingPhoto = false,
       isUploadingDocument = false,
       specializationOptions = [],
@@ -226,18 +248,22 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         name: d.name,
         clinic_type: d.type,
         description: d.description,
-        phone: d.phone || undefined,
-        website: d.website || undefined,
+        experience_years: parseYears(d.experienceYears),
+        // Очищенные поля шлём пустой строкой (координаты и дату — null), а не
+        // undefined: отсутствующее в теле поле PUT оставляет старое значение,
+        // и стёртый сайт или телефон после «Данные сохранены» возвращались.
+        phone: d.phone,
+        website: normalizeWebsite(d.website),
         country: d.country || undefined,
         city: d.city || undefined,
-        address: d.fullAddress || undefined,
-        latitude: d.latitude || undefined,
-        longitude: d.longitude || undefined,
-        legal_name: d.legalName || undefined,
-        reg_number: d.registrationNumber || undefined,
-        license_number: d.licenseNumber || undefined,
+        address: d.fullAddress,
+        latitude: normalizeCoordinate(d.latitude),
+        longitude: normalizeCoordinate(d.longitude),
+        legal_name: d.legalName,
+        reg_number: d.registrationNumber,
+        license_number: d.licenseNumber,
         license_date: toApiDate(d.licenseDate),
-        license_authority: d.licenseAuthority || undefined,
+        license_authority: d.licenseAuthority,
         additional_services: d.additionalServices,
         equipment: d.equipment,
         patient_conditions: d.patientConditions,
@@ -292,6 +318,26 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
         e.target.value = "";
       }
     };
+
+    // Пока идёт удаление — блокируем повторный клик по тому же крестику.
+    // Тост об успехе/ошибке показывает мутация в useClinicCabinet.
+    const [deletingKey, setDeletingKey] = useState<null | string>(null);
+    const handleDelete = async (
+      key: string,
+      remove: () => Promise<unknown>,
+    ) => {
+      setDeletingKey(key);
+      try {
+        await remove();
+      } catch {
+        // Ошибка уже показана тостом в onError мутации
+      } finally {
+        setDeletingKey(null);
+      }
+    };
+
+    const galleryItems: { id?: number; url: string }[] =
+      photoItems ?? photos.map((url) => ({ url }));
 
     const days = d.days;
 
@@ -358,6 +404,18 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
               </div>
 
               <div className="mb-6">
+                <Input
+                  label="Стаж клиники, лет"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  value={d.experienceYears}
+                  onChange={(e) => set("experienceYears", e.target.value)}
+                  placeholder="Например, 5"
+                />
+              </div>
+
+              <div className="mb-6">
                 <Textarea
                   label="Описание"
                   value={d.description}
@@ -370,25 +428,43 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 <label className="block text-secondary text-sm mb-2">
                   Фотографии
                 </label>
-                <div className="flex items-center gap-4 overflow-x-auto pb-2">
-                  {photos.map((photo, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setOpenPhoto(photo)}
-                      className="w-24 h-24 rounded-2xl overflow-hidden bg-surface shrink-0 cursor-pointer"
-                    >
-                      <ImageWithFallback
-                        src={photo}
-                        alt={`Photo ${i + 1}`}
-                        width={96}
-                        height={96}
-                        sizes="96px"
-                        loadingVariant="spinner"
-                        className="w-full h-full object-cover"
-                        fallback={null}
-                      />
-                    </button>
+                {/* pt-2/pr-2 — место под кнопку удаления, выступающую за угол */}
+                <div className="flex items-center gap-4 overflow-x-auto pt-2 pr-2 pb-2">
+                  {galleryItems.map((photo, i) => (
+                    <div key={photo.id ?? i} className="relative shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setOpenPhoto(photo.url)}
+                        className="block w-24 h-24 rounded-2xl overflow-hidden bg-surface cursor-pointer"
+                      >
+                        <ImageWithFallback
+                          src={photo.url}
+                          alt={`Photo ${i + 1}`}
+                          width={96}
+                          height={96}
+                          sizes="96px"
+                          loadingVariant="spinner"
+                          className="w-full h-full object-cover"
+                          fallback={null}
+                        />
+                      </button>
+                      {onDeletePhoto && photo.id !== undefined && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDelete(`photo-${photo.id}`, () =>
+                              onDeletePhoto(photo.id as number),
+                            )
+                          }
+                          disabled={deletingKey === `photo-${photo.id}`}
+                          className="absolute -right-2 -top-2 size-6 rounded-full bg-foreground text-sm leading-none text-white disabled:opacity-50"
+                          aria-label="Удалить фотографию"
+                          title="Удалить фотографию"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
                 <input
@@ -441,6 +517,9 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
               </div>
 
               <FieldRow label="Тип">{type}</FieldRow>
+              <FieldRow label="Стаж, лет">
+                {experienceYears ? String(experienceYears) : ""}
+              </FieldRow>
               <FieldRow label="Описание">{description}</FieldRow>
 
               <div className="pt-3">
@@ -698,11 +777,33 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                 </label>
                 <div className="flex flex-wrap gap-4">
                   {documents.map((doc, i) => (
-                    <div key={i} className="flex flex-col items-center gap-1">
+                    <div
+                      key={doc.id ?? i}
+                      className="relative flex flex-col items-center gap-1"
+                    >
                       <FileIcon />
-                      <span className="text-xs text-secondary max-w-20 text-center truncate">
+                      <span
+                        className="text-xs text-secondary max-w-20 text-center truncate"
+                        title={doc.name}
+                      >
                         {doc.name}
                       </span>
+                      {onDeleteDocument && doc.id !== undefined && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDelete(`document-${doc.id}`, () =>
+                              onDeleteDocument(doc.id as number),
+                            )
+                          }
+                          disabled={deletingKey === `document-${doc.id}`}
+                          className="absolute -right-2 -top-2 size-6 rounded-full bg-foreground text-sm leading-none text-white disabled:opacity-50"
+                          aria-label={`Удалить документ ${doc.name}`}
+                          title="Удалить документ"
+                        >
+                          ×
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -750,7 +851,10 @@ export const ClinicProfileForm = forwardRef<ClinicProfileFormHandle, Props>(
                       className="flex flex-col items-center gap-1 hover:opacity-70 transition-opacity"
                     >
                       <FileIcon />
-                      <span className="text-xs text-secondary max-w-20 text-center truncate">
+                      <span
+                        className="text-xs text-secondary max-w-20 text-center truncate"
+                        title={doc.name}
+                      >
                         {doc.name}
                       </span>
                     </a>

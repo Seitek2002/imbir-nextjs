@@ -36,6 +36,7 @@ export const ClinicBasicInfoPage: FC = () => {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
   const [description, setDescription] = useState("");
+  const [experienceYears, setExperienceYears] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | undefined>(undefined);
   const [openPhoto, setOpenPhoto] = useState<null | string>(null);
@@ -54,6 +55,9 @@ export const ClinicBasicInfoPage: FC = () => {
     setName(source.name ?? "");
     setType(source.type ?? "");
     setDescription(source.description ?? "");
+    setExperienceYears(
+      source.experienceYears ? String(source.experienceYears) : "",
+    );
     setLogoPreview(source.logo);
   };
 
@@ -92,6 +96,8 @@ export const ClinicBasicInfoPage: FC = () => {
       name,
       clinic_type: type,
       description,
+      // Стаж — по нему работает фильтр «Стаж» в каталоге клиник; пусто — 0
+      experience_years: Math.max(0, Math.floor(Number(experienceYears)) || 0),
       ...(logoFile ? { logo: logoFile } : {}),
     });
     setLogoFile(null);
@@ -181,6 +187,16 @@ export const ClinicBasicInfoPage: FC = () => {
               options={clinicTypeOptions}
               value={type}
               onChange={setType}
+            />
+
+            <Input
+              label="Стаж клиники, лет"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              value={experienceYears}
+              onChange={(e) => setExperienceYears(e.target.value)}
+              placeholder="Например, 5"
             />
 
             <Textarea
@@ -299,6 +315,9 @@ export const ClinicBasicInfoPage: FC = () => {
             </div>
 
             <FieldRow label="Тип">{profile.type}</FieldRow>
+            <FieldRow label="Стаж, лет">
+              {profile.experienceYears ? String(profile.experienceYears) : ""}
+            </FieldRow>
             <FieldRow label="Описание">{profile.description}</FieldRow>
 
             <div className="pt-3">

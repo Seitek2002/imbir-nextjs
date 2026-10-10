@@ -148,8 +148,13 @@ export const ClinicLegalPage: FC = () => {
                         className="relative flex flex-col items-center gap-1"
                       >
                         <FileIcon />
-                        <span className="max-w-24 truncate text-center text-xs text-secondary">
-                          {document.url.split("/").pop() || "Документ"}
+                        {/* name — раскодированное имя файла (useClinicCabinet);
+                            title — полное имя, когда подпись обрезана */}
+                        <span
+                          className="max-w-24 truncate text-center text-xs text-secondary"
+                          title={document.name}
+                        >
+                          {document.name}
                         </span>
                         <button
                           type="button"
@@ -216,8 +221,11 @@ export const ClinicLegalPage: FC = () => {
                     className="flex flex-col items-center gap-1 hover:opacity-70 transition-opacity"
                   >
                     <FileIcon />
-                    <span className="text-xs text-secondary max-w-20 text-center truncate">
-                      {document.url.split("/").pop() || "Документ"}
+                    <span
+                      className="text-xs text-secondary max-w-20 text-center truncate"
+                      title={document.name}
+                    >
+                      {document.name}
                     </span>
                   </a>
                 ))}

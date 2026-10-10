@@ -18,7 +18,14 @@ export type ClinicScheduleData = {
 };
 
 export type ClinicDocument = {
+  // id с бэка — нужен для удаления; в старых местах документы бывают без него
+  id?: number;
   name: string;
+  url: string;
+};
+
+export type ClinicPhotoItem = {
+  id: number;
   url: string;
 };
 
@@ -34,6 +41,8 @@ export type ClinicProfile = {
 
   // Оборудование и условия
   equipment: string[];
+  // Стаж клиники, лет — по нему работает фильтр «Стаж» в каталоге клиник
+  experienceYears?: number;
   fullAddress: string;
   id: string;
   latitude: string;
@@ -64,4 +73,25 @@ export type ClinicProfile = {
 
   // Расписание
   workSchedule: ClinicScheduleData;
+};
+
+// Сайт без схемы («imbir.kg») бэк (URLField) отклоняет 400-й ошибкой на всё
+// сохранение профиля — дописываем https:// сами, как и бэк в новых версиях.
+export const normalizeWebsite = (value: string): string => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  return /^[a-z][a-z\d+.-]*:\/\//i.test(trimmed)
+    ? trimmed
+    : `https://${trimmed.replace(/^\/+/, "")}`;
+};
+
+// Координаты из Google Maps приходят с 14 знаками после запятой, а бэк
+// (DecimalField(9, 6)) принимает не больше 6. Пустое поле — null, чтобы
+// очищенная координата действительно стиралась. Нечисловое значение
+// отправляем как есть: бэк вернёт ошибку с названием поля.
+export const normalizeCoordinate = (value: string): null | string => {
+  const trimmed = value.trim().replace(",", ".");
+  if (!trimmed) return null;
+  const number = Number(trimmed);
+  return Number.isFinite(number) ? number.toFixed(6) : trimmed;
 };
