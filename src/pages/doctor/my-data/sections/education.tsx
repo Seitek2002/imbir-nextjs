@@ -70,8 +70,12 @@ export const DoctorEducationSection: FC = () => {
   // переходе между вкладками страница монтируется, когда профиль уже в кеше.
   // С useState(profile) первый же рендер записывал его в трекер, условие ниже
   // не срабатывало никогда — и форма оставалась пустой.
+  //
+  // !isEditing — профиль меняется и без сохранения этой формы (фото уходит
+  // отдельным PUT, ИИ-фото подтягивается через 60/120 с, загрузка
+  // сертификата): иначе несохранённые правки стирались. Как в overview.tsx.
   const [syncedProfile, setSyncedProfile] = useState<typeof profile>(null);
-  if (profile && profile !== syncedProfile) {
+  if (profile && profile !== syncedProfile && !isEditing) {
     setSyncedProfile(profile);
     setD({
       university: profile.university,

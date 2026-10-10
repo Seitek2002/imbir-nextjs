@@ -11,8 +11,19 @@ export type LegalInfo = {
   reg_number: string;
 };
 
+// Активная привязка врача к клинике (поле clinics профиля кабинета).
+// id — публичный id клиники, его же ждёт clinic_id формы услуги.
+export type DoctorOwnClinic = {
+  branch: { address: string; id: number; name: string } | null;
+  id: number;
+  name: string;
+};
+
 export type DoctorPrivateProfile = DoctorDetail & {
   appointments_total: number;
+  // Места работы врача. Старый бэк поле не отдаёт — тогда клиники берутся
+  // из публичной карточки (см. useDoctorClinics).
+  clinics?: DoctorOwnClinic[];
   is_published: boolean;
   legal: LegalInfo;
   // Возвращается только после запроса с process_photo=true и новым фото:

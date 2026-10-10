@@ -2,8 +2,11 @@
 
 import { FC } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { useDoctorCabinet } from "@/widgets/doctor/layout";
 
+import { doctorCabinetKeys, getDoctorStats } from "@/shared/api";
 import { ClockIcon, StarIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { usePendingDoctorAppointments } from "@/shared/lib/usePendingAppointments";
@@ -121,6 +124,46 @@ const MENU_ITEMS = [
   },
 ];
 
+// Плитки статистики между карточкой профиля и меню. Тот же запрос
+// /api/doctor/stats/, что у счётчика новых записей (ключ общий), — раньше из
+// ответа брали только pending, а просмотры, пациентов и долю завершённых
+// приёмов врач нигде не видел.
+const DoctorStatsTiles: FC = () => {
+  const { data: stats } = useQuery({
+    queryKey: doctorCabinetKeys.stats(),
+    queryFn: getDoctorStats,
+  });
+  if (!stats) return null;
+
+  const tiles = [
+    {
+      label: "Просмотры профиля",
+      value: stats.profile_views.toLocaleString("ru-RU"),
+    },
+    { label: "Пациенты", value: stats.patients_count.toLocaleString("ru-RU") },
+    {
+      label: "Приёмы завершены",
+      value: `${stats.completion_rate.toLocaleString("ru-RU", { maximumFractionDigits: 1 })}%`,
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-3 gap-2 mb-4">
+      {tiles.map((tile) => (
+        <div
+          key={tile.label}
+          className="bg-white rounded-3xl px-3 py-4 flex flex-col items-center gap-1 text-center"
+        >
+          <span className="text-foreground font-semibold text-lg">
+            {tile.value}
+          </span>
+          <span className="text-muted text-xs">{tile.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 // Мобильный хаб кабинета врача — карточка профиля, меню разделов и выход,
 // как в макете. Это НЕ отдельный маршрут: рендерится внутри /doctor-profile
 // на узких экранах (как ProfileMobileHub у пациента), а на десктопе тот же
@@ -159,6 +202,7 @@ export const DoctorProfileMobileHub: FC = () => {
           </div>
         ) : undefined
       }
+      beforeMenu={<DoctorStatsTiles />}
       // Счётчик вешается на «Записи» здесь, а не в MENU_ITEMS: список — модульная
       // константа, а число приходит из запроса.
       items={MENU_ITEMS.map((item) =>

@@ -13,9 +13,25 @@ type OnlineProfileSettingsProps = {
   isPublished: boolean;
   onConsultationPriceChange: (value: string) => void;
   onOnlineAvailableChange: (value: boolean) => void;
-  onPublishedChange: (value: boolean) => void;
   readOnlyClassName?: string;
 };
+
+// Публикацию врач сам не переключает: is_published на бэке только для
+// чтения (модерационное поле). Раньше здесь был чекбокс — значение уходило
+// в PUT, бэк его молча игнорировал, и после сохранения галочка возвращалась.
+const PublishedStatus: FC<{ isPublished: boolean }> = ({ isPublished }) => (
+  <div className="flex flex-col gap-1">
+    <FieldView
+      label="Профиль в каталоге"
+      value={isPublished ? "Опубликован" : "Не опубликован"}
+    />
+    <p className="text-muted text-sm">
+      {isPublished
+        ? "Публикацией управляет модератор."
+        : "Профиль публикует модератор после проверки. Пока профиль не опубликован, он не показывается в поиске и на него нельзя записаться."}
+    </p>
+  </div>
+);
 
 export const OnlineProfileSettings: FC<OnlineProfileSettingsProps> = ({
   consultationPrice,
@@ -24,7 +40,6 @@ export const OnlineProfileSettings: FC<OnlineProfileSettingsProps> = ({
   isPublished,
   onConsultationPriceChange,
   onOnlineAvailableChange,
-  onPublishedChange,
   readOnlyClassName = "flex flex-col gap-4",
 }) => (
   <div className="mt-6 pt-6 border-t border-border order-last lg:order-none">
@@ -52,16 +67,7 @@ export const OnlineProfileSettings: FC<OnlineProfileSettingsProps> = ({
             disabled={!isOnlineAvailable}
           />
         </div>
-        <Checkbox
-          size="large"
-          label="Опубликовать профиль в каталоге"
-          checked={isPublished}
-          onChange={(e) => onPublishedChange(e.target.checked)}
-        />
-        <p className="text-muted text-sm">
-          Пока профиль не опубликован, он не показывается в поиске и на него
-          нельзя записаться.
-        </p>
+        <PublishedStatus isPublished={isPublished} />
       </div>
     ) : (
       <div className={readOnlyClassName}>
@@ -73,10 +79,7 @@ export const OnlineProfileSettings: FC<OnlineProfileSettingsProps> = ({
           label="Стоимость консультации, сом"
           value={consultationPrice}
         />
-        <FieldView
-          label="Профиль в каталоге"
-          value={isPublished ? "Опубликован" : "Не опубликован"}
-        />
+        <PublishedStatus isPublished={isPublished} />
       </div>
     )}
   </div>

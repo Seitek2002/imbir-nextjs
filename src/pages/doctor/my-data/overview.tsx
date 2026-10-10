@@ -2,6 +2,8 @@
 
 import { FC, useRef, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
+
 import {
   FieldView,
   SectionCard,
@@ -20,7 +22,13 @@ import {
   useSpecializations,
 } from "@/entities/specialization";
 
-import { getConditions, getEquipment, referenceKeys } from "@/shared/api";
+import {
+  doctorCabinetKeys,
+  getConditions,
+  getDoctorStats,
+  getEquipment,
+  referenceKeys,
+} from "@/shared/api";
 import { CheckIcon, CloseIcon } from "@/shared/assets/icons";
 import { MAX_DOCUMENT_MB, isFileSizeAllowed } from "@/shared/lib/files";
 import { getMediaFileName } from "@/shared/lib/media";
@@ -223,6 +231,44 @@ const fromProfile = (
   licenseNumber: p.licenseNumber,
 });
 
+// Статистика профиля. Тот же запрос /api/doctor/stats/, что у счётчика новых
+// записей в сайдбаре (ключ общий), — раньше из ответа брали только pending,
+// а просмотры, пациентов и долю завершённых приёмов врач нигде не видел.
+const DoctorStatsCard: FC = () => {
+  const { data: stats } = useQuery({
+    queryKey: doctorCabinetKeys.stats(),
+    queryFn: getDoctorStats,
+  });
+  if (!stats) return null;
+
+  const items = [
+    {
+      label: "Просмотры профиля",
+      value: stats.profile_views.toLocaleString("ru-RU"),
+    },
+    { label: "Пациенты", value: stats.patients_count.toLocaleString("ru-RU") },
+    {
+      label: "Приёмы завершены",
+      value: `${stats.completion_rate.toLocaleString("ru-RU", { maximumFractionDigits: 1 })}%`,
+    },
+  ];
+
+  return (
+    <SectionCard title="Статистика">
+      <div className="grid grid-cols-3 gap-4">
+        {items.map((item) => (
+          <div key={item.label}>
+            <p className="text-muted text-sm">{item.label}</p>
+            <p className="text-foreground font-semibold text-2xl mt-0.5">
+              {item.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </SectionCard>
+  );
+};
+
 export const DoctorMyDataOverview: FC = () => {
   const {
     profile,
@@ -390,7 +436,6 @@ export const DoctorMyDataOverview: FC = () => {
       consultation_price: d.consultationPrice.trim()
         ? `${parseFloat(d.consultationPrice.replace(",", ".")) || 0}`
         : "0.00",
-      is_published: d.isPublished,
       education: toApiEducation({
         university: d.university,
         diplomaSpecialty: d.diplomaSpecialty,
@@ -452,6 +497,8 @@ export const DoctorMyDataOverview: FC = () => {
           </Button>
         )}
       </div>
+
+      <DoctorStatsCard />
 
       {/* ── 1. Основная информация ─────────────────────────────────────── */}
       <SectionCard title="Основная информация">
@@ -777,7 +824,6 @@ export const DoctorMyDataOverview: FC = () => {
           isPublished={d.isPublished}
           onOnlineAvailableChange={(value) => set("isOnlineAvailable", value)}
           onConsultationPriceChange={(value) => set("consultationPrice", value)}
-          onPublishedChange={(value) => set("isPublished", value)}
           readOnlyClassName={fieldList}
         />
       </SectionCard>

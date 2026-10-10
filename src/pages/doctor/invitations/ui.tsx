@@ -13,6 +13,7 @@ import {
   acceptDoctorInvitation,
   declineDoctorInvitation,
   doctorCabinetKeys,
+  doctorKeys,
   getDoctorInvitations,
 } from "@/shared/api";
 import { extractErrorMessage } from "@/shared/lib/errors";
@@ -49,6 +50,9 @@ export function DoctorInvitationsPage() {
     void queryClient.invalidateQueries({
       queryKey: doctorCabinetKeys.profile(),
     });
+    // Места работы в публичной карточке врача тоже поменялись — по ней форма
+    // услуги строит выбор клиники, пока бэк не отдаёт clinics в профиле.
+    void queryClient.invalidateQueries({ queryKey: doctorKeys.details() });
   };
 
   const acceptMutation = useMutation({

@@ -45,8 +45,10 @@ export const ClinicLegalPage: FC = () => {
     setLicenseAuthority(source.licenseAuthority ?? "");
   };
 
+  // !isEditing — загрузка или удаление документа идут сразу и меняют profile;
+  // без этой проверки fillFrom стирал несохранённые юридические поля.
   const [synced, setSynced] = useState<typeof profile>(null);
-  if (profile && profile !== synced) {
+  if (profile && profile !== synced && !isEditing) {
     setSynced(profile);
     fillFrom(profile);
   }

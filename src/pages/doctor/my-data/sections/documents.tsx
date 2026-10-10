@@ -58,10 +58,15 @@ export const DoctorDocumentsSection: FC = () => {
   // переходе между вкладками страница монтируется, когда профиль уже в кеше.
   // С useState(profile) первый же рендер записывал его в трекер, условие ниже
   // не срабатывало никогда — и форма оставалась пустой.
+  //
+  // Список файлов берём с сервера всегда: загрузка и удаление идут сразу и
+  // должны отражаться и в режиме правки. А номер лицензии в режиме правки не
+  // трогаем — иначе загрузка сертификата (новая ссылка на profile) стирала
+  // набранный, но ещё не сохранённый номер.
   const [syncedProfile, setSyncedProfile] = useState<typeof profile>(null);
   if (profile && profile !== syncedProfile) {
     setSyncedProfile(profile);
-    setLicenseNumber(profile.licenseNumber);
+    if (!isEditing) setLicenseNumber(profile.licenseNumber);
     setCerts([...profile.certificates]);
   }
 

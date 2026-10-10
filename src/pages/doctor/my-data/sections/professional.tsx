@@ -121,8 +121,12 @@ export const DoctorProfessionalInfoSection: FC = () => {
   // переходе между вкладками страница монтируется, когда профиль уже в кеше.
   // С useState(profile) первый же рендер записывал его в трекер, условие ниже
   // не срабатывало никогда — и форма оставалась пустой.
+  //
+  // !isEditing — профиль меняется и без сохранения этой формы (фото уходит
+  // отдельным PUT, ИИ-фото подтягивается через 60/120 с, загрузка
+  // сертификата): иначе несохранённые правки стирались. Как в overview.tsx.
   const [syncedProfile, setSyncedProfile] = useState<typeof profile>(null);
-  if (profile && profile !== syncedProfile) {
+  if (profile && profile !== syncedProfile && !isEditing) {
     setSyncedProfile(profile);
     setD(fromProfile(profile));
   }
@@ -203,7 +207,6 @@ export const DoctorProfessionalInfoSection: FC = () => {
       consultation_price: d.consultationPrice.trim()
         ? `${parseFloat(d.consultationPrice.replace(",", ".")) || 0}`
         : "0.00",
-      is_published: d.isPublished,
     });
     setIsEditing(false);
     setShowSaveConfirm(false);
@@ -411,7 +414,6 @@ export const DoctorProfessionalInfoSection: FC = () => {
           isPublished={d.isPublished}
           onOnlineAvailableChange={(value) => set("isOnlineAvailable", value)}
           onConsultationPriceChange={(value) => set("consultationPrice", value)}
-          onPublishedChange={(value) => set("isPublished", value)}
           readOnlyClassName={fieldList}
         />
       </div>

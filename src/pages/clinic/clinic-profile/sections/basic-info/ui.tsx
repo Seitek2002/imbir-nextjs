@@ -61,8 +61,11 @@ export const ClinicBasicInfoPage: FC = () => {
     setLogoPreview(source.logo);
   };
 
+  // !isEditing — загрузка или удаление фото галереи идут сразу и меняют
+  // profile; без этой проверки fillFrom стирал несохранённые название, тип,
+  // описание и превью нового логотипа (а сам файл логотипа всё равно уходил).
   const [synced, setSynced] = useState<typeof profile>(null);
-  if (profile && profile !== synced) {
+  if (profile && profile !== synced && !isEditing) {
     setSynced(profile);
     fillFrom(profile);
   }
