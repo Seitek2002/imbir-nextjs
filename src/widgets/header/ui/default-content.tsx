@@ -1,10 +1,10 @@
 "use client";
-import { FC, Suspense, useState } from "react";
+import { FC, Suspense } from "react";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { GlobalSearch } from "@/features/global-search";
+import { NotificationsBell } from "@/features/notifications-bell";
 
 import {
   GeoBtnArrowIcon,
@@ -20,14 +20,6 @@ import { Button, IconBtn } from "@/shared/ui";
 import { useAuthDisplay } from "../lib/useAuthDisplay";
 import { HeaderChatButton } from "./chat-button";
 
-// Модалка выбора города тянет за собой Modal и Dropdown со всеми их
-// зависимостями, а открывают её редко. Шапка стоит на каждой странице,
-// поэтому модалку грузим отдельным чанком при первом открытии.
-const CitySelectorModal = dynamic(
-  () => import("./city-selector").then((mod) => mod.CitySelectorModal),
-  { ssr: false },
-);
-
 const ROLE_ROUTE: Record<string, string> = {
   patient: "/profile",
   doctor: "/doctor-profile",
@@ -37,15 +29,11 @@ const ROLE_ROUTE: Record<string, string> = {
 export const DefaultContent: FC<{ searchable?: boolean }> = ({
   searchable,
 }) => {
-  const [isCityModalOpen, setIsCityModalOpen] = useState(false);
-  // Монтируем модалку только после первого открытия (до этого её чанк даже
-  // не запрашивается) и дальше уже не размонтируем — как и раньше, она сама
-  // решает, что показывать, по isOpen.
-  const [cityModalRequested, setCityModalRequested] = useState(false);
-  const openCityModal = () => {
-    setCityModalRequested(true);
-    setIsCityModalOpen(true);
-  };
+  // Окно выбора города одно на всё приложение и живёт в app/providers
+  // (CitySelectorHost): его открывает и эта кнопка, и «Изменить» в баннере
+  // города. Шапка рендерит DefaultContent дважды (десктоп и мобильный), так
+  // что своя модалка в каждом экземпляре открывалась бы дважды.
+  const openCityModal = useCityStore((state) => state.openSelector);
   const city = useCityStore((state) => state.city);
   const { isAuthed, role } = useAuthDisplay();
   const isDoctor = role === "doctor";
@@ -85,8 +73,9 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             <Link href={ROUTES.BLOG}>Блог</Link>
           </nav>
 
-          {/* Mobile City Selector */}
-          <div className="md:hidden">
+          {/* Mobile City Selector + уведомления. Колокольчик крайний справа:
+              его список выпадает влево от кнопки и иначе уходит за экран. */}
+          <div className="flex items-center gap-2 md:hidden">
             <Button
               IconLeft={GeoIcon}
               IconRight={GeoBtnArrowIcon}
@@ -96,6 +85,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             >
               {city}
             </Button>
+            <NotificationsBell isAuthed={isAuthed} role={role} />
           </div>
 
           <div className="hidden md:flex gap-3">
@@ -111,6 +101,7 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
             >
               <GlobalSearch />
             </Suspense>
+            <NotificationsBell isAuthed={isAuthed} role={role} />
             <HeaderChatButton />
             <Link href={profileHref}>
               <IconBtn variant="outline" size="sm">
@@ -135,14 +126,6 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
           </div>
         )}
       </div>
-
-      {/* РЕНДЕРИМ МОДАЛКУ */}
-      {cityModalRequested && (
-        <CitySelectorModal
-          isOpen={isCityModalOpen}
-          onClose={() => setIsCityModalOpen(false)}
-        />
-      )}
     </>
   );
 };

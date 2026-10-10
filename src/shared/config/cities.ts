@@ -46,6 +46,43 @@ export const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
   Караганда: { lat: 49.8047, lng: 73.1094 },
 };
 
+// Расстояние между двумя точками по поверхности Земли (формула гаверсинусов), км.
+const distanceKm = (
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+) => {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(h));
+};
+
+// Дальше этого от центра ближайшего города из списка считаем, что человек
+// не в одном из наших городов, и город за него не выбираем.
+const NEAREST_CITY_MAX_KM = 100;
+
+// Ближайший к точке город из CITY_COORDS — для кнопки «Моё текущее
+// местоположение» в выборе города. null, если ни один город не ближе
+// NEAREST_CITY_MAX_KM.
+export const findNearestCity = (point: {
+  lat: number;
+  lng: number;
+}): null | string => {
+  let nearest: null | string = null;
+  let best = Infinity;
+  for (const [city, coords] of Object.entries(CITY_COORDS)) {
+    const d = distanceKm(point, coords);
+    if (d < best) {
+      best = d;
+      nearest = city;
+    }
+  }
+  return best <= NEAREST_CITY_MAX_KM ? nearest : null;
+};
+
 // ISO-код страны для Nominatim: сужает поиск адреса до нужной страны, иначе
 // «Советская 20» находится в десятке постсоветских городов сразу.
 export const COUNTRY_ISO: Record<string, string> = {

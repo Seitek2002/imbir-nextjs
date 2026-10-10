@@ -4,7 +4,10 @@ import { FC, useState } from "react";
 import toast from "react-hot-toast";
 
 import { GeoIcon } from "@/shared/assets/icons";
-import { CITIES_BY_COUNTRY as COUNTRIES_DATA } from "@/shared/config";
+import {
+  CITIES_BY_COUNTRY as COUNTRIES_DATA,
+  findNearestCity,
+} from "@/shared/config";
 import { useCityStore } from "@/shared/store";
 import { Button, Dropdown, Modal } from "@/shared/ui";
 
@@ -66,18 +69,26 @@ export const CitySelectorModal: FC<Props> = ({ isOpen, onClose }) => {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        // В РЕАЛЬНОМ ПРОЕКТЕ здесь будет запрос к Yandex Map API или Google Maps API
-        // const { latitude, longitude } = position.coords;
-        // const cityName = await fetch(`https://geocode-api...`);
-
-        // Для примера имитируем задержку и успешное определение (например, Бишкек)
-        console.log(position);
-        setTimeout(() => {
-          setCity("Бишкек");
-          setIsDetecting(false);
-          toast.success("Местоположение определено!", { id: "geo" });
-          onClose();
-        }, 1000);
+        // Город — ближайший из нашего списка к координатам устройства. Раньше
+        // здесь была заглушка, которая всегда ставила «Бишкек», и пользователь
+        // из Оша оставался с чужим городом (а setCity к тому же отключает
+        // автоподстановку города по IP).
+        setIsDetecting(false);
+        const city = findNearestCity({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        if (!city) {
+          // Рядом нет ни одного города из списка — ничего не подменяем,
+          // пусть человек выберет город сам.
+          toast.error("Не нашли ваш город в списке. Выберите его вручную", {
+            id: "geo",
+          });
+          return;
+        }
+        setCity(city);
+        toast.success(`Город изменен на ${city}`, { id: "geo" });
+        onClose();
       },
       (error) => {
         setIsDetecting(false);

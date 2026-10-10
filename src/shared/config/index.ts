@@ -8,5 +8,6 @@ export {
   COUNTRY_CENTER,
   COUNTRY_ISO,
   DEFAULT_COUNTRY,
+  findNearestCity,
 } from "./cities";
 export { DEFAULT_CLINIC_TYPES, DEFAULT_COUNTRIES } from "./reference-defaults";

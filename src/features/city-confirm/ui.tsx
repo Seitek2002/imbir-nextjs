@@ -33,8 +33,14 @@ function useDetectedCity(): null | string {
 }
 
 export const CityConfirmBanner = () => {
-  const { isSet, manuallySelected, setCity, dismiss, applyDetectedCity } =
-    useCityStore();
+  const {
+    isSet,
+    manuallySelected,
+    setCity,
+    dismiss,
+    applyDetectedCity,
+    openSelector,
+  } = useCityStore();
   const detectedCity = useDetectedCity();
   const [closed, setClosed] = useState(false);
 
@@ -79,9 +85,12 @@ export const CityConfirmBanner = () => {
     setClosed(true);
   };
 
+  // «Изменить» открывает то же окно выбора города, что и кнопка в шапке.
+  // Раньше баннер просто прятался, и человек оставался с городом по IP.
   const handleChange = () => {
     dismiss();
     setClosed(true);
+    openSelector();
   };
 
   return (

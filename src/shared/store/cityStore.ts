@@ -17,6 +17,8 @@ const writeCityCookie = (city: string) => {
 type CityStore = {
   applyDetectedCity: (city: string) => void;
   city: string;
+  // Закрыть окно выбора города.
+  closeSelector: () => void;
   dismiss: () => void;
   // Баннер подтверждения города показан/скрыт (dismiss или подтверждение).
   isSet: boolean;
@@ -24,6 +26,12 @@ type CityStore = {
   // Отличается от isSet: закрытие баннера («Изменить») не считается выбором и
   // не блокирует автоподстановку задетекченного города.
   manuallySelected: boolean;
+  // Открыть окно выбора города. Окно одно на всё приложение (монтируется в
+  // app/providers), поэтому его открывает не только кнопка города в шапке,
+  // но и «Изменить» в баннере подтверждения города.
+  openSelector: () => void;
+  // Окно выбора города открыто. В localStorage не пишется (см. partialize).
+  selectorOpen: boolean;
   setCity: (city: string) => void;
 };
 
@@ -33,6 +41,7 @@ export const useCityStore = create<CityStore>()(
       city: DEFAULT_CITY,
       isSet: false,
       manuallySelected: false,
+      selectorOpen: false,
 
       // Ручной выбор города: и хедер, и каталог начинают слать именно его,
       // автоподстановка детекта больше не перезаписывает.
@@ -53,9 +62,19 @@ export const useCityStore = create<CityStore>()(
       },
 
       dismiss: () => set({ isSet: true }),
+
+      openSelector: () => set({ selectorOpen: true }),
+      closeSelector: () => set({ selectorOpen: false }),
     }),
     {
       name: "user-city-storage",
+      // Сохраняем только выбор города: открытое окно не должно всплывать
+      // снова после перезагрузки страницы.
+      partialize: ({ city, isSet, manuallySelected }) => ({
+        city,
+        isSet,
+        manuallySelected,
+      }),
       // Keep the cookie in sync with the persisted value on every load, so
       // existing users (who set their city before cookies existed) also get it.
       onRehydrateStorage: () => (state) => {

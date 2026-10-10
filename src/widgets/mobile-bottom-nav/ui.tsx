@@ -5,6 +5,9 @@ import { FC, SVGProps } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useQuery } from "@tanstack/react-query";
+
+import { chatKeys, getChatUnreadCount } from "@/shared/api";
 import { useAuthStore } from "@/shared/store";
 
 type IconProps = SVGProps<SVGSVGElement>;
@@ -62,6 +65,18 @@ const ProfileTabIcon: FC<IconProps> = (props) => (
 export const MobileBottomNav: FC = () => {
   const pathname = usePathname() ?? "";
   const role = useAuthStore((s) => s.user?.role);
+  const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
+
+  // Бейдж непрочитанных на вкладке «Чат». На телефоне это единственное место,
+  // где видно новое сообщение: кнопка чата с бейджем есть только в десктопной
+  // шапке. Тот же запрос и ключ, что у неё; опрашивает его один таймер в
+  // features/chat-notifications, здесь только читаем кеш.
+  const { data: chatUnread = 0 } = useQuery({
+    queryKey: chatKeys.unreadCount(),
+    queryFn: getChatUnreadCount,
+    enabled: isAuthed,
+    retry: false,
+  });
 
   const profileHref =
     role === "doctor"
@@ -84,7 +99,12 @@ export const MobileBottomNav: FC = () => {
       // целиком: вкладка открывается сразу.
       prefetch: true,
     },
-    { href: "/chat", label: "Чат", Icon: ChatTabIcon },
+    {
+      href: "/chat",
+      label: "Чат",
+      Icon: ChatTabIcon,
+      badge: isAuthed ? chatUnread : 0,
+    },
     {
       href: profileHref,
       label: "Профиль",
@@ -111,18 +131,28 @@ export const MobileBottomNav: FC = () => {
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-border pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-stretch">
-        {items.map(({ href, label, Icon, prefetch }) => {
+        {items.map(({ href, label, Icon, prefetch, badge }) => {
           const active = href === "/" ? pathname === "/" : pathname === href;
           return (
             <Link
               key={label}
               href={href}
               prefetch={prefetch}
+              aria-label={
+                badge ? `${label}, непрочитанных: ${badge}` : undefined
+              }
               className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-colors ${
                 active ? "text-primary" : "text-muted"
               }`}
             >
-              <Icon className="w-6 h-6" />
+              <span className="relative">
+                <Icon className="w-6 h-6" />
+                {!!badge && badge > 0 && (
+                  <span className="absolute -top-1 -right-2 min-w-4 h-4 px-0.5 rounded-full bg-primary text-white text-[10px] font-semibold flex items-center justify-center">
+                    {badge > 9 ? "9+" : badge}
+                  </span>
+                )}
+              </span>
               <span className="text-[11px] font-medium leading-none">
                 {label}
               </span>

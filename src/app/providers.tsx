@@ -3,6 +3,8 @@
 import { Suspense, useState } from "react";
 import { Toaster } from "react-hot-toast";
 
+import dynamic from "next/dynamic";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { AxiosError } from "axios";
@@ -14,7 +16,59 @@ import { CityConfirmBanner } from "@/features/city-confirm";
 
 import { SessionExpiredError } from "@/shared/api";
 import { UrlStateBridge } from "@/shared/lib/url-state";
+import {
+  usePendingClinicAppointments,
+  usePendingDoctorAppointments,
+} from "@/shared/lib/usePendingAppointments";
 import { useTapHaptics } from "@/shared/lib/useTapHaptics";
+import { useAuthStore, useCityStore } from "@/shared/store";
+
+// Модалка выбора города тянет за собой Modal и Dropdown со всеми их
+// зависимостями, а открывают её редко, поэтому грузим её отдельным чанком
+// при первом открытии.
+const CitySelectorModal = dynamic(
+  () =>
+    import("@/widgets/header/ui/city-selector").then(
+      (mod) => mod.CitySelectorModal,
+    ),
+  { ssr: false },
+);
+
+// Одно окно выбора города на всё приложение. Открывается через cityStore:
+// кнопкой города в шапке и «Изменить» в баннере подтверждения города.
+function CitySelectorHost() {
+  const isOpen = useCityStore((s) => s.selectorOpen);
+  const close = useCityStore((s) => s.closeSelector);
+  // Монтируем модалку только после первого открытия (до этого её чанк даже
+  // не запрашивается) и дальше уже не размонтируем — она сама решает, что
+  // показывать, по isOpen. Флаг ставим прямо в рендере (паттерн «adjust
+  // state during render»), а не в эффекте.
+  const [requested, setRequested] = useState(false);
+  if (isOpen && !requested) setRequested(true);
+
+  if (!requested) return null;
+  return <CitySelectorModal isOpen={isOpen} onClose={close} />;
+}
+
+// Звук «Новые записи» для врача и клиники на любой странице, а не только в
+// кабинете: раньше опрос жил лишь в сайдбаре/меню кабинета, и на /chat или
+// публичном сайте новая запись приходила молча. Ничего не рисует; бейджи в
+// кабинете читают тот же кеш react-query.
+function PendingAppointmentsWatcher() {
+  const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
+  const role = useAuthStore((s) => s.user?.role);
+
+  usePendingDoctorAppointments({
+    enabled: isAuthed && role === "doctor",
+    sound: true,
+  });
+  usePendingClinicAppointments({
+    enabled: isAuthed && role === "clinic",
+    sound: true,
+  });
+
+  return null;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useTapHaptics();
@@ -56,6 +110,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </Suspense>
       <CityConfirmBanner />
       <ChatMessageSoundWatcher />
+      <PendingAppointmentsWatcher />
+      <CitySelectorHost />
       <Toaster position="bottom-right" />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
