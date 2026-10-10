@@ -23,6 +23,10 @@ const WS_CODE_NOT_A_PARTICIPANT = 4003;
 // Больше окна дебаунса отправителя (2с) с запасом.
 const TYPING_EXPIRE_MS = 6000;
 
+// Переподключение после обрыва сокета: 1с, 2с, 4с… но не реже раза в 30с.
+const RECONNECT_BASE_MS = 1000;
+const RECONNECT_MAX_MS = 30_000;
+
 const SYSTEM_APPOINTMENT_RE = /(\d{2})\.(\d{2})\.(\d{4})\s+в\s+(\d{2}):(\d{2})/;
 
 const getConsultationKey = (date: string, time: string) =>
@@ -120,21 +124,42 @@ export const useChatRoom = (
     [queryClient, roomId],
   );
 
+  // Последний снимок ленты для обработчика сокета: он живёт дольше рендера и
+  // иначе видел бы сообщения только на момент подключения.
+  const messagesRef = useRef<ChatThreadMessage[]>([]);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
   useEffect(() => {
     if (roomId === null || currentUserId === null || !token || !role) return;
 
     let isActive = true;
+    let socket: null | WebSocket = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+    let reconnectAttempt = 0;
+    // Входящее пришло, пока вкладка была скрыта: прочитанным пометим, когда
+    // пользователь к ней вернётся.
+    let hasUnseenIncoming = false;
+
+    // Прочитали входящие (GET истории или кадр "read") — бейджи у комнаты и в
+    // шапке пересчитываются сервером.
+    const refreshUnread = () => {
+      void queryClient.invalidateQueries({ queryKey: chatKeys.rooms() });
+      void queryClient.invalidateQueries({ queryKey: chatKeys.unreadCount() });
+    };
 
     // 1. Load history (incoming unread messages are marked read server-side).
-    Promise.all([
-      getRoomMessages(roomId),
-      getChatConsultations(role).catch(() => []),
-    ])
-      .then(([history, consultations]) => {
-        if (!isActive) return;
-        consultationsRef.current = consultations;
-        setMessages(
-          history.map((message) => ({
+    // Повторяется после переподключения: догружает то, что пришло без сокета.
+    const loadHistory = () =>
+      Promise.all([
+        getRoomMessages(roomId),
+        getChatConsultations(role).catch(() => []),
+      ])
+        .then(([history, consultations]) => {
+          if (!isActive) return;
+          consultationsRef.current = consultations;
+          const loaded: ChatThreadMessage[] = history.map((message) => ({
             id: message.id,
             content: message.content,
             createdAt: message.created_at,
@@ -147,31 +172,77 @@ export const useChatRoom = (
             consultationId:
               message.appointment_id ??
               findConsultationId(message.content, consultations),
-          })),
-        );
-      })
-      .catch(() => {
-        if (isActive) setError("Не удалось загрузить историю сообщений");
-      })
-      .finally(() => {
-        if (isActive) setIsLoadingHistory(false);
-      });
+          }));
+          setMessages((prev) => {
+            // Пришедшие по сокету, пока шёл запрос истории, в ответ могли не
+            // попасть — не теряем их.
+            const loadedIds = new Set(loaded.map((message) => message.id));
+            const arrived = prev.filter(
+              (message) => message.id > 0 && !loadedIds.has(message.id),
+            );
+            // Отправленные до обрыва, но не подтверждённые сервером сообщения
+            // не теряем, если их нет в загруженной истории.
+            const ownContents = new Set(
+              loaded
+                .filter((message) => message.isMine)
+                .map((message) => message.content),
+            );
+            const pending = prev.filter(
+              (message) => message.id < 0 && !ownContents.has(message.content),
+            );
+            return [...loaded, ...arrived, ...pending];
+          });
+          refreshUnread();
+        })
+        .catch(() => {
+          if (isActive) setError("Не удалось загрузить историю сообщений");
+        })
+        .finally(() => {
+          if (isActive) setIsLoadingHistory(false);
+        });
 
-    // 2. Open the authenticated socket — the token goes in the query string.
-    const socket = new WebSocket(
-      `${CHAT_WS_BASE}/ws/chat/${roomId}/?token=${token}`,
-    );
-    socketRef.current = socket;
-
-    socket.onopen = () => {
-      if (!isActive) return;
-      setConnectionState("open");
-      setError(null); // Clear any stale "reconnecting" error after a refresh.
+    const sendRead = () => {
+      if (document.visibilityState === "hidden") {
+        hasUnseenIncoming = true;
+        return;
+      }
+      hasUnseenIncoming = false;
+      if (socket?.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: "read" }));
+      }
     };
 
-    socket.onmessage = (event) => {
+    const handleVisibilityChange = () => {
+      if (hasUnseenIncoming && document.visibilityState === "visible") {
+        sendRead();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    void loadHistory();
+
+    const handleFrame = (event: MessageEvent) => {
       if (!isActive) return;
       const payload = JSON.parse(event.data as string) as IncomingSocketFrame;
+
+      // Кто-то прочитал сообщения комнаты.
+      if (payload.type === "messages_read") {
+        // Это мы (здесь или на другом устройстве) — обновляем счётчики.
+        if (payload.reader_id === currentUserId) {
+          refreshUnread();
+          return;
+        }
+        // Собеседник прочитал наши сообщения — галочки становятся зелёными.
+        const readIds = new Set(payload.message_ids);
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.isMine && !message.isRead && readIds.has(message.id)
+              ? { ...message, isRead: true }
+              : message,
+          ),
+        );
+        return;
+      }
 
       // Событие "печатает…". Своё сервер не присылает, но подстрахуемся.
       if (payload.type === "typing") {
@@ -233,7 +304,17 @@ export const useChatRoom = (
       // Сопоставляем echo с optimistic-сообщением, чтобы сразу получить настоящий
       // id и затем иметь возможность редактировать/удалять его без перезагрузки.
       if (sender && sender.id === currentUserId) {
+        const isPendingHere = messagesRef.current.some(
+          (message) =>
+            message.isMine &&
+            message.id < 0 &&
+            message.content === payload.content,
+        );
+        // Отправлено с другого устройства/вкладки — список комнат тоже свежий.
+        if (!isPendingHere) touchRoom(payload.content, payload.created_at);
+
         setMessages((prev) => {
+          if (prev.some((message) => message.id === payload.id)) return prev;
           const optimisticIndex = [...prev]
             .map((message, index) => ({ message, index }))
             .reverse()
@@ -243,13 +324,28 @@ export const useChatRoom = (
                 message.id < 0 &&
                 message.content === payload.content,
             )?.index;
-          if (optimisticIndex === undefined) return prev;
+          // Своего optimistic-сообщения нет — значит, оно отправлено с
+          // другого устройства: показываем его как своё.
+          if (optimisticIndex === undefined) {
+            return [
+              ...prev,
+              {
+                id: payload.id,
+                content: payload.content,
+                createdAt: payload.created_at,
+                editedAt: payload.edited_at,
+                isMine: true,
+                isRead: payload.is_read ?? false,
+              },
+            ];
+          }
           const next = [...prev];
           next[optimisticIndex] = {
             ...next[optimisticIndex],
             id: payload.id,
             createdAt: payload.created_at,
-            isRead: payload.is_read,
+            // Старый бэк is_read в кадре не шлёт — оставляем серую галочку.
+            isRead: payload.is_read ?? next[optimisticIndex].isRead,
           };
           return next;
         });
@@ -284,6 +380,10 @@ export const useChatRoom = (
         },
       ]);
 
+      // Комната открыта — входящее сразу прочитано. Без этого оно оставалось
+      // непрочитанным на сервере и счётчик в шапке рос, пока чат открыт.
+      sendRead();
+
       // Новая запись могла появиться уже после загрузки истории комнаты.
       // Обновляем список и добавляем ссылку в только что пришедшее уведомление.
       if (sender === null && !payload.appointment_id) {
@@ -308,23 +408,64 @@ export const useChatRoom = (
       }
     };
 
-    socket.onerror = () => {
-      if (isActive) setConnectionState("error");
+    // 2. Open the authenticated socket — the token goes in the query string.
+    const connect = () => {
+      // receipts=1 — просим кадры "messages_read" (старым клиентам бэк их не шлёт).
+      const ws = new WebSocket(
+        `${CHAT_WS_BASE}/ws/chat/${roomId}/?token=${token}&receipts=1`,
+      );
+      socket = ws;
+      socketRef.current = ws;
+
+      ws.onopen = () => {
+        if (!isActive) return;
+        setConnectionState("open");
+        setError(null); // Clear any stale "reconnecting" error after a refresh.
+        // Переподключились — пока сокета не было, могли прийти сообщения.
+        if (reconnectAttempt > 0) void loadHistory();
+        reconnectAttempt = 0;
+      };
+
+      ws.onmessage = handleFrame;
+
+      ws.onerror = () => {
+        if (isActive) setConnectionState("error");
+      };
+
+      ws.onclose = (event) => {
+        if (!isActive) return;
+        if (event.code === WS_CODE_INVALID_TOKEN) {
+          // Переподключится сам эффект, когда обновится токен.
+          setConnectionState("closed");
+          setError("Сессия истекла. Войдите снова.");
+          return;
+        }
+        if (event.code === WS_CODE_NOT_A_PARTICIPANT) {
+          setConnectionState("closed");
+          setError("Нет доступа к этому чату");
+          return;
+        }
+        // Обрыв сети, сон устройства, рестарт сервера — раньше сокет так и
+        // оставался закрытым до перезагрузки. Переподключаемся с паузой.
+        setConnectionState("connecting");
+        const delay = Math.min(
+          RECONNECT_BASE_MS * 2 ** reconnectAttempt,
+          RECONNECT_MAX_MS,
+        );
+        reconnectAttempt += 1;
+        reconnectTimer = setTimeout(() => {
+          if (isActive) connect();
+        }, delay);
+      };
     };
 
-    socket.onclose = (event) => {
-      if (!isActive) return;
-      setConnectionState("closed");
-      if (event.code === WS_CODE_INVALID_TOKEN) {
-        setError("Сессия истекла. Войдите снова.");
-      } else if (event.code === WS_CODE_NOT_A_PARTICIPANT) {
-        setError("Нет доступа к этому чату");
-      }
-    };
+    connect();
 
     return () => {
       isActive = false;
-      socket.close();
+      clearTimeout(reconnectTimer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      socket?.close();
       socketRef.current = null;
       consultationsRef.current = [];
       // Гасим все таймеры авто-снятия и статусы при смене комнаты/токена.
@@ -332,7 +473,7 @@ export const useChatRoom = (
       typingTimersRef.current = {};
       setTypingUsers({});
     };
-  }, [roomId, currentUserId, token, role, touchRoom]);
+  }, [roomId, currentUserId, token, role, touchRoom, queryClient]);
 
   const sendTyping = useCallback((isTyping: boolean) => {
     const socket = socketRef.current;
@@ -360,6 +501,8 @@ export const useChatRoom = (
           content: text,
           createdAt,
           isMine: true,
+          // Серая галочка сразу; зелёной станет по кадру "messages_read".
+          isRead: false,
         },
       ]);
       socket.send(JSON.stringify({ content: text }));

@@ -15,8 +15,8 @@ export type ChatRoom = {
   id: number;
   last_message: ChatRoomLastMessage | null;
   participants: ChatParticipant[];
-  // Кол-во непрочитанных сообщений в комнате. Заполняется бэком; пока поля нет —
-  // счётчик в хедере остаётся 0. См. бейдж в HeaderChatButton.
+  // Кол-во непрочитанных входящих в комнате (без удалённых). Старый бэк поле
+  // не отдаёт — тогда бейдж у комнаты не рисуется.
   unread_count?: number;
 };
 
@@ -77,6 +77,20 @@ export type IncomingDeletedMessages = {
   type: "messages_deleted";
 };
 
+// Участник reader_id прочитал сообщения message_ids (открыл комнату или
+// получил их, держа её открытой). Старый бэк этот кадр не шлёт.
+export type IncomingReadMessages = {
+  message_ids: number[];
+  reader_id: number;
+  type: "messages_read";
+};
+
+// Клиент держит комнату открытой и увидел входящее — просит пометить
+// прочитанным. Старый бэк кадр без content просто игнорирует.
+export type ReadOutgoing = {
+  type: "read";
+};
+
 export type ChatConsultation = {
   date: string;
   doctor?: ChatParticipant | null;
@@ -121,6 +135,7 @@ export type IncomingSocketFrame =
   | IncomingChatMessage
   | IncomingDeletedMessages
   | IncomingEditedMessage
+  | IncomingReadMessages
   | TypingIncoming;
 
 // ── AI assistant chat (room 0) ──────────────────────────────────────────────
