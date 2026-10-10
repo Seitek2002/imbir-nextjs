@@ -2,7 +2,14 @@ import toast from "react-hot-toast";
 
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
+import { loginHref } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
+import {
+  shareRotatedTokens,
+  syncAuthFromStorage,
+} from "@/shared/store/authStore";
+
+import type { RefreshResponse } from "./auth/types";
 
 // Экспортируем: серверные компоненты берут тот же адрес, но ходят нативным
 // fetch'ем ради кеша Next (axios мимо него проходит) — см. getSiteSettings.
@@ -20,8 +27,34 @@ export const apiClient = axios.create({
 // PUT — специализации, стаж, образование, опыт работы.
 export const FILE_UPLOAD_TIMEOUT_MS = 120_000;
 
+type RetriableRequestConfig = InternalAxiosRequestConfig & {
+  // Повтор без токена после окончательно истёкшей сессии (см. ниже).
+  _anonymousRetry?: boolean;
+  _retry?: boolean;
+};
+
+// Эндпоинты входа и регистрации токен не используют, но DRF проверяет
+// Bearer ещё до прав доступа: с протухшим токеном в сторе вход с верным
+// паролем получал 401, интерсептор пытался продлить мёртвую сессию, и форма
+// показывала «Неверный email или пароль». Сюда токен не прикрепляем.
+// /api/auth/me/ и /api/auth/logout/ сюда не входят — им нужен пользователь.
+const ANONYMOUS_AUTH_PATHS = [
+  "/api/auth/login/",
+  "/api/auth/register/",
+  "/api/auth/refresh/",
+  "/api/auth/password-reset/",
+  "/api/auth/verify/",
+  "/api/auth/invite/",
+  "/api/auth/email/check/",
+];
+
+const isAnonymousAuthRequest = (url?: string) =>
+  !!url && ANONYMOUS_AUTH_PATHS.some((path) => url.includes(path));
+
 // Attach access token to every request
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const { _anonymousRetry } = config as RetriableRequestConfig;
+  if (_anonymousRetry || isAnonymousAuthRequest(config.url)) return config;
   const token = useAuthStore.getState().accessToken;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -83,30 +116,156 @@ const handleSessionExpired = () => {
   // Раньше редирект случался лишь побочно: logout() чистил стор, AuthGuard
   // это замечал и уводил на /login. Работало только пока гейт смонтирован —
   // то есть зависело от того, на какой странице застал 401. Уводим явно.
-  const { pathname } = window.location;
+  // ?next= возвращает после входа на ту же страницу кабинета.
+  const { pathname, search } = window.location;
   const inCabinet = PROTECTED_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
-  if (inCabinet) window.location.href = "/login?expired=1";
+  if (inCabinet) {
+    const href = loginHref(`${pathname}${search}`);
+    window.location.href = `${href}${href.includes("?") ? "&" : "?"}expired=1`;
+  }
 };
+
+const isSafeMethod = (method?: string) =>
+  ["get", "head", "options"].includes((method ?? "get").toLowerCase());
+
+const bearerOf = (config: InternalAxiosRequestConfig): null | string => {
+  const header = config.headers?.Authorization;
+  return typeof header === "string" && header.startsWith("Bearer ")
+    ? header.slice("Bearer ".length)
+    : null;
+};
+
+// Сессия окончательно мертва. Бэк отвечает 401 даже на публичные
+// эндпоинты (списки врачей и клиник, слоты), если прислать протухший Bearer,
+// поэтому раньше после неудачного refresh такие запросы падали насовсем:
+// React Query их не ретраит, и форма записи с календарём оставались пустыми
+// до ручной перезагрузки. Читающие запросы один раз повторяем уже без
+// токена — гостю они доступны. Пишущие (запись, отзыв) не повторяем: молча
+// создать гостевую запись вместо записи из аккаунта нельзя.
+const failWithExpiredSession = (request: RetriableRequestConfig) => {
+  const expired = new SessionExpiredError();
+  if (request._anonymousRetry || !isSafeMethod(request.method)) {
+    return Promise.reject(expired);
+  }
+  request._retry = true;
+  request._anonymousRetry = true;
+  request.headers.delete("Authorization");
+  return apiClient(request).catch((retryError: unknown) => {
+    // Эндпоинт и правда требует входа — отдаём привычную ошибку сессии.
+    if ((retryError as AxiosError)?.response?.status === 401) throw expired;
+    throw retryError;
+  });
+};
+
+// Сессия закончилась, только если бэк отверг сам refresh-токен (401 — истёк
+// или в blacklist, 400 — битый). Обрыв связи, таймаут и 5xx (например,
+// рестарт бэка при деплое, ~12 с) — не повод выкидывать пользователя:
+// refresh-токен ещё действителен, следующий запрос его продлит.
+const isRefreshRejected = (error: unknown) => {
+  if (error instanceof SessionExpiredError) return true;
+  const status = (error as AxiosError)?.response?.status;
+  return status === 401 || status === 400;
+};
+
+const REFRESH_LOCK_NAME = "imbir-auth-refresh";
+
+// Сколько ждём сообщения от соседней вкладки, если наш refresh оказался уже
+// использованным (см. refreshAccessToken).
+const ROTATION_SETTLE_MS = 300;
+
+// Продление сессии по очереди между вкладками: бэк ротирует refresh-токен,
+// и две вкладки, одновременно пришедшие с одним токеном, разлогинивали бы
+// одна другую (вторая получает «Token is blacklisted»). Web Locks есть во
+// всех актуальных браузерах; без них просто идём без межвкладочной очереди.
+const withRefreshLock = async (
+  task: () => Promise<string>,
+): Promise<string> => {
+  if (typeof navigator === "undefined" || !("locks" in navigator)) {
+    return task();
+  }
+  return navigator.locks.request(REFRESH_LOCK_NAME, task);
+};
+
+const postRefresh = async (refresh: string): Promise<RefreshResponse> => {
+  // Голым axios, а не apiClient — иначе запрос попал бы в этот же
+  // интерсептор. Таймаут задаём явно: у дефолтного инстанса его нет, и
+  // зависший refresh держал бы всю очередь запросов бесконечно.
+  const { data } = await axios.post<RefreshResponse>(
+    `${BASE_URL}/api/auth/refresh/`,
+    { refresh },
+    { timeout: 15_000 },
+  );
+  return data;
+};
+
+// usedAccess — токен, с которым запрос получил 401. Если в сторе уже другой,
+// сессию продлили без нас (соседняя вкладка), и второй refresh не нужен.
+const refreshAccessToken = (usedAccess: null | string) =>
+  withRefreshLock(async () => {
+    syncAuthFromStorage();
+    const { accessToken, refreshToken } = useAuthStore.getState();
+    if (accessToken && accessToken !== usedAccess) return accessToken;
+    if (!refreshToken) throw new SessionExpiredError();
+
+    let data: RefreshResponse;
+    try {
+      data = await postRefresh(refreshToken);
+    } catch (error) {
+      if (!isRefreshRejected(error)) throw error;
+      // Токен могла только что ротировать соседняя вкладка, а сообщение о
+      // новой паре ещё в пути. Даём ему дойти и перечитываем стор.
+      await new Promise((resolve) => setTimeout(resolve, ROTATION_SETTLE_MS));
+      syncAuthFromStorage();
+      const latest = useAuthStore.getState();
+      if (latest.accessToken && latest.accessToken !== usedAccess) {
+        return latest.accessToken;
+      }
+      throw error;
+    }
+
+    // Бэк ротирует refresh (ROTATE_REFRESH_TOKENS): присланный токен уже в
+    // blacklist. Раньше сохранялся только access, и следующий refresh через
+    // час шёл со старым токеном — сессия жила максимум около двух часов
+    // вместо семи дней. Если бэк перестанет ротировать, оставляем прежний.
+    const tokens = {
+      access: data.access,
+      refresh: data.refresh ?? refreshToken,
+    };
+    // Пока мы ждали ответа, пользователь мог выйти — не воскрешаем сессию.
+    if (useAuthStore.getState().refreshToken === refreshToken) {
+      useAuthStore.getState().setTokens(tokens);
+      shareRotatedTokens(refreshToken, tokens);
+    }
+    return tokens.access;
+  });
 
 // Auto-refresh on 401
 apiClient.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-    };
+    const originalRequest = error.config as RetriableRequestConfig | undefined;
 
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    if (
+      !originalRequest ||
+      error.response?.status !== 401 ||
+      originalRequest._retry ||
+      // Вход и регистрация шли без токена — продлевать нечего, а 401 тут
+      // означает ответ самого эндпоинта, который форма должна показать.
+      isAnonymousAuthRequest(originalRequest.url)
+    ) {
       return Promise.reject(error);
     }
 
-    const { refreshToken, setAccessToken } = useAuthStore.getState();
+    const usedAccess = bearerOf(originalRequest);
+    const { refreshToken } = useAuthStore.getState();
 
     if (!refreshToken) {
       handleSessionExpired();
-      return Promise.reject(new SessionExpiredError());
+      // Запрос ушёл без токена — повтор без токена ничего не изменит.
+      if (!usedAccess) return Promise.reject(new SessionExpiredError());
+      return failWithExpiredSession(originalRequest);
     }
 
     if (isRefreshing) {
@@ -117,34 +276,38 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
       return new Promise<string>((resolve, reject) => {
         pendingQueue.push({ resolve, reject });
-      }).then((token) => {
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return apiClient(originalRequest);
-      });
+      }).then(
+        (token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return apiClient(originalRequest);
+        },
+        (queueError: unknown) =>
+          queueError instanceof SessionExpiredError
+            ? failWithExpiredSession(originalRequest)
+            : Promise.reject(queueError),
+      );
     }
 
     originalRequest._retry = true;
     isRefreshing = true;
 
     try {
-      // Голым axios, а не apiClient — иначе запрос попал бы в этот же
-      // интерсептор. Таймаут задаём явно: у дефолтного инстанса его нет, и
-      // зависший refresh держал бы всю очередь запросов бесконечно.
-      const { data } = await axios.post<{ access: string }>(
-        `${BASE_URL}/api/auth/refresh/`,
-        { refresh: refreshToken },
-        { timeout: 15_000 },
-      );
-      const newToken = data.access;
-      setAccessToken(newToken);
+      const newToken = await refreshAccessToken(usedAccess);
       processPendingQueue(null, newToken);
       originalRequest.headers.Authorization = `Bearer ${newToken}`;
       return apiClient(originalRequest);
-    } catch {
+    } catch (refreshError) {
+      if (!isRefreshRejected(refreshError)) {
+        // Сеть, таймаут или 5xx: токены не трогаем и никуда не уводим.
+        // Запрос падает обычной сетевой ошибкой — React Query повторит его
+        // сам, а следующий 401 снова попробует продлить сессию.
+        processPendingQueue(refreshError, null);
+        return Promise.reject(refreshError);
+      }
       const expired = new SessionExpiredError();
       processPendingQueue(expired, null);
       handleSessionExpired();
-      return Promise.reject(expired);
+      return failWithExpiredSession(originalRequest);
     } finally {
       isRefreshing = false;
     }

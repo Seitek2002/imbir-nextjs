@@ -3,6 +3,7 @@
 import { FC, ReactNode, useEffect, useMemo, useRef } from "react";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
@@ -18,7 +19,7 @@ import {
 
 import { api, clinicKeys, doctorKeys, reviewKeys } from "@/shared/api";
 import { ChatIcon, HeaderBackIcon, StarIcon } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config";
+import { loginHref } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
 import { AnimatedNumber, ReviewForm } from "@/shared/ui";
 
@@ -75,6 +76,8 @@ export const AllReviewsPage: FC<Props> = ({
   backHref,
 }) => {
   const isAuthed = useAuthStore((state) => Boolean(state.accessToken));
+  // Адрес возврата для ссылки «Войдите, чтобы оставить отзыв».
+  const pathname = usePathname() ?? "";
   const currentUserId = useAuthStore((state) => state.user?.id);
   const isDoctor = targetType === "doctor";
 
@@ -237,7 +240,7 @@ export const AllReviewsPage: FC<Props> = ({
 
             {!isAuthed && (
               <Link
-                href={ROUTES.LOGIN}
+                href={loginHref(pathname)}
                 className="bg-white border border-border-soft rounded-2xl p-5 text-center hover:border-primary transition-colors"
               >
                 <p className="text-foreground font-medium">

@@ -31,7 +31,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       ]}
       value={authMode}
       onChange={(val) => {
-        router.push(val === "register" ? ROUTES.REGISTER : ROUTES.LOGIN);
+        // Адрес возврата (?next=) не теряем при переключении вход/регистрация.
+        const next = new URLSearchParams(window.location.search).get("next");
+        const path = val === "register" ? ROUTES.REGISTER : ROUTES.LOGIN;
+        router.push(next ? `${path}?next=${encodeURIComponent(next)}` : path);
       }}
     />
   );

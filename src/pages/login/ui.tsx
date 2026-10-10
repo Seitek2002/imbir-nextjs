@@ -10,7 +10,8 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { loginFn } from "@/shared/api";
 import { EmailIcon, EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config";
+import { ROUTES, resolveNextPath } from "@/shared/config";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { useAuthStore } from "@/shared/store";
 import { Button, Checkbox, type Country, Input, PhoneInput } from "@/shared/ui";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
@@ -98,16 +99,30 @@ export const LoginPage = () => {
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
-      router.push(getRoleRedirect(res.user.role));
+      // ?next= ставят middleware, AuthGuard, перехватчик 401 и ссылки «Войти»
+      // (запись, чат, отзыв): возвращаем туда, откуда человек пришёл. Без
+      // него — в кабинет роли, как раньше.
+      const next = resolveNextPath(
+        new URLSearchParams(window.location.search).get("next"),
+        res.user.role,
+      );
+      router.push(next ?? getRoleRedirect(res.user.role));
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { detail?: string; error?: string } } })
-          ?.response?.data?.detail ??
-        (err as { response?: { data?: { error?: string } } })?.response?.data
-          ?.error ??
-        (loginBy === "email"
+      const credentialsFallback =
+        loginBy === "email"
           ? "Неверный email или пароль"
-          : "Неверный номер телефона или пароль");
+          : "Неверный номер телефона или пароль";
+      const response = (
+        err as { response?: { data?: unknown; status?: number } }
+      )?.response;
+      // Без ответа (обрыв связи, таймаут) и на 5xx пароль ни при чём —
+      // раньше и здесь показывалось «Неверный email или пароль».
+      // Ошибки валидации бэк кладёт в non_field_errors (например,
+      // «Аккаунт отключён»), поэтому достаём первую строку из любого поля.
+      const msg =
+        !response || (response.status ?? 0) >= 500
+          ? "Не удалось связаться с сервером. Проверьте интернет и попробуйте снова"
+          : extractErrorMessage(response.data, credentialsFallback);
       setError(msg);
     } finally {
       setIsLoading(false);

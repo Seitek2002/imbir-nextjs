@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import { AppointmentDateTimePicker } from "@/widgets/appointment-datetime-picker";
 
-import { ROUTES } from "@/shared/config";
+import { ROUTES, loginHref } from "@/shared/config";
 import {
   formatDuration,
   formatTimeRange,
@@ -18,7 +19,9 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
   const {
     mobileStep,
     isAuthenticated,
+    selectedClinicId,
     selectedDoctorId,
+    selectedServiceId,
     selectedService,
     slotNotice,
     selectedDate,
@@ -30,6 +33,23 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
     isStep2Complete,
     setMobileStep,
   } = form;
+  const searchParams = useSearchParams();
+
+  // После входа возвращаемся в эту же форму с уже выбранными клиникой,
+  // врачом и услугой (форма читает их из URL), а не в кабинет.
+  const loginParams = new URLSearchParams(searchParams?.toString());
+  for (const [key, value] of [
+    ["clinic", selectedClinicId],
+    ["doctor", selectedDoctorId],
+    ["service", selectedServiceId],
+  ] as const) {
+    if (value) loginParams.set(key, value);
+    else loginParams.delete(key);
+  }
+  const loginQuery = loginParams.toString();
+  const loginLink = loginHref(
+    loginQuery ? `${ROUTES.RECORD}?${loginQuery}` : ROUTES.RECORD,
+  );
 
   return (
     <section
@@ -49,7 +69,7 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
         <p className="text-xs text-muted mb-3">
           Видеозвонок с врачом доступен после{" "}
           <Link
-            href={ROUTES.LOGIN}
+            href={loginLink}
             className="text-primary underline hover:no-underline"
           >
             авторизации

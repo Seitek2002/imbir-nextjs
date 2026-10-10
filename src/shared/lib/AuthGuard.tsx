@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { loginHref } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
 import { Spinner } from "@/shared/ui";
 
@@ -32,6 +33,7 @@ import { Spinner } from "@/shared/ui";
 export const AuthGuard = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const token = useAuthStore((s) => s.accessToken);
+  const restoring = useAuthStore((s) => s.isRestoringSession);
   // Ленивый инициализатор: если persist уже гидратировался к моменту монтирования
   // (частый случай — стор мог гидратироваться раньше через другой компонент,
   // например Header), читаем это синхронно и не ждём лишний тик. На SSR
@@ -53,10 +55,15 @@ export const AuthGuard = ({ children }: { children: ReactNode }) => {
     // эффект перезапускался при реальном изменении стора (например, логаут
     // с уже открытой защищённой страницы, без перезагрузки) — иначе рендер
     // корректно скроет детей по гейту ниже, но редиректа не произойдёт.
-    if (hydrated && !useAuthStore.getState().accessToken) {
-      router.replace("/login");
+    // isRestoringSession: новая вкладка ещё ждёт, не передаст ли ей сессию
+    // соседняя (вход без «Запомнить меня»). Не уводим раньше времени.
+    const { accessToken, isRestoringSession } = useAuthStore.getState();
+    if (hydrated && !accessToken && !isRestoringSession) {
+      // Адрес возврата: после входа форма вернёт сюда, а не в кабинет роли.
+      const { pathname, search } = window.location;
+      router.replace(loginHref(`${pathname}${search}`));
     }
-  }, [hydrated, token, router]);
+  }, [hydrated, token, restoring, router]);
 
   // Раньше здесь был `return null` — экран оставался пустым всё время, пока
   // persist поднимает стор из localStorage, и это читалось как зависшая

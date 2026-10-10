@@ -41,7 +41,7 @@ import {
   EyeOffIcon,
   ProfileIcon,
 } from "@/shared/assets/icons";
-import { colors } from "@/shared/config";
+import { colors, resolveNextPath } from "@/shared/config";
 import { isEmailValid } from "@/shared/lib/booking";
 import {
   extractErrorMessage,
@@ -209,6 +209,10 @@ export const RegisterPage = () => {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams() ?? new URLSearchParams();
   const { setTokens, setUser, setRememberMe } = useAuthStore();
+  // Как и вход: если пришли по ссылке с ?next= (запись, чат, отзыв), после
+  // регистрации возвращаем туда, иначе — в кабинет роли.
+  const postAuthRedirect = (role: string) =>
+    resolveNextPath(searchParams.get("next"), role) ?? getRoleRedirect(role);
   const hasInviteParams =
     searchParams.has("invite_clinic_id") || searchParams.has("clinicId");
 
@@ -503,7 +507,7 @@ export const RegisterPage = () => {
       setTokens({ access: res.access, refresh: res.refresh });
       setUser(res.user);
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
-      router.push(getRoleRedirect(res.user.role));
+      router.push(postAuthRedirect(res.user.role));
     } catch (err: unknown) {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
       toast.error(
@@ -722,7 +726,7 @@ export const RegisterPage = () => {
       }
 
       toast.success(`Добро пожаловать, ${res.user.first_name}!`);
-      router.push(getRoleRedirect(res.user.role));
+      router.push(postAuthRedirect(res.user.role));
     } catch (err: unknown) {
       toast.error(getRegistrationErrorMessage(err), {
         duration: 10_000,
@@ -995,7 +999,7 @@ export const RegisterPage = () => {
       }
 
       toast.success(`Добро пожаловать, ${data.clinicName}!`);
-      router.push(getRoleRedirect(res.user.role));
+      router.push(postAuthRedirect(res.user.role));
     } catch (err: unknown) {
       const errData = (err as { response?: { data?: unknown } })?.response
         ?.data;

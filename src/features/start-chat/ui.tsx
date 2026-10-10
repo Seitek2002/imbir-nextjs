@@ -9,7 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import { createChatRoom } from "@/shared/api";
 import { ChatIcon } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config";
+import { ROUTES, loginHref } from "@/shared/config";
 import { useAuthStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
 
@@ -45,7 +45,9 @@ export const StartChatButton: FC<Props> = ({
 
   const handleClick = () => {
     if (!isAuthed) {
-      router.push(ROUTES.LOGIN);
+      // После входа вернём на эту же страницу — к врачу, которому писали.
+      const { pathname, search } = window.location;
+      router.push(loginHref(`${pathname}${search}`));
       return;
     }
     startChat();

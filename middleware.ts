@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { loginHref } from "./src/shared/config/routes";
+
 // Maps Netlify English city names to Russian equivalents used in the app
 const CITY_MAP: Record<string, string> = {
   Bishkek: "Бишкек",
@@ -35,7 +37,14 @@ export function middleware(request: NextRequest) {
   // с city/imbir-city-set/imbir-detected-city ни по имени, ни по назначению.
   if (isProtectedPath(request.nextUrl.pathname)) {
     if (!request.cookies.get("is_authed")) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      // Запоминаем, куда шёл пользователь: после входа форма вернёт его
+      // сюда (?next=), а не в кабинет роли по умолчанию.
+      // Служебный _rsc клиентских переходов в адрес возврата не берём.
+      const params = new URLSearchParams(request.nextUrl.search);
+      params.delete("_rsc");
+      const query = params.toString();
+      const next = `${request.nextUrl.pathname}${query ? `?${query}` : ""}`;
+      return NextResponse.redirect(new URL(loginHref(next), request.url));
     }
   }
 

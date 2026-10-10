@@ -11,7 +11,7 @@ import { Header } from "@/widgets/header";
 
 import { type ChatRoom, chatKeys, getChatRooms } from "@/shared/api";
 import { ChatIcon } from "@/shared/assets/icons";
-import { ROUTES } from "@/shared/config";
+import { ROUTES, loginHref } from "@/shared/config";
 import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import { Button } from "@/shared/ui";
@@ -47,30 +47,37 @@ const PageShell: FC<{ children: React.ReactNode }> = ({ children }) => (
   </main>
 );
 
-const LoginPrompt = () => (
-  <PageShell>
-    <div className="flex-1 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl border border-border-soft p-8 w-full max-w-sm text-center flex flex-col items-center gap-4">
-        <div className="size-14 rounded-full bg-primary-tint flex items-center justify-center">
-          <ChatIcon className="size-6" />
+const LoginPrompt = () => {
+  // После входа вернём в чаты с теми же параметрами (?room=, ?ask=).
+  const searchParams = useSearchParams();
+  const query = searchParams?.toString();
+  const next = query ? `${ROUTES.CHATS}?${query}` : ROUTES.CHATS;
+
+  return (
+    <PageShell>
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl border border-border-soft p-8 w-full max-w-sm text-center flex flex-col items-center gap-4">
+          <div className="size-14 rounded-full bg-primary-tint flex items-center justify-center">
+            <ChatIcon className="size-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">
+              Войдите, чтобы открыть чаты
+            </h2>
+            <p className="text-sm text-muted mt-1">
+              Сообщения и ИИ-помощник доступны авторизованным пользователям.
+            </p>
+          </div>
+          <Link href={loginHref(next)} className="w-full">
+            <Button className="w-full justify-center" size="lg">
+              Войти
+            </Button>
+          </Link>
         </div>
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">
-            Войдите, чтобы открыть чаты
-          </h2>
-          <p className="text-sm text-muted mt-1">
-            Сообщения и ИИ-помощник доступны авторизованным пользователям.
-          </p>
-        </div>
-        <Link href={ROUTES.LOGIN} className="w-full">
-          <Button className="w-full justify-center" size="lg">
-            Войти
-          </Button>
-        </Link>
       </div>
-    </div>
-  </PageShell>
-);
+    </PageShell>
+  );
+};
 
 const EmptyState = () => (
   <div className="flex-1 flex flex-col items-center justify-center text-muted gap-3 p-8">

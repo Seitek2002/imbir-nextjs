@@ -65,3 +65,65 @@ export const ROUTES = {
     return `/record?${params.toString()}`;
   },
 } as const;
+
+// Кабинет каждой роли. Чужой кабинет в ?next= не открываем: пациент, вошедший
+// по ссылке /doctor-profile/..., всё равно получил бы там пустую страницу.
+const ROLE_CABINET_PREFIX: Record<string, string> = {
+  patient: "/profile",
+  doctor: "/doctor-profile",
+  clinic: "/clinic-profile",
+};
+
+const startsWithSegment = (path: string, prefix: string) =>
+  path === prefix ||
+  path.startsWith(`${prefix}/`) ||
+  path.startsWith(`${prefix}?`) ||
+  path.startsWith(`${prefix}#`);
+
+// Адрес возврата после входа. Принимаем только относительный путь внутри
+// сайта: "//evil.com" и "/\evil.com" браузер понимает как другой домен, а
+// полный URL превратил бы /login?next= в открытый редирект. Сами /login и
+// /register не возвращаем — иначе после входа человек снова увидит форму.
+// Обратный слэш и управляющие символы отбрасываем целиком: браузер выкидывает
+// табы и переводы строк из URL, и "/\t/evil.com" превратился бы в "//evil.com".
+export const getSafeNextPath = (
+  raw: null | string | undefined,
+): null | string => {
+  if (!raw) return null;
+  if (
+    !raw.startsWith("/") ||
+    raw.startsWith("//") ||
+    /[\\\u0000-\u001f\u007f]/.test(raw)
+  )
+    return null;
+  if (
+    startsWithSegment(raw, ROUTES.LOGIN) ||
+    startsWithSegment(raw, ROUTES.REGISTER)
+  )
+    return null;
+  return raw;
+};
+
+// То же, но с учётом роли вошедшего: кабинет другой роли отбрасываем, и
+// вызывающий код уводит в кабинет по умолчанию.
+export const resolveNextPath = (
+  raw: null | string | undefined,
+  role: string,
+): null | string => {
+  const next = getSafeNextPath(raw);
+  if (!next) return null;
+  const foreignCabinet = Object.entries(ROLE_CABINET_PREFIX).some(
+    ([cabinetRole, prefix]) =>
+      cabinetRole !== role && startsWithSegment(next, prefix),
+  );
+  return foreignCabinet ? null : next;
+};
+
+// Ссылка на вход с адресом возврата: после входа (и регистрации) человек
+// попадает туда, откуда ушёл, а не всегда в свой кабинет.
+export const loginHref = (next?: null | string): string => {
+  const safe = getSafeNextPath(next);
+  return safe
+    ? `${ROUTES.LOGIN}?next=${encodeURIComponent(safe)}`
+    : ROUTES.LOGIN;
+};
