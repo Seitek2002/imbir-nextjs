@@ -7,6 +7,42 @@ import { SelectField } from "./SelectField";
 import { SelectionListItem } from "./SelectionListItem";
 import { StepTitle } from "./StepTitle";
 
+// Формат приёма. Раньше он брался только из ссылки (mode=online) и в форме
+// не менялся — сменив врача, нельзя было ни перейти в офлайн, ни вернуться
+// в онлайн. Показывается, лишь когда врач онлайн-приём проводит.
+const FormatSwitch = ({
+  isOnline,
+  onChange,
+}: {
+  isOnline: boolean;
+  onChange: (isOnline: boolean) => void;
+}) => (
+  <div className="space-y-1.5">
+    <span className="text-sm font-medium text-overlay">Формат приёма</span>
+    <div className="grid grid-cols-2 gap-1 p-1 rounded-lg border border-border-soft">
+      {[
+        { value: false, label: "Офлайн" },
+        { value: true, label: "Онлайн" },
+      ].map((option) => (
+        <button
+          key={option.label}
+          type="button"
+          aria-pressed={isOnline === option.value}
+          onClick={() => onChange(option.value)}
+          className={cn(
+            "h-9 rounded-md text-sm font-medium transition-colors",
+            isOnline === option.value
+              ? "bg-primary text-white"
+              : "text-secondary hover:text-foreground",
+          )}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
 export const Step1Selection = ({ form }: { form: RecordForm }) => {
   const {
     errors,
@@ -27,7 +63,17 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
     handleMobileStep1Select,
     isMobileStageLoading,
     isClinicFieldHidden,
+    canChooseOnline,
+    isOnlineBooking,
+    setOnlineBooking,
+    formatNotice,
   } = form;
+
+  const formatBlock = canChooseOnline ? (
+    <FormatSwitch isOnline={isOnlineBooking} onChange={setOnlineBooking} />
+  ) : formatNotice ? (
+    <p className="text-sm text-secondary">{formatNotice}</p>
+  ) : null;
 
   return (
     <section
@@ -71,6 +117,8 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
             error={errors.service}
             onClick={() => openModal("service")}
           />
+
+          {formatBlock}
         </div>
       </div>
 
@@ -80,6 +128,11 @@ export const Step1Selection = ({ form }: { form: RecordForm }) => {
             {mobileStep1Config.title}
           </h2>
         </div>
+
+        {/* На мобильном — только после выбора врача: до него формат не важен. */}
+        {selectedDoctor && formatBlock && (
+          <div className="mt-3">{formatBlock}</div>
+        )}
 
         <div className="mt-3">
           <SearchInput

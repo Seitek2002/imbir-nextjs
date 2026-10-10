@@ -33,8 +33,8 @@ export const SummaryCard: FC<{
   appointmentId?: null | number;
   doctor: Doctor;
   initialStatus?: AppointmentStatus | null;
-  // Формат больше не выбирается: приёмы только онлайн. Но гостю бэк
-  // онлайн-запись не даёт (400), поэтому у него запись остаётся офлайновой —
+  // Итоговый формат записи (см. isOnlineBooking в use-record-form.ts): гостю
+  // бэк онлайн-запись не даёт (400), поэтому у него запись всегда офлайновая —
   // подписываем как есть, а не как хотелось бы.
   isOnline: boolean;
   selectedDate: Date | null;
@@ -115,6 +115,19 @@ export const SummaryCard: FC<{
             {isOnline ? "Онлайн-консультация" : "Офлайн-консультация"}
           </span>
         </div>
+
+        {/* Процедура в филиале — пациенту нужен его адрес, а не основной
+            адрес клиники. Для онлайн-приёма адрес не важен. */}
+        {!isOnline && service.branchAddress && (
+          <div className="flex flex-col gap-1">
+            <span className="text-secondary text-xs">Адрес</span>
+            <span className="font-medium text-foreground leading-snug">
+              {service.branchName
+                ? `${service.branchName}, ${service.branchAddress}`
+                : service.branchAddress}
+            </span>
+          </div>
+        )}
 
         <div className="flex flex-col gap-1">
           <span className="text-secondary text-xs">Дата и время</span>

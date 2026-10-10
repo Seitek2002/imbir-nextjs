@@ -25,6 +25,10 @@ type Doctor = {
   experience: number;
   id: string;
   image: StaticImageData | string;
+  // Проводит ли врач онлайн-консультации. undefined — неизвестно: у врачей из
+  // списка клиники (GET /api/clinics/{id}/) этого поля нет, тогда смотрим
+  // детали врача (см. use-record-form.ts).
+  isOnlineAvailable?: boolean;
   name: string;
   rating: number;
   reviews: number;
@@ -33,6 +37,10 @@ type Doctor = {
 };
 
 type Service = {
+  // Филиал, где проводится процедура, если он указан. Старый бэк поле branch
+  // не отдаёт — тогда адрес филиала просто не показываем.
+  branchAddress?: string;
+  branchName?: string;
   category: string;
   clinicId: string;
   // Название клиники берём напрямую из ответа API (см. use-record-form.ts),
@@ -46,7 +54,9 @@ type Service = {
   duration: null | number;
   id: string;
   image: StaticImageData | string;
-  price: number;
+  // undefined — клиника не указала цену. Не 0: «0 c» читается как
+  // «бесплатно», а на приёме деньги всё равно возьмут.
+  price?: number;
   rating: number;
   reviews: number;
   title: string;

@@ -119,9 +119,10 @@ export const SpecialistDetailsPage: FC<Props> = ({
   // Link, и Next сам их не подгружает) после тапа «Онлайн» браузер сначала
   // скачивал код и данные страницы записи, и только потом показывал её:
   // около 0.7 с на телефоне, и всё это время кнопка выглядела «мёртвой».
-  // Адреса те же, что у кнопок ниже: мобильной и десктопной.
-  const mobileRecordHref = `${ROUTES.RECORD}?doctor=${id}`;
-  const desktopRecordHref = doctor
+  // Адрес один для мобильной и десктопной кнопок «Онлайн». Раньше мобильная
+  // вела на /record?doctor=id без mode=online — и вместо онлайн-консультации
+  // оформлялась обычная офлайн-запись.
+  const onlineRecordHref = doctor
     ? ROUTES.RECORD_FOR_DOCTOR(id, {
         workplaces: doctor.workplaces,
         mode: "online",
@@ -129,10 +130,9 @@ export const SpecialistDetailsPage: FC<Props> = ({
     : null;
   const canBookOnline = !isDoctor && Boolean(doctor?.isOnlineAvailable);
   useEffect(() => {
-    if (!canBookOnline) return;
-    router.prefetch(mobileRecordHref);
-    if (desktopRecordHref) router.prefetch(desktopRecordHref);
-  }, [canBookOnline, mobileRecordHref, desktopRecordHref, router]);
+    if (!canBookOnline || !onlineRecordHref) return;
+    router.prefetch(onlineRecordHref);
+  }, [canBookOnline, onlineRecordHref, router]);
 
   const { data: reviews = [] } = useQuery({
     queryKey: reviewKeys.byTarget("doctor", id),
@@ -552,7 +552,14 @@ export const SpecialistDetailsPage: FC<Props> = ({
               className="flex-1 justify-center"
               size="lg"
               IconLeft={OnlineRecordIcon}
-              onClick={() => router.push(mobileRecordHref)}
+              onClick={() =>
+                router.push(
+                  ROUTES.RECORD_FOR_DOCTOR(id, {
+                    workplaces: doctor.workplaces,
+                    mode: "online",
+                  }),
+                )
+              }
             >
               Онлайн
             </Button>

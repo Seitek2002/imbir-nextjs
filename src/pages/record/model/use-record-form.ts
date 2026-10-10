@@ -15,6 +15,7 @@ import {
 import {
   api,
   createAppointment,
+  doctorKeys,
   getClinicById,
   getDoctorAvailableSlots,
   getProfile,
@@ -25,11 +26,14 @@ import {
 import type {
   AppointmentResponse,
   CreateAppointmentRequest,
+  ServiceFilters,
+  ServiceListItem,
 } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { formatDuration, hasDuration } from "@/shared/lib/duration";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { toHttps, toMediaUrl } from "@/shared/lib/media";
+import { parsePrice } from "@/shared/lib/price";
 import { useAuthStore, useCityStore } from "@/shared/store";
 
 import { SELECTION_LABELS } from "./constants";
@@ -57,6 +61,50 @@ import type {
 // /services — постраничная подгрузка с кнопкой «Показать ещё», иначе бэк
 // отдаёт только первую страницу и часть клиник в форме записи не найти.
 const CLINICS_PAGE_SIZE = 20;
+
+// Врачей и услуги в модалках ищем на клиенте, поэтому забираем список
+// целиком: бэк отдаёт не больше 100 записей за запрос (page_size сверх этого
+// молча урезается), дальше — по страницам. Потолок страниц — страховка от
+// бесконечного цикла, если пагинация придёт битой.
+const LIST_PAGE_SIZE = 100;
+const LIST_MAX_PAGES = 20;
+
+const fetchAllPages = async <T>(
+  fetchPage: (page: number) => Promise<{
+    data: T[];
+    pagination?: { page: number; total_pages: number };
+  }>,
+  maxPages = LIST_MAX_PAGES,
+): Promise<T[]> => {
+  const all: T[] = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const result = await fetchPage(page);
+    all.push(...result.data);
+    if (!result.pagination || page >= result.pagination.total_pages) break;
+  }
+  return all;
+};
+
+type ApiDoctor = Awaited<
+  ReturnType<typeof api.getDoctorsPaginated>
+>["data"][number];
+
+const toRecordDoctor = (d: ApiDoctor): Doctor => ({
+  id: String(d.id),
+  clinicId: d.workplaces[0]?.clinicId ?? "",
+  workplaces: d.workplaces.map((w) => ({
+    clinicId: w.clinicId,
+    clinicName: w.clinicName,
+    clinicAddress: w.clinicAddress,
+  })),
+  isOnlineAvailable: d.isOnlineAvailable,
+  name: d.name,
+  specialty: d.specialty,
+  rating: d.rating,
+  reviews: d.reviews,
+  experience: d.experience,
+  image: d.image ?? "",
+});
 
 export const useRecordForm = () => {
   const router = useRouter();
@@ -118,12 +166,15 @@ export const useRecordForm = () => {
   // уходит с is_online: false.
   const isAuthenticated = useAuthStore((state) => Boolean(state.accessToken));
 
-  // Приём онлайн — только если пользователь пришёл по кнопке «Онлайн-запись»
-  // на карточке врача (она есть лишь у тех, кто is_online_available) и вошёл
-  // в аккаунт. Раньше признак брался из одной авторизации, и запись к врачу
-  // без онлайн-приёма падала с «Этот врач не проводит онлайн-консультации» —
-  // записаться к нему было нельзя вообще.
-  const isOnlineBooking = isAuthenticated && urlParams.get("mode") === "online";
+  // Желаемый формат приёма. Изначально онлайн — только если пользователь
+  // пришёл по кнопке «Онлайн» на странице врача (mode=online), дальше его
+  // можно переключить в форме (см. setOnlineBooking). Итоговый признак
+  // isOnlineBooking считается ниже, когда известен выбранный врач.
+  const [wantsOnline, setWantsOnline] = useState(
+    () => urlParams.get("mode") === "online",
+  );
+  // Почему формат сменился сам (врач без онлайн-приёма) — показываем тостом.
+  const [formatNotice, setFormatNotice] = useState<null | string>(null);
 
   const { data: profile } = useQuery({
     queryKey: ["record-profile"],
@@ -151,31 +202,6 @@ export const useRecordForm = () => {
     }
   }, [profile]);
 
-  const {
-    data: clinicsPages,
-    fetchNextPage: fetchMoreClinics,
-    hasNextPage: hasMoreClinics,
-    isFetchingNextPage: isFetchingMoreClinics,
-    isLoading: isLoadingClinics,
-  } = useInfiniteQuery({
-    queryKey: ["record-clinics"],
-    queryFn: ({ pageParam }) =>
-      api.getClinicsPaginated({
-        page: pageParam,
-        page_size: CLINICS_PAGE_SIZE,
-      }),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
-      lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
-        ? lastPage.pagination.page + 1
-        : undefined,
-  });
-
-  const clinicsData = useMemo(
-    () => clinicsPages?.pages.flatMap((page) => page.data) ?? [],
-    [clinicsPages],
-  );
-
   // Стор города персистится из localStorage асинхронно, уже ПОСЛЕ маунта. У
   // /specialists есть безопасный дефолт на время гидратации — сервер читает
   // тот же город из cookie и передаёт его пропом, так что оба значения
@@ -200,12 +226,61 @@ export const useRecordForm = () => {
     );
   }, []);
 
-  // Врачи выбранного города; page_size поднят, иначе бэк отдаст только
-  // первую страницу (20 записей) и в форме будут видны не все врачи.
+  // Клиники — того же города, что и врачи ниже: иначе в модалке «Клиника»
+  // вперемешку шли клиники всех городов, а врачи — только выбранного.
+  // Клиника из ссылки, которой нет в списке, всё равно подтянется по id
+  // (см. clinicDetail и selectedClinic).
+  const {
+    data: clinicsPages,
+    fetchNextPage: fetchMoreClinics,
+    hasNextPage: hasMoreClinics,
+    isFetchingNextPage: isFetchingMoreClinics,
+    isLoading: isLoadingClinics,
+  } = useInfiniteQuery({
+    queryKey: ["record-clinics", selectedCity],
+    queryFn: ({ pageParam }) =>
+      api.getClinicsPaginated({
+        city: selectedCity || undefined,
+        page: pageParam,
+        page_size: CLINICS_PAGE_SIZE,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage && lastPage.pagination.page < lastPage.pagination.total_pages
+        ? lastPage.pagination.page + 1
+        : undefined,
+    enabled: isCityHydrated,
+  });
+
+  const clinicsData = useMemo(
+    () => clinicsPages?.pages.flatMap((page) => page.data) ?? [],
+    [clinicsPages],
+  );
+
+  // Врачи выбранного города — все страницы (см. fetchAllPages). Раньше
+  // просили page_size 200, бэк урезал до 100, и остальные врачи в форме не
+  // находились.
   const { data: doctorsData = [], isLoading: isLoadingDoctors } = useQuery({
     queryKey: ["record-doctors", selectedCity],
-    queryFn: () => api.getDoctors({ city: selectedCity, page_size: 200 }),
+    queryFn: ({ signal }) =>
+      fetchAllPages((page) =>
+        api.getDoctorsPaginated(
+          { city: selectedCity, page, page_size: LIST_PAGE_SIZE },
+          signal,
+        ),
+      ),
     enabled: isCityHydrated,
+  });
+
+  // Детали выбранного врача. Нужны, когда врач пришёл по ссылке, а в список
+  // города не попал (другой город, не влез в выдачу): без них не было ни его
+  // мест работы, ни поля «Клиника», и запись уходила без clinic_id. Отсюда же
+  // берём is_online_available — у врачей из списка клиники его нет. Ключ тот
+  // же, что у страницы врача, — оттуда данные уже лежат в кеше.
+  const { data: selectedDoctorDetail } = useQuery({
+    queryKey: doctorKeys.detail(selectedDoctorId ?? ""),
+    queryFn: () => api.getDoctorById(selectedDoctorId as string),
+    enabled: Boolean(selectedDoctorId),
   });
 
   // Детали выбранной клиники — источник её списка врачей для шага «Выберите
@@ -216,21 +291,27 @@ export const useRecordForm = () => {
     enabled: Boolean(selectedClinicId),
   });
 
-  // Бэк моделирует услуги клиники и услуги конкретного врача как
-  // непересекающиеся наборы (у "докторских" услуг clinic всегда null) —
-  // передача clinic_id и doctor_id вместе даёт пересечение, которое всегда
-  // пусто. Поэтому фильтруем по врачу, если он выбран, и только иначе — по
-  // клинике целиком.
+  // Услуги врача, если он выбран, иначе — клиники целиком. У врача сюда
+  // попадают и его собственные услуги (clinic = null), и процедуры каждой
+  // клиники, где его на них назначили; процедуры чужих клиник отсекаем уже
+  // на клиенте, когда известно место приёма (см. serviceOptions). Запрос с
+  // clinic_id и doctor_id вместе потерял бы собственные услуги врача.
+  // Список забираем целиком (поиск в модалке — на клиенте); без фильтра —
+  // только первую страницу, весь каталог услуг тут не нужен.
   const { data: servicesRaw, isLoading: isLoadingServices } = useQuery({
     queryKey: ["record-services", selectedClinicId, selectedDoctorId],
-    queryFn: () =>
-      getServices(
-        selectedDoctorId
-          ? { doctor_id: selectedDoctorId }
-          : selectedClinicId
-            ? { clinic_id: selectedClinicId }
-            : {},
-      ),
+    queryFn: ({ signal }) => {
+      const filters: ServiceFilters = selectedDoctorId
+        ? { doctor_id: selectedDoctorId }
+        : selectedClinicId
+          ? { clinic_id: selectedClinicId }
+          : {};
+      return fetchAllPages<ServiceListItem>(
+        (page) =>
+          getServices({ ...filters, page, page_size: LIST_PAGE_SIZE }, signal),
+        selectedDoctorId || selectedClinicId ? LIST_MAX_PAGES : 1,
+      );
+    },
   });
 
   // Собственная клиника/врач(и) выбранной услуги — GET /api/services/{id}/
@@ -310,21 +391,18 @@ export const useRecordForm = () => {
     image: c.image ?? "",
   }));
 
-  const DOCTORS: Doctor[] = doctorsData.map((d) => ({
-    id: String(d.id),
-    clinicId: d.workplaces[0]?.clinicId ?? "",
-    workplaces: d.workplaces.map((w) => ({
-      clinicId: w.clinicId,
-      clinicName: w.clinicName,
-      clinicAddress: w.clinicAddress,
-    })),
-    name: d.name,
-    specialty: d.specialty,
-    rating: d.rating,
-    reviews: d.reviews,
-    experience: d.experience,
-    image: d.image ?? "",
-  }));
+  // Врач из ссылки, которого нет в списке города, — добавляем по его деталям,
+  // иначе поле «Специалист» оставалось пустым, а место приёма не находилось.
+  const DOCTORS: Doctor[] = useMemo(() => {
+    const cityDoctors = doctorsData.map(toRecordDoctor);
+    if (
+      !selectedDoctorDetail ||
+      cityDoctors.some((d) => d.id === String(selectedDoctorDetail.id))
+    ) {
+      return cityDoctors;
+    }
+    return [...cityDoctors, toRecordDoctor(selectedDoctorDetail)];
+  }, [doctorsData, selectedDoctorDetail]);
 
   // Врачи выбранной клиники (GET /api/clinics/{id}/). Когда клиника выбрана,
   // именно этот список показываем в «Выберите специалиста», а не всех по городу.
@@ -350,10 +428,12 @@ export const useRecordForm = () => {
     image: d.photo ?? "",
   }));
 
-  const SERVICES: Service[] = (servicesRaw?.data ?? []).map((s) => ({
+  const SERVICES: Service[] = (servicesRaw ?? []).map((s) => ({
     id: String(s.id),
     clinicId: s.clinic ? String(s.clinic.id) : "",
     clinicName: s.clinic?.name,
+    branchAddress: s.branch?.address || undefined,
+    branchName: s.branch?.name || undefined,
     doctorIds: [],
     title: s.name,
     category: s.category,
@@ -361,10 +441,10 @@ export const useRecordForm = () => {
     // хотя /api/services/ отдаёт все три поля. В модалке выбора услуги это
     // выглядело как серый квадрат вместо фото и вечные «0 (0)» у рейтинга.
     //
-    // Number(), а не parseFloat под условием typeof: бэк отдаёт price
-    // строкой ("100.00"), а rating числом (4.0) — при прежней проверке любое
-    // число молча превращалось в 0.
-    price: Number(s.price) || 0,
+    // Бэк отдаёт price строкой ("100.00"), а rating числом (4.0). Цена,
+    // которую клиника не указала (null), остаётся undefined, а не 0 — иначе
+    // в форме стояло «0 c» и «К оплате 0 c», как будто услуга бесплатная.
+    price: parsePrice(s.price),
     duration: s.duration ?? null,
     rating: Number(s.rating) || 0,
     reviews: Number(s.reviews_count) || 0,
@@ -460,6 +540,46 @@ export const useRecordForm = () => {
     () => doctorPool.find((doctor) => doctor.id === selectedDoctorId) ?? null,
     [doctorPool, selectedDoctorId],
   );
+
+  // Проводит ли выбранный врач онлайн-приём: из деталей врача, а пока они
+  // грузятся — из списка города. undefined — врач не выбран или ещё неизвестно.
+  const selectedDoctorOnline: boolean | undefined =
+    selectedDoctorDetail && String(selectedDoctorDetail.id) === selectedDoctorId
+      ? Boolean(selectedDoctorDetail.isOnlineAvailable)
+      : selectedDoctor?.isOnlineAvailable;
+
+  // Переключатель формата показываем, только когда онлайн-приём реально
+  // возможен: гостю бэк онлайн-запись не даёт («Онлайн-запись доступна только
+  // авторизованным пользователям», 400), а врач должен его проводить.
+  const canChooseOnline = isAuthenticated && selectedDoctorOnline === true;
+
+  // Пришли с mode=online, а в форме выбрали врача без онлайн-приёма. Раньше
+  // справа так и висело «Онлайн-консультация», а отправка падала с «Этот
+  // врач не проводит онлайн-консультации» — без выхода, переключателя не
+  // было. Теперь переводим запись в офлайн и объясняем почему (как и
+  // checkedSlots ниже — корректировка состояния прямо во время рендера).
+  if (wantsOnline && isAuthenticated && selectedDoctorOnline === false) {
+    setWantsOnline(false);
+    setFormatNotice(
+      "Этот специалист не проводит онлайн-консультации — запись будет офлайн",
+    );
+  }
+
+  // Онлайн — только для вошедшего пользователя. Пока признак врача ещё
+  // неизвестен, держим выбор из ссылки, чтобы формат не мигал.
+  const isOnlineBooking =
+    isAuthenticated && wantsOnline && selectedDoctorOnline !== false;
+
+  useEffect(() => {
+    if (formatNotice) toast(formatNotice, { id: "record-format-reset" });
+  }, [formatNotice]);
+
+  const setOnlineBooking = (value: boolean) => {
+    setWantsOnline(value);
+    setFormatNotice(null);
+    toast.dismiss("record-format-reset");
+  };
+
   const selectedService = useMemo(
     () => SERVICES.find((service) => service.id === selectedServiceId) ?? null,
     [SERVICES, selectedServiceId],
@@ -504,7 +624,21 @@ export const useRecordForm = () => {
     return pool.filter((doctor) => serviceDoctorIds.has(doctor.id));
   }, [selectedClinicId, CLINIC_DOCTORS, DOCTORS, serviceDoctorIds]);
 
-  const serviceOptions = SERVICES;
+  // Услуги врача приходят по всем клиникам, где он работает (см. запрос
+  // выше). Когда место приёма уже выбрано, процедуры другой клиники не
+  // показываем: иначе запись уходила с clinic_id одной клиники и услугой
+  // другой — с чужой ценой и длительностью. Собственные услуги врача (без
+  // клиники) годятся в любом месте приёма.
+  const serviceOptions = useMemo(
+    () =>
+      selectedDoctorId && selectedClinicId
+        ? SERVICES.filter(
+            (service) =>
+              !service.clinicId || service.clinicId === selectedClinicId,
+          )
+        : SERVICES,
+    [SERVICES, selectedDoctorId, selectedClinicId],
+  );
 
   // Список, который сейчас показывает открытая модалка/этап, ещё грузится —
   // без этого пользователь на секунду видит пустой список с надписью
@@ -609,11 +743,18 @@ export const useRecordForm = () => {
   };
 
   // Клиника выбирается из мест работы уже выбранного врача — в отличие от
-  // applyClinicSelection, врача и услугу трогать не нужно: они относятся к
-  // тому же врачу, просто уточняется, в каком из его мест работы.
+  // applyClinicSelection, врача трогать не нужно: уточняется лишь, в каком из
+  // его мест работы приём. А вот процедуру другой клиники сбрасываем — врач
+  // может вести процедуры в нескольких клиниках, и оставить её значило бы
+  // записать в эту клинику на чужую услугу.
   const applyWorkplaceSelection = (clinicId: string) => {
     setSelectedClinicId(clinicId);
     setErrors((prev) => ({ ...prev, clinic: undefined, submit: undefined }));
+    const currentServiceClinicId =
+      serviceClinicId ?? selectedService?.clinicId ?? null;
+    if (currentServiceClinicId && currentServiceClinicId !== clinicId) {
+      setSelectedServiceId(null);
+    }
   };
 
   const selectService = (serviceId: string) => {
@@ -1028,6 +1169,10 @@ export const useRecordForm = () => {
     appointmentResult,
     isAuthenticated,
     isOnlineBooking,
+    // Переключатель «Офлайн / Онлайн» в первом шаге (см. Step1Selection).
+    canChooseOnline,
+    setOnlineBooking,
+    formatNotice,
     clinicMap,
     hasMoreClinics: Boolean(hasMoreClinics),
     isFetchingMoreClinics,

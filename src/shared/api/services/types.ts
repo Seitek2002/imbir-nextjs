@@ -4,7 +4,16 @@ export type ServiceCategoryRef = {
   title: string;
 };
 
+// Филиал клиники, где проводится процедура. Старый бэк поле не отдаёт.
+export type ServiceBranch = {
+  address: string;
+  id: number;
+  name: string;
+};
+
 export type ServiceListItem = {
+  // null/нет поля — процедура проходит по основному адресу клиники.
+  branch?: null | ServiceBranch;
   // Старое текстовое поле. Пока бэк хранит его рядом со справочником, а
   // фронт подставляет сюда service_category.title, если он есть (см.
   // withCategoryTitle) — поэтому все списки и карточки читают только category.
