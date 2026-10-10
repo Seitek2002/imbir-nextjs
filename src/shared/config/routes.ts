@@ -80,10 +80,20 @@ const startsWithSegment = (path: string, prefix: string) =>
   path.startsWith(`${prefix}?`) ||
   path.startsWith(`${prefix}#`);
 
+// Ссылка-приглашение клиники (/register/doctor?invite=…). Врач с аккаунтом
+// уходит с неё на вход и должен вернуться обратно — там вместо анкеты кнопка
+// «Принять приглашение».
+const isDoctorInvitePath = (path: string) => {
+  if (!startsWithSegment(path, `${ROUTES.REGISTER}/doctor`)) return false;
+  const params = new URLSearchParams(path.split("#")[0].split("?")[1] ?? "");
+  return params.has("invite") || params.has("invite_clinic_id");
+};
+
 // Адрес возврата после входа. Принимаем только относительный путь внутри
 // сайта: "//evil.com" и "/\evil.com" браузер понимает как другой домен, а
 // полный URL превратил бы /login?next= в открытый редирект. Сами /login и
-// /register не возвращаем — иначе после входа человек снова увидит форму.
+// /register не возвращаем — иначе после входа человек снова увидит форму
+// (кроме ссылки-приглашения: там вошедшему врачу форму не показываем).
 // Обратный слэш и управляющие символы отбрасываем целиком: браузер выкидывает
 // табы и переводы строк из URL, и "/\t/evil.com" превратился бы в "//evil.com".
 export const getSafeNextPath = (
@@ -96,10 +106,8 @@ export const getSafeNextPath = (
     /[\\\u0000-\u001f\u007f]/.test(raw)
   )
     return null;
-  if (
-    startsWithSegment(raw, ROUTES.LOGIN) ||
-    startsWithSegment(raw, ROUTES.REGISTER)
-  )
+  if (startsWithSegment(raw, ROUTES.LOGIN)) return null;
+  if (startsWithSegment(raw, ROUTES.REGISTER) && !isDoctorInvitePath(raw))
     return null;
   return raw;
 };
@@ -116,6 +124,8 @@ export const resolveNextPath = (
     ([cabinetRole, prefix]) =>
       cabinetRole !== role && startsWithSegment(next, prefix),
   );
+  // Принять приглашение клиники может только врач — остальных в кабинет.
+  if (role !== "doctor" && isDoctorInvitePath(next)) return null;
   return foreignCabinet ? null : next;
 };
 
