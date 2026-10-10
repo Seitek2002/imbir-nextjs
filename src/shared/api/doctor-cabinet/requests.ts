@@ -298,14 +298,16 @@ export const addDoctorService = async (
   // photo может быть File — тогда уходит multipart'ом.
   sendMaybeMultipart<DoctorServiceItem>("/api/doctor/services/", "POST", body);
 
-// Длительность очищают null'ом. В JSON он так и уходит, а multipart (когда
-// вместе меняют фото) null-поля пропускает — бэк оставил бы старое значение.
-// Пустую строку DRF для такого поля читает как null.
-const withClearedDuration = (
-  body: DoctorServiceBody,
-): Record<string, unknown> =>
-  body.duration === null && body.photo instanceof File
-    ? { ...body, duration: "" }
+// Длительность и цену очищают null'ом. В JSON он так и уходит, а multipart
+// (когда вместе меняют фото) null-поля пропускает — бэк оставил бы старое
+// значение. Пустую строку DRF для таких полей читает как null.
+const withCleared = (body: DoctorServiceBody): Record<string, unknown> =>
+  body.photo instanceof File
+    ? {
+        ...body,
+        ...(body.duration === null ? { duration: "" } : {}),
+        ...(body.price === null ? { price: "" } : {}),
+      }
     : body;
 
 // Только PUT: PATCH у этого ресурса в схеме нет, поэтому тело собираем
@@ -317,7 +319,7 @@ export const updateDoctorService = async (
   sendMaybeMultipart<DoctorServiceItem>(
     `/api/doctor/services/${id}/`,
     "PUT",
-    withClearedDuration(body),
+    withCleared(body),
   );
 
 export const deleteDoctorService = async (id: number): Promise<void> => {

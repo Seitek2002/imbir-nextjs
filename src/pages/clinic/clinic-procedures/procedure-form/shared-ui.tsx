@@ -2,8 +2,6 @@
 
 import { FC, useState } from "react";
 
-import { AppointmentDateTimePicker } from "@/widgets/appointment-datetime-picker";
-
 import {
   DAY_LABELS,
   type DayKey,
@@ -11,7 +9,6 @@ import {
 } from "@/entities/clinic-profile";
 
 import type { ClinicDoctorItem } from "@/shared/api";
-import type { TimeGroup } from "@/shared/lib/booking";
 import { Button, Dropdown, IconBtn, Modal } from "@/shared/ui";
 
 export const FieldRow: FC<{ children: React.ReactNode; label: string }> = ({
@@ -25,59 +22,6 @@ export const FieldRow: FC<{ children: React.ReactNode; label: string }> = ({
     </div>
   </div>
 );
-
-// Демо-сетка слотов «Записи» — на бэке нет отдельного расписания записи для
-// конкретной процедуры, поэтому блок статичный/иллюстративный, без реальных
-// данных о занятости.
-export const DEMO_TIME_GROUPS: TimeGroup[] = [
-  {
-    label: "Утро",
-    slots: [
-      { value: "08:00" },
-      { value: "09:00" },
-      { value: "10:00" },
-      { value: "11:00" },
-      { value: "12:00" },
-    ],
-  },
-  {
-    label: "Обед",
-    slots: [
-      { value: "13:00" },
-      { value: "14:00" },
-      { value: "15:00", disabled: true },
-      { value: "16:00", disabled: true },
-      { value: "17:00" },
-    ],
-  },
-  {
-    label: "Вечер",
-    slots: [
-      { value: "18:00" },
-      { value: "19:00", disabled: true },
-      { value: "20:00" },
-      { value: "21:00" },
-    ],
-  },
-];
-
-// Блок «Записи»: тот же календарь+слоты, что на публичной странице /record —
-// здесь чисто иллюстративный (демо-данные, ничего не сохраняет и не читает
-// реальную занятость конкретной процедуры, такого API пока нет).
-export const RecordsPreview: FC = () => {
-  const [date, setDate] = useState<Date | null>(new Date());
-  const [time, setTime] = useState<null | string>("11:00");
-
-  return (
-    <AppointmentDateTimePicker
-      selectedDate={date}
-      onDateChange={setDate}
-      selectedTime={time}
-      onTimeChange={setTime}
-      timeGroups={DEMO_TIME_GROUPS}
-    />
-  );
-};
 
 type ScheduleEditorProps = {
   isEditing: boolean;
@@ -182,6 +126,23 @@ export const ScheduleEditor: FC<ScheduleEditorProps> = ({
   </div>
 );
 
+// Врачи с активной привязкой к клинике. is_active бэк отдаёт всегда; если
+// поля вдруг нет — считаем связь активной.
+export const activeClinicDoctors = (doctors: ClinicDoctorItem[]) =>
+  doctors.filter((d) => d.is_active !== false);
+
+// doctor_ids для сохранения: только выбранные и при этом привязанные сейчас
+// врачи. Врач, которого открепили после назначения, в форме не виден, но его
+// id оставался в состоянии — и сохранение падало с 400 «Некоторые врачи не
+// принадлежат этой клинике».
+export const linkedDoctorIds = (
+  doctors: ClinicDoctorItem[],
+  selectedIds: string[],
+): number[] => {
+  const linked = new Set(activeClinicDoctors(doctors).map((d) => String(d.id)));
+  return selectedIds.filter((id) => linked.has(id)).map(Number);
+};
+
 type SpecialistsPickerProps = {
   doctors: ClinicDoctorItem[];
   isEditing: boolean;
@@ -190,9 +151,8 @@ type SpecialistsPickerProps = {
   selectedIds: string[];
 };
 
-// Список «Специалисты, выполняющие услугу» — реальные имена из списка врачей
-// клиники (GET /api/clinic/doctors/), но сама привязка услуга↔врач нигде не
-// сохраняется: в ClinicServiceBody такого поля нет.
+// Список «Специалисты, выполняющие услугу» — врачи клиники из
+// GET /api/clinic/doctors/, на сохранение уходят в doctor_ids.
 export const SpecialistsPicker: FC<SpecialistsPickerProps> = ({
   doctors,
   selectedIds,
@@ -203,8 +163,11 @@ export const SpecialistsPicker: FC<SpecialistsPickerProps> = ({
   const [modalOpen, setModalOpen] = useState(false);
   const [draftId, setDraftId] = useState("");
 
-  const selected = doctors.filter((d) => selectedIds.includes(String(d.id)));
-  const available = doctors.filter((d) => !selectedIds.includes(String(d.id)));
+  // Только реально привязанные врачи: неактивную связь бэк в doctor_ids не
+  // примет (400), а откреплённого врача в списке нет вовсе.
+  const linked = activeClinicDoctors(doctors);
+  const selected = linked.filter((d) => selectedIds.includes(String(d.id)));
+  const available = linked.filter((d) => !selectedIds.includes(String(d.id)));
 
   return (
     <div>

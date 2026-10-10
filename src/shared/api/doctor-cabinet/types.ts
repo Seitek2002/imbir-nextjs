@@ -153,7 +153,8 @@ export type DoctorServiceBody = {
   name: string;
   // File уходит multipart'ом, строка — URL уже загруженной картинки.
   photo?: File | null | string;
-  price?: string;
+  // null очищает цену (пустое поле в форме).
+  price?: null | string;
   // Запись справочника категорий; null снимает категорию.
   service_category_id?: null | number;
 };

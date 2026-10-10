@@ -17,6 +17,7 @@ import {
 import { useServiceCategories } from "@/entities/service";
 
 import {
+  branchLabel,
   clinicCabinetKeys,
   deleteClinicService,
   getClinicDoctors,
@@ -30,8 +31,11 @@ import {
   hasDuration,
   parseDurationInput,
 } from "@/shared/lib/duration";
+import { extractErrorMessage } from "@/shared/lib/errors";
+import { PRICE_INPUT_ERROR, parsePriceInput } from "@/shared/lib/price";
 import {
   Button,
+  Checkbox,
   ConfirmDialog,
   Dropdown,
   IconBtn,
@@ -41,12 +45,11 @@ import {
 } from "@/shared/ui";
 
 import {
-  CURRENCY_OPTIONS,
   EMPTY_SCHEDULE,
   FieldRow,
-  RecordsPreview,
   ScheduleEditor,
   SpecialistsPicker,
+  linkedDoctorIds,
   lunchToApi,
   scheduleFromApi,
   scheduleToApi,
@@ -60,6 +63,9 @@ export const ClinicProcedureDetailPage: FC = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  // Бэк не удаляет процедуру, на которую уже есть записи (иначе записи
+  // теряют название и цену), — тогда диалог предлагает деактивировать её.
+  const [deleteBlocked, setDeleteBlocked] = useState<null | string>(null);
 
   // Раньше карточку искали в общем списке — теперь у бэка есть своя ручка.
   const { data: service = null, isLoading } = useQuery({
@@ -83,7 +89,7 @@ export const ClinicProcedureDetailPage: FC = () => {
     useServiceCategories();
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [currency, setCurrency] = useState("KGS");
+  const [isActive, setIsActive] = useState(true);
   const [duration, setDuration] = useState("");
   const [branchId, setBranchId] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | undefined>();
@@ -98,7 +104,7 @@ export const ClinicProcedureDetailPage: FC = () => {
   // Филиалы уже есть в профиле клиники — отдельного запроса не нужно.
   const { rawProfile } = useClinicCabinet();
   const branchOptions = (rawProfile?.branches ?? []).map((b) => ({
-    label: b.address || `Филиал #${b.id}`,
+    label: branchLabel(b),
     value: String(b.id),
   }));
 
@@ -109,6 +115,7 @@ export const ClinicProcedureDetailPage: FC = () => {
     setCategory(service.category ?? "");
     setDescription(service.description ?? "");
     setPrice(service.price ?? "");
+    setIsActive(service.is_active !== false);
     setDuration(service.duration != null ? String(service.duration) : "");
     setBranchId(service.branch ? String(service.branch.id) : "");
     setPhotoPreview(service.photo ?? undefined);
@@ -140,12 +147,21 @@ export const ClinicProcedureDetailPage: FC = () => {
         category,
         service_category_id: resolveCategoryId(category),
         description: description.trim(),
-        price: price.trim() || undefined,
-        // null очищает длительность — раньше пустое поле не отправлялось.
+        // null очищает цену и длительность — раньше пустое поле не
+        // отправлялось, и оставалось старое значение.
+        price: parsedPrice ?? null,
         duration: parsedDuration,
-        is_active: true,
-        // При PUT бэк заменяет старые связи врач↔услуга на переданные.
-        doctor_ids: specialistIds.map(Number),
+        // Реальное состояние переключателя: раньше всегда уходило true, и
+        // любая правка заново включала деактивированную процедуру.
+        is_active: isActive,
+        // При PUT бэк заменяет старые связи врач↔услуга на переданные. Пока
+        // список врачей не загрузился (или пришёл не целиком — он постраничный),
+        // шлём как есть, иначе связи бы стёрлись. Устаревшие id новый бэк
+        // отбрасывает сам.
+        doctor_ids:
+          doctorsData && doctorsData.pagination.total <= doctors.length
+            ? linkedDoctorIds(doctors, specialistIds)
+            : specialistIds.map(Number),
         // Фото шлём только когда его реально меняли: иначе PUT затрёт
         // уже загруженную картинку пустым значением.
         ...(photoFile ? { photo: photoFile } : {}),
@@ -175,6 +191,8 @@ export const ClinicProcedureDetailPage: FC = () => {
 
   // undefined — в поле не целое число минут от 1 до суток; пусто — null.
   const parsedDuration = parseDurationInput(duration);
+  // undefined — отрицательная или нечисловая цена; пусто — null.
+  const parsedPrice = parsePriceInput(price);
 
   // Бэк требует name и category (пустые → 400 «Это поле не может быть
   // пустым» без указания поля). Проверяем до запроса и называем поле явно.
@@ -191,6 +209,10 @@ export const ClinicProcedureDetailPage: FC = () => {
       toast.error(DURATION_INPUT_ERROR);
       return;
     }
+    if (parsedPrice === undefined) {
+      toast.error(PRICE_INPUT_ERROR);
+      return;
+    }
     saveMutation.mutate();
   };
 
@@ -201,15 +223,58 @@ export const ClinicProcedureDetailPage: FC = () => {
       toast.success("Процедура удалена");
       router.push("/clinic-profile/procedures");
     },
-    onError: () => toast.error("Не удалось удалить процедуру"),
+    onError: (err: unknown) => {
+      const response = (
+        err as { response?: { data?: unknown; status?: number } }
+      )?.response;
+      // 400 — у процедуры есть записи: удалить нельзя, только деактивировать.
+      if (response?.status === 400) {
+        setDeleteBlocked(
+          extractErrorMessage(
+            response.data,
+            "У процедуры есть записи — её можно только деактивировать",
+          ),
+        );
+        return;
+      }
+      toast.error("Не удалось удалить процедуру");
+    },
+  });
+
+  const closeDeleteDialog = () => {
+    setDeleteOpen(false);
+    setDeleteBlocked(null);
+  };
+
+  const deactivateMutation = useMutation({
+    mutationFn: () =>
+      // PUT на бэке частичный: name/category — те же, меняется только статус.
+      updateClinicService(serviceId, {
+        name: service?.name ?? name,
+        category: service?.category ?? category,
+        is_active: false,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.services() });
+      queryClient.invalidateQueries({
+        queryKey: clinicCabinetKeys.service(serviceId),
+      });
+      toast.success("Процедура деактивирована");
+      closeDeleteDialog();
+    },
+    onError: () => toast.error("Не удалось деактивировать процедуру"),
   });
 
   const handleDeleteConfirm = async () => {
+    if (deleteBlocked) {
+      deactivateMutation.mutate();
+      return;
+    }
     try {
       await deleteMutation.mutateAsync();
       setDeleteOpen(false);
     } catch {
-      // ошибка уже обработана в onError мутации (toast)
+      // ошибка уже обработана в onError мутации (toast или диалог деактивации)
     }
   };
 
@@ -408,21 +473,19 @@ export const ClinicProcedureDetailPage: FC = () => {
                 placeholder="Расскажите, как проходит процедура"
                 rows={3}
               />
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Стоимость"
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="0"
-                />
-                <Dropdown
-                  label=" "
-                  options={CURRENCY_OPTIONS}
-                  value={currency}
-                  onChange={setCurrency}
-                />
-              </div>
+              {/* Валюты нет: цена хранится и выводится в сомах — выбор
+                  «USD» раньше ни на что не влиял. */}
+              <Input
+                label="Стоимость, сом"
+                type="number"
+                min="0"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0"
+                error={
+                  parsedPrice === undefined ? PRICE_INPUT_ERROR : undefined
+                }
+              />
               {/* Поле было только при создании: изменить длительность
                   процедуры после этого было негде. */}
               <Input
@@ -453,9 +516,19 @@ export const ClinicProcedureDetailPage: FC = () => {
                 value={branchId}
                 onChange={setBranchId}
               />
+              <Checkbox
+                label="Процедура активна — пациенты видят её и могут записаться"
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+              />
             </div>
           ) : (
             <>
+              <FieldRow label="Статус">
+                {service.is_active === false
+                  ? "Неактивна — пациенты её не видят"
+                  : "Активна"}
+              </FieldRow>
               <FieldRow label="Стоимость">
                 {service.price ? `${service.price} с` : "—"}
               </FieldRow>
@@ -465,7 +538,10 @@ export const ClinicProcedureDetailPage: FC = () => {
                   : "—"}
               </FieldRow>
               <FieldRow label="Описание">{service.description || "—"}</FieldRow>
-              <FieldRow label="Филиал">{service.branch?.name}</FieldRow>
+              {/* У филиалов из админки имя часто пустое — тогда адрес. */}
+              <FieldRow label="Филиал">
+                {service.branch ? branchLabel(service.branch) : null}
+              </FieldRow>
               <FieldRow label="Адрес филиала">
                 {service.branch?.address}
               </FieldRow>
@@ -488,7 +564,11 @@ export const ClinicProcedureDetailPage: FC = () => {
           />
         </div>
 
-        <div className="bg-white rounded-3xl border border-border p-5 mb-4">
+        {/* Блока «Записи» с календарём здесь больше нет: он рисовал одни и
+            те же демо-слоты («занято» 15:00, 16:00, 19:00) для любой
+            процедуры, и это принимали за реальную загрузку. Настоящие записи
+            клиники — в разделе «Записи». */}
+        <div className="bg-white rounded-3xl border border-border p-5">
           <h3 className="text-foreground font-semibold text-lg mb-1">
             {isEditing ? "График проведения процедуры" : "График процедуры"}
           </h3>
@@ -502,24 +582,23 @@ export const ClinicProcedureDetailPage: FC = () => {
             isEditing={isEditing}
           />
         </div>
-
-        <div className="bg-white rounded-3xl border border-border p-5">
-          <h3 className="text-foreground font-semibold text-lg mb-3">Записи</h3>
-          <RecordsPreview />
-        </div>
       </ClinicPageLayout>
 
       <ConfirmDialog
         isOpen={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
+        onClose={closeDeleteDialog}
         onConfirm={handleDeleteConfirm}
-        isLoading={deleteMutation.isPending}
+        isLoading={deleteMutation.isPending || deactivateMutation.isPending}
         closeOnConfirm={false}
         icon={<TrashIcon className="w-7 h-7" />}
-        variant="danger"
-        title="Удалить процедуру?"
-        description="Действие нельзя отменить — процедура исчезнет из списка услуг клиники"
-        confirmLabel="Удалить"
+        variant={deleteBlocked ? "default" : "danger"}
+        title={deleteBlocked ? "Удалить нельзя" : "Удалить процедуру?"}
+        description={
+          deleteBlocked
+            ? `${deleteBlocked}. Неактивная процедура скрыта от пациентов, а история записей сохранится.`
+            : "Действие нельзя отменить — процедура исчезнет из списка услуг клиники"
+        }
+        confirmLabel={deleteBlocked ? "Деактивировать" : "Удалить"}
         cancelLabel="Отмена"
       />
     </>

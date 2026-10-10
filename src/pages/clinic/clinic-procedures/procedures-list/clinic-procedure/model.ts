@@ -4,6 +4,8 @@ export type Procedure = {
   duration?: null | number;
   id: string;
   image?: string;
+  // false — процедура деактивирована: пациенты её не видят.
+  isActive?: boolean;
   name: string;
   // Бэк может не отдать цену — карточка тогда прячет строку с ценой
   price?: number;

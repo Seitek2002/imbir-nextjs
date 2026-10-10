@@ -16,6 +16,7 @@ import {
   deleteClinicService,
   getClinicServices,
 } from "@/shared/api";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { parsePrice } from "@/shared/lib/price";
 
 import { ProceduresList } from "./procedures-list";
@@ -53,7 +54,12 @@ export const ClinicProceduresPage: FC = () => {
       queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.services() });
       toast.success("Процедура удалена");
     },
-    onError: () => toast.error("Не удалось удалить процедуру"),
+    // 400 — у процедуры есть записи: бэк объясняет, что её можно только
+    // деактивировать (в карточке процедуры).
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось удалить процедуру"));
+    },
   });
 
   const procedures: Procedure[] = (data?.data ?? []).map((s) => ({
@@ -64,6 +70,7 @@ export const ClinicProceduresPage: FC = () => {
     price: parsePrice(s.price),
     duration: s.duration,
     image: s.photo ?? undefined,
+    isActive: s.is_active !== false,
   }));
 
   return (

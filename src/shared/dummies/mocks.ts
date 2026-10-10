@@ -99,6 +99,7 @@ export type Branch = {
   city?: string;
   coordinates?: Coordinates;
   id: string;
+  name?: string;
   phone?: string;
   schedule?: string;
 };

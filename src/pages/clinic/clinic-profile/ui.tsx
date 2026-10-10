@@ -22,7 +22,10 @@ import {
 
 import {
   type ClinicProfileBranch,
+  branchLabel,
   clinicCabinetKeys,
+  createClinicBranch,
+  deleteClinicBranch,
   getClinicStats,
   getConditions,
   getEquipment,
@@ -30,6 +33,7 @@ import {
   updateClinicBranch,
 } from "@/shared/api";
 import { CheckIcon } from "@/shared/assets/icons";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import {
   AnimatedNumber,
   Button,
@@ -65,77 +69,207 @@ const ClinicStatsTiles: FC = () => {
   return <StatTiles tiles={tiles} className="md:grid-cols-3 mb-6" />;
 };
 
-// Филиалы клиники: список с inline-правкой адреса (PUT /api/clinic/branches/{id}/).
+type BranchDraft = { address: string; name: string; phone: string };
+
+const EMPTY_BRANCH_DRAFT: BranchDraft = { name: "", address: "", phone: "" };
+
+// Форма филиала — одна и для нового, и для правки существующего.
+const BranchForm: FC<{
+  draft: BranchDraft;
+  isPending: boolean;
+  onCancel: () => void;
+  onChange: (draft: BranchDraft) => void;
+  onSave: () => void;
+}> = ({ draft, isPending, onCancel, onChange, onSave }) => (
+  <div className="flex flex-col gap-3 py-3 border-b border-background last:border-0">
+    <Input
+      label="Название"
+      value={draft.name}
+      onChange={(e) => onChange({ ...draft, name: e.target.value })}
+      placeholder="Например, филиал на Чуй"
+    />
+    <Input
+      label="Адрес"
+      value={draft.address}
+      onChange={(e) => onChange({ ...draft, address: e.target.value })}
+      placeholder="Адрес филиала"
+    />
+    <Input
+      label="Телефон"
+      type="tel"
+      value={draft.phone}
+      onChange={(e) => onChange({ ...draft, phone: e.target.value })}
+      placeholder="+996 ..."
+    />
+    <div className="flex items-center gap-3">
+      <Button
+        size="sm"
+        disabled={!draft.address.trim() || isPending}
+        onClick={onSave}
+      >
+        {isPending ? "Сохранение..." : "Сохранить"}
+      </Button>
+      <CancelEditButton onClick={onCancel} />
+    </div>
+  </div>
+);
+
+// Филиалы клиники: добавление (POST /api/clinic/branches/), правка названия,
+// адреса и телефона (PUT /api/clinic/branches/{id}/) и удаление. Раньше
+// можно было только поменять адрес уже заведённого через админку филиала, а
+// при нуле филиалов карточка не показывалась вовсе — завести первый было
+// негде, и выбор филиала в процедурах и приглашениях оставался пустым.
 const BranchesCard: FC<{ branches: ClinicProfileBranch[] }> = ({
   branches,
 }) => {
   const queryClient = useQueryClient();
-  const [editingId, setEditingId] = useState<null | number>(null);
-  const [address, setAddress] = useState("");
+  // "new" — форма добавления, число — правка этого филиала.
+  const [editingId, setEditingId] = useState<"new" | null | number>(null);
+  const [draft, setDraft] = useState<BranchDraft>(EMPTY_BRANCH_DRAFT);
+  const [deleteTarget, setDeleteTarget] = useState<ClinicProfileBranch | null>(
+    null,
+  );
+
+  const refreshProfile = () =>
+    queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.profile() });
 
   const { mutate: save, isPending } = useMutation({
-    mutationFn: (vars: { address: string; id: number }) =>
-      updateClinicBranch(String(vars.id), { address: vars.address }),
+    mutationFn: async () => {
+      const body = {
+        name: draft.name.trim(),
+        address: draft.address.trim(),
+        phone: draft.phone.trim(),
+      };
+      if (editingId === "new") await createClinicBranch(body);
+      else if (editingId !== null)
+        await updateClinicBranch(String(editingId), body);
+    },
     onSuccess: () => {
-      toast.success("Филиал обновлён");
-      queryClient.invalidateQueries({
-        queryKey: clinicCabinetKeys.profile(),
-      });
+      toast.success(
+        editingId === "new" ? "Филиал добавлен" : "Филиал обновлён",
+      );
+      refreshProfile();
       setEditingId(null);
     },
-    onError: () => toast.error("Не удалось сохранить филиал"),
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(extractErrorMessage(data, "Не удалось сохранить филиал"));
+    },
   });
 
-  if (branches.length === 0) return null;
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteClinicBranch(id),
+    onSuccess: () => {
+      toast.success("Филиал удалён");
+      refreshProfile();
+      setDeleteTarget(null);
+    },
+    onError: () => toast.error("Не удалось удалить филиал"),
+  });
+
+  const startEdit = (id: "new" | number, next: BranchDraft) => {
+    setEditingId(id);
+    setDraft(next);
+  };
+
+  const form = (
+    <BranchForm
+      draft={draft}
+      isPending={isPending}
+      onChange={setDraft}
+      onSave={() => save()}
+      onCancel={() => setEditingId(null)}
+    />
+  );
 
   return (
     <div className="bg-white rounded-3xl border border-border p-5 lg:p-6 mb-6">
-      <h3 className="text-lg font-semibold text-foreground mb-3">Филиалы</h3>
-      <div className="flex flex-col gap-2">
-        {branches.map((branch) => (
-          <div
-            key={branch.id}
-            className="flex items-center gap-3 py-2 border-b border-background last:border-0"
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h3 className="text-lg font-semibold text-foreground">Филиалы</h3>
+        {editingId === null && (
+          <Button
+            variant="text"
+            className="text-primary"
+            onClick={() => startEdit("new", EMPTY_BRANCH_DRAFT)}
           >
-            {editingId === branch.id ? (
-              <>
-                <Input
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="flex-1"
-                  placeholder="Адрес филиала"
-                />
-                <Button
-                  size="sm"
-                  disabled={!address.trim() || isPending}
-                  onClick={() =>
-                    save({ id: branch.id, address: address.trim() })
-                  }
-                >
-                  {isPending ? "..." : "Сохранить"}
-                </Button>
-                <CancelEditButton onClick={() => setEditingId(null)} />
-              </>
-            ) : (
-              <>
-                <span className="flex-1 text-sm text-foreground truncate">
-                  {branch.address || "Адрес не указан"}
-                </span>
-                <Button
-                  variant="text"
-                  className="text-primary"
-                  onClick={() => {
-                    setEditingId(branch.id);
-                    setAddress(branch.address ?? "");
-                  }}
-                >
-                  Изменить
-                </Button>
-              </>
-            )}
-          </div>
-        ))}
+            + Добавить филиал
+          </Button>
+        )}
       </div>
+      {branches.length === 0 && editingId !== "new" && (
+        <p className="text-sm text-muted">
+          Филиалов пока нет. Добавьте адреса, где клиника принимает пациентов —
+          их можно будет указать в процедурах и приглашениях врачам.
+        </p>
+      )}
+      <div className="flex flex-col gap-2">
+        {branches.map((branch) =>
+          editingId === branch.id ? (
+            <div key={branch.id}>{form}</div>
+          ) : (
+            <div
+              key={branch.id}
+              className="flex items-center gap-3 py-2 border-b border-background last:border-0"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-foreground truncate">
+                  {branchLabel(branch)}
+                </div>
+                {!!branch.name?.trim() && (
+                  <div className="text-xs text-muted truncate">
+                    {branch.address || "Адрес не указан"}
+                  </div>
+                )}
+                {!!branch.phone && (
+                  <div className="text-xs text-muted truncate">
+                    {branch.phone}
+                  </div>
+                )}
+              </div>
+              <Button
+                variant="text"
+                className="text-primary"
+                disabled={editingId !== null}
+                onClick={() =>
+                  startEdit(branch.id, {
+                    name: branch.name ?? "",
+                    address: branch.address ?? "",
+                    phone: branch.phone ?? "",
+                  })
+                }
+              >
+                Изменить
+              </Button>
+              <Button
+                variant="text"
+                className="text-muted"
+                disabled={editingId !== null}
+                onClick={() => setDeleteTarget(branch)}
+              >
+                Удалить
+              </Button>
+            </div>
+          ),
+        )}
+        {editingId === "new" && form}
+      </div>
+
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+        isLoading={deleteMutation.isPending}
+        closeOnConfirm={false}
+        variant="danger"
+        title="Удалить филиал?"
+        description={
+          deleteTarget
+            ? `«${branchLabel(deleteTarget)}» исчезнет из профиля. Врачи, процедуры и ссылки-приглашения останутся, но без привязки к филиалу.`
+            : undefined
+        }
+        confirmLabel="Удалить"
+        cancelLabel="Отмена"
+      />
     </div>
   );
 };
@@ -316,6 +450,10 @@ export const ClinicProfilePage: FC = () => {
 
       <div className="md:hidden">
         <ClinicProfileHub />
+        {/* В хабе раздела под филиалы нет — карточка та же, что на десктопе. */}
+        <div className="mt-6 px-4">
+          <BranchesCard branches={rawProfile?.branches ?? []} />
+        </div>
       </div>
 
       <div className="mt-8 px-4 md:px-0">

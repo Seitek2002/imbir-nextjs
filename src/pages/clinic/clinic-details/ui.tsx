@@ -413,7 +413,7 @@ export const ClinicDetailsPage: FC<Props> = ({
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-semibold text-foreground">
-                      Филиал №{idx + 1}
+                      {branch.name || `Филиал №${idx + 1}`}
                     </span>
                     <span className="text-xs text-primary bg-[#FFF2F0] px-2 py-0.5 rounded-full">
                       {branch.schedule ?? "По записи"}

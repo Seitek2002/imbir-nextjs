@@ -1,5 +1,4 @@
 export {
-  CURRENCY_OPTIONS,
   EMPTY_PROCEDURE_FORM,
   EMPTY_SCHEDULE,
   lunchToApi,
@@ -9,7 +8,7 @@ export {
 export type { ProcedureFormState } from "./model";
 export {
   FieldRow,
-  RecordsPreview,
   ScheduleEditor,
   SpecialistsPicker,
+  linkedDoctorIds,
 } from "./shared-ui";

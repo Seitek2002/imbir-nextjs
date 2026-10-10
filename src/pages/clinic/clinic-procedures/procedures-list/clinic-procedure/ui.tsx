@@ -16,6 +16,7 @@ type Props = {
   duration?: null | number;
   id: string;
   image?: string;
+  isActive?: boolean;
   name: string;
   onDelete?: (id: string) => void;
   price?: number;
@@ -33,6 +34,14 @@ const DeleteButton: FC<{
   >
     <CloseIcon className="size-4 text-secondary" />
   </button>
+);
+
+// Деактивированная процедура скрыта от пациентов, но остаётся в кабинете —
+// без пометки её не отличить от обычной.
+const InactiveBadge: FC = () => (
+  <span className="text-xs text-muted bg-surface px-2 py-0.5 rounded-full shrink-0">
+    Неактивна
+  </span>
 );
 
 const PlaceholderPhoto: FC<{ className?: string }> = ({ className }) => (
@@ -83,6 +92,7 @@ export const ProcedureCard: FC<Props> = ({
   duration,
   price,
   image,
+  isActive = true,
   reviews,
   onDelete,
 }) => {
@@ -127,9 +137,12 @@ export const ProcedureCard: FC<Props> = ({
 
         {/* Info */}
         <div className="px-1">
-          <h3 className="font-semibold text-base text-foreground leading-tight truncate mb-1">
-            {name}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-base text-foreground leading-tight truncate">
+              {name}
+            </h3>
+            {!isActive && <InactiveBadge />}
+          </div>
           <p className="text-sm text-muted truncate mb-2">
             {category}
             {hasDuration(duration) && ` • ${formatDuration(duration)}`}{" "}
@@ -166,6 +179,7 @@ export const ProcedureRow: FC<Props> = ({
   duration,
   price,
   image,
+  isActive = true,
   reviews,
   onDelete,
 }) => (
@@ -209,6 +223,11 @@ export const ProcedureRow: FC<Props> = ({
         {hasDuration(duration) && ` • ${formatDuration(duration)}`}{" "}
         <span className="text-primary">• {clinic}</span>
       </p>
+      {!isActive && (
+        <div className="mt-1">
+          <InactiveBadge />
+        </div>
+      )}
       {!!reviews && (
         <div className="flex items-center gap-1 text-xs mt-1">
           <StarIcon className="w-3.5 h-3.5 text-primary" />

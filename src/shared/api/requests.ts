@@ -243,6 +243,20 @@ const adaptClinicDetail = (c: ApiClinicDetail): MockClinicListItem => {
     email: c.email || undefined,
     images: c.photos?.map((p) => toHttps(p)).filter(Boolean) as string[],
     schedule: formatClinicSchedule(c.schedule),
+    // Раньше филиалы терялись здесь, и блок «Филиалы» на странице клиники не
+    // показывался никогда. schedule у филиала — объект по дням (по умолчанию
+    // {}), а не строка: выводим его тем же форматом, что график клиники.
+    branches: (c.branches ?? []).map((b) => ({
+      id: String(b.id),
+      name: b.name?.trim() || undefined,
+      address: b.address ?? "",
+      city: b.city,
+      phone: b.phone || undefined,
+      schedule:
+        typeof b.schedule === "string"
+          ? b.schedule || undefined
+          : formatClinicSchedule(b.schedule),
+    })),
   };
 };
 

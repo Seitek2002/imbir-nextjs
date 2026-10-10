@@ -10,7 +10,11 @@ export type ClinicBranch = {
   city?: string;
   coordinates?: { lat: number; lng: number };
   id: number | string;
+  // Бэк отдаёт name всегда, но у заведённых через админку филиалов он часто
+  // пустой.
+  name?: string;
   phone?: string;
+  // На деле объект по дням (по умолчанию {}), строкой не приходит.
   schedule?: ClinicSchedule | string;
 };
 

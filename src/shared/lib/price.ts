@@ -16,3 +16,15 @@ export const parsePrice = (value: unknown): number | undefined => {
 // валидной ценой, а null/undefined/"" — отсутствием данных.
 export const hasPrice = (value: null | number | string | undefined): boolean =>
   typeof value === "number" ? Number.isFinite(value) : !!value?.trim();
+
+export const PRICE_INPUT_ERROR = "Стоимость не может быть отрицательной";
+
+// Поле «Стоимость» формы → значение для бэка. Пустое поле — null: так цену и
+// очищают (раньше пустое поле не отправлялось, и оставалась старая цена).
+// undefined — в поле отрицательное или не число, отправлять нельзя.
+export const parsePriceInput = (value: string): null | string | undefined => {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) && parsed >= 0 ? trimmed : undefined;
+};

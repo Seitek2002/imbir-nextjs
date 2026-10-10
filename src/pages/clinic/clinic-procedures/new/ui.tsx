@@ -18,6 +18,7 @@ import { useServiceCategories } from "@/entities/service";
 
 import {
   addClinicService,
+  branchLabel,
   clinicCabinetKeys,
   getClinicDoctors,
 } from "@/shared/api";
@@ -26,6 +27,7 @@ import {
   DURATION_INPUT_ERROR,
   parseDurationInput,
 } from "@/shared/lib/duration";
+import { PRICE_INPUT_ERROR, parsePriceInput } from "@/shared/lib/price";
 import {
   Button,
   Dropdown,
@@ -36,10 +38,10 @@ import {
 } from "@/shared/ui";
 
 import {
-  CURRENCY_OPTIONS,
   EMPTY_SCHEDULE,
   ScheduleEditor,
   SpecialistsPicker,
+  linkedDoctorIds,
   lunchToApi,
   scheduleToApi,
 } from "../procedure-form";
@@ -58,7 +60,7 @@ export const ClinicNewProcedurePage: FC = () => {
   // Филиалы уже приходят в профиле клиники — отдельного запроса не нужно.
   const { rawProfile } = useClinicCabinet();
   const branchOptions = (rawProfile?.branches ?? []).map((b) => ({
-    label: b.address || `Филиал #${b.id}`,
+    label: branchLabel(b),
     value: String(b.id),
   }));
 
@@ -72,7 +74,6 @@ export const ClinicNewProcedurePage: FC = () => {
     useServiceCategories();
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [currency, setCurrency] = useState("KGS");
   const [duration, setDuration] = useState("");
   const [branchId, setBranchId] = useState("");
   const [specialistIds, setSpecialistIds] = useState<string[]>([]);
@@ -115,6 +116,8 @@ export const ClinicNewProcedurePage: FC = () => {
 
   // undefined — в поле не целое число минут от 1 до суток; пусто — null.
   const parsedDuration = parseDurationInput(duration);
+  // undefined — отрицательная или нечисловая цена; пусто — без цены.
+  const parsedPrice = parsePriceInput(price);
 
   const handleSave = () => {
     if (!name.trim()) {
@@ -133,18 +136,22 @@ export const ClinicNewProcedurePage: FC = () => {
       toast.error(DURATION_INPUT_ERROR);
       return;
     }
+    if (parsedPrice === undefined) {
+      toast.error(PRICE_INPUT_ERROR);
+      return;
+    }
     addMutation.mutate({
       name: name.trim(),
       category,
       service_category_id: resolveCategoryId(category),
       description: description.trim() || undefined,
-      price: price.trim() || undefined,
+      price: parsedPrice ?? undefined,
       duration: parsedDuration,
       is_active: true,
       // Врачи клиники, которым назначается услуга. Бэк принимает только id
       // врачей, привязанных к этой клинике (иначе 400), и сам проставляет
       // услугу им в список.
-      doctor_ids: specialistIds.map(Number),
+      doctor_ids: linkedDoctorIds(doctors, specialistIds),
       ...(photoFile ? { photo: photoFile } : {}),
       branch_id: branchId ? Number(branchId) : null,
       schedule: scheduleToApi(schedule),
@@ -267,22 +274,17 @@ export const ClinicNewProcedurePage: FC = () => {
           onChange={setCategory}
         />
 
-        <div className="grid items-end grid-cols-2 gap-4">
-          <Input
-            label="Стоимость"
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder="0"
-          />
-          <Dropdown
-            label=" "
-            options={CURRENCY_OPTIONS}
-            value={currency}
-            onChange={setCurrency}
-            className=""
-          />
-        </div>
+        {/* Валюты нет: цена хранится и выводится в сомах — выбор «USD»
+            раньше ни на что не влиял. */}
+        <Input
+          label="Стоимость, сом"
+          type="number"
+          min="0"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          placeholder="0"
+          error={parsedPrice === undefined ? PRICE_INPUT_ERROR : undefined}
+        />
 
         <Input
           label="Длительность, мин"
@@ -347,10 +349,6 @@ export const ClinicNewProcedurePage: FC = () => {
           isEditing
         />
       </div>
-
-      {/* Блока «Записи» здесь нет: процедуры ещё не существует, записаться на
-          неё нельзя — календарь показывался бы заведомо пустым. Он остаётся
-          на странице уже созданной процедуры (detail). */}
     </ClinicPageLayout>
   );
 };

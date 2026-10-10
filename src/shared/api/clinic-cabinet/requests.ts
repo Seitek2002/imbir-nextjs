@@ -14,6 +14,7 @@ import {
   ClinicDocument,
   ClinicPhoto,
   ClinicPrivateProfile,
+  ClinicProfileBranch,
   ClinicServiceBody,
   ClinicServiceDetail,
   ClinicServiceListItem,
@@ -136,11 +137,34 @@ export const updateClinicProfile = async (
   // Логотип (File) требует multipart; правила упаковки — в appendMultipart выше.
   sendMaybeMultipart<ClinicPrivateProfile>("/api/clinic/profile/", "PUT", body);
 
+// Название филиала, а если его не задали — адрес: у заведённых через админку
+// филиалов имя часто пустое (в карточке процедуры из-за этого стояло «—»).
+export const branchLabel = (
+  branch: Pick<ClinicProfileBranch, "address" | "id" | "name">,
+): string =>
+  branch.name?.trim() || branch.address?.trim() || `Филиал #${branch.id}`;
+
+export const createClinicBranch = async (
+  body: UpdateBranchRequest,
+): Promise<ClinicProfileBranch> => {
+  const { data } = await apiClient.post<ClinicProfileBranch>(
+    "/api/clinic/branches/",
+    body,
+  );
+  return data;
+};
+
 export const updateClinicBranch = async (
   branchId: string,
   body: UpdateBranchRequest,
 ): Promise<void> => {
   await apiClient.put(`/api/clinic/branches/${branchId}/`, body);
+};
+
+// Привязки врачей, инвайты и процедуры филиала при удалении остаются — бэк
+// просто снимает у них филиал (SET_NULL).
+export const deleteClinicBranch = async (branchId: number): Promise<void> => {
+  await apiClient.delete(`/api/clinic/branches/${branchId}/`);
 };
 
 const asCollection = <T>(data: null | T | T[] | undefined): T[] => {
@@ -315,14 +339,16 @@ export const addClinicService = async (
     body,
   );
 
-// Длительность очищают null'ом. В JSON он так и уходит, а multipart (когда
-// вместе меняют фото) null-поля пропускает — бэк оставил бы старое значение.
-// Пустую строку DRF для такого поля читает как null.
-const withClearedDuration = (
-  body: ClinicServiceBody,
-): Record<string, unknown> =>
-  body.duration === null && body.photo instanceof File
-    ? { ...body, duration: "" }
+// Длительность и цену очищают null'ом. В JSON он так и уходит, а multipart
+// (когда вместе меняют фото) null-поля пропускает — бэк оставил бы старое
+// значение. Пустую строку DRF для таких полей читает как null.
+const withCleared = (body: ClinicServiceBody): Record<string, unknown> =>
+  body.photo instanceof File
+    ? {
+        ...body,
+        ...(body.duration === null ? { duration: "" } : {}),
+        ...(body.price === null ? { price: "" } : {}),
+      }
     : body;
 
 export const updateClinicService = async (
@@ -332,7 +358,7 @@ export const updateClinicService = async (
   sendMaybeMultipart<ClinicServiceListItem>(
     `/api/clinic/services/${id}/`,
     "PUT",
-    withClearedDuration(body),
+    withCleared(body),
   );
 
 export const deleteClinicService = async (id: number): Promise<void> => {

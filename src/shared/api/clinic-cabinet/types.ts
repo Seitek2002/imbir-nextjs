@@ -1,9 +1,15 @@
 import type { SpecializationItem } from "../references/types";
 import type { ServiceCategoryRef, ServiceListItem } from "../services/types";
 
+// Филиал в профиле клиники (ClinicBranchUpdateSerializer). name/phone/schedule
+// бэк отдавал всегда, но в типе их не было; помечены необязательными на
+// случай старого ответа. schedule — объект по дням, по умолчанию {}.
 export type ClinicProfileBranch = {
   address: string;
   id: number;
+  name?: string;
+  phone?: string;
+  schedule?: Record<string, ClinicScheduleDay>;
 };
 
 export type ClinicDocument = {
@@ -267,8 +273,11 @@ export type CreateInviteRequest = {
   expires_at?: null | string;
 };
 
+// POST /api/clinic/branches/ и PUT/PATCH /api/clinic/branches/{id}/ — PUT
+// на бэке частичный, непереданные поля не трогаются.
 export type UpdateBranchRequest = {
   address?: string;
+  name?: string;
   phone?: string;
-  schedule?: string;
+  schedule?: Record<string, ClinicScheduleDay>;
 };

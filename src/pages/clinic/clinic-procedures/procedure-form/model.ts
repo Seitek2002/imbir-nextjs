@@ -14,7 +14,6 @@ import type { ClinicScheduleDay } from "@/shared/api";
 export type ProcedureFormState = {
   branchId: string;
   category: string;
-  currency: string;
   duration: string;
   lunchFrom: string;
   lunchTo: string;
@@ -40,7 +39,6 @@ export const EMPTY_PROCEDURE_FORM: ProcedureFormState = {
   name: "",
   category: "",
   price: "",
-  currency: "KGS",
   duration: "",
   branchId: "",
   specialistIds: [],
@@ -48,11 +46,6 @@ export const EMPTY_PROCEDURE_FORM: ProcedureFormState = {
   lunchFrom: "",
   lunchTo: "",
 };
-
-export const CURRENCY_OPTIONS = [
-  { label: "KGS", value: "KGS" },
-  { label: "USD", value: "USD" },
-];
 
 // Форма ↔ бэк: у формы дни это mon/tue/… с open/close, у бэка — monday/tuesday/…
 // с from/to (тот же формат, что у графика клиники, см. DAY_API).

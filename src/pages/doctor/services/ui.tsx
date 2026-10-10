@@ -26,10 +26,15 @@ import {
   parseDurationInput,
 } from "@/shared/lib/duration";
 import { extractErrorMessage } from "@/shared/lib/errors";
-import { parsePrice } from "@/shared/lib/price";
+import {
+  PRICE_INPUT_ERROR,
+  parsePrice,
+  parsePriceInput,
+} from "@/shared/lib/price";
 import { cn } from "@/shared/lib/utils";
 import {
   Button,
+  Checkbox,
   ConfirmDialog,
   Dropdown,
   IconBtn,
@@ -105,6 +110,19 @@ const AddIcon: FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+// Деактивированная услуга скрыта от пациентов, но остаётся в кабинете —
+// без пометки её не отличить от обычной.
+const InactiveBadge: FC<{ className?: string }> = ({ className }) => (
+  <span
+    className={cn(
+      "inline-block text-xs font-normal text-muted bg-surface px-2 py-0.5 rounded-full",
+      className,
+    )}
+  >
+    Неактивна
+  </span>
+);
+
 type ServiceModalProps = {
   isLoading?: boolean;
   isOpen: boolean;
@@ -131,6 +149,7 @@ const ServiceModal: FC<ServiceModalProps> = ({
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
+  const [isActive, setIsActive] = useState(true);
   const [clinicId, setClinicId] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | undefined>();
@@ -149,6 +168,7 @@ const ServiceModal: FC<ServiceModalProps> = ({
     setDescription(service?.description ?? "");
     setPrice(service?.price ?? "");
     setDuration(service?.duration != null ? String(service.duration) : "");
+    setIsActive(service?.is_active !== false);
     setClinicId(service?.clinic ? String(service.clinic.id) : "");
     setPhotoFile(null);
     setPhotoPreview(service?.photo ?? undefined);
@@ -171,6 +191,7 @@ const ServiceModal: FC<ServiceModalProps> = ({
     setDescription("");
     setPrice("");
     setDuration("");
+    setIsActive(true);
     setClinicId("");
     setPhotoFile(null);
     setPhotoPreview(undefined);
@@ -192,12 +213,17 @@ const ServiceModal: FC<ServiceModalProps> = ({
   // отправлялось, и старое оставалось).
   const parsedDuration = parseDurationInput(duration);
   const isDurationValid = parsedDuration !== undefined;
+  // undefined — отрицательная или нечисловая цена. Пустое поле — null: так
+  // цена и очищается на правке (раньше пустое поле не отправлялось).
+  const parsedPrice = parsePriceInput(price);
+  const isPriceValid = parsedPrice !== undefined;
 
   const canSubmit =
     !!name.trim() &&
     !!category &&
     (!isClinicRequired || !!clinicId) &&
-    isDurationValid;
+    isDurationValid &&
+    isPriceValid;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
@@ -207,9 +233,10 @@ const ServiceModal: FC<ServiceModalProps> = ({
       category,
       service_category_id: resolveCategoryId(category),
       description: description || undefined,
-      price: price ? String(price) : undefined,
+      // На создании пустую цену не шлём вовсе, на правке null её очищает.
+      price: isEdit ? parsedPrice : (parsedPrice ?? undefined),
       duration: parsedDuration,
-      is_active: service?.is_active ?? true,
+      is_active: isActive,
       // clinic_id шлём только когда врач сам выбирал клинику. При одной
       // клинике бэк подставляет её сам, а на правке пустое поле сбросило бы
       // уже привязанное место приёма.
@@ -271,11 +298,13 @@ const ServiceModal: FC<ServiceModalProps> = ({
             label="Стоимость, сом"
             type="number"
             // Без min браузер пропускает минус, а бэк отрицательную цену
-            // принимает как есть — услуга сохранялась с price "-500.00".
+            // принимал как есть — услуга сохранялась с price "-500.00".
+            // min не мешает ввести минус с клавиатуры, поэтому ещё и проверка.
             min="0"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="0"
+            error={isPriceValid ? undefined : PRICE_INPUT_ERROR}
           />
           <Input
             label="Длительность, мин"
@@ -326,6 +355,16 @@ const ServiceModal: FC<ServiceModalProps> = ({
             </Button>
           </div>
         </div>
+
+        {/* Раньше статус нельзя было поменять вовсе: убрать услугу из записи
+            можно было только удалением, а оно стирало её у прошлых записей. */}
+        {isEdit && (
+          <Checkbox
+            label="Услуга активна — пациенты видят её и могут записаться"
+            checked={isActive}
+            onChange={(e) => setIsActive(e.target.checked)}
+          />
+        )}
 
         <div className="flex gap-3 pt-1">
           <Button
@@ -471,6 +510,7 @@ const ServiceCard: FC<{
             {service.description}
           </p>
         )}
+        {service.is_active === false && <InactiveBadge className="mt-1" />}
       </div>
 
       <div className="flex flex-col gap-1 shrink-0">
@@ -566,13 +606,51 @@ export const DoctorServicesPage: FC = () => {
     },
   });
 
+  // Бэк не удаляет услугу, на которую уже есть записи (иначе записи теряют
+  // название и цену), — тогда диалог предлагает деактивировать её.
+  const [deleteBlocked, setDeleteBlocked] = useState<null | string>(null);
+  const closeDeleteDialog = () => {
+    setDeleteTarget(null);
+    setDeleteBlocked(null);
+  };
+
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteDoctorService(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.services() });
       toast.success("Услуга удалена");
     },
-    onError: () => toast.error("Не удалось удалить услугу"),
+    onError: (err: unknown) => {
+      const response = (
+        err as { response?: { data?: unknown; status?: number } }
+      )?.response;
+      if (response?.status === 400) {
+        setDeleteBlocked(
+          extractErrorMessage(
+            response.data,
+            "У услуги есть записи — её можно только деактивировать",
+          ),
+        );
+        return;
+      }
+      toast.error("Не удалось удалить услугу");
+    },
+  });
+
+  const deactivateMutation = useMutation({
+    mutationFn: (service: DoctorServiceItem) =>
+      // PUT на бэке частичный: name/category — те же, меняется только статус.
+      updateDoctorService(service.id, {
+        name: service.name,
+        category: service.category,
+        is_active: false,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: doctorCabinetKeys.services() });
+      toast.success("Услуга деактивирована");
+      closeDeleteDialog();
+    },
+    onError: () => toast.error("Не удалось деактивировать услугу"),
   });
 
   const services = data?.data ?? [];
@@ -689,6 +767,9 @@ export const DoctorServicesPage: FC = () => {
                           </td>
                           <td className={`${TD} text-foreground font-medium`}>
                             {s.name}
+                            {s.is_active === false && (
+                              <InactiveBadge className="ml-2" />
+                            )}
                           </td>
                           <td className={`${TD} text-muted`}>
                             {s.category || "—"}
@@ -782,25 +863,31 @@ export const DoctorServicesPage: FC = () => {
 
       <ConfirmDialog
         isOpen={!!deleteTarget}
-        onClose={() => setDeleteTarget(null)}
+        onClose={closeDeleteDialog}
         onConfirm={() => {
           if (!deleteTarget) return;
+          if (deleteBlocked) {
+            deactivateMutation.mutate(deleteTarget);
+            return;
+          }
           // Диалог закроется сам только после успешного удаления.
           deleteMutation.mutate(deleteTarget.id, {
             onSuccess: () => setDeleteTarget(null),
           });
         }}
-        isLoading={deleteMutation.isPending}
+        isLoading={deleteMutation.isPending || deactivateMutation.isPending}
         closeOnConfirm={false}
         icon={<TrashIcon className="w-6 h-6" />}
-        variant="danger"
-        title="Удалить услугу?"
+        variant={deleteBlocked ? "default" : "danger"}
+        title={deleteBlocked ? "Удалить нельзя" : "Удалить услугу?"}
         description={
-          deleteTarget
-            ? `«${deleteTarget.name}» будет удалена без возможности восстановления.`
-            : undefined
+          deleteBlocked
+            ? `${deleteBlocked}. Неактивная услуга скрыта от пациентов, а история записей сохранится.`
+            : deleteTarget
+              ? `«${deleteTarget.name}» будет удалена без возможности восстановления.`
+              : undefined
         }
-        confirmLabel="Удалить"
+        confirmLabel={deleteBlocked ? "Деактивировать" : "Удалить"}
       />
     </>
   );
