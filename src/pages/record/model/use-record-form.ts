@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -13,11 +13,13 @@ import {
 } from "@tanstack/react-query";
 
 import {
+  SessionExpiredError,
   api,
   createAppointment,
   doctorKeys,
   getClinicById,
   getDoctorAvailableSlots,
+  getDoctorById,
   getProfile,
   getServiceById,
   getServices,
@@ -29,12 +31,19 @@ import type {
   ServiceFilters,
   ServiceListItem,
 } from "@/shared/api";
-import { ROUTES } from "@/shared/config";
+import { ROUTES, loginHref } from "@/shared/config";
+import {
+  hasNoWorkingDays,
+  makeBookingDateFilter,
+  splitPhone,
+  toE164Phone,
+} from "@/shared/lib/booking";
 import { formatDuration, hasDuration } from "@/shared/lib/duration";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { toHttps, toMediaUrl } from "@/shared/lib/media";
 import { parsePrice } from "@/shared/lib/price";
 import { useAuthStore, useCityStore } from "@/shared/store";
+import { COUNTRIES, getPhoneLength } from "@/shared/ui";
 
 import { SELECTION_LABELS } from "./constants";
 import {
@@ -42,7 +51,6 @@ import {
   groupAvailableSlots,
   isEmailValid,
   isPhoneValid,
-  normalizeLocalPhone,
   toApiDate,
   toApiTime,
 } from "./lib";
@@ -84,6 +92,11 @@ const fetchAllPages = async <T>(
   }
   return all;
 };
+
+// Технический адрес, который бэк пишет пациенту, зарегистрированному по
+// телефону (users/utils.py, PHONE_PLACEHOLDER_DOMAIN).
+const isPlaceholderEmail = (value: string) =>
+  value.trim().toLowerCase().endsWith("@phone.imbir.kg");
 
 type ApiDoctor = Awaited<
   ReturnType<typeof api.getDoctorsPaginated>
@@ -133,7 +146,14 @@ export const useRecordForm = () => {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  // Национальная часть номера (только цифры) и код страны отдельно — как в
+  // PhoneInput на входе и регистрации. На бэк уходит E.164 (toE164Phone).
   const [phone, setPhone] = useState("");
+  const [phoneDialCode, setPhoneDialCode] = useState("+996");
+  const [phoneCountryCode, setPhoneCountryCode] = useState("KG");
+  // PhoneInput берёт страну только при монтировании — после подстановки
+  // номера из профиля пересоздаём поле, чтобы флаг и код совпали с номером.
+  const [phoneFieldKey, setPhoneFieldKey] = useState(0);
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
   const [errors, setErrors] = useState<OptionalFormErrors>({});
@@ -182,25 +202,56 @@ export const useRecordForm = () => {
     enabled: isAuthenticated,
   });
 
+  // Подставляем данные профиля один раз: повторный ответ /api/profile/
+  // (перезапрос кеша) иначе затирал бы то, что человек уже поправил в форме —
+  // а правки теперь уходят на бэк как контакт на этот визит.
+  const isProfilePrefilled = useRef(false);
   useEffect(() => {
-    if (profile) {
-      if (profile.first_name) setFirstName(profile.first_name);
-      if (profile.last_name) setLastName(profile.last_name);
-      if (profile.phone) {
-        let localPhone = profile.phone;
-        if (localPhone.startsWith("+996")) {
-          localPhone = localPhone.slice(4);
-        } else if (localPhone.startsWith("996")) {
-          localPhone = localPhone.slice(3);
-        } else if (localPhone.startsWith("+")) {
-          localPhone = localPhone.slice(1);
-        }
-        const cleaned = localPhone.replace(/\D/g, "");
-        setPhone(normalizeLocalPhone(cleaned));
-      }
-      if (profile.email) setEmail(profile.email);
+    if (!profile || isProfilePrefilled.current) return;
+    isProfilePrefilled.current = true;
+    if (profile.first_name) setFirstName(profile.first_name);
+    if (profile.last_name) setLastName(profile.last_name);
+    if (profile.phone) {
+      // Номер с любым кодом страны: раньше всё, что не +996, обрезалось до
+      // 9 цифр и показывалось после префикса +996.
+      const split = splitPhone(
+        profile.phone,
+        COUNTRIES.map((c) => c.dialCode),
+      );
+      const country = COUNTRIES.find((c) => c.dialCode === split.dialCode);
+      setPhoneDialCode(split.dialCode);
+      if (country) setPhoneCountryCode(country.code);
+      setPhone(split.local.slice(0, getPhoneLength(split.dialCode)));
+      setPhoneFieldKey((key) => key + 1);
+    }
+    // Технический адрес *@phone.imbir.kg (регистрация по телефону) — не
+    // почта человека; старый бэк ещё отдаёт его в профиле.
+    if (profile.email && !isPlaceholderEmail(profile.email)) {
+      setEmail(profile.email);
     }
   }, [profile]);
+
+  // Данные аккаунта, с которыми сравниваем поля формы: на бэк уходит только
+  // то, что вошедший пациент изменил (контакт на этот визит).
+  const accountContact = useMemo(
+    () => ({
+      name: `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim(),
+      phoneDigits: (profile?.phone ?? "").replace(/\D/g, ""),
+      email: (profile?.email ?? "").trim().toLowerCase(),
+    }),
+    [profile],
+  );
+
+  // Форму открыли вошедшим, а потом сессия умерла (истёк refresh, выход в
+  // другой вкладке). Раньше следующий клик молча оформлял гостевую офлайн-
+  // запись на подставленные из профиля данные: её не было в «Моих записях»,
+  // без видеозвонка и отзыва. Теперь останавливаемся и просим войти снова;
+  // гостем — только по явной кнопке «Записаться без входа».
+  const [wasAuthenticated, setWasAuthenticated] = useState(false);
+  if (isAuthenticated && !wasAuthenticated) setWasAuthenticated(true);
+  const [isGuestConfirmed, setIsGuestConfirmed] = useState(false);
+  const isSessionExpired =
+    wasAuthenticated && !isAuthenticated && !isGuestConfirmed;
 
   // Стор города персистится из localStorage асинхронно, уже ПОСЛЕ маунта. У
   // /specialists есть безопасный дефолт на время гидратации — сервер читает
@@ -573,6 +624,55 @@ export const useRecordForm = () => {
   useEffect(() => {
     if (formatNotice) toast(formatNotice, { id: "record-format-reset" });
   }, [formatNotice]);
+
+  // Ссылка «Войти»: после входа возвращаемся в эту же форму с уже выбранными
+  // клиникой, врачом, услугой и форматом (форма читает их из URL), а не в
+  // кабинет. Нужна и подсказке гостю (шаг 2), и уведомлению об истёкшей
+  // сессии (шаг 3).
+  const urlQuery = urlParams.toString();
+  const loginLink = useMemo(() => {
+    const params = new URLSearchParams(urlQuery);
+    for (const [key, value] of [
+      ["clinic", selectedClinicId],
+      ["doctor", selectedDoctorId],
+      ["service", selectedServiceId],
+      ["mode", wantsOnline ? "online" : null],
+    ] as const) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
+    const query = params.toString();
+    return loginHref(query ? `${ROUTES.RECORD}?${query}` : ROUTES.RECORD);
+  }, [
+    urlQuery,
+    selectedClinicId,
+    selectedDoctorId,
+    selectedServiceId,
+    wantsOnline,
+  ]);
+
+  // График врача — по нему календарь гасит выходные (K13). Берём сырой ответ
+  // /api/doctors/{id}/: адаптированный api.getDoctorById график не несёт.
+  // Старый бэк поля не отдаёт — тогда гасим только прошлое и горизонт.
+  const { data: doctorScheduleDetail } = useQuery({
+    queryKey: ["doctor-booking-schedule", selectedDoctorId],
+    queryFn: () => getDoctorById(selectedDoctorId as string),
+    enabled: Boolean(selectedDoctorId),
+  });
+  const doctorSchedule =
+    doctorScheduleDetail && String(doctorScheduleDetail.id) === selectedDoctorId
+      ? (doctorScheduleDetail.schedule ?? null)
+      : null;
+  const isDateDisabled = useMemo(
+    () => makeBookingDateFilter(doctorSchedule),
+    [doctorSchedule],
+  );
+  const hasNoSchedule = hasNoWorkingDays(doctorSchedule);
+  // Дату выбрали до того, как пришёл график (или сменили врача) и она
+  // оказалась выходным — снимаем, иначе висела бы дата без единого слота.
+  if (selectedDate && doctorSchedule && isDateDisabled(selectedDate)) {
+    setSelectedDate(null);
+  }
 
   const setOnlineBooking = (value: boolean) => {
     setWantsOnline(value);
@@ -992,12 +1092,33 @@ export const useRecordForm = () => {
     if (selectedServiceId) request.service_id = Number(selectedServiceId);
     if (comment.trim()) request.notes = comment.trim();
 
-    // Guests pass their contacts explicitly; authenticated bookings are tied
-    // to the logged-in user on the server, so no guest_* fields are sent.
+    const guestName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    // E.164 без пробелов, с выбранным кодом страны — раньше всегда уходило
+    // «+996 …», даже если номер иностранный.
+    const guestPhone = phone.trim() ? toE164Phone(phoneDialCode, phone) : "";
+    const guestEmail = email.trim();
+
     if (!isAuthenticated) {
-      request.guest_name = `${firstName.trim()} ${lastName.trim()}`.trim();
-      request.guest_phone = `+996 ${phone.trim()}`;
-      if (email.trim()) request.guest_email = email.trim();
+      request.guest_name = guestName;
+      request.guest_phone = guestPhone;
+      if (guestEmail) request.guest_email = guestEmail;
+    } else {
+      // Запись привязана к аккаунту (patient на бэке), но контакт на визит
+      // может отличаться: мать записывает ребёнка, у аккаунта по email нет
+      // телефона. Раньше поля шага 3 у вошедшего молча игнорировались —
+      // теперь отправляем то, что отличается от аккаунта.
+      if (guestName && guestName !== accountContact.name) {
+        request.guest_name = guestName;
+      }
+      if (
+        guestPhone &&
+        guestPhone.replace(/\D/g, "") !== accountContact.phoneDigits
+      ) {
+        request.guest_phone = guestPhone;
+      }
+      if (guestEmail && guestEmail.toLowerCase() !== accountContact.email) {
+        request.guest_email = guestEmail;
+      }
     }
 
     return request;
@@ -1018,7 +1139,24 @@ export const useRecordForm = () => {
     });
   };
 
-  const validateAndSubmit = async () => {
+  // Явное согласие записаться гостем после того, как сессия истекла (см.
+  // isSessionExpired): запись уйдёт без аккаунта и офлайн.
+  const submitAsGuest = () => {
+    setIsGuestConfirmed(true);
+    return submitBooking(false);
+  };
+
+  const validateAndSubmit = () => submitBooking(true);
+
+  const submitBooking = async (requireSession: boolean) => {
+    // Сессия умерла, пока форма была открыта: гостем без спроса не записываем
+    // (уведомление с «Войти снова» и «Записаться без входа» — в шаге 3).
+    if (requireSession && isSessionExpired) {
+      setErrors({});
+      revealStep(3);
+      return;
+    }
+
     // Проверяем шаги в том же порядке, в каком они идут на экране. Раньше
     // первыми шли контакты, и человек с пустой формой сначала заполнял их,
     // и только потом узнавал, что не выбрал врача — два круга вместо одного.
@@ -1056,18 +1194,21 @@ export const useRecordForm = () => {
     // ── Шаг 3 ────────────────────────────────────────────────────────────
     const nextErrors: OptionalFormErrors = {};
 
-    // Для авторизованных пользователей имя/фамилия/телефон не уходят на бэк
-    // (запись привязывается к JWT-юзеру, см. buildAppointmentRequest) —
-    // требовать их незачем.
+    // Вошедшему пациенту поля не обязательны: чего он не указал, бэк возьмёт
+    // из аккаунта (см. buildAppointmentRequest). Но введённый номер должен
+    // быть полным — он уходит на бэк как контакт на визит.
+    const phoneLength = getPhoneLength(phoneDialCode);
     if (!isAuthenticated) {
       if (!firstName.trim()) nextErrors.firstName = "Введите ваше имя";
       if (!lastName.trim()) nextErrors.lastName = "Введите вашу фамилию";
 
       if (!phone.trim()) {
         nextErrors.phone = "Введите номер телефона";
-      } else if (!isPhoneValid(phone)) {
+      } else if (!isPhoneValid(phone, phoneLength)) {
         nextErrors.phone = "Проверьте формат телефона";
       }
+    } else if (phone.trim() && !isPhoneValid(phone, phoneLength)) {
+      nextErrors.phone = "Проверьте формат телефона";
     }
 
     if (email && !isEmailValid(email)) {
@@ -1096,6 +1237,15 @@ export const useRecordForm = () => {
       setAppointmentResult(result);
       setShowSuccess(true);
     } catch (err: unknown) {
+      // Сессию продлить не вышло — перехватчик уже разлогинил, и шаг 3
+      // показывает «Сессия истекла — войдите снова» (isSessionExpired).
+      // Фолбэк «Попробуйте ещё раз» тут вредил: повторный клик уходил гостем.
+      if (err instanceof SessionExpiredError && wasAuthenticated) {
+        setErrors({});
+        revealStep(3);
+        return;
+      }
+
       const errData = (err as { response?: { data?: Record<string, unknown> } })
         ?.response?.data;
 
@@ -1154,6 +1304,10 @@ export const useRecordForm = () => {
     setLastName,
     phone,
     setPhone,
+    phoneDialCode,
+    setPhoneDialCode,
+    phoneCountryCode,
+    phoneFieldKey,
     email,
     setEmail,
     comment,
@@ -1204,6 +1358,14 @@ export const useRecordForm = () => {
     closeModal,
     handleModalItemSelect,
     validateAndSubmit,
+    // Сессия истекла при открытой форме — шаг 3 просит войти снова и даёт
+    // явную кнопку «Записаться без входа» (submitAsGuest).
+    isSessionExpired,
+    submitAsGuest,
+    loginLink,
+    // Календарь: прошлое по Бишкеку, горизонт записи и выходные врача.
+    isDateDisabled,
+    hasNoSchedule,
   };
 };
 

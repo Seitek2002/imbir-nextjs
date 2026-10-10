@@ -166,6 +166,22 @@ export const AppointmentDateTimePicker: FC<Props> = ({
     });
   }, [monthCursor, isDateDisabled]);
 
+  // Листать к месяцу, где все дни недоступны (прошлое, даты за горизонтом
+  // записи), незачем — раньше можно было уйти на годы вперёд по пустым
+  // месяцам. Без фильтра дат листаем свободно, как раньше.
+  const monthHasSelectableDay = (offset: number) => {
+    if (!isDateDisabled) return true;
+    const year = monthCursor.getFullYear();
+    const month = monthCursor.getMonth() + offset;
+    const days = new Date(year, month + 1, 0).getDate();
+    for (let day = 1; day <= days; day++) {
+      if (!isDateDisabled(new Date(year, month, day))) return true;
+    }
+    return false;
+  };
+  const canGoPrev = monthHasSelectableDay(-1);
+  const canGoNext = monthHasSelectableDay(1);
+
   const handleDateSelect = (date: Date) => {
     onDateChange(date);
     if (
@@ -183,6 +199,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
         size="xs"
         className="hover:bg-white"
         aria-label="Предыдущий месяц"
+        disabled={!canGoPrev}
         onClick={() =>
           setMonthCursor((p) => new Date(p.getFullYear(), p.getMonth() - 1, 1))
         }
@@ -195,6 +212,7 @@ export const AppointmentDateTimePicker: FC<Props> = ({
         size="xs"
         className="hover:bg-white"
         aria-label="Следующий месяц"
+        disabled={!canGoNext}
         onClick={() =>
           setMonthCursor((p) => new Date(p.getFullYear(), p.getMonth() + 1, 1))
         }

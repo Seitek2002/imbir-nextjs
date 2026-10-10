@@ -53,6 +53,10 @@ export type WorkExperienceItem = {
   to?: null | number;
 };
 
+// Недельный график врача: monday…sunday. enabled: false — в этот день слотов
+// не будет (выходной, нет графика или время не разобрать).
+export type DoctorWeekSchedule = Record<string, DaySchedule>;
+
 export type DoctorDetail = DoctorListItem & {
   about: string;
   education: EducationItem[];
@@ -60,9 +64,13 @@ export type DoctorDetail = DoctorListItem & {
   equipment: string[];
   languages: string[];
   location: { lat: number; lng: number } | null;
+  // Старый бэк этих полей не отдаёт — тогда календарь гасит только прошлое
+  // и даты дальше горизонта записи.
+  lunch_break?: LunchBreak | null;
   patient_conditions: string[];
   payment_methods: string[];
   phone: null | string;
+  schedule?: DoctorWeekSchedule | null;
   skills: string[];
   work_experience: WorkExperienceItem[];
 };

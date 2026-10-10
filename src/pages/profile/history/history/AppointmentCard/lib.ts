@@ -1,3 +1,5 @@
+import { parseLocalDate } from "@/shared/lib/datetime";
+
 // Короткие месяцы для «12 нояб 2025» (как в макете, без точки).
 const MONTHS_SHORT = [
   "янв",
@@ -14,17 +16,19 @@ const MONTHS_SHORT = [
   "дек",
 ];
 
-// "2025-11-12" → "12 нояб 2025" (мобильная версия карточки).
+// "2025-11-12" → "12 нояб 2025" (мобильная версия карточки). Разбираем как
+// местную дату: new Date(iso) читает её как полночь по UTC, и западнее
+// Гринвича карточка показывала предыдущий день.
 export const formatDateHuman = (iso: string): string => {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
+  const d = parseLocalDate(iso);
+  if (!d) return iso;
   return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
 };
 
 // "2025-11-12" → "12.11.2025" (десктоп-версия карточки).
 export const formatDateNumeric = (iso: string): string => {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
+  const d = parseLocalDate(iso);
+  if (!d) return iso;
   const dd = String(d.getDate()).padStart(2, "0");
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   return `${dd}.${mm}.${d.getFullYear()}`;

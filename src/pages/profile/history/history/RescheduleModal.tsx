@@ -9,10 +9,15 @@ import { AppointmentDateTimePicker } from "@/widgets/appointment-datetime-picker
 
 import {
   getDoctorAvailableSlots,
+  getDoctorById,
   profileKeys,
   rescheduleAppointment,
 } from "@/shared/api";
-import { groupAvailableSlots, toApiDate } from "@/shared/lib/booking";
+import {
+  groupAvailableSlots,
+  makeBookingDateFilter,
+  toApiDate,
+} from "@/shared/lib/booking";
 import {
   formatDuration,
   formatTimeRange,
@@ -143,12 +148,22 @@ export const RescheduleModal: FC<Props> = ({
     onClose();
   };
 
-  // Прошедшие даты выбрать нельзя.
-  const isDateDisabled = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
-  };
+  // График врача — по нему гасим его выходные. Сырой /api/doctors/{id}/:
+  // адаптированный api.getDoctorById график не несёт. Старый бэк поля не
+  // отдаёт — тогда гасим только прошлое и даты дальше горизонта записи.
+  const { data: doctorDetail } = useQuery({
+    queryKey: ["doctor-booking-schedule", doctorId],
+    queryFn: () => getDoctorById(doctorId),
+    enabled: isOpen && Boolean(doctorId),
+  });
+  const doctorSchedule = doctorDetail?.schedule ?? null;
+
+  // Прошедшие (по бишкекскому «сегодня»), слишком далёкие даты и выходные
+  // врача выбрать нельзя.
+  const isDateDisabled = useMemo(
+    () => makeBookingDateFilter(doctorSchedule),
+    [doctorSchedule],
+  );
 
   return (
     <Modal

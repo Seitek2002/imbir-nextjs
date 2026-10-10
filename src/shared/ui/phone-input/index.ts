@@ -1,2 +1,2 @@
-export { PhoneInput, getPhoneLength } from "./ui";
+export { COUNTRIES, PhoneInput, getPhoneLength } from "./ui";
 export type { Country } from "./ui";

@@ -1,4 +1,6 @@
-import type { AvailableSlot } from "@/shared/api";
+import type { AvailableSlot, DoctorWeekSchedule } from "@/shared/api";
+
+import { todayInBookingZone } from "./datetime";
 
 // Общие хелперы записи на приём — используются и формой /record, и офлайн-
 // модалкой на странице врача. Живут в shared, чтобы слайсы не импортировали
@@ -28,17 +30,86 @@ export const toApiDate = (date: Date) => {
 export const toApiTime = (time: string) =>
   time.length === 5 ? `${time}:00` : time;
 
-export const normalizeLocalPhone = (value: string) => {
-  const digits = value.replace(/\D/g, "").slice(0, 9);
+// Длина национальной части зависит от страны (у +996 — 9 цифр, у +7 — 10),
+// поэтому её передают явно. По умолчанию — 9, как у Кыргызстана: раньше
+// длина была зашита, и номер +7 молча обрезался до 9 цифр.
+export const normalizeLocalPhone = (value: string, maxLength = 9) => {
+  const digits = value.replace(/\D/g, "").slice(0, maxLength);
   return digits.replace(/(\d{3})(\d{3})?(\d{3})?/, (_, a, b, c) =>
     [a, b, c].filter(Boolean).join(" "),
   );
 };
 
-export const isPhoneLocalValid = (local: string) =>
-  local.replace(/\s/g, "").length === 9;
+export const isPhoneLocalValid = (local: string, length = 9) =>
+  local.replace(/\D/g, "").length === length;
 
-export const isPhoneValid = (value: string) => isPhoneLocalValid(value);
+export const isPhoneValid = (value: string, length = 9) =>
+  isPhoneLocalValid(value, length);
+
+// Номер для бэка — E.164 без пробелов: "+996" + "700123456".
+export const toE164Phone = (dialCode: string, local: string) =>
+  `${dialCode}${local.replace(/\D/g, "")}`;
+
+// Полный номер из профиля ("+77011234567", "996 700 123 456") → код страны и
+// национальная часть. Код ищем среди известных (dialCodes), самый длинный
+// подходящий. Номер без кода и неизвестный код считаем кыргызским, как и
+// раньше.
+export const splitPhone = (
+  full: string,
+  dialCodes: string[],
+  fallbackDialCode = "+996",
+): { dialCode: string; local: string } => {
+  const digits = full.replace(/\D/g, "");
+  const match = [...dialCodes]
+    .sort((a, b) => b.length - a.length)
+    .find((code) => {
+      const codeDigits = code.replace(/\D/g, "");
+      return digits.startsWith(codeDigits) && digits.length > codeDigits.length;
+    });
+  if (match && (full.trim().startsWith("+") || digits.length > 9)) {
+    return {
+      dialCode: match,
+      local: digits.slice(match.replace(/\D/g, "").length),
+    };
+  }
+  return { dialCode: fallbackDialCode, local: digits };
+};
+
+// Записаться можно не дальше, чем на столько дней вперёд: врачи не ведут
+// график на годы, а календарь раньше давал выбрать любую дату в будущем.
+export const BOOKING_HORIZON_DAYS = 60;
+
+const WEEKDAY_KEYS = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
+
+// У врача в графике нет ни одного рабочего дня — записаться к нему нельзя.
+// Без графика (старый бэк) ничего не знаем — false.
+export const hasNoWorkingDays = (schedule?: DoctorWeekSchedule | null) =>
+  !!schedule && WEEKDAY_KEYS.every((key) => schedule[key]?.enabled !== true);
+
+// Фильтр дней календаря записи: прошлое (по бишкекскому «сегодня»), даты
+// дальше BOOKING_HORIZON_DAYS и выходные врача по его графику. Без графика
+// (старый бэк) гасим только прошлое и горизонт.
+export const makeBookingDateFilter = (schedule?: DoctorWeekSchedule | null) => {
+  const today = todayInBookingZone();
+  const lastDay = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() + BOOKING_HORIZON_DAYS,
+  );
+  return (date: Date) => {
+    if (date < today || date > lastDay) return true;
+    if (!schedule) return false;
+    return schedule[WEEKDAY_KEYS[date.getDay()]]?.enabled !== true;
+  };
+};
 
 export const isEmailValid = (value: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.toLowerCase());

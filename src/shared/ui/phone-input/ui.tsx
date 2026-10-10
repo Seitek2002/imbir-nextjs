@@ -126,6 +126,10 @@ export const getPhoneLength = (dialCode: string): number =>
   COUNTRIES.find((c) => c.dialCode === dialCode)?.phoneLength ?? 9;
 
 type Props = {
+  // Весь справочник стран, а не только AVAILABLE_COUNTRIES. Для контакта в
+  // записи на приём (гость из Казахстана или России): там номер не служит
+  // логином, и ограничение регистрации/входа к нему не относится.
+  allCountries?: boolean;
   className?: string;
   defaultCountryCode?: string;
   error?: string;
@@ -140,15 +144,17 @@ export const PhoneInput: FC<Props> = ({
   label,
   value = "",
   defaultCountryCode = "KG",
+  allCountries = false,
   onChange,
   onCountryChange,
   error,
   hint,
   className,
 }) => {
+  const countries = allCountries ? COUNTRIES : AVAILABLE_COUNTRIES;
   const defaultCountry =
-    AVAILABLE_COUNTRIES.find((c) => c.code === defaultCountryCode) ??
-    AVAILABLE_COUNTRIES.find((c) => c.code === "KG")!;
+    countries.find((c) => c.code === defaultCountryCode) ??
+    countries.find((c) => c.code === "KG")!;
 
   const [selectedCountry, setSelectedCountry] =
     useState<Country>(defaultCountry);
@@ -200,15 +206,15 @@ export const PhoneInput: FC<Props> = ({
   };
 
   const filteredCountries = useMemo(() => {
-    if (!searchQuery) return AVAILABLE_COUNTRIES;
+    if (!searchQuery) return countries;
     const q = searchQuery.toLowerCase();
-    return AVAILABLE_COUNTRIES.filter(
+    return countries.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         c.dialCode.includes(q) ||
         c.code.toLowerCase().includes(q),
     );
-  }, [searchQuery]);
+  }, [searchQuery, countries]);
 
   const { sheetRef, scrollRef, handlers } = useDropdownSwipe(closeDropdown);
 

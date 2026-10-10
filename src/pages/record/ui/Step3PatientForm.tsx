@@ -1,8 +1,9 @@
+import Link from "next/link";
+
 import { cn } from "@/shared/lib/utils";
-import { Button, Input, Textarea } from "@/shared/ui";
+import { Button, Input, PhoneInput, Textarea } from "@/shared/ui";
 import { Spinner } from "@/shared/ui";
 
-import { isPhoneValid, normalizeLocalPhone } from "../model/lib";
 import type { RecordForm } from "../model/use-record-form";
 import { FieldLabel } from "./FieldLabel";
 import { StepTitle } from "./StepTitle";
@@ -16,6 +17,9 @@ export const Step3PatientForm = ({ form }: { form: RecordForm }) => {
     setLastName,
     phone,
     setPhone,
+    setPhoneDialCode,
+    phoneCountryCode,
+    phoneFieldKey,
     email,
     setEmail,
     comment,
@@ -24,6 +28,10 @@ export const Step3PatientForm = ({ form }: { form: RecordForm }) => {
     setErrors,
     isSubmitting,
     validateAndSubmit,
+    isAuthenticated,
+    isSessionExpired,
+    submitAsGuest,
+    loginLink,
   } = form;
 
   return (
@@ -36,6 +44,16 @@ export const Step3PatientForm = ({ form }: { form: RecordForm }) => {
       )}
     >
       <StepTitle number={3} title="Заполните данные" />
+
+      {/* Поля подставлены из профиля, и раньше их правки у вошедшего молча
+          терялись. Теперь изменённое уходит врачу как контакт на визит. */}
+      {isAuthenticated && (
+        <p className="text-xs text-muted mb-3">
+          Данные подставлены из профиля. Записываете другого человека или хотите
+          оставить другой номер — измените их: врач увидит эти данные в записи,
+          профиль не изменится.
+        </p>
+      )}
 
       <div className="grid gap-3 lg:grid-cols-2">
         <Input
@@ -60,45 +78,26 @@ export const Step3PatientForm = ({ form }: { form: RecordForm }) => {
           error={errors.lastName}
         />
 
-        <div className="space-y-1.5">
-          <span className="text-sm font-medium text-overlay">
-            Номер телефона
-          </span>
-          <div
-            className={cn(
-              "flex items-center h-11 rounded-lg border transition-all overflow-hidden",
-              errors.phone
-                ? "border-red-400"
-                : "border-border-soft focus-within:border-primary/60",
-            )}
-          >
-            <span className="px-3 h-full flex items-center bg-[#F7F8F9] border-r border-border-soft text-sm text-foreground select-none shrink-0">
-              +996
-            </span>
-            <input
-              type="tel"
-              placeholder="000 000 000"
-              value={phone}
-              onChange={(event) => {
-                setPhone(normalizeLocalPhone(event.target.value));
-                setErrors((prev) => ({ ...prev, phone: undefined }));
-              }}
-              onBlur={() => {
-                if (!phone) return;
-                setErrors((prev) => ({
-                  ...prev,
-                  phone: isPhoneValid(phone)
-                    ? undefined
-                    : "Проверьте формат номера",
-                }));
-              }}
-              className="flex-1 h-full px-3 text-sm text-foreground outline-none bg-transparent placeholder:text-muted"
-            />
-          </div>
-          {errors.phone && (
-            <p className="text-xs text-red-500">{errors.phone}</p>
-          )}
-        </div>
+        {/* Код страны выбирается, как на входе и регистрации: раньше здесь
+            был зашит «+996», и номер гостя из Казахстана или России
+            обрезался до 9 цифр. key пересоздаёт поле, когда номер с другим
+            кодом подставился из профиля. */}
+        <PhoneInput
+          key={phoneFieldKey}
+          allCountries
+          label="Номер телефона"
+          defaultCountryCode={phoneCountryCode}
+          value={phone}
+          onChange={(value) => {
+            setPhone(value);
+            setErrors((prev) => ({ ...prev, phone: undefined }));
+          }}
+          onCountryChange={(country) => {
+            setPhoneDialCode(country.dialCode);
+            setErrors((prev) => ({ ...prev, phone: undefined }));
+          }}
+          error={errors.phone}
+        />
 
         <div>
           <FieldLabel label="Электронная почта" hint="Необязательное поле" />
@@ -128,12 +127,47 @@ export const Step3PatientForm = ({ form }: { form: RecordForm }) => {
         <p className="mt-4 text-sm text-red-500">{errors.submit}</p>
       )}
 
+      {/* Сессия истекла, пока форма была открыта. Раньше повторный клик молча
+          оформлял гостевую офлайн-запись, которой потом не было в «Моих
+          записях». Гостем — только по явному выбору. */}
+      {isSessionExpired && (
+        <div
+          role="alert"
+          className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm"
+        >
+          <p className="font-medium text-red-600">
+            Сессия истекла — войдите снова
+          </p>
+          <p className="mt-1 text-foreground">
+            Без входа запись оформится как гостевая и офлайн: её не будет в
+            «Моих записях», без видеозвонка и отзыва.
+          </p>
+          <div className="mt-3 flex flex-col gap-2 lg:flex-row">
+            <Link
+              href={loginLink}
+              className="inline-flex items-center justify-center rounded-full bg-primary px-5 h-10 text-sm text-white font-medium active:bg-primary-dark"
+            >
+              Войти снова
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              className="justify-center"
+              disabled={isSubmitting}
+              onClick={() => submitAsGuest()}
+            >
+              Записаться без входа
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="mt-6">
         <Button
           className="w-full lg:w-auto lg:min-w-50 justify-center"
           size="lg"
-          disabled={isSubmitting}
-          onClick={validateAndSubmit}
+          disabled={isSubmitting || isSessionExpired}
+          onClick={() => validateAndSubmit()}
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2">

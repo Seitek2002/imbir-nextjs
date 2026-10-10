@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 
 import { AppointmentDateTimePicker } from "@/widgets/appointment-datetime-picker";
 
-import { ROUTES, loginHref } from "@/shared/config";
 import {
   formatDuration,
   formatTimeRange,
@@ -19,9 +17,8 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
   const {
     mobileStep,
     isAuthenticated,
-    selectedClinicId,
+    isSessionExpired,
     selectedDoctorId,
-    selectedServiceId,
     selectedService,
     slotNotice,
     selectedDate,
@@ -32,24 +29,11 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
     isLoadingSlots,
     isStep2Complete,
     setMobileStep,
+    // Ссылка «Войти» с возвратом в эту же форму (собирается в модели).
+    loginLink,
+    isDateDisabled,
+    hasNoSchedule,
   } = form;
-  const searchParams = useSearchParams();
-
-  // После входа возвращаемся в эту же форму с уже выбранными клиникой,
-  // врачом и услугой (форма читает их из URL), а не в кабинет.
-  const loginParams = new URLSearchParams(searchParams?.toString());
-  for (const [key, value] of [
-    ["clinic", selectedClinicId],
-    ["doctor", selectedDoctorId],
-    ["service", selectedServiceId],
-  ] as const) {
-    if (value) loginParams.set(key, value);
-    else loginParams.delete(key);
-  }
-  const loginQuery = loginParams.toString();
-  const loginLink = loginHref(
-    loginQuery ? `${ROUTES.RECORD}?${loginQuery}` : ROUTES.RECORD,
-  );
 
   return (
     <section
@@ -65,7 +49,22 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
       {/* Приёмы только онлайн, но бэк запрещает онлайн-запись без аккаунта
           («Онлайн-запись доступна только авторизованным пользователям», 400),
           поэтому гостю говорим прямо, чего он лишается. */}
-      {!isAuthenticated && (
+      {/* Сессия истекла при открытой форме — это не гость: просим войти
+          снова (подробнее и выбор «без входа» — в шаге 3). */}
+      {isSessionExpired && (
+        <p role="alert" className="text-xs text-red-500 mb-3">
+          Сессия истекла —{" "}
+          <Link
+            href={loginLink}
+            className="text-primary underline hover:no-underline"
+          >
+            войдите снова
+          </Link>
+          , чтобы запись оформилась на ваш аккаунт.
+        </p>
+      )}
+
+      {!isAuthenticated && !isSessionExpired && (
         <p className="text-xs text-muted mb-3">
           Видеозвонок с врачом доступен после{" "}
           <Link
@@ -95,6 +94,13 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
         </p>
       )}
 
+      {selectedDoctorId && hasNoSchedule && (
+        <p className="text-xs text-muted mb-3">
+          У специалиста пока нет рабочих дней в графике — запись к нему
+          недоступна. Выберите другого специалиста.
+        </p>
+      )}
+
       {slotNotice && (
         <p role="alert" className="text-sm text-red-500 mb-3">
           {slotNotice}
@@ -109,15 +115,9 @@ export const Step2DateTime = ({ form }: { form: RecordForm }) => {
         onTimeChange={setSelectedTime}
         timeGroups={timeGroups}
         isLoadingSlots={isLoadingSlots}
-        isDateDisabled={(date) => {
-          const now = new Date();
-          const startOfToday = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate(),
-          );
-          return date < startOfToday;
-        }}
+        // Прошлое (по бишкекскому «сегодня», а не по часам браузера), даты
+        // дальше горизонта записи и выходные врача по его графику.
+        isDateDisabled={isDateDisabled}
       />
 
       <div className="lg:hidden mt-6">
