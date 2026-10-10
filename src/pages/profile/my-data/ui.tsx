@@ -11,6 +11,7 @@ import { NotificationSoundSettings } from "@/features/notification-sounds";
 
 import { getProfile, profileKeys, updateProfile } from "@/shared/api";
 import { CheckIcon, EditIcon } from "@/shared/assets/icons";
+import { extractErrorMessage } from "@/shared/lib/errors";
 import { useAuthStore } from "@/shared/store";
 import {
   Button,
@@ -32,12 +33,24 @@ type D = {
   photo?: string;
 };
 
-const Field: FC<{ label: string; value: string }> = ({ label, value }) => (
+const Field: FC<{ empty?: string; label: string; value: string }> = ({
+  label,
+  value,
+  empty = "—",
+}) => (
   <div className="py-3 border-b border-background last:border-0">
     <p className="text-muted text-xs mb-1">{label}</p>
-    <p className="text-foreground text-base">{value || "—"}</p>
+    <p className="text-foreground text-base">{value || empty}</p>
   </div>
 );
+
+// У зарегистрированного по телефону почты нет: старый бэк отдаёт вместо неё
+// технический адрес вида 996700000000@phone.imbir.kg (новый — пустую строку).
+// Показывать его как «Почту» нельзя.
+const visibleEmail = (email?: null | string) =>
+  email && !email.toLowerCase().endsWith("@phone.imbir.kg") ? email : "";
+
+const EMAIL_EMPTY = "Почта не указана";
 
 export const ProfileMyDataPage: FC = () => {
   const user = useAuthStore((s) => s.user);
@@ -52,7 +65,7 @@ export const ProfileMyDataPage: FC = () => {
     lastName: user?.last_name ?? "",
     patronymic: "",
     phone: user?.phone ?? "",
-    email: user?.email ?? "",
+    email: visibleEmail(user?.email),
     photo: user?.avatar ?? undefined,
   };
   const [d, setD] = useState<D>(initialData);
@@ -84,7 +97,7 @@ export const ProfileMyDataPage: FC = () => {
       lastName: profile.last_name ?? "",
       patronymic: profile.patronymic ?? "",
       phone: profile.phone ?? "",
-      email: profile.email ?? "",
+      email: visibleEmail(profile.email),
       photo: profile.avatar ?? undefined,
     };
     savedDataRef.current = next;
@@ -149,8 +162,14 @@ export const ProfileMyDataPage: FC = () => {
       toast.success("Данные сохранены");
       setIsEditing(false);
       setShowSaveConfirm(false);
-    } catch {
-      toast.error("Не удалось сохранить. Попробуйте снова");
+    } catch (err) {
+      // Причину отказа (например, «Пользователь с таким номером телефона уже
+      // зарегистрирован») показываем как есть — иначе человек бесконечно
+      // повторял сохранение, не зная, что не так.
+      const data = (err as { response?: { data?: unknown } })?.response?.data;
+      toast.error(
+        extractErrorMessage(data, "Не удалось сохранить. Попробуйте снова"),
+      );
     } finally {
       setIsSaving(false);
     }
@@ -339,7 +358,9 @@ export const ProfileMyDataPage: FC = () => {
                           onChange={(e) =>
                             set(key, e.target.value as D[typeof key])
                           }
-                          placeholder={placeholder}
+                          placeholder={
+                            key === "email" ? EMAIL_EMPTY : placeholder
+                          }
                           disabled={key === "email"}
                         />
                       )}
@@ -352,7 +373,7 @@ export const ProfileMyDataPage: FC = () => {
                   <Field label="Фамилия" value={d.lastName} />
                   <Field label="Отчество" value={d.patronymic} />
                   <Field label="Номер телефона" value={d.phone} />
-                  <Field label="Почта" value={d.email} />
+                  <Field label="Почта" value={d.email} empty={EMAIL_EMPTY} />
                 </>
               )}
             </div>

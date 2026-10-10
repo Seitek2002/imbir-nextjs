@@ -260,8 +260,9 @@ export const getMeFn = async (): Promise<AuthUser> => {
   return data;
 };
 
-// Бэк отвечает одинаковым detail независимо от того, существует email —
-// это ожидаемо (защита от перебора почт), не ошибка.
+// Бэк отвечает одинаковым detail независимо от того, существует email или
+// телефон — это ожидаемо (защита от перебора), не ошибка. По телефону код
+// приходит в СМС.
 export const requestPasswordResetFn = async (
   body: PasswordResetRequest,
 ): Promise<{ detail: string }> => {
@@ -283,7 +284,7 @@ export const verifyPasswordResetFn = async (
   return data;
 };
 
-// Финальный шаг: установка нового пароля по email+коду.
+// Финальный шаг: установка нового пароля по email (или телефону) + коду.
 export const confirmPasswordResetFn = async (
   body: PasswordResetConfirmRequest,
 ): Promise<{ detail: string }> => {

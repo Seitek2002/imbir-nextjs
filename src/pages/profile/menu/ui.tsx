@@ -43,6 +43,8 @@ const MENU_ITEMS: CabinetMenuItem[] = [
   },
 ];
 
+const PHONE_PLACEHOLDER_SUFFIX = "@phone.imbir.kg";
+
 // Карточка статуса пациента — специфична для роли, поэтому живёт здесь и
 // передаётся в footer общего меню. Данные — GET /api/references/user-status/
 // {id}/; нет отзывов у пользователя, значит status: null и карточку не рисуем.
@@ -54,6 +56,13 @@ export const ProfileMobileHub: FC = () => {
   const userName = user
     ? `${user.first_name} ${user.last_name?.charAt(0) ?? ""}`.trim()
     : "";
+  // У зарегистрированного по телефону почты нет: старый бэк отдаёт вместо неё
+  // технический адрес *@phone.imbir.kg (новый — пустую строку). Его не
+  // показываем, а подписываем карточку номером телефона.
+  const email = user?.email?.toLowerCase().endsWith(PHONE_PLACEHOLDER_SUFFIX)
+    ? ""
+    : user?.email;
+  const contact = email || user?.phone || "";
 
   return (
     <CabinetMobileMenu
@@ -73,8 +82,8 @@ export const ProfileMobileHub: FC = () => {
       }
       name={userName}
       subtitle={
-        user?.email ? (
-          <p className="text-muted text-sm mt-0.5">{user.email}</p>
+        contact ? (
+          <p className="text-muted text-sm mt-0.5">{contact}</p>
         ) : undefined
       }
       items={MENU_ITEMS}

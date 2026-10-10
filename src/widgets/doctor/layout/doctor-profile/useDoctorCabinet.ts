@@ -25,6 +25,7 @@ import {
   updateDoctorProfile,
   uploadDoctorDocument,
 } from "@/shared/api";
+import { extractErrorMessage } from "@/shared/lib/errors";
 
 import type { DoctorProfileData } from "./model";
 
@@ -276,8 +277,13 @@ export const useDoctorCabinet = () => {
           toast.success("Данные сохранены");
         }
       },
-      onError: () => {
-        toast.error("Не удалось сохранить. Попробуйте снова");
+      onError: (err) => {
+        // Причину отказа («Пользователь с таким номером телефона уже
+        // зарегистрирован» и т.п.) показываем как есть, а не общую фразу.
+        const data = (err as { response?: { data?: unknown } })?.response?.data;
+        toast.error(
+          extractErrorMessage(data, "Не удалось сохранить. Попробуйте снова"),
+        );
       },
     },
   );

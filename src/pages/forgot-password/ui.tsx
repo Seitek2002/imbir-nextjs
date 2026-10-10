@@ -24,9 +24,21 @@ import { colors } from "@/shared/config";
 import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
-import { Button, IconBtn, Input } from "@/shared/ui";
+import {
+  Button,
+  type Country,
+  IconBtn,
+  Input,
+  PhoneInput,
+  getPhoneLength,
+} from "@/shared/ui";
+import { SegmentedControl } from "@/shared/ui/segmented-control";
 
 type Step = "code" | "email" | "new_password" | "success";
+
+// Пациент, зарегистрированный по телефону, почты не имеет — код ему приходит
+// в СМС на номер.
+type ResetBy = "email" | "phone";
 
 // Бэк требует код ровно из 6 цифр (minLength/maxLength: 6 в
 // PasswordResetVerifyRequest/PasswordResetConfirmRequest).
@@ -38,7 +50,12 @@ export const ForgotPasswordPage = () => {
   const [step, setStep] = useState<Step>("email");
 
   // Стейты данных
+  const [resetBy, setResetBy] = useState<ResetBy>("email");
   const [email, setEmail] = useState("");
+  // Как на входе: национальная часть номера и код страны из PhoneInput,
+  // полный номер собираем только при отправке.
+  const [phoneLocal, setPhoneLocal] = useState("");
+  const [dialCode, setDialCode] = useState("+996");
   const [code, setCode] = useState(Array(CODE_LENGTH).fill(""));
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -64,10 +81,7 @@ export const ForgotPasswordPage = () => {
     onError: (err) => {
       const data = (err as { response?: { data?: unknown } })?.response?.data;
       toast.error(
-        extractErrorMessage(
-          data,
-          "Не удалось отправить письмо. Попробуйте снова",
-        ),
+        extractErrorMessage(data, "Не удалось отправить код. Попробуйте снова"),
       );
     },
   });
@@ -94,6 +108,15 @@ export const ForgotPasswordPage = () => {
       );
     },
   });
+
+  // Контакт, на который ушёл код: тот же канал передаём на проверку кода и
+  // при сохранении пароля.
+  const target =
+    resetBy === "email" ? { email } : { phone: `${dialCode}${phoneLocal}` };
+  const targetFilled =
+    resetBy === "email"
+      ? !!email
+      : phoneLocal.length === getPhoneLength(dialCode);
 
   // Валидация пароля
   const isLengthValid = password.length >= 8;
@@ -173,8 +196,8 @@ export const ForgotPasswordPage = () => {
                 className="flex flex-1 flex-col"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (!email || requestResetMutation.isPending) return;
-                  requestResetMutation.mutate({ email });
+                  if (!targetFilled || requestResetMutation.isPending) return;
+                  requestResetMutation.mutate(target);
                 }}
               >
                 <div className="mt-4 mb-6 md:mt-0">
@@ -182,25 +205,46 @@ export const ForgotPasswordPage = () => {
                     Восстановить пароль
                   </h2>
                   <p className="text-muted text-sm md:text-base">
-                    Введите почту, к которой привязан ваш аккаунт
+                    {resetBy === "email"
+                      ? "Введите почту, к которой привязан ваш аккаунт"
+                      : "Введите номер телефона, к которому привязан ваш аккаунт"}
                   </p>
                 </div>
-                <Input
-                  label="Электронная почта"
-                  type="email"
-                  name="email"
-                  autoComplete="email"
-                  placeholder="Введите вашу почту"
-                  IconRight={EmailIcon}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+                <div className="flex flex-col gap-4">
+                  <SegmentedControl
+                    options={[
+                      { label: "Эл. почта", value: "email" },
+                      { label: "Телефон", value: "phone" },
+                    ]}
+                    value={resetBy}
+                    onChange={setResetBy}
+                  />
+                  {resetBy === "email" ? (
+                    <Input
+                      label="Электронная почта"
+                      type="email"
+                      name="email"
+                      autoComplete="email"
+                      placeholder="Введите вашу почту"
+                      IconRight={EmailIcon}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  ) : (
+                    <PhoneInput
+                      label="Номер телефона"
+                      value={phoneLocal}
+                      onChange={setPhoneLocal}
+                      onCountryChange={(c: Country) => setDialCode(c.dialCode)}
+                    />
+                  )}
+                </div>
                 <div className="mt-auto pt-10 md:mt-10">
                   <Button
                     type="submit"
                     className="w-full justify-center md:h-14 md:text-lg"
                     size="lg"
-                    disabled={!email || requestResetMutation.isPending}
+                    disabled={!targetFilled || requestResetMutation.isPending}
                   >
                     {requestResetMutation.isPending
                       ? "Отправка..."
@@ -219,7 +263,7 @@ export const ForgotPasswordPage = () => {
                   const value = code.join("");
                   if (value.length < CODE_LENGTH || verifyMutation.isPending)
                     return;
-                  verifyMutation.mutate({ email, code: value });
+                  verifyMutation.mutate({ ...target, code: value });
                 }}
               >
                 <div className="mt-4 mb-6 md:mt-0 text-center md:text-left">
@@ -227,7 +271,9 @@ export const ForgotPasswordPage = () => {
                     Восстановить пароль
                   </h2>
                   <p className="text-muted text-sm md:text-base">
-                    Введите код подтверждения, отправленный на вашу почту
+                    {resetBy === "email"
+                      ? "Введите код подтверждения, отправленный на вашу почту"
+                      : "Введите код подтверждения из СМС"}
                   </p>
                 </div>
 
@@ -259,7 +305,7 @@ export const ForgotPasswordPage = () => {
                       type="button"
                       className="text-sm text-primary hover:underline disabled:opacity-50"
                       disabled={requestResetMutation.isPending}
-                      onClick={() => requestResetMutation.mutate({ email })}
+                      onClick={() => requestResetMutation.mutate(target)}
                     >
                       Получить код повторно
                     </button>
@@ -290,7 +336,7 @@ export const ForgotPasswordPage = () => {
                   e.preventDefault();
                   if (!isPasswordValid || confirmMutation.isPending) return;
                   confirmMutation.mutate({
-                    email,
+                    ...target,
                     code: code.join(""),
                     password,
                   });

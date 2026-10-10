@@ -23,19 +23,25 @@ export type RefreshResponse = {
   refresh: string;
 };
 
+// Сброс пароля: канал один — email ЛИБО phone (пациент, зарегистрированный по
+// телефону, почты не имеет). Телефон в том же виде, что при регистрации:
+// код страны + номер без пробелов, напр. +996700000000.
 export type PasswordResetRequest = {
-  email: string;
+  email?: string;
+  phone?: string;
 };
 
 export type PasswordResetVerifyRequest = {
   code: string;
-  email: string;
+  email?: string;
+  phone?: string;
 };
 
 export type PasswordResetConfirmRequest = {
   code: string;
-  email: string;
+  email?: string;
   password: string;
+  phone?: string;
 };
 
 // POST /api/auth/email/check/ — чистая проверка занятости, без побочных
