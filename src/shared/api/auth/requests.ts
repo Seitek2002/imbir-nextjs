@@ -3,6 +3,8 @@ import type { AuthUser } from "@/shared/store/authStore";
 import { FILE_UPLOAD_TIMEOUT_MS, apiClient } from "../client";
 import {
   AuthResponse,
+  DoctorInviteAcceptResponse,
+  DoctorInviteParams,
   DoctorInviteValidationResponse,
   EmailCheckRequest,
   EmailCheckResponse,
@@ -15,6 +17,7 @@ import {
   PasswordResetConfirmRequest,
   PasswordResetRequest,
   PasswordResetVerifyRequest,
+  PhoneCheckResponse,
   PhoneRegisterConfirmRequest,
   PhoneRegisterRequestRequest,
   PhoneRegisterRequestSuccess,
@@ -26,13 +29,24 @@ import {
   VerifyPhoneConfirmRequest,
 } from "./types";
 
-export const validateDoctorInvite = async (params: {
-  invite_branch_id?: number;
-  invite_clinic_id: number;
-}): Promise<DoctorInviteValidationResponse> => {
+export const validateDoctorInvite = async (
+  params: DoctorInviteParams,
+): Promise<DoctorInviteValidationResponse> => {
   const { data } = await apiClient.get<DoctorInviteValidationResponse>(
     "/api/auth/invite/validate/",
     { params },
+  );
+  return data;
+};
+
+// Врач с уже существующим аккаунтом принимает ссылку-приглашение клиники
+// (регистрироваться повторно ему не дают — «email уже используется»).
+export const acceptDoctorInvite = async (
+  body: DoctorInviteParams,
+): Promise<DoctorInviteAcceptResponse> => {
+  const { data } = await apiClient.post<DoctorInviteAcceptResponse>(
+    "/api/auth/invite/accept/",
+    body,
   );
   return data;
 };
@@ -65,6 +79,18 @@ export const checkEmailAvailabilityFn = async (
   const { data } = await apiClient.post<EmailCheckResponse>(
     "/api/auth/email/check/",
     body,
+  );
+  return data;
+};
+
+// Пара к checkEmailAvailabilityFn: свободен ли телефон для регистрации врача
+// или клиники. Номер — полный, с кодом страны, как он уйдёт в анкету.
+export const checkPhoneAvailabilityFn = async (
+  phone: string,
+): Promise<PhoneCheckResponse> => {
+  const { data } = await apiClient.get<PhoneCheckResponse>(
+    "/api/auth/phone/check/",
+    { params: { phone } },
   );
   return data;
 };

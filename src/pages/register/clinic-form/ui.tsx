@@ -8,7 +8,11 @@ import {
   useVerifyContact,
 } from "@/features/verify-contact";
 
-import { checkEmailAvailabilityFn } from "@/shared/api";
+import {
+  checkEmailAvailabilityFn,
+  checkPhoneAvailabilityFn,
+} from "@/shared/api";
+import { isEmailValid } from "@/shared/lib/booking";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import {
   PASSWORD_REQUIREMENTS_ERROR,
@@ -102,12 +106,12 @@ export const ClinicRegistrationForm = ({
   // Блок подтверждения показывается только после первой попытки отправить
   // анкету — до этого он был бы шумом, а код успел бы истечь.
   const [showVerify, setShowVerify] = useState(false);
-  // POST /api/auth/email/check/ — чистая проверка занятости на шаге 2, а не
-  // только на финальном сабмите (см. тот же приём в doctor-form/ui.tsx).
-  // Почта на этом шаге необязательна (isValid её не требует) — проверяем
-  // только если что-то ввели, формат не валидируем (этот шаг и раньше не
-  // валидировал формат — оставляем эту часть бэку на финальном сабмите).
+  // POST /api/auth/email/check/ и GET /api/auth/phone/check/ — чистые
+  // проверки занятости на шаге 2, а не только на финальном сабмите (см. тот
+  // же приём в doctor-form/ui.tsx). Почта обязательна: без неё бэк отвечает
+  // «Email обязателен» уже после 7 шагов и подтверждения кода.
   const [emailError, setEmailError] = useState<null | string>(null);
+  const [phoneError, setPhoneError] = useState<null | string>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   const verify = useVerifyContact({
@@ -122,6 +126,7 @@ export const ClinicRegistrationForm = ({
     if (key === "password" || key === "confirmPassword") setPasswordError("");
     if (key === "lunchBreak" || key === "emergency247") setScheduleError("");
     if (key === "email") setEmailError(null);
+    if (key === "phone" || key === "phoneDialCode") setPhoneError(null);
     setData((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -146,7 +151,8 @@ export const ClinicRegistrationForm = ({
     step === 1
       ? !!data.clinicName
       : step === 2
-        ? data.phone.length === getPhoneLength(data.phoneDialCode)
+        ? data.phone.length === getPhoneLength(data.phoneDialCode) &&
+          !!data.email.trim()
         : step === 4
           ? // Дата лицензии необязательна, но начатая должна быть полной.
             !data.licenseDate || isCompleteDate(data.licenseDate)
@@ -161,16 +167,30 @@ export const ClinicRegistrationForm = ({
   const handleContinue = async () => {
     if (!isValid || isLoading || isCheckingEmail) return;
     if (step < 7) {
-      if (step === 2 && data.email.trim()) {
+      if (step === 2) {
+        if (!isEmailValid(data.email)) {
+          setEmailError("Введите корректный email");
+          return;
+        }
         setIsCheckingEmail(true);
         try {
-          const { data: check } = await checkEmailAvailabilityFn({
-            email: data.email,
-          });
-          if (!check.available) {
+          const [emailCheck, phoneAvailable] = await Promise.all([
+            checkEmailAvailabilityFn({ email: data.email }),
+            // Эндпоинта может не быть на старом бэке — тогда номер, как и
+            // раньше, проверит только финальная отправка анкеты.
+            checkPhoneAvailabilityFn(`${data.phoneDialCode}${data.phone}`)
+              .then(({ data: check }) => check.available)
+              .catch(() => true),
+          ]);
+          if (!emailCheck.data.available) {
             setEmailError("Этот email уже используется");
-            return;
           }
+          if (!phoneAvailable) {
+            setPhoneError(
+              "Пользователь с таким номером телефона уже зарегистрирован",
+            );
+          }
+          if (!emailCheck.data.available || !phoneAvailable) return;
         } catch (err: unknown) {
           const errData = (err as { response?: { data?: unknown } })?.response
             ?.data;
@@ -221,6 +241,7 @@ export const ClinicRegistrationForm = ({
         data={data}
         onChange={handleChange}
         emailError={emailError}
+        phoneError={phoneError}
       />
     ),
     3: (

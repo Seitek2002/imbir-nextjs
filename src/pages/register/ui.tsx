@@ -20,6 +20,7 @@ import {
 
 import {
   type RegisterDoctorRequest,
+  acceptDoctorInvite,
   checkEmailAvailabilityFn,
   doctorCabinetKeys,
   getDoctorProfile,
@@ -193,16 +194,36 @@ const toApiDate = (ddmmyyyy: string): string => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-// Регистрационный endpoint иногда возвращает ФИО с собственной разбивкой на
-// first_name/last_name. Для профильного PUT используем то, что ввёл врач:
-// этот endpoint требует оба поля и иначе отклоняет весь запрос с данными.
+// Для профильного PUT используем то, что ввёл врач: этот endpoint требует
+// оба поля и иначе отклоняет весь запрос с данными. ФИО вводится в порядке
+// «Фамилия Имя Отчество» — так же его разбирает бэк при регистрации (и форма
+// специалиста клиники). Раньше именем здесь считалось первое слово, и PUT
+// менял местами имя и фамилию, только что правильно записанные бэком.
+// Отчество профильный PUT не принимает — его сохраняет сама регистрация.
 const splitFullName = (fullName: string) => {
-  const parts = fullName.trim().split(/\s+/).filter(Boolean);
-  return {
-    firstName: parts[0] ?? "",
-    lastName: parts.slice(1).join(" "),
-  };
+  const [lastName = "", firstName = ""] = fullName
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  return { firstName, lastName };
 };
+
+// Шаг анкеты, к которому относится ошибка бэка ({"step2": {"email": ...}}):
+// кроме тоста возвращаем человека на нужный шаг, а не оставляем на последнем
+// гадать, где исправлять.
+const getErrorStep = (err: unknown): null | number => {
+  const data = (err as { response?: { data?: unknown } })?.response?.data;
+  if (!data || typeof data !== "object") return null;
+  const steps = Object.keys(data)
+    .map((key) => /^step(\d)$/.exec(key)?.[1])
+    .filter(Boolean)
+    .map(Number);
+  return steps.length > 0 ? Math.min(...steps) : null;
+};
+
+// Параметр ?invite= — id инвайта (uuid). Мусор на бэк не отправляем.
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const RegisterPage = () => {
   const router = useRouter();
@@ -214,7 +235,10 @@ export const RegisterPage = () => {
   const postAuthRedirect = (role: string) =>
     resolveNextPath(searchParams.get("next"), role) ?? getRoleRedirect(role);
   const hasInviteParams =
-    searchParams.has("invite_clinic_id") || searchParams.has("clinicId");
+    searchParams.has("invite") ||
+    searchParams.has("invite_clinic_id") ||
+    searchParams.has("clinicId");
+  const authUser = useAuthStore((s) => s.user);
 
   const [activeForm, setActiveForm] = useState<ActiveForm>(
     hasInviteParams ? "doctor" : "role",
@@ -226,6 +250,10 @@ export const RegisterPage = () => {
   const [inviteValidationStatus, setInviteValidationStatus] = useState<
     "idle" | "invalid" | "loading" | "valid"
   >(hasInviteParams ? "loading" : "idle");
+  // id конкретного инвайта: регистрация и «Принять приглашение» привязывают
+  // врача ровно по нему (филиал — из самого инвайта).
+  const [inviteId, setInviteId] = useState<string | undefined>();
+  const [isAcceptingInvite, setIsAcceptingInvite] = useState(false);
 
   // Dropdown/текстовые поля специализации хранят название (см.
   // useSpecializationOptions), а бэк на запись принимает только id — резолвим
@@ -233,24 +261,32 @@ export const RegisterPage = () => {
   const { data: specializationList = [] } = useSpecializations("reference");
 
   useEffect(() => {
+    const inviteParam = searchParams.get("invite")?.trim() ?? "";
     const clinicIdParam =
       searchParams.get("invite_clinic_id") ?? searchParams.get("clinicId");
-    if (!clinicIdParam) return;
+    if (!inviteParam && !clinicIdParam) return;
     const branchIdParam =
       searchParams.get("invite_branch_id") ?? searchParams.get("branchId");
-    const clinicId = Number(clinicIdParam);
+    const clinicId = clinicIdParam ? Number(clinicIdParam) : null;
     const branchId = branchIdParam ? Number(branchIdParam) : null;
+    const isValidId = (id: null | number) =>
+      id === null || (Number.isInteger(id) && id > 0);
+    const hasInviteId = UUID_RE.test(inviteParam);
 
     // Проверяем приглашение до показа анкеты. Публичный каталог клиник здесь
     // не подходит: invite_clinic_id — это user_id аккаунта клиники.
     setSelectedRole("doctor");
     setActiveForm("doctor");
     setInviteClinic(undefined);
+    setInviteId(undefined);
 
+    // Новые ссылки несут id инвайта (?invite=) и дублируют старые параметры:
+    // старый бэк понимает только invite_clinic_id/invite_branch_id.
     if (
-      !Number.isInteger(clinicId) ||
-      clinicId <= 0 ||
-      (branchId !== null && (!Number.isInteger(branchId) || branchId <= 0))
+      (inviteParam && !hasInviteId) ||
+      (!hasInviteId && clinicId === null) ||
+      !isValidId(clinicId) ||
+      !isValidId(branchId)
     ) {
       setInviteValidationStatus("invalid");
       return;
@@ -259,7 +295,8 @@ export const RegisterPage = () => {
     setInviteValidationStatus("loading");
 
     validateDoctorInvite({
-      invite_clinic_id: clinicId,
+      ...(hasInviteId ? { invite: inviteParam } : {}),
+      ...(clinicId ? { invite_clinic_id: clinicId } : {}),
       ...(branchId ? { invite_branch_id: branchId } : {}),
     })
       .then(({ data }) => {
@@ -267,8 +304,10 @@ export const RegisterPage = () => {
           setInviteValidationStatus("invalid");
           return;
         }
+        setInviteId(data.invite_id ?? (hasInviteId ? inviteParam : undefined));
         setInviteClinic({
-          clinicId,
+          // 0 — в ссылке нет id клиники: врача привяжет id инвайта.
+          clinicId: clinicId ?? 0,
           clinicName: data.clinic.name,
           clinicLogo: data.clinic.logo,
           clinicCity: data.clinic.city,
@@ -284,6 +323,44 @@ export const RegisterPage = () => {
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Врач, у которого уже есть аккаунт, открыл ссылку-приглашение: заново
+  // зарегистрироваться ему не дадут («email уже используется»), поэтому
+  // вместо анкеты — принять приглашение текущим аккаунтом.
+  const canAcceptInvite =
+    inviteValidationStatus === "valid" &&
+    !!inviteClinic &&
+    authUser?.role === "doctor";
+
+  const handleAcceptInvite = async () => {
+    if (!inviteClinic || isAcceptingInvite) return;
+    setIsAcceptingInvite(true);
+    try {
+      const { data } = await acceptDoctorInvite({
+        ...(inviteId ? { invite: inviteId } : {}),
+        ...(inviteClinic.clinicId
+          ? { invite_clinic_id: inviteClinic.clinicId }
+          : {}),
+        ...(inviteClinic.branchId
+          ? { invite_branch_id: inviteClinic.branchId }
+          : {}),
+      });
+      toast.success(
+        data.already_linked
+          ? `Вы уже работаете в клинике «${data.clinic.name}»`
+          : `Вы присоединились к клинике «${data.clinic.name}»`,
+      );
+      router.push(getRoleRedirect("doctor"));
+    } catch (err: unknown) {
+      const errData = (err as { response?: { data?: unknown } })?.response
+        ?.data;
+      toast.error(
+        extractErrorMessage(errData, "Не удалось принять приглашение"),
+      );
+    } finally {
+      setIsAcceptingInvite(false);
+    }
+  };
 
   // Client form
   const [clientStep, setClientStep] = useState<1 | 2>(1);
@@ -535,7 +612,8 @@ export const RegisterPage = () => {
       );
 
       const registerRequest: RegisterDoctorRequest = {
-        invite_clinic_id: inviteClinic?.clinicId,
+        invite: inviteClinic ? inviteId : undefined,
+        invite_clinic_id: inviteClinic?.clinicId || undefined,
         invite_branch_id: inviteClinic?.branchId ?? undefined,
         password: data.password,
         // Фото в регистрацию не кладём — оно уходит отдельным запросом после
@@ -589,7 +667,8 @@ export const RegisterPage = () => {
         step5: {
           primary_specializations: primarySpecializations.ids,
           narrow_specializations: narrowSpecializations.ids,
-          additional_services: data.position || undefined,
+          position: data.position.trim() || undefined,
+          qualification_category: data.category.trim() || undefined,
         },
         step6: { equipment: [], patient_conditions: [], payment_methods: [] },
         step7: {
@@ -661,16 +740,18 @@ export const RegisterPage = () => {
           legal_name: data.fullName,
           primary_specialization_ids: primarySpecializations.ids,
           narrow_specialization_ids: narrowSpecializations.ids,
-          additional_services: data.position || undefined,
           experience_years: parseInt(data.experience) || 0,
-          work_experience: [
-            {
-              position: data.position,
-              clinic: data.workplace,
-              qualification: data.category,
-              scientific_degree: data.academicDegree,
-            },
-          ],
+          // Должность, категория и степень — в плоские поля профиля, которые
+          // читает кабинет. Раньше должность уходила в additional_services
+          // («Дополнительные услуги»), а категория со степенью — в историю
+          // работы, и в кабинете эти поля были пустыми. В work_experience
+          // остаётся только место работы — так его сохраняет и сам кабинет.
+          position: data.position.trim(),
+          qualification_category: data.category.trim(),
+          academic_degree: data.academicDegree.trim(),
+          work_experience: data.workplace.trim()
+            ? [{ clinic: data.workplace.trim() }]
+            : [],
           education,
           license_number: data.licenseNumber,
           about: data.about.trim() || undefined,
@@ -732,6 +813,11 @@ export const RegisterPage = () => {
         duration: 10_000,
         id: "doctor-registration-error",
       });
+      // ФИО, телефон и почта (step1 бэка) вводятся на первом шаге анкеты.
+      if (getErrorStep(err) === 1) {
+        doctorStepRef.current = 1;
+        setDoctorStep(1);
+      }
     } finally {
       setIsLoadingDoctor(false);
     }
@@ -1006,6 +1092,13 @@ export const RegisterPage = () => {
       toast.error(
         extractErrorMessage(errData, "Ошибка регистрации. Попробуйте снова"),
       );
+      // Шаги анкеты клиники совпадают со step1…step7 бэка.
+      const errorStep = getErrorStep(err);
+      if (errorStep && errorStep < clinicStepRef.current) {
+        const step = errorStep as ClinicStep;
+        clinicStepRef.current = step;
+        setClinicStep(step);
+      }
     } finally {
       setIsLoadingClinic(false);
     }
@@ -1138,7 +1231,28 @@ export const RegisterPage = () => {
             </div>
           )}
 
-          {inviteValidationStatus !== "loading" && (
+          {canAcceptInvite && (
+            <div className="flex-1 flex flex-col">
+              <p className="text-sm text-secondary">
+                Вы вошли как врач. Примите приглашение — клиника появится в
+                вашем кабинете, заново регистрироваться не нужно.
+              </p>
+              <div className="mt-auto pt-10 md:mt-10 flex flex-col gap-3">
+                <Button
+                  type="button"
+                  className="w-full justify-center md:h-14 md:text-lg"
+                  size="lg"
+                  onClick={() => void handleAcceptInvite()}
+                  disabled={isAcceptingInvite}
+                  loading={isAcceptingInvite}
+                >
+                  Принять приглашение
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {inviteValidationStatus !== "loading" && !canAcceptInvite && (
             <DoctorRegistrationForm
               step={doctorStep}
               onContinue={(fromStep) => {

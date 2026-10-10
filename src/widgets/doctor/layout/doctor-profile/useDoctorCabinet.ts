@@ -113,12 +113,15 @@ export const mapApiToProfile = (
     experienceYears: String(a.experience_years ?? 0),
     // Новые плоские поля не смешиваются с историей работы. Fallback оставлен
     // только для старых профилей, где данные ещё лежат в первой JSON-записи.
-    currentPosition: a.position ?? legacyProfessional?.position ?? "",
+    // Через ||, а не ??: бэк отдаёт незаполненное поле пустой строкой, и
+    // у врачей, зарегистрированных до исправления анкеты, должность и
+    // категория из work_experience иначе не показывались вовсе.
+    currentPosition: a.position || legacyProfessional?.position || "",
     workplace: legacyProfessional?.clinic ?? "",
     qualification:
-      a.qualification_category ?? legacyProfessional?.qualification ?? "",
+      a.qualification_category || legacyProfessional?.qualification || "",
     scientificDegree:
-      a.academic_degree ?? legacyProfessional?.scientific_degree ?? "",
+      a.academic_degree || legacyProfessional?.scientific_degree || "",
     equipment: a.equipment ?? [],
     patientConditions: a.patient_conditions ?? [],
     paymentMethods: a.payment_methods ?? [],

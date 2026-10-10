@@ -22,6 +22,7 @@ type Props = {
     key: K,
     value: ClinicFormData[K],
   ) => void;
+  phoneError?: null | string;
 };
 
 const isValidWebsite = (value: string): boolean => {
@@ -39,7 +40,12 @@ const isValidWebsite = (value: string): boolean => {
   }
 };
 
-export const Step2Location = ({ data, onChange, emailError }: Props) => {
+export const Step2Location = ({
+  data,
+  onChange,
+  emailError,
+  phoneError,
+}: Props) => {
   // Временно только Кыргызстан — по просьбе поддержки, чтобы у операторов не
   // возникало вопросов из-за случайно выбранной другой страны при
   // регистрации. Города — из /references/cities/ поверх локального каталога.
@@ -96,6 +102,7 @@ export const Step2Location = ({ data, onChange, emailError }: Props) => {
         onCountryChange={(country) =>
           onChange("phoneDialCode", country.dialCode)
         }
+        error={phoneError ?? undefined}
       />
       <Input
         label="Почта"
@@ -105,6 +112,9 @@ export const Step2Location = ({ data, onChange, emailError }: Props) => {
         value={data.email}
         onChange={(e) => onChange("email", e.target.value)}
         error={emailError ?? undefined}
+        // Почта обязательна (см. isValid шага 2): без неё бэк отклонял
+        // анкету только на шаге 7, после подтверждения телефона кодом.
+        hint={emailError ? undefined : "Обязательно — для входа в кабинет"}
       />
       <Input
         label="Сайт (если есть)"

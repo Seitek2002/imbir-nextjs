@@ -75,11 +75,18 @@ export const EMPTY_SPECIALIST_FORM: SpecialistFormState = {
 export const splitFullName = (
   fullName: string,
 ): { droppedPatronymic?: string; firstName: string; lastName: string } => {
-  const [lastName = "", firstName = "", patronymic] = fullName
+  const [lastName = "", firstName = "", ...rest] = fullName
     .trim()
     .split(/\s+/)
     .filter(Boolean);
-  return { firstName, lastName, droppedPatronymic: patronymic };
+  // Отчество может быть из нескольких слов («Тимур кызы») — раньше в
+  // предупреждение попадало только первое из них.
+  const patronymic = rest.join(" ");
+  return {
+    firstName,
+    lastName,
+    droppedPatronymic: patronymic || undefined,
+  };
 };
 
 // "ДД.ММ.ГГГГ" → "ГГГГ-ММ-ДД"; пусто → null (бэк поле обнуляемое)

@@ -87,6 +87,33 @@ const CheckIcon = () => (
   </svg>
 );
 
+// Дата в поле <input type="date"> — по локальному календарю, а не по UTC:
+// toISOString() с 00:00 до 06:00 по Бишкеку отдавал вчерашний день.
+const toLocalDateInputValue = (date: Date) => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+// «Действует до 10.10» — включительно, до конца этого дня по Бишкеку (UTC+6,
+// без перехода на летнее время). Раньше уходила полночь UTC, то есть 06:00
+// выбранного дня, а ссылка «до сегодня» истекала сразу после создания.
+const toInviteExpiresAt = (date: string) => `${date}T23:59:59+06:00`;
+
+// Ссылка ведёт на конкретный инвайт (?invite=<id>): бэк проверяет именно его,
+// поэтому удалённая ссылка перестаёт работать, а филиал берётся из неё самой.
+// invite_clinic_id/invite_branch_id дублируются для старого бэка, который
+// id инвайта ещё не понимает.
+const buildInvitePath = (
+  inviteId: string,
+  clinicId: string,
+  branchId: null | number,
+) => {
+  const params = new URLSearchParams({ invite: inviteId });
+  if (clinicId) params.set("invite_clinic_id", clinicId);
+  if (branchId != null) params.set("invite_branch_id", String(branchId));
+  return `/register/doctor?${params.toString()}`;
+};
+
 export const ClinicInvitesPage: FC = () => {
   const { profile, rawProfile } = useClinicCabinet();
   const authUser = useAuthStore((s) => s.user);
@@ -125,7 +152,7 @@ export const ClinicInvitesPage: FC = () => {
         ...(selectedBranch.id != null
           ? { branch: Number(selectedBranch.id) }
           : {}),
-        ...(expiresAt ? { expires_at: `${expiresAt}T00:00:00Z` } : {}),
+        ...(expiresAt ? { expires_at: toInviteExpiresAt(expiresAt) } : {}),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.invites() });
@@ -140,9 +167,7 @@ export const ClinicInvitesPage: FC = () => {
   });
 
   const handleCopy = (linkId: string, branchId: null | number) => {
-    const params = new URLSearchParams({ invite_clinic_id: clinicId });
-    if (branchId != null) params.set("invite_branch_id", String(branchId));
-    const url = `${window.location.origin}/register/doctor?${params.toString()}`;
+    const url = `${window.location.origin}${buildInvitePath(linkId, clinicId, branchId)}`;
     navigator.clipboard.writeText(url);
     setCopiedId(linkId);
     setTimeout(() => setCopiedId(null), 2000);
@@ -259,7 +284,7 @@ export const ClinicInvitesPage: FC = () => {
             id="invite-expires-at"
             type="date"
             value={expiresAt}
-            min={new Date().toISOString().slice(0, 10)}
+            min={toLocalDateInputValue(new Date())}
             onChange={(event) => setExpiresAt(event.target.value)}
             className="h-11 px-3 rounded-lg border border-border-soft bg-white text-sm text-foreground outline-none focus:border-primary"
           />
@@ -298,7 +323,7 @@ export const ClinicInvitesPage: FC = () => {
                   </p>
                   <p className="text-xs text-muted mt-0.5 font-mono truncate">
                     {hasClinicId
-                      ? `/register/doctor?invite_clinic_id=${clinicId}${link.branch != null ? `&invite_branch_id=${link.branch}` : ""}`
+                      ? buildInvitePath(link.id, clinicId, link.branch)
                       : "ID клиники недоступен"}
                   </p>
                 </div>

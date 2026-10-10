@@ -58,6 +58,13 @@ export type EmailCheckResponse = {
   };
 };
 
+export type PhoneCheckResponse = {
+  data: {
+    available: boolean;
+    phone: string;
+  };
+};
+
 export type RegisterClientRequest = {
   email: string;
   first_name: string;
@@ -161,6 +168,9 @@ export type LunchBreak = {
 // logo/photos/documents у RegisterClinicRequest). Реальная загрузка идёт
 // отдельным updateDoctorProfile({photo}) сразу после регистрации.
 export type RegisterDoctorRequest = {
+  // id конкретного инвайта из ссылки (?invite=<uuid>). Старый бэк поле не
+  // знает и ищет инвайт по invite_clinic_id/invite_branch_id — шлём оба.
+  invite?: string;
   invite_branch_id?: number;
   invite_clinic_id?: number;
   password: string;
@@ -203,7 +213,11 @@ export type RegisterDoctorRequest = {
   step5: {
     additional_services?: string;
     narrow_specializations: number[];
+    // Должность и категория — в свои поля профиля. Старый бэк их игнорирует,
+    // поэтому они дублируются в PUT профиля сразу после регистрации.
+    position?: string;
     primary_specializations: number[];
+    qualification_category?: string;
   };
   step6: {
     equipment: string[];
@@ -238,7 +252,25 @@ export type DoctorInviteValidationResponse = {
   data: {
     branch: DoctorInviteValidationBranch | null;
     clinic: DoctorInviteValidationClinic | null;
+    // Новое поле: id найденного инвайта. Старый бэк его не отдаёт.
+    invite_id?: null | string;
     valid: boolean;
+  };
+};
+
+// Параметры ссылки-приглашения: invite — id инвайта (новые ссылки),
+// invite_clinic_id/invite_branch_id — старый формат (и fallback для старого бэка).
+export type DoctorInviteParams = {
+  invite?: string;
+  invite_branch_id?: number;
+  invite_clinic_id?: number;
+};
+
+export type DoctorInviteAcceptResponse = {
+  data: {
+    already_linked: boolean;
+    branch: DoctorInviteValidationBranch | null;
+    clinic: DoctorInviteValidationClinic;
   };
 };
 

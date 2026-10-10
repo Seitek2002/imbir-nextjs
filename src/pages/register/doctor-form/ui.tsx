@@ -3,13 +3,18 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import Link from "next/link";
+
 import {
   VerifyContactBlock,
   useVerifyContact,
 } from "@/features/verify-contact";
 
-import { checkEmailAvailabilityFn } from "@/shared/api";
-import { DEFAULT_COUNTRY } from "@/shared/config";
+import {
+  checkEmailAvailabilityFn,
+  checkPhoneAvailabilityFn,
+} from "@/shared/api";
+import { DEFAULT_COUNTRY, loginHref } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import {
   PASSWORD_REQUIREMENTS_ERROR,
@@ -86,6 +91,13 @@ export const DoctorRegistrationForm = ({
   // гейты: verify подтверждает владение контактом, но не его свободность).
   const [emailError, setEmailError] = useState<null | string>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  // Занятость телефона (GET /api/auth/phone/check/) — там же, на шаге 1:
+  // раньше о ней врач узнавал только после всех шагов и подтверждения кода.
+  const [phoneError, setPhoneError] = useState<null | string>(null);
+  // Почта или телефон уже принадлежат аккаунту, а врач пришёл по
+  // приглашению: регистрироваться заново ему не нужно — достаточно войти и
+  // принять приглашение на этой же странице.
+  const [hasExistingAccount, setHasExistingAccount] = useState(false);
 
   const verify = useVerifyContact({
     email: data.email,
@@ -98,6 +110,9 @@ export const DoctorRegistrationForm = ({
   ) => {
     if (key === "password" || key === "confirmPassword") setPasswordError("");
     if (key === "email") setEmailError(null);
+    if (key === "phone" || key === "phoneDialCode") setPhoneError(null);
+    if (key === "email" || key === "phone" || key === "phoneDialCode")
+      setHasExistingAccount(false);
     setData((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -125,11 +140,29 @@ export const DoctorRegistrationForm = ({
     if (step === 1) {
       setIsCheckingEmail(true);
       try {
-        const { data: check } = await checkEmailAvailabilityFn({
-          email: data.email,
-        });
-        if (!check.available) {
-          setEmailError("Этот email уже используется");
+        const [emailCheck, phoneAvailable] = await Promise.all([
+          checkEmailAvailabilityFn({ email: data.email }),
+          // Эндпоинта может не быть на старом бэке — тогда номер, как и
+          // раньше, проверит только финальная отправка анкеты.
+          checkPhoneAvailabilityFn(`${data.phoneDialCode}${data.phone}`)
+            .then(({ data: check }) => check.available)
+            .catch(() => true),
+        ]);
+        const emailAvailable = emailCheck.data.available;
+        if (!emailAvailable) {
+          setEmailError(
+            inviteClinic
+              ? "Этот email уже зарегистрирован — войдите, чтобы принять приглашение"
+              : "Этот email уже используется",
+          );
+        }
+        if (!phoneAvailable) {
+          setPhoneError(
+            "Пользователь с таким номером телефона уже зарегистрирован",
+          );
+        }
+        if (!emailAvailable || !phoneAvailable) {
+          setHasExistingAccount(!!inviteClinic);
           return;
         }
       } catch (err: unknown) {
@@ -219,6 +252,24 @@ export const DoctorRegistrationForm = ({
         {STEP_TITLES[step]}
       </h2>
       {steps[step]}
+      {step === 1 && phoneError && (
+        <p className="mt-2 text-sm text-[#DF1C41]">{phoneError}</p>
+      )}
+      {step === 1 && hasExistingAccount && inviteClinic && (
+        <div className="mt-4 px-4 py-4 rounded-xl bg-primary-tint border border-[#FDDDD5] text-sm text-secondary">
+          У вас уже есть аккаунт.{" "}
+          <Link
+            href={loginHref(
+              `${window.location.pathname}${window.location.search}`,
+            )}
+            className="font-medium text-primary underline"
+          >
+            Войдите
+          </Link>
+          , чтобы принять приглашение клиники «{inviteClinic.clinicName}» —
+          регистрироваться заново не нужно.
+        </div>
+      )}
       <FormSubmitButton
         label={step === 4 ? "Завершить регистрацию" : "Продолжить"}
         disabled={!isValid || isLoading}
