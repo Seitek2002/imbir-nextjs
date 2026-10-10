@@ -82,10 +82,19 @@ export default async function Page({
       queryKey: doctorKeys.list(doctorFilters),
       queryFn: () => api.getDoctors(doctorFilters),
     }),
+    // Ключ и параметры — как в SearchPage: специализация в ключе только если
+    // выбрана.
     queryClient.prefetchQuery({
-      queryKey: ["search-clinics", activeQuery, city],
+      queryKey: doctorFilters.specialization
+        ? ["search-clinics", activeQuery, city, doctorFilters.specialization]
+        : ["search-clinics", activeQuery, city],
       queryFn: () =>
-        api.getClinics({ search: activeQuery, city, page_size: 12 }),
+        api.getClinics({
+          search: activeQuery,
+          city,
+          specialization: doctorFilters.specialization,
+          page_size: 12,
+        }),
     }),
     queryClient.prefetchQuery({
       queryKey: ["search-services", activeQuery, city],

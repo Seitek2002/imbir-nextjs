@@ -25,6 +25,15 @@ export const getDoctorById = async (
   return data;
 };
 
+// Засчитать просмотр анкеты врача. Страница врача отдаётся из ISR-кеша, и
+// GET детальной до бэка почти не доходит — поэтому просмотр шлётся отдельно,
+// из браузера посетителя (features/profile-view-tracker).
+export const trackDoctorProfileView = async (
+  id: number | string,
+): Promise<void> => {
+  await apiClient.post(`/api/doctors/${id}/view/`);
+};
+
 // excludeAppointmentId — при переносе: своя же запись не должна занимать
 // время, на которое её двигают. Бэк учитывает его, только если спрашивает
 // пациент или врач этой записи.

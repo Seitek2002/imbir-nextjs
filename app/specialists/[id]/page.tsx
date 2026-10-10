@@ -1,5 +1,7 @@
 import { SpecialistDetailsPage } from "@/pages/specialist-details";
 
+import { ProfileViewTracker } from "@/features/profile-view-tracker";
+
 import { api } from "@/shared/api";
 
 // Страница врача одинакова для всех посетителей (избранное, «мой отзыв» и
@@ -32,11 +34,16 @@ export default async function Page({
   const resolvedParams = await params;
   const { doctor, fetchedAt } = await loadDoctor(resolvedParams.id);
 
+  // Просмотр засчитывает браузер посетителя: сама страница из ISR-кеша, и её
+  // серверный GET к бэку на каждого посетителя не уходит.
   return (
-    <SpecialistDetailsPage
-      id={resolvedParams.id}
-      initialDoctor={doctor}
-      initialDoctorUpdatedAt={fetchedAt}
-    />
+    <>
+      <ProfileViewTracker kind="doctor" id={resolvedParams.id} />
+      <SpecialistDetailsPage
+        id={resolvedParams.id}
+        initialDoctor={doctor}
+        initialDoctorUpdatedAt={fetchedAt}
+      />
+    </>
   );
 }

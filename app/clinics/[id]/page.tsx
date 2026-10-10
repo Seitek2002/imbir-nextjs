@@ -1,5 +1,7 @@
 import { ClinicDetailsPage } from "@/pages/clinic/clinic-details";
 
+import { ProfileViewTracker } from "@/features/profile-view-tracker";
+
 import { api } from "@/shared/api";
 
 // См. app/specialists/[id]/page.tsx — тот же приём: страница клиники общая
@@ -31,11 +33,15 @@ export default async function Page({
   const resolvedParams = await params;
   const { clinic, fetchedAt } = await loadClinic(resolvedParams.id);
 
+  // Просмотр засчитывает браузер посетителя — см. app/specialists/[id]/page.tsx.
   return (
-    <ClinicDetailsPage
-      id={resolvedParams.id}
-      initialClinic={clinic}
-      initialClinicUpdatedAt={fetchedAt}
-    />
+    <>
+      <ProfileViewTracker kind="clinic" id={resolvedParams.id} />
+      <ClinicDetailsPage
+        id={resolvedParams.id}
+        initialClinic={clinic}
+        initialClinicUpdatedAt={fetchedAt}
+      />
+    </>
   );
 }

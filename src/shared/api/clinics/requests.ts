@@ -19,3 +19,10 @@ export const getClinicById = async (
   const { data } = await apiClient.get<ClinicDetail>(`/api/clinics/${id}/`);
   return data;
 };
+
+// Засчитать просмотр страницы клиники — см. trackDoctorProfileView.
+export const trackClinicProfileView = async (
+  id: number | string,
+): Promise<void> => {
+  await apiClient.post(`/api/clinics/${id}/view/`);
+};

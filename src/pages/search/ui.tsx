@@ -119,10 +119,24 @@ export const SearchPage: FC<Props> = ({ initialCity }) => {
   });
 
   const search = activeQuery || undefined;
+  // Выбранные специализации сужают и клиники: раньше фильтр действовал только
+  // на врачей, а клиники под ним оставались все. Без специализации ключ
+  // прежний — его же префетчит app/search/page.tsx.
+  const clinicSpecialization = doctorFilters.specialization;
   const { data: clinics = [], isLoading: isClinicsLoading } = useQuery({
-    queryKey: ["search-clinics", activeQuery, city],
+    queryKey: clinicSpecialization
+      ? ["search-clinics", activeQuery, city, clinicSpecialization]
+      : ["search-clinics", activeQuery, city],
     queryFn: ({ signal }) =>
-      api.getClinics({ search, city, page_size: 12 }, signal),
+      api.getClinics(
+        {
+          search,
+          city,
+          specialization: clinicSpecialization,
+          page_size: 12,
+        },
+        signal,
+      ),
     enabled: Boolean(activeQuery),
     retry: false,
   });
@@ -142,16 +156,10 @@ export const SearchPage: FC<Props> = ({ initialCity }) => {
   // --- ФИЛЬТР ВРАЧЕЙ --- список специализаций уже обработан API.
   const filteredDoctors = doctors;
 
-  // --- ФИЛЬТР КЛИНИК ---
-  const filteredClinics = clinics.filter((clinic) => {
-    if (!activeQuery) return false; // Показываем клиники только если есть текстовый запрос
-    const q = activeQuery.toLowerCase();
-    const matchesName = clinic.name.toLowerCase().includes(q);
-    const matchesSpec = clinic.specialties.some((s) =>
-      s.toLowerCase().includes(q),
-    );
-    return matchesName || matchesSpec;
-  });
+  // --- ФИЛЬТР КЛИНИК --- поиск по названию и специализациям делает API.
+  // Повторная проверка здесь смотрела только основные специализации и
+  // выбрасывала клиники, найденные бэком по узким.
+  const filteredClinics = activeQuery ? clinics : [];
 
   // --- ФИЛЬТР УСЛУГ ---
   const filteredServices = services.filter((service) => {
