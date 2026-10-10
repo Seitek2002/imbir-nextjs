@@ -8,7 +8,14 @@ export type AppointmentStatus =
 
 export type Appointment = {
   address: string;
+  // Можно ли оставить отзыв (can_review с бэка: приём завершён, и этому врачу
+  // или клинике пациент ещё не писал).
+  canReview: boolean;
+  // id клиники записи — цель отзыва, если запись без врача.
+  clinicId: string;
   date: string;
+  // Итоги приёма, которые врач заполняет в кабинете.
+  diagnosis?: string;
   doctorClinic: string;
   doctorId: string;
   doctorImage?: string;
@@ -17,8 +24,12 @@ export type Appointment = {
   doctorSpecialty: string;
   id: string;
   isOnline: boolean;
+  // is_past с бэка: запись во вкладке «Прошедшие». Нет на старом бэке —
+  // тогда вкладку определяем по статусу.
+  isPast?: boolean;
   // Цена фиксируется при записи, но бэк может её не отдать — тогда прячем
   price?: number;
+  recommendations?: string;
   service: string;
   // Минуты; есть — показываем «17:30–18:30» вместо одного начала.
   serviceDuration?: null | number;

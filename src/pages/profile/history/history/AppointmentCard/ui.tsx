@@ -116,7 +116,9 @@ export const AppointmentCard: FC<Props> = ({
   const isCompleted = appointment.status === "completed";
   const isCancelled = appointment.status === "cancelled";
   const showCancel = isActive && !!onCancel;
-  const showReview = isCompleted && !!onReview;
+  // can_review: отзыв один на врача, поэтому после отзыва (здесь или со
+  // страницы врача) кнопка пропадает у всех его приёмов.
+  const showReview = isCompleted && appointment.canReview && !!onReview;
   const showReschedule = isActive && !!onReschedule && !!appointment.doctorId;
   const showConsultation = isActive && appointment.isOnline;
 
@@ -129,28 +131,56 @@ export const AppointmentCard: FC<Props> = ({
   const meta = (
     <p className="text-muted">
       {appointment.doctorSpecialty}{" "}
-      <span className="text-primary">• {appointment.doctorClinic}</span>
+      {appointment.doctorClinic && (
+        <span className="text-primary">• {appointment.doctorClinic}</span>
+      )}
     </p>
   );
 
-  const ratingBadge = (size: "lg" | "sm") => (
-    <div
-      className={
-        size === "lg"
-          ? "absolute top-3 left-3 flex items-center gap-1 bg-[#FFF0EE] rounded-lg px-2 py-1 shadow-sm"
-          : "absolute top-2 left-2 flex items-center gap-0.5 bg-[#FFF0EE] rounded-md px-1.5 py-0.5 shadow-sm"
-      }
-    >
-      <StarIcon
-        className={`text-primary ${size === "lg" ? "w-4 h-4" : "w-3 h-3"}`}
-      />
-      <span
-        className={`text-foreground font-semibold ${size === "lg" ? "text-sm" : "text-xs"}`}
+  // Итоги приёма, которые врач заполнил в кабинете («Диагноз» и
+  // «Рекомендации» — в отличие от заметок врача, они для пациента).
+  const summary = isCompleted &&
+    (appointment.diagnosis || appointment.recommendations) && (
+      <div className="flex flex-col gap-2 rounded-2xl bg-background px-4 py-3 text-sm text-foreground">
+        {appointment.diagnosis && (
+          <div>
+            <p className="text-muted mb-0.5">Диагноз</p>
+            <p className="whitespace-pre-line break-words">
+              {appointment.diagnosis}
+            </p>
+          </div>
+        )}
+        {appointment.recommendations && (
+          <div>
+            <p className="text-muted mb-0.5">Рекомендации врача</p>
+            <p className="whitespace-pre-line break-words">
+              {appointment.recommendations}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+
+  // Рейтинга 0 у врача не бывает — это «ещё нет оценок»; «0.00» не показываем.
+  const ratingBadge = (size: "lg" | "sm") =>
+    appointment.doctorRating > 0 && (
+      <div
+        className={
+          size === "lg"
+            ? "absolute top-3 left-3 flex items-center gap-1 bg-[#FFF0EE] rounded-lg px-2 py-1 shadow-sm"
+            : "absolute top-2 left-2 flex items-center gap-0.5 bg-[#FFF0EE] rounded-md px-1.5 py-0.5 shadow-sm"
+        }
       >
-        {appointment.doctorRating.toFixed(2)}
-      </span>
-    </div>
-  );
+        <StarIcon
+          className={`text-primary ${size === "lg" ? "w-4 h-4" : "w-3 h-3"}`}
+        />
+        <span
+          className={`text-foreground font-semibold ${size === "lg" ? "text-sm" : "text-xs"}`}
+        >
+          {appointment.doctorRating.toFixed(2)}
+        </span>
+      </div>
+    );
 
   const photo = (sizes: string, initialCls: string) => (
     <ImageWithFallback
@@ -210,6 +240,7 @@ export const AppointmentCard: FC<Props> = ({
               </div>
             )}
           </div>
+          {summary && <div className="mt-4">{summary}</div>}
         </div>
 
         <div className="flex flex-col items-end justify-between shrink-0 pt-1">
@@ -308,11 +339,18 @@ export const AppointmentCard: FC<Props> = ({
           </div>
         </div>
 
+        {summary && <div className="mb-3">{summary}</div>}
+
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-sm text-secondary flex-1 min-w-0 bg-background px-3 py-2.5 rounded-2xl">
-            <GeoIcon className="w-4 h-4 shrink-0 [&_path]:stroke-secondary" />
-            <span className="flex-1 truncate">{appointment.address}</span>
-          </div>
+          {/* Адрес клиники записи; у онлайн-консультации его нет. */}
+          {appointment.address ? (
+            <div className="flex items-center gap-1.5 text-sm text-secondary flex-1 min-w-0 bg-background px-3 py-2.5 rounded-2xl">
+              <GeoIcon className="w-4 h-4 shrink-0 [&_path]:stroke-secondary" />
+              <span className="flex-1 truncate">{appointment.address}</span>
+            </div>
+          ) : (
+            <div className="flex-1" />
+          )}
 
           {showConsultation && (
             <ConsultationButton appointmentId={appointment.id} compact />

@@ -23,20 +23,55 @@ export type UpdateProfileRequest = Partial<
   avatar_upload?: File;
 };
 
+// photo/specialty/rating/is_published бэк добавил в запись, чтобы история не
+// дочитывала врача через /api/doctors/{id}/ (тот отвечает 404 для снятого с
+// публикации). На старом бэке их нет — поэтому необязательные.
+export type ProfileAppointmentDoctor = {
+  full_name: string;
+  id: number;
+  is_published?: boolean;
+  photo?: null | string;
+  rating?: null | number | string;
+  specialty?: string;
+};
+
+// address — клиники (или филиала услуги) именно этой записи; на старом бэке нет.
+export type ProfileAppointmentClinic = {
+  address?: string;
+  id: number;
+  name: string;
+};
+
+export type ProfileAppointmentService = {
+  duration?: null | number;
+  id: number;
+  name: string;
+  price?: null | number | string;
+};
+
 export type ProfileAppointment = {
-  can_review: string;
-  clinic: string;
+  can_review: boolean;
+  clinic: null | ProfileAppointmentClinic;
   created_at: string;
   date: string;
-  doctor: string;
+  diagnosis?: null | string;
+  doctor: null | ProfileAppointmentDoctor;
   google_meet_link: null | string;
   id: number;
   is_online: boolean;
+  // Вкладка «Прошедшие»: завершена, отменена или время уже прошло. На старом
+  // бэке поля нет — тогда вкладку определяем по статусу.
+  is_past?: boolean;
   notes?: string;
-  service: string;
+  recommendations?: null | string;
+  service: null | ProfileAppointmentService;
   status: AppointmentStatus;
   time: string;
 };
+
+// Вкладка «Истории записей»: upcoming — ещё не прошедшие, ближайшая первой;
+// past — завершённые, отменённые и просроченные, свежие первыми.
+export type ProfileAppointmentsTab = "past" | "upcoming";
 
 export type FavoriteTargetType = "clinic" | "doctor" | "service";
 

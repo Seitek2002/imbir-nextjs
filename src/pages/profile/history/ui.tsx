@@ -2,19 +2,21 @@
 
 import { FC, forwardRef, useEffect, useRef, useState } from "react";
 
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
 
 import {
+  api,
   doctorKeys,
-  getDoctorById,
   getProfileAppointments,
   profileKeys,
 } from "@/shared/api";
+import type { ProfileAppointment } from "@/shared/api";
 import { FilterSample, RemoveIcon, SearchIcon } from "@/shared/assets/icons";
+import { toMediaUrl } from "@/shared/lib/media";
 import { parsePrice } from "@/shared/lib/price";
-import { FilterPanel, IconBtn } from "@/shared/ui";
+import { Button, FilterPanel, IconBtn } from "@/shared/ui";
 import { SearchInput } from "@/shared/ui/input";
 import { SegmentedControl } from "@/shared/ui/segmented-control";
 
@@ -88,15 +90,29 @@ const toEntityId = (value: unknown): string => {
   return "";
 };
 
-// Подмножество полей врача из getDoctorById, которые нужны карточке записи
-// (специальность, рейтинг, фото, адрес клиники/места работы).
-type DoctorDetails = {
-  clinic?: { address?: string; name?: string };
-  photo?: string;
-  rating?: number | string;
+// Столько же, сколько отдаёт сервер по умолчанию; остальное — «Показать ещё».
+const PAGE_SIZE = 20;
+
+// Фото, специальность и рейтинг врача бэк теперь отдаёт прямо в записи. Пока
+// он не обновлён, дочитываем их через api.getDoctorById — тот же адаптированный
+// объект и тот же ключ, что у страницы врача, так что кеш у них общий. Адрес
+// отсюда не берём: у врача он первой клиники, а не клиники записи.
+type DoctorFallback = {
+  image?: unknown;
+  rating?: number;
   specialty?: string;
-  workplaces?: Array<{ address?: string }>;
 };
+
+const needsDoctorFallback = (a: ProfileAppointment): boolean =>
+  !!a.doctor && typeof a.doctor === "object" && !("specialty" in a.doctor);
+
+const toRating = (value: unknown): number => {
+  const rating = parseFloat(String(value ?? ""));
+  return Number.isFinite(rating) ? rating : 0;
+};
+
+const toText = (value: unknown): string | undefined =>
+  typeof value === "string" && value.trim() ? value : undefined;
 
 // Цена берётся из объекта услуги ({id, name, price}); бэк отдаёт число или
 // строку. Если цены нет — undefined, карточка прячет блок стоимости.
@@ -158,82 +174,89 @@ export const ProfileHistoryPage: FC = () => {
     setFilterOpen(false);
   };
 
-  const { data, isLoading: isAppointmentsLoading } = useQuery({
-    queryKey: profileKeys.appointments({ status: activeTab }),
-    queryFn: () => getProfileAppointments(activeTab),
-  });
+  // Вкладку отдаёт бэк (tab): в «Предстоящих» только визиты, время которых
+  // ещё не прошло, ближайший первым; в «Прошедших» — завершённые, отменённые и
+  // просроченные, свежие первыми. Раньше брали status=upcoming: туда попадали
+  // давно прошедшие визиты, ближайший оказывался внизу, а дальше первых 20 не
+  // было видно ничего. status шлём тоже — старый бэк не знает tab и фильтрует
+  // только по нему (на «Прошедших» тогда отсеивает список ниже, по статусу).
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: profileKeys.appointments({
+        tab: activeTab,
+        status: activeTab === "upcoming" ? "upcoming" : statusFilter,
+      }),
+      queryFn: ({ pageParam }) =>
+        getProfileAppointments(
+          activeTab === "upcoming" ? "upcoming" : (statusFilter ?? undefined),
+          pageParam,
+          PAGE_SIZE,
+          activeTab === "upcoming" ? "upcoming" : "past",
+        ),
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) =>
+        lastPage.pagination &&
+        lastPage.pagination.page < lastPage.pagination.total_pages
+          ? lastPage.pagination.page + 1
+          : undefined,
+    });
 
-  // Отменённые записи не подпадают ни под "Предстоящие", ни под "Прошедшие"
-  // на бэке — без этого запроса они не видны нигде. Показываем их вместе с
-  // завершёнными на вкладке "Прошедшие", а фильтр по статусу разделяет их.
-  const { data: cancelledData, isLoading: isCancelledLoading } = useQuery({
-    queryKey: profileKeys.appointments({ status: "cancelled" }),
-    queryFn: () => getProfileAppointments("cancelled"),
-    enabled: activeTab === "completed",
-  });
+  const rawAppointments = data?.pages.flatMap((page) => page.data) ?? [];
 
-  const rawAppointments = [
-    ...(data?.data ?? []),
-    ...(activeTab === "completed" ? (cancelledData?.data ?? []) : []),
-  ];
-  const doctorIds = Array.from(
-    new Set(rawAppointments.map((a) => toEntityId(a.doctor)).filter(Boolean)),
+  // Только для старого бэка (в записи нет фото и специальности врача). Ошибку
+  // не повторяем и список ею не блокируем: снятый с публикации врач отвечает
+  // 404, и раньше вся история секунды висела на «Загрузка...».
+  const fallbackDoctorIds = Array.from(
+    new Set(
+      rawAppointments
+        .filter(needsDoctorFallback)
+        .map((a) => toEntityId(a.doctor))
+        .filter(Boolean),
+    ),
   );
-
-  const doctorQueries = useQueries({
-    queries: doctorIds.map((id) => ({
+  const fallbackQueries = useQueries({
+    queries: fallbackDoctorIds.map((id) => ({
       queryKey: doctorKeys.detail(id),
-      queryFn: () => getDoctorById(id),
+      queryFn: () => api.getDoctorById(id),
+      retry: false,
     })),
   });
-
-  const isDoctorsLoading = doctorQueries.some((q) => q.isLoading);
-  const isLoading =
-    isAppointmentsLoading ||
-    (activeTab === "completed" && isCancelledLoading) ||
-    isDoctorsLoading;
-
-  const doctorsMap = new Map<string, DoctorDetails>();
-  doctorQueries.forEach((q, index) => {
-    if (q.data) {
-      doctorsMap.set(doctorIds[index], q.data as DoctorDetails);
-    }
+  const fallbackDoctors = new Map<string, DoctorFallback>();
+  fallbackQueries.forEach((q, index) => {
+    if (q.data) fallbackDoctors.set(fallbackDoctorIds[index], q.data);
   });
 
   const appointments: Appointment[] = rawAppointments.map((a) => {
     const docId = toEntityId(a.doctor);
-    const doctorDetails = doctorsMap.get(docId);
-
-    let address = "";
-    if (doctorDetails?.clinic?.address) {
-      address = doctorDetails.clinic.address;
-    } else if (
-      Array.isArray(doctorDetails?.workplaces) &&
-      doctorDetails.workplaces[0]?.address
-    ) {
-      address = doctorDetails.workplaces[0].address;
-    }
+    const doctor = a.doctor && typeof a.doctor === "object" ? a.doctor : null;
+    const clinic = a.clinic && typeof a.clinic === "object" ? a.clinic : null;
+    const fallback = fallbackDoctors.get(docId);
 
     return {
       id: String(a.id),
       doctorId: docId,
+      clinicId: toEntityId(a.clinic),
       serviceId: toEntityId(a.service),
       serviceDuration: toServiceDuration(a.service),
       doctorName: toDisplayName(a.doctor),
-      doctorSpecialty: doctorDetails?.specialty || "",
-      doctorClinic:
-        toDisplayName(a.clinic) || doctorDetails?.clinic?.name || "",
-      doctorRating: doctorDetails?.rating
-        ? parseFloat(String(doctorDetails.rating)) || 0
-        : 0,
-      doctorImage: doctorDetails?.photo || "",
+      doctorSpecialty: doctor?.specialty || fallback?.specialty || "",
+      // Клиника и адрес — именно этой записи, а не первой клиники врача.
+      doctorClinic: toDisplayName(a.clinic),
+      doctorRating: toRating(doctor?.rating ?? fallback?.rating),
+      // Фото из записи бэк отдаёт по http — приводим, как адаптер врача.
+      doctorImage: toMediaUrl(doctor?.photo) || toText(fallback?.image) || "",
       date: a.date,
       time: a.time,
       service: toDisplayName(a.service),
       price: toServicePrice(a.service),
-      address,
+      // У онлайн-консультации физического адреса нет.
+      address: a.is_online ? "" : (clinic?.address ?? ""),
       status: a.status,
       isOnline: a.is_online,
+      isPast: typeof a.is_past === "boolean" ? a.is_past : undefined,
+      canReview: a.can_review === true,
+      diagnosis: toText(a.diagnosis),
+      recommendations: toText(a.recommendations),
     };
   });
 
@@ -334,12 +357,25 @@ export const ProfileHistoryPage: FC = () => {
             Загрузка...
           </div>
         ) : (
-          <ProfileHistory
-            appointments={appointments}
-            activeTab={activeTab}
-            searchQuery={searchQuery}
-            statusFilter={statusFilter ?? undefined}
-          />
+          <>
+            <ProfileHistory
+              appointments={appointments}
+              activeTab={activeTab}
+              searchQuery={searchQuery}
+              statusFilter={statusFilter ?? undefined}
+            />
+            {hasNextPage && (
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => fetchNextPage()}
+                  loading={isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? "Загрузка…" : "Показать ещё"}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>

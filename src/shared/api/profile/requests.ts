@@ -6,6 +6,7 @@ import {
   FavoritesList,
   PatientReview,
   ProfileAppointment,
+  ProfileAppointmentsTab,
   UpdateProfileRequest,
 } from "./types";
 
@@ -45,10 +46,11 @@ export const getProfileAppointments = async (
   status?: "cancelled" | "completed" | "upcoming",
   page = 1,
   page_size = 20,
+  tab?: ProfileAppointmentsTab,
 ): Promise<PaginatedResponse<ProfileAppointment>> => {
   const { data } = await apiClient.get<PaginatedResponse<ProfileAppointment>>(
     "/api/profile/appointments/",
-    { params: { status, page, page_size } },
+    { params: { status, page, page_size, tab } },
   );
   return data;
 };

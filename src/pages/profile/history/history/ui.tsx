@@ -3,12 +3,17 @@
 import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  type InfiniteData,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { ReviewModal } from "@/features/review-modal";
 import { useInvalidateAfterReview } from "@/features/submit-review";
 
 import { cancelAppointment, createReview, profileKeys } from "@/shared/api";
+import type { PaginatedResponse, ProfileAppointment } from "@/shared/api";
 import { WarningIcon } from "@/shared/assets/icons";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
@@ -16,6 +21,12 @@ import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 import type { Appointment, AppointmentStatus } from "./AppointmentCard/model";
 import { AppointmentCard } from "./AppointmentCard/ui";
 import { RescheduleModal } from "./RescheduleModal";
+
+// Отзыв — врачу; если запись без врача (только клиника) — клинике.
+const reviewTarget = (apt: Appointment) =>
+  apt.doctorId
+    ? { target_type: "doctor" as const, target_id: Number(apt.doctorId) }
+    : { target_type: "clinic" as const, target_id: Number(apt.clinicId) };
 
 type Props = {
   activeTab: "completed" | "upcoming";
@@ -48,15 +59,16 @@ export const ProfileHistory: FC<Props> = ({
 
   const query = searchQuery.trim().toLowerCase();
   const filteredAppointments = appointmentsList.filter((apt) => {
-    // "Прошедшие" объединяет завершённые и отменённые записи (бэк не относит
-    // отменённые ни к одной из вкладок) — statusFilter сужает до одной из них.
-    const byTab =
-      activeTab === "upcoming"
-        ? apt.status === "upcoming" ||
-          apt.status === "pending" ||
-          apt.status === "confirmed" ||
-          apt.status === "scheduled"
-        : apt.status === "completed" || apt.status === "cancelled";
+    // "Прошедшие" объединяет завершённые, отменённые и просроченные записи —
+    // statusFilter сужает до одного статуса. Вкладку записи знает бэк
+    // (isPast); старый бэк её не отдаёт — тогда решаем по статусу.
+    const isActiveStatus =
+      apt.status === "upcoming" ||
+      apt.status === "pending" ||
+      apt.status === "confirmed" ||
+      apt.status === "scheduled";
+    const isPast = apt.isPast ?? !isActiveStatus;
+    const byTab = activeTab === "upcoming" ? isActiveStatus && !isPast : isPast;
     if (!byTab) return false;
     if (statusFilter && apt.status !== statusFilter) return false;
     if (!query) return true;
@@ -118,8 +130,7 @@ export const ProfileHistory: FC<Props> = ({
       rating: number;
     }) =>
       createReview({
-        target_type: "doctor",
-        target_id: Number(vars.appointment.doctorId),
+        ...reviewTarget(vars.appointment),
         appointment_id: Number(vars.appointment.id),
         rating: vars.rating,
         text: vars.comment,
@@ -128,7 +139,46 @@ export const ProfileHistory: FC<Props> = ({
       // Та же тройка сбросов, что на страницах врача и клиники
       // (features/submit-review). Раньше здесь сбрасывался весь reviewKeys.all;
       // теперь только список того врача, кому оставили отзыв.
-      invalidateAfterReview("doctor", Number(vars.appointment.doctorId));
+      const target = reviewTarget(vars.appointment);
+      invalidateAfterReview(target.target_type, target.target_id);
+      // Отзыв один на врача (клинику): кнопка пропадает и у этой записи, и у
+      // остальных приёмов у него. can_review перечитываем с бэка.
+      const sameTarget = (doctorId: string, clinicId: string) =>
+        target.target_type === "doctor"
+          ? doctorId === vars.appointment.doctorId
+          : !doctorId && clinicId === vars.appointment.clinicId;
+      setAppointmentsList((prev) =>
+        prev.map((apt) =>
+          sameTarget(apt.doctorId, apt.clinicId)
+            ? { ...apt, canReview: false }
+            : apt,
+        ),
+      );
+      // И в кеше: иначе родитель на старте перезапроса отдаст старые записи,
+      // и кнопка мигнёт обратно, пока бэк не ответит.
+      queryClient.setQueriesData<
+        InfiniteData<PaginatedResponse<ProfileAppointment>>
+      >({ queryKey: [...profileKeys.all, "appointments"] }, (old) =>
+        old && Array.isArray(old.pages)
+          ? {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                data: page.data.map((a) =>
+                  sameTarget(
+                    a.doctor ? String(a.doctor.id) : "",
+                    a.clinic ? String(a.clinic.id) : "",
+                  )
+                    ? { ...a, can_review: false }
+                    : a,
+                ),
+              })),
+            }
+          : old,
+      );
+      queryClient.invalidateQueries({
+        queryKey: [...profileKeys.all, "appointments"],
+      });
       toast.success("Отзыв сохранён");
       setReviewModalOpen(false);
       setSelectedAppointment(null);
@@ -208,7 +258,7 @@ export const ProfileHistory: FC<Props> = ({
         closeOnConfirm={false}
         icon={<WarningIcon className="w-7 h-7 [&_path]:stroke-primary" />}
         title="Отменить запись на приём?"
-        description="История будет удалена без возможности восстановления"
+        description="Запись будет отменена и останется в истории со статусом «Отменено»"
         confirmLabel="Да, отменить"
         cancelLabel="Назад"
       />
