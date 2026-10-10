@@ -76,7 +76,27 @@ const adaptDoctor = (d: ApiDoctor): MockDoctorListItem => ({
   })),
 });
 
-const adaptDoctorDetail = (d: ApiDoctorDetail): MockDoctorListItem => {
+// Интервью в составе профиля врача (GET /api/doctors/{id}/ → interviews[]).
+type ApiDoctorInterview = {
+  id: number;
+  priority: number;
+  title: string;
+  video_url: string;
+};
+
+export type DoctorInterviewItem = {
+  id: string;
+  priority: number;
+  title: string;
+  videoUrl: string;
+};
+
+const adaptDoctorDetail = (
+  d: ApiDoctorDetail & { interviews?: ApiDoctorInterview[] },
+): MockDoctorListItem & {
+  // undefined — бэк список не прислал (тогда интервью ищем в общем списке).
+  interviews?: DoctorInterviewItem[];
+} => {
   const base = adaptDoctor(d);
   const formattedWorkExperience =
     d.work_experience && d.work_experience.length > 0
@@ -149,6 +169,16 @@ const adaptDoctorDetail = (d: ApiDoctorDetail): MockDoctorListItem => {
       phone: d.phone || "",
       email: d.email || "",
     },
+    // Интервью врача приходят прямо в профиле — раньше их искали в общем
+    // топ-100 /api/interviews/ и теряли, если врач туда не попадал.
+    interviews: Array.isArray(d.interviews)
+      ? d.interviews.map((i) => ({
+          id: String(i.id),
+          priority: i.priority ?? 0,
+          title: i.title,
+          videoUrl: i.video_url,
+        }))
+      : undefined,
   };
 };
 
@@ -234,10 +264,73 @@ const isNextWeekday = (prevName: string, nextName: string): boolean => {
   return prevIndex !== -1 && nextIndex === prevIndex + 1;
 };
 
-const adaptClinicDetail = (c: ApiClinicDetail): MockClinicListItem => {
+// Врачи и услуги самой клиники из GET /api/clinics/{id}/. Раньше адаптер их
+// отбрасывал, и страница клиники собирала их из общего каталога: врачей — из
+// топ-100 по рейтингу в городе по IP (врачи клиники из другого города не
+// находились вовсе), услуг — первые 20.
+const adaptClinicDoctors = (
+  c: ApiClinicDetail,
+): MockDoctorListItem[] | undefined => {
+  const doctors = c.doctors ?? [];
+  // Старый бэк не отдаёт reviews_count и ещё не скрывает неопубликованных
+  // врачей — с ним остаёмся на прежнем способе (undefined).
+  if (doctors.some((d) => d.reviews_count === undefined)) return undefined;
+  return doctors.map((d) => ({
+    id: d.id,
+    name: d.full_name,
+    specialty: d.specialty,
+    experience: d.experience_years,
+    isOnlineAvailable: Boolean(d.is_online_available),
+    rating: Number(d.rating) || 0,
+    reviews: d.reviews_count ?? 0,
+    image: toHttps(d.photo),
+    // Место работы здесь одно и уже известно — сама клиника.
+    workplaces: [
+      {
+        clinicId: String(c.id),
+        clinicName: c.name,
+        clinicAddress: c.address ?? "",
+        schedule: emptySchedule,
+      },
+    ],
+  }));
+};
+
+const adaptClinicServices = (
+  c: ApiClinicDetail,
+): MockServiceItem[] | undefined => {
+  const services = c.services;
+  // Без photo — старый бэк: фото услуг тогда берём из каталога (undefined).
+  if (!services || services.some((s) => !("photo" in s))) return undefined;
+  return services.map((s) => ({
+    id: String(s.id),
+    clinicId: String(c.id),
+    clinicName: c.name,
+    name: s.name,
+    category: s.category,
+    price: parsePrice(s.price),
+    duration: s.duration,
+    image: toMediaUrl(s.photo) ?? "",
+    schedule: emptySchedule,
+    doctorIds: [],
+    // Как в каталоге услуг: рейтинг услуги клиники — рейтинг самой клиники.
+    rating: Number(c.rating) || 0,
+    reviews: c.reviews_count ?? 0,
+  }));
+};
+
+const adaptClinicDetail = (
+  c: ApiClinicDetail,
+): MockClinicListItem & {
+  // undefined — бэк старый, списки нужно брать из каталога.
+  doctors?: MockDoctorListItem[];
+  services?: MockServiceItem[];
+} => {
   const base = adaptClinic(c);
   return {
     ...base,
+    doctors: adaptClinicDoctors(c),
+    services: adaptClinicServices(c),
     description: c.description || undefined,
     phone: c.phone || undefined,
     email: c.email || undefined,

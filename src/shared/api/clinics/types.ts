@@ -23,12 +23,28 @@ export type ClinicDoctor = {
   experience_years: number;
   full_name: string;
   id: number;
+  // Новые поля бэка для карточки врача на странице клиники. Старый бэк их не
+  // отдаёт (и тогда ещё не скрывает неопубликованных врачей) — отсюда optional.
+  is_online_available?: boolean;
   photo: null | string;
   // Строка, а не число: DecimalField в DRF сериализуется как "5.00" — проверено
   // живым запросом. Раньше здесь стоял number, и каждый потребитель узнавал об этом
   // сам и только в браузере.
   rating: string;
+  reviews_count?: number;
   specialty: string;
+};
+
+// Услуга в составе карточки клиники (GET /api/clinics/{id}/ → services[]).
+export type ClinicService = {
+  category: string;
+  // Минуты; null — не указана.
+  duration: null | number;
+  id: number;
+  name: string;
+  // Старый бэк поля не отдаёт — тогда фото берём из каталога услуг.
+  photo?: null | string;
+  price: null | string;
 };
 
 export type ClinicListItem = {
@@ -63,6 +79,8 @@ export type ClinicDetail = ClinicListItem & {
   phone: null | string;
   photos: string[];
   schedule: ClinicSchedule;
+  // Все активные услуги клиники.
+  services?: ClinicService[];
   website: null | string;
 };
 

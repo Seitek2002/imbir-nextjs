@@ -20,7 +20,10 @@ import {
   useSubmitReview,
 } from "@/features/submit-review";
 
-import { fetchDoctorInterviews } from "@/entities/interview";
+import {
+  fetchDoctorInterviews,
+  interviewsFromDoctor,
+} from "@/entities/interview";
 
 // ИМПОРТЫ API
 import { api, doctorKeys, reviewKeys } from "@/shared/api";
@@ -143,11 +146,16 @@ export const SpecialistDetailsPage: FC<Props> = ({
   const { removeReview } = useDeleteReview("doctor", id);
   const alreadyReviewed = useHasMyReview("doctor", id);
 
-  // 3. ПОЛУЧАЕМ ИНТЕРВЬЮ ЭТОГО ВРАЧА
-  const { data: doctorInterviews = [] } = useQuery({
+  // 3. ИНТЕРВЬЮ ЭТОГО ВРАЧА — из его профиля. Общий список /api/interviews/
+  // (топ-100) запрашиваем, только если профиль пришёл без interviews.
+  const { data: fetchedInterviews = [] } = useQuery({
     queryKey: ["interviews", "doctor", id],
     queryFn: () => fetchDoctorInterviews(id),
+    enabled: Boolean(doctor) && doctor?.interviews === undefined,
   });
+  const doctorInterviews = doctor?.interviews
+    ? interviewsFromDoctor(doctor, doctor.interviews)
+    : fetchedInterviews;
 
   if (isDoctorError || (!isDoctorLoading && !doctor)) {
     return (

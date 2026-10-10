@@ -1,2 +1,6 @@
-export { fetchDoctorInterviews, fetchInterviews } from "./model";
+export {
+  fetchDoctorInterviews,
+  fetchInterviews,
+  interviewsFromDoctor,
+} from "./model";
 export type { Interview } from "./model";

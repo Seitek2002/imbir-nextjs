@@ -1,4 +1,8 @@
-import { type PublicInterview, getInterviews } from "@/shared/api";
+import {
+  type DoctorInterviewItem,
+  type PublicInterview,
+  getInterviews,
+} from "@/shared/api";
 
 export type Interview = {
   authorName: string;
@@ -34,7 +38,36 @@ export const fetchInterviews = async (limit = 12): Promise<Interview[]> => {
   }
 };
 
-// Интервью конкретного врача: бэк не даёт фильтр по врачу в /api/interviews/,
+// Интервью из профиля врача (GET /api/doctors/{id}/ → interviews[]). Обложка
+// и подпись — фото, имя и специальность самого врача, как в общем списке.
+export const interviewsFromDoctor = (
+  doctor: {
+    id: number | string;
+    image?: unknown;
+    name: string;
+    specialty: string;
+  },
+  interviews: DoctorInterviewItem[],
+  limit = 12,
+): Interview[] =>
+  [...interviews]
+    .sort((a, b) => b.priority - a.priority)
+    .slice(0, limit)
+    .map((item) => ({
+      id: item.id,
+      title: item.title,
+      authorName: doctor.name,
+      authorRole: doctor.specialty,
+      thumbnail:
+        typeof doctor.image === "string" && doctor.image
+          ? doctor.image
+          : undefined,
+      youtubeUrl: item.videoUrl,
+      doctorId: String(doctor.id),
+    }));
+
+// Интервью конкретного врача из общего списка — запасной путь, если профиль
+// врача пришёл без interviews: бэк не даёт фильтр по врачу в /api/interviews/,
 // поэтому тянем список большим page_size и фильтруем на клиенте — limit здесь
 // ограничивает только итоговую выдачу, а не то, сколько записей запрашивать.
 export const fetchDoctorInterviews = async (

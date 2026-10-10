@@ -54,8 +54,24 @@ export function ClinicDoctorInvitationsPage() {
     Number.isSafeInteger(Number(manualDoctorId));
 
   const doctorsQuery = useQuery({
-    queryKey: doctorKeys.list({ search: submittedSearch, page_size: 20 }),
-    queryFn: () => getDoctors({ search: submittedSearch, page_size: 20 }),
+    queryKey: doctorKeys.list({
+      search: submittedSearch,
+      page_size: 20,
+      city: "all",
+    }),
+    queryFn: async () => {
+      // Ищем по всем городам (city=all): без city бэк подставлял город по IP
+      // клиники, и врач из другого города не находился. Бэк, который ещё не
+      // знает city=all, ищет город «all» и ничего не находит — тогда
+      // повторяем запрос по-старому, без city.
+      const all = await getDoctors({
+        search: submittedSearch,
+        page_size: 20,
+        city: "all",
+      });
+      if (all.data.length > 0) return all;
+      return getDoctors({ search: submittedSearch, page_size: 20 });
+    },
     enabled: submittedSearch.length >= 2,
   });
 

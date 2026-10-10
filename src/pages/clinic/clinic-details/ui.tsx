@@ -96,12 +96,18 @@ export const ClinicDetailsPage: FC<Props> = ({
     initialDataUpdatedAt: initialClinicUpdatedAt,
   });
 
-  const { data: services = [] } = useQuery({
+  // Врачи и услуги — из ответа самой клиники: там все её врачи и все услуги.
+  // Каталог (первые 20 услуг; топ-100 врачей в городе по IP, из-за чего врачи
+  // клиники из другого города не находились) запрашиваем, только если бэк
+  // ещё старый и этих списков в карточке клиники нет.
+  const { data: fetchedServices = [] } = useQuery({
     queryKey: ["services", "clinic", id],
     queryFn: () => api.getServices({ clinic_id: id }),
+    enabled: Boolean(clinic) && clinic?.services === undefined,
   });
+  const services = clinic?.services ?? fetchedServices;
 
-  const { data: doctors = [] } = useQuery({
+  const { data: fetchedDoctors = [] } = useQuery({
     queryKey: ["doctors", "clinic", id],
     queryFn: async () => {
       const allDoctors = await api.getDoctors({ page_size: 100 });
@@ -109,7 +115,9 @@ export const ClinicDetailsPage: FC<Props> = ({
         doc.workplaces.some((w) => w.clinicId === id),
       );
     },
+    enabled: Boolean(clinic) && clinic?.doctors === undefined,
   });
+  const doctors = clinic?.doctors ?? fetchedDoctors;
 
   const isAuthed = useAuthStore((s) => Boolean(s.accessToken));
   const { data: reviews = [] } = useQuery({
@@ -509,6 +517,29 @@ export const ClinicDetailsPage: FC<Props> = ({
 
       <div className="hidden md:block">
         <Footer />
+      </div>
+
+      {/* Мобильная панель записи — как на странице врача. Десктопная пара
+          кнопок выше скрыта на телефоне, и без этой панели с телефона нельзя
+          было ни записаться в клинику, ни открыть её телефон и почту:
+          «Офлайн» открывает именно эти контакты. */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-border-soft z-50 flex gap-2 shadow-[0_-4px_10px_rgba(0,0,0,0.03)]">
+        <Button
+          className="flex-1 justify-center bg-[#FFF2F0] text-primary border border-transparent"
+          size="lg"
+          IconLeft={OfflineRecordIcon}
+          onClick={() => setIsOfflineInfoOpen(true)}
+        >
+          Офлайн
+        </Button>
+        <Button
+          className="flex-1 justify-center"
+          size="lg"
+          IconLeft={OnlineRecordIcon}
+          onClick={() => router.push(recordHref)}
+        >
+          Онлайн
+        </Button>
       </div>
 
       <ContactInfoModal
