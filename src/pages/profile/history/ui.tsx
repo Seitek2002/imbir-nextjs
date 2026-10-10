@@ -253,6 +253,7 @@ export const ProfileHistoryPage: FC = () => {
       address: a.is_online ? "" : (clinic?.address ?? ""),
       status: a.status,
       isOnline: a.is_online,
+      consultationFinished: a.consultation_status === "finished",
       isPast: typeof a.is_past === "boolean" ? a.is_past : undefined,
       canReview: a.can_review === true,
       diagnosis: toText(a.diagnosis),

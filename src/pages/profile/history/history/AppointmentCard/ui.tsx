@@ -120,7 +120,10 @@ export const AppointmentCard: FC<Props> = ({
   // страницы врача) кнопка пропадает у всех его приёмов.
   const showReview = isCompleted && appointment.canReview && !!onReview;
   const showReschedule = isActive && !!onReschedule && !!appointment.doctorId;
-  const showConsultation = isActive && appointment.isOnline;
+  // У завершённой видео-консультации «Подключиться» не показываем: бэк всё
+  // равно не пустит в комнату («Консультация уже завершена»).
+  const showConsultation =
+    isActive && appointment.isOnline && !appointment.consultationFinished;
 
   const cancelledBadge = isCancelled && (
     <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-red-50 text-red-500 text-xs font-medium">

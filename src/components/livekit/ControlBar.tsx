@@ -130,10 +130,12 @@ export const ControlBar = ({ onLeave }: ControlBarProps) => {
           onClick={leave}
           disabled={pending !== null}
           className={styles.leaveButton}
-          aria-label="Завершить консультацию"
+          aria-label="Выйти из консультации"
         >
           <PhoneIcon />
-          <span>{pending === "leave" ? "Завершаем…" : "Завершить"}</span>
+          {/* Выход только отключает от комнаты: консультация завершается,
+              когда из неё вышли оба участника, и вернуться можно до этого. */}
+          <span>{pending === "leave" ? "Выходим…" : "Выйти"}</span>
         </button>
       </div>
     </div>

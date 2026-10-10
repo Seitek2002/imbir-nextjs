@@ -13,6 +13,9 @@ export type Appointment = {
   canReview: boolean;
   // id клиники записи — цель отзыва, если запись без врача.
   clinicId: string;
+  // Видео-консультация завершена (consultation_status === "finished").
+  // На старом бэке поля нет — тогда смотрим только на статус записи.
+  consultationFinished?: boolean;
   date: string;
   // Итоги приёма, которые врач заполняет в кабинете.
   diagnosis?: string;

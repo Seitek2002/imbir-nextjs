@@ -49,9 +49,18 @@ export type ProfileAppointmentService = {
   price?: null | number | string;
 };
 
+export type ProfileConsultationStatus =
+  | "active"
+  | "cancelled"
+  | "created"
+  | "finished"
+  | "waiting";
+
 export type ProfileAppointment = {
   can_review: boolean;
   clinic: null | ProfileAppointmentClinic;
+  // Статус видео-консультации LiveKit; на старом бэке поля нет.
+  consultation_status?: ProfileConsultationStatus;
   created_at: string;
   date: string;
   diagnosis?: null | string;
