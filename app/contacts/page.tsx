@@ -15,6 +15,33 @@ const OFFICE_ADDRESS = "г. Бишкек, ул. Абдумомунова, 244";
 const OFFICE_LAT = "42.8798875";
 const OFFICE_LNG = "74.5941185";
 
+// Единый режим работы — и в карточке, и у техподдержки (раньше было 18:00 в
+// одном блоке и 20:00 в соседнем).
+const WORK_DAYS = "Пн–Пт";
+const WORK_FROM = "09:00";
+const WORK_TO = "18:00";
+
+// Телефоны сравниваем по цифрам: «+996 550 222 777» и «+996550222777» — один
+// и тот же номер.
+const phoneDigits = (value: string) => value.replace(/\D/g, "");
+
+const dedupePhones = (values: string[]) => {
+  const seen = new Set<string>();
+  return values.filter((value) => {
+    const digits = phoneDigits(value);
+    if (!digits || seen.has(digits)) return false;
+    seen.add(digits);
+    return true;
+  });
+};
+
+// Подпись под соцсетью — адрес без схемы и www, чтобы было видно, куда ведёт.
+const socialHandle = (url: string) =>
+  url
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/$/, "");
+
 // Реквизиты юрлица: строки «название — значение», значение может быть
 // многострочным (банк, телефоны).
 const REQUISITES: { label: string; value: string }[] = [
@@ -59,15 +86,28 @@ const ContactCard = ({
   </div>
 );
 
-// Телефон, почта и адрес — из «Настроек сайта» в админке (как в футере),
-// чтобы их меняли без деплоя; пустые поля закрывают реквизиты юрлица.
+// Телефон, почта, адрес и соцсети — из «Настроек сайта» в админке (как в
+// футере), чтобы их меняли без деплоя; пустые поля закрывают реквизиты юрлица.
+// Телефоны юрлица в карточке — только запасной вариант: если номер задан в
+// настройках, показываем его одного (реквизиты ниже всё равно их содержат).
 export default async function ContactsPage() {
   const settings = await getSiteSettings();
-  const phone = settings?.contact_phone || COMPANY.phones[0];
-  const phones = Array.from(new Set([phone, ...COMPANY.phones]));
+  const phones = dedupePhones(
+    settings?.contact_phone ? [settings.contact_phone] : [...COMPANY.phones],
+  );
+  const phone = phones[0] ?? COMPANY.phones[0];
   const email = settings?.contact_email || COMPANY.email;
   const address = settings?.address || OFFICE_ADDRESS;
   const isOfficeAddress = address === OFFICE_ADDRESS;
+  // Только заполненные в админке соцсети, кликабельными ссылками.
+  const socials = [
+    { icon: "📷", label: "Instagram", url: settings?.instagram_url },
+    { icon: "📘", label: "Facebook", url: settings?.facebook_url },
+    { icon: "✖️", label: "X (Twitter)", url: settings?.twitter_url },
+    { icon: "💼", label: "LinkedIn", url: settings?.linkedin_url },
+  ].filter((social): social is typeof social & { url: string } =>
+    Boolean(social.url),
+  );
 
   return (
     <main className="min-h-screen bg-background flex flex-col">
@@ -97,7 +137,7 @@ export default async function ContactsPage() {
           <ContactCard
             icon="🕐"
             title="Режим работы"
-            lines={["Пн–Пт: 09:00–18:00", "Сб–Вс: выходной"]}
+            lines={[`${WORK_DAYS}: ${WORK_FROM}–${WORK_TO}`, "Сб–Вс: выходной"]}
           />
         </div>
 
@@ -122,7 +162,9 @@ export default async function ContactsPage() {
         </div>
 
         {/* Support + Social */}
-        <div className="grid md:grid-cols-2 gap-3">
+        <div
+          className={`grid gap-3 ${socials.length > 0 ? "md:grid-cols-2" : ""}`}
+        >
           <div className="bg-white rounded-3xl p-6 border border-border">
             <h2 className="text-foreground font-semibold text-lg mb-4">
               Техподдержка
@@ -141,35 +183,41 @@ export default async function ContactsPage() {
                 <span>{email}</span>
               </div>
               <p className="text-xs text-muted mt-1">
-                Техподдержка работает: Пн–Пт с 09:00 до 20:00
+                Техподдержка работает: {WORK_DAYS} с {WORK_FROM} до {WORK_TO}
               </p>
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 border border-border">
-            <h2 className="text-foreground font-semibold text-lg mb-4">
-              Мы в социальных сетях
-            </h2>
-            <div className="flex flex-col gap-3 text-sm text-secondary">
-              {[
-                { icon: "📷", label: "Instagram", handle: "@imbir.kg" },
-                { icon: "✈️", label: "Telegram", handle: "@imbir_kg" },
-                { icon: "▶️", label: "YouTube", handle: "IMBIR Health" },
-              ].map(({ icon, label, handle }) => (
-                <div key={label} className="flex items-center gap-3">
-                  <span className="size-8 rounded-xl bg-[#FEF3F0] flex items-center justify-center text-base">
-                    {icon}
-                  </span>
-                  <div>
-                    <p className="text-foreground font-medium text-xs">
-                      {label}
-                    </p>
-                    <p className="text-primary text-xs">{handle}</p>
-                  </div>
-                </div>
-              ))}
+          {socials.length > 0 && (
+            <div className="bg-white rounded-3xl p-6 border border-border">
+              <h2 className="text-foreground font-semibold text-lg mb-4">
+                Мы в социальных сетях
+              </h2>
+              <div className="flex flex-col gap-3 text-sm text-secondary">
+                {socials.map(({ icon, label, url }) => (
+                  <a
+                    key={label}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                  >
+                    <span className="size-8 rounded-xl bg-[#FEF3F0] flex items-center justify-center text-base">
+                      {icon}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-foreground font-medium text-xs">
+                        {label}
+                      </p>
+                      <p className="text-primary text-xs truncate">
+                        {socialHandle(url)}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Реквизиты юрлица — нужны операторам для согласования имени

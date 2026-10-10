@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -14,14 +14,35 @@ import { useMounted } from "@/shared/lib/useMounted";
 import { useSearchHistoryStore } from "@/shared/store";
 import { ConfirmDialog, IconBtn } from "@/shared/ui";
 
-export const RecentSearches: FC = () => {
+type Props = {
+  // Сообщает панели, что открыт диалог подтверждения: он живёт в портале вне
+  // панели, и клики по нему не должны закрывать поиск.
+  onDialogChange?: (open: boolean) => void;
+  // Закрыть панель после перехода: на /search страница не перемонтируется,
+  // и без этого панель осталась бы открытой поверх новой выдачи.
+  onNavigate?: () => void;
+};
+
+export const RecentSearches: FC<Props> = ({ onNavigate, onDialogChange }) => {
   const router = useRouter();
   const { history, removeSearch, clearHistory } = useSearchHistoryStore();
 
   const mounted = useMounted();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const handleSearch = (query: string) => router.push(ROUTES.SEARCH({ query }));
+  const toggleConfirm = (open: boolean) => {
+    setConfirmOpen(open);
+    onDialogChange?.(open);
+  };
+
+  // Если компонент исчезнет при открытом диалоге (например, пользователь начал
+  // печатать запрос), панель не должна остаться «запертой».
+  useEffect(() => () => onDialogChange?.(false), [onDialogChange]);
+
+  const handleSearch = (query: string) => {
+    router.push(ROUTES.SEARCH({ query }));
+    onNavigate?.();
+  };
 
   if (!mounted || history.length === 0) return null;
 
@@ -33,7 +54,7 @@ export const RecentSearches: FC = () => {
             Недавно искали
           </h2>
           <button
-            onClick={() => setConfirmOpen(true)}
+            onClick={() => toggleConfirm(true)}
             className="text-primary text-base active:scale-95 transition-transform hover:opacity-80"
           >
             Удалить все
@@ -67,8 +88,13 @@ export const RecentSearches: FC = () => {
 
       <ConfirmDialog
         isOpen={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={clearHistory}
+        onClose={() => toggleConfirm(false)}
+        // После очистки история пуста и компонент вместе с диалогом
+        // размонтируется, не дождавшись onClose, — сбрасываем флаг сразу.
+        onConfirm={() => {
+          clearHistory();
+          toggleConfirm(false);
+        }}
         icon={<TrashIcon className="w-7 h-7 text-primary" />}
         title="Удалить историю поиска?"
         description="История будет удалена без возможности восстановления"

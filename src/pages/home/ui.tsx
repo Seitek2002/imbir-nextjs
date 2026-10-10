@@ -72,12 +72,8 @@ export const HomePage = async () => {
       queryKey: doctorKeys.list(HOME_DOCTORS_FILTERS),
       queryFn: () => api.getDoctors(HOME_DOCTORS_FILTERS),
     }),
-    // Плитки специализаций (SpecializationsSection).
-    queryClient.prefetchQuery({
-      queryKey: referenceKeys.specializations("all"),
-      queryFn: () => getSpecializations("all"),
-    }),
-    // Список в фильтре «Специализация» над врачами (FilterBar).
+    // Список в фильтре «Специализация» над врачами (FilterBar) и плитки
+    // специализаций (SpecializationsSection) — оба по врачам, один запрос.
     queryClient.prefetchQuery({
       queryKey: referenceKeys.specializations("doctor"),
       queryFn: () => getSpecializations("doctor"),

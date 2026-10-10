@@ -78,6 +78,8 @@ export const useUserStatus = () => {
   return {
     status: data?.status ?? null,
     percent: data?.percent ?? null,
+    positivePercent: data?.positive_percent ?? null,
+    negativePercent: data?.negative_percent ?? null,
     isLoading,
   };
 };

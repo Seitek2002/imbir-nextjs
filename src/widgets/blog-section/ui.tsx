@@ -9,10 +9,12 @@ import {
   BlogCategory,
   BlogImageFallback,
   BlogPost,
+  BlogSkeleton,
+  fetchBlogPostsPage,
 } from "@/entities/blog";
 
 import { colors } from "@/shared/config";
-import { ImageWithFallback } from "@/shared/ui";
+import { Button, ImageWithFallback } from "@/shared/ui";
 
 type Props = {
   categories: BlogCategory[];
@@ -21,7 +23,27 @@ type Props = {
   // first card (its image is the mobile LCP). Off by default (e.g. on home,
   // where the section sits far below the fold).
   prioritizeFirstCard?: boolean;
+  // Сколько всего страниц у общего списка (первая уже в posts). Нет — значит,
+  // кнопки «Показать ещё» не будет.
+  totalPages?: number;
   variant?: "default" | "home";
+};
+
+// Загруженные статьи по одной вкладке категорий («all» — без фильтра).
+type CategoryList = {
+  error: boolean;
+  loading: boolean;
+  page: number;
+  posts: BlogPost[];
+  totalPages: number;
+};
+
+const EMPTY_LIST: CategoryList = {
+  error: false,
+  loading: false,
+  page: 0,
+  posts: [],
+  totalPages: 1,
 };
 
 export const BlogSection: FC<Props> = ({
@@ -29,19 +51,80 @@ export const BlogSection: FC<Props> = ({
   categories,
   variant = "default",
   prioritizeFirstCard = false,
+  totalPages = 1,
 }) => {
   const [activeCategory, setActiveCategory] = useState("all");
+  // Каждая категория грузится с бэка отдельно (?category=slug) и листается
+  // своими страницами — раньше фильтр работал только по первым 12 статьям, и
+  // более старые статьи и целые категории пропадали.
+  const [lists, setLists] = useState<Record<string, CategoryList>>(() => ({
+    all: { ...EMPTY_LIST, page: 1, posts, totalPages },
+  }));
 
   const featuredLinkClassName =
     "inline-flex w-fit items-center rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-white transition-all active:bg-primary-dark hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)]";
 
+  const loadPage = async (categoryId: string, page: number) => {
+    setLists((prev) => ({
+      ...prev,
+      [categoryId]: {
+        ...(prev[categoryId] ?? EMPTY_LIST),
+        loading: true,
+        error: false,
+      },
+    }));
+    try {
+      const result = await fetchBlogPostsPage({
+        page,
+        category: categoryId === "all" ? undefined : categoryId,
+      });
+      setLists((prev) => {
+        const current = prev[categoryId] ?? EMPTY_LIST;
+        const base = page === 1 ? [] : current.posts;
+        const seen = new Set(base.map((post) => post.id));
+        return {
+          ...prev,
+          [categoryId]: {
+            error: false,
+            loading: false,
+            page: result.page,
+            posts: [
+              ...base,
+              ...result.posts.filter((post) => !seen.has(post.id)),
+            ],
+            totalPages: result.totalPages,
+          },
+        };
+      });
+    } catch {
+      setLists((prev) => ({
+        ...prev,
+        [categoryId]: {
+          ...(prev[categoryId] ?? EMPTY_LIST),
+          loading: false,
+          error: true,
+        },
+      }));
+    }
+  };
+
+  const selectCategory = (categoryId: string) => {
+    setActiveCategory(categoryId);
+    if (!lists[categoryId]) void loadPage(categoryId, 1);
+  };
+
+  const current = lists[activeCategory] ?? { ...EMPTY_LIST, loading: true };
+
+  // Крупно сверху — первая избранная статья. Остальные избранные идут в общую
+  // сетку, а не пропадают. В чужой категории крупный блок не показываем.
   const featured = posts.find((post) => post.featured);
-  const filtered =
-    activeCategory === "all"
-      ? posts.filter((post) => !post.featured)
-      : posts.filter(
-          (post) => !post.featured && post.categoryId === activeCategory,
-        );
+  const showFeatured =
+    !!featured &&
+    (activeCategory === "all" || featured.categoryId === activeCategory);
+  const filtered = current.posts.filter(
+    (post) => !(showFeatured && post.id === featured?.id),
+  );
+  const hasMore = current.page > 0 && current.page < current.totalPages;
 
   if (variant === "home") {
     const homeFeatured = featured ?? posts[0];
@@ -80,7 +163,7 @@ export const BlogSection: FC<Props> = ({
 
   return (
     <div className="flex flex-col gap-6">
-      {featured && (
+      {featured && showFeatured && (
         <div className="hidden md:flex gap-5">
           <Link
             href={featured.href}
@@ -129,7 +212,7 @@ export const BlogSection: FC<Props> = ({
         </div>
       )}
 
-      {featured && (
+      {featured && showFeatured && (
         <div className="md:hidden flex flex-col gap-2">
           <div className="bg-white rounded-3xl border border-border-soft p-5 flex flex-col gap-4">
             <div className="flex items-center gap-3">
@@ -173,7 +256,7 @@ export const BlogSection: FC<Props> = ({
 
       <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button
-          onClick={() => setActiveCategory("all")}
+          onClick={() => selectCategory("all")}
           className="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
           style={{
             backgroundColor:
@@ -186,7 +269,7 @@ export const BlogSection: FC<Props> = ({
         {categories.map((category) => (
           <button
             key={category.id}
-            onClick={() => setActiveCategory(category.id)}
+            onClick={() => selectCategory(category.id)}
             className="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer"
             style={{
               backgroundColor:
@@ -215,10 +298,43 @@ export const BlogSection: FC<Props> = ({
             />
           ))}
         </div>
-      ) : (
+      ) : current.loading ? (
+        <BlogSkeleton count={3} />
+      ) : current.error ? null : (
         <p className="text-sm text-muted py-8 text-center">
           Нет статей в этой категории
         </p>
+      )}
+
+      {current.error && (
+        <div className="flex flex-col items-center gap-3 py-4">
+          <p className="text-sm text-muted text-center">
+            Не удалось загрузить статьи
+          </p>
+          <Button
+            variant="outline"
+            onClick={() =>
+              void loadPage(
+                activeCategory,
+                current.page > 0 ? current.page + 1 : 1,
+              )
+            }
+          >
+            Повторить
+          </Button>
+        </div>
+      )}
+
+      {hasMore && !current.error && (
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            onClick={() => void loadPage(activeCategory, current.page + 1)}
+            loading={current.loading}
+          >
+            {current.loading ? "Загрузка…" : "Показать ещё"}
+          </Button>
+        </div>
       )}
     </div>
   );

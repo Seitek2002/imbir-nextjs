@@ -31,6 +31,10 @@ export const GlobalSearchPanel: FC<Props> = ({ onClose }) => {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const ref = useRef<HTMLDivElement>(null);
+  // Открыт диалог «Удалить историю поиска?». Он рендерится порталом в body,
+  // вне панели, поэтому клик по его кнопкам useClickAway считает внешним, а
+  // Esc ловит и сам диалог. Пока он открыт, панель не закрываем.
+  const dialogOpenRef = useRef(false);
   const router = useRouter();
   const addSearch = useSearchHistoryStore((state) => state.addSearch);
 
@@ -40,8 +44,22 @@ export const GlobalSearchPanel: FC<Props> = ({ onClose }) => {
   }, [onClose]);
 
   useClickAway(ref, () => {
-    if (!isClosing) handleClose();
+    if (!isClosing && !dialogOpenRef.current) handleClose();
   });
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isClosing && !dialogOpenRef.current) {
+        handleClose();
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isClosing, handleClose]);
+
+  const handleDialogChange = useCallback((open: boolean) => {
+    dialogOpenRef.current = open;
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -78,6 +96,7 @@ export const GlobalSearchPanel: FC<Props> = ({ onClose }) => {
       >
         <div className="py-4">
           <SearchInput
+            autoFocus
             placeholder="Поиск клиники, специалиста, услуги"
             value={query}
             onChange={setQuery}
@@ -104,7 +123,10 @@ export const GlobalSearchPanel: FC<Props> = ({ onClose }) => {
             </div>
           ) : (
             <>
-              <RecentSearches />
+              <RecentSearches
+                onNavigate={handleClose}
+                onDialogChange={handleDialogChange}
+              />
               <CategoriesGrid onItemClick={handleClose} />
             </>
           )}

@@ -1,6 +1,10 @@
 import Link from "next/link";
 
-import { fetchBlogCategories, fetchBlogPosts } from "@/entities/blog";
+import {
+  type BlogPostsPage,
+  fetchBlogCategories,
+  fetchBlogPostsPage,
+} from "@/entities/blog";
 
 import { ROUTES } from "@/shared/config";
 
@@ -13,10 +17,15 @@ export async function BlogSectionServer({
   prioritizeFirstCard?: boolean;
   variant?: "default" | "home";
 }) {
-  const [posts, categories] = await Promise.all([
-    fetchBlogPosts(),
+  // Блог — публичный контент: если запрос не прошёл, показываем пустой раздел,
+  // а не роняем страницу (она рендерится на сервере, в том числе при ISR).
+  const [firstPage, categories] = await Promise.all([
+    fetchBlogPostsPage().catch(
+      (): BlogPostsPage => ({ page: 1, posts: [], totalPages: 1 }),
+    ),
     fetchBlogCategories(),
   ]);
+  const posts = firstPage.posts;
 
   // На главной блог — необязательный блок: если статей нет вообще (бэк
   // пуст — проверено через swagger), скрываем его целиком, вместе с
@@ -60,6 +69,7 @@ export async function BlogSectionServer({
   return (
     <BlogSection
       posts={posts}
+      totalPages={firstPage.totalPages}
       categories={categories}
       variant={variant}
       prioritizeFirstCard={prioritizeFirstCard}

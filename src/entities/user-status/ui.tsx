@@ -14,16 +14,31 @@ type Props = { className?: string };
 // Карточка показывается ВСЕГДА, в том числе когда бэк отдаёт status: null —
 // так бывает у пользователя без отзывов. В этом случае рисуем ту же вёрстку с
 // нулями: человек видит, что блок существует и чего в нём ждать.
-// Проценты пересчитываются на сервере по средней оценке отзывов, поэтому после
-// любого изменения отзыва кэш сбрасывается — см. useInvalidateUserStatus.
+// Статус сервер выбирает по средней оценке отзывов, а доли «положительных» и
+// «отрицательных» считает по самим отзывам (4–5★ и 1–2★, 3★ — нейтральные,
+// поэтому сумма может быть меньше 100). После любого изменения отзыва кэш
+// сбрасывается — см. useInvalidateUserStatus.
 export const UserStatusCard: FC<Props> = ({ className }) => {
-  const { status, percent, isLoading } = useUserStatus();
+  const { status, percent, positivePercent, negativePercent, isLoading } =
+    useUserStatus();
 
   if (isLoading) return null;
 
   const hasData = percent !== null;
-  const positive = hasData ? Math.round(percent) : 0;
-  const negative = hasData ? 100 - positive : 0;
+  // Старый бэк долей не отдаёт — тогда остаётся прежний расчёт от среднего балла.
+  const hasShares = positivePercent !== null && negativePercent !== null;
+  const positive = hasShares
+    ? Math.round(positivePercent)
+    : hasData
+      ? Math.round(percent)
+      : 0;
+  // Обе доли округляются вверх на .5 (12.5 + 87.5 → 13 + 88), поэтому
+  // отрицательную ограничиваем остатком, чтобы сумма не вылезала за 100.
+  const negative = hasShares
+    ? Math.min(Math.round(negativePercent), 100 - positive)
+    : hasData
+      ? 100 - positive
+      : 0;
 
   return (
     <div
@@ -53,8 +68,9 @@ export const UserStatusCard: FC<Props> = ({ className }) => {
           </span>
         </div>
 
-        {/* Единый трек: оранжевый сегмент + синий хвост, как в макете. Пока
-          данных нет, трек остаётся серым, а не «100% отрицательных». */}
+        {/* Единый трек: оранжевый сегмент слева, синий справа, как в макете;
+          нейтральные отзывы — серый промежуток между ними. Пока данных нет,
+          трек остаётся серым, а не «100% отрицательных». */}
         <div className="flex items-center gap-2">
           <span className="text-primary text-sm font-semibold border border-primary rounded-lg px-2 py-0.5">
             {positive}%
@@ -67,8 +83,8 @@ export const UserStatusCard: FC<Props> = ({ className }) => {
                   style={{ width: `${positive}%` }}
                 />
                 <div
-                  className="h-full flex-1"
-                  style={{ backgroundColor: NEGATIVE }}
+                  className="h-full ml-auto"
+                  style={{ backgroundColor: NEGATIVE, width: `${negative}%` }}
                 />
               </>
             )}

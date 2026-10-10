@@ -158,7 +158,10 @@ export const resolveSpecializationIds = (
 };
 
 export const useSpecializationTiles = (limit = SPECIALIZATION_TILES_LIMIT) => {
-  const { data = [], isLoading } = useSpecializations();
+  // Плитка ведёт в каталог врачей (?doc_spec=), поэтому берём только
+  // специализации опубликованных врачей. Со scope «all» в плитки попадали и
+  // специализации одних клиник, и клик открывал «Врачи не найдены».
+  const { data = [], isLoading } = useSpecializations("doctor");
 
   // Плитку без картинки не показываем вовсе. Раньше блок добирал недостающие
   // алфавитным хвостом справочника, и на Главной висели одинаковые серые

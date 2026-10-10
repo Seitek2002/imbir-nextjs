@@ -107,6 +107,39 @@ export const fetchBlogPosts = async (limit = 12): Promise<BlogPost[]> => {
   }
 };
 
+// Страница списка для /blog: бэк сам фильтрует по категории (slug) и режет на
+// страницы, поэтому «Показать ещё» и выбор категории идут отдельными запросами,
+// а не фильтром по первым 12 статьям на клиенте. Ошибку не глотаем — вызывающий
+// решает сам: сервер покажет пустой раздел, клиент — «Повторить».
+export const BLOG_PAGE_SIZE = 12;
+
+export type BlogPostsPage = {
+  page: number;
+  posts: BlogPost[];
+  totalPages: number;
+};
+
+export const fetchBlogPostsPage = async ({
+  category,
+  page = 1,
+  pageSize = BLOG_PAGE_SIZE,
+}: {
+  category?: string;
+  page?: number;
+  pageSize?: number;
+} = {}): Promise<BlogPostsPage> => {
+  const { data, pagination } = await getBlogPosts({
+    page,
+    page_size: pageSize,
+    ...(category ? { category } : {}),
+  });
+  return {
+    posts: data.map(adaptPost),
+    page: pagination?.page ?? page,
+    totalPages: pagination?.total_pages ?? page,
+  };
+};
+
 export const fetchBlogCategories = async (): Promise<BlogCategory[]> => {
   try {
     const categories = await getBlogCategories();

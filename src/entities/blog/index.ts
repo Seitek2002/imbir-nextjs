@@ -5,7 +5,13 @@ export {
   fetchBlogArticle,
   fetchBlogCategories,
   fetchBlogPosts,
+  fetchBlogPostsPage,
   fetchRelatedBlogPosts,
   formatBlogDate,
 } from "./model";
-export type { BlogArticle, BlogCategory, BlogPost } from "./model";
+export type {
+  BlogArticle,
+  BlogCategory,
+  BlogPost,
+  BlogPostsPage,
+} from "./model";

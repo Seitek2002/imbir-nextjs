@@ -47,7 +47,12 @@ export type UserStatus = {
 
 export type UserAccountStatus = {
   average_rating: null | number;
+  // Доля отзывов на 1–2★. Поле новое: старый бэк его не отдаёт.
+  negative_percent?: null | number;
+  // Средний балл в процентах — по нему выбирается статус.
   percent: null | number;
+  // Доля отзывов на 4–5★. Поле новое: старый бэк его не отдаёт.
+  positive_percent?: null | number;
   reviews_count: number;
   status: null | UserStatus;
   user_id: number;
@@ -70,6 +75,9 @@ export type SiteSettings = {
   privacy_policy_text: string;
   terms_text: string;
   twitter_url: string;
+  // ISO-время последнего сохранения настроек. Поле новое: старый бэк его не
+  // отдаёт.
+  updated_at?: null | string;
 };
 
 export type SiteSettingsResponse = {

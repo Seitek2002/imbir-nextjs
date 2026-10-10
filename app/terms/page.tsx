@@ -2,8 +2,22 @@
 import { Header } from "@/widgets/header";
 
 import { getSiteSettings } from "@/shared/api";
-import { ROUTES } from "@/shared/config";
+import { COMPANY, ROUTES } from "@/shared/config";
 import { Markdown } from "@/shared/ui";
+
+// Дата из updated_at настроек сайта: «5 октября 2026 г.». Бэк меняет её при
+// любом сохранении настроек, так что она не старше реальной правки текста.
+const formatUpdatedAt = (iso?: null | string) => {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Bishkek",
+  });
+};
 
 const Section = ({
   num,
@@ -30,6 +44,14 @@ export default async function TermsPage() {
   // реальный текст, и терять его ради пустой страницы нельзя.
   const settings = await getSiteSettings();
   const text = settings?.terms_text?.trim();
+  // Текст из админки датируем последним сохранением настроек; у запасного
+  // текста ниже — своя фиксированная дата. Нет даты (старый бэк) — строку
+  // не показываем, чтобы не выдавать неверную.
+  const updatedAt = text
+    ? formatUpdatedAt(settings?.updated_at)
+    : "1 января 2025 г.";
+  // Адрес для обращений — контактный email сайта, а не заглушка.
+  const contactEmail = settings?.contact_email || COMPANY.email;
 
   return (
     <main className="min-h-screen bg-background flex flex-col">
@@ -41,9 +63,11 @@ export default async function TermsPage() {
             <h1 className="text-3xl font-bold text-foreground mb-2">
               Условия использования
             </h1>
-            <p className="text-muted text-sm">
-              Последнее обновление: 1 января 2025 г.
-            </p>
+            {updatedAt && (
+              <p className="text-muted text-sm">
+                Последнее обновление: {updatedAt}
+              </p>
+            )}
           </div>
 
           {text ? (
@@ -166,8 +190,8 @@ export default async function TermsPage() {
                   нахождения IMBIR.
                 </p>
                 <p>
-                  По вопросам, связанным с условиями использования, обращайтесь:
-                  legal@imbir.kg
+                  По вопросам, связанным с условиями использования, обращайтесь:{" "}
+                  {contactEmail}
                 </p>
               </Section>
             </>

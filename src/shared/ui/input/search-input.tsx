@@ -7,6 +7,9 @@ import { RemoveIcon, SearchIcon } from "@/shared/assets/icons";
 import { Input } from "@/shared/ui";
 
 type Props = {
+  // Фокус сразу при монтировании — для поиска в выпадающей панели, где
+  // пользователь начинает печатать сразу после клика по лупе.
+  autoFocus?: boolean;
   onChange: (val: string) => void;
   onEnter?: () => void;
   placeholder?: string;
@@ -18,6 +21,7 @@ export const SearchInput: FC<Props> = ({
   value,
   onChange,
   onEnter,
+  autoFocus,
 }) => {
   // Функция очистки инпута
   const handleClear = () => {
@@ -33,6 +37,7 @@ export const SearchInput: FC<Props> = ({
       onIconRightClick={handleClear}
       placeholder={placeholder || "Поиск клиники, врача, услуги"}
       className="w-full rounded-full bg-white"
+      autoFocus={autoFocus}
       value={value}
       onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
       onKeyDown={(e) => {
