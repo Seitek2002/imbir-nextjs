@@ -107,17 +107,46 @@ const appendMultipart = (form: FormData, key: string, value: unknown) => {
   form.append(key, String(value));
 };
 
-// Файл в теле требует multipart, без файла — обычный JSON. Разница важна не
-// только для кодировки: в multipart всё превращается в строки, поэтому пустой
-// JSON-путь оставляем для запросов без картинок.
+const splitFiles = (body: Record<string, unknown>) => {
+  const files: [string, File][] = [];
+  const rest: Record<string, unknown> = {};
+  Object.entries(body).forEach(([key, value]) => {
+    if (value instanceof File) files.push([key, value]);
+    else if (value !== undefined) rest[key] = value;
+  });
+  return { files, rest };
+};
+
+const sendJson = async <T>(
+  path: string,
+  method: "PATCH" | "POST" | "PUT",
+  body: Record<string, unknown>,
+): Promise<T> => {
+  const { data } = await apiClient.request<T>({
+    url: path,
+    method,
+    data: body,
+  });
+  return data;
+};
+
+// Файл в теле требует multipart, без файла — обычный JSON.
+// При правке (PATCH/PUT — на бэке это всегда частичное обновление) данные и
+// файл уходят раздельно: сначала JSON, затем multipart только с файлом. В
+// multipart нельзя передать «очистить»: null и [] там просто пропадали, бэк
+// оставлял старое значение и отвечал успехом — при смене фото не снимались
+// врачи процедуры, доп. специализация, языки, оборудование, дата рождения.
+// POST создаёт запись с нуля, очищать там нечего — он идёт одним multipart.
 const sendMaybeMultipart = async <T>(
   path: string,
   method: "PATCH" | "POST" | "PUT",
   body: Record<string, unknown>,
 ): Promise<T> => {
-  const hasFile = Object.values(body).some((v) => v instanceof File);
+  const { files, rest } = splitFiles(body);
 
-  if (hasFile) {
+  if (files.length === 0) return sendJson<T>(path, method, body);
+
+  if (method === "POST") {
     const form = new FormData();
     Object.entries(body).forEach(([key, value]) => {
       if (value === undefined || value === null) return;
@@ -126,12 +155,10 @@ const sendMaybeMultipart = async <T>(
     return sendMultipart<T>(path, method, form);
   }
 
-  const { data } = await apiClient.request<T>({
-    url: path,
-    method,
-    data: body,
-  });
-  return data;
+  if (Object.keys(rest).length > 0) await sendJson<T>(path, method, rest);
+  const form = new FormData();
+  files.forEach(([key, file]) => form.append(key, file));
+  return sendMultipart<T>(path, method, form);
 };
 
 export const updateClinicProfile = async (
@@ -233,12 +260,29 @@ export const getClinicDoctors = async (): Promise<
 // Регистрация врача клиникой из кабинета. Создаёт User(role=doctor) +
 // DoctorProfile (город/страна клиники) + DoctorClinicLink. Почта и телефон
 // должны быть уникальны (иначе 400).
+// Профильные поля бэк принимает тем же запросом — врача можно завести сразу с
+// заполненной карточкой. Фото уходит вторым запросом (PATCH карточки): в
+// multipart языки и образование доходили до бэка одной JSON-строкой внутри
+// списка. Если не загрузилось только фото, врач уже создан — повторное
+// создание упёрлось бы в «почта занята», поэтому ошибку фото возвращаем
+// отдельно (photoError), а не бросаем.
 export const createClinicDoctor = async (
   body: CreateClinicDoctorRequest,
-): Promise<ClinicDoctorItem> =>
-  // Профильные поля (включая фото) бэк принимает тем же запросом — врача
-  // можно завести сразу с заполненной карточкой.
-  sendMaybeMultipart<ClinicDoctorItem>("/api/clinic/doctors/", "POST", body);
+): Promise<ClinicDoctorItem & { photoError?: unknown }> => {
+  const { photo, ...rest } = body;
+  const created = await sendJson<ClinicDoctorItem>(
+    "/api/clinic/doctors/",
+    "POST",
+    photo instanceof File ? rest : body,
+  );
+  if (!(photo instanceof File)) return created;
+  try {
+    const updated = await updateClinicDoctor(created.id, { photo });
+    return { ...created, photo: updated.photo };
+  } catch (photoError) {
+    return { ...created, photoError };
+  }
+};
 
 export const detachClinicDoctor = async (doctorId: number): Promise<void> => {
   await apiClient.delete(`/api/clinic/doctors/${doctorId}/`);
@@ -342,18 +386,9 @@ export const addClinicService = async (
     body,
   );
 
-// Длительность и цену очищают null'ом. В JSON он так и уходит, а multipart
-// (когда вместе меняют фото) null-поля пропускает — бэк оставил бы старое
-// значение. Пустую строку DRF для таких полей читает как null.
-const withCleared = (body: ClinicServiceBody): Record<string, unknown> =>
-  body.photo instanceof File
-    ? {
-        ...body,
-        ...(body.duration === null ? { duration: "" } : {}),
-        ...(body.price === null ? { price: "" } : {}),
-      }
-    : body;
-
+// Длительность, цену, врачей и филиал очищают null'ом / []. С новым фото
+// данные всё равно уходят JSON'ом отдельно от файла (см. sendMaybeMultipart),
+// поэтому очистка срабатывает и вместе со сменой фото.
 export const updateClinicService = async (
   id: number,
   body: ClinicServiceBody,
@@ -361,7 +396,7 @@ export const updateClinicService = async (
   sendMaybeMultipart<ClinicServiceListItem>(
     `/api/clinic/services/${id}/`,
     "PUT",
-    withCleared(body),
+    body,
   );
 
 export const deleteClinicService = async (id: number): Promise<void> => {

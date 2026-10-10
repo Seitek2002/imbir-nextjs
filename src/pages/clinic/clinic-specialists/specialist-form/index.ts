@@ -1,6 +1,7 @@
 export {
   EMPTY_SPECIALIST_FORM,
   fromDoctorProfile,
+  pickChangedFields,
   splitFullName,
   toDoctorProfileBody,
 } from "./model";

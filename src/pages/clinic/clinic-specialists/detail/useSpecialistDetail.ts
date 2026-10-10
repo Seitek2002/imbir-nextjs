@@ -26,6 +26,7 @@ import { extractErrorMessage } from "@/shared/lib/errors";
 import {
   type SpecialistFormState,
   fromDoctorProfile,
+  pickChangedFields,
   toDoctorProfileBody,
 } from "../specialist-form";
 
@@ -70,20 +71,25 @@ export const useSpecialistDetail = (id: string) => {
     queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.doctors() });
   };
 
+  const toBody = (d: SpecialistFormState) =>
+    toDoctorProfileBody(d, {
+      primary: resolveSpecializationIds(d.specialization, specializationList)
+        .ids,
+      narrow: resolveSpecializationIds(
+        d.additionalSpecialization,
+        specializationList,
+      ).ids,
+    });
+
   const saveMutation = useMutation({
-    mutationFn: (d: SpecialistFormState) => {
-      const primary = resolveSpecializationIds(
-        d.specialization ? [d.specialization] : [],
-        specializationList,
-      );
-      const narrow = resolveSpecializationIds(
-        d.additionalSpecialization ? [d.additionalSpecialization] : [],
-        specializationList,
-      );
-      return updateClinicDoctor(
-        doctorId,
-        toDoctorProfileBody(d, { primary: primary.ids, narrow: narrow.ids }),
-      );
+    mutationFn: async (d: SpecialistFormState) => {
+      // Шлём только то, что клиника поменяла: иначе PATCH перезаписывал
+      // данные, которые врач успел изменить в своём кабинете.
+      const body = initialForm
+        ? pickChangedFields(toBody(d), toBody(initialForm))
+        : toBody(d);
+      if (Object.keys(body).length === 0) return null;
+      return updateClinicDoctor(doctorId, body);
     },
     onSuccess: () => {
       invalidateCard();

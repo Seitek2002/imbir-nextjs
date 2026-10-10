@@ -21,7 +21,7 @@ export const ClinicSpecialistProfessionalPage: FC = () => {
   const { d, set, reset } = useSpecialistForm(initialForm);
 
   // Кнопка в шапке переключает просмотр/правку; при выходе из правки
-  // отправляем карточку целиком (PATCH принимает частичное тело).
+  // отправляем только изменённые поля (см. useSpecialistDetail).
   const handleCancel = () => {
     reset();
     setIsEditing(false);

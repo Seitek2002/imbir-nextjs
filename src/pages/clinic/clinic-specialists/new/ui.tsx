@@ -49,11 +49,11 @@ export const ClinicNewSpecialistPage: FC = () => {
   const { data: specializationList = [] } = useSpecializations("reference");
   const resolveSpecs = () => {
     const primary = resolveSpecializationIds(
-      d.specialization ? [d.specialization] : [],
+      d.specialization,
       specializationList,
     );
     const narrow = resolveSpecializationIds(
-      d.additionalSpecialization ? [d.additionalSpecialization] : [],
+      d.additionalSpecialization,
       specializationList,
     );
     return { primary: primary.ids, narrow: narrow.ids };
@@ -81,6 +81,13 @@ export const ClinicNewSpecialistPage: FC = () => {
       }),
     onSuccess: (doctor) => {
       toast.success(`Врач ${doctor.full_name} добавлен`);
+      // Фото грузится вторым запросом — врач уже создан, даже если оно
+      // не загрузилось; повторно создавать его не нужно.
+      if (doctor.photoError) {
+        toast.error(
+          "Фото не загрузилось — добавьте его в карточке специалиста",
+        );
+      }
       queryClient.invalidateQueries({ queryKey: clinicCabinetKeys.doctors() });
       router.push("/clinic-profile/specialists");
     },

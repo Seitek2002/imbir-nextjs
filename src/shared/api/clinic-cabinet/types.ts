@@ -163,12 +163,15 @@ export type ClinicServiceDetail = {
   service_category?: null | ServiceCategoryRef;
 };
 
-// Запись образования врача. Интернатура/ординатура/специализация по диплому
-// лежат тут же отдельными ключами — в отличие от кабинета самого врача, где
-// бэк принимает только плоский массив institution/degree/year.
+// Запись образования врача — общий с кабинетом врача формат
+// institution/degree/year (интернатура и ординатура — отдельные записи с
+// пометкой в degree, см. entities/doctor-education). Ключи internship/
+// residency/diploma_specialization — старый формат кабинета клиники: так
+// клиника больше не пишет, но такие записи ещё встречаются при чтении.
 export type ClinicDoctorEducation = {
+  degree?: string;
   diploma_specialization?: string;
-  institution?: string;
+  institution: string;
   internship?: string;
   residency?: string;
   year?: null | number;
@@ -179,9 +182,11 @@ export type ClinicDoctorCourse = {
   year?: null | number;
 };
 
-// Поля карточки врача, которые заполняет клиника. Логин (email/пароль),
-// график приёма и цена консультации сюда НЕ входят — их меняет только сам
-// врач через /api/doctor/profile/, бэк их здесь не примет.
+// Поля карточки врача, которые заполняет клиника. Логин (email/пароль), ФИО,
+// телефон и цена консультации сюда НЕ входят — их меняет только сам врач
+// через /api/doctor/profile/, бэк их здесь не примет. График (schedule,
+// lunch_break) новый бэк принимает и отдаёт, старый — нет, поэтому поля
+// необязательные и формой пока не шлются.
 export type ClinicDoctorProfileBody = {
   // «О себе» — текст для публичной страницы врача.
   about?: string;
@@ -194,6 +199,7 @@ export type ClinicDoctorProfileBody = {
   gender?: string;
   languages?: string[];
   license_number?: string;
+  lunch_break?: ClinicLunchBreak | null;
   narrow_specialization_ids?: number[];
   // Как и логотип клиники: File уходит multipart'ом, строка — это URL уже
   // загруженной картинки.
@@ -201,6 +207,7 @@ export type ClinicDoctorProfileBody = {
   position?: string;
   primary_specialization_ids?: number[];
   qualification_category?: string;
+  schedule?: Record<string, ClinicScheduleDay>;
 };
 
 // GET /api/clinic/doctors/{id}/ — полная карточка прикреплённого врача.

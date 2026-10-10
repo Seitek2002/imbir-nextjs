@@ -1,6 +1,13 @@
+import {
+  type AdditionalEducationEntry,
+  fromApiAdditionalEducation,
+  fromApiEducation,
+  fromLegacyAdditionalEducation,
+  toApiAdditionalEducation,
+  toApiEducation,
+} from "@/entities/doctor-education";
+
 import type {
-  ClinicDoctorCourse,
-  ClinicDoctorEducation,
   ClinicDoctorProfile,
   ClinicDoctorProfileBody,
 } from "@/shared/api";
@@ -10,8 +17,11 @@ import type {
 // врача целиком (POST /api/clinic/doctors/ и PATCH /api/clinic/doctors/{id}/).
 export type SpecialistFormState = {
   about: string;
-  additionalEducation: string;
-  additionalSpecialization: string;
+  // Курсы с годом — тот же формат, что в кабинете врача (additional_education).
+  additionalEducation: AdditionalEducationEntry[];
+  // Специализаций у врача может быть несколько (в кабинете врача — мультивыбор).
+  // Раньше форма клиники держала одну и при сохранении стирала остальные.
+  additionalSpecialization: string[];
   birthDate: string;
   city: string;
   degree: string;
@@ -33,7 +43,7 @@ export type SpecialistFormState = {
   position: string;
   qualification: string;
   residency: string;
-  specialization: string;
+  specialization: string[];
   university: string;
 
   workplace: string;
@@ -50,8 +60,8 @@ export const EMPTY_SPECIALIST_FORM: SpecialistFormState = {
   password: "",
   photoPreview: undefined,
   photoFile: null,
-  specialization: "",
-  additionalSpecialization: "",
+  specialization: [],
+  additionalSpecialization: [],
   experienceYears: "",
   position: "",
   workplace: "",
@@ -62,7 +72,7 @@ export const EMPTY_SPECIALIST_FORM: SpecialistFormState = {
   internship: "",
   residency: "",
   diplomaSpecialty: "",
-  additionalEducation: "",
+  additionalEducation: [],
   licenseNumber: "",
   about: "",
 };
@@ -110,31 +120,14 @@ const csv = (s: string): string[] =>
     .map((x) => x.trim())
     .filter(Boolean);
 
-// Образование бэк хранит массивом записей, но на форме это плоские поля —
-// кладём всё в одну запись (ВУЗ + год + интернатура + ординатура + диплом).
-const toApiEducation = (d: SpecialistFormState): ClinicDoctorEducation[] => {
-  const entry: ClinicDoctorEducation = {
-    institution: d.university.trim(),
-    year: parseInt(d.graduationYear, 10) || null,
-    internship: d.internship.trim(),
-    residency: d.residency.trim(),
-    diploma_specialization: d.diplomaSpecialty.trim(),
-  };
-  // Пустую запись не шлём — иначе в карточке появится пустой блок образования.
-  return Object.values(entry).some(Boolean) ? [entry] : [];
-};
-
-// Допобразование — textarea по строке на курс.
-const toApiCourses = (value: string): ClinicDoctorCourse[] =>
-  value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((name) => ({ name }));
-
 // Форма → тело запроса. Специализации приходят названиями (Dropdown работает
 // по имени), а бэк принимает только id — резолвит вызывающая сторона и
 // передаёт готовые массивы.
+// Образование пишем в формате кабинета врача (entities/doctor-education):
+// диплом, интернатура и ординатура — отдельными записями, курсы с годом —
+// в additional_education. Раньше клиника писала одну запись со своими
+// ключами, и врач с пациентом не видели интернатуру и ординатуру, а клиника —
+// то, что внёс врач; сохранение любой стороны стирало данные другой.
 export const toDoctorProfileBody = (
   d: SpecialistFormState,
   specializationIds: { narrow: number[]; primary: number[] },
@@ -150,17 +143,52 @@ export const toDoctorProfileBody = (
   position: d.position.trim(),
   qualification_category: d.qualification.trim(),
   academic_degree: d.degree.trim(),
-  education: toApiEducation(d),
-  additional_education: toApiCourses(d.additionalEducation),
+  education: toApiEducation({
+    university: d.university,
+    diplomaSpecialty: d.diplomaSpecialty,
+    graduationYear: d.graduationYear,
+    internship: d.internship,
+    residency: d.residency,
+    additionalEducation: [],
+  }),
+  additional_education: toApiAdditionalEducation(d.additionalEducation),
   license_number: d.licenseNumber.trim(),
   about: d.about.trim(),
 });
+
+// Только поля, которые клиника реально поменяла. PATCH всей карточки
+// перезаписывал всё, что врач успел изменить в своём кабинете, — и даже
+// неизменённое образование переписывалось в формат формы.
+export const pickChangedFields = (
+  next: ClinicDoctorProfileBody,
+  prev: ClinicDoctorProfileBody,
+): ClinicDoctorProfileBody => {
+  const changed = Object.fromEntries(
+    Object.entries(next).filter(
+      ([key, value]) =>
+        value instanceof File ||
+        JSON.stringify(value) !==
+          JSON.stringify(prev[key as keyof ClinicDoctorProfileBody]),
+    ),
+  ) as ClinicDoctorProfileBody;
+  // Старые курсы врача могли лежать внутри education (см. fromDoctorProfile):
+  // новый education их уже не содержит, а пустой additional_education снова
+  // показал бы их из education. Поэтому оба поля уходят только вместе.
+  if (changed.education || changed.additional_education) {
+    changed.education = next.education;
+    changed.additional_education = next.additional_education;
+  }
+  return changed;
+};
 
 // Ответ бэка → форма.
 export const fromDoctorProfile = (
   p: ClinicDoctorProfile,
 ): SpecialistFormState => {
-  const education = p.education?.[0];
+  // Читает и формат кабинета врача, и старые записи клиники с ключами
+  // internship/residency/diploma_specialization.
+  const education = fromApiEducation(p.education);
+  const courses = fromApiAdditionalEducation(p.additional_education);
 
   return {
     ...EMPTY_SPECIALIST_FORM,
@@ -172,26 +200,29 @@ export const fromDoctorProfile = (
     birthDate: fromApiDate(p.birth_date),
     city: p.city ?? "",
     languages: Array.isArray(p.languages) ? p.languages.join(", ") : "",
-    // PhoneInput работает с национальной частью номера.
-    phone: (p.phone ?? "").replace(/^\+?996/, ""),
+    // Телефон у существующего врача только на чтение (меняет сам врач),
+    // поэтому храним его целиком, с кодом страны.
+    phone: p.phone ?? "",
     email: p.email ?? "",
     photoPreview: p.photo ?? undefined,
     photoFile: null,
-    specialization: p.primary_specializations?.[0]?.name ?? "",
-    additionalSpecialization: p.narrow_specializations?.[0]?.name ?? "",
+    specialization: (p.primary_specializations ?? []).map((s) => s.name),
+    additionalSpecialization: (p.narrow_specializations ?? []).map(
+      (s) => s.name,
+    ),
     experienceYears: p.experience_years ? String(p.experience_years) : "",
     position: p.position ?? "",
     qualification: p.qualification_category ?? "",
     degree: p.academic_degree ?? "",
-    university: education?.institution ?? "",
-    graduationYear: education?.year ? String(education.year) : "",
-    internship: education?.internship ?? "",
-    residency: education?.residency ?? "",
-    diplomaSpecialty: education?.diploma_specialization ?? "",
-    additionalEducation: (p.additional_education ?? [])
-      .map((c) => c.name)
-      .filter(Boolean)
-      .join("\n"),
+    university: education.university,
+    graduationYear: education.graduationYear,
+    internship: education.internship,
+    residency: education.residency,
+    diplomaSpecialty: education.diplomaSpecialty,
+    // Курсы, которые врач завёл до появления additional_education, лежат в
+    // education без пометки — их читаем так же, как кабинет врача.
+    additionalEducation:
+      courses.length > 0 ? courses : fromLegacyAdditionalEducation(p.education),
     licenseNumber: p.license_number ?? "",
     about: p.about ?? "",
   };

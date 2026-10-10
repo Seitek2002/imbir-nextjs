@@ -11,8 +11,14 @@ export const RESIDENCY_DEGREE = "Ординатура";
 
 export type ApiEducationEntry = {
   degree?: string;
+  // Старый формат кабинета клиники: одна запись, где интернатура, ординатура
+  // и специальность по диплому лежали отдельными ключами. Читаем его тем же
+  // путём (см. expandLegacyClinicEntry), пишем всегда формат кабинета врача.
+  diploma_specialization?: string;
   institution: string;
-  year?: number;
+  internship?: string;
+  residency?: string;
+  year?: null | number;
 };
 
 export type AdditionalEducationEntry = { name: string; year: string };
@@ -41,10 +47,50 @@ export const fromApiAdditionalEducation = (
       year: entry.year ? String(entry.year) : "",
     }));
 
+const isMarked = (entry: ApiEducationEntry, degree: string) =>
+  entry.degree?.trim() === degree;
+
+// Запись клиники {institution, year, internship, residency,
+// diploma_specialization} → записи формата кабинета врача: диплом
+// (специальность в degree) + помеченные интернатура и ординатура. Без этого
+// ни врач, ни пациент не видели интернатуру, внесённую клиникой, а первое же
+// сохранение кабинета врачом её стирало.
+const expandLegacyClinicEntry = (
+  entry: ApiEducationEntry,
+): ApiEducationEntry[] => {
+  const internship = entry.internship?.trim() ?? "";
+  const residency = entry.residency?.trim() ?? "";
+  const diplomaSpecialty = entry.diploma_specialization?.trim() ?? "";
+  if (!internship && !residency && !diplomaSpecialty) return [entry];
+
+  const expanded: ApiEducationEntry[] = [];
+  if (entry.institution?.trim() || diplomaSpecialty) {
+    expanded.push({
+      institution: entry.institution ?? "",
+      degree: entry.degree?.trim() || diplomaSpecialty,
+      year: entry.year ?? 0,
+    });
+  }
+  if (internship) {
+    expanded.push({ institution: internship, degree: INTERNSHIP_DEGREE });
+  }
+  if (residency) {
+    expanded.push({ institution: residency, degree: RESIDENCY_DEGREE });
+  }
+  return expanded;
+};
+
+const normalizeEducation = (
+  entries: ApiEducationEntry[] | null | undefined,
+): ApiEducationEntry[] =>
+  (entries ?? []).flatMap((entry) =>
+    entry && typeof entry === "object" ? expandLegacyClinicEntry(entry) : [],
+  );
+
 export const fromLegacyAdditionalEducation = (
   entries: ApiEducationEntry[] | null | undefined,
 ): AdditionalEducationEntry[] => {
-  const rest = (entries ?? []).filter(
+  const rest = normalizeEducation(entries).filter(
     (entry) =>
       !isMarked(entry, INTERNSHIP_DEGREE) && !isMarked(entry, RESIDENCY_DEGREE),
   );
@@ -71,9 +117,6 @@ export const EMPTY_EDUCATION_FORM: EducationForm = {
   residency: "",
   additionalEducation: [],
 };
-
-const isMarked = (entry: ApiEducationEntry, degree: string) =>
-  entry.degree?.trim() === degree;
 
 export const toApiEducation = (form: EducationForm): ApiEducationEntry[] => {
   const entries: ApiEducationEntry[] = [];
@@ -113,7 +156,7 @@ export const toApiEducation = (form: EducationForm): ApiEducationEntry[] => {
 export const fromApiEducation = (
   entries: ApiEducationEntry[] | null | undefined,
 ): EducationForm => {
-  const list = entries ?? [];
+  const list = normalizeEducation(entries);
   const internship = list.find((e) => isMarked(e, INTERNSHIP_DEGREE));
   const residency = list.find((e) => isMarked(e, RESIDENCY_DEGREE));
   // Всё, что не помечено — диплом (первая запись) и допобразование (остальные).

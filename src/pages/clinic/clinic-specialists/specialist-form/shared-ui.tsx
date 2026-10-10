@@ -5,13 +5,14 @@ import { FC, useRef } from "react";
 import { useDoctorSpecializationOptions } from "@/entities/specialization";
 
 import type { ClinicDocument } from "@/shared/api";
-import { UserCircleIcon } from "@/shared/assets/icons";
+import { CloseIcon, UserCircleIcon } from "@/shared/assets/icons";
 import { MAX_DOCUMENT_MB, isFileSizeAllowed } from "@/shared/lib/files";
 import { getMediaFileName } from "@/shared/lib/media";
 import {
   Button,
   DateField,
   Dropdown,
+  IconBtn,
   ImageWithFallback,
   Input,
   PhoneInput,
@@ -26,18 +27,20 @@ export const GENDER_OPTIONS = [
   { label: "Женский", value: "female" },
 ];
 
+const OWN_FIELD_HINT = "Меняет сам врач в своём кабинете";
+
 const withSelectedSpecialization = (
   options: DropdownOption[],
-  selected: string,
+  selected: string[],
 ): DropdownOption[] => {
-  if (!selected || options.some((option) => option.value === selected)) {
-    return options;
-  }
+  const missing = selected.filter(
+    (value) => value && !options.some((option) => option.value === value),
+  );
 
-  // Не прячем уже сохранённое значение, если оно больше не входит в scope
-  // опубликованных врачей. Иначе открытие и сохранение карточки могло бы его
+  // Не прячем уже сохранённые значения, если они больше не входят в scope
+  // опубликованных врачей. Иначе открытие и сохранение карточки могло бы их
   // молча удалить.
-  return [...options, { label: selected, value: selected }];
+  return [...options, ...missing.map((value) => ({ label: value, value }))];
 };
 
 // Строка «label / значение» с разделителем — тот же паттерн, что в остальных
@@ -148,8 +151,12 @@ export const BasicInfoSection: FC<SectionProps> = ({
         hint={
           isNew
             ? "Фамилия Имя Отчество — отчество не сохранится, при создании врача бэк его не принимает"
-            : undefined
+            : OWN_FIELD_HINT
         }
+        // ФИО, как почту и телефон, у существующего врача меняет только он
+        // сам: клинике бэк эти поля на запись не принимает, и правка молча
+        // терялась после «Сохранить».
+        disabled={!isNew}
       />
 
       <Dropdown
@@ -186,11 +193,16 @@ export const BasicInfoSection: FC<SectionProps> = ({
         hint="Через запятую"
       />
 
-      <PhoneInput
-        label="Телефон"
-        value={d.phone}
-        onChange={(v) => set("phone", v)}
-      />
+      {isNew ? (
+        <PhoneInput
+          label="Телефон"
+          value={d.phone}
+          onChange={(v) => set("phone", v)}
+        />
+      ) : (
+        // У PhoneInput нет режима «только чтение» — показываем номер целиком.
+        <Input label="Телефон" value={d.phone} disabled hint={OWN_FIELD_HINT} />
+      )}
 
       <Input
         label="Почта"
@@ -202,6 +214,7 @@ export const BasicInfoSection: FC<SectionProps> = ({
         // Почту меняет только сам врач через /api/doctor/profile/ — у клиники
         // это поле только на чтение (кроме момента создания аккаунта).
         disabled={!isNew}
+        hint={isNew ? undefined : OWN_FIELD_HINT}
       />
 
       {isNew && (
@@ -256,9 +269,9 @@ export const ProfessionalSection: FC<SectionProps> = ({
   if (!isEditing) {
     return (
       <div>
-        <FieldRow label="Специализация">{d.specialization}</FieldRow>
+        <FieldRow label="Специализация">{d.specialization.join(", ")}</FieldRow>
         <FieldRow label="Дополнительная специализация">
-          {d.additionalSpecialization}
+          {d.additionalSpecialization.join(", ")}
         </FieldRow>
         <FieldRow label="Стаж работы (лет)">{d.experienceYears}</FieldRow>
         <FieldRow label="Текущая должность">{d.position}</FieldRow>
@@ -284,6 +297,7 @@ export const ProfessionalSection: FC<SectionProps> = ({
           specializationOptions,
           d.specialization,
         )}
+        isMulti
         searchable
         value={d.specialization}
         onChange={(v) => set("specialization", v)}
@@ -295,6 +309,7 @@ export const ProfessionalSection: FC<SectionProps> = ({
           specializationOptions,
           d.additionalSpecialization,
         )}
+        isMulti
         searchable
         value={d.additionalSpecialization}
         onChange={(v) => set("additionalSpecialization", v)}
@@ -348,11 +363,26 @@ export const EducationSection: FC<SectionProps> = ({ d, set, isEditing }) => {
           {d.diplomaSpecialty}
         </FieldRow>
         <FieldRow label="Дополнительное образование">
-          {d.additionalEducation}
+          {d.additionalEducation.length > 0 && (
+            <span className="whitespace-pre-line">
+              {d.additionalEducation
+                .map(({ name, year }) => (year ? `${name} (${year})` : name))
+                .join("\n")}
+            </span>
+          )}
         </FieldRow>
       </div>
     );
   }
+
+  const courses = d.additionalEducation;
+  const setCourse = (index: number, patch: { name?: string; year?: string }) =>
+    set(
+      "additionalEducation",
+      courses.map((course, i) =>
+        i === index ? { ...course, ...patch } : course,
+      ),
+    );
 
   return (
     <div className="flex flex-col gap-4">
@@ -386,14 +416,62 @@ export const EducationSection: FC<SectionProps> = ({ d, set, isEditing }) => {
         onChange={(e) => set("diplomaSpecialty", e.target.value)}
         placeholder="Введите специализацию по диплому"
       />
-      <Textarea
-        label="Дополнительное образование"
-        value={d.additionalEducation}
-        onChange={(e) => set("additionalEducation", e.target.value)}
-        placeholder="Курсы повышения квалификации, сертификаты..."
-        rows={3}
-        hint="По одному курсу в строке"
-      />
+      {/* Курсы — с годом, как в кабинете врача: раньше форма клиники
+          хранила только названия и при сохранении стирала годы. */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-foreground text-sm font-medium">
+            Дополнительное образование
+          </span>
+          <Button
+            variant="text"
+            size="xs"
+            className="text-primary"
+            onClick={() =>
+              set("additionalEducation", [...courses, { name: "", year: "" }])
+            }
+          >
+            + Добавить курс
+          </Button>
+        </div>
+        <div className="flex flex-col gap-2">
+          {courses.length === 0 && (
+            <p className="text-dim text-sm">
+              Курсы повышения квалификации, сертификаты...
+            </p>
+          )}
+          {courses.map((course, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Input
+                value={course.name}
+                onChange={(e) => setCourse(i, { name: e.target.value })}
+                placeholder="Курс"
+                className="flex-1"
+              />
+              <Input
+                value={course.year}
+                onChange={(e) => setCourse(i, { year: e.target.value })}
+                placeholder="Год"
+                className="w-24"
+              />
+              <IconBtn
+                onClick={() =>
+                  set(
+                    "additionalEducation",
+                    courses.filter((_, j) => j !== i),
+                  )
+                }
+                variant="text"
+                size="xs"
+                className="text-dim hover:text-primary"
+                aria-label="Удалить курс"
+              >
+                <CloseIcon />
+              </IconBtn>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

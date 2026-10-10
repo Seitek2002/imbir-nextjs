@@ -50,7 +50,14 @@ export const ClinicSpecialistDetailPage: FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { d, set } = useSpecialistForm(initialForm);
+  const { d, set, reset } = useSpecialistForm(initialForm);
+
+  // «Отмена» возвращает форму к данным с сервера: иначе режим просмотра
+  // показывал несохранённые правки, а следующее «Сохранить» их отправляло.
+  const handleCancel = () => {
+    reset();
+    setIsEditing(false);
+  };
 
   const handleSave = async () => {
     try {
@@ -119,7 +126,7 @@ export const ClinicSpecialistDetailPage: FC = () => {
                 <>
                   <Button
                     variant="outline"
-                    onClick={() => setIsEditing(false)}
+                    onClick={handleCancel}
                     disabled={saveMutation.isPending}
                   >
                     Отмена

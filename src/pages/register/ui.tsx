@@ -601,7 +601,12 @@ export const RegisterPage = () => {
     // в отдельном поле анкеты (см. DoctorFormData.phoneDialCode).
     const doctorPhone = data.phone ? `${data.phoneDialCode}${data.phone}` : "";
     try {
-      const emptyDay = { from: null, to: null, enabled: false };
+      // Врач после регистрации сразу опубликован. С графиком «все дни
+      // выключены» у него не было ни одного слота — записаться к нему было
+      // нельзя, пока он сам не найдёт раздел «Расписание». Стартуем с
+      // пн–пт 09:00–18:00, поменять можно в кабинете.
+      const workDay = { from: "09:00", to: "18:00", enabled: true };
+      const dayOff = { from: null, to: null, enabled: false };
       const primarySpecializations = resolveSpecializationIds(
         data.specialization,
         specializationList,
@@ -644,13 +649,13 @@ export const RegisterPage = () => {
         },
         step3: {
           schedule: {
-            monday: emptyDay,
-            tuesday: emptyDay,
-            wednesday: emptyDay,
-            thursday: emptyDay,
-            friday: emptyDay,
-            saturday: emptyDay,
-            sunday: emptyDay,
+            monday: workDay,
+            tuesday: workDay,
+            wednesday: workDay,
+            thursday: workDay,
+            friday: workDay,
+            saturday: dayOff,
+            sunday: dayOff,
           },
           lunch_break: { from: "", to: "" },
           emergency_24_7: false,
