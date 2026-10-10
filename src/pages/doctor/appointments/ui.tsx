@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -37,6 +37,78 @@ const TD = "px-6 py-4 whitespace-nowrap";
 // Тень рисуется внутри ячейки и не занимает места, так что колонки не съезжают.
 const TD_NEW = "shadow-[inset_4px_0_0_0_var(--color-info)]";
 
+// Завершить можно только начавшийся приём: бэк завершение будущей записи
+// отклоняет, а пациенту иначе уходило «Приём завершён, оставьте отзыв» до визита.
+// Не разобрали дату — кнопку не прячем, решит бэк.
+const hasStarted = (a: DoctorAppointment, now: number) => {
+  const start = new Date(`${a.date}T${a.time.slice(0, 5)}:00`).getTime();
+  return Number.isNaN(start) || start <= now;
+};
+
+// Текущее время, раз в минуту обновляемое: страница записей висит открытой
+// весь рабочий день, и «Завершить» должно появиться, когда приём начался.
+const useNow = (intervalMs = 60_000) => {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+  return now;
+};
+
+// Формат и место приёма. Старый бэк is_online/clinic может не отдавать —
+// тогда строку не рисуем, а не пишем «В клинике» наугад.
+const formatLabel = (a: DoctorAppointment): null | string => {
+  const parts: string[] = [];
+  if (a.is_online !== undefined) parts.push(a.is_online ? "Онлайн" : "Очно");
+  if (a.clinic?.name) parts.push(a.clinic.name);
+  return parts.length > 0 ? parts.join(" • ") : null;
+};
+
+// Телефон и почта пациента (у гостя — те, что он оставил при записи): врачу
+// иначе не с кем связаться, если пациент не пришёл или надо перенести приём.
+// Клик по ссылке не должен открывать итоги приёма, как клик по строке.
+const PatientContacts: FC<{ patient: DoctorAppointment["patient"] }> = ({
+  patient,
+}) => {
+  if (!patient.phone && !patient.email) return null;
+  return (
+    <p className="text-xs text-muted mt-0.5 font-normal flex flex-wrap gap-x-2">
+      {patient.phone && (
+        <a
+          href={`tel:${patient.phone.replace(/[^\d+]/g, "")}`}
+          onClick={(e) => e.stopPropagation()}
+          className="hover:text-primary"
+        >
+          {patient.phone}
+        </a>
+      )}
+      {patient.email && (
+        <a
+          href={`mailto:${patient.email}`}
+          onClick={(e) => e.stopPropagation()}
+          className="hover:text-primary"
+        >
+          {patient.email}
+        </a>
+      )}
+    </p>
+  );
+};
+
+// Комментарий, который пациент оставил при записи.
+const PatientNotes: FC<{ className?: string; notes?: string }> = ({
+  className,
+  notes,
+}) => {
+  if (!notes?.trim()) return null;
+  return (
+    <p className={cn("text-xs text-muted mt-1", className)} title={notes}>
+      <span className="text-foreground">Комментарий пациента:</span> {notes}
+    </p>
+  );
+};
+
 // Заглушка повторяет саму таблицу записей — та же шапка и колонки, чтобы при
 // появлении данных ничего не прыгало.
 // Мобильная карточка записи. Таблица на 390px показывала только имя
@@ -50,13 +122,15 @@ const AppointmentCard: FC<{
     status: "cancelled" | "completed" | "confirmed",
   ) => void;
   onOpenSummary: (id: number) => void;
-}> = ({ appointment: a, onChangeStatus, onOpenSummary }) => {
+  started: boolean;
+}> = ({ appointment: a, onChangeStatus, onOpenSummary, started }) => {
   const isNew = a.status === "pending";
   const isOpen =
     a.status === "pending" ||
     a.status === "confirmed" ||
     a.status === "scheduled" ||
     a.status === "upcoming";
+  const format = formatLabel(a);
 
   return (
     <div
@@ -79,7 +153,12 @@ const AppointmentCard: FC<{
           {fmtDate(a.date)} • {fmtTime(a.time)}
         </p>
         <p className="text-xs text-muted mt-0.5">{a.service?.name ?? "—"}</p>
+        {format && <p className="text-xs text-muted mt-0.5">{format}</p>}
       </button>
+
+      {/* Ссылки — вне кнопки карточки: <a> внутри <button> недопустим. */}
+      <PatientContacts patient={a.patient} />
+      <PatientNotes notes={a.notes} className="whitespace-pre-line" />
 
       {isOpen && (
         <div className="flex flex-wrap items-center gap-1.5 mt-3">
@@ -93,13 +172,15 @@ const AppointmentCard: FC<{
               Подтвердить
             </Button>
           )}
-          <Button
-            size="sm"
-            className="text-xs px-2.5 h-8 bg-[#2FA968] hover:bg-[#258753]"
-            onClick={() => onChangeStatus(a.id, "completed")}
-          >
-            Завершить
-          </Button>
+          {started && (
+            <Button
+              size="sm"
+              className="text-xs px-2.5 h-8 bg-[#2FA968] hover:bg-[#258753]"
+              onClick={() => onChangeStatus(a.id, "completed")}
+            >
+              Завершить
+            </Button>
+          )}
           <Button
             size="sm"
             variant="outline"
@@ -328,6 +409,7 @@ export const DoctorAppointmentsPage: FC = () => {
   const [tab, setTab] = useState<Tab>("all");
   const [summaryId, setSummaryId] = useState<null | number>(null);
   const queryClient = useQueryClient();
+  const now = useNow();
 
   const { data, isLoading } = useQuery({
     queryKey: doctorCabinetKeys.appointments({ status: tab }),
@@ -411,6 +493,7 @@ export const DoctorAppointmentsPage: FC = () => {
                 appointment={a}
                 onChangeStatus={(id, status) => changeStatus({ id, status })}
                 onOpenSummary={setSummaryId}
+                started={hasStarted(a, now)}
               />
             ))}
           </div>
@@ -437,10 +520,12 @@ export const DoctorAppointmentsPage: FC = () => {
                   {appointments.map((a) => {
                     const canConfirm = a.status === "pending";
                     const canComplete =
-                      a.status === "pending" ||
-                      a.status === "confirmed" ||
-                      a.status === "scheduled" ||
-                      a.status === "upcoming";
+                      (a.status === "pending" ||
+                        a.status === "confirmed" ||
+                        a.status === "scheduled" ||
+                        a.status === "upcoming") &&
+                      hasStarted(a, now);
+                    const format = formatLabel(a);
                     const canCancel =
                       a.status === "pending" ||
                       a.status === "confirmed" ||
@@ -467,6 +552,11 @@ export const DoctorAppointmentsPage: FC = () => {
                           }`}
                         >
                           {a.patient.full_name}
+                          <PatientContacts patient={a.patient} />
+                          <PatientNotes
+                            notes={a.notes}
+                            className="font-normal max-w-64 truncate"
+                          />
                         </td>
                         <td
                           onClick={() => setSummaryId(a.id)}
@@ -485,6 +575,11 @@ export const DoctorAppointmentsPage: FC = () => {
                           className={`${TD} text-foreground cursor-pointer`}
                         >
                           {a.service?.name ?? "—"}
+                          {format && (
+                            <p className="text-xs text-muted mt-0.5">
+                              {format}
+                            </p>
+                          )}
                         </td>
                         <td className={TD}>
                           <StatusPill status={a.status} />

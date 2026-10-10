@@ -35,17 +35,22 @@ export type DoctorSchedule = {
   schedule: WeekSchedule;
 };
 
+// У гостевой записи (без аккаунта) id нет — бэк отдаёт имя и контакты гостя.
 export type DoctorAppointmentPatient = {
+  email?: null | string;
   full_name: string;
-  id: number;
-  phone: string;
+  id?: number;
+  phone: null | string;
 };
 
 export type DoctorAppointment = {
+  // Место приёма. Старый бэк поле не отдаёт — тогда его просто не показываем.
+  clinic?: { id: number; name: string } | null;
   // Когда запись создана (ISO). По нему новые записи идут первыми.
   created_at?: string;
   date: string;
   id: number;
+  is_online?: boolean;
   notes?: string;
   patient: DoctorAppointmentPatient;
   service: { id: number; name: string; price: number } | null;
