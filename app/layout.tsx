@@ -39,7 +39,7 @@ export default async function RootLayout({
 
   return (
     <html
-      lang="en"
+      lang="ru"
       suppressHydrationWarning
       className={`${onest.className} h-full antialiased`}
     >
