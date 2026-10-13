@@ -12,8 +12,8 @@ import {
 } from "./model";
 
 const CHANNEL_OPTIONS: { label: string; value: VerifyChannel }[] = [
-  { value: "email", label: "Почта" },
   { value: "phone", label: "Телефон" },
+  { value: "email", label: "Почта" },
 ];
 
 const CheckIcon = () => (

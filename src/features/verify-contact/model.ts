@@ -28,7 +28,8 @@ type Params = {
 // Подтверждение НЕ создаёт аккаунт и живёт 24 часа, поэтому упавшую по другой
 // причине регистрацию можно повторить, не запрашивая код заново.
 export const useVerifyContact = ({ email, phone }: Params) => {
-  const [channel, setChannel] = useState<VerifyChannel>("email");
+  // Код по SMS — основной канал, как и вход по номеру.
+  const [channel, setChannel] = useState<VerifyChannel>("phone");
   const [code, setCode] = useState("");
   const [isSent, setIsSent] = useState(false);
   const [isVerified, setIsVerified] = useState(false);

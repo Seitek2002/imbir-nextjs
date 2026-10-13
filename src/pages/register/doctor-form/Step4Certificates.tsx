@@ -5,7 +5,7 @@ import { type ReactNode, useRef, useState } from "react";
 import { EyeIcon, EyeOffIcon, UploadCloudIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
 import { MAX_DOCUMENT_MB, filterAllowedFiles } from "@/shared/lib/files";
-import { Input } from "@/shared/ui";
+import { ConsentNotice, Input } from "@/shared/ui";
 
 import type { DoctorFormData } from "../model/types";
 import { FileThumb } from "./FileThumb";
@@ -140,6 +140,8 @@ export const Step4Certificates = ({
       />
 
       {verifySlot}
+
+      <ConsentNotice />
 
       <div className="flex gap-3 p-4 rounded-xl bg-background mt-2">
         <InfoIcon />

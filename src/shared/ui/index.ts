@@ -38,3 +38,4 @@ export { AnimatedNumber } from "./animated-number";
 export { ReviewForm } from "./review-form";
 export { Spinner } from "./spinner";
 export { EmptyState } from "./empty-state";
+export { ConsentNotice } from "./consent-notice";

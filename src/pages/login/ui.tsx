@@ -62,7 +62,9 @@ export const LoginPage = () => {
   // Перехватчик 401 уводит сюда с ?expired=1, когда сессию продлить не вышло.
   const isExpired = useSessionExpiredFlag();
 
-  const [loginBy, setLoginBy] = useState<LoginBy>("email");
+  // Телефон — основной способ входа: большинство пациентов регистрируются по
+  // номеру, почта остаётся второй вкладкой.
+  const [loginBy, setLoginBy] = useState<LoginBy>("phone");
   const [email, setEmail] = useState("");
   // Телефон храним раздельно: национальную часть (phoneLocal) и код страны из
   // PhoneInput — полный E.164-номер собираем только при отправке.
@@ -153,8 +155,8 @@ export const LoginPage = () => {
         <div className="flex flex-col gap-4">
           <SegmentedControl
             options={[
-              { label: "Эл. почта", value: "email" },
               { label: "Телефон", value: "phone" },
+              { label: "Эл. почта", value: "email" },
             ]}
             value={loginBy}
             onChange={(val) => {

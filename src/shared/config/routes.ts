@@ -20,6 +20,8 @@ export const ROUTES = {
   CONTACTS: "/contacts",
   TERMS: "/terms",
   PRIVACY: "/privacy",
+  // Образец согласия на обработку персональных данных (ссылка из регистрации)
+  PERSONAL_DATA_CONSENT: "/documents/personal-data-consent",
 
   // Динамические страницы (передаем ID)
   CLINIC_DETAILS: (id: number | string) => `/clinics/${id}`,

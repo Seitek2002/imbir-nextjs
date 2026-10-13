@@ -52,6 +52,7 @@ import { cn } from "@/shared/lib/utils";
 import { useAuthStore } from "@/shared/store";
 import {
   Button,
+  ConsentNotice,
   ImageWithFallback,
   Input,
   PhoneInput,
@@ -376,8 +377,9 @@ export const RegisterPage = () => {
   const [passwordError, setPasswordError] = useState("");
   const [isLoadingClient, setIsLoadingClient] = useState(false);
 
+  // Регистрация по номеру — основной вариант, как и на входе.
   const [clientAuthMethod, setClientAuthMethod] = useState<"email" | "phone">(
-    "email",
+    "phone",
   );
   const [phone, setPhone] = useState("");
   const [dialCode, setDialCode] = useState("+996");
@@ -1347,8 +1349,8 @@ export const RegisterPage = () => {
               <div className="mt-1">
                 <SegmentedControl
                   options={[
-                    { label: "Эл. почта", value: "email" },
                     { label: "Телефон", value: "phone" },
+                    { label: "Эл. почта", value: "email" },
                   ]}
                   value={clientAuthMethod}
                   onChange={(val) =>
@@ -1380,6 +1382,7 @@ export const RegisterPage = () => {
                   defaultCountryCode="KG"
                 />
               )}
+              <ConsentNotice />
             </div>
           )}
 

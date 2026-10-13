@@ -4,7 +4,7 @@ import { type ReactNode, useState } from "react";
 
 import { EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 import { colors } from "@/shared/config";
-import { Checkbox, Input } from "@/shared/ui";
+import { Checkbox, ConsentNotice, Input } from "@/shared/ui";
 
 import type { ClinicFormData } from "../model/types";
 
@@ -106,6 +106,7 @@ export const Step7Completion = ({
             />
           ))}
         </div>
+        <ConsentNotice className="mt-3" />
       </div>
 
       {verifySlot}
