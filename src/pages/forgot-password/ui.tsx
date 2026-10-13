@@ -25,6 +25,7 @@ import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { cn } from "@/shared/lib/utils";
 import {
+  AuthImagePanel,
   Button,
   type Country,
   IconBtn,
@@ -129,18 +130,62 @@ export const ForgotPasswordPage = () => {
     password === confirmPassword &&
     password !== "";
 
+  const focusCell = (index: number) =>
+    document.getElementById(`code-input-${index}`)?.focus();
+
+  // Раскладывает цифры по ячейкам, начиная с index. Нужна и для вставки из
+  // буфера, и для автоподстановки кода на телефоне: раньше у ячеек стоял
+  // maxLength=1, браузер обрезал вставку до одной цифры, и заполнялась только
+  // первая ячейка.
+  const fillCode = (index: number, digits: string) => {
+    const chars = digits.slice(0, CODE_LENGTH - index).split("");
+    if (chars.length === 0) return;
+    const newCode = [...code];
+    chars.forEach((digit, i) => {
+      newCode[index + i] = digit;
+    });
+    setCode(newCode);
+    focusCell(Math.min(index + chars.length, CODE_LENGTH - 1));
+  };
+
   // Хендлер для посимвольного ввода кода
   const handleCodeChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return; // Только цифры
+    const digits = value.replace(/\D/g, "");
+    if (value && !digits) return; // Только цифры
+    // Больше двух цифр разом — это подстановка всего кода (автозаполнение
+    // из SMS/письма кладёт его в одну ячейку). Две — цифру допечатали в уже
+    // заполненную ячейку: берём новую.
+    if (digits.length > 2) {
+      fillCode(index, digits);
+      return;
+    }
     const newCode = [...code];
-    newCode[index] = value.slice(-1); // Берем только последний символ
+    newCode[index] = digits.slice(-1);
     setCode(newCode);
 
     // Автофокус на следующий инпут
-    if (value && index < CODE_LENGTH - 1) {
-      const nextInput = document.getElementById(`code-input-${index + 1}`);
-      nextInput?.focus();
-    }
+    if (digits && index < CODE_LENGTH - 1) focusCell(index + 1);
+  };
+
+  const handleCodePaste = (
+    index: number,
+    e: React.ClipboardEvent<HTMLInputElement>,
+  ) => {
+    e.preventDefault();
+    fillCode(index, e.clipboardData.getData("text").replace(/\D/g, ""));
+  };
+
+  // Backspace в пустой ячейке стирает предыдущую и переводит фокус на неё.
+  const handleCodeKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key !== "Backspace" || code[index] || index === 0) return;
+    e.preventDefault();
+    const newCode = [...code];
+    newCode[index - 1] = "";
+    setCode(newCode);
+    focusCell(index - 1);
   };
 
   const handleBack = () => {
@@ -155,12 +200,8 @@ export const ForgotPasswordPage = () => {
       <Header backTo={step === "success" ? undefined : ROUTES.LOGIN} />
 
       <div className="flex-1 w-full max-w-360 md:max-w-340 mx-auto px-4 md:px-10 flex flex-col md:flex-row md:gap-10 pt-4 md:pt-16 pb-10">
-        {/* --- ЛЕВАЯ КАРТОЧКА --- */}
-        <div className="hidden md:flex md:w-1/2 rounded-2xl p-6 bg-white shrink-0 items-center justify-center">
-          <div className="relative w-full aspect-square rounded-xl bg-[#ADD8E6] flex items-center justify-center border-2 border-dashed border-muted/50 text-muted">
-            <span className="text-xl font-medium">Место для картинки</span>
-          </div>
-        </div>
+        {/* --- ЛЕВАЯ КАРТОЧКА: та же картинка, что на входе и регистрации --- */}
+        <AuthImagePanel />
 
         {/* --- ПРАВАЯ КАРТОЧКА --- */}
         <div className="flex-1 md:bg-white md:rounded-2xl md:p-10 md:pb-16 flex flex-col max-w-120 md:max-w-none mx-auto w-full relative">
@@ -284,9 +325,16 @@ export const ForgotPasswordPage = () => {
                       id={`code-input-${idx}`}
                       type="text"
                       inputMode="numeric"
-                      maxLength={1}
+                      // Подсказка ОС подставить код из SMS/письма — только в
+                      // первую ячейку, дальше его раскладывает handleCodeChange.
+                      autoComplete={idx === 0 ? "one-time-code" : "off"}
+                      aria-label={`Цифра ${idx + 1} из ${CODE_LENGTH}`}
                       value={digit}
                       onChange={(e) => handleCodeChange(idx, e.target.value)}
+                      onPaste={(e) => handleCodePaste(idx, e)}
+                      // Выделяем цифру: новая заменит её, а не встанет рядом.
+                      onFocus={(e) => e.target.select()}
+                      onKeyDown={(e) => handleCodeKeyDown(idx, e)}
                       className="size-11 md:size-14 text-center text-2xl font-medium border border-border-soft rounded-xl focus:border-primary focus:outline-none focus:shadow-[0_0_0_2px_rgba(245,101,62,0.2)] transition-all"
                     />
                   ))}

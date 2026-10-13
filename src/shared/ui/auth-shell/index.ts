@@ -1,1 +1,1 @@
-export { AuthShell } from "./ui";
+export { AuthImagePanel, AuthShell } from "./ui";
