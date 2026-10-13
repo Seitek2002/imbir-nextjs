@@ -4,8 +4,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { clearAiChat, getAiChatHistory, sendAiMessage } from "@/shared/api";
 import type { AiChatMessage } from "@/shared/api";
+import { extractErrorMessage } from "@/shared/lib/errors";
 
 import type { ChatThreadMessage } from "./types";
+
+// Бэк ограничивает ИИ-чат: не больше N сообщений в минуту от человека (429)
+// и N одновременных вопросов на весь сайт или модель не ответила (503 с
+// понятным detail). Остальное — общая заглушка.
+const getAiSendError = (err: unknown): string => {
+  const response = (err as { response?: { data?: unknown; status?: number } })
+    ?.response;
+  if (response?.status === 429)
+    return "Слишком много сообщений подряд. Подождите минуту и спросите снова.";
+  if (response?.status === 503)
+    return extractErrorMessage(
+      response.data,
+      "ИИ-помощник сейчас перегружен. Попробуйте через минуту.",
+    );
+  return "ИИ-помощник недоступен. Попробуйте позже.";
+};
 
 const toThreadMessage = (message: AiChatMessage): ChatThreadMessage => ({
   id: message.id,
@@ -82,8 +99,8 @@ export const useAiChat = (
         ...prev,
         { ...toThreadMessage(reply), isFresh: true },
       ]);
-    } catch {
-      setError("ИИ-помощник недоступен. Попробуйте позже.");
+    } catch (err) {
+      setError(getAiSendError(err));
     } finally {
       setIsSending(false);
     }
