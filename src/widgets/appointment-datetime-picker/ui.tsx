@@ -35,6 +35,31 @@ const SlotsMessage: FC<{ isLoading?: boolean; text: string }> = ({
   </p>
 );
 
+// Единые состояния ячеек календаря и слотов — одни и те же в записи и в
+// переносе (пикер у них общий): свободное зелёное, выбранное — фирменное
+// оранжевое, недоступное — серое. Раньше свободное было белым и сливалось с
+// недоступным, а при переносе не было видно, куда вообще можно перейти.
+const CELL_FREE =
+  "border-[#BFE5C6] bg-[#EFF9F1] text-[#1F7A35] hover:border-[#4CAF50]";
+const CELL_SELECTED = "border-primary text-primary bg-[#FFF3EE]";
+const CELL_DISABLED =
+  "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed";
+
+const Legend: FC = () => (
+  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
+    {[
+      { label: "Свободно", className: "border-[#BFE5C6] bg-[#EFF9F1]" },
+      { label: "Выбрано", className: "border-primary bg-[#FFF3EE]" },
+      { label: "Недоступно", className: "border-[#ECEDEE] bg-background" },
+    ].map(({ label, className }) => (
+      <span key={label} className="flex items-center gap-1.5">
+        <span className={cn("size-3 rounded border", className)} />
+        {label}
+      </span>
+    ))}
+  </div>
+);
+
 const WEEK_DAYS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
 
 const MONTHS = [
@@ -250,17 +275,18 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                     disabled={item.disabled || !isDoctorSelected}
                     className={cn(
                       "flex flex-col items-center justify-center gap-1 w-12 h-14 rounded-xl border text-sm transition-all shrink-0",
-                      isSelected
-                        ? "border-primary text-primary bg-[#FFF3EE]"
-                        : "border-border-soft text-foreground bg-white",
-                      (item.disabled || !isDoctorSelected) &&
-                        "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                      isSelected ? CELL_SELECTED : CELL_FREE,
+                      (item.disabled || !isDoctorSelected) && CELL_DISABLED,
                     )}
                   >
                     <span
                       className={cn(
                         "text-[10px]",
-                        isSelected ? "text-primary" : "text-muted",
+                        isSelected
+                          ? "text-primary"
+                          : item.disabled || !isDoctorSelected
+                            ? "text-muted"
+                            : "text-[#1F7A35]/80",
                       )}
                     >
                       {dayLabel}
@@ -294,11 +320,8 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                       disabled={slot.disabled}
                       className={cn(
                         "min-w-14 px-2 h-9 rounded-lg border text-sm transition-colors",
-                        isSelected
-                          ? "border-primary text-primary bg-[#FFF3EE]"
-                          : "border-border-soft text-foreground",
-                        slot.disabled &&
-                          "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                        isSelected ? CELL_SELECTED : CELL_FREE,
+                        slot.disabled && CELL_DISABLED,
                       )}
                     >
                       {slot.value}
@@ -342,11 +365,8 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                     disabled={cell.disabled || !isDoctorSelected}
                     className={cn(
                       "h-9 rounded-lg border text-sm transition-all",
-                      isSelected
-                        ? "border-primary text-primary bg-[#FFF3EE]"
-                        : "border-border-soft text-foreground hover:border-primary/40",
-                      (cell.disabled || !isDoctorSelected) &&
-                        "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                      isSelected ? CELL_SELECTED : CELL_FREE,
+                      (cell.disabled || !isDoctorSelected) && CELL_DISABLED,
                     )}
                   >
                     {pad(date.getDate())}
@@ -375,11 +395,8 @@ export const AppointmentDateTimePicker: FC<Props> = ({
                       disabled={slot.disabled}
                       className={cn(
                         "min-w-14 px-2 h-9 rounded-lg border text-sm transition-colors",
-                        isSelected
-                          ? "border-primary text-primary bg-[#FFF3EE]"
-                          : "border-border-soft text-foreground hover:border-primary/40",
-                        slot.disabled &&
-                          "bg-background text-[#A9AFB2] border-[#ECEDEE] cursor-not-allowed",
+                        isSelected ? CELL_SELECTED : CELL_FREE,
+                        slot.disabled && CELL_DISABLED,
                       )}
                     >
                       {slot.value}
@@ -391,6 +408,8 @@ export const AppointmentDateTimePicker: FC<Props> = ({
           ))}
         </div>
       </div>
+
+      {isDoctorSelected && <Legend />}
     </div>
   );
 };

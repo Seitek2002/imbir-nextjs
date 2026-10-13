@@ -2,6 +2,8 @@
 
 import { FC, forwardRef, useEffect, useRef, useState } from "react";
 
+import Link from "next/link";
+
 import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
 
 import { MobilePageHeader } from "@/widgets/profile/mobile-header";
@@ -13,7 +15,13 @@ import {
   profileKeys,
 } from "@/shared/api";
 import type { ProfileAppointment } from "@/shared/api";
-import { FilterSample, RemoveIcon, SearchIcon } from "@/shared/assets/icons";
+import {
+  CalendarIcon,
+  FilterSample,
+  RemoveIcon,
+  SearchIcon,
+} from "@/shared/assets/icons";
+import { ROUTES } from "@/shared/config";
 import { toMediaUrl } from "@/shared/lib/media";
 import { parsePrice } from "@/shared/lib/price";
 import { Button, FilterPanel, IconBtn } from "@/shared/ui";
@@ -332,8 +340,24 @@ export const ProfileHistoryPage: FC = () => {
                 onClick={() => setFilterOpen((v) => !v)}
               />
             )}
+            {/* Новая запись прямо из кабинета, без возврата на главную. */}
+            <Link
+              href={ROUTES.RECORD}
+              className="font-medium flex items-center justify-center gap-2 transition-all rounded-full outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.45)] bg-primary text-white active:bg-primary-dark hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)] h-12 px-6 text-sm"
+            >
+              <CalendarIcon className="size-5" />
+              Записаться
+            </Link>
           </div>
         </div>
+        {/* На телефоне в шапке рядом с поиском места нет — кнопка над списком. */}
+        <Link
+          href={ROUTES.RECORD}
+          className="md:hidden font-medium flex items-center justify-center gap-2 transition-all rounded-full outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.45)] bg-primary text-white active:bg-primary-dark hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)] h-12 px-6 text-base w-full mb-4"
+        >
+          <CalendarIcon className="size-5" />
+          Записаться на приём
+        </Link>
         <div className="hidden md:block w-75 mb-6">
           <SegmentedControl
             options={TABS}

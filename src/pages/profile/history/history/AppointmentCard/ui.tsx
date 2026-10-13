@@ -49,6 +49,18 @@ const CalendarEditIcon: FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+// «Записаться снова» — к тому же врачу, в ту же клинику и на ту же услугу:
+// форма записи подставит их из адреса и сразу откроется на выборе времени.
+const rebookHref = (appointment: Appointment) => {
+  const params = new URLSearchParams();
+  if (appointment.doctorId) params.set("doctor", appointment.doctorId);
+  if (appointment.clinicId) params.set("clinic", appointment.clinicId);
+  if (appointment.serviceId)
+    params.set("service", String(appointment.serviceId));
+  const query = params.toString();
+  return query ? `/record?${query}` : "/record";
+};
+
 const ClockIcon: FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 20 20" fill="none">
     <circle cx="10" cy="10" r="7.25" stroke="currentColor" strokeWidth="1.5" />
@@ -120,6 +132,13 @@ export const AppointmentCard: FC<Props> = ({
   // страницы врача) кнопка пропадает у всех его приёмов.
   const showReview = isCompleted && appointment.canReview && !!onReview;
   const showReschedule = isActive && !!onReschedule && !!appointment.doctorId;
+  // У прошедших и отменённых — записаться к тому же врачу ещё раз, не уходя
+  // из кабинета на главную. isPast — и для записей, время которых прошло, а
+  // статус так и остался «ожидает» (врач не подтвердил): без этого у них во
+  // вкладке «Прошедшие» не было ни одного действия.
+  const showRebook =
+    (isCompleted || isCancelled || appointment.isPast === true) &&
+    (!!appointment.doctorId || !!appointment.clinicId);
   // У завершённой видео-консультации «Подключиться» не показываем: бэк всё
   // равно не пустит в комнату («Консультация уже завершена»).
   const showConsultation =
@@ -284,6 +303,18 @@ export const AppointmentCard: FC<Props> = ({
                 Оставить отзыв
               </Button>
             )}
+            {showRebook && (
+              // Ссылка, а не Button: её можно открыть в новой вкладке, и
+              // Next заранее подгружает страницу записи. Вид — как у
+              // соседних кнопок (Button size="sm" variant="text").
+              <Link
+                href={rebookHref(appointment)}
+                className="font-medium flex items-center justify-center gap-2 transition-all rounded-full outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.45)] shrink-0 h-10 text-sm px-5 bg-[#FFF0EE] text-primary hover:bg-[#FFE4DE] active:bg-[#FFE4DE]"
+              >
+                <CalendarIcon className="size-5" />
+                Записаться снова
+              </Link>
+            )}
           </div>
 
           <div className="text-right">
@@ -384,6 +415,15 @@ export const AppointmentCard: FC<Props> = ({
             >
               <ReviewsIcon className="w-5 h-5 [&_path]:stroke-primary" />
             </button>
+          )}
+          {showRebook && (
+            <Link
+              href={rebookHref(appointment)}
+              aria-label="Записаться снова"
+              className="w-11 h-11 rounded-full border border-border flex items-center justify-center shrink-0 text-primary hover:bg-primary-tint transition-colors"
+            >
+              <CalendarIcon className="w-4.5 h-4.5" />
+            </Link>
           )}
         </div>
       </div>

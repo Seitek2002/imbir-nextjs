@@ -3,6 +3,8 @@
 import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+import Link from "next/link";
+
 import {
   type InfiniteData,
   useMutation,
@@ -15,6 +17,7 @@ import { useInvalidateAfterReview } from "@/features/submit-review";
 import { cancelAppointment, createReview, profileKeys } from "@/shared/api";
 import type { PaginatedResponse, ProfileAppointment } from "@/shared/api";
 import { WarningIcon } from "@/shared/assets/icons";
+import { ROUTES } from "@/shared/config";
 import { extractErrorMessage } from "@/shared/lib/errors";
 import { ConfirmDialog } from "@/shared/ui/confirm-dialog";
 
@@ -210,6 +213,14 @@ export const ProfileHistory: FC<Props> = ({
               ? "У вас нет предстоящих записей"
               : "У вас нет прошедших записей"}
         </p>
+        {!query && activeTab === "upcoming" && (
+          <Link
+            href={ROUTES.RECORD}
+            className="font-medium flex items-center justify-center gap-2 transition-all rounded-full outline-none focus-visible:shadow-[0_0_1px_3px_rgba(245,101,62,0.45)] bg-primary text-white active:bg-primary-dark hover:shadow-[0_0_1px_3px_rgba(245,101,62,0.3)] h-12 px-8 text-base mt-6 mx-auto w-fit"
+          >
+            Записаться
+          </Link>
+        )}
       </div>
     );
   }
