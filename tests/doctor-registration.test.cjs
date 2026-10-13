@@ -110,6 +110,10 @@ function pageHandler(api = {}) {
   const context = {
     events,
     inviteClinic: undefined,
+    inviteId: undefined,
+    // Ошибка в данных шага 1 возвращает анкету на него (см. getErrorStep).
+    doctorStepRef: { current: 4 },
+    setDoctorStep: (step) => events.push(["step", step]),
     specializationList: [],
     registerDoctorWithRecovery,
     updateDoctorProfile: api.profile ?? (async () => {}),
@@ -126,6 +130,8 @@ function pageHandler(api = {}) {
     splitFullName: () => ({ firstName: "QA", lastName: "Doctor" }),
     toApiDate: () => "1990-01-01",
     toApiEducation: () => [],
+    // Чистая функция страницы — берём настоящую, а не заглушку.
+    getErrorStep: extractPageFunction("getErrorStep", {}),
     toast: {
       error: (message) => events.push(["error", message]),
       success: () => {},
@@ -137,6 +143,8 @@ function pageHandler(api = {}) {
     },
     router: { push: (url) => events.push(["redirect", url]) },
     getRoleRedirect: () => "/doctor-profile",
+    // Без ?next= в адресе страница ведёт в кабинет роли.
+    postAuthRedirect: () => "/doctor-profile",
     queryClient: { invalidateQueries: () => Promise.resolve() },
     doctorCabinetKeys: { profile: () => ["profile"] },
     ...load("src/shared/lib/errors.ts"),
@@ -214,6 +222,11 @@ const form = () => ({
   certificates: [],
   password: "Synthetic123!",
   experience: "2",
+  // Страница вызывает .trim() у этих полей — в анкете они всегда строки.
+  position: "",
+  category: "",
+  academicDegree: "",
+  workplace: "",
   about: "  Принимаю взрослых.\nВторой абзац.  ",
   photo: null,
 });
@@ -470,6 +483,11 @@ test("a genuine validation error keeps the server message after a single sign-in
   assert.equal(
     events.find(([n]) => n === "error")[1],
     "Номер уже зарегистрирован",
+  );
+  // Телефон — поле первого шага: анкета возвращается туда.
+  assert.deepEqual(
+    events.find(([n]) => n === "step"),
+    ["step", 1],
   );
 });
 
