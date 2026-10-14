@@ -23,6 +23,11 @@ export const SelectionListItem = ({
   const isDoctor = "specialty" in item;
   const isService = "category" in item;
   const itemTitle = isService ? item.title : item.name;
+  // У врача на первом месте специализация, ФИО — второй строкой: пациент ищет
+  // «кардиолога», а не фамилию. Без специализации заголовком остаётся ФИО.
+  const hasSpecialty = isDoctor && Boolean(item.specialty);
+  const headline = hasSpecialty ? item.specialty : itemTitle;
+  const clinicName = isDoctor ? clinicMap.get(item.clinicId)?.name : undefined;
 
   return (
     <button
@@ -60,7 +65,7 @@ export const SelectionListItem = ({
               compact ? "text-base" : "text-[26px]",
             )}
           >
-            {itemTitle}
+            {headline}
           </p>
           {isService && (
             <span
@@ -81,11 +86,13 @@ export const SelectionListItem = ({
               compact ? "text-xs" : "text-sm",
             )}
           >
-            {item.specialty}
-            <span className="text-primary">
-              {" "}
-              • {clinicMap.get(item.clinicId)?.name}
-            </span>
+            {hasSpecialty && item.name}
+            {clinicName && (
+              <span className="text-primary">
+                {hasSpecialty && " • "}
+                {clinicName}
+              </span>
+            )}
           </p>
         )}
 
@@ -119,7 +126,7 @@ export const SelectionListItem = ({
             <StarIcon className="size-4 text-primary" />
             <span className="font-medium text-primary">{item.rating}</span>
             <span>({item.reviews})</span>
-            {(isClinic || isDoctor) && item.experience > 0 && (
+            {isClinic && item.experience > 0 && (
               <span>
                 • {item.experience} {pluralYears(item.experience)} опыта
               </span>
@@ -127,21 +134,21 @@ export const SelectionListItem = ({
           </div>
         )}
 
-        {/* Стаж показываем и без отзывов — он от них не зависит. */}
-        {item.reviews === 0 &&
-          (isClinic || isDoctor) &&
-          item.experience > 0 && (
-            <div
-              className={cn(
-                "flex items-center gap-1 mt-1 text-secondary",
-                compact ? "text-xs" : "text-sm",
-              )}
-            >
-              <span>
-                {item.experience} {pluralYears(item.experience)} опыта
-              </span>
-            </div>
-          )}
+        {/* Стаж клиники показываем и без отзывов — он от них не зависит. У
+            врача стаж в краткой карточке не нужен: он есть в его профиле, а
+            здесь пациент ищет по специализации. */}
+        {item.reviews === 0 && isClinic && item.experience > 0 && (
+          <div
+            className={cn(
+              "flex items-center gap-1 mt-1 text-secondary",
+              compact ? "text-xs" : "text-sm",
+            )}
+          >
+            <span>
+              {item.experience} {pluralYears(item.experience)} опыта
+            </span>
+          </div>
+        )}
 
         {/* Адрес есть не у всех клиник — без проверки оставалась одинокая
             иконка-булавка без текста. */}
