@@ -5,7 +5,10 @@ import toast from "react-hot-toast";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { AppointmentDateTimePicker } from "@/widgets/appointment-datetime-picker";
+import {
+  AppointmentDateTimePicker,
+  useAvailableDatesFilter,
+} from "@/widgets/appointment-datetime-picker";
 
 import {
   getDoctorAvailableSlots,
@@ -124,6 +127,10 @@ export const RescheduleModal: FC<Props> = ({
       queryClient.invalidateQueries({
         queryKey: ["reschedule-available-slots"],
       });
+      queryClient.invalidateQueries({ queryKey: ["record-available-dates"] });
+      queryClient.invalidateQueries({
+        queryKey: ["reschedule-available-dates"],
+      });
       handleClose();
     },
     onError: (err: unknown) => {
@@ -160,10 +167,20 @@ export const RescheduleModal: FC<Props> = ({
 
   // Прошедшие (по бишкекскому «сегодня»), слишком далёкие даты и выходные
   // врача выбрать нельзя.
-  const isDateDisabled = useMemo(
+  const isScheduleDisabled = useMemo(
     () => makeBookingDateFilter(doctorSchedule),
     [doctorSchedule],
   );
+  // Зелёные — только дни со свободным слотом, как и при записи. Своя же запись
+  // время не занимает: иначе при переносе в тот же день он бы серел.
+  const isDateDisabled = useAvailableDatesFilter({
+    doctorId,
+    enabled: isOpen,
+    excludeAppointmentId: appointmentId,
+    serviceId,
+    isDateDisabled: isScheduleDisabled,
+    queryKey: "reschedule-available-dates",
+  });
 
   return (
     <Modal

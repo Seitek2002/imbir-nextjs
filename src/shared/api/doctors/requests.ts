@@ -1,6 +1,7 @@
 import { apiClient } from "../client";
 import { PaginatedResponse } from "../types";
 import {
+  AvailableDatesResponse,
   AvailableSlotsResponse,
   DoctorDetail,
   DoctorFilters,
@@ -48,6 +49,32 @@ export const getDoctorAvailableSlots = async (
     {
       params: {
         date,
+        ...(service_id ? { service_id } : {}),
+        ...(excludeAppointmentId
+          ? { exclude_appointment_id: excludeAppointmentId }
+          : {}),
+      },
+    },
+  );
+  return data;
+};
+
+// Даты периода [from, to] ("YYYY-MM-DD", не больше 62 дней), на которые есть
+// хотя бы один свободный слот. Считается теми же правилами, что и слоты, —
+// календарь красит зелёным именно эти дни. Параметры как у слотов.
+export const getDoctorAvailableDates = async (
+  id: number | string,
+  from: string,
+  to: string,
+  service_id?: null | number | string,
+  excludeAppointmentId?: null | number | string,
+): Promise<AvailableDatesResponse> => {
+  const { data } = await apiClient.get<AvailableDatesResponse>(
+    `/api/doctors/${id}/available-dates/`,
+    {
+      params: {
+        from,
+        to,
         ...(service_id ? { service_id } : {}),
         ...(excludeAppointmentId
           ? { exclude_appointment_id: excludeAppointmentId }

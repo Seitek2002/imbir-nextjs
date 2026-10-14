@@ -12,6 +12,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
+import { useAvailableDatesFilter } from "@/widgets/appointment-datetime-picker";
+
 import {
   SessionExpiredError,
   api,
@@ -177,6 +179,11 @@ export const useRecordForm = () => {
       queryClient.invalidateQueries({ queryKey: ["record-available-slots"] });
       queryClient.invalidateQueries({
         queryKey: ["reschedule-available-slots"],
+      });
+      // И день, где это был последний свободный слот, должен посереть.
+      queryClient.invalidateQueries({ queryKey: ["record-available-dates"] });
+      queryClient.invalidateQueries({
+        queryKey: ["reschedule-available-dates"],
       });
     },
   });
@@ -663,16 +670,26 @@ export const useRecordForm = () => {
     doctorScheduleDetail && String(doctorScheduleDetail.id) === selectedDoctorId
       ? (doctorScheduleDetail.schedule ?? null)
       : null;
-  const isDateDisabled = useMemo(
+  const isScheduleDisabled = useMemo(
     () => makeBookingDateFilter(doctorSchedule),
     [doctorSchedule],
   );
   const hasNoSchedule = hasNoWorkingDays(doctorSchedule);
   // Дату выбрали до того, как пришёл график (или сменили врача) и она
   // оказалась выходным — снимаем, иначе висела бы дата без единого слота.
-  if (selectedDate && doctorSchedule && isDateDisabled(selectedDate)) {
+  if (selectedDate && doctorSchedule && isScheduleDisabled(selectedDate)) {
     setSelectedDate(null);
   }
+  // Календарю — ещё и «в этот день есть свободный слот» (с учётом длительности
+  // выбранной услуги): день по графику может быть занят целиком. Выбранную дату
+  // по этому признаку не снимаем — если слоты разобрали, пока форма была
+  // открыта, под ней и так написано «Нет свободного времени».
+  const isDateDisabled = useAvailableDatesFilter({
+    doctorId: selectedDoctorId,
+    serviceId: selectedServiceId,
+    isDateDisabled: isScheduleDisabled,
+    queryKey: "record-available-dates",
+  });
 
   const setOnlineBooking = (value: boolean) => {
     setWantsOnline(value);

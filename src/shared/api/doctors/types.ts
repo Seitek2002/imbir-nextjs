@@ -99,3 +99,10 @@ export type AvailableSlotsResponse = {
   date: string;
   slots: AvailableSlot[];
 };
+
+// Даты периода, на которые у врача есть хотя бы один свободный слот ("YYYY-MM-DD").
+export type AvailableDatesResponse = {
+  dates: string[];
+  from: string;
+  to: string;
+};
