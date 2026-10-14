@@ -89,10 +89,12 @@ export const DefaultContent: FC<{ searchable?: boolean }> = ({
           </div>
 
           <div className="hidden md:flex gap-3">
+            {/* Онлайн-консультация — ключевая услуга платформы, поэтому
+                кнопка ведёт сразу в онлайн-формат записи (mode=online). */}
             {!isDoctor && (
-              <Link href={ROUTES.RECORD}>
+              <Link href={`${ROUTES.RECORD}?mode=online`}>
                 <Button size="sm" className="px-5 whitespace-nowrap">
-                  Записаться на приём
+                  Онлайн-консультация
                 </Button>
               </Link>
             )}
