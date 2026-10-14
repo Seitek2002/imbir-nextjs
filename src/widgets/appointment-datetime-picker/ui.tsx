@@ -185,10 +185,18 @@ export const AppointmentDateTimePicker: FC<Props> = ({
     const start = addDays(firstDay, -7);
     const total =
       Math.round((lastDay.getTime() - start.getTime()) / 86400000) + 1 + 7;
-    return Array.from({ length: total }, (_, i) => {
+    const days = Array.from({ length: total }, (_, i) => {
       const date = addDays(start, i);
       return { date, disabled: isDateDisabled?.(date) ?? false };
     });
+    // Неделя перед 1-м числом нужна, чтобы при листании к следующему месяцу
+    // был виден его «хвост». В текущем месяце она и дни до сегодняшнего —
+    // уже прошлое: лента открывалась на сером «24 сентября» при октябрьской
+    // дате, а сегодняшнее число пряталось за правым краем. Начинаем с первого
+    // доступного дня. Если доступных нет вовсе (у врача нет графика) —
+    // оставляем всё как есть.
+    const firstSelectable = days.findIndex((day) => !day.disabled);
+    return firstSelectable > 0 ? days.slice(firstSelectable) : days;
   }, [monthCursor, isDateDisabled]);
 
   // Листать к месяцу, где все дни недоступны (прошлое, даты за горизонтом
