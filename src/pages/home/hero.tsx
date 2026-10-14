@@ -52,32 +52,19 @@ export const Hero: FC = () => {
 
       <div className="relative z-10 w-full max-w-300 mx-auto h-full flex flex-col md:flex-row justify-between">
         <div className="flex flex-col items-start w-full md:w-1/2 z-20">
+          {/* Главный акцент первого экрана — вопрос AI-помощника: с него
+              пользователь начинает разговор. Прежний заголовок про лучших
+              специалистов ушёл в подзаголовок. */}
           <h1 className="font-semibold text-[32px] leading-[1.1] md:text-5xl text-foreground mb-3 md:mb-5">
-            Лучшие специалисты <br className="hidden md:block" /> и честные
-            отзывы
+            Что вас беспокоит?
           </h1>
 
           <p className="text-secondary text-sm md:text-lg mb-6 md:mb-8 max-w-[320px] md:max-w-112.5">
-            Свяжитесь со специалистом из любой точки — быстро, удобно и без
-            ожидания
+            Расскажите — AI-помощник подберёт специалиста. Лучшие врачи и
+            честные отзывы, быстро и без ожидания
           </p>
 
-          {/* prefetch: главный переход с Главной. Каталог — динамический
-              маршрут, и по умолчанию Next заранее грузит только его скелетон.
-              Первая страница каталога без фильтров лежит в серверном кеше
-              (shared/api/server-cache.ts), поэтому забрать её заранее целиком
-              бэку ничего не стоит, а переход становится мгновенным. */}
-          <Link
-            href="/specialists"
-            prefetch
-            className="w-full md:w-auto mb-6 md:mb-16"
-          >
-            <Button size="md" className="w-full justify-center">
-              Выбрать специалиста / услугу
-            </Button>
-          </Link>
-
-          <div className="border border-primary rounded-3xl bg-white p-4 w-full md:w-105 flex flex-col gap-4">
+          <div className="border border-primary rounded-3xl bg-white p-4 w-full md:w-105 flex flex-col gap-4 mb-4 md:mb-6">
             <Link
               href={assistantHref}
               className="flex items-center gap-3 group cursor-pointer"
@@ -91,7 +78,7 @@ export const Hero: FC = () => {
                 />
               </div>
               <p className="text-sm text-secondary leading-tight group-hover:text-primary transition-colors">
-                Что вас беспокоит? <br /> Я помогу подобрать вам специалиста
+                Я AI-помощник <br /> Помогу подобрать вам специалиста
               </p>
             </Link>
 
@@ -115,6 +102,23 @@ export const Hero: FC = () => {
               </Button>
             </div>
           </div>
+
+          {/* prefetch: главный переход с Главной. Каталог — динамический
+              маршрут, и по умолчанию Next заранее грузит только его скелетон.
+              Первая страница каталога без фильтров лежит в серверном кеше
+              (shared/api/server-cache.ts), поэтому забрать её заранее целиком
+              бэку ничего не стоит, а переход становится мгновенным.
+              Вариант outline: основное действие экрана теперь — вопрос
+              помощнику, каталог — запасной путь. */}
+          <Link href="/specialists" prefetch className="w-full md:w-auto">
+            <Button
+              size="md"
+              variant="outline"
+              className="w-full justify-center"
+            >
+              Выбрать специалиста / услугу
+            </Button>
+          </Link>
         </div>
 
         <div className="mt-8 md:mt-0 w-full md:absolute md:bottom-0 md:right-0 flex justify-center md:justify-end items-end z-10 h-87.5 md:h-[90%] pointer-events-none">
